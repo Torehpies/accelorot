@@ -1,0 +1,17 @@
+name: flutter_application_1
+description: "A new Flutter project."
+
+# Make sure this section exists and is properly configured
+environment:
+  sdk: '^3.9.0'  
+
+dependencies:
+  flutter:
+    sdk: flutter
+    
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+# ... rest of your pubspec (assets, fonts, etc.)
