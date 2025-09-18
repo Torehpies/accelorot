@@ -1,6 +1,6 @@
-# flutter_application_1
+# ACCEL-O-ROT APP 
 
-A new Flutter project.
+Accel-o-rot app made with flutter.
 
 ## Getting Started
 
