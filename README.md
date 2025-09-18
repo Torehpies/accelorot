@@ -10,7 +10,9 @@ Accel-o-rot app made with flutter.
 - Perez, Christian D.
 - Salupado, Seiffer Charles S.
 - Villanueva, Jasper P.
+
 BSCS 4C - SY 2025-2026
+
 University of Caloocan City
 
 ## Project Title
