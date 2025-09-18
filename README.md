@@ -2,9 +2,21 @@
 
 Accel-o-rot app made with flutter.
 
-## Getting Started
+## Authors
+- Alera, Erricka Joy R.
+- De Pedro, Marie Joy S.
+- Estremadura, Rashly R.
+- Giray, Renalyn G.
+- Perez, Christian D.
+- Salupado, Seiffer Charles S.
+- Villanueva, Jasper P.
+BSCS 4C - SY 2025-2026
+University of Caloocan City
 
-This project is a starting point for a Flutter application.
+## Project Title
+Accel-O-Rot: Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting
+
+## Flutter Resources 
 
 A few resources to get you started if this is your first Flutter project:
 
