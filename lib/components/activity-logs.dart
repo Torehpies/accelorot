@@ -11,15 +11,15 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 400,
+      width: double.infinity, // full width within parent constraints
       height: 190,
       child: Card(
-        elevation: 4,
+        elevation: 10, // match splash screen elevation
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20), // match splash screen rounding
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(24.0), // match splash screen padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -27,14 +27,14 @@ class CustomCard extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 18, // header size
-                  fontWeight: FontWeight.w500,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
 
               const SizedBox(height: 8),
 
-              // Straight line
+              // Divider line
               const Divider(
                 thickness: 1,
                 color: Colors.grey,
