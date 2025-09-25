@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
+import 'screens/statistics_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,6 +38,9 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const SplashScreen(),
+      routes: {
+        '/statistics': (context) =>  StatisticsPage(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }
