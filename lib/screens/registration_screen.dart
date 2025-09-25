@@ -1,6 +1,6 @@
-// lib/screens/registration_screen.dart
 import 'package:flutter/material.dart';
 import '../utils/snackbar_utils.dart';
+import '../services/auth_service.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
 
@@ -13,10 +13,12 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final AuthService _authService = AuthService();
   String? selectedRole = 'User';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -24,7 +26,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
@@ -35,16 +38,33 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      showSnackbar(context, 'Successfully registered as $selectedRole!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      try {
+
+        final fullName = '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
+        
+        final result = await _authService.registerUser(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+          fullName: fullName,
+          role: selectedRole ?? 'User',
+        );
+
+        setState(() => _isLoading = false);
+
+        if (result['success']) {
+          showSnackbar(context, 'Successfully registered as ${selectedRole}!');
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          showSnackbar(context, result['message'], isError: true);
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        showSnackbar(context, 'An unexpected error occurred', isError: true);
+      }
     }
   }
 
@@ -118,19 +138,43 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Full Name Field
-                      TextFormField(
-                        controller: nameController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelText: 'Full Name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      // First Name and Last Name Row
+                      Row(
+                        children: [
+                          // First Name Field
+                          Expanded(
+                            child: TextFormField(
+                              controller: firstNameController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: 'First Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              validator: (value) => value == null || value.isEmpty 
+                                  ? 'First name is required' 
+                                  : null,
+                            ),
                           ),
-                        ),
-                        validator: (value) => value == null || value.isEmpty 
-                            ? 'Name is required' 
-                            : null,
+                          const SizedBox(width: 16),
+                          // Last Name Field
+                          Expanded(
+                            child: TextFormField(
+                              controller: lastNameController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: 'Last Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              validator: (value) => value == null || value.isEmpty 
+                                  ? 'Last name is required' 
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
