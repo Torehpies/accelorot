@@ -304,39 +304,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Role Dropdown
-                      DropdownButtonFormField<String>(
-                        value: selectedRole,
-                        decoration: InputDecoration(
-                          labelText: 'Select Role',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
-                          ),
-                        ),
-                        items: ['User', 'Admin'].map((String role) {
-                          return DropdownMenuItem<String>(
-                            value: role,
-                            child: Text(role),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedRole = value;
-                          });
-                        },
-                        validator: (value) => value == null ? 'Please select a role' : null,
-                      ),
-                      const SizedBox(height: 32),
-
                       // Register Button
                       SizedBox(
                         width: double.infinity,
