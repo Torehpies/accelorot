@@ -73,16 +73,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final theme = Theme.of(context);
     
     return Scaffold(
+      backgroundColor: Colors.white, // White background
       body: SafeArea(
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Form(
@@ -150,6 +146,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 labelText: 'First Name',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                                 ),
                               ),
                               validator: (value) => value == null || value.isEmpty 
@@ -167,6 +172,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 labelText: 'Last Name',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                                 ),
                               ),
                               validator: (value) => value == null || value.isEmpty 
@@ -187,6 +201,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Email Address',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -221,6 +244,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -253,6 +285,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -270,6 +311,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Select Role',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         items: ['User', 'Admin'].map((String role) {
@@ -347,7 +397,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
               ),
-            ),
           ),
         ),
       ),
