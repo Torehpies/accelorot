@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               children: const [
                 Spacer(), // pushes card to the bottom
-                CustomCard(title: "Activity Logs"),
+                ActivityLogs(title: "Activity Logs"),
                 SizedBox(height: 20),
               ],
             ),
