@@ -1,9 +1,35 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:logging/logging.dart';
 
-void main() {
+void main() async {
+	WidgetsFlutterBinding.ensureInitialized();
+	await Firebase.initializeApp(
+		options: DefaultFirebaseOptions.currentPlatform,
+	);
+
+	// setup logger
+	_setupLogging();
+
   runApp(const MyApp());
+}
+
+void _setupLogging() {
+	Logger.root.level = Level.ALL;
+	Logger.root.onRecord.listen((record) {
+		print(
+			'[${record.level.name}] ${record.time}: ${record.loggerName}: ${record.message}',
+		);
+		if (record.error != null) {
+			print(' Error: ${record.error}');
+		}
+		if (record.stackTrace != null) {
+			print(' Stack: ${record.stackTrace}');
+		}
+	});
 }
 
 class MyApp extends StatelessWidget {

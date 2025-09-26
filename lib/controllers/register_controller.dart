@@ -5,6 +5,8 @@ import '../models/appuser.dart';
 class RegisterController {
 	final FirebaseAuth _auth = FirebaseAuth.instance;
 	final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+	final _logger = Logger('RegisterController');
 	
 	Future<AppUser?> register({
 		required String fullName,
@@ -14,7 +16,7 @@ class RegisterController {
 		try {
 			// create firebase auth account
 			UserCredential cred = await _auth.createUserWithEmailAndPassword(
-				email: email.
+				email: email,
 				password: password,
 			);
 			User? user = cred.user;
@@ -34,12 +36,14 @@ class RegisterController {
 
 			await _firestore.collection("users").doc(user.uid).set(appUser.toFirestore());
 
+			_logger.info("User registered successfully: ${user.uid}");
+
 			return appUser;
 		} on FirebaseAuthException catch (e) {
-			print("Auth error: ${e.code} = ${e.message}");
+			_logger.severe("Auth error: ${e.code} - ${e.message}");
 			rethrow;
-		} catch (e) {
-			print("Other error: $e");
+		} catch (e, stack) {
+			_logger.severe("Unexpected error during registration", e, stack);
 			rethrow;
 		}
 	}
