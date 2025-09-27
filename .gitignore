@@ -12,16 +12,15 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IntelliJ/ VSCode/ Xcode 
 *.iml
 *.ipr
 *.iws
 .idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+.vscode/
+*.swp
+*.lock
+*.DS_Store
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -43,3 +42,33 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase / FlutterFire
+firebase.json
+firebase_options.dart
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Android
+android/.gradle/
+android/captures/
+android/app/*.keystore
+android/app/*.jks
+android/local.properties
+android/key.properties
+android/app/google-services.json
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Windows
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
+
+# Linux
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugins.cmake
+
+# Web
+web/firebase-messaging-sw.js
+
