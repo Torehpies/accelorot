@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 # Make sure this section exists and is properly configured
 environment:
-  sdk: '^3.9.0'  
+  sdk: '^3.9.0'
 
 dependencies:
   flutter:
@@ -13,7 +13,7 @@ dependencies:
   cloud_firestore: ^5.4.0
   flutter_date_pickers: ^0.4.2
 
-    
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
