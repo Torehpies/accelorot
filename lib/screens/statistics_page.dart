@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'system_card.dart';
-import 'humidity_card.dart';
-import 'temperature_card.dart';
+import 'date_filter.dart';
 
-class StatisticsPage extends StatelessWidget {
+class StatisticsPage extends StatefulWidget {
+  @override
+  _StatisticsPageState createState() => _StatisticsPageState();
+}
+
+class _StatisticsPageState extends State<StatisticsPage> {
+  DateTimeRange? _selectedRange;
+
+  void _onDateChanged(DateTimeRange? range) {
+    setState(() {
+      _selectedRange = range;
+    });
+
+    // TODO: Pass this date range to filter your data
+    print("Selected range: $_selectedRange");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,19 +30,18 @@ class StatisticsPage extends StatelessWidget {
         elevation: 0,
       ),
 
-      // BODY: split into header + scrollable content
       body: Column(
         children: [
-          // Fixed Header (like its own div)
+          // Header (Statistics + Date Filter)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
+                  color: Colors.green.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -41,31 +55,18 @@ class StatisticsPage extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: BorderSide(color: Colors.grey.shade400),
-                  ),
-                  child: const Text(
-                    'Date Filter',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
 
-          // Scrollable cards
+          // Scrollable content
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: [
+              children: const [
                 SystemCard(),
-                const SizedBox(height: 16),
-                HumidityCard(),
-                const SizedBox(height: 16),
-                TemperatureCard(),
+                SizedBox(height: 16),
               ],
             ),
           ),

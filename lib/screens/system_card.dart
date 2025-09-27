@@ -11,6 +11,8 @@ class _SystemCardState extends State<SystemCard> {
   String status = "Excellent"; // can be "Excellent", "Warning", "Error"
   String selectedPeriod = "1 hour";
   String selectedCycle = "100"; // default cycle
+  bool isRunning = false; // tracks if Start was pressed
+  bool isPaused = false; // tracks Pause state
 
   // Status color & icon
   Color getStatusColor() {
@@ -175,35 +177,86 @@ class _SystemCardState extends State<SystemCard> {
           ),
           const SizedBox(height: 20),
 
-          // Start button
+          // Action buttons
           Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // example: simulate status change
-                setState(() {
-                  status = status == "Excellent"
-                      ? "Warning"
-                      : status == "Warning"
-                          ? "Error"
-                          : "Excellent";
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E5339), // deep green
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-              ),
-              child: const Text(
-                'Start',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+            child: isRunning
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isPaused = !isPaused;
+                            status = isPaused ? "Warning" : "Excellent";
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isPaused ? const Color.fromARGB(255, 14, 138, 255) : const Color.fromARGB(255, 255, 185, 32),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 14),
+                        ),
+                        child: Text(
+                          isPaused ? "Resume" : "Pause",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            isRunning = false;
+                            isPaused = false;
+                            status = "Excellent";
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 14),
+                        ),
+                        child: const Text(
+                          "Stop",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isRunning = true;
+                        status = "Excellent";
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E5339), // deep green
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 14),
+                    ),
+                    child: const Text(
+                      'Start',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),
