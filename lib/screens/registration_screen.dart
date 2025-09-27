@@ -1,8 +1,8 @@
 // lib/screens/registration_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -43,7 +43,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const MainNavigation()),
       );
     }
   }
