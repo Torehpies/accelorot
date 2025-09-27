@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'system_card.dart';
 import 'date_filter.dart';
+import 'home_screen.dart';
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -48,12 +49,27 @@ class _StatisticsPageState extends State<StatisticsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Statistics',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()), 
+                          (route) => false, // removes all previous routes
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Statistics',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 DateFilter(onChanged: _onDateChanged),
               ],
