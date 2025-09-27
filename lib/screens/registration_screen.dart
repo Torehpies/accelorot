@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -38,6 +38,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
+
       try {
 
         final fullName = '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
@@ -65,6 +66,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         setState(() => _isLoading = false);
         showSnackbar(context, 'An unexpected error occurred', isError: true);
       }
+
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 2));
+      
+      setState(() => _isLoading = false);
+      showSnackbar(context, 'Successfully registered as $selectedRole!');
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavigation()),
+      );
+
     }
   }
 
