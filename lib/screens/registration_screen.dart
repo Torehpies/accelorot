@@ -75,18 +75,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.white, // White background
       body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
+        child: SingleChildScrollView(
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              padding: const EdgeInsets.all(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
                       // Logo
                       Container(
                         width: 80,
@@ -337,6 +338,44 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded( 
+                            child: Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              'or continue with',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          ),
+                         
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      GestureDetector(
+                        onTap: () {
+                          // Implement Google Sign-In
+                          //
+                          //
+                        },
+                        child: Image.asset(
+                          'assets/icons/Google_logo.png',
+                          height: 48,
+                          width: 48,
+                        ),
+                      ),
 
                       // Sign In Link
                       Row(
@@ -364,9 +403,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
               ),
+            ),
           ),
         ),
-      ),
+      ),    
     );
   }
 }
