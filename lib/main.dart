@@ -1,7 +1,9 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
+import 'screens/statistics_screen.dart';
 import 'screens/main_navigation.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Accel-o-Rot',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
@@ -46,10 +49,11 @@ class MyApp extends StatelessWidget {
       ),
       // Start with splash, then navigate to MainNavigation
       home: const SplashScreen(),
-      debugShowCheckedModeBanner: false,
       routes: {
         '/main': (context) => const MainNavigation(),
+        '/statistics': (context) =>  const StatisticsScreen(),
       },
+     
     );
   }
 }
