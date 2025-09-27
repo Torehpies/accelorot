@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
       {'value': 'fruiting_vegetables', 'label': 'Fruiting Vegetables', 'needs': 'Needs carbon'},
       {'value': 'fruit_trees', 'label': 'Fruit Trees', 'needs': 'Needs carbon'},
       {'value': 'root_crops', 'label': 'Root Crops', 'needs': 'Needs carbon'},
+
     ],
   };
 
