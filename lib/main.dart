@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const SplashScreen(),
       routes: {
-        '/statistics': (context) =>  StatisticsPage(),
+        '/statistics': (context) =>  const StatisticsPage(),
       },
       debugShowCheckedModeBanner: false,
     );

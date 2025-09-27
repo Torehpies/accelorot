@@ -4,6 +4,8 @@ import 'date_filter.dart';
 import 'home_screen.dart';
 
 class StatisticsPage extends StatefulWidget {
+  const StatisticsPage({super.key}); // ✅ const constructor
+
   @override
   _StatisticsPageState createState() => _StatisticsPageState();
 }
@@ -15,9 +17,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
     setState(() {
       _selectedRange = range;
     });
-
-    // TODO: Pass this date range to filter your data
-    print("Selected range: $_selectedRange");
   }
 
   @override
@@ -52,12 +51,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      icon: const Icon(Icons.chevron_left, color: Colors.black),
                       onPressed: () {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()), 
-                          (route) => false, // removes all previous routes
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()),
+                          (route) => false,
                         );
                       },
                     ),
@@ -71,7 +71,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: _onDateChanged),
+                DateFilter(onChanged: _onDateChanged), // not const
               ],
             ),
           ),
