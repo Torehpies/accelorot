@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+
 import '../components/activity-logs.dart';
+
+import '../components/activity-logs.dart'; 
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -70,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -82,11 +88,17 @@ class _HomeScreenState extends State<HomeScreen> {
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
             child: Column(
+
               children: [
                 const Spacer(),
                 // Pass logs to card
                 CustomCard(title: "Activity Logs", logs: _wasteLogs),
                 const SizedBox(height: 20),
+  children: const [
+                Spacer(), // pushes card to the bottom
+                ActivityLogs(title: "Activity Logs"),
+                SizedBox(height: 20),
+
               ],
             ),
           ),
