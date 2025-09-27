@@ -49,12 +49,10 @@ class MyApp extends StatelessWidget {
       // Start with splash, then navigate to MainNavigation
       home: const SplashScreen(),
       routes: {
+        '/main': (context) => const MainNavigation(),
         '/statistics': (context) =>  const StatisticsPage(),
       },
-      debugShowCheckedModeBanner: false,
-      routes: {
-        '/main': (context) => const MainNavigation(),
-      },
+     
     );
   }
 }
