@@ -54,33 +54,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         setState(() => _isLoading = false);
 
         if (result['success']) {
-          showSnackbar(context, 'Successfully registered as ${selectedRole}!');
-          
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        } else {
-          showSnackbar(context, result['message'], isError: true);
-        }
+        showSnackbar(context, 'Successfully registered as $selectedRole!');
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+        );
+
+          } else {
+            showSnackbar(context, result['message'], isError: true);
+          }
       } catch (e) {
         setState(() => _isLoading = false);
         showSnackbar(context, 'An unexpected error occurred', isError: true);
       }
 
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      showSnackbar(context, 'Successfully registered as $selectedRole!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
-      );
 
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
