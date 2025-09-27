@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/activity-logs.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key}); // ✅ Fixed: use super.key
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  // Store logged waste products
   final List<Map<String, dynamic>> _wasteLogs = [];
 
   final Map<String, String> _wasteCategoryInfo = {
@@ -83,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 const Spacer(),
+                // Pass logs to card
                 CustomCard(title: "Activity Logs", logs: _wasteLogs),
                 const SizedBox(height: 20),
               ],
@@ -155,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Waste Category Info
                       if (_selectedWasteCategory != null)
                         Container(
                           width: double.infinity,
@@ -175,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       if (_selectedWasteCategory != null) const SizedBox(height: 12),
 
+                      // Waste Category
                       DropdownButtonFormField<String>(
                         value: _selectedWasteCategory,
                         isExpanded: true,
@@ -203,6 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Plant Type Info
                       if (_selectedWasteCategory != null && _selectedPlantType != null)
                         Container(
                           width: double.infinity,
@@ -224,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (_selectedWasteCategory != null && _selectedPlantType != null)
                         const SizedBox(height: 12),
 
+                      // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
                         value: _selectedPlantType,
                         isExpanded: true,
@@ -250,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Quantity - With proper validation
                       TextField(
                         controller: _quantityController,
                         decoration: InputDecoration(
@@ -276,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      // Description
                       TextField(
                         controller: _descriptionController,
                         maxLines: 2,
@@ -294,20 +302,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 24),
 
+                      // Submit Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
+                            // Validate
                             final qtyError = _validateQuantity(_quantityController.text);
                             if (_selectedWasteCategory == null) {
-                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Select waste category')),
                               );
                               return;
                             }
                             if (_selectedPlantType == null) {
-                              if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Select target plant type')),
                               );
@@ -320,9 +328,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               return;
                             }
 
+                            // Success!
                             final quantity = double.parse(_quantityController.text);
                             final plantLabel = _getPlantLabel(_selectedPlantType);
 
+                            // Add to logs
                             setState(() {
                               _wasteLogs.insert(
                                 0,
@@ -338,7 +348,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             });
 
                             Navigator.pop(context);
-                            if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('✅ ${_selectedWasteCategory == 'greens' ? 'Greens' : 'Browns'} waste assigned to $plantLabel!'),
@@ -373,6 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // FIXED: Single-line dropdown items with tooltip
   List<DropdownMenuItem<String>> _getPlantTypeItems() {
     if (_selectedWasteCategory == null) {
       return [
