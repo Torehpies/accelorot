@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
-import 'screens/statistics_page.dart';
+import 'screens/statistics_screen.dart';
 import 'screens/main_navigation.dart';
 
 
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainNavigation(),
-        '/statistics': (context) =>  const StatisticsPage(),
+        '/statistics': (context) =>  const StatisticsScreen(),
       },
      
     );
