@@ -123,7 +123,6 @@ class ActivityLogs extends StatelessWidget {
     ];
   }
 
-
   // 🔹 Helper widget for log entries
   static Widget _buildLogItem({
     required IconData icon,
