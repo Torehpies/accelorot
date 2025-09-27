@@ -1,12 +1,11 @@
-// lib/components/activity-logs.dart
 import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
   final String title;
-  final List<Map<String, dynamic>> logs; // ← Accept logs
+  final List<Map<String, dynamic>> logs;
 
   const CustomCard({
-    super.key,
+    super.key, // ✅ Fixed: use super.key
     required this.title,
     required this.logs,
   });
@@ -37,7 +36,6 @@ class CustomCard extends StatelessWidget {
               const Divider(thickness: 1, color: Colors.grey),
               const SizedBox(height: 12),
 
-              // Show latest log or "No logs"
               Expanded(
                 child: logs.isEmpty
                     ? const Center(
@@ -49,7 +47,8 @@ class CustomCard extends StatelessWidget {
                     : ListView.builder(
                         itemCount: logs.length > 3 ? 3 : logs.length,
                         itemBuilder: (context, index) {
-                          final log = logs[logs.length - 1 - index]; // Show newest first
+                          // ✅ This correctly shows newest first
+                          final log = logs[logs.length - 1 - index];
                           final category = log['category'] == 'greens' ? 'Greens' : 'Browns';
                           final plant = log['plantTypeLabel'] ?? 'Plant';
                           final qty = log['quantity'];
