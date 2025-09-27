@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import '../components/activity-logs.dart';
+=======
+
+import '../components/activity-logs.dart';
+
+import '../components/activity-logs.dart'; 
+
+>>>>>>> 7334e288c73827a4b566a3c9702ec39df37ce557
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7334e288c73827a4b566a3c9702ec39df37ce557
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -70,6 +82,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7334e288c73827a4b566a3c9702ec39df37ce557
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -82,11 +98,23 @@ class _HomeScreenState extends State<HomeScreen> {
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
             child: Column(
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7334e288c73827a4b566a3c9702ec39df37ce557
               children: [
                 const Spacer(),
                 // Pass logs to card
                 CustomCard(title: "Activity Logs", logs: _wasteLogs),
                 const SizedBox(height: 20),
+<<<<<<< HEAD
+=======
+  children: const [
+                Spacer(), // pushes card to the bottom
+                ActivityLogs(title: "Activity Logs"),
+                SizedBox(height: 20),
+
+>>>>>>> 7334e288c73827a4b566a3c9702ec39df37ce557
               ],
             ),
           ),
