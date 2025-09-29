@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../components/activity-logs.dart';
+import '../components/environmental_sensors_card.dart';
+import '../screens/composting_progress_card.dart';
+
 
 
 
@@ -74,40 +77,53 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.teal,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-
-  children: [
-    const Spacer(),
-    // Pass logs to card
-    CustomCard(title: "Activity Logs", logs: _wasteLogs),
-    const SizedBox(height: 20),
-  ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Dashboard'),
+      backgroundColor: Colors.teal,
+    ),
+    body: SafeArea(
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false, // 👈 Hides scrollbar on all platforms
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  EnvironmentalSensorsCard(
+                    temperature: 3.0,
+                    moisture: 5.0,
+                    humidity: 8.0,
+                  ),
+                  const SizedBox(height: 20),
+                  CompostingProgressCard(
+                    batchStart: DateTime(2025, 9, 15),
+                  ),
+                  const SizedBox(height: 20),
+                  CustomCard(title: "Activity Logs", logs: _wasteLogs),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddWasteProductModal(context);
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        _showAddWasteProductModal(context);
+      },
+      backgroundColor: Colors.green,
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+  );
+}
 
   void _showAddWasteProductModal(BuildContext context) {
     _resetForm();
