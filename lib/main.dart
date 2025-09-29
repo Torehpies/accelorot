@@ -4,20 +4,28 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:ui' show PlatformDispatcher; // Required for global error handling
+
 import 'screens/statistics_screen.dart';
 import 'screens/main_navigation.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    print('Uncaught async error: $error');
+    return true;
+  };
+
   // Only initialize Firebase on supported platforms
-  if (!kIsWeb) {
+  try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  } catch (e) {
+    print('Firebase initialization failed: $e');
+    // App continues, but Firebase features may be disabled
   }
-  
 
   runApp(const MyApp());
 }
@@ -60,13 +68,19 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // Start with splash, then navigate to MainNavigation
       home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainNavigation(),
-        '/statistics': (context) =>  const StatisticsScreen(),
+        '/statistics': (context) => const StatisticsScreen(),
       },
-     
+      builder: (context, child) {
+        if (child != null) {
+          return child;
+        }
+        return const Scaffold(
+          body: Center(child: Text('An unexpected error occurred.')),
+        );
+      },
     );
   }
 }
