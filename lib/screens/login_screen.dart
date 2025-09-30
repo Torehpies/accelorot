@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import 'package:flutter_application_1/screens/statistics_screen.dart';
 import '../utils/snackbar_utils.dart';
+import '../services/auth_service.dart';
 import 'registration_screen.dart';
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -31,16 +32,28 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      showSnackbar(context, 'Login successful!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
-      );
+      try {
+        final result = await _authService.signInUser(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+        );
+
+        setState(() => _isLoading = false);
+
+        if (result['success']) {
+          showSnackbar(context, 'Login successful!');
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        } else {
+          showSnackbar(context, result['message'], isError: true);
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        showSnackbar(context, 'An unexpected error occurred', isError: true);
+      }
     }
   }
 
@@ -140,6 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: passwordController,
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.done,
+                        onFieldSubmitted: (_) => _loginUser(),
                         decoration: InputDecoration(
                           labelText: 'Password',
                           suffixIcon: IconButton(
