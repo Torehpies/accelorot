@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/services/auth_service.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
-import '../services/auth_service.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({Key? key}) : super(key: key);
+  const RegistrationScreen({super.key});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -372,10 +372,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(height: 24),
 
                       GestureDetector(
-                        onTap: () {
-                          // Implement Google Sign-In
-                          //
-                          //
+                        onTap: () async {
+													try {
+																																								  
+													} catch (e) {
+														
+													}
                         },
                         child: Image.asset(
                           'assets/icons/Google_logo.png',

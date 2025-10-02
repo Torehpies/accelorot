@@ -1,29 +1,33 @@
 // lib/main.dart
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'screens/splash_screen.dart';
-import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
-import 'screens/statistics_screen.dart';
-import 'screens/main_navigation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'firebase_options.dart';
+import 'screens/main_navigation.dart';
+import 'screens/splash_screen.dart';
+import 'screens/statistics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Only initialize Firebase on supported platforms
   if (!kIsWeb) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-  
 
-  runApp(const MyApp());
+  runApp(
+		const ProviderScope(
+			child: MyApp(),
+		),
+	);
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +37,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(color: Colors.grey[700]),
-        ),
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey[700])),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
@@ -51,9 +53,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Colors.teal, width: 2),
@@ -64,9 +64,8 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainNavigation(),
-        '/statistics': (context) =>  const StatisticsScreen(),
+        '/statistics': (context) => const StatisticsScreen(),
       },
-     
     );
   }
 }
