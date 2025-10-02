@@ -3,15 +3,25 @@ description: "A new Flutter project."
 
 # Make sure this section exists and is properly configured
 environment:
-  sdk: '^3.9.0'  
+  sdk: '^3.9.0'
 
 dependencies:
   flutter:
     sdk: flutter
-    
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.4.0
+  flutter_date_pickers: ^0.4.2
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
 
-# ... rest of your pubspec (assets, fonts, etc.)
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/
+
+
