@@ -1,10 +1,13 @@
+// lib/screens/statistics_screen.dart
+
 import 'package:flutter/material.dart';
+import '../widgets/humidity_statistic_card.dart';
 import 'system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ const constructor
+  const StatisticsScreen({super.key});
 
   @override
   _StatisticsScreenState createState() => _StatisticsScreenState();
@@ -29,7 +32,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-
       body: Column(
         children: [
           // Header (Statistics + Date Filter)
@@ -71,7 +73,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: _onDateChanged), // not const
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
@@ -80,15 +82,28 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: const [
-                SystemCard(),
-                SizedBox(height: 16),
+              children: [
+                // ✅ SYSTEM CARD FIRST (TOP)
+                const SystemCard(),
+                const SizedBox(height: 16),
+
+                // ✅ HUMIDITY CARD SECOND (BOTTOM) — CENTERED & COMPACT
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: HumidityStatisticCard(
+                      currentHumidity: 38.0,
+                      hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                      lastUpdated: DateTime.now(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
         ],
       ),
-
     );
   }
 }

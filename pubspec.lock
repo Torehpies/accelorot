@@ -142,21 +142,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.3"
-  flutter_lints:
-    dependency: "direct dev"
-    description:
-      name: flutter_lints
-      sha256: "3105dc8492f6183fb076ccf1f351ac3d60564bff92e20bfc4af9cc1651f4e7e1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
   flutter_localizations:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
   flutter_test:
-    dependency: "direct dev"
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -205,14 +197,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  lints:
-    dependency: transitive
-    description:
-      name: lints
-      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
   matcher:
     dependency: transitive
     description:
@@ -290,6 +274,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  syncfusion_flutter_charts:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_charts
+      sha256: bee5094cd8128dd531f530842bede56ecd0edb72833a522dcbb7b7eb93ffcf12
+      url: "https://pub.dev"
+    source: hosted
+    version: "31.1.22"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "6a01bd0da768003f59a9c51ae28145a61372abb59e3e588ef33c86db3579bccf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "31.1.22"
   term_glyph:
     dependency: transitive
     description:
@@ -340,4 +340,4 @@ packages:
     version: "1.1.1"
 sdks:
   dart: ">=3.9.0 <4.0.0"
-  flutter: ">=3.22.0"
+  flutter: ">=3.35.1"
