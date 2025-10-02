@@ -1,8 +1,9 @@
-// lib/screens/registration_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/home_screen.dart';
+import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
+import '../services/auth_service.dart';
 import 'login_screen.dart';
-import 'home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -13,10 +14,12 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  final AuthService _authService = AuthService();
   String? selectedRole = 'User';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -24,7 +27,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
@@ -35,42 +39,62 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      showSnackbar(context, 'Successfully registered as $selectedRole!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+
+      try {
+
+        final fullName = '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
+        
+        final result = await _authService.registerUser(
+          email: emailController.text.trim(),
+          password: passwordController.text,
+          fullName: fullName,
+          role: selectedRole ?? 'User',
+        );
+
+        setState(() => _isLoading = false);
+
+        if (result['success']) {
+        showSnackbar(context, 'Successfully registered as $selectedRole!');
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+        );
+
+          } else {
+            showSnackbar(context, result['message'], isError: true);
+          }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        showSnackbar(context, 'An unexpected error occurred', isError: true);
+      }
+
+
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
     return Scaffold(
+      backgroundColor: Colors.white, // White background
       body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
+        child: SingleChildScrollView(
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              padding: const EdgeInsets.all(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
                       // Logo
                       Container(
                         width: 80,
@@ -118,19 +142,61 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Full Name Field
-                      TextFormField(
-                        controller: nameController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          labelText: 'Full Name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      // First Name and Last Name Row
+                      Row(
+                        children: [
+                          // First Name Field
+                          Expanded(
+                            child: TextFormField(
+                              controller: firstNameController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: 'First Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                                ),
+                              ),
+                              validator: (value) => value == null || value.isEmpty 
+                                  ? 'First name is required' 
+                                  : null,
+                            ),
                           ),
-                        ),
-                        validator: (value) => value == null || value.isEmpty 
-                            ? 'Name is required' 
-                            : null,
+                          const SizedBox(width: 16),
+                          // Last Name Field
+                          Expanded(
+                            child: TextFormField(
+                              controller: lastNameController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                labelText: 'Last Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                                ),
+                              ),
+                              validator: (value) => value == null || value.isEmpty 
+                                  ? 'Last name is required' 
+                                  : null,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -143,6 +209,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Email Address',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -177,6 +252,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -209,6 +293,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -218,30 +311,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-
-                      // Role Dropdown
-                      DropdownButtonFormField<String>(
-                        value: selectedRole,
-                        decoration: InputDecoration(
-                          labelText: 'Select Role',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        items: ['User', 'Admin'].map((String role) {
-                          return DropdownMenuItem<String>(
-                            value: role,
-                            child: Text(role),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedRole = value;
-                          });
-                        },
-                        validator: (value) => value == null ? 'Please select a role' : null,
-                      ),
-                      const SizedBox(height: 32),
 
                       // Register Button
                       SizedBox(
@@ -276,6 +345,44 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded( 
+                            child: Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              'or continue with',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                          Expanded(
+                            child: Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                          ),
+                          ),
+                         
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      GestureDetector(
+                        onTap: () {
+                          // Implement Google Sign-In
+                          //
+                          //
+                        },
+                        child: Image.asset(
+                          'assets/icons/Google_logo.png',
+                          height: 48,
+                          width: 48,
+                        ),
+                      ),
 
                       // Sign In Link
                       Row(
@@ -306,7 +413,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
           ),
         ),
-      ),
+      ),    
     );
   }
 }
