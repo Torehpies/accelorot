@@ -22,6 +22,14 @@ jobs:
         with:
           flutter-version: "3.35.5"
 
+      - name: Inject Firebase Options (Dart)
+        env:
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_CONTENT }}
+        run: |
+          mkdir -p lib
+          echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
+        shell: bash
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -31,7 +39,6 @@ jobs:
       - name: Run tests
         run: flutter test
 
-      # Optional: Ensure app builds (debug mode to save time)
       - name: Build debug APK
         run: flutter build apk --debug
 
