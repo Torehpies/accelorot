@@ -1,4 +1,6 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
+import '../components/activity-logs.dart';
 import '../components/add-waste-product.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,52 +11,51 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, dynamic>> _products = [];
-
-  void _addProduct(String name, double quantity) {
-    setState(() {
-      _products.add({
-        'id': DateTime.now().millisecondsSinceEpoch,
-        'name': name,
-        'quantity': quantity,
-      });
-    });
-  }
+  final List<Map<String, dynamic>> _wasteLogs = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Waste Tracker'),
+        title: const Text('Dashboard'),
+        backgroundColor: Colors.teal,
       ),
-      body: _products.isEmpty
-          ? const Center(child: Text('No products added yet'))
-          : ListView.builder(
-              itemCount: _products.length,
-              itemBuilder: (context, index) {
-                final product = _products[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    title: Text(product['name']),
-                    subtitle: Text('${product['quantity']} kg'),
-                  ),
-                );
-              },
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const Spacer(),
+                CustomCard(title: "Activity Logs", logs: _wasteLogs),
+                const SizedBox(height: 20),
+              ],
             ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => AddWasteProductScreen(
-                onAddProduct: _addProduct,
-              ),
-            ),
-          );
+          _showAddWasteProductModal(context);
         },
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
+  }
+
+  void _showAddWasteProductModal(BuildContext context) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+       builder: (context) => const AddWasteProduct(),
+    );
+
+    if (result != null) {
+      setState(() {
+        _wasteLogs.insert(0, result);
+      });
+    }
   }
 }
