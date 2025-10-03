@@ -1,6 +1,5 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'registration_screen.dart';
 
 class SplashScreen extends StatefulWidget {
