@@ -35,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbar(context, message, isError: true);
       },
     );
+
+    // Remove modal popups on load
   }
 
   @override
@@ -91,12 +93,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          // Popup modal button at top right
+          // Button at top right for Admin Panel
           Positioned(
             top: 24,
             right: 24,
-            child: GestureDetector(
-              onTap: () {
+            child: IconButton(
+              icon: const Icon(
+                Icons.admin_panel_settings,
+                color: Colors.white,
+                size: 28,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                shadowColor: Colors.black.withValues(alpha:0.08),
+                elevation: 8,
+              ),
+              onPressed: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -104,32 +118,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: const Icon(
-                  Icons.admin_panel_settings,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
             ),
           ),
-          // Popup modal button at top left
+          // Button at top left for Home
           Positioned(
             top: 24,
             left: 24,
-            child: GestureDetector(
-              onTap: () {
+            child: IconButton(
+              icon: const Icon(
+                Icons.home,
+                color: Colors.white,
+                size: 28,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                shadowColor: Colors.black.withValues(alpha:0.08),
+                elevation: 8,
+              ),
+              onPressed: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -137,24 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(12),
-                child: const Icon(
-                  Icons.home,
-                  color: Colors.white,
-                  size: 28,
-                ),
-              ),
             ),
           ),
         ],
