@@ -1,6 +1,6 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import '../components/activity-logs.dart'; 
+import '../components/activity_logs.dart'; 
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
