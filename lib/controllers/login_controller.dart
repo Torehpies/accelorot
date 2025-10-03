@@ -95,6 +95,6 @@ class LoginController {
     //
     //
     //
-    onLoginError?.call('wla pa po ate');
+    onLoginError?.call('Forgot password feature is not yet implemented');
   }
 }
