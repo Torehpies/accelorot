@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../services/auth_service.dart';
