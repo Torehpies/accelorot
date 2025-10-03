@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   PlatformDispatcher.instance.onError = (error, stack) {
-    print('Uncaught async error: $error');
+    //print('Uncaught async error: $error');
     return true;
   };
 
@@ -23,7 +23,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    print('Firebase initialization failed: $e');
+    //print('Firebase initialization failed: $e');
     // App continues, but Firebase features may be disabled
   }
 
