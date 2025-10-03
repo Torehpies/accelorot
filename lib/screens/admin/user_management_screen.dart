@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
-import 'registration_screen.dart';
+import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class UserManagementScreen extends StatelessWidget {
+  const UserManagementScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: const Text("User Management"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // Navigate back to Login Screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+              MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
             );
           },
         ),
       ),
-      body: const Center(
+      body: Center(
         child: Text(
-          "Profile Page",
-          style: TextStyle(fontSize: 20),
+          "User Management Screen",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
     );
