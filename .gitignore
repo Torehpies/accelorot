@@ -67,3 +67,5 @@ linux/flutter/generated_plugins.cmake
 
 # Web
 web/firebase-messaging-sw.js
+
+notes.md
