@@ -22,16 +22,33 @@ jobs:
         with:
           flutter-version: "3.35.5"
 
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Inject Firebase Options (Dart)
+        env:
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_CONTENT }}
+        run: |
+          mkdir -p lib
+          echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
+        shell: bash
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Analyze project
-        run: flutter analyze
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Check formatting
+        run: flutter format --set-exit-if-changed .
 
       - name: Run tests
         run: flutter test
 
-      # Optional: Ensure app builds (debug mode to save time)
       - name: Build debug APK
         run: flutter build apk --debug
 
@@ -48,7 +65,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.0"
+          flutter-version: "3.35.5"
 
       - name: Setup Java
         uses: actions/setup-java@v3
