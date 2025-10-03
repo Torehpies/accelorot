@@ -1,7 +1,6 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
-import 'package:flutter_application_1/screens/statistics_screen.dart';
+import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import 'registration_screen.dart';
 
@@ -39,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
+        MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
       );
     }
   }
