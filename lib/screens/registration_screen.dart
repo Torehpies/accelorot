@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
@@ -6,7 +9,7 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({Key? key}) : super(key: key);
+  const RegistrationScreen({super.key});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -111,6 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                                     // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),

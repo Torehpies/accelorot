@@ -12,3 +12,4 @@ dependencies:
   cloud_firestore: ^5.4.0
   flutter_date_pickers: ^0.4.2
   syncfusion_flutter_charts: ^31.1.22
+  flutter_lints: ^6.0.0

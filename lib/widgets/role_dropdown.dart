@@ -1,4 +1,6 @@
 // lib/widgets/role_dropdown.dart
+// ignore_for_file: use_super_parameters
+
 import 'package:flutter/material.dart';
 
 class RoleDropdown extends StatelessWidget {
@@ -12,6 +14,7 @@ class RoleDropdown extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: DropdownButtonFormField<String>(
+            // ignore: deprecated_member_use
         value: value,
         decoration: const InputDecoration(
           labelText: 'Select Role',

@@ -5,6 +5,7 @@ import '../components/activity-logs.dart';
 
 
 class HomeScreen extends StatefulWidget {
+         // ignore: deprecated_member_use, use_super_parameters
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -132,6 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
+                    
+                               // ignore: deprecated_member_use
                         color: Colors.black.withOpacity(0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
@@ -186,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Waste Category
                       DropdownButtonFormField<String>(
+                               // ignore: deprecated_member_use
                         value: _selectedWasteCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
@@ -237,6 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
+                            // ignore: deprecated_member_use
                         value: _selectedPlantType,
                         isExpanded: true,
                         decoration: InputDecoration(

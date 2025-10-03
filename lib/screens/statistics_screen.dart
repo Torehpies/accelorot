@@ -1,5 +1,7 @@
 // lib/screens/statistics_screen.dart
 
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart'; 
 import '../screens/system_card.dart';           
@@ -42,6 +44,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
+                      // ignore: deprecated_member_use
                   color: Colors.green.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),

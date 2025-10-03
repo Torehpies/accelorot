@@ -25,6 +25,7 @@ class HumidityStatisticCard extends StatelessWidget {
           border: Border.all(color: Colors.green.shade100),
           boxShadow: [
             BoxShadow(
+                  // ignore: deprecated_member_use
               color: Colors.green.withOpacity(0.1),
               blurRadius: 8,
               offset: const Offset(0, 4),
@@ -52,6 +53,7 @@ class HumidityStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
+                // ignore: deprecated_member_use
             color: Colors.green.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),

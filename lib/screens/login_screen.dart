@@ -1,4 +1,6 @@
 // lib/screens/login_screen.dart
+// ignore_for_file: use_super_parameters, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
@@ -82,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                                  // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),

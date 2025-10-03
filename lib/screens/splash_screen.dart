@@ -1,5 +1,8 @@
 // lib/screens/splash_screen.dart
+// ignore_for_file: unnecessary_import, use_super_parameters
+
 import 'package:flutter/material.dart';
+
 import 'package:flutter/widgets.dart';
 import 'registration_screen.dart';
 
@@ -72,6 +75,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                                  // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
