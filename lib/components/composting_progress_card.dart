@@ -99,7 +99,7 @@ class CompostingProgressCard extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           '$formattedDate – $timeText',
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

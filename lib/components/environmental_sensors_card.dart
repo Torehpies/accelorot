@@ -110,7 +110,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 9, color: Colors.grey),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -129,7 +129,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 change,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                style: const TextStyle(fontSize: 7, color: Colors.grey),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
