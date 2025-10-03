@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import '../components/activity-logs.dart';
 import '../components/environmental_sensors_card.dart';
 import '../components/composting_progress_card.dart';
-
+import '../components/activity_logs.dart';
 
 
 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
 
@@ -148,7 +147,7 @@ Widget build(BuildContext context) {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -202,7 +201,7 @@ Widget build(BuildContext context) {
 
                       // Waste Category
                       DropdownButtonFormField<String>(
-                        value: _selectedWasteCategory,
+                        initialValue: _selectedWasteCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Waste Category',
@@ -253,7 +252,7 @@ Widget build(BuildContext context) {
 
                       // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
-                        value: _selectedPlantType,
+                        initialValue: _selectedPlantType,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Target Plant Type',
