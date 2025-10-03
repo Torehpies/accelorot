@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
+import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -109,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: Colors.black.withOpacity(0.08),
                       blurRadius: 8,
                     ),
                   ],
@@ -117,6 +118,39 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.all(12),
                 child: const Icon(
                   Icons.admin_panel_settings,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+          // Popup modal button at top left
+          Positioned(
+            top: 24,
+            left: 24,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainNavigation(),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(12),
+                child: const Icon(
+                  Icons.home,
                   color: Colors.white,
                   size: 28,
                 ),
