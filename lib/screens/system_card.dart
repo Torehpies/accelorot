@@ -160,7 +160,7 @@ class _SystemCardState extends State<SystemCard> {
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                   ),
-                  value: selectedPeriod,
+                  initialValue: selectedPeriod,
                   onChanged: (value) {
                     setState(() => selectedPeriod = value!);
                   },

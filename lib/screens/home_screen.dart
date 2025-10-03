@@ -237,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
-                        value: _selectedPlantType,
+                        initialValue: _selectedPlantType,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Target Plant Type',
