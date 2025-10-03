@@ -22,7 +22,7 @@ class AdminProfileScreen extends StatelessWidget {
       ),
       body: const Center(
         child: Text(
-          "Admin Profile Screen",
+          "Admin Profiles Screen",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
