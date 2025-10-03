@@ -1,7 +1,7 @@
 name: flutter_application_1
 description: "A new Flutter project."
 
-# Make sure this section exists and is properly configured
+
 environment:
   sdk: '^3.9.0'
 
@@ -23,5 +23,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/images/
 
 
