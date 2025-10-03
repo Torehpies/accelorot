@@ -7,15 +7,15 @@ class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key}); // ✅ const constructor
 
   @override
-  _StatisticsScreenState createState() => _StatisticsScreenState();
+  StatisticsScreenState createState() => StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
-  DateTimeRange? _selectedRange;
+class StatisticsScreenState extends State<StatisticsScreen> {
+  DateTimeRange? selectedRange;
 
-  void _onDateChanged(DateTimeRange? range) {
+  void onDateChanged(DateTimeRange? range) {
     setState(() {
-      _selectedRange = range;
+      selectedRange = range;
     });
   }
 
@@ -39,7 +39,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -71,7 +71,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: _onDateChanged), // not const
+                DateFilter(onChanged: onDateChanged), // not const
               ],
             ),
           ),
