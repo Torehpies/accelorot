@@ -5,7 +5,7 @@ import '../components/activity_logs.dart';
 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
 
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Waste Category
                       DropdownButtonFormField<String>(
-                        value: _selectedWasteCategory,
+                        initialValue: _selectedWasteCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Waste Category',

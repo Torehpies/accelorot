@@ -5,7 +5,7 @@ import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withOpacity(0.3),
+            color: Colors.teal..withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
