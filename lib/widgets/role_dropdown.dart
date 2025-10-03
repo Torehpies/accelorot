@@ -5,14 +5,14 @@ class RoleDropdown extends StatelessWidget {
   final ValueChanged<String?>? onChanged;
   final String? value;
 
-  const RoleDropdown({Key? key, this.onChanged, this.value}) : super(key: key);
+  const RoleDropdown({super.key, this.onChanged, this.value});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: DropdownButtonFormField<String>(
-        value: value,
+        initialValue: value,
         decoration: const InputDecoration(
           labelText: 'Select Role',
           prefixIcon: Icon(Icons.account_circle, color: Colors.grey),
