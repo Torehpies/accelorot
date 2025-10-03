@@ -27,30 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbar(context, 'Login successful!');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
+          MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
         );
       },
       onLoginError: (message) {
         showSnackbar(context, message, isError: true);
       },
     );
-  }
-
-  Future<void> _loginUser() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      showSnackbar(context, 'Login successful!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
-      );
-    }
   }
 
   @override
