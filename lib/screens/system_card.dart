@@ -76,8 +76,10 @@ class _SystemCardState extends State<SystemCard> {
               ),
               Row(
                 children: [
-                  const Text('Status: ',
-                      style: TextStyle(color: Colors.black54)),
+                  const Text(
+                    'Status: ',
+                    style: TextStyle(color: Colors.black54),
+                  ),
                   Text(
                     status,
                     style: TextStyle(
@@ -97,10 +99,7 @@ class _SystemCardState extends State<SystemCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Text(
-                'Uptime\n12:12:12',
-                style: TextStyle(color: Colors.black87),
-              ),
+              Text('Uptime\n12:12:12', style: TextStyle(color: Colors.black87)),
               Text(
                 'Last Update\n12:12:13 Aug 30, 2025',
                 textAlign: TextAlign.right,
@@ -131,7 +130,9 @@ class _SystemCardState extends State<SystemCard> {
                     ),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   value: selectedCycle,
                   onChanged: (value) {
@@ -158,7 +159,9 @@ class _SystemCardState extends State<SystemCard> {
                     ),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   value: selectedPeriod,
                   onChanged: (value) {
@@ -167,9 +170,13 @@ class _SystemCardState extends State<SystemCard> {
                   items: const [
                     DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
                     DropdownMenuItem(
-                        value: '12 hours', child: Text('12 hours')),
+                      value: '12 hours',
+                      child: Text('12 hours'),
+                    ),
                     DropdownMenuItem(
-                        value: '24 hours', child: Text('24 hours')),
+                      value: '24 hours',
+                      child: Text('24 hours'),
+                    ),
                   ],
                 ),
               ),
@@ -191,13 +198,16 @@ class _SystemCardState extends State<SystemCard> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isPaused ? const Color.fromARGB(255, 14, 138, 255) : const Color.fromARGB(255, 255, 185, 32),
+                          backgroundColor: isPaused
+                              ? const Color.fromARGB(255, 14, 138, 255)
+                              : const Color.fromARGB(255, 255, 185, 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 14),
+                            horizontal: 30,
+                            vertical: 14,
+                          ),
                         ),
                         child: Text(
                           isPaused ? "Resume" : "Pause",
@@ -222,7 +232,9 @@ class _SystemCardState extends State<SystemCard> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 14),
+                            horizontal: 30,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Stop",
@@ -247,7 +259,9 @@ class _SystemCardState extends State<SystemCard> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 14),
+                        horizontal: 50,
+                        vertical: 14,
+                      ),
                     ),
                     child: const Text(
                       'Start',

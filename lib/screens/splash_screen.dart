@@ -10,7 +10,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -21,10 +22,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack);
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutBack,
+    );
     _animationController.forward();
-
-    
   }
 
   @override
@@ -99,19 +101,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       const SizedBox(height: 16),
                       Text(
                         'Start Compounding Now!',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: theme.hintColor,
-                        ),
+                        style: TextStyle(fontSize: 18, color: theme.hintColor),
                       ),
                       const SizedBox(height: 20),
                       Text(
                         'Join us in accelerating sustainable growth and innovation through smart compounding solutions.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: theme.hintColor,
-                        ),
+                        style: TextStyle(fontSize: 14, color: theme.hintColor),
                       ),
                       const SizedBox(height: 50),
                       SizedBox(
@@ -120,7 +116,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const RegistrationScreen(),
+                              ),
                             );
                           },
                           style: ElevatedButton.styleFrom(

@@ -56,7 +56,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                            builder: (context) => const HomeScreen(),
+                          ),
                           (route) => false,
                         );
                       },
@@ -80,15 +81,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: const [
-                SystemCard(),
-                SizedBox(height: 16),
-              ],
+              children: const [SystemCard(), SizedBox(height: 16)],
             ),
           ),
         ],
       ),
-
     );
   }
 }

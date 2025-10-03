@@ -5,11 +5,7 @@ class CustomCard extends StatelessWidget {
   final String title;
   final List<Map<String, dynamic>> logs; // ← Accept logs
 
-  const CustomCard({
-    super.key,
-    required this.title,
-    required this.logs,
-  });
+  const CustomCard({super.key, required this.title, required this.logs});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +14,7 @@ class CustomCard extends StatelessWidget {
       height: 190,
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -49,8 +43,13 @@ class CustomCard extends StatelessWidget {
                     : ListView.builder(
                         itemCount: logs.length > 3 ? 3 : logs.length,
                         itemBuilder: (context, index) {
-                          final log = logs[logs.length - 1 - index]; // Show newest first
-                          final category = log['category'] == 'greens' ? 'Greens' : 'Browns';
+                          final log =
+                              logs[logs.length -
+                                  1 -
+                                  index]; // Show newest first
+                          final category = log['category'] == 'greens'
+                              ? 'Greens'
+                              : 'Browns';
                           final plant = log['plantTypeLabel'] ?? 'Plant';
                           final qty = log['quantity'];
 

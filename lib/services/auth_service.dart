@@ -37,10 +37,7 @@ class AuthService {
           'uid': user.uid,
         };
       } else {
-        return {
-          'success': false,
-          'message': 'Failed to create user account',
-        };
+        return {'success': false, 'message': 'Failed to create user account'};
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -57,10 +54,7 @@ class AuthService {
         default:
           message = e.message ?? 'An error occurred during registration.';
       }
-      return {
-        'success': false,
-        'message': message,
-      };
+      return {'success': false, 'message': message};
     } catch (e) {
       return {
         'success': false,

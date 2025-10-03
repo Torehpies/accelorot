@@ -99,10 +99,7 @@ class _DateFilterState extends State<DateFilter> {
         backgroundColor: Colors.white,
         side: BorderSide(color: Colors.grey.shade400),
       ),
-      child: Text(
-        _formatRange(),
-        style: const TextStyle(color: Colors.black),
-      ),
+      child: Text(_formatRange(), style: const TextStyle(color: Colors.black)),
     );
   }
 }

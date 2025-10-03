@@ -5,7 +5,6 @@ import 'package:flutter_application_1/screens/statistics_screen.dart';
 import '../utils/snackbar_utils.dart';
 import 'registration_screen.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -30,13 +29,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loginUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
+
       // Simulate API call delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       setState(() => _isLoading = false);
       showSnackbar(context, 'Login successful!');
-      
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainNavigation()),
@@ -47,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -107,10 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Sign in to continue',
-                        style: TextStyle(
-                          fontSize: 16, 
-                          color: theme.hintColor,
-                        ),
+                        style: TextStyle(fontSize: 16, color: theme.hintColor),
                       ),
                       const SizedBox(height: 32),
 
@@ -126,7 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Email is required';
+                          if (value == null || value.isEmpty)
+                            return 'Email is required';
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email address';
                           }
@@ -144,8 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           labelText: 'Password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword 
-                                  ? Icons.visibility_outlined 
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
                               color: Colors.grey,
                             ),
@@ -159,7 +156,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'Password is required' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Password is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
 
@@ -168,7 +167,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            showSnackbar(context, 'Password reset feature coming soon!');
+                            showSnackbar(
+                              context,
+                              'Password reset feature coming soon!',
+                            );
                           },
                           child: const Text('Forgot Password?'),
                         ),
@@ -195,7 +197,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
@@ -218,7 +222,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const RegistrationScreen(),
+                                ),
                               );
                             },
                             child: const Text(

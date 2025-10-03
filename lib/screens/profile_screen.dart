@@ -8,10 +8,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Profile")),
       body: const Center(
-        child: Text(
-          "Profile Page",
-          style: TextStyle(fontSize: 20),
-        ),
+        child: Text("Profile Page", style: TextStyle(fontSize: 20)),
       ),
     );
   }

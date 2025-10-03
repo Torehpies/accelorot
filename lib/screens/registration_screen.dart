@@ -38,12 +38,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Future<void> _registerUser() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      
 
       try {
+        final fullName =
+            '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
 
-        final fullName = '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
-        
         final result = await _authService.registerUser(
           email: emailController.text.trim(),
           password: passwordController.text,
@@ -54,31 +53,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         setState(() => _isLoading = false);
 
         if (result['success']) {
-        showSnackbar(context, 'Successfully registered as $selectedRole!');
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
-        );
+          showSnackbar(context, 'Successfully registered as $selectedRole!');
 
-          } else {
-            showSnackbar(context, result['message'], isError: true);
-          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        } else {
+          showSnackbar(context, result['message'], isError: true);
+        }
       } catch (e) {
         setState(() => _isLoading = false);
         showSnackbar(context, 'An unexpected error occurred', isError: true);
       }
-
-
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white, // White background
       body: SafeArea(
@@ -87,14 +81,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: Container(
               constraints: const BoxConstraints(maxWidth: 500),
               padding: const EdgeInsets.all(24),
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
                       // Logo
                       Container(
                         width: 80,
@@ -135,10 +129,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(height: 8),
                       Text(
                         'Join us to get started',
-                        style: TextStyle(
-                          fontSize: 16, 
-                          color: theme.hintColor,
-                        ),
+                        style: TextStyle(fontSize: 16, color: theme.hintColor),
                       ),
                       const SizedBox(height: 32),
 
@@ -154,19 +145,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 labelText: 'First Name',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                    width: 2,
+                                  ),
                                 ),
                               ),
-                              validator: (value) => value == null || value.isEmpty 
-                                  ? 'First name is required' 
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'First name is required'
                                   : null,
                             ),
                           ),
@@ -180,19 +179,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 labelText: 'Last Name',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFF2B7326),
+                                    width: 2,
+                                  ),
                                 ),
                               ),
-                              validator: (value) => value == null || value.isEmpty 
-                                  ? 'Last name is required' 
+                              validator: (value) =>
+                                  value == null || value.isEmpty
+                                  ? 'Last name is required'
                                   : null,
                             ),
                           ),
@@ -209,19 +216,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Email Address',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Email is required';
+                          if (value == null || value.isEmpty)
+                            return 'Email is required';
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email address';
                           }
@@ -239,8 +254,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscurePassword 
-                                  ? Icons.visibility_outlined 
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
                               color: Colors.grey,
                             ),
@@ -252,20 +267,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Password is required';
-                          if (value.length < 6) return 'Password must be at least 6 characters';
+                          if (value == null || value.isEmpty)
+                            return 'Password is required';
+                          if (value.length < 6)
+                            return 'Password must be at least 6 characters';
                           return null;
                         },
                       ),
@@ -280,33 +304,43 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           labelText: 'Confirm Password',
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureConfirmPassword 
-                                  ? Icons.visibility_outlined 
+                              _obscureConfirmPassword
+                                  ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
                               color: Colors.grey,
                             ),
                             onPressed: () {
                               setState(() {
-                                _obscureConfirmPassword = !_obscureConfirmPassword;
+                                _obscureConfirmPassword =
+                                    !_obscureConfirmPassword;
                               });
                             },
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF2B7326),
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Please confirm your password';
-                          if (value != passwordController.text) return 'Passwords do not match';
+                          if (value == null || value.isEmpty)
+                            return 'Please confirm your password';
+                          if (value != passwordController.text)
+                            return 'Passwords do not match';
                           return null;
                         },
                       ),
@@ -332,7 +366,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
@@ -347,14 +383,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(height: 24),
                       Row(
                         children: [
-                          Expanded( 
+                          Expanded(
                             child: Divider(
-                            color: Colors.grey[300],
-                            thickness: 1,
-                          ),
+                              color: Colors.grey[300],
+                              thickness: 1,
+                            ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                            ),
                             child: Text(
                               'or continue with',
                               style: TextStyle(color: Colors.grey[600]),
@@ -362,22 +400,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           Expanded(
                             child: Divider(
-                            color: Colors.grey[300],
-                            thickness: 1,
+                              color: Colors.grey[300],
+                              thickness: 1,
+                            ),
                           ),
-                          ),
-                         
                         ],
                       ),
                       const SizedBox(height: 24),
 
                       GestureDetector(
                         onTap: () async {
-													try {
-																																								  
-													} catch (e) {
-														
-													}
+                          try {
+                            _authService.signInWithGoogle();
+                          } catch (e) {
+                            showSnackbar(context, 'Error $e');
+                          }
                         },
                         child: Image.asset(
                           'assets/icons/Google_logo.png',
@@ -395,7 +432,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             onPressed: () {
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
                               );
                             },
                             child: const Text(
@@ -415,7 +454,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
           ),
         ),
-      ),    
+      ),
     );
   }
 }
