@@ -7,10 +7,10 @@ class DateFilter extends StatefulWidget {
   const DateFilter({super.key, required this.onChanged});
 
   @override
-  _DateFilterState createState() => _DateFilterState();
+  DateFilterState createState() => DateFilterState();
 }
 
-class _DateFilterState extends State<DateFilter> {
+class DateFilterState extends State<DateFilter> {
   DateTimeRange? _selectedRange;
 
   void _pickDateRange() {
@@ -56,7 +56,7 @@ class _DateFilterState extends State<DateFilter> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     selectedPeriodMiddleDecoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.5),
+                      color: Colors.green..withValues(alpha: 0.5),
                       shape: BoxShape.rectangle,
                     ),
                   ),

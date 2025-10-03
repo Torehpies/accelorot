@@ -101,25 +101,25 @@ class AuthService extends ChangeNotifier {
     }
   }
 
- // Future<GoogleSignInAccount> signInWithGoogle() async {
- //   await _ensureGoogleSignInInitialized();
+  // Future<GoogleSignInAccount> signInWithGoogle() async {
+  //   await _ensureGoogleSignInInitialized();
 
- //   try {
- //     // authenticate() throws exceptions instead of returning null
- //     final GoogleSignInAccount account = await _googleSignIn.authenticate(
- //       scopeHint: ['email'], // Specify required scopes
- //     );
- //     return account;
- //   } on GoogleSignInException catch (e) {
- //     print(
- //       'Google Sign In error: code: ${e.code.name} description:${e.description} details:${e.details}, error: e',
- //     );
- //     rethrow;
- //   } catch (error) {
- //     print('Unexpected Google Sign-In error: $error');
- //     rethrow;
- //   }
- // }
+  //   try {
+  //     // authenticate() throws exceptions instead of returning null
+  //     final GoogleSignInAccount account = await _googleSignIn.authenticate(
+  //       scopeHint: ['email'], // Specify required scopes
+  //     );
+  //     return account;
+  //   } on GoogleSignInException catch (e) {
+  //     print(
+  //       'Google Sign In error: code: ${e.code.name} description:${e.description} details:${e.details}, error: e',
+  //     );
+  //     rethrow;
+  //   } catch (error) {
+  //     print('Unexpected Google Sign-In error: $error');
+  //     rethrow;
+  //   }
+  // }
 
   Future<GoogleSignInAccount?> attemptSilentSignIn() async {
     await _ensureGoogleSignInInitialized();
@@ -170,16 +170,16 @@ class AuthService extends ChangeNotifier {
 
   bool get isSignedIn => _currentUser != null;
 
-//  Future<void> signIn() async {
-//    try {
-//      _currentUser = await signInWithGoogle();
-//      // Manually notify listeners or update state
-//      _notifyUserChanged();
-//    } catch (error) {
-//      _currentUser = null;
-//      rethrow;
-//    }
-//  }
+  //  Future<void> signIn() async {
+  //    try {
+  //      _currentUser = await signInWithGoogle();
+  //      // Manually notify listeners or update state
+  //      _notifyUserChanged();
+  //    } catch (error) {
+  //      _currentUser = null;
+  //      rethrow;
+  //    }
+  //  }
 
   Future<void> signOut() async {
     await _auth.signOut();
@@ -223,7 +223,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<UserCredential> signInWithGoogle() async {
-		await _ensureGoogleSignInInitialized();
+    await _ensureGoogleSignInInitialized();
     // Trigger the authentication flow
     final GoogleSignInAccount googleUser = await GoogleSignIn.instance
         .authenticate();

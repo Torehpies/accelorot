@@ -1,14 +1,11 @@
 // lib/main.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'firebase_options.dart';
+import 'screens/statistics_screen.dart';
 import 'screens/main_navigation.dart';
 import 'screens/splash_screen.dart';
-import 'screens/statistics_screen.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
@@ -51,11 +48,18 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // Start with splash, then navigate to MainNavigation
       home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
+      },
+      builder: (context, child) {
+        if (child != null) {
+          return child;
+        }
+        return const Scaffold(
+          body: Center(child: Text('An unexpected error occurred.')),
+        );
       },
     );
   }

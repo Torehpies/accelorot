@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/auth_service.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import 'login_screen.dart';
 
@@ -49,22 +47,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fullName: fullName,
           role: selectedRole ?? 'User',
         );
+        if (mounted) {
+          setState(() => _isLoading = false);
 
-        setState(() => _isLoading = false);
-
-        if (result['success']) {
-          showSnackbar(context, 'Successfully registered as $selectedRole!');
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
-          );
-        } else {
-          showSnackbar(context, result['message'], isError: true);
+          if (result['success']) {
+            showSnackbar(context, 'Successfully registered as $selectedRole!');
+          } else {
+            showSnackbar(context, result['message'], isError: true);
+          }
         }
       } catch (e) {
-        setState(() => _isLoading = false);
-        showSnackbar(context, 'An unexpected error occurred', isError: true);
+        if (mounted) {
+          setState(() => _isLoading = false);
+          showSnackbar(context, 'An unexpected error occurred', isError: true);
+        }
       }
     }
   }
@@ -105,7 +101,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.teal.withOpacity(0.3),
+                              color: Colors.teal.withValues(alpha: 0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
