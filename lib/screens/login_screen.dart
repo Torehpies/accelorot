@@ -39,59 +39,91 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Form(
-                  key: _controller.formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo
-                      _buildLogo(),
-                      const SizedBox(height: 24),
-                      
-                      // Title
-                      _buildTitle(theme),
-                      const SizedBox(height: 32),
-
-                      // Email Field
-                      _buildEmailField(),
-                      const SizedBox(height: 16),
-
-                      // Password Field
-                      _buildPasswordField(),
-                      const SizedBox(height: 16),
-
-                      // Forgot Password
-                      _buildForgotPassword(),
-                      const SizedBox(height: 24),
-
-                      // Login Button
-                      _buildLoginButton(),
-                      const SizedBox(height: 24),
-
-                      // Sign Up Link
-                      _buildSignUpLink(),
-                    ],
+      body: Stack(
+        children: [
+          // Main login UI
+          SafeArea(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 500),
+                padding: const EdgeInsets.all(24),
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Form(
+                      key: _controller.formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Logo
+                          _buildLogo(),
+                          const SizedBox(height: 24),
+                          // Title
+                          _buildTitle(theme),
+                          const SizedBox(height: 32),
+                          // Email Field
+                          _buildEmailField(),
+                          const SizedBox(height: 16),
+                          // Password Field
+                          _buildPasswordField(),
+                          const SizedBox(height: 16),
+                          // Forgot Password
+                          _buildForgotPassword(),
+                          const SizedBox(height: 24),
+                          // Login Button
+                          _buildLoginButton(),
+                          const SizedBox(height: 24),
+                          // Sign Up Link
+                          _buildSignUpLink(),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          // Popup modal button at top right
+          Positioned(
+            top: 24,
+            right: 24,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminMainNavigation(),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(12),
+                child: const Icon(
+                  Icons.admin_panel_settings,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
