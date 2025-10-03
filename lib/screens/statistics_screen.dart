@@ -1,8 +1,8 @@
 // lib/screens/statistics_screen.dart
 
 import 'package:flutter/material.dart';
-import '../widgets/humidity_statistic_card.dart';
-import 'system_card.dart';
+import '../widgets/humidity_statistic_card.dart'; 
+import '../screens/system_card.dart';           
 import 'date_filter.dart';
 import 'home_screen.dart';
 
@@ -14,6 +14,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
+  // ignore: unused_field
   DateTimeRange? _selectedRange;
 
   void _onDateChanged(DateTimeRange? range) {
@@ -27,7 +28,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false, // 👈 Remove default back button (you have custom one)
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -58,7 +59,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                            builder: (context) => const HomeScreen(),
+                          ),
                           (route) => false,
                         );
                       },
@@ -83,20 +85,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               children: [
-                // ✅ SYSTEM CARD FIRST (TOP)
+                // ✅ Full-width System Card
                 const SystemCard(),
                 const SizedBox(height: 16),
 
-                // ✅ HUMIDITY CARD SECOND (BOTTOM) — CENTERED & COMPACT
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: HumidityStatisticCard(
-                      currentHumidity: 38.0,
-                      hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                      lastUpdated: DateTime.now(),
-                    ),
-                  ),
+                // ✅ Full-width Humidity Card (no Center or extra padding)
+                HumidityStatisticCard(
+                  currentHumidity: 38.0,
+                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                  lastUpdated: DateTime.now(),
                 ),
                 const SizedBox(height: 16),
               ],

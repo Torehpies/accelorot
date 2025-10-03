@@ -18,7 +18,7 @@ class HumidityStatisticCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (hourlyReadings.isEmpty) {
       return Container(
-        width: double.infinity, // 👈 Ensure full width even when empty
+        width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -45,7 +45,7 @@ class HumidityStatisticCard extends StatelessWidget {
     final color = _getColorForQuality(quality);
 
     return Container(
-      width: double.infinity, // 👈 THIS IS THE CRITICAL FIX - ensures full width
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -131,7 +131,7 @@ class HumidityStatisticCard extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: 90,
-            width: double.infinity, // 👈 Chart fills full card width
+            width: double.infinity,
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
@@ -164,6 +164,7 @@ class HumidityStatisticCard extends StatelessWidget {
                   width: 2,
                   markerSettings: const MarkerSettings(isVisible: true),
                 ),
+                // Upper bound (65%)
                 LineSeries<Map<String, Object>, String>(
                   dataSource: List<Map<String, Object>>.from(
                     List.generate(hourlyReadings.length, (i) {
@@ -180,6 +181,7 @@ class HumidityStatisticCard extends StatelessWidget {
                   dashArray: const [5, 5],
                   width: 1,
                 ),
+                // Lower bound (40%)
                 LineSeries<Map<String, Object>, String>(
                   dataSource: List<Map<String, Object>>.from(
                     List.generate(hourlyReadings.length, (i) {
@@ -222,7 +224,6 @@ class HumidityStatisticCard extends StatelessWidget {
   }
 
   double _calculateProgress(double humidity) {
-    // Normalize to 0-1 range properly
     if (humidity <= 0) return 0.0;
     if (humidity >= 100) return 1.0;
     return humidity / 100;
