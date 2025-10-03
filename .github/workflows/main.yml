@@ -46,7 +46,7 @@ jobs:
             echo '{"project_info": {"project_id": "dummy-pr"}}' > android/app/google-services.json
           else
             echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-          fi`        
+          fi        
 
       - name: Install dependencies
         run: flutter pub get
