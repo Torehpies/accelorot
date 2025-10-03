@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
+  // ignore: use_super_parameters
   const RegistrationScreen({Key? key}) : super(key: key);
 
   @override
@@ -54,19 +54,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         setState(() => _isLoading = false);
 
         if (result['success']) {
-        showSnackbar(context, 'Successfully registered as $selectedRole!');
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
-        );
-
-          } else {
+          if (mounted) {
+            showSnackbar(context, 'Successfully registered as $selectedRole!');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MainNavigation()),
+            );
+          }
+        } else {
+          if (mounted) {
             showSnackbar(context, result['message'], isError: true);
           }
+        }
       } catch (e) {
         setState(() => _isLoading = false);
-        showSnackbar(context, 'An unexpected error occurred', isError: true);
+        if (mounted) {
+          showSnackbar(context, 'An unexpected error occurred', isError: true);
+        }
       }
 
 
@@ -111,6 +115,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                              // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),

@@ -7,10 +7,12 @@ class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key}); // ✅ const constructor
 
   @override
+  // ignore: library_private_types_in_public_api
   _StatisticsScreenState createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
+  // ignore: unused_field
   DateTimeRange? _selectedRange;
 
   void _onDateChanged(DateTimeRange? range) {
@@ -39,6 +41,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
+                      // ignore: deprecated_member_use
                   color: Colors.green.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),

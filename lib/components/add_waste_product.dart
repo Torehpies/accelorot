@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 class AddWasteProduct extends StatefulWidget {
-  const AddWasteProduct({Key? key}) : super(key: key);
+  const AddWasteProduct({super.key});
 
   @override
   State<AddWasteProduct> createState() => _AddWasteProductState();
@@ -110,6 +110,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
@@ -164,6 +165,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
               // Waste Category
               DropdownButtonFormField<String>(
+                    // ignore: deprecated_member_use
                 value: _selectedWasteCategory,
                 isExpanded: true,
                 decoration: InputDecoration(
@@ -215,7 +217,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
               // Target Plant Type
               DropdownButtonFormField<String>(
-                value: _selectedPlantType,
+                initialValue: _selectedPlantType,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: 'Select Target Plant Type',

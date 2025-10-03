@@ -50,6 +50,7 @@ class _SystemCardState extends State<SystemCard> {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
+                // ignore: deprecated_member_use
             color: Colors.green.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
@@ -133,7 +134,7 @@ class _SystemCardState extends State<SystemCard> {
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                   ),
-                  value: selectedCycle,
+                  initialValue: selectedCycle,
                   onChanged: (value) {
                     setState(() => selectedCycle = value!);
                   },
@@ -160,7 +161,7 @@ class _SystemCardState extends State<SystemCard> {
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 10),
                   ),
-                  value: selectedPeriod,
+                  initialValue: selectedPeriod,
                   onChanged: (value) {
                     setState(() => selectedPeriod = value!);
                   },

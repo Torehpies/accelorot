@@ -1,9 +1,10 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import '../components/activity-logs.dart';
-import '../components/add-waste-product.dart';
+import '../components/activity_logs.dart';
+import '../components/add_waste_product.dart';
 
 class HomeScreen extends StatefulWidget {
+  // ignore: use_super_parameters
   const HomeScreen({Key? key}) : super(key: key);
 
   @override

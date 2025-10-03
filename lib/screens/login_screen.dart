@@ -1,13 +1,12 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
-import 'package:flutter_application_1/screens/statistics_screen.dart';
+import 'main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import 'registration_screen.dart';
 
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -35,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await Future.delayed(const Duration(seconds: 2));
       
       setState(() => _isLoading = false);
+      if (!mounted) return;
       showSnackbar(context, 'Login successful!');
       
       Navigator.pushReplacement(
@@ -83,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+                                  // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
