@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/activity-logs.dart';
 import '../components/environmental_sensors_card.dart';
-import '../screens/composting_progress_card.dart';
+import '../components/composting_progress_card.dart';
 
 
 
