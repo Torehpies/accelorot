@@ -1,9 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
+import 'package:flutter_application_1/components/user_card.dart';
+import 'package:flutter_application_1/models/user_model.dart';
 import 'package:flutter_application_1/screens/admin/add_user/archive_screen.dart';
 
-class UserManagementScreen extends StatelessWidget {
+class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
+
+  @override
+  State<UserManagementScreen> createState() => _UserManagementScreenState();
+}
+
+class _UserManagementScreenState extends State<UserManagementScreen> {
+  List<UserModel> users = [
+    UserModel(name: "Joy Merk", email: "joymerk@gmail.com"),
+    UserModel(name: "Test User", email: "test@gmail.com"),
+  ];
+
+  List<UserModel> archivedUsers = [];
+
+  void moveToArchive(UserModel user) {
+    setState(() {
+      users.remove(user);
+      archivedUsers.add(user);
+    });
+  }
+
+  void restoreFromArchive(UserModel user) {
+    setState(() {
+      archivedUsers.remove(user);
+      users.add(user);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,34 +39,20 @@ class UserManagementScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Custom Header Row
+            // 🔹 Header AppBar Row
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Back button
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AdminMainNavigation(),
-                        ),
-                      );
-                    },
-                  ),
+                  const SizedBox(width: 48), // to balance alignment
                   const Text(
                     "User List",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Row(
                     children: [
-                      // Archive List button
+                      // Archive Button
                       TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.grey.shade200,
@@ -47,11 +60,15 @@ class UserManagementScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () {
-                          Navigator.push(
+                        onPressed: () async {
+                          // Navigate to Archive and wait for possible restore
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ArchiveScreen(),
+                              builder: (context) => ArchiveScreen(
+                                archivedUsers: archivedUsers,
+                                onRestore: restoreFromArchive,
+                              ),
                             ),
                           );
                         },
@@ -61,7 +78,7 @@ class UserManagementScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Add User button
+                      // Add User Button
                       ElevatedButton.icon(
                         onPressed: () {
                           // TODO: Add User Navigation
@@ -77,21 +94,35 @@ class UserManagementScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
-
             const Divider(),
 
-            // Body
-            const Expanded(
-              child: Center(
-                child: Text(
-                  "User Management Screen",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
+            // 🔹 User List
+            Expanded(
+              child: users.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No active users",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: users.length,
+                      itemBuilder: (context, index) {
+                        final user = users[index];
+                        return UserCard(
+                          name: user.name,
+                          email: user.email,
+                          onDelete: () => moveToArchive(user),
+                          onEdit: () {
+                            // TODO: Navigate to Edit
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
