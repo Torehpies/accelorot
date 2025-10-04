@@ -1,10 +1,13 @@
 // lib/screens/statistics_screen.dart
+
+// ignore_for_file: deprecated_member_use, depend_on_referenced_packages
+
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // ✅ Critical import
 import '../components/system_card.dart';
 import '../components/date_filter.dart';
 import 'home_screen.dart';
-import '../components/history.dart'; // ✅ Now used
+import '../components/history.dart'; // ✅ Now used correctly
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -33,7 +36,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           _selectedFilterLabel = "Last 14 Days";
         } else {
           final format = DateFormat('MMM d');
-          _selectedFilterLabel = '${format.format(range.start)} – ${format.format(range.end)}';
+          _selectedFilterLabel =
+              '${format.format(range.start)} – ${format.format(range.end)}';
         }
       }
     });
@@ -101,7 +105,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 const SystemCard(),
                 const SizedBox(height: 16),
                 if (_selectedRange != null)
-                  History(
+                  HistoryPage( // ✅ FIXED: use correct class name
                     filter: _selectedFilterLabel,
                     range: _selectedRange!,
                   ),
