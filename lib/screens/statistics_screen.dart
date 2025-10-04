@@ -1,40 +1,39 @@
+// lib/screens/statistics_screen.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // ✅ Critical import
 import '../components/system_card.dart';
 import '../components/date_filter.dart';
 import 'home_screen.dart';
-import '../components/history.dart';
-
+import '../components/history.dart'; // ✅ Now used
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _StatisticsScreenState createState() => _StatisticsScreenState();
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // ignore: unused_field
   DateTimeRange? _selectedRange;
+  String _selectedFilterLabel = "Date Filter";
 
-  void onDateChanged(DateTimeRange? range) {
+  void _onDateChanged(DateTimeRange? range) {
     setState(() {
-      selectedRange = range;
+      _selectedRange = range;
 
       if (range == null) {
-        selectedFilterLabel = "Date Filter";
+        _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
-          selectedFilterLabel = "Last 3 Days";
+          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
-          selectedFilterLabel = "Last 7 Days";
+          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          selectedFilterLabel = "Last 14 Days";
+          _selectedFilterLabel = "Last 14 Days";
         } else {
-          // Custom Range label
-          selectedFilterLabel =
-              "${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}";
+          final format = DateFormat('MMM d');
+          _selectedFilterLabel = '${format.format(range.start)} – ${format.format(range.end)}';
         }
       }
     });
@@ -45,22 +44,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-
       body: Column(
         children: [
-          // Header (Statistics + Date Filter)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                      // ignore: deprecated_member_use
                   color: Colors.green.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -78,7 +74,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                            builder: (context) => const HomeScreen(),
+                          ),
                           (route) => false,
                         );
                       },
@@ -93,29 +90,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: _onDateChanged), // not const
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
-
-            // Scrollable content
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                children: [
-                  const SystemCard(),
-                  const SizedBox(height: 16),
-
-                  if (selectedRange != null)
-                    HistoryPage(
-                      filter: selectedFilterLabel,
-                      range: selectedRange!,
-                    ),
-                ],
-              ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                const SystemCard(),
+                const SizedBox(height: 16),
+                if (_selectedRange != null)
+                  History(
+                    filter: _selectedFilterLabel,
+                    range: _selectedRange!,
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

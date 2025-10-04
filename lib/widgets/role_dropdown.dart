@@ -13,7 +13,6 @@ class RoleDropdown extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: DropdownButtonFormField<String>(
         initialValue: value,
-        initialValue: value,
         decoration: const InputDecoration(
           labelText: 'Select Role',
           prefixIcon: Icon(Icons.account_circle, color: Colors.grey),

@@ -1,11 +1,14 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+// ignore: unused_import
 import 'main_navigation.dart';
+// ignore: unused_import
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
   const LoginScreen({super.key});
 
   @override
@@ -13,31 +16,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late LoginController _controller;
+  late final LoginController _controller = LoginController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _loginUser() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
-      if (!mounted) return;
-      showSnackbar(context, 'Login successful!');
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
-      );
-    }
   }
 
   @override
@@ -79,7 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                  // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
@@ -105,11 +89,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Sign in to continue',
                         style: TextStyle(
-                          fontSize: 16, 
+                          fontSize: 16,
                           color: theme.hintColor,
                         ),
                       ),
                       const SizedBox(height: 32),
+
+                      // Email Field
+                      _buildEmailField(),
+                      const SizedBox(height: 16),
+
+                      // Password Field
+                      _buildPasswordField(),
+                      const SizedBox(height: 8),
+
+                      // Forgot Password
+                      _buildForgotPassword(),
+                      const SizedBox(height: 24),
+
+                      // Login Button
+                      _buildLoginButton(),
+                      const SizedBox(height: 16),
+
+                      // Sign Up Link
+                      _buildSignUpLink(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildEmailField() {
     return TextFormField(
@@ -131,13 +144,13 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _controller.passwordController,
       obscureText: _controller.obscurePassword,
       textInputAction: TextInputAction.done,
-      onFieldSubmitted: (_) => _controller.loginUser(),
+      onFieldSubmitted: (_) => _controller.loginUser(context, _formKey),
       decoration: InputDecoration(
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            _controller.obscurePassword 
-                ? Icons.visibility_outlined 
+            _controller.obscurePassword
+                ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
@@ -165,7 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _controller.isLoading ? null : _controller.loginUser,
+        onPressed: _controller.isLoading
+            ? null
+            : () => _controller.loginUser(context, _formKey),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,
           foregroundColor: Colors.white,
