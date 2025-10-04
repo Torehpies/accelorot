@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
+import 'package:flutter_application_1/admin_screens/admin_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -23,12 +24,22 @@ class _LoginScreenState extends State<LoginScreen> {
     _controller.setCallbacks(
       onLoadingChanged: (isLoading) => setState(() {}),
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
-      onLoginSuccess: () {
-        showSnackbar(context, 'Login successful!');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
-        );
+      onLoginSuccess: (result) {
+                Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
+        String userRole = userData['role'] ?? 'User';
+        
+        // Navigate based on role
+        if (userRole == 'Admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminNavigation()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        }
       },
       onLoginError: (message) {
         showSnackbar(context, message, isError: true);
