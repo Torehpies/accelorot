@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
+import '../components/history.dart';
+
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ const constructor
+  const StatisticsScreen({super.key});
 
   @override
   _StatisticsScreenState createState() => _StatisticsScreenState();
@@ -12,10 +14,28 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   DateTimeRange? _selectedRange;
+  String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
     setState(() {
       _selectedRange = range;
+
+      if (range == null) {
+        _selectedFilterLabel = "Date Filter";
+      } else {
+        final daysDiff = range.end.difference(range.start).inDays;
+        if (daysDiff == 3) {
+          _selectedFilterLabel = "Last 3 Days";
+        } else if (daysDiff == 7) {
+          _selectedFilterLabel = "Last 7 Days";
+        } else if (daysDiff == 14) {
+          _selectedFilterLabel = "Last 14 Days";
+        } else {
+          // Custom Range label
+          _selectedFilterLabel =
+              "${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}";
+        }
+      }
     });
   }
 
@@ -23,72 +43,73 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-
-      body: Column(
-        children: [
-          // Header (Statistics + Date Filter)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      'Statistics',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+      body: SafeArea( // 👈 Add this
+        child: Column(
+          children: [
+            // Header (Statistics + Date Filter)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left, color: Colors.black),
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
                       ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'Statistics',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  DateFilter(onChanged: _onDateChanged),
+                ],
+              ),
+            ),
+
+            // Scrollable content
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  const SystemCard(),
+                  const SizedBox(height: 16),
+
+                  if (_selectedRange != null)
+                    HistoryPage(
+                      filter: _selectedFilterLabel,
+                      range: _selectedRange!,
                     ),
-                  ],
-                ),
-                DateFilter(onChanged: _onDateChanged), // not const
-              ],
+                ],
+              ),
             ),
-          ),
-
-          // Scrollable content
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: const [
-                SystemCard(),
-                SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-
     );
   }
 }
