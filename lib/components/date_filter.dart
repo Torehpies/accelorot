@@ -7,12 +7,12 @@ class DateFilter extends StatefulWidget {
   const DateFilter({super.key, required this.onChanged});
 
   @override
-  _DateFilterState createState() => _DateFilterState();
+  DateFilterState createState() => DateFilterState();
 }
 
-class _DateFilterState extends State<DateFilter> {
-  DateTimeRange? _selectedRange;
-  String _currentSelection = "Date Filter";
+class DateFilterState extends State<DateFilter> {
+  DateTimeRange? selectedRange;
+  String currentSelection = "Date Filter";
 
   void _showQuickOptions() {
     DateTime now = DateTime.now();
@@ -83,10 +83,10 @@ class _DateFilterState extends State<DateFilter> {
 
   void _setDateRange(DateTimeRange range) {
     setState(() {
-      _selectedRange = range;
-      _currentSelection = _getQuickOptionText(range);
+      selectedRange = range;
+      currentSelection = _getQuickOptionText(range);
     });
-    widget.onChanged(_selectedRange);
+    widget.onChanged(selectedRange);
   }
 
   String _getQuickOptionText(DateTimeRange range) {
@@ -103,8 +103,8 @@ class _DateFilterState extends State<DateFilter> {
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
-    DateTime start = _selectedRange?.start ?? now.subtract(const Duration(days: 7));
-    DateTime end = _selectedRange?.end ?? now;
+    DateTime start = selectedRange?.start ?? now.subtract(const Duration(days: 7));
+    DateTime end = selectedRange?.end ?? now;
 
     DateTimeRange tempRange = DateTimeRange(start: start, end: end);
 
@@ -167,10 +167,10 @@ class _DateFilterState extends State<DateFilter> {
                         TextButton(
                           onPressed: () {
                             setState(() {
-                              _selectedRange = tempRange;
-                              _currentSelection = _formatRange();
+                              selectedRange = tempRange;
+                              currentSelection = _formatRange();
                             });
-                            widget.onChanged(_selectedRange);
+                            widget.onChanged(selectedRange);
                             Navigator.pop(context);
                           },
                           child: const Text("OK", style: TextStyle(fontSize: 14)),
@@ -188,9 +188,9 @@ class _DateFilterState extends State<DateFilter> {
   }
 
   String _formatRange() {
-    if (_selectedRange == null) return "Date Filter";
-    return "${_selectedRange!.start.month}/${_selectedRange!.start.day}/${_selectedRange!.start.year} - "
-        "${_selectedRange!.end.month}/${_selectedRange!.end.day}/${_selectedRange!.end.year}";
+    if (selectedRange == null) return "Date Filter";
+    return "${selectedRange!.start.month}/${selectedRange!.start.day}/${selectedRange!.start.year} - "
+        "${selectedRange!.end.month}/${selectedRange!.end.day}/${selectedRange!.end.year}";
   }
 
   @override
@@ -203,7 +203,7 @@ class _DateFilterState extends State<DateFilter> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       child: Text(
-        _currentSelection,
+        currentSelection,
         style: const TextStyle(fontSize: 14, color: Colors.black),
       ),
     );
