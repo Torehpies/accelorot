@@ -42,8 +42,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Firebase / FlutterFire (do NOT ignore google-services.json)
+# Firebase / FlutterFire
 firebase_options.dart
+google-services.json
 
 # Android
 android/.gradle/
@@ -66,3 +67,5 @@ linux/flutter/generated_plugins.cmake
 
 # Web
 web/firebase-messaging-sw.js
+
+notes.md

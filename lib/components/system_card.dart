@@ -50,8 +50,12 @@ class _SystemCardState extends State<SystemCard> {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
+<<<<<<< HEAD:lib/screens/system_card.dart
                 // ignore: deprecated_member_use
             color: Colors.green.withOpacity(0.1),
+=======
+            color: Colors.green.withValues(alpha:0.1),
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1:lib/components/system_card.dart
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

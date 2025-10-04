@@ -5,8 +5,12 @@ import '../services/auth_service.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
+<<<<<<< HEAD
   // ignore: use_super_parameters
   const RegistrationScreen({Key? key}) : super(key: key);
+=======
+  const RegistrationScreen({super.key});
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -50,6 +54,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fullName: fullName,
           role: selectedRole ?? 'User',
         );
+        if (mounted) {
 
         setState(() => _isLoading = false);
 
@@ -67,15 +72,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           }
         }
       } catch (e) {
+        if (mounted)  {
         setState(() => _isLoading = false);
         if (mounted) {
           showSnackbar(context, 'An unexpected error occurred', isError: true);
         }
       }
-
-
     }
-  }
+  } 
+}
 
   
 
@@ -115,8 +120,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+<<<<<<< HEAD
                               // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
+=======
+                              color: Colors.teal.withValues(alpha: 0.3),
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),

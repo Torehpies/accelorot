@@ -1,7 +1,10 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 // ignore: unnecessary_import
 import 'package:flutter/widgets.dart';
+=======
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
 import 'registration_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -73,8 +76,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
+<<<<<<< HEAD
                               // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
+=======
+                              color: Colors.teal.withValues(alpha: 0.3),
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),

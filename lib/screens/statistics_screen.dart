@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'system_card.dart';
-import 'date_filter.dart';
+import '../components/system_card.dart';
+import '../components/date_filter.dart';
 import 'home_screen.dart';
+import '../components/history.dart';
+
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ const constructor
+  const StatisticsScreen({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -15,9 +17,26 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   // ignore: unused_field
   DateTimeRange? _selectedRange;
 
-  void _onDateChanged(DateTimeRange? range) {
+  void onDateChanged(DateTimeRange? range) {
     setState(() {
-      _selectedRange = range;
+      selectedRange = range;
+
+      if (range == null) {
+        selectedFilterLabel = "Date Filter";
+      } else {
+        final daysDiff = range.end.difference(range.start).inDays;
+        if (daysDiff == 3) {
+          selectedFilterLabel = "Last 3 Days";
+        } else if (daysDiff == 7) {
+          selectedFilterLabel = "Last 7 Days";
+        } else if (daysDiff == 14) {
+          selectedFilterLabel = "Last 14 Days";
+        } else {
+          // Custom Range label
+          selectedFilterLabel =
+              "${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}";
+        }
+      }
     });
   }
 
@@ -79,19 +98,25 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-          // Scrollable content
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: const [
-                SystemCard(),
-                SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ],
-      ),
+            // Scrollable content
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                children: [
+                  const SystemCard(),
+                  const SizedBox(height: 16),
 
+                  if (selectedRange != null)
+                    HistoryPage(
+                      filter: selectedFilterLabel,
+                      range: selectedRange!,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
