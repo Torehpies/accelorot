@@ -407,10 +407,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       GestureDetector(
                         onTap: () async {
                           try {
-                            _authService.signInWithGoogle();
+                            _authService.signInWithGoogleFirebase();
                           } catch (e) {
                             showSnackbar(context, 'Error $e');
-                          }
+                          } 
                         },
                         child: Image.asset(
                           'assets/icons/Google_logo.png',
