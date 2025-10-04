@@ -90,7 +90,6 @@ class _DateFilterState extends State<DateFilter> {
   }
 
   String _getQuickOptionText(DateTimeRange range) {
-    final now = DateTime.now();
     final daysDiff = range.end.difference(range.start).inDays;
     
     if (daysDiff == 3) return "Last 3 Days";
@@ -150,7 +149,7 @@ class _DateFilterState extends State<DateFilter> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           selectedPeriodMiddleDecoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.5),
+                            color: Colors.green.withAlpha((0.5 * 255).toInt()),
                             shape: BoxShape.rectangle,
                           ),
                         ),
