@@ -1,8 +1,10 @@
 // lib/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
 import '../components/activity_logs.dart';
-import '../components/add_waste_product.dart';
-
+// ignore: unused_import
+import '../components/add_waste_product.dart';  // (if you have this)
+  
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -13,40 +15,85 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, dynamic>> _wasteLogs = [];
 
+  // State for the modal
+  String? _selectedWasteCategory;
+  String? _selectedPlantType;
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  // Example structure for your plant type options (customize this)
+  final Map<String, List<Map<String, String>>> _plantTypeOptions = {
+    'greens': [
+      {'value': 'tomato', 'label': 'Tomato', 'needs': 'High nitrogen'},
+      {'value': 'lettuce', 'label': 'Lettuce', 'needs': 'Moderate nitrogen'},
+    ],
+    'browns': [
+      {'value': 'carrot', 'label': 'Carrot', 'needs': 'Low nitrogen'},
+      {'value': 'potato', 'label': 'Potato', 'needs': 'Moderate nitrogen'},
+    ],
+  };
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.teal,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const Spacer(),
-                CustomCard(title: "Activity Logs", logs: _wasteLogs),
-                const SizedBox(height: 20),
-              ],
-            ),
+  void dispose() {
+    _quantityController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  String? _validateQuantity(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Enter a quantity';
+    }
+    final num? parsed = num.tryParse(value);
+    if (parsed == null) {
+      return 'Enter a valid number';
+    }
+    if (parsed < 5 || parsed > 25) {
+      return 'Quantity must be between 5 and 25 kg';
+    }
+    return null;
+  }
+
+  String _getPlantLabel(String? plantValue) {
+    if (_selectedWasteCategory == null || plantValue == null) return '';
+    final opts = _plantTypeOptions[_selectedWasteCategory] ?? [];
+    final found = opts.firstWhere((opt) => opt['value'] == plantValue, orElse: () => {});
+    return found['label'] ?? '';
+  }
+
+  String _getPlantNeedsInfo() {
+    if (_selectedWasteCategory == null || _selectedPlantType == null) {
+      return '';
+    }
+    final opts = _plantTypeOptions[_selectedWasteCategory] ?? [];
+    final found = opts.firstWhere((opt) => opt['value'] == _selectedPlantType, orElse: () => {});
+    return found['needs'] ?? '';
+  }
+
+  List<DropdownMenuItem<String>> _getPlantTypeItems() {
+    if (_selectedWasteCategory == null) {
+      return const [
+        DropdownMenuItem(value: null, child: Text('Select waste category first')),
+      ];
+    }
+    final options = _plantTypeOptions[_selectedWasteCategory] ?? [];
+    return options.map((option) {
+      return DropdownMenuItem<String>(
+        value: option['value'],
+        child: Tooltip(
+          message: option['needs'] ?? '',
+          child: Text(
+            option['label'] ?? '',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddWasteProductModal(context);
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
+      );
+    }).toList();
   }
 
   void _showAddWasteProductModal(BuildContext context) async {
+    // ignore: unused_local_variable
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (BuildContext context) {
@@ -67,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Colors.black.withAlpha((0.1 * 255).round()),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -109,7 +156,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             border: Border.all(color: Colors.green[100]!),
                           ),
                           child: Text(
-                            '💡 ${_wasteCategoryInfo[_selectedWasteCategory]!}',
+                            '💡 ${_plantTypeOptions[_selectedWasteCategory]?.firstWhere(
+                                  (opt) => true,
+                                  orElse: () => {'needs': ''})['needs'] ?? ''}',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.green[800],
@@ -119,25 +168,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       if (_selectedWasteCategory != null) const SizedBox(height: 12),
 
-                      // Waste Category
+                      // Waste Category Dropdown
                       DropdownButtonFormField<String>(
-                        initialValue: _selectedWasteCategory,
+                        // ignore: deprecated_member_use
+                        value: _selectedWasteCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Waste Category',
-                          prefixIcon: const Icon(Icons.category_outlined, size: 18),
+                          prefixIcon:
+                              const Icon(Icons.category_outlined, size: 18),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.teal.shade700),
+                            borderSide:
+                                BorderSide(color: Colors.teal.shade700),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 12),
                         ),
                         items: const [
-                          DropdownMenuItem(value: 'greens', child: Text('Greens (Nitrogen)')),
-                          DropdownMenuItem(value: 'browns', child: Text('Browns (Carbon)')),
+                          DropdownMenuItem(
+                              value: 'greens',
+                              child: Text('Greens (Nitrogen)')),
+                          DropdownMenuItem(
+                              value: 'browns',
+                              child: Text('Browns (Carbon)')),
                         ],
                         onChanged: (value) {
                           setModalState(() {
@@ -149,7 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 16),
 
                       // Plant Type Info
-                      if (_selectedWasteCategory != null && _selectedPlantType != null)
+                      if (_selectedWasteCategory != null &&
+                          _selectedPlantType != null)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(8),
@@ -167,24 +225,29 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ),
-                      if (_selectedWasteCategory != null && _selectedPlantType != null)
+                      if (_selectedWasteCategory != null &&
+                          _selectedPlantType != null)
                         const SizedBox(height: 12),
 
-                      // Target Plant Type - FIXED: Single line + tooltip
+                      // Plant Type Dropdown
                       DropdownButtonFormField<String>(
-                        initialValue: _selectedPlantType,
+                        // ignore: deprecated_member_use
+                        value: _selectedPlantType,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Target Plant Type',
-                          prefixIcon: const Icon(Icons.local_florist_outlined, size: 18),
+                          prefixIcon: const Icon(Icons.local_florist_outlined,
+                              size: 18),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.teal.shade700),
+                            borderSide:
+                                BorderSide(color: Colors.teal.shade700),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 12),
                         ),
                         items: _getPlantTypeItems(),
                         onChanged: _selectedWasteCategory == null
@@ -197,25 +260,29 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Quantity - With proper validation
+                      // Quantity TextField
                       TextField(
                         controller: _quantityController,
                         decoration: InputDecoration(
                           labelText: 'Enter Quantity (5-25 kg)',
                           prefixIcon: const Icon(Icons.scale, size: 18),
                           suffixText: 'kg',
-                          suffixStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
+                          suffixStyle: const TextStyle(
+                              color: Colors.grey, fontWeight: FontWeight.w500),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.teal.shade700),
+                            borderSide:
+                                BorderSide(color: Colors.teal.shade700),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 12),
                           errorText: quantityError,
                         ),
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (value) {
                           setModalState(() {
                             quantityError = _validateQuantity(value);
@@ -224,21 +291,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Description
+                      // Description TextField
                       TextField(
                         controller: _descriptionController,
                         maxLines: 2,
                         decoration: InputDecoration(
                           labelText: 'Description',
-                          prefixIcon: const Icon(Icons.description_outlined, size: 18),
+                          prefixIcon: const Icon(Icons.description_outlined,
+                              size: 18),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.teal.shade700),
+                            borderSide:
+                                BorderSide(color: Colors.teal.shade700),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 12),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -248,17 +318,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            // Validate
-                            final qtyError = _validateQuantity(_quantityController.text);
+                            final qtyError =
+                                _validateQuantity(_quantityController.text);
                             if (_selectedWasteCategory == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Select waste category')),
+                                const SnackBar(
+                                    content:
+                                        Text('Select waste category')),
                               );
                               return;
                             }
                             if (_selectedPlantType == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Select target plant type')),
+                                const SnackBar(
+                                    content: Text(
+                                        'Select target plant type')),
                               );
                               return;
                             }
@@ -269,11 +343,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               return;
                             }
 
-                            // Success!
-                            final quantity = double.parse(_quantityController.text);
+                            final quantity =
+                                double.parse(_quantityController.text);
                             final plantLabel = _getPlantLabel(_selectedPlantType);
 
-                            // Add to logs
                             setState(() {
                               _wasteLogs.insert(
                                 0,
@@ -291,10 +364,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('✅ ${_selectedWasteCategory == 'greens' ? 'Greens' : 'Browns'} waste assigned to $plantLabel!'),
+                                content: Text(
+                                    '✅ ${( _selectedWasteCategory == 'greens' ? 'Greens' : 'Browns')} waste assigned to $plantLabel!'),
                                 duration: const Duration(seconds: 2),
                               ),
                             );
+
+                            // Clear inputs after use
+                            _quantityController.clear();
+                            _descriptionController.clear();
+                            _selectedWasteCategory = null;
+                            _selectedPlantType = null;
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2E7D32),
@@ -323,41 +403,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // FIXED: Single-line dropdown items with tooltip
-  List<DropdownMenuItem<String>> _getPlantTypeItems() {
-    if (_selectedWasteCategory == null) {
-      return [
-        const DropdownMenuItem(
-          value: null,
-          child: Text('Select waste category first'),
-        )
-      ];
-    }
-
-    final options = _plantTypeOptions[_selectedWasteCategory] ?? [];
-    return options.map((option) {
-      return DropdownMenuItem(
-        value: option['value'],
-        child: Tooltip(
-          message: '${option['label']} - ${option['needs']}',
-          child: Text(
-            option['label']!,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 14),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        backgroundColor: Colors.teal,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                const Spacer(),
+                CustomCard(title: "Activity Logs", logs: _wasteLogs),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
-      );
-    }).toList();
-  }
-
-  String _getPlantNeedsInfo() {
-    if (_selectedWasteCategory == null || _selectedPlantType == null) return '';
-    final options = _plantTypeOptions[_selectedWasteCategory] ?? [];
-    final plant = options.firstWhere(
-      (option) => option['value'] == _selectedPlantType,
-      orElse: () => {'needs': 'Nutritional needs'},
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddWasteProductModal(context);
+        },
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
-    return plant['needs'] ?? 'Nutritional needs';
   }
 }

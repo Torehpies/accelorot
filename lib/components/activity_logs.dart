@@ -1,6 +1,4 @@
 // lib/components/activity-logs.dart
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
@@ -17,11 +15,7 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: 400,
-<<<<<<< HEAD:lib/components/activity-logs.dart
-      // Remove fixed height to allow Expanded
-=======
       height: 170,
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1:lib/components/activity_logs.dart
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(

@@ -11,7 +11,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
 
-  // ignore: use_super_parameters
+  
   const CustomTextField({
    super.key,
     required this.hintText,

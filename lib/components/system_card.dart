@@ -52,12 +52,7 @@ class _SystemCardState extends State<SystemCard> {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-<<<<<<< HEAD:lib/screens/system_card.dart
-                // ignore: deprecated_member_use
-            color: Colors.green.withOpacity(0.1),
-=======
-            color: Colors.green.withValues(alpha:0.1),
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1:lib/components/system_card.dart
+            color: Colors.green.withOpacity(0.1), // ✅ Correct way to set opacity
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -139,12 +134,7 @@ class _SystemCardState extends State<SystemCard> {
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-<<<<<<< HEAD:lib/screens/system_card.dart
-                  // ignore: deprecated_member_use
-                  value: selectedCycle,
-=======
-                  initialValue: selectedCycle,
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1:lib/components/system_card.dart
+                  value: selectedCycle, // ✅ Use `value` instead of `initialValue` for better practice
                   onChanged: (value) {
                     if (value != null) {
                       setState(() => selectedCycle = value);
@@ -173,12 +163,7 @@ class _SystemCardState extends State<SystemCard> {
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-<<<<<<< HEAD:lib/screens/system_card.dart
-                      // ignore: deprecated_member_use
                   value: selectedPeriod,
-=======
-                  initialValue: selectedPeriod,
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1:lib/components/system_card.dart
                   onChanged: (value) {
                     if (value != null) {
                       setState(() => selectedPeriod = value);

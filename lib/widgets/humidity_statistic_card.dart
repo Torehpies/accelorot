@@ -1,4 +1,6 @@
 // lib/components/humidity_statistic_card.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -17,33 +19,42 @@ class HumidityStatisticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hourlyReadings.isEmpty) {
-      return Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.green.shade100),
-          boxShadow: [
-            BoxShadow(
-                  // ignore: deprecated_member_use
-              color: Colors.green.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(18),
-        child: Center(
-          child: Text(
-            'No humidity data',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-        ),
-      );
+      return _buildEmptyCard(context);
     }
 
     final quality = _getQuality(currentHumidity);
     final color = _getColorForQuality(quality);
+
+    // Precompute chart data once
+    final now = DateTime.now();
+    final int dataLength = hourlyReadings.length;
+    final List<Map<String, Object>> humidityData = List.generate(dataLength, (i) {
+      // i=0 → oldest (e.g., 6h ago), i=last → most recent
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {
+        'x': '${hour.toString().padLeft(2, '0')}:00',
+        'y': hourlyReadings[i],
+      };
+    });
+
+    // Static bounds (same length as data)
+    final List<Map<String, Object>> upperBound = List.filled(
+      dataLength,
+      {'x': '', 'y': 65.0},
+    ).asMap().entries.map((e) {
+      final i = e.key;
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 65.0};
+    }).toList();
+
+    final List<Map<String, Object>> lowerBound = List.filled(
+      dataLength,
+      {'x': '', 'y': 40.0},
+    ).asMap().entries.map((e) {
+      final i = e.key;
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
+    }).toList();
 
     return Container(
       width: double.infinity,
@@ -53,7 +64,6 @@ class HumidityStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-                // ignore: deprecated_member_use
             color: Colors.green.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
@@ -82,12 +92,13 @@ class HumidityStatisticCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          if (lastUpdated != null)
+          if (lastUpdated != null) ...[
+            const SizedBox(height: 4),
             Text(
               'Last updated: ${_formatDate(lastUpdated!)}',
               style: TextStyle(fontSize: 11, color: Colors.grey[600]),
             ),
+          ],
           const SizedBox(height: 12),
 
           Row(
@@ -127,7 +138,8 @@ class HumidityStatisticCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           Text(
-            'Trend (Last 6 Hours)',
+            // ignore: unnecessary_brace_in_string_interps
+            'Trend (Last ${dataLength} Hours)',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
@@ -148,54 +160,28 @@ class HumidityStatisticCard extends StatelessWidget {
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
-              margin: const EdgeInsets.all(0),
+              margin: EdgeInsets.zero,
               series: <CartesianSeries>[
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: List<Map<String, Object>>.from(
-                    List.generate(hourlyReadings.length, (i) {
-                      final hour = DateTime.now().add(Duration(hours: -6 + i)).hour;
-                      return <String, Object>{
-                        'x': '$hour:00',
-                        'y': hourlyReadings[i],
-                      };
-                    }),
-                  ),
-                  xValueMapper: (Map<String, Object> data, _) => data['x'] as String,
-                  yValueMapper: (Map<String, Object> data, _) => data['y'] as double,
+                  dataSource: humidityData,
+                  xValueMapper: (data, _) => data['x'] as String,
+                  yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.blue,
                   width: 2,
                   markerSettings: const MarkerSettings(isVisible: true),
                 ),
-                // Upper bound (65%)
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: List<Map<String, Object>>.from(
-                    List.generate(hourlyReadings.length, (i) {
-                      final hour = DateTime.now().add(Duration(hours: -6 + i)).hour;
-                      return <String, Object>{
-                        'x': '$hour:00',
-                        'y': 65.0,
-                      };
-                    }),
-                  ),
-                  xValueMapper: (Map<String, Object> data, _) => data['x'] as String,
-                  yValueMapper: (Map<String, Object> data, _) => data['y'] as double,
+                  dataSource: upperBound,
+                  xValueMapper: (data, _) => data['x'] as String,
+                  yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.red,
                   dashArray: const [5, 5],
                   width: 1,
                 ),
-                // Lower bound (40%)
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: List<Map<String, Object>>.from(
-                    List.generate(hourlyReadings.length, (i) {
-                      final hour = DateTime.now().add(Duration(hours: -6 + i)).hour;
-                      return <String, Object>{
-                        'x': '$hour:00',
-                        'y': 40.0,
-                      };
-                    }),
-                  ),
-                  xValueMapper: (Map<String, Object> data, _) => data['x'] as String,
-                  yValueMapper: (Map<String, Object> data, _) => data['y'] as double,
+                  dataSource: lowerBound,
+                  xValueMapper: (data, _) => data['x'] as String,
+                  yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.red,
                   dashArray: const [5, 5],
                   width: 1,
@@ -208,6 +194,31 @@ class HumidityStatisticCard extends StatelessWidget {
     );
   }
 
+  Widget _buildEmptyCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Center(
+        child: Text(
+          'No humidity data',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+      ),
+    );
+  }
+
   String _getQuality(double humidity) {
     if (humidity >= 40 && humidity <= 65) return 'Excellent';
     if ((humidity >= 30 && humidity < 40) || (humidity > 65 && humidity <= 75)) return 'Good';
@@ -216,19 +227,14 @@ class HumidityStatisticCard extends StatelessWidget {
 
   Color _getColorForQuality(String quality) {
     switch (quality) {
-      case 'Excellent':
-        return Colors.green;
-      case 'Good':
-        return Colors.orange;
-      default:
-        return Colors.red;
+      case 'Excellent': return Colors.green;
+      case 'Good': return Colors.orange;
+      default: return Colors.red;
     }
   }
 
   double _calculateProgress(double humidity) {
-    if (humidity <= 0) return 0.0;
-    if (humidity >= 100) return 1.0;
-    return humidity / 100;
+    return (humidity.clamp(0.0, 100.0) / 100.0);
   }
 
   String _formatDate(DateTime date) {

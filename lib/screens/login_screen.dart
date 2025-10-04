@@ -1,5 +1,4 @@
-// lib/screens/login_screen.dart
-// ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 // ignore: unused_import
@@ -17,36 +16,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late LoginController _controller;
-  final _formKey = GlobalKey<FormState>(); // ✅ Add missing _formKey
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = LoginController();
-    
-    // Set up callbacks
-    _controller.setCallbacks(
-      onLoadingChanged: (isLoading) => setState(() {}),
-      onPasswordVisibilityChanged: (obscured) => setState(() {}),
-      onLoginSuccess: () {
-        if (!mounted) return;
-        showSnackbar(context, 'Login successful!');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
-        );
-      },
-      onLoginError: (message) {
-        if (!mounted) return;
-        showSnackbar(context, message, isError: true);
-      },
-    );
-  }
+  late final LoginController _controller = LoginController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
-    _controller.dispose(); // ✅ Clean up controller
+    _controller.dispose();
     super.dispose();
   }
 
@@ -68,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Form(
-                  key: _formKey, // ✅ Now defined
+                  key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -114,21 +89,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Sign in to continue',
                         style: TextStyle(
-                          fontSize: 16, 
+                          fontSize: 16,
                           color: theme.hintColor,
                         ),
                       ),
                       const SizedBox(height: 32),
 
-                      // ✅ Moved outside build()
+                      // Email Field
                       _buildEmailField(),
                       const SizedBox(height: 16),
+
+                      // Password Field
                       _buildPasswordField(),
                       const SizedBox(height: 8),
+
+                      // Forgot Password
                       _buildForgotPassword(),
                       const SizedBox(height: 24),
+
+                      // Login Button
                       _buildLoginButton(),
                       const SizedBox(height: 16),
+
+                      // Sign Up Link
                       _buildSignUpLink(),
                     ],
                   ),
@@ -141,7 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // ✅ All widget methods moved OUTSIDE build()
   Widget _buildEmailField() {
     return TextFormField(
       controller: _controller.emailController,
