@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import '../components/activity-logs.dart';
+
 import '../components/system_card.dart';
+import '../components/environmental_sensors_card.dart';
+import '../components/composting_progress_card.dart';
+import '../components/activity_logs.dart';
+
+
 
 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
 
@@ -74,41 +79,53 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.teal,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                // System card above logs
-                const SystemCard(),
-                const SizedBox(height: 20),
-                CustomCard(title: "Activity Logs", logs: _wasteLogs),
-                const SizedBox(height: 20),
-                const Spacer(),
-              ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Dashboard'),
+      backgroundColor: Colors.teal,
+    ),
+    body: SafeArea(
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false, // 👈 Hides scrollbar on all platforms
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  EnvironmentalSensorsCard(
+                    temperature: 3.0,
+                    moisture: 5.0,
+                    humidity: 8.0,
+                  ),
+                  const SizedBox(height: 20),
+                  CompostingProgressCard(
+                    batchStart: DateTime(2025, 9, 15),
+                  ),
+                  const SizedBox(height: 20),
+                  CustomCard(title: "Activity Logs", logs: _wasteLogs),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showAddWasteProductModal(context);
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        _showAddWasteProductModal(context);
+      },
+      backgroundColor: Colors.green,
+      child: const Icon(Icons.add, color: Colors.white),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+  );
+}
 
   void _showAddWasteProductModal(BuildContext context) {
     _resetForm();
@@ -133,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -187,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Waste Category
                       DropdownButtonFormField<String>(
-                        value: _selectedWasteCategory,
+                        initialValue: _selectedWasteCategory,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Waste Category',
@@ -238,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
-                        value: _selectedPlantType,
+                        initialValue: _selectedPlantType,
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Target Plant Type',
