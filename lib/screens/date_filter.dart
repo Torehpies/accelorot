@@ -59,6 +59,7 @@ class _DateFilterState extends State<DateFilter> {
                     ),
                     selectedPeriodMiddleDecoration: BoxDecoration(
                           // ignore: deprecated_member_use
+                          // ignore: deprecated_member_use
                       color: Colors.green.withOpacity(0.5),
                       shape: BoxShape.rectangle,
                     ),

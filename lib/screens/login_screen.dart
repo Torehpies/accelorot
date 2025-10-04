@@ -2,8 +2,9 @@
 // ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
+// ignore: unused_import
+import 'main_navigation.dart';
+// ignore: unused_import
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -161,13 +162,13 @@ class _LoginScreenState extends State<LoginScreen> {
       controller: _controller.passwordController,
       obscureText: _controller.obscurePassword,
       textInputAction: TextInputAction.done,
-      onFieldSubmitted: (_) => _controller.loginUser(),
+      onFieldSubmitted: (_) => _controller.loginUser(context, _formKey),
       decoration: InputDecoration(
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            _controller.obscurePassword 
-                ? Icons.visibility_outlined 
+            _controller.obscurePassword
+                ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
@@ -195,7 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _controller.isLoading ? null : _controller.loginUser,
+        onPressed: _controller.isLoading
+            ? null
+            : () => _controller.loginUser(context, _formKey),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,
           foregroundColor: Colors.white,

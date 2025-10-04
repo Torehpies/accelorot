@@ -22,16 +22,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   void _onDateChanged(DateTimeRange? range) { // ✅ Match method name passed to DateFilter
     setState(() {
       _selectedRange = range;
+      _selectedRange = range;
 
       if (range == null) {
+        _selectedFilterLabel = "Date Filter";
         _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
           _selectedFilterLabel = "Last 3 Days";
+          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
           _selectedFilterLabel = "Last 7 Days";
+          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
+          _selectedFilterLabel = "Last 14 Days";
           _selectedFilterLabel = "Last 14 Days";
         } else {
           _selectedFilterLabel =

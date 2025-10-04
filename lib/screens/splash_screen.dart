@@ -26,8 +26,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack);
     _animationController.forward();
-
-    
   }
 
   @override
@@ -59,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Gradient Circular Logo Container (matching LoginScreen)
+                      // Gradient Circular Logo Container
                       Container(
                         width: 120,
                         height: 120,
