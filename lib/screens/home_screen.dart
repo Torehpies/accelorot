@@ -107,6 +107,8 @@ Widget build(BuildContext context) {
                     batchStart: DateTime(2025, 9, 15),
                   ),
                   const SizedBox(height: 20),
+                  const SystemCard(),
+                  const SizedBox(height: 20),
                   CustomCard(title: "Activity Logs", logs: _wasteLogs),
                   const SizedBox(height: 20),
                 ],

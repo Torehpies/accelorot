@@ -13,26 +13,26 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  DateTimeRange? _selectedRange;
-  String _selectedFilterLabel = "Date Filter";
+  DateTimeRange? selectedRange;
+  String selectedFilterLabel = "Date Filter";
 
   void onDateChanged(DateTimeRange? range) {
     setState(() {
-      _selectedRange = range;
+      selectedRange = range;
 
       if (range == null) {
-        _selectedFilterLabel = "Date Filter";
+        selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
-          _selectedFilterLabel = "Last 3 Days";
+          selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
-          _selectedFilterLabel = "Last 7 Days";
+          selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          _selectedFilterLabel = "Last 14 Days";
+          selectedFilterLabel = "Last 14 Days";
         } else {
           // Custom Range label
-          _selectedFilterLabel =
+          selectedFilterLabel =
               "${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}";
         }
       }
@@ -53,7 +53,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -99,10 +99,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   const SystemCard(),
                   const SizedBox(height: 16),
 
-                  if (_selectedRange != null)
+                  if (selectedRange != null)
                     HistoryPage(
-                      filter: _selectedFilterLabel,
-                      range: _selectedRange!,
+                      filter: selectedFilterLabel,
+                      range: selectedRange!,
                     ),
                 ],
               ),
