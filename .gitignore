@@ -72,3 +72,7 @@ web/firebase-messaging-sw.js
 notes.md
 
 *.env
+
+# Freezed
+*.g.dart
+*.freezed.dart
