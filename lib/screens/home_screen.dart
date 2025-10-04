@@ -10,12 +10,12 @@ import '../components/activity_logs.dart';
 
 
 class HomeScreen extends StatefulWidget {
-<<<<<<< HEAD
+
          // ignore: deprecated_member_use, use_super_parameters
   const HomeScreen({Key? key}) : super(key: key);
-=======
+
   const HomeScreen({super.key});
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
+
 
   @override
 
@@ -273,12 +273,12 @@ Widget build(BuildContext context) {
 
                       // Target Plant Type - FIXED: Single line + tooltip
                       DropdownButtonFormField<String>(
-<<<<<<< HEAD
+
                             // ignore: deprecated_member_use
                         value: _selectedPlantType,
-=======
+
                         initialValue: _selectedPlantType,
->>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
+
                         isExpanded: true,
                         decoration: InputDecoration(
                           labelText: 'Select Target Plant Type',

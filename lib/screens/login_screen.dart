@@ -1,5 +1,5 @@
 // lib/screens/login_screen.dart
-// ignore_for_file: use_super_parameters, use_build_context_synchronously
+// ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
@@ -17,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late LoginController _controller;
+  final _formKey = GlobalKey<FormState>(); // ✅ Add missing _formKey
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onLoadingChanged: (isLoading) => setState(() {}),
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
       onLoginSuccess: () {
+        if (!mounted) return;
         showSnackbar(context, 'Login successful!');
         Navigator.pushReplacement(
           context,
@@ -35,11 +37,16 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
       onLoginError: (message) {
+        if (!mounted) return;
         showSnackbar(context, message, isError: true);
       },
     );
+  }
 
-    // Remove modal popups on load
+  @override
+  void dispose() {
+    _controller.dispose(); // ✅ Clean up controller
+    super.dispose();
   }
 
   @override
@@ -60,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Form(
-                  key: _formKey,
+                  key: _formKey, // ✅ Now defined
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                  // ignore: deprecated_member_use
                               color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
@@ -113,6 +119,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 32),
 
+                      // ✅ Moved outside build()
+                      _buildEmailField(),
+                      const SizedBox(height: 16),
+                      _buildPasswordField(),
+                      const SizedBox(height: 8),
+                      _buildForgotPassword(),
+                      const SizedBox(height: 24),
+                      _buildLoginButton(),
+                      const SizedBox(height: 16),
+                      _buildSignUpLink(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ✅ All widget methods moved OUTSIDE build()
   Widget _buildEmailField() {
     return TextFormField(
       controller: _controller.emailController,
