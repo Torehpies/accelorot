@@ -8,8 +8,8 @@ class AdminProfile extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Profile'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color.fromARGB(255, 77, 68, 68),
       ),
       body: const Center(
         child: Text(
