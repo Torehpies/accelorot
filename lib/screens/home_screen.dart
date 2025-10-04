@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/activity-logs.dart';
-
+import '../components/system_card.dart';
 
 
 
@@ -87,13 +87,14 @@ class _HomeScreenState extends State<HomeScreen> {
             constraints: const BoxConstraints(maxWidth: 500),
             padding: const EdgeInsets.all(24),
             child: Column(
-
-  children: [
-    const Spacer(),
-    // Pass logs to card
-    CustomCard(title: "Activity Logs", logs: _wasteLogs),
-    const SizedBox(height: 20),
-  ],
+              children: [
+                // System card above logs
+                const SystemCard(),
+                const SizedBox(height: 20),
+                CustomCard(title: "Activity Logs", logs: _wasteLogs),
+                const SizedBox(height: 20),
+                const Spacer(),
+              ],
             ),
           ),
         ),
