@@ -9,10 +9,10 @@ class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  _StatisticsScreenState createState() => _StatisticsScreenState();
+  StatisticsScreenState createState() => StatisticsScreenState();
 }
 
-class _StatisticsScreenState extends State<StatisticsScreen> {
+class StatisticsScreenState extends State<StatisticsScreen> {
   DateTimeRange? selectedRange;
   String selectedFilterLabel = "Date Filter";
 
