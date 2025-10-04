@@ -7,7 +7,7 @@ class RoleDropdown extends StatelessWidget {
   final ValueChanged<String?>? onChanged;
   final String? value;
 
-  const RoleDropdown({Key? key, this.onChanged, this.value}) : super(key: key);
+  const RoleDropdown({super.key, this.onChanged, this.value});
 
   @override
   Widget build(BuildContext context) {

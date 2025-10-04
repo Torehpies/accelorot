@@ -10,6 +10,7 @@ import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
+  const RegistrationScreen({super.key});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -53,6 +54,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fullName: fullName,
           role: selectedRole ?? 'User',
         );
+        if (mounted) {
 
         setState(() => _isLoading = false);
 
@@ -67,14 +69,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           } else {
             showSnackbar(context, result['message'], isError: true);
           }
+        }
       } catch (e) {
+        if (mounted)  {
         setState(() => _isLoading = false);
         showSnackbar(context, 'An unexpected error occurred', isError: true);
       }
-
-
     }
-  }
+  } 
+}
 
   
 

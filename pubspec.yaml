@@ -1,15 +1,37 @@
 name: flutter_application_1
 description: "A new Flutter project."
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
 environment:
   sdk: '^3.9.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.7.0
-  cloud_firestore: ^5.4.0
+  firebase_core: ^4.1.1
+  firebase_auth: ^6.1.0
+  cloud_firestore: ^6.0.2
   flutter_date_pickers: ^0.4.2
+<<<<<<< HEAD
   syncfusion_flutter_charts: ^31.1.22
   flutter_lints: ^6.0.0
+=======
+  fl_chart: ^1.1.1
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/
+    - assets/images/
+
+
+>>>>>>> 4ece559a03999a144ac02310009b176d27db85c1
