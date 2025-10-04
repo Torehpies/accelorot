@@ -16,7 +16,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
 
-  void _onDateChanged(DateTimeRange? range) {
+  void onDateChanged(DateTimeRange? range) {
     setState(() {
       _selectedRange = range;
 
@@ -86,7 +86,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       ),
                     ],
                   ),
-                  DateFilter(onChanged: _onDateChanged),
+                  DateFilter(onChanged: onDateChanged),
                 ],
               ),
             ),
