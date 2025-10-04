@@ -12,6 +12,7 @@ dependencies:
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
   flutter_date_pickers: ^0.4.2
+  fl_chart: ^1.1.1
 
 
 dev_dependencies:

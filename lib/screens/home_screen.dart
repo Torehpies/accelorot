@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../components/system_card.dart';
 import '../components/environmental_sensors_card.dart';
 import '../components/composting_progress_card.dart';
 import '../components/activity_logs.dart';
+
 
 
 
@@ -103,6 +106,8 @@ Widget build(BuildContext context) {
                   CompostingProgressCard(
                     batchStart: DateTime(2025, 9, 15),
                   ),
+                  const SizedBox(height: 20),
+                  const SystemCard(),
                   const SizedBox(height: 20),
                   CustomCard(title: "Activity Logs", logs: _wasteLogs),
                   const SizedBox(height: 20),
