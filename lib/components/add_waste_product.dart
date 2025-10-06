@@ -164,7 +164,6 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
               // Waste Category
               DropdownButtonFormField<String>(
-                    // ignore: deprecated_member_use
                 value: _selectedWasteCategory,
                 isExpanded: true,
                 decoration: InputDecoration(
