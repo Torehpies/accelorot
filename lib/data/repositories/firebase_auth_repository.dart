@@ -82,9 +82,8 @@ class FirebaseAuthRepository extends AuthRepository{
 		return FirebaseAuth.instance.currentUser;
   }
 
-  @override
+	@override
   Future<void> signOut() async {
 		await FirebaseAuth.instance.signOut();
   }
-
 }
