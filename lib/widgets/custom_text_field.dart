@@ -10,7 +10,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const CustomTextField({
-   super.key,
+    super.key,
     required this.hintText,
     required this.prefixIcon,
     this.obscureText = false,

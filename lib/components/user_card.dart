@@ -36,9 +36,7 @@ class UserCard extends StatelessWidget {
               onPressed: () => Navigator.of(ctx).pop(),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               onPressed: () {
                 Navigator.of(ctx).pop();
                 onConfirm();
@@ -97,7 +95,7 @@ class UserCard extends StatelessWidget {
                 icon: const Icon(Icons.edit, color: Colors.green),
                 onPressed: onEdit,
               ),
-            ]
+            ],
           ],
         ),
       ),
