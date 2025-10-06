@@ -52,6 +52,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
           if (result['success']) {
             showSnackbar(context, 'Successfully registered as $selectedRole!');
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MainNavigation()),
+            );
           } else {
             showSnackbar(context, result['message'], isError: true);
           }

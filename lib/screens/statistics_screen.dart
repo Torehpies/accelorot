@@ -1,21 +1,48 @@
 import 'package:flutter/material.dart';
-import 'system_card.dart';
+import '../widgets/humidity_statistic_card.dart';
+import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
+// import '../components/history.dart'; // Optional: remove if not used
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ const constructor
+  const StatisticsScreen({super.key}); // ✅ Only one constructor
 
   @override
-  StatisticsScreenState createState() => StatisticsScreenState();
+  State<StatisticsScreen> createState() => _StatisticsScreenState(); // ✅ Correct return type
 }
 
-class StatisticsScreenState extends State<StatisticsScreen> {
-  DateTimeRange? selectedRange;
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  // ignore: unused_field
+  DateTimeRange? _selectedRange; // ✅ Declare private fields
+  // ignore: unused_field
+  String _selectedFilterLabel = "Date Filter";
 
-  void onDateChanged(DateTimeRange? range) {
+  void _onDateChanged(DateTimeRange? range) {
+    // ✅ Match method name passed to DateFilter
     setState(() {
-      selectedRange = range;
+      _selectedRange = range;
+      _selectedRange = range;
+
+      if (range == null) {
+        _selectedFilterLabel = "Date Filter";
+        _selectedFilterLabel = "Date Filter";
+      } else {
+        final daysDiff = range.end.difference(range.start).inDays;
+        if (daysDiff == 3) {
+          _selectedFilterLabel = "Last 3 Days";
+          _selectedFilterLabel = "Last 3 Days";
+        } else if (daysDiff == 7) {
+          _selectedFilterLabel = "Last 7 Days";
+          _selectedFilterLabel = "Last 7 Days";
+        } else if (daysDiff == 14) {
+          _selectedFilterLabel = "Last 14 Days";
+          _selectedFilterLabel = "Last 14 Days";
+        } else {
+          _selectedFilterLabel =
+              "${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}";
+        }
+      }
     });
   }
 
@@ -24,12 +51,11 @@ class StatisticsScreenState extends State<StatisticsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-
       body: Column(
         children: [
           // Header (Statistics + Date Filter)
@@ -72,7 +98,9 @@ class StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: onDateChanged), // not const
+                DateFilter(
+                  onChanged: _onDateChanged,
+                ), // ✅ Now matches method name
               ],
             ),
           ),
@@ -81,7 +109,19 @@ class StatisticsScreenState extends State<StatisticsScreen> {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: const [SystemCard(), SizedBox(height: 16)],
+              children: [
+                const SystemCard(),
+                const SizedBox(height: 16),
+                HumidityStatisticCard(
+                  currentHumidity: 38.0,
+                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                // Optional: Add History widget here if needed later
+                // if (_selectedRange != null)
+                //   History(filter: _selectedFilterLabel, range: _selectedRange!),
+              ],
             ),
           ),
         ],

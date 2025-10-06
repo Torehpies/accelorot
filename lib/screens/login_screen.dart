@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
+import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -34,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbar(context, message, isError: true);
       },
     );
+
+    // Remove modal popups on load
   }
 
   @override
@@ -90,12 +93,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          // Popup modal button at top right
+          // Button at top right for Admin Panel
           Positioned(
             top: 24,
             right: 24,
-            child: GestureDetector(
-              onTap: () {
+            child: IconButton(
+              icon: const Icon(
+                Icons.admin_panel_settings,
+                color: Colors.white,
+                size: 28,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
+                elevation: 8,
+              ),
+              onPressed: () {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -103,24 +118,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
+            ),
+          ),
+          // Button at top left for Home
+          Positioned(
+            top: 24,
+            left: 24,
+            child: IconButton(
+              icon: const Icon(Icons.home, color: Colors.white, size: 28),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
                 padding: const EdgeInsets.all(12),
-                child: const Icon(
-                  Icons.admin_panel_settings,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
+                elevation: 8,
               ),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainNavigation(),
+                  ),
+                );
+              },
             ),
           ),
         ],
