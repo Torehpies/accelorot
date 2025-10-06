@@ -1,4 +1,6 @@
 // lib/widgets/custom_text_field.dart
+// ignore_for_file: use_super_parameters
+
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -9,6 +11,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
 
+  
   const CustomTextField({
    super.key,
     required this.hintText,
@@ -32,7 +35,7 @@ class CustomTextField extends StatelessWidget {
           prefixIcon: Icon(prefixIcon, color: Colors.grey),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
+            borderSide: BorderSide(color: Colors.grey[300] ?? Colors.grey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'screens/splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
+// ignore: unnecessary_import
 import 'dart:ui' show PlatformDispatcher; // Required for global error handling
 
 import 'screens/statistics_screen.dart';
@@ -31,7 +32,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // ignore: use_super_parameters
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

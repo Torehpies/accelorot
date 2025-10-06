@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables, camel_case_types, deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class SystemCard extends StatefulWidget {
@@ -50,7 +52,7 @@ class _SystemCardState extends State<SystemCard> {
         border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha:0.1),
+            color: Colors.green.withOpacity(0.1), // ✅ Correct way to set opacity
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -76,8 +78,7 @@ class _SystemCardState extends State<SystemCard> {
               ),
               Row(
                 children: [
-                  const Text('Status: ',
-                      style: TextStyle(color: Colors.black54)),
+                  const Text('Status: ', style: TextStyle(color: Colors.black54)),
                   Text(
                     status,
                     style: TextStyle(
@@ -130,12 +131,14 @@ class _SystemCardState extends State<SystemCard> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                  initialValue: selectedCycle,
+                  value: selectedCycle, // ✅ Use `value` instead of `initialValue` for better practice
                   onChanged: (value) {
-                    setState(() => selectedCycle = value!);
+                    if (value != null) {
+                      setState(() => selectedCycle = value);
+                    }
                   },
                   items: const [
                     DropdownMenuItem(value: "50", child: Text("50")),
@@ -157,19 +160,19 @@ class _SystemCardState extends State<SystemCard> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                  initialValue: selectedPeriod,
+                  value: selectedPeriod,
                   onChanged: (value) {
-                    setState(() => selectedPeriod = value!);
+                    if (value != null) {
+                      setState(() => selectedPeriod = value);
+                    }
                   },
                   items: const [
                     DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
-                    DropdownMenuItem(
-                        value: '12 hours', child: Text('12 hours')),
-                    DropdownMenuItem(
-                        value: '24 hours', child: Text('24 hours')),
+                    DropdownMenuItem(value: '12 hours', child: Text('12 hours')),
+                    DropdownMenuItem(value: '24 hours', child: Text('24 hours')),
                   ],
                 ),
               ),
@@ -191,13 +194,14 @@ class _SystemCardState extends State<SystemCard> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isPaused ? const Color.fromARGB(255, 14, 138, 255) : const Color.fromARGB(255, 255, 185, 32),
+                          backgroundColor: isPaused
+                              ? const Color.fromARGB(255, 14, 138, 255) // blue
+                              : const Color.fromARGB(255, 255, 185, 32), // amber
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 14),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                         ),
                         child: Text(
                           isPaused ? "Resume" : "Pause",
@@ -221,8 +225,8 @@ class _SystemCardState extends State<SystemCard> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 14),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                         ),
                         child: const Text(
                           "Stop",
@@ -246,8 +250,7 @@ class _SystemCardState extends State<SystemCard> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 50, vertical: 14),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
                     ),
                     child: const Text(
                       'Start',

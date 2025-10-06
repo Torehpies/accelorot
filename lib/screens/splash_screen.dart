@@ -1,5 +1,9 @@
 // lib/screens/splash_screen.dart
+// ignore_for_file: unnecessary_import, use_super_parameters
+
 import 'package:flutter/material.dart';
+
+import 'package:flutter/widgets.dart';
 import 'registration_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,8 +26,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack);
     _animationController.forward();
-
-    
   }
 
   @override
@@ -55,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Gradient Circular Logo Container (matching LoginScreen)
+                      // Gradient Circular Logo Container
                       Container(
                         width: 120,
                         height: 120,
@@ -71,7 +73,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.teal.withValues(alpha: 0.3),
+                                  // ignore: deprecated_member_use
+                              color: Colors.teal.withOpacity(0.3),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
