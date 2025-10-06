@@ -16,7 +16,7 @@ class DateFilterState extends State<DateFilter> {
 
   void _showQuickOptions() {
     DateTime now = DateTime.now();
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -33,24 +33,30 @@ class DateFilterState extends State<DateFilter> {
                 ),
                 const SizedBox(height: 12),
                 _buildQuickOption("3 Days", () {
-                  _setDateRange(DateTimeRange(
-                    start: now.subtract(const Duration(days: 3)),
-                    end: now,
-                  ));
+                  _setDateRange(
+                    DateTimeRange(
+                      start: now.subtract(const Duration(days: 3)),
+                      end: now,
+                    ),
+                  );
                   Navigator.pop(context);
                 }),
                 _buildQuickOption("7 Days", () {
-                  _setDateRange(DateTimeRange(
-                    start: now.subtract(const Duration(days: 7)),
-                    end: now,
-                  ));
+                  _setDateRange(
+                    DateTimeRange(
+                      start: now.subtract(const Duration(days: 7)),
+                      end: now,
+                    ),
+                  );
                   Navigator.pop(context);
                 }),
                 _buildQuickOption("14 Days", () {
-                  _setDateRange(DateTimeRange(
-                    start: now.subtract(const Duration(days: 14)),
-                    end: now,
-                  ));
+                  _setDateRange(
+                    DateTimeRange(
+                      start: now.subtract(const Duration(days: 14)),
+                      end: now,
+                    ),
+                  );
                   Navigator.pop(context);
                 }),
                 _buildQuickOption("Custom", () {
@@ -72,10 +78,7 @@ class DateFilterState extends State<DateFilter> {
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 14),
-          ),
+          child: Text(text, style: const TextStyle(fontSize: 14)),
         ),
       ),
     );
@@ -91,7 +94,7 @@ class DateFilterState extends State<DateFilter> {
 
   String _getQuickOptionText(DateTimeRange range) {
     final daysDiff = range.end.difference(range.start).inDays;
-    
+
     if (daysDiff == 3) return "Last 3 Days";
     if (daysDiff == 7) return "Last 7 Days";
     if (daysDiff == 14) return "Last 14 Days";
@@ -103,7 +106,8 @@ class DateFilterState extends State<DateFilter> {
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
-    DateTime start = selectedRange?.start ?? now.subtract(const Duration(days: 7));
+    DateTime start =
+        selectedRange?.start ?? now.subtract(const Duration(days: 7));
     DateTime end = selectedRange?.end ?? now;
 
     DateTimeRange tempRange = DateTimeRange(start: start, end: end);
@@ -122,13 +126,19 @@ class DateFilterState extends State<DateFilter> {
                   children: [
                     const Text(
                       "Custom Range",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 300,
                       child: dp.RangePicker(
-                        selectedPeriod: dp.DatePeriod(tempRange.start, tempRange.end),
+                        selectedPeriod: dp.DatePeriod(
+                          tempRange.start,
+                          tempRange.end,
+                        ),
                         onChanged: (dp.DatePeriod newPeriod) {
                           setDialogState(() {
                             tempRange = DateTimeRange(
@@ -161,7 +171,10 @@ class DateFilterState extends State<DateFilter> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text("Cancel", style: TextStyle(fontSize: 14)),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
@@ -173,7 +186,10 @@ class DateFilterState extends State<DateFilter> {
                             widget.onChanged(selectedRange);
                             Navigator.pop(context);
                           },
-                          child: const Text("OK", style: TextStyle(fontSize: 14)),
+                          child: const Text(
+                            "OK",
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                       ],
                     ),

@@ -7,7 +7,6 @@ class DateFilter extends StatefulWidget {
   const DateFilter({super.key, required this.onChanged});
 
   @override
-  
   // ignore: library_private_types_in_public_api
   _DateFilterState createState() => _DateFilterState();
 }
@@ -58,9 +57,9 @@ class _DateFilterState extends State<DateFilter> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     selectedPeriodMiddleDecoration: BoxDecoration(
-                          // ignore: deprecated_member_use
-                          // ignore: deprecated_member_use
-                      color: Colors.green.withOpacity(0.5),
+                      // ignore: deprecated_member_use
+                      // ignore: deprecated_member_use
+                      color: Colors.green.withValues(alpha: 0.5),
                       shape: BoxShape.rectangle,
                     ),
                   ),
@@ -103,10 +102,7 @@ class _DateFilterState extends State<DateFilter> {
         backgroundColor: Colors.white,
         side: BorderSide(color: Colors.grey.shade400),
       ),
-      child: Text(
-        _formatRange(),
-        style: const TextStyle(color: Colors.black),
-      ),
+      child: Text(_formatRange(), style: const TextStyle(color: Colors.black)),
     );
   }
 }

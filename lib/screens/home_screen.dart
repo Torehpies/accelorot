@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   // Store logged waste products
   final List<Map<String, dynamic>> _wasteLogs = [];
 

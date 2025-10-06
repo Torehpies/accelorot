@@ -22,11 +22,19 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   final Map<String, List<Map<String, String>>> _plantTypeOptions = {
     'greens': [
-      {'value': 'leafy_vegetables', 'label': 'Leafy Vegetables', 'needs': 'Needs nitrogen'},
+      {
+        'value': 'leafy_vegetables',
+        'label': 'Leafy Vegetables',
+        'needs': 'Needs nitrogen',
+      },
       {'value': 'herbs', 'label': 'Herbs', 'needs': 'Needs nitrogen'},
     ],
     'browns': [
-      {'value': 'fruiting_vegetables', 'label': 'Fruiting Vegetables', 'needs': 'Needs carbon'},
+      {
+        'value': 'fruiting_vegetables',
+        'label': 'Fruiting Vegetables',
+        'needs': 'Needs carbon',
+      },
       {'value': 'fruit_trees', 'label': 'Fruit Trees', 'needs': 'Needs carbon'},
       {'value': 'root_crops', 'label': 'Root Crops', 'needs': 'Needs carbon'},
     ],
@@ -74,7 +82,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
         const DropdownMenuItem(
           value: null,
           child: Text('Select waste category first'),
-        )
+        ),
       ];
     }
 
@@ -164,7 +172,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
               // Waste Category
               DropdownButtonFormField<String>(
-                value: _selectedWasteCategory,
+                initialValue: _selectedWasteCategory,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: 'Select Waste Category',
@@ -176,11 +184,20 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                     borderSide: BorderSide(color: Colors.teal.shade700),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'greens', child: Text('Greens (Nitrogen)')),
-                  DropdownMenuItem(value: 'browns', child: Text('Browns (Carbon)')),
+                  DropdownMenuItem(
+                    value: 'greens',
+                    child: Text('Greens (Nitrogen)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'browns',
+                    child: Text('Browns (Carbon)'),
+                  ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -219,7 +236,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: 'Select Target Plant Type',
-                  prefixIcon: const Icon(Icons.local_florist_outlined, size: 18),
+                  prefixIcon: const Icon(
+                    Icons.local_florist_outlined,
+                    size: 18,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
@@ -227,7 +247,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                     borderSide: BorderSide(color: Colors.teal.shade700),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
                 ),
                 items: _getPlantTypeItems(),
                 onChanged: _selectedWasteCategory == null
@@ -241,30 +264,38 @@ class _AddWasteProductState extends State<AddWasteProduct> {
               const SizedBox(height: 16),
 
               // Quantity
-             TextField(
-  controller: _quantityController,
-  decoration: InputDecoration(
-    labelText: 'Enter Quantity (5-25 kg)',
-    prefixIcon: const Icon(Icons.scale, size: 18),
-    suffixText: 'kg',
-    suffixStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.teal.shade700),
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-    errorText: _quantityError, // ✅ Show error here
-  ),
-  keyboardType: TextInputType.numberWithOptions(decimal: true),
-  onChanged: (value) {
-    setState(() {
-      _quantityError = _validateQuantity(value); // ✅ Validate as user types
-    });
-  },
-),
+              TextField(
+                controller: _quantityController,
+                decoration: InputDecoration(
+                  labelText: 'Enter Quantity (5-25 kg)',
+                  prefixIcon: const Icon(Icons.scale, size: 18),
+                  suffixText: 'kg',
+                  suffixStyle: const TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal.shade700),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
+                  errorText: _quantityError, // ✅ Show error here
+                ),
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                onChanged: (value) {
+                  setState(() {
+                    _quantityError = _validateQuantity(
+                      value,
+                    ); // ✅ Validate as user types
+                  });
+                },
+              ),
               const SizedBox(height: 16),
 
               // Description
@@ -281,7 +312,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                     borderSide: BorderSide(color: Colors.teal.shade700),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -291,7 +325,9 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    final qtyError = _validateQuantity(_quantityController.text);
+                    final qtyError = _validateQuantity(
+                      _quantityController.text,
+                    );
                     if (_selectedWasteCategory == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Select waste category')),
@@ -300,14 +336,16 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                     }
                     if (_selectedPlantType == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Select target plant type')),
+                        const SnackBar(
+                          content: Text('Select target plant type'),
+                        ),
                       );
                       return;
                     }
                     if (qtyError != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(qtyError)),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(qtyError)));
                       return;
                     }
 
