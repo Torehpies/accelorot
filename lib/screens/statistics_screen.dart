@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/humidity_statistic_card.dart'; 
-import '../components/system_card.dart';           
+import '../widgets/humidity_statistic_card.dart';
+import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
 // import '../components/history.dart'; // Optional: remove if not used
@@ -18,7 +18,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   // ignore: unused_field
   String _selectedFilterLabel = "Date Filter";
 
-  void _onDateChanged(DateTimeRange? range) { // ✅ Match method name passed to DateFilter
+  void _onDateChanged(DateTimeRange? range) {
+    // ✅ Match method name passed to DateFilter
     setState(() {
       _selectedRange = range;
       _selectedRange = range;
@@ -64,7 +65,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -97,7 +98,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(onChanged: _onDateChanged), // ✅ Now matches method name
+                DateFilter(
+                  onChanged: _onDateChanged,
+                ), // ✅ Now matches method name
               ],
             ),
           ),

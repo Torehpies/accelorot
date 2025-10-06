@@ -19,10 +19,7 @@ class RoleDropdown extends StatelessWidget {
           border: OutlineInputBorder(),
         ),
         items: ['User', 'Admin'].map((String role) {
-          return DropdownMenuItem<String>(
-            value: role,
-            child: Text(role),
-          );
+          return DropdownMenuItem<String>(value: role, child: Text(role));
         }).toList(),
         onChanged: onChanged,
         validator: (value) => value == null ? 'Please select a role' : null,
