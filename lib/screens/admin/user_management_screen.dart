@@ -15,7 +15,9 @@ class UserManagementScreen extends StatelessWidget {
             // Navigate back to Login Screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+              MaterialPageRoute(
+                builder: (context) => const AdminMainNavigation(),
+              ),
             );
           },
         ),
