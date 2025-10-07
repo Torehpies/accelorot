@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
 import 'package:flutter_application_1/admin_screens/admin_navigation.dart';
 import '../utils/snackbar_utils.dart';
@@ -19,11 +20,12 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _controller = LoginController();
-    
+
     // Set up callbacks
     _controller.setCallbacks(
       onLoadingChanged: (isLoading) => setState(() {}),
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
+
       onLoginSuccess: (result) {
                 Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
         String userRole = userData['role'] ?? 'User';
@@ -45,70 +47,115 @@ class _LoginScreenState extends State<LoginScreen> {
         showSnackbar(context, message, isError: true);
       },
     );
-  }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    // Remove modal popups on load
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
-            child: Card(
-              elevation: 10,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Form(
-                  key: _controller.formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo
-                      _buildLogo(),
-                      const SizedBox(height: 24),
-                      
-                      // Title
-                      _buildTitle(theme),
-                      const SizedBox(height: 32),
-
-                      // Email Field
-                      _buildEmailField(),
-                      const SizedBox(height: 16),
-
-                      // Password Field
-                      _buildPasswordField(),
-                      const SizedBox(height: 16),
-
-                      // Forgot Password
-                      _buildForgotPassword(),
-                      const SizedBox(height: 24),
-
-                      // Login Button
-                      _buildLoginButton(),
-                      const SizedBox(height: 24),
-
-                      // Sign Up Link
-                      _buildSignUpLink(),
-                    ],
+      body: Stack(
+        children: [
+          // Main login UI
+          SafeArea(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 500),
+                padding: const EdgeInsets.all(24),
+                child: Card(
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Form(
+                      key: _controller.formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Logo
+                          _buildLogo(),
+                          const SizedBox(height: 24),
+                          // Title
+                          _buildTitle(theme),
+                          const SizedBox(height: 32),
+                          // Email Field
+                          _buildEmailField(),
+                          const SizedBox(height: 16),
+                          // Password Field
+                          _buildPasswordField(),
+                          const SizedBox(height: 16),
+                          // Forgot Password
+                          _buildForgotPassword(),
+                          const SizedBox(height: 24),
+                          // Login Button
+                          _buildLoginButton(),
+                          const SizedBox(height: 24),
+                          // Sign Up Link
+                          _buildSignUpLink(),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          // Button at top right for Admin Panel
+          Positioned(
+            top: 24,
+            right: 24,
+            child: IconButton(
+              icon: const Icon(
+                Icons.admin_panel_settings,
+                color: Colors.white,
+                size: 28,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
+                elevation: 8,
+              ),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminMainNavigation(),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Button at top left for Home
+          Positioned(
+            top: 24,
+            left: 24,
+            child: IconButton(
+              icon: const Icon(Icons.home, color: Colors.white, size: 28),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.teal,
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(12),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
+                elevation: 8,
+              ),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MainNavigation(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,10 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 80,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.teal.shade400,
-            Colors.teal.shade700,
-          ],
+          colors: [Colors.teal.shade400, Colors.teal.shade700],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -135,11 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.trending_up,
-        size: 36,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
     );
   }
 
@@ -157,10 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         Text(
           'Sign in to continue',
-          style: TextStyle(
-            fontSize: 16, 
-            color: theme.hintColor,
-          ),
+          style: TextStyle(fontSize: 16, color: theme.hintColor),
         ),
       ],
     );
@@ -173,9 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         labelText: 'Email Address',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: _controller.validateEmail,
     );
@@ -191,16 +226,14 @@ class _LoginScreenState extends State<LoginScreen> {
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            _controller.obscurePassword 
-                ? Icons.visibility_outlined 
+            _controller.obscurePassword
+                ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
           onPressed: _controller.togglePasswordVisibility,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: _controller.validatePassword,
     );
@@ -241,10 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
               )
             : const Text(
                 'Sign In',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     );
@@ -259,15 +289,14 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+              MaterialPageRoute(
+                builder: (context) => const RegistrationScreen(),
+              ),
             );
           },
           child: const Text(
             "Sign up",
-            style: TextStyle(
-              color: Colors.teal,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
           ),
         ),
       ],

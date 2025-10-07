@@ -3,26 +3,20 @@ import 'package:flutter/material.dart';
 
 class CustomCard extends StatelessWidget {
   final String title;
-  final List<Map<String, dynamic>> logs; // ← Accept logs
+  final List<Map<String, dynamic>> logs;
 
-  const CustomCard({
-    super.key,
-    required this.title,
-    required this.logs,
-  });
+  const CustomCard({super.key, required this.title, required this.logs});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 400,
-      height: 190,
+      height: 170,
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -33,12 +27,11 @@ class CustomCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               const Divider(thickness: 1, color: Colors.grey),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              // Show latest log or "No logs"
-              Expanded(
+              Flexible(
                 child: logs.isEmpty
                     ? const Center(
                         child: Text(
@@ -48,9 +41,13 @@ class CustomCard extends StatelessWidget {
                       )
                     : ListView.builder(
                         itemCount: logs.length > 3 ? 3 : logs.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
-                          final log = logs[logs.length - 1 - index]; // Show newest first
-                          final category = log['category'] == 'greens' ? 'Greens' : 'Browns';
+                          final log = logs[logs.length - 1 - index];
+                          final category = log['category'] == 'greens'
+                              ? 'Greens'
+                              : 'Browns';
                           final plant = log['plantTypeLabel'] ?? 'Plant';
                           final qty = log['quantity'];
 
@@ -59,6 +56,7 @@ class CustomCard extends StatelessWidget {
                             child: Text(
                               '• $category → $plant (${qty}kg)',
                               style: const TextStyle(fontSize: 13),
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           );

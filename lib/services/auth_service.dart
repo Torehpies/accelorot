@@ -5,8 +5,6 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-
-
   Future<Map<String, dynamic>> signInUser({
     required String email,
     required String password,
@@ -20,8 +18,11 @@ class AuthService {
       User? user = result.user;
       if (user != null) {
         // Get user data from Firestore
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
-        
+        DocumentSnapshot userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
         if (userDoc.exists) {
           return {
             'success': true,
@@ -30,16 +31,10 @@ class AuthService {
             'userData': userDoc.data(),
           };
         } else {
-          return {
-            'success': false,
-            'message': 'User data not found',
-          };
+          return {'success': false, 'message': 'User data not found'};
         }
       } else {
-        return {
-          'success': false,
-          'message': 'Failed to sign in',
-        };
+        return {'success': false, 'message': 'Failed to sign in'};
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -62,10 +57,7 @@ class AuthService {
         default:
           message = e.message ?? 'An error occurred during sign in.';
       }
-      return {
-        'success': false,
-        'message': message,
-      };
+      return {'success': false, 'message': message};
     } catch (e) {
       return {
         'success': false,
@@ -106,10 +98,7 @@ class AuthService {
           'uid': user.uid,
         };
       } else {
-        return {
-          'success': false,
-          'message': 'Failed to create user account',
-        };
+        return {'success': false, 'message': 'Failed to create user account'};
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -126,10 +115,7 @@ class AuthService {
         default:
           message = e.message ?? 'An error occurred during registration.';
       }
-      return {
-        'success': false,
-        'message': message,
-      };
+      return {'success': false, 'message': message};
     } catch (e) {
       return {
         'success': false,
