@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
 import 'package:flutter_application_1/screens/main_navigation.dart';
-import 'package:flutter_application_1/admin_screens/admin_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -34,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (userRole == 'Admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminNavigation()),
+            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
           );
         } else {
           Navigator.pushReplacement(
