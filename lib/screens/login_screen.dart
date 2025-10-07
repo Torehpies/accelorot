@@ -61,31 +61,33 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(32),
                     child: Form(
                       key: _controller.formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Logo
-                          _buildLogo(),
-                          const SizedBox(height: 24),
-                          // Title
-                          _buildTitle(theme),
-                          const SizedBox(height: 32),
-                          // Email Field
-                          _buildEmailField(),
-                          const SizedBox(height: 16),
-                          // Password Field
-                          _buildPasswordField(),
-                          const SizedBox(height: 16),
-                          // Forgot Password
-                          _buildForgotPassword(),
-                          const SizedBox(height: 24),
-                          // Login Button
-                          _buildLoginButton(),
-                          const SizedBox(height: 24),
-                          // Sign Up Link
-                          _buildSignUpLink(),
-                        ],
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Logo
+                            _buildLogo(),
+                            const SizedBox(height: 24),
+                            // Title
+                            _buildTitle(theme),
+                            const SizedBox(height: 32),
+                            // Email Field
+                            _buildEmailField(),
+                            const SizedBox(height: 16),
+                            // Password Field
+                            _buildPasswordField(),
+                            const SizedBox(height: 16),
+                            // Forgot Password
+                            _buildForgotPassword(),
+                            const SizedBox(height: 24),
+                            // Login Button
+                            _buildLoginButton(),
+                            const SizedBox(height: 24),
+                            // Sign Up Link
+                            _buildSignUpLink(),
+                          ],
+                        ),
                       ),
                     ),
                   ),

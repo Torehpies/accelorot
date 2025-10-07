@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/auth_service.dart';
 import '../utils/snackbar_utils.dart';
 import 'login_screen.dart';
+import '../screens/main_navigation.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
