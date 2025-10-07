@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/user_card.dart';
-import 'package:flutter_application_1/models/user.dart';
+import 'package:flutter_application_1/models/user.model.dart';
 import 'package:flutter_application_1/screens/admin/add_user/archive_screen.dart';
 
 class UserManagementScreen extends StatefulWidget {
