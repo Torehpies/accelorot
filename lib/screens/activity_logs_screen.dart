@@ -8,10 +8,7 @@ class ActivityLogsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Activity Logs")),
       body: const Center(
-        child: Text(
-          "Activity Logs Page",
-          style: TextStyle(fontSize: 20),
-        ),
+        child: Text("Activity Logs Page", style: TextStyle(fontSize: 20)),
       ),
     );
   }
