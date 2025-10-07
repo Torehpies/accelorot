@@ -18,7 +18,6 @@ class _AdminNavigationState extends State<AdminNavigation> {
     AdminHomeScreen(),
     UserList(),
     AdminProfile(),
-
   ];
 
   void _onItemTapped(int index) {
