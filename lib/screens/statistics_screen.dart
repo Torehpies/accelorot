@@ -1,42 +1,37 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
 import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
-// import '../components/history.dart'; // Optional: remove if not used
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ Only one constructor
+  const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState(); // ✅ Correct return type
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   // ignore: unused_field
-  DateTimeRange? _selectedRange; // ✅ Declare private fields
+  DateTimeRange? _selectedRange;
   // ignore: unused_field
   String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
-    // ✅ Match method name passed to DateFilter
     setState(() {
       _selectedRange = range;
-      _selectedRange = range;
-
       if (range == null) {
-        _selectedFilterLabel = "Date Filter";
         _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
           _selectedFilterLabel = "Last 3 Days";
-          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
           _selectedFilterLabel = "Last 7 Days";
-          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          _selectedFilterLabel = "Last 14 Days";
           _selectedFilterLabel = "Last 14 Days";
         } else {
           _selectedFilterLabel =
@@ -45,6 +40,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
     });
   }
+
+  // Consistent horizontal padding for all content cards
+  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(horizontal: 12);
 
   @override
   Widget build(BuildContext context) {
@@ -58,14 +56,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: Column(
         children: [
-          // Header (Statistics + Date Filter)
+          // 🔹 Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.2),
+                  color: Colors.green.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -98,30 +96,40 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(
-                  onChanged: _onDateChanged,
-                ), // ✅ Now matches method name
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
 
-          // Scrollable content
+          // 🔹 FIXED: SystemCard stays in place with matching width
+          Padding(
+            padding: _cardPadding,
+            child: const SystemCard(),
+          ),
+          const SizedBox(height: 16),
+
+          // 🔹 SCROLLABLE: Only humidity and temperature cards scroll
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: [
-                const SystemCard(),
-                const SizedBox(height: 16),
-                HumidityStatisticCard(
-                  currentHumidity: 38.0,
-                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                  lastUpdated: DateTime.now(),
-                ),
-                const SizedBox(height: 16),
-                // Optional: Add History widget here if needed later
-                // if (_selectedRange != null)
-                //   History(filter: _selectedFilterLabel, range: _selectedRange!),
-              ],
+            child: SingleChildScrollView(
+              padding: _cardPadding.add(const EdgeInsets.symmetric(vertical: 8)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  HumidityStatisticCard(
+                    currentHumidity: 38.0,
+                    hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                    lastUpdated: DateTime.now(),
+                  ),
+                  const SizedBox(height: 16),
+                  TemperatureStatisticCard(
+                    currentTemperature: 24.5,
+                    hourlyReadings: [22.0, 23.5, 25.0, 26.2, 24.8, 24.5],
+                    lastUpdated: DateTime.now(),
+                  ),
+                  const SizedBox(height: 16),
+                  // Add more statistic cards here if needed in the future
+                ],
+              ),
             ),
           ),
         ],
