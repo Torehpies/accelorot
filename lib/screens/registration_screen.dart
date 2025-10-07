@@ -3,6 +3,7 @@ import 'package:flutter_application_1/screens/main_navigation.dart';
 import '../utils/snackbar_utils.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'package:flutter_application_1/screens/email_verify.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -56,7 +57,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const MainNavigation()),
+              MaterialPageRoute(builder: (context) => EmailVerifyScreen(email: emailController.text.trim())),
             );
           } else {
             showSnackbar(context, result['message'], isError: true);
