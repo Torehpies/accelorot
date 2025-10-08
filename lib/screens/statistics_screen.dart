@@ -1,18 +1,17 @@
-// ignore_for_file: unused_field
+// ignore_for_file: unused_field, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
-import '../widgets/moisture_statistic_card.dart'; // 👈 ADD THIS IMPORT
+import '../widgets/moisture_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
 import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
-  const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState();
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
@@ -41,9 +40,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
     });
   }
-
-  // Consistent horizontal padding for all content cards
-  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(horizontal: 12);
 
   @override
   Widget build(BuildContext context) {
@@ -104,33 +100,37 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-          // 🔹 FIXED: SystemCard stays in place with matching width
-          Padding(
-            padding: _cardPadding,
-            child: const SystemCard(),
+          // 🔹 FIXED: SystemCard stays at top (non-scrolling)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: SystemCard(),
           ),
           const SizedBox(height: 16),
 
-          // 🔹 SCROLLABLE: Only humidity and temperature cards scroll
+          // 🔹 SCROLLABLE: Sensor cards (Temperature before Moisture)
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               children: [
-                const SystemCard(),
-                const SizedBox(height: 16),
                 HumidityStatisticCard(
                   currentHumidity: 38.0,
                   hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
                   lastUpdated: DateTime.now(),
                 ),
                 const SizedBox(height: 16),
-                MoistureStatisticCard( // 👈 ADD THIS WIDGET
+                // 👇 SWAPPED: Temperature comes BEFORE Moisture
+                TemperatureStatisticCard(
+                  currentTemperature: 22.5,
+                  hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                MoistureStatisticCard(
                   currentMoisture: 45.0,
                   hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
                   lastUpdated: DateTime.now(),
                 ),
                 const SizedBox(height: 16),
-                // Optional: History widget later
               ],
             ),
           ),
