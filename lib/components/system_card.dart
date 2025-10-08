@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class SystemCard extends StatefulWidget {
@@ -8,36 +10,27 @@ class SystemCard extends StatefulWidget {
 }
 
 class _SystemCardState extends State<SystemCard> {
-  String status = "Excellent"; // can be "Excellent", "Warning", "Error"
+  String status = "Excellent"; // "Excellent", "Warning", "Error"
   String selectedPeriod = "1 hour";
-  String selectedCycle = "100"; // default cycle
-  bool isRunning = false; // tracks if Start was pressed
-  bool isPaused = false; // tracks Pause state
+  String selectedCycle = "100";
+  bool isRunning = false;
+  bool isPaused = false;
 
-  // Status color & icon
   Color getStatusColor() {
     switch (status) {
-      case "Excellent":
-        return Colors.green;
-      case "Warning":
-        return Colors.orange;
-      case "Error":
-        return Colors.red;
-      default:
-        return Colors.grey;
+      case "Excellent": return Colors.green;
+      case "Warning": return Colors.orange;
+      case "Error": return Colors.red;
+      default: return Colors.grey;
     }
   }
 
   IconData getStatusIcon() {
     switch (status) {
-      case "Excellent":
-        return Icons.check_circle;
-      case "Warning":
-        return Icons.warning;
-      case "Error":
-        return Icons.error;
-      default:
-        return Icons.info;
+      case "Excellent": return Icons.check_circle;
+      case "Warning": return Icons.warning;
+      case "Error": return Icons.error;
+      default: return Icons.info;
     }
   }
 
@@ -47,10 +40,10 @@ class _SystemCardState extends State<SystemCard> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.grey.shade200), // ✅ Harmonized border
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1), // ✅ Fixed + consistent
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -60,7 +53,7 @@ class _SystemCardState extends State<SystemCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row with title and status
+          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -76,16 +69,10 @@ class _SystemCardState extends State<SystemCard> {
               ),
               Row(
                 children: [
-                  const Text(
-                    'Status: ',
-                    style: TextStyle(color: Colors.black54),
-                  ),
+                  const Text('Status: ', style: TextStyle(color: Colors.black54)),
                   Text(
                     status,
-                    style: TextStyle(
-                      color: getStatusColor(),
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(color: getStatusColor(), fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 4),
                   Icon(getStatusIcon(), color: getStatusColor(), size: 18),
@@ -95,7 +82,7 @@ class _SystemCardState extends State<SystemCard> {
           ),
           const SizedBox(height: 12),
 
-          // Uptime and Last Update info
+          // Uptime info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
@@ -109,35 +96,24 @@ class _SystemCardState extends State<SystemCard> {
           ),
           const SizedBox(height: 20),
 
-          // Drum Rotation Label
-          const Text(
-            'Drum Rotation',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
+          // Drum Rotation
+          const Text('Drum Rotation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           const SizedBox(height: 12),
 
-          // Inputs row
+          // Input row
           Row(
             children: [
-              // Cycle choices dropdown
               Expanded(
                 flex: 2,
                 child: DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Set number of Cycles',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                  initialValue: selectedCycle,
-                  onChanged: (value) {
-                    setState(() => selectedCycle = value!);
-                  },
+                  value: selectedCycle,
+                  onChanged: (value) => setState(() => selectedCycle = value!),
                   items: const [
                     DropdownMenuItem(value: "50", child: Text("50")),
                     DropdownMenuItem(value: "100", child: Text("100")),
@@ -147,36 +123,21 @@ class _SystemCardState extends State<SystemCard> {
                 ),
               ),
               const SizedBox(width: 12),
-
-              // Period dropdown
               Expanded(
                 flex: 2,
                 child: DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Set Period',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
-                  initialValue: selectedPeriod,
-                  onChanged: (value) {
-                    setState(() => selectedPeriod = value!);
-                  },
+                  value: selectedPeriod,
+                  onChanged: (value) => setState(() => selectedPeriod = value!),
                   items: const [
                     DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
-                    DropdownMenuItem(
-                      value: '12 hours',
-                      child: Text('12 hours'),
-                    ),
-                    DropdownMenuItem(
-                      value: '24 hours',
-                      child: Text('24 hours'),
-                    ),
+                    DropdownMenuItem(value: '12 hours', child: Text('12 hours')),
+                    DropdownMenuItem(value: '24 hours', child: Text('24 hours')),
                   ],
                 ),
               ),
@@ -201,20 +162,12 @@ class _SystemCardState extends State<SystemCard> {
                           backgroundColor: isPaused
                               ? const Color.fromARGB(255, 14, 138, 255)
                               : const Color.fromARGB(255, 255, 185, 32),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 14,
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                         ),
                         child: Text(
                           isPaused ? "Resume" : "Pause",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -228,20 +181,12 @@ class _SystemCardState extends State<SystemCard> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30,
-                            vertical: 14,
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                         ),
                         child: const Text(
                           "Stop",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -254,21 +199,13 @@ class _SystemCardState extends State<SystemCard> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E5339), // deep green
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 50,
-                        vertical: 14,
-                      ),
+                      backgroundColor: const Color(0xFF2E5339),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
                     ),
                     child: const Text(
                       'Start',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                     ),
                   ),
           ),

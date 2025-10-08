@@ -9,8 +9,10 @@ import 'home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
+  const StatisticsScreen({super.key});
 
   @override
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
@@ -40,6 +42,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
   }
 
+  // Consistent horizontal padding for all content cards
+  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(horizontal: 12);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,14 +57,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: Column(
         children: [
-          // Header (Statistics + Date Filter)
+          // 🔹 Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.2),
+                  color: Colors.green.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -99,7 +104,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-          // Scrollable content
+          // 🔹 FIXED: SystemCard stays in place with matching width
+          Padding(
+            padding: _cardPadding,
+            child: const SystemCard(),
+          ),
+          const SizedBox(height: 16),
+
+          // 🔹 SCROLLABLE: Only humidity and temperature cards scroll
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
