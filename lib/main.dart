@@ -63,7 +63,7 @@ class MyApp extends ConsumerWidget {
       //home: const SplashScreen(),
       home: authState.when(
         data: (user) =>
-            user != null ? const HomeScreen() : const RefactoredLoginScreen(),
+            user != null ? const MainNavigation() : const RefactoredLoginScreen(),
         error: (err, _) => Scaffold(
 					body: Center(child: Text('Error: $err')),
 				),

@@ -30,7 +30,11 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      //body: _screens[_selectedIndex],
+			body: IndexedStack(
+				index: _selectedIndex,
+				children: _screens,
+			),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
