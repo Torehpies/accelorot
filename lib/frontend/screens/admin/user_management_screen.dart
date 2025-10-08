@@ -77,7 +77,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 MaterialPageRoute(
                   builder: (context) => ArchiveScreen(
                     archivedUsers: archivedUsers,
-                    onRestore: _restoreFromArchive,
+                    onRestore: restoreFromArchive,
                   ),
                 ),
               );
