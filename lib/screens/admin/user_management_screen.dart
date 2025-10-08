@@ -12,24 +12,9 @@ class UserManagementScreen extends StatefulWidget {
 
 class _UserManagementScreenState extends State<UserManagementScreen> {
   List<User> users = [
-    User(
-      id: '1',
-      name: 'Joy Merk',
-      email: 'joymerk@gmail.com',
-      isActive: true,
-    ),
-    User(
-      id: '2',
-      name: 'Test User',
-      email: 'test@gmail.com',
-      isActive: false,
-    ),
-    User(
-      id: '3',
-      name: 'John DoeDoe',
-      email: 'johndoe@example.com',
-      isActive: true,
-    ),
+    User(id: '1', name: 'Joy Merk', email: 'joymerk@gmail.com', isActive: true),
+    User(id: '2', name: 'Test User', email: 'test@gmail.com', isActive: false),
+    User(id: '3', name: 'John DoeDoe', email: 'johndoe@example.com', isActive: true),
   ];
 
   List<User> archivedUsers = [];
@@ -45,13 +30,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   void _editUser(User user) {
-    // TODO: Navigate to edit user screen
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit user ${user.name}')),
     );
   }
 
-  void restoreFromArchive(User user) {
+  void _restoreFromArchive(User user) {
     setState(() {
       archivedUsers.remove(user);
       users.add(user);
@@ -72,21 +56,17 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         actions: [
           TextButton(
             onPressed: () async {
-              // Navigate to Archive and wait for possible restore
               await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ArchiveScreen(
                     archivedUsers: archivedUsers,
-                    onRestore: restoreFromArchive,
+                    onRestore: _restoreFromArchive,
                   ),
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              elevation: 0,
-              shadowColor: Colors.transparent,
-            ),
+            style: TextButton.styleFrom(elevation: 0),
             child: const Text(
               'Archive List',
               style: TextStyle(color: Color.fromARGB(255, 77, 68, 68)),
@@ -96,64 +76,58 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             margin: const EdgeInsets.only(right: 8),
             child: ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navigate to add user screen
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Add user')),
                 );
+              
               },
               icon: const Icon(Icons.add, color: Colors.white, size: 18),
               label: const Text('Add User', style: TextStyle(color: Colors.white, fontSize: 14)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
                 elevation: 0,
-                shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             ),
           ),
         ],
       ),
       body: users.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 64,
-                    color: Colors.grey,
+                  const Icon(Icons.people_outline, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No users found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
-
+                  const SizedBox(height: 24),
+                  // Action buttons when empty
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Archive Button
                       TextButton(
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArchiveScreen(
+                                archivedUsers: archivedUsers,
+                                onRestore: _restoreFromArchive,
+                              ),
+                            ),
+                          );
+                        },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.grey.shade200,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () async {
-                          // Navigate to Archive and wait for possible restore
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ArchiveScreen(
-                                archivedUsers: archivedUsers,
-                                onRestore: restoreFromArchive,
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "Archive",
-                          style: TextStyle(color: Colors.black),
-                        ),
+                        child: const Text("Archive", style: TextStyle(color: Colors.black)),
                       ),
                       const SizedBox(width: 8),
-                      // Add User Button
                       ElevatedButton.icon(
                         onPressed: () {
                           
@@ -169,15 +143,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         ),
                       ),
                     ],
-
-                  SizedBox(height: 16),
-                  Text(
-                    'No users found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-
                   ),
                 ],
               ),
@@ -194,37 +159,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 );
               },
             ),
-
-            const Divider(),
-
-            // 🔹 User List
-            Expanded(
-              child: users.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No active users",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final user = users[index];
-                        return UserCard(
-                          name: user.name,
-                          email: user.email,
-                          onDelete: () => moveToArchive(user),
-                          onEdit: () {
-                            
-                          },
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-
     );
   }
 }
