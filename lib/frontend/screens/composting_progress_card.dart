@@ -5,10 +5,7 @@ class CompostingProgressCard extends StatelessWidget {
   final DateTime batchStart;
   static const int totalDays = 12; // Fixed 12-day cycle
 
-  const CompostingProgressCard({
-    super.key,
-    required this.batchStart,
-  });
+  const CompostingProgressCard({super.key, required this.batchStart});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +20,7 @@ class CompostingProgressCard extends StatelessWidget {
       height: 150,
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
@@ -51,7 +46,10 @@ class CompostingProgressCard extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '${(progress * 100).toInt()}%',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -95,7 +93,10 @@ class CompostingProgressCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Batch Start', style: TextStyle(fontSize: 11, color: Colors.grey)),
+        const Text(
+          'Batch Start',
+          style: TextStyle(fontSize: 11, color: Colors.grey),
+        ),
         const SizedBox(height: 2),
         Text(
           '$formattedDate – $timeText',
@@ -124,7 +125,10 @@ class CompostingProgressCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Est Completion', style: TextStyle(fontSize: 11, color: Colors.grey)),
+        const Text(
+          'Est Completion',
+          style: TextStyle(fontSize: 11, color: Colors.grey),
+        ),
         const SizedBox(height: 2),
         Text(
           '$formattedDate – $timeText',
@@ -138,8 +142,18 @@ class CompostingProgressCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }

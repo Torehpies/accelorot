@@ -15,16 +15,15 @@ class ProfileScreen extends StatelessWidget {
             // Navigate back to Login Screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+              MaterialPageRoute(
+                builder: (context) => const RegistrationScreen(),
+              ),
             );
           },
         ),
       ),
       body: const Center(
-        child: Text(
-          "Profile Page",
-          style: TextStyle(fontSize: 20),
-        ),
+        child: Text("Profile Page", style: TextStyle(fontSize: 20)),
       ),
     );
   }
