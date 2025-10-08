@@ -6,28 +6,32 @@ part 'auth_view_model.g.dart';
 
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
-	late final FirebaseAuthRepository _repository = ref.read(firebaseAuthRepositoryProvider);
+  late final FirebaseAuthRepository _repository = ref.read(
+    firebaseAuthRepositoryProvider,
+  );
 
-	@override
+  @override
   FutureOr<void> build() => null;
 
-	Future<void> login(String email, String password) async {
-		state = const AsyncValue.loading();
+  Future<void> login(String email, String password) async {
+    state = const AsyncValue.loading();
 
-		final result = await AsyncValue.guard(() async {
-			await _repository.login(email, password);
-		});
+    try {
+      await _repository.login(email, password);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 
-		state = result;
-	}
+  Future<void> logout() async {
+    state = const AsyncValue.loading();
 
-	Future<void> logout() async {
-		state = const AsyncValue.loading();
+    final result = await AsyncValue.guard(() async {
+      await _repository.logout();
+    });
 
-		final result = await AsyncValue.guard(() async {
-			await _repository.logout();
-		});
-
-		state = result;
-	}
+    state = result;
+  }
 }

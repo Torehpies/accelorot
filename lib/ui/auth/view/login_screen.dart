@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/admin/admin_main_navigation.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,12 +14,27 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  void _onLoginPressed() {
+  void _onLoginPressed() async {
     if (!_formKey.currentState!.validate()) return;
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    ref.read(authViewModelProvider.notifier).login(email, password);
+    try {
+      await ref.read(authViewModelProvider.notifier).login(email, password);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString()),
+				backgroundColor: Colors.red,	
+				));
+      }
+    }
   }
 
   @override
@@ -28,32 +42,68 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
     final loginState = ref.watch(authViewModelProvider);
 
     return Scaffold(
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _emailController,
-              validator: (v) => v != null && v.contains('@') ? null : 'Invalid',
-            ),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              validator: (v) => v != null && v.length >= 6 ? null : 'Too short',
-            ),
-            const SizedBox(height: 20),
-            loginState.isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _onLoginPressed,
-                    child: const Text('Login'),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 80),
+                const Icon(Icons.lock_outline, size: 80, color: Colors.green),
+                const SizedBox(height: 20),
+                const Text(
+                  'Welcome back!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'Login to continue',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.mail_outline),
                   ),
-            if (loginState.hasError)
-              Text(
-                loginState.error.toString(),
-                style: const TextStyle(color: Colors.red),
-              ),
-          ],
+                  validator: (v) => v != null && v.contains('@')
+                      ? null
+                      : 'Invalid email address',
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock_outline_rounded),
+                  ),
+                  validator: (v) =>
+                      v != null && v.length >= 6 ? null : 'Too short',
+                ),
+                const SizedBox(height: 10),
+                loginState.isLoading
+                    ? Center(child: const CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: _onLoginPressed,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                        ),
+                        child: const Text('Login'),
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
     );

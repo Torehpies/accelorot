@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class FirebaseAuthService{
+class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _isGoogleSignInInitialized = false;
@@ -31,16 +31,20 @@ class FirebaseAuthService{
     String fullName,
   ) async {
     try {
-      final credential = await _auth 
-          .createUserWithEmailAndPassword(email: email, password: password);
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       User? user = credential.user;
       await user?.updateDisplayName(fullName);
       return credential.user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
+        throw Exception('The password provided is too weak.');
       } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+        throw Exception('The account already exists for that email.');
+      } else {
+        throw Exception(e.message ?? 'Registration failed');
       }
     } catch (e) {
       print(e);
@@ -56,13 +60,26 @@ class FirebaseAuthService{
       );
       return credential;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+      print(e.code);
+      switch (e.code) {
+        case 'user-not-found':
+          throw 'No account found for that email.';
+        case 'invalid-credential':
+          throw 'Login failed, wrong email or password';
+        case 'network-request-failed':
+          throw 'Login failed, check your internet connection';
+        case 'wrong-password':
+          throw 'Incorrect password. Please try again.';
+        case 'invalid-email':
+          throw 'The email address is invalid.';
+        case 'user-disabled':
+          throw 'This account has been disabled.';
+        default:
+          throw 'Login failed. Please try again later.';
       }
+    } catch (e) {
+      throw 'An unexpected error occurred. Please try again.';
     }
-    return null;
   }
 
   Future<User?> signInWithGoogle() async {
