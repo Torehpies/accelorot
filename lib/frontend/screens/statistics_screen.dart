@@ -1,7 +1,8 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
 import '../widgets/temperature_statistic_card.dart';
 import '../components/system_card.dart';
 import 'date_filter.dart';
@@ -15,14 +16,13 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // ignore: unused_field
   DateTimeRange? _selectedRange;
-  // ignore: unused_field
   String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
     setState(() {
       _selectedRange = range;
+
       if (range == null) {
         _selectedFilterLabel = "Date Filter";
       } else {
@@ -40,9 +40,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
     });
   }
-
-  // Consistent horizontal padding for all content cards
-  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(horizontal: 12);
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +60,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -101,34 +98,38 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-          // 🔹 FIXED: SystemCard stays in place with matching width
-          Padding(padding: _cardPadding, child: const SystemCard()),
+          // 🔹 FIXED: SystemCard stays at top (non-scrolling)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: SystemCard(),
+          ),
           const SizedBox(height: 16),
 
-          // 🔹 SCROLLABLE: Only humidity and temperature cards scroll
+          // 🔹 SCROLLABLE: Sensor cards (Temperature before Moisture)
           Expanded(
-            child: SingleChildScrollView(
-              padding: _cardPadding.add(
-                const EdgeInsets.symmetric(vertical: 8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  HumidityStatisticCard(
-                    currentHumidity: 38.0,
-                    hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                    lastUpdated: DateTime.now(),
-                  ),
-                  const SizedBox(height: 16),
-                  TemperatureStatisticCard(
-                    currentTemperature: 24.5,
-                    hourlyReadings: [22.0, 23.5, 25.0, 26.2, 24.8, 24.5],
-                    lastUpdated: DateTime.now(),
-                  ),
-                  const SizedBox(height: 16),
-                  // Add more statistic cards here if needed in the future
-                ],
-              ),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                HumidityStatisticCard(
+                  currentHumidity: 38.0,
+                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                // 👇 SWAPPED: Temperature comes BEFORE Moisture
+                TemperatureStatisticCard(
+                  currentTemperature: 22.5,
+                  hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                MoistureStatisticCard(
+                  currentMoisture: 45.0,
+                  hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
         ],
