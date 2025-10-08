@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
-import '../utils/snackbar_utils.dart';
-import '../services/auth_service.dart';
+import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import 'login_screen.dart';
-import 'package:flutter_application_1/screens/email_verify.dart';
+import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});

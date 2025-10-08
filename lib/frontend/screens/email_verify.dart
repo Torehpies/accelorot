@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../utils/snackbar_utils.dart';
+import '../../utils/snackbar_utils.dart';
 import 'login_screen.dart';
-import 'main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 
 class EmailVerifyScreen extends StatefulWidget {
   final String email;

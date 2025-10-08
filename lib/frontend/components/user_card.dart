@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/user.model.dart';
+import '../models/user_model.dart';
 
 class UserCard extends StatelessWidget {
-  final User user;
+  final UserModel user;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
   final VoidCallback? onRestore;
