@@ -21,58 +21,54 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 🔹 Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
+      appBar: AppBar(
+        title: const Text('Archive'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color.fromARGB(255, 77, 68, 68),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 77, 68, 68)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: widget.archivedUsers.isEmpty
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
+                  Icon(
+                    Icons.archive_outlined,
+                    size: 64,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Archive",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  SizedBox(height: 16),
+                  Text(
+                    'No archived users',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              itemCount: widget.archivedUsers.length,
+              itemBuilder: (context, index) {
+                final user = widget.archivedUsers[index];
+                return UserCard(
+                  user: user,
+                  isArchived: true,
+                  onRestore: () {
+                    setState(() {
+                      widget.archivedUsers.remove(user);
+                    });
+                    widget.onRestore(user);
+                  },
+                );
+              },
             ),
-            const Divider(),
-
-            // 🔹 Archived List
-            Expanded(
-              child: widget.archivedUsers.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No archived users",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: widget.archivedUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = widget.archivedUsers[index];
-                        return UserCard(
-                          name: user.name,
-                          email: user.email,
-                          isArchived: true,
-                          onRestore: () {
-                            setState(() {
-                              widget.archivedUsers.remove(user);
-                            });
-                            widget.onRestore(user);
-                          },
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

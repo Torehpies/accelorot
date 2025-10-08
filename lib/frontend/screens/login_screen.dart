@@ -24,12 +24,23 @@ class _LoginScreenState extends State<LoginScreen> {
     _controller.setCallbacks(
       onLoadingChanged: (isLoading) => setState(() {}),
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
-      onLoginSuccess: () {
-        showSnackbar(context, 'Login successful!');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
-        );
+
+      onLoginSuccess: (result) {
+                Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
+        String userRole = userData['role'] ?? 'User';
+        
+        // Navigate based on role
+        if (userRole == 'Admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        }
       },
       onLoginError: (message) {
         showSnackbar(context, message, isError: true);
