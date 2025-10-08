@@ -237,8 +237,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Email is required';
+                          }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email address';
                           }
@@ -288,10 +289,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Password is required';
-                          if (value.length < 6)
+                          }
+                          if (value.length < 6) {
                             return 'Password must be at least 6 characters';
+                          }
                           return null;
                         },
                       ),
@@ -339,10 +342,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
-                          if (value != passwordController.text)
+														}
+                          if (value != passwordController.text) {
                             return 'Passwords do not match';
+													}
                           return null;
                         },
                       ),
