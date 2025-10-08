@@ -45,7 +45,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   void _editUser(User user) {
-    // TODO: Navigate to edit user screen
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit user ${user.name}')),
     );
@@ -72,7 +71,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         actions: [
           TextButton(
             onPressed: () async {
-              // Navigate to Archive and wait for possible restore
               await Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -96,7 +94,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             margin: const EdgeInsets.only(right: 8),
             child: ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navigate to add user screen
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Add user')),
                 );
@@ -115,19 +112,19 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         ],
       ),
       body: users.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.people_outline,
                     size: 64,
                     color: Colors.grey,
                   ),
-
+                  const SizedBox(height: 16),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Archive Button
                       TextButton(
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.grey.shade200,
@@ -136,7 +133,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                           ),
                         ),
                         onPressed: () async {
-                          // Navigate to Archive and wait for possible restore
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -153,7 +149,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Add User Button
                       ElevatedButton.icon(
                         onPressed: () {
                           
@@ -169,15 +164,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         ),
                       ),
                     ],
-
-                  SizedBox(height: 16),
-                  Text(
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
                     'No users found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),
@@ -194,37 +185,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 );
               },
             ),
-
-            const Divider(),
-
-            // 🔹 User List
-            Expanded(
-              child: users.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No active users",
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        final user = users[index];
-                        return UserCard(
-                          name: user.name,
-                          email: user.email,
-                          onDelete: () => moveToArchive(user),
-                          onEdit: () {
-                            
-                          },
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-
     );
   }
 }
