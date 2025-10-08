@@ -27,9 +27,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
       height: 210,
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -57,29 +55,41 @@ class EnvironmentalSensorsCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    Expanded(child: _buildSensorTile(
-                      title: 'Temperature',
-                      value: temperature != null ? '${temperature!.toStringAsFixed(1)}°C' : '--°C',
-                      change: temperatureChange,
-                      iconColor: Colors.green,
-                      borderColor: Colors.green,
-                    )),
+                    Expanded(
+                      child: _buildSensorTile(
+                        title: 'Temperature',
+                        value: temperature != null
+                            ? '${temperature!.toStringAsFixed(1)}°C'
+                            : '--°C',
+                        change: temperatureChange,
+                        iconColor: Colors.green,
+                        borderColor: Colors.green,
+                      ),
+                    ),
                     const SizedBox(width: 8), // Small gap between tiles
-                    Expanded(child: _buildSensorTile(
-                      title: 'Moisture',
-                      value: moisture != null ? '${moisture!.toStringAsFixed(1)} g/m³' : '-- g/m³',
-                      change: moistureChange,
-                      iconColor: Colors.orange,
-                      borderColor: Colors.orange,
-                    )),
+                    Expanded(
+                      child: _buildSensorTile(
+                        title: 'Moisture',
+                        value: moisture != null
+                            ? '${moisture!.toStringAsFixed(1)} g/m³'
+                            : '-- g/m³',
+                        change: moistureChange,
+                        iconColor: Colors.orange,
+                        borderColor: Colors.orange,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildSensorTile(
-                      title: 'Humidity',
-                      value: humidity != null ? '${humidity!.toStringAsFixed(0)}%' : '--%',
-                      change: humidityChange,
-                      iconColor: Colors.red,
-                      borderColor: Colors.red,
-                    )),
+                    Expanded(
+                      child: _buildSensorTile(
+                        title: 'Humidity',
+                        value: humidity != null
+                            ? '${humidity!.toStringAsFixed(0)}%'
+                            : '--%',
+                        change: humidityChange,
+                        iconColor: Colors.red,
+                        borderColor: Colors.red,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -116,10 +126,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

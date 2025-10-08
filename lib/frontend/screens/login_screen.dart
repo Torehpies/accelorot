@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _controller = LoginController();
-    
+
     // Set up callbacks
     _controller.setCallbacks(
       onLoadingChanged: (isLoading) => setState(() {}),
@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 backgroundColor: Colors.teal,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(12),
-                shadowColor: Colors.black.withValues(alpha:0.08),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
                 elevation: 8,
               ),
               onPressed: () {
@@ -125,16 +125,12 @@ class _LoginScreenState extends State<LoginScreen> {
             top: 24,
             left: 24,
             child: IconButton(
-              icon: const Icon(
-                Icons.home,
-                color: Colors.white,
-                size: 28,
-              ),
+              icon: const Icon(Icons.home, color: Colors.white, size: 28),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.teal,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(12),
-                shadowColor: Colors.black.withValues(alpha:0.08),
+                shadowColor: Colors.black.withValues(alpha: 0.08),
                 elevation: 8,
               ),
               onPressed: () {
@@ -158,10 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
       height: 80,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.teal.shade400,
-            Colors.teal.shade700,
-          ],
+          colors: [Colors.teal.shade400, Colors.teal.shade700],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -174,11 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.trending_up,
-        size: 36,
-        color: Colors.white,
-      ),
+      child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
     );
   }
 
@@ -196,10 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 8),
         Text(
           'Sign in to continue',
-          style: TextStyle(
-            fontSize: 16, 
-            color: theme.hintColor,
-          ),
+          style: TextStyle(fontSize: 16, color: theme.hintColor),
         ),
       ],
     );
@@ -212,9 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         labelText: 'Email Address',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: _controller.validateEmail,
     );
@@ -230,16 +214,14 @@ class _LoginScreenState extends State<LoginScreen> {
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            _controller.obscurePassword 
-                ? Icons.visibility_outlined 
+            _controller.obscurePassword
+                ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
           onPressed: _controller.togglePasswordVisibility,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: _controller.validatePassword,
     );
@@ -280,10 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
               )
             : const Text(
                 'Sign In',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     );
@@ -298,15 +277,14 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+              MaterialPageRoute(
+                builder: (context) => const RegistrationScreen(),
+              ),
             );
           },
           child: const Text(
             "Sign up",
-            style: TextStyle(
-              color: Colors.teal,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
           ),
         ),
       ],
