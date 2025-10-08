@@ -14,6 +14,7 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
 
   void _onLoginPressed() async {
     if (!_formKey.currentState!.validate()) return;
@@ -80,12 +81,24 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock_outline_rounded),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                   ),
                   validator: (v) =>
                       v != null && v.length >= 6 ? null : 'Too short',
