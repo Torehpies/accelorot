@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -47,7 +45,7 @@ class TemperatureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -62,16 +60,16 @@ class TemperatureStatisticCard extends StatelessWidget {
             children: [
               Text(
                 'Temperature',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '${currentTemperature.toStringAsFixed(1)}°C',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -124,14 +122,20 @@ class TemperatureStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
                 maximum: 40,
                 interval: 10,
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
@@ -178,7 +182,7 @@ class TemperatureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -196,7 +200,8 @@ class TemperatureStatisticCard extends StatelessWidget {
 
   String _getQuality(double temperature) {
     if (temperature >= 18 && temperature <= 24) return 'Excellent';
-    if ((temperature >= 15 && temperature < 18) || (temperature > 24 && temperature <= 27)) {
+    if ((temperature >= 15 && temperature < 18) ||
+        (temperature > 24 && temperature <= 27)) {
       return 'Good';
     }
     return 'Poor';

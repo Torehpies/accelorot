@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/main_navigation.dart';
-import '../utils/snackbar_utils.dart';
-import '../services/auth_service.dart';
+import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import 'login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -237,7 +237,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Email is required';
+                          if (value == null || value.isEmpty)
+                            return 'Email is required';
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email address';
                           }
@@ -287,8 +288,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Password is required';
-                          if (value.length < 6) return 'Password must be at least 6 characters';
+                          if (value == null || value.isEmpty)
+                            return 'Password is required';
+                          if (value.length < 6)
+                            return 'Password must be at least 6 characters';
                           return null;
                         },
                       ),
@@ -336,8 +339,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Please confirm your password';
-                          if (value != passwordController.text) return 'Passwords do not match';
+                          if (value == null || value.isEmpty)
+                            return 'Please confirm your password';
+                          if (value != passwordController.text)
+                            return 'Passwords do not match';
                           return null;
                         },
                       ),

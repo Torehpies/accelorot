@@ -102,16 +102,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
 
           // 🔹 FIXED: SystemCard stays in place with matching width
-          Padding(
-            padding: _cardPadding,
-            child: const SystemCard(),
-          ),
+          Padding(padding: _cardPadding, child: const SystemCard()),
           const SizedBox(height: 16),
 
           // 🔹 SCROLLABLE: Only humidity and temperature cards scroll
           Expanded(
             child: SingleChildScrollView(
-              padding: _cardPadding.add(const EdgeInsets.symmetric(vertical: 8)),
+              padding: _cardPadding.add(
+                const EdgeInsets.symmetric(vertical: 8),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

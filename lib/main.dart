@@ -1,13 +1,13 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'screens/splash_screen.dart';
+import 'frontend/screens/splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' show PlatformDispatcher; // Required for global error handling
 
-import 'screens/statistics_screen.dart';
-import 'screens/main_navigation.dart';
+import 'frontend/screens/statistics_screen.dart';
+import 'frontend/screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

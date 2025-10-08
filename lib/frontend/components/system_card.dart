@@ -18,19 +18,27 @@ class _SystemCardState extends State<SystemCard> {
 
   Color getStatusColor() {
     switch (status) {
-      case "Excellent": return Colors.green;
-      case "Warning": return Colors.orange;
-      case "Error": return Colors.red;
-      default: return Colors.grey;
+      case "Excellent":
+        return Colors.green;
+      case "Warning":
+        return Colors.orange;
+      case "Error":
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData getStatusIcon() {
     switch (status) {
-      case "Excellent": return Icons.check_circle;
-      case "Warning": return Icons.warning;
-      case "Error": return Icons.error;
-      default: return Icons.info;
+      case "Excellent":
+        return Icons.check_circle;
+      case "Warning":
+        return Icons.warning;
+      case "Error":
+        return Icons.error;
+      default:
+        return Icons.info;
     }
   }
 
@@ -69,10 +77,16 @@ class _SystemCardState extends State<SystemCard> {
               ),
               Row(
                 children: [
-                  const Text('Status: ', style: TextStyle(color: Colors.black54)),
+                  const Text(
+                    'Status: ',
+                    style: TextStyle(color: Colors.black54),
+                  ),
                   Text(
                     status,
-                    style: TextStyle(color: getStatusColor(), fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: getStatusColor(),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Icon(getStatusIcon(), color: getStatusColor(), size: 18),
@@ -97,7 +111,10 @@ class _SystemCardState extends State<SystemCard> {
           const SizedBox(height: 20),
 
           // Drum Rotation
-          const Text('Drum Rotation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          const Text(
+            'Drum Rotation',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
           const SizedBox(height: 12),
 
           // Input row
@@ -108,9 +125,14 @@ class _SystemCardState extends State<SystemCard> {
                 child: DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Set number of Cycles',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   value: selectedCycle,
                   onChanged: (value) => setState(() => selectedCycle = value!),
@@ -128,16 +150,27 @@ class _SystemCardState extends State<SystemCard> {
                 child: DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     labelText: 'Set Period',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                   ),
                   value: selectedPeriod,
                   onChanged: (value) => setState(() => selectedPeriod = value!),
                   items: const [
                     DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
-                    DropdownMenuItem(value: '12 hours', child: Text('12 hours')),
-                    DropdownMenuItem(value: '24 hours', child: Text('24 hours')),
+                    DropdownMenuItem(
+                      value: '12 hours',
+                      child: Text('12 hours'),
+                    ),
+                    DropdownMenuItem(
+                      value: '24 hours',
+                      child: Text('24 hours'),
+                    ),
                   ],
                 ),
               ),
@@ -162,12 +195,20 @@ class _SystemCardState extends State<SystemCard> {
                           backgroundColor: isPaused
                               ? const Color.fromARGB(255, 14, 138, 255)
                               : const Color.fromARGB(255, 255, 185, 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 14,
+                          ),
                         ),
                         child: Text(
                           isPaused ? "Resume" : "Pause",
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -181,12 +222,20 @@ class _SystemCardState extends State<SystemCard> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Stop",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -200,12 +249,20 @@ class _SystemCardState extends State<SystemCard> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2E5339),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 50,
+                        vertical: 14,
+                      ),
                     ),
                     child: const Text(
                       'Start',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
           ),
