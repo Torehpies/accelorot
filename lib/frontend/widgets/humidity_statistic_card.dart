@@ -219,8 +219,9 @@ class HumidityStatisticCard extends StatelessWidget {
 
   String _getQuality(double humidity) {
     if (humidity >= 40 && humidity <= 65) return 'Excellent';
-    if ((humidity >= 30 && humidity < 40) || (humidity > 65 && humidity <= 75))
+    if ((humidity >= 30 && humidity < 40) || (humidity > 65 && humidity <= 75)) {
       return 'Good';
+    }
     return 'Poor';
   }
 
