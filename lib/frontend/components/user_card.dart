@@ -56,9 +56,7 @@ class UserCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading: CircleAvatar(
@@ -70,10 +68,7 @@ class UserCard extends StatelessWidget {
           user.name,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
-        subtitle: Text(
-          user.email,
-          style: const TextStyle(fontSize: 12),
-        ),
+        subtitle: Text(user.email, style: const TextStyle(fontSize: 12)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -85,7 +80,9 @@ class UserCard extends StatelessWidget {
                   color: user.isActive ? Colors.green[100] : Colors.red[100],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: user.isActive ? Colors.green.shade300 : Colors.red.shade300,
+                    color: user.isActive
+                        ? Colors.green.shade300
+                        : Colors.red.shade300,
                     width: 1,
                   ),
                 ),
@@ -107,13 +104,18 @@ class UserCard extends StatelessWidget {
                   onTap: () {
                     _showConfirmationDialog(
                       context,
-                      message: "Are you sure you want to move this user to archive?",
+                      message:
+                          "Are you sure you want to move this user to archive?",
                       onConfirm: onDelete ?? () {},
                     );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    child: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -125,7 +127,11 @@ class UserCard extends StatelessWidget {
                   onTap: onEdit,
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    child: const Icon(Icons.edit, color: Colors.green, size: 20),
+                    child: const Icon(
+                      Icons.edit,
+                      color: Colors.green,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
@@ -138,13 +144,18 @@ class UserCard extends StatelessWidget {
                   onTap: () {
                     _showConfirmationDialog(
                       context,
-                      message: "Are you sure you want to restore this user back to the User List?",
+                      message:
+                          "Are you sure you want to restore this user back to the User List?",
                       onConfirm: onRestore ?? () {},
                     );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    child: const Icon(Icons.restore, color: Colors.green, size: 20),
+                    child: const Icon(
+                      Icons.restore,
+                      color: Colors.green,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),

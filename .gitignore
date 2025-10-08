@@ -69,3 +69,10 @@ linux/flutter/generated_plugins.cmake
 web/firebase-messaging-sw.js
 
 notes.md
+
+
+
+
+# Freezed
+*.g.dart
+*.freezed.dart

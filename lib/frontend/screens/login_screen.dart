@@ -26,14 +26,17 @@ class _LoginScreenState extends State<LoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) {
-                Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
+        Map<String, dynamic> userData =
+            result['userData'] as Map<String, dynamic>;
         String userRole = userData['role'] ?? 'User';
-        
+
         // Navigate based on role
         if (userRole == 'Admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+            MaterialPageRoute(
+              builder: (context) => const AdminMainNavigation(),
+            ),
           );
         } else {
           Navigator.pushReplacement(
