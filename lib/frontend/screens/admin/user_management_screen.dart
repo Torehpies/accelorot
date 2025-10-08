@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/components/user_card.dart';
-import 'package:flutter_application_1/models/user.dart';
-import 'package:flutter_application_1/screens/admin/add_user/archive_screen.dart';
+import 'package:flutter_application_1/frontend/components/user_card.dart';
+import 'package:flutter_application_1/frontend/models/user_model.dart';
+import 'package:flutter_application_1/frontend/screens/admin/add_user/archive_screen.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -11,20 +11,20 @@ class UserManagementScreen extends StatefulWidget {
 }
 
 class _UserManagementScreenState extends State<UserManagementScreen> {
-  List<User> users = [
-    User(
+  List<UserModel> users = [
+    UserModel(
       id: '1',
       name: 'Joy Merk',
       email: 'joymerk@gmail.com',
       isActive: true,
     ),
-    User(
+    UserModel(
       id: '2',
       name: 'Test User',
       email: 'test@gmail.com',
       isActive: false,
     ),
-    User(
+    UserModel(
       id: '3',
       name: 'John DoeDoe',
       email: 'johndoe@example.com',
@@ -32,9 +32,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     ),
   ];
 
-  List<User> archivedUsers = [];
+  List<UserModel> archivedUsers = [];
 
-  void _deleteUser(User user) {
+  void _deleteUser(UserModel user) {
     setState(() {
       users.remove(user);
       archivedUsers.add(user);
@@ -44,14 +44,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  void _editUser(User user) {
+  void _editUser(UserModel user) {
     // TODO: Navigate to edit user screen
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit user ${user.name}')),
     );
   }
 
-  void restoreFromArchive(User user) {
+  void restoreFromArchive(UserModel user) {
     setState(() {
       archivedUsers.remove(user);
       users.add(user);
