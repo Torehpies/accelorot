@@ -1,42 +1,36 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart'; // 👈 ADD THIS IMPORT
 import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
-// import '../components/history.dart'; // Optional: remove if not used
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ Only one constructor
+  const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState(); // ✅ Correct return type
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // ignore: unused_field
-  DateTimeRange? _selectedRange; // ✅ Declare private fields
-  // ignore: unused_field
+  DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
-    // ✅ Match method name passed to DateFilter
     setState(() {
-      _selectedRange = range;
       _selectedRange = range;
 
       if (range == null) {
-        _selectedFilterLabel = "Date Filter";
         _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
           _selectedFilterLabel = "Last 3 Days";
-          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
           _selectedFilterLabel = "Last 7 Days";
-          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          _selectedFilterLabel = "Last 14 Days";
           _selectedFilterLabel = "Last 14 Days";
         } else {
           _selectedFilterLabel =
@@ -100,7 +94,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 ),
                 DateFilter(
                   onChanged: _onDateChanged,
-                ), // ✅ Now matches method name
+                ),
               ],
             ),
           ),
@@ -118,9 +112,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   lastUpdated: DateTime.now(),
                 ),
                 const SizedBox(height: 16),
-                // Optional: Add History widget here if needed later
-                // if (_selectedRange != null)
-                //   History(filter: _selectedFilterLabel, range: _selectedRange!),
+                MoistureStatisticCard( // 👈 ADD THIS WIDGET
+                  currentMoisture: 45.0,
+                  hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                // Optional: History widget later
               ],
             ),
           ),
