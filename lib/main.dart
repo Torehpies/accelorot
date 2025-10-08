@@ -1,6 +1,9 @@
 // lib/main.dart
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/screens/home_screen.dart';
+import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
@@ -15,11 +18,13 @@ Future main() async {
   runApp(ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
+
     return MaterialApp(
       title: 'Accel-o-Rot',
       debugShowCheckedModeBanner: false,
@@ -49,11 +54,23 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
+        '/login': (context) => const RefactoredLoginScreen(),
+        '/home': (context) => const HomeScreen(),
       },
+      //home: const SplashScreen(),
+      home: authState.when(
+        data: (user) =>
+            user != null ? const HomeScreen() : const RefactoredLoginScreen(),
+        error: (err, _) => Scaffold(
+					body: Center(child: Text('Error: $err')),
+				),
+        loading: () => const Scaffold(
+					body: Center(child: CircularProgressIndicator()),
+				),
+      ),
       builder: (context, child) {
         if (child != null) {
           return child;

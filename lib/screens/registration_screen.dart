@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/auth_service.dart';
 import '../utils/snackbar_utils.dart';
 import 'login_screen.dart';
+import '../ui/auth/view/login_screen.dart';
 import '../screens/main_navigation.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -237,8 +238,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Email is required';
+                          }
                           if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                             return 'Enter a valid email address';
                           }
@@ -288,10 +290,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Password is required';
-                          if (value.length < 6)
+                          }
+                          if (value.length < 6) {
                             return 'Password must be at least 6 characters';
+                          }
                           return null;
                         },
                       ),
@@ -339,10 +343,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty)
+                          if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
-                          if (value != passwordController.text)
+                          }
+                          if (value != passwordController.text) {
                             return 'Passwords do not match';
+                          }
                           return null;
                         },
                       ),
@@ -435,7 +441,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const LoginScreen(),
+                                  builder: (context) => const RefactoredLoginScreen(),
                                 ),
                               );
                             },
