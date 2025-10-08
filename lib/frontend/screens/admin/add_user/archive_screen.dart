@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/components/user_card.dart';
-import 'package:flutter_application_1/models/user.dart';
+import 'package:flutter_application_1/frontend/components/user_card.dart';
+import 'package:flutter_application_1/frontend/models/user_model.dart';
 
 class ArchiveScreen extends StatefulWidget {
-  final List<User> archivedUsers;
-  final Function(User) onRestore;
+  final List<UserModel> archivedUsers;
+  final Function(UserModel) onRestore;
 
   const ArchiveScreen({
     super.key,
@@ -26,7 +26,10 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
         foregroundColor: const Color.fromARGB(255, 77, 68, 68),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 77, 68, 68)),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Color.fromARGB(255, 77, 68, 68),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -35,18 +38,11 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.archive_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  Icon(Icons.archive_outlined, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
                     'No archived users',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),

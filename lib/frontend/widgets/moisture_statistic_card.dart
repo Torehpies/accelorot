@@ -27,7 +27,9 @@ class MoistureStatisticCard extends StatelessWidget {
     // Precompute chart data once
     final now = DateTime.now();
     final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> moistureData = List.generate(dataLength, (i) {
+    final List<Map<String, Object>> moistureData = List.generate(dataLength, (
+      i,
+    ) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {
         'x': '${hour.toString().padLeft(2, '0')}:00',
@@ -36,23 +38,19 @@ class MoistureStatisticCard extends StatelessWidget {
     });
 
     // Static bounds (ideal range: 40–60 g/m³)
-    final List<Map<String, Object>> upperBound = List.filled(dataLength, {'x': '', 'y': 60.0})
-        .asMap()
-        .entries
-        .map((e) {
-      final i = e.key;
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
-    }).toList();
+    final List<Map<String, Object>> upperBound =
+        List.filled(dataLength, {'x': '', 'y': 60.0}).asMap().entries.map((e) {
+          final i = e.key;
+          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
+        }).toList();
 
-    final List<Map<String, Object>> lowerBound = List.filled(dataLength, {'x': '', 'y': 40.0})
-        .asMap()
-        .entries
-        .map((e) {
-      final i = e.key;
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
-    }).toList();
+    final List<Map<String, Object>> lowerBound =
+        List.filled(dataLength, {'x': '', 'y': 40.0}).asMap().entries.map((e) {
+          final i = e.key;
+          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
+        }).toList();
 
     return Container(
       width: double.infinity,
@@ -77,17 +75,16 @@ class MoistureStatisticCard extends StatelessWidget {
             children: [
               Text(
                 'Moisture',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '${currentMoisture.toStringAsFixed(0)}g/m³',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -223,7 +220,8 @@ class MoistureStatisticCard extends StatelessWidget {
 
   String _getQuality(double moisture) {
     if (moisture >= 40 && moisture <= 60) return 'Excellent';
-    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) return 'Good';
+    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70))
+      return 'Good';
     return 'Critical'; // 👈 Changed from "Poor" to match image
   }
 
