@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/components/user_card.dart';
-import 'package:flutter_application_1/models/user.dart';
+import 'package:flutter_application_1/frontend/components/user_card.dart';
+import 'package:flutter_application_1/frontend/models/user_model.dart';
+
 
 class ArchiveScreen extends StatefulWidget {
-  final List<User> archivedUsers;
-  final Function(User) onRestore;
+  final List<UserModel> archivedUsers;
+  final Function(UserModel) onRestore;
 
   const ArchiveScreen({
     super.key,
