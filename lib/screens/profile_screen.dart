@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,18 +20,12 @@ class ProfileScreen extends ConsumerWidget{
               label: const Text("Logout"),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               onPressed: () async {
-                // ✅ Trigger sign-out
                 await ref.read(authViewModelProvider.notifier).logout();
 
-                // ✅ Navigate back to login screen
                 if (context.mounted) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RefactoredLoginScreen(),
-                    ),
-                    (route) => false, // remove all previous routes
-                  );
+									ScaffoldMessenger.of(context).showSnackBar(
+										const SnackBar(content: Text('Logged out successfully'))
+									);
                 }
               },
             ),

@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
@@ -9,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'screens/statistics_screen.dart';
 import 'screens/main_navigation.dart';
-import 'screens/splash_screen.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");

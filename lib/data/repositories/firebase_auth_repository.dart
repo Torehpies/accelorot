@@ -6,13 +6,15 @@ class FirebaseAuthRepository {
 
 	FirebaseAuthRepository(this._authService);	
 
-	Stream<User?> get authStateChanges => _authService.authStateChanges();
+	Stream<User?> get authStateChanges => FirebaseAuth.instance.authStateChanges();
 
 	Future<User?> login(String email, String password) async {
 		final credential = await _authService.signInWithEmail(email, password);
 		return credential?.user;
 	}
 
-	Future<void> logout() => _authService.signOut();
+	Future<void> logout() async {
+		FirebaseAuth.instance.signOut();
+	}
   
 }
