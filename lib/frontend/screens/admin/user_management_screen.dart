@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/components/user_card.dart';
-import 'package:flutter_application_1/models/user.dart';
-import 'package:flutter_application_1/screens/admin/add_user/archive_screen.dart';
+import 'package:flutter_application_1/frontend/components/user_card.dart';
+import 'package:flutter_application_1/frontend/models/user_model.dart';
+import 'package:flutter_application_1/frontend/screens/admin/add_user/archive_screen.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -11,38 +11,54 @@ class UserManagementScreen extends StatefulWidget {
 }
 
 class _UserManagementScreenState extends State<UserManagementScreen> {
-  List<User> users = [
-    User(id: '1', name: 'Joy Merk', email: 'joymerk@gmail.com', isActive: true),
-    User(id: '2', name: 'Test User', email: 'test@gmail.com', isActive: false),
-    User(id: '3', name: 'John DoeDoe', email: 'johndoe@example.com', isActive: true),
+  List<UserModel> users = [
+    UserModel(
+      id: '1',
+      name: 'Joy Merk',
+      email: 'joymerk@gmail.com',
+      isActive: true,
+    ),
+    UserModel(
+      id: '2',
+      name: 'Test User',
+      email: 'test@gmail.com',
+      isActive: false,
+    ),
+    UserModel(
+      id: '3',
+      name: 'John DoeDoe',
+      email: 'johndoe@example.com',
+      isActive: true,
+    ),
   ];
 
-  List<User> archivedUsers = [];
+  List<UserModel> archivedUsers = [];
 
-  void _deleteUser(User user) {
+  void _deleteUser(UserModel user) {
     setState(() {
       users.remove(user);
       archivedUsers.add(user);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User moved to archive')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('User moved to archive')));
   }
 
-  void _editUser(User user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit user ${user.name}')),
-    );
+  void _editUser(UserModel user) {
+    // TODO: Navigate to edit user screen
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Edit user ${user.name}')));
   }
 
-  void _restoreFromArchive(User user) {
+  void restoreFromArchive(UserModel user) {
     setState(() {
       archivedUsers.remove(user);
       users.add(user);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User restored successfully')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('User restored successfully')));
   }
 
   @override
@@ -66,7 +82,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 ),
               );
             },
-            style: TextButton.styleFrom(elevation: 0),
+            style: TextButton.styleFrom(
+              elevation: 0,
+              shadowColor: Colors.transparent,
+            ),
             child: const Text(
               'Archive List',
               style: TextStyle(color: Color.fromARGB(255, 77, 68, 68)),
@@ -76,16 +95,24 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             margin: const EdgeInsets.only(right: 8),
             child: ElevatedButton.icon(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add user')),
-                );
-              
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Add user')));
               },
               icon: const Icon(Icons.add, color: Colors.white, size: 18),
-              label: const Text('Add User', style: TextStyle(color: Colors.white, fontSize: 14)),
+              label: const Text(
+                'Add User',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
                 elevation: 0,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
             ),
           ),
@@ -96,42 +123,41 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No users found',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  const Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 24),
-                  // Action buttons when empty
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ArchiveScreen(
-                                archivedUsers: archivedUsers,
-                                onRestore: _restoreFromArchive,
-                              ),
-                            ),
-                          );
-                        },
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.grey.shade200,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text("Archive", style: TextStyle(color: Colors.black)),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArchiveScreen(
+                                archivedUsers: archivedUsers,
+                                onRestore: restoreFromArchive,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Archive",
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
-                        onPressed: () {
-                          
-                        },
+                        onPressed: () {},
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text("Add User"),
                         style: ElevatedButton.styleFrom(
@@ -143,6 +169,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No users found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),

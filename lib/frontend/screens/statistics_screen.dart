@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field, deprecated_member_use
-
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
 import '../widgets/moisture_statistic_card.dart';
@@ -60,7 +58,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -93,9 +91,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(
-                  onChanged: _onDateChanged,
-                ),
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
