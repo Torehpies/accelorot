@@ -5,6 +5,31 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<Map<String, dynamic>> sendEmailVerify() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return {'success': true, 'message': 'Verification email sent'};
+      } else if (user != null && user.emailVerified) {
+        return {'success': false, 'message': 'Email is already verified'};
+      } else {
+        return {'success': false, 'message': 'No user is currently signed in'};
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An error occurred: ${e.toString()}',
+      };
+    }
+  }
+
+  Future<bool> isEmailVerified() async {
+    User? user = _auth.currentUser;
+    await user?.reload(); // Refresh user data
+    return user?.emailVerified ?? false;
+  }
+
   Future<Map<String, dynamic>> signInUser({
     required String email,
     required String password,
@@ -17,6 +42,15 @@ class AuthService {
 
       User? user = result.user;
       if (user != null) {
+        if (!user.emailVerified) {
+          await _auth.signOut();
+          return {
+            'success': false,
+            'message': 'Email not verified. Please verify your email.',
+            'needsVerification': true,
+            'uid': user.uid,
+          };
+        }
         // Get user data from Firestore
         DocumentSnapshot userDoc = await _firestore
             .collection('users')
@@ -82,6 +116,7 @@ class AuthService {
 
       User? user = result.user;
       if (user != null) {
+        await user.sendEmailVerification();
         // Save additional user data to Firestore
         await _firestore.collection('users').doc(user.uid).set({
           'uid': user.uid,
@@ -90,12 +125,14 @@ class AuthService {
           'role': role,
           'createdAt': FieldValue.serverTimestamp(),
           'isActive': true,
+          'emailVerified': false,
         });
 
         return {
           'success': true,
           'message': 'User registered successfully',
           'uid': user.uid,
+          'needsVerification': true,
         };
       } else {
         return {'success': false, 'message': 'Failed to create user account'};
@@ -121,6 +158,16 @@ class AuthService {
         'success': false,
         'message': 'An unexpected error occurred: ${e.toString()}',
       };
+    }
+  }
+  //verification email status
+  Future<void> updateEmailVerificationStatus(String uid, bool isVerified) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'emailVerified': isVerified,
+      });
+    } catch (e) {
+      print('Error updating email verification status: $e');
     }
   }
 
