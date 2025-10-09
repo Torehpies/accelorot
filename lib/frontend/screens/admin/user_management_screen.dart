@@ -39,16 +39,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       users.remove(user);
       archivedUsers.add(user);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User moved to archive')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('User moved to archive')));
   }
 
   void _editUser(UserModel user) {
     // TODO: Navigate to edit user screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit user ${user.name}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Edit user ${user.name}')));
   }
 
   void restoreFromArchive(UserModel user) {
@@ -56,9 +56,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       archivedUsers.remove(user);
       users.add(user);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User restored successfully')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('User restored successfully')));
   }
 
   @override
@@ -72,7 +72,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         actions: [
           TextButton(
             onPressed: () async {
-              // Navigate to Archive and wait for possible restore
               await Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -96,41 +95,85 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             margin: const EdgeInsets.only(right: 8),
             child: ElevatedButton.icon(
               onPressed: () {
-                // TODO: Navigate to add user screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add user')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Add user')));
               },
               icon: const Icon(Icons.add, color: Colors.white, size: 18),
-              label: const Text('Add User', style: TextStyle(color: Colors.white, fontSize: 14)),
+              label: const Text(
+                'Add User',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shadowColor: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
             ),
           ),
         ],
       ),
       body: users.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.people_outline,
                     size: 64,
                     color: Colors.grey,
                   ),
-                  SizedBox(height: 16),
-                  Text(
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.grey.shade200,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArchiveScreen(
+                                archivedUsers: archivedUsers,
+                                onRestore: restoreFromArchive,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Archive",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text("Add User"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
                     'No users found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),
