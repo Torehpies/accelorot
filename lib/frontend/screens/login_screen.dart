@@ -40,12 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
         String userRole = userData['role'] ?? 'User';
-        
+
         // Navigate based on role
         if (userRole == 'Admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+            MaterialPageRoute(
+              builder: (context) => const AdminMainNavigation(),
+            ),
           );
         } else {
           Navigator.pushReplacement(
