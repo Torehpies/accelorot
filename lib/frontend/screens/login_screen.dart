@@ -4,6 +4,7 @@ import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
+import 'email_verify.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,7 +27,18 @@ class _LoginScreenState extends State<LoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) {
-                Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
+        if (result['needsVerification'] == true) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EmailVerifyScreen(
+                email: _controller.emailController.text.trim(),
+              ),
+            ),
+          );
+          return;
+        }
+        Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
         String userRole = userData['role'] ?? 'User';
         
         // Navigate based on role
