@@ -46,7 +46,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
           await _authService.updateEmailVerificationStatus(user.uid, true);
         }
         
-        if (!mounted) return; // <--- Add this line
+        if (!mounted) return; 
         showSnackbar(context, 'Email verified successfully!');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const MainNavigation()),
@@ -114,6 +114,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         await _authService.updateEmailVerificationStatus(user.uid, true);
       }
       
+      if (!mounted) return; 
       showSnackbar(context, 'Email verified successfully!');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const MainNavigation()),
