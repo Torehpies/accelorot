@@ -167,7 +167,7 @@ class AuthService {
         'emailVerified': isVerified,
       });
     } catch (e) {
-      print('Error updating email verification status: $e');
+      //irror
     }
   }
 

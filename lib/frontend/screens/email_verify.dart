@@ -105,10 +105,12 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
-   // NEW: Manual check for verification
+
   Future<void> _checkVerificationStatus() async {
     bool isVerified = await _authService.isEmailVerified();
-    if (isVerified && mounted) {
+    if (!mounted) return; // Add this check after the first await
+    
+    if (isVerified) {
       final user = _authService.getCurrentUser();
       if (user != null) {
         await _authService.updateEmailVerificationStatus(user.uid, true);
@@ -123,6 +125,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
     }
   }
+
 
   
  @override
