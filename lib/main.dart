@@ -1,13 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
+import './frontend/screens/home_screen.dart';
 import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
-import 'screens/statistics_screen.dart';
-import 'screens/main_navigation.dart';
+import 'frontend/screens/splash_screen.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:ui' show PlatformDispatcher; // Required for global error handling
+import 'frontend/screens/statistics_screen.dart';
+import 'frontend/screens/main_navigation.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");

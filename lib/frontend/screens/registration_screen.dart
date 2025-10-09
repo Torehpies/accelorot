@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/services/auth_service.dart';
-import '../utils/snackbar_utils.dart';
-import 'login_screen.dart';
-import '../ui/auth/view/login_screen.dart';
-import '../screens/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -419,7 +418,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       GestureDetector(
                         onTap: () async {
                           try {
-                            _authService.signInWithGoogleFirebase();
+                            //_authService.signInWithGoogleFirebase();
                           } catch (e) {
                             showSnackbar(context, 'Error $e');
                           }
