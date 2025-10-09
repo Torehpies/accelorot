@@ -46,6 +46,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
           await _authService.updateEmailVerificationStatus(user.uid, true);
         }
         
+        if (!mounted) return; // <--- Add this line
         showSnackbar(context, 'Email verified successfully!');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const MainNavigation()),
@@ -53,6 +54,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       }
     });
   }
+
 
   Future<void> _resendVerifyEmail() async {
     if (!_canResendEmail) return;
@@ -64,20 +66,19 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
     });
     final result = await _authService.sendEmailVerify();
 
-    if (mounted) {
-      setState(() => _isResendingEmail = false);
-      showSnackbar(
-        context,
-        result['message'],
-        isError: !result['success'],
-        );
-      if (result['success']) {
+    if (!mounted) return; // <--- Add this line
+    setState(() => _isResendingEmail = false);
+    showSnackbar(
+      context,
+      result['message'],
+      isError: !result['success'],
+    );
+    if (result['success']) {
       _startResendCooldown();
-      }else{
-        setState(() {
-          _canResendEmail = true;
-        });
-      }
+    } else {
+      setState(() {
+        _canResendEmail = true;
+      });
     }
   }
 
@@ -122,12 +123,6 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
     }
   }
 
-  void _simulateEmailVerified() {
-    showSnackbar(context, 'Email verified!');
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const MainNavigation()),
-    );
-  }
   
  @override
   Widget build(BuildContext context) {
