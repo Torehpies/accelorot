@@ -1,42 +1,33 @@
 import 'package:flutter/material.dart';
-import '../widgets/humidity_statistic_card.dart';
-import '../components/system_card.dart';
-import 'date_filter.dart';
-import 'home_screen.dart';
-// import '../components/history.dart'; // Optional: remove if not used
+import '../widgets/oxygen_statistic_card.dart';
+import '../components/date_filter.dart';
+import '../components/history.dart';
+import 'main_navigation.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ Only one constructor
+  const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState(); // ✅ Correct return type
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // ignore: unused_field
-  DateTimeRange? _selectedRange; // ✅ Declare private fields
-  // ignore: unused_field
+  DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
-    // ✅ Match method name passed to DateFilter
     setState(() {
-      _selectedRange = range;
       _selectedRange = range;
 
       if (range == null) {
-        _selectedFilterLabel = "Date Filter";
         _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
           _selectedFilterLabel = "Last 3 Days";
-          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
           _selectedFilterLabel = "Last 7 Days";
-          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          _selectedFilterLabel = "Last 14 Days";
           _selectedFilterLabel = "Last 14 Days";
         } else {
           _selectedFilterLabel =
@@ -47,20 +38,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-      body: Column(
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: SafeArea( 
+      child: Column(
         children: [
-          // Header (Statistics + Date Filter)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 6), 
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -82,7 +67,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const MainNavigation(),
                           ),
                           (route) => false,
                         );
@@ -98,34 +83,33 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(
-                  onChanged: _onDateChanged,
-                ), // ✅ Now matches method name
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
 
-          // Scrollable content
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: [
-                const SystemCard(),
-                const SizedBox(height: 16),
-                HumidityStatisticCard(
-                  currentHumidity: 38.0,
-                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                  lastUpdated: DateTime.now(),
-                ),
-                const SizedBox(height: 16),
-                // Optional: Add History widget here if needed later
-                // if (_selectedRange != null)
-                //   History(filter: _selectedFilterLabel, range: _selectedRange!),
-              ],
-            ),
+            child: _selectedRange == null
+                ? ListView(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    children: [
+                      const SizedBox(height: 16),
+                      OxygenStatisticCard(
+                        currentOxygen: 21.0,
+                        hourlyReadings: [20.8, 21.1, 21.2, 20.9, 21.0, 21.1],
+                        lastUpdated: DateTime.now(),
+                      ),
+                    ],
+                  )
+                : HistoryPage(
+                    filter: _selectedFilterLabel,
+                    range: _selectedRange!,
+                  ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
