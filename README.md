@@ -18,6 +18,13 @@ University of Caloocan City
 ## Project Title
 Accel-O-Rot: Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting
 
+## Dev Log
+### Used packages
+##### riverpod 3.0^
+- Providers for simpler and easier connection of widgets
+##### freezed
+- Easier data modelling
+
 ## Flutter Resources 
 
 A few resources to get you started if this is your first Flutter project:
