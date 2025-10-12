@@ -8,6 +8,10 @@ class FirebaseAuthRepository {
 
 	Stream<User?> get authStateChanges => FirebaseAuth.instance.authStateChanges();
 
+	Future<void> register(String email, String password, String fullName) async {
+		await _authService.registerWithEmail(email, password, fullName);
+	}
+
 	Future<User?> login(String email, String password) async {
 		final credential = await _authService.signInWithEmail(email, password);
 		return credential?.user;
@@ -15,6 +19,10 @@ class FirebaseAuthRepository {
 
 	Future<void> logout() async {
 		FirebaseAuth.instance.signOut();
+	}
+
+	Future<void> signInWithGoogle() async {
+		await _authService.signInWithGoogle();
 	}
   
 }
