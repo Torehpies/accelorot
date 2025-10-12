@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'registration_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -11,14 +11,8 @@ class ProfileScreen extends StatelessWidget {
         title: const Text("Profile"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Navigate back to Login Screen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const RegistrationScreen(),
-              ),
-            );
+          onPressed: () async {
+            await FirebaseAuth.instance.signOut();
           },
         ),
       ),
