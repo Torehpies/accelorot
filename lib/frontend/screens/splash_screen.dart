@@ -1,6 +1,9 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'registration_screen.dart';
+import 'registration_screen.dart';
+import 'main_navigation.dart';
+import 'email_verify.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,6 +29,8 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeOutBack,
     );
     _animationController.forward();
+
+    
   }
 
   @override
