@@ -3,6 +3,17 @@ import 'home_screen.dart';
 import 'activity_logs_screen.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+void logCurrentUser() {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    print('Logged-in User: ${user.email}, UID: ${user.uid}');
+  } else {
+    print('No user is currently logged in.');
+  }
+}
+
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -25,6 +36,7 @@ class _MainNavigationState extends State<MainNavigation> {
     setState(() {
       _selectedIndex = index;
     });
+    logCurrentUser();
   }
 
   @override

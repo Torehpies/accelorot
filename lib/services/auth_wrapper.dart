@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
-import '../frontend/screens/login_screen.dart';
 import '../frontend/screens/main_navigation.dart';
 import '../frontend/screens/email_verify.dart';
 import '../services/sess_service.dart';
