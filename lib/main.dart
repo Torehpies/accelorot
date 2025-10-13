@@ -1,14 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/ui/auth_wrapper.dart';
 import './frontend/screens/home_screen.dart';
 import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
-import 'frontend/screens/splash_screen.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:ui' show PlatformDispatcher; // Required for global error handling
 import 'frontend/screens/statistics_screen.dart';
 import 'frontend/screens/main_navigation.dart';
 
@@ -24,7 +21,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
 
     return MaterialApp(
       title: 'Accel-o-Rot',
@@ -62,24 +58,7 @@ class MyApp extends ConsumerWidget {
         '/home': (context) => const HomeScreen(),
       },
       //home: const SplashScreen(),
-      home: authState.when(
-        data: (user) =>
-            user != null ? const MainNavigation() : const RefactoredLoginScreen(),
-        error: (err, _) => Scaffold(
-					body: Center(child: Text('Error: $err')),
-				),
-        loading: () => const Scaffold(
-					body: Center(child: CircularProgressIndicator()),
-				),
-      ),
-      builder: (context, child) {
-        if (child != null) {
-          return child;
-        }
-        return const Scaffold(
-          body: Center(child: Text('An unexpected error occurred.')),
-        );
-      },
+      home: const AuthWrapper(),
     );
   }
 }

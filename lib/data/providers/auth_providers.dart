@@ -12,11 +12,11 @@ final firebaseAuthRepositoryProvider = Provider<FirebaseAuthRepository>((ref) {
   return FirebaseAuthRepository(service);
 });
 
-final authStateProvider = StreamProvider<User?>((ref) {
-  final stream = FirebaseAuth.instance.authStateChanges();
-  stream.listen((user) {
+final authStateProvider = StreamProvider<User?>(isAutoDispose: false, (ref) {
+  print('authStateChangesProvider initialized');
+  final repository = ref.watch(firebaseAuthRepositoryProvider);
+  return repository.idTokenChanges.map((user) {
+    print('[AuthStateProvider] user: ${user?.uid}');
+    return user;
   });
-  return stream;
-  //final repo = ref.watch(firebaseAuthRepositoryProvider);
-  //return repo.authStateChanges;
 });

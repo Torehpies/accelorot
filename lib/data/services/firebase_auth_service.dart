@@ -21,9 +21,12 @@ class FirebaseAuthService {
     }
   }
 
-  Stream<User?> authStateChanges() {
-    return _auth.authStateChanges();
-  }
+//  Stream<User?> authStateChanges() {
+//    return _auth.authStateChanges();
+//  }
+	Stream<User?> get authStateChanges => _auth.authStateChanges();
+	Stream<User?> get idTokenChanges => _auth.idTokenChanges();
+	Stream<User?> get userChanges => _auth.userChanges();
 
   Future<User?> registerWithEmail(
     String email,

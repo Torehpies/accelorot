@@ -6,7 +6,9 @@ class FirebaseAuthRepository {
 
 	FirebaseAuthRepository(this._authService);	
 
-	Stream<User?> get authStateChanges => FirebaseAuth.instance.authStateChanges();
+	Stream<User?> get authStateChanges =>  _authService.authStateChanges;
+	Stream<User?> get idTokenChanges =>  _authService.idTokenChanges;
+	Stream<User?> get userChanges =>  _authService.userChanges;
 
 	Future<void> register(String email, String password, String fullName) async {
 		await _authService.registerWithEmail(email, password, fullName);

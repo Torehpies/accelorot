@@ -1,79 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
-import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
-import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 
-class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+class RefactoredRegistrationScreen extends ConsumerStatefulWidget {
+  const RefactoredRegistrationScreen({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  ConsumerState<RefactoredRegistrationScreen> createState() =>
+      _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState
+    extends ConsumerState<RefactoredRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  String? selectedRole = 'User';
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isLoading = false;
 
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
+  void _onCreateAccountPressed() async {
+    if (!_formKey.currentState!.validate()) return;
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    // final confirmPassword = _confirmPasswordController.text.trim();
+    final fullName = '$firstName $lastName';
 
-  Future<void> _registerUser() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      try {
-        final fullName =
-            '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
-
-        final result = await _authService.registerUser(
-          email: emailController.text.trim(),
-          password: passwordController.text,
-          fullName: fullName,
-          role: selectedRole ?? 'User',
+    try {
+      await ref
+          .read(authViewModelProvider.notifier)
+          .register(email, password, fullName);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Register successful!')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
-        if (mounted) {
-          setState(() => _isLoading = false);
-
-          if (result['success']) {
-            showSnackbar(context, 'Successfully registered as $selectedRole!');
-
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MainNavigation()),
-            );
-          } else {
-            showSnackbar(context, result['message'], isError: true);
-          }
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          showSnackbar(context, 'An unexpected error occurred', isError: true);
-        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final registerState = ref.watch(authViewModelProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -129,12 +108,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           color: theme.primaryColor,
                         ),
                       ),
-                      const SizedBox(height: 8),
                       Text(
                         'Join us to get started',
                         style: TextStyle(fontSize: 16, color: theme.hintColor),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 10),
 
                       // First Name and Last Name Row
                       Row(
@@ -142,7 +120,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           // First Name Field
                           Expanded(
                             child: TextFormField(
-                              controller: firstNameController,
+                              controller: _firstNameController,
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'First Name',
@@ -176,7 +154,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           // Last Name Field
                           Expanded(
                             child: TextFormField(
-                              controller: lastNameController,
+                              controller: _lastNameController,
                               textInputAction: TextInputAction.next,
                               decoration: InputDecoration(
                                 labelText: 'Last Name',
@@ -212,7 +190,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       // Email Field
                       TextFormField(
-                        controller: emailController,
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
@@ -251,7 +229,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       // Password Field
                       TextFormField(
-                        controller: passwordController,
+                        controller: _passwordController,
                         obscureText: _obscurePassword,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
@@ -293,7 +271,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }
-                          if (value.length < 6) {
+                          if (value.length < 8) {
                             return 'Password must be at least 6 characters';
                           }
                           return null;
@@ -303,7 +281,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       // Confirm Password Field
                       TextFormField(
-                        controller: confirmPasswordController,
+                        controller: _confirmPasswordController,
                         obscureText: _obscureConfirmPassword,
                         textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
@@ -346,7 +324,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           if (value == null || value.isEmpty) {
                             return 'Please confirm your password';
                           }
-                          if (value != passwordController.text) {
+                          if (value != _passwordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -355,39 +333,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(height: 16),
 
                       // Register Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _registerUser,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      registerState.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : ElevatedButton(
+                              onPressed: _onCreateAccountPressed,
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 48),
+                              ),
+                              child: const Text('Create Account'),
                             ),
-                            elevation: 4,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
-                              : const Text(
-                                  'Create Account',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
                       const SizedBox(height: 24),
                       Row(
                         children: [
@@ -418,9 +372,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       GestureDetector(
                         onTap: () async {
-                          try {
-															
-                          } catch (e) {
+                          try {} catch (e) {
                             showSnackbar(context, 'Error $e');
                           }
                         },
@@ -441,7 +393,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RefactoredLoginScreen(),
+                                  builder: (context) =>
+                                      const RefactoredLoginScreen(),
                                 ),
                               );
                             },

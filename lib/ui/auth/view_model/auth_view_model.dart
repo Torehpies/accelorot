@@ -13,6 +13,18 @@ class AuthViewModel extends _$AuthViewModel {
   @override
   FutureOr<void> build() => null;
 
+	Future<void> register(String email, String password, String fullName) async {
+		state = const AsyncValue.loading();
+
+		try {
+			await _repository.register(email, password, fullName);
+      state = const AsyncValue.data(null);
+		} catch(e, st) {
+      state = AsyncValue.error(e, st);
+			rethrow;	
+		}
+	}
+
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
 
@@ -24,6 +36,18 @@ class AuthViewModel extends _$AuthViewModel {
       rethrow;
     }
   }
+
+	Future<void> signInWithGoogle() async {
+		state = const AsyncValue.loading();
+
+		try {
+			await _repository.signInWithGoogle();
+			state = const AsyncValue.data(null);
+		} catch (e, st) {
+			state = AsyncValue.error(e, st);
+			rethrow;
+		}
+	}
 
   Future<void> logout() async {
     state = const AsyncValue.loading();
