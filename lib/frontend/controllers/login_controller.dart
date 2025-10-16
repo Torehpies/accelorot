@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 
 class LoginController {
   final AuthService _authService = AuthService();
@@ -16,14 +16,14 @@ class LoginController {
   // Callback functions
   Function(bool)? onLoadingChanged;
   Function(bool)? onPasswordVisibilityChanged;
-  Function()? onLoginSuccess;
+  Function(Map<String, dynamic>)? onLoginSuccess;
   Function(String)? onLoginError;
 
   // Initialize callbacks
   void setCallbacks({
     Function(bool)? onLoadingChanged,
     Function(bool)? onPasswordVisibilityChanged,
-    Function()? onLoginSuccess,
+    Function(Map<String, dynamic>)? onLoginSuccess,
     Function(String)? onLoginError,
   }) {
     this.onLoadingChanged = onLoadingChanged;
@@ -67,7 +67,7 @@ class LoginController {
         setLoading(false);
 
         if (result['success']) {
-          onLoginSuccess?.call();
+          onLoginSuccess?.call(result);
         } else {
           onLoginError?.call(result['message']);
         }

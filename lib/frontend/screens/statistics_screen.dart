@@ -1,42 +1,37 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
 import '../widgets/humidity_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
 import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'home_screen.dart';
-// import '../components/history.dart'; // Optional: remove if not used
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key}); // ✅ Only one constructor
+  const StatisticsScreen({super.key});
 
   @override
-  State<StatisticsScreen> createState() => _StatisticsScreenState(); // ✅ Correct return type
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  // ignore: unused_field
-  DateTimeRange? _selectedRange; // ✅ Declare private fields
-  // ignore: unused_field
+  DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
 
   void _onDateChanged(DateTimeRange? range) {
-    // ✅ Match method name passed to DateFilter
     setState(() {
-      _selectedRange = range;
       _selectedRange = range;
 
       if (range == null) {
-        _selectedFilterLabel = "Date Filter";
         _selectedFilterLabel = "Date Filter";
       } else {
         final daysDiff = range.end.difference(range.start).inDays;
         if (daysDiff == 3) {
           _selectedFilterLabel = "Last 3 Days";
-          _selectedFilterLabel = "Last 3 Days";
         } else if (daysDiff == 7) {
           _selectedFilterLabel = "Last 7 Days";
-          _selectedFilterLabel = "Last 7 Days";
         } else if (daysDiff == 14) {
-          _selectedFilterLabel = "Last 14 Days";
           _selectedFilterLabel = "Last 14 Days";
         } else {
           _selectedFilterLabel =
@@ -58,7 +53,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: Column(
         children: [
-          // Header (Statistics + Date Filter)
+          // 🔹 Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
@@ -98,29 +93,42 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ),
                   ],
                 ),
-                DateFilter(
-                  onChanged: _onDateChanged,
-                ), // ✅ Now matches method name
+                DateFilter(onChanged: _onDateChanged),
               ],
             ),
           ),
 
-          // Scrollable content
+          // 🔹 FIXED: SystemCard stays at top (non-scrolling)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: SystemCard(),
+          ),
+          const SizedBox(height: 16),
+
+          // 🔹 SCROLLABLE: Sensor cards (Temperature before Moisture)
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               children: [
-                const SystemCard(),
-                const SizedBox(height: 16),
                 HumidityStatisticCard(
                   currentHumidity: 38.0,
                   hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
                   lastUpdated: DateTime.now(),
                 ),
                 const SizedBox(height: 16),
-                // Optional: Add History widget here if needed later
-                // if (_selectedRange != null)
-                //   History(filter: _selectedFilterLabel, range: _selectedRange!),
+                // 👇 SWAPPED: Temperature comes BEFORE Moisture
+                TemperatureStatisticCard(
+                  currentTemperature: 22.5,
+                  hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                MoistureStatisticCard(
+                  currentMoisture: 45.0,
+                  hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
