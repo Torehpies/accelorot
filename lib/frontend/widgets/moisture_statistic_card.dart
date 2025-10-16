@@ -1,14 +1,16 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class HumidityStatisticCard extends StatelessWidget {
-  final double currentHumidity;
+class MoistureStatisticCard extends StatelessWidget {
+  final double currentMoisture; // now in g/m³
   final List<double> hourlyReadings;
   final DateTime? lastUpdated;
 
-  const HumidityStatisticCard({
+  const MoistureStatisticCard({
     super.key,
-    required this.currentHumidity,
+    required this.currentMoisture,
     required this.hourlyReadings,
     this.lastUpdated,
   });
@@ -19,16 +21,15 @@ class HumidityStatisticCard extends StatelessWidget {
       return _buildEmptyCard(context);
     }
 
-    final quality = _getQuality(currentHumidity);
+    final quality = _getQuality(currentMoisture);
     final color = _getColorForQuality(quality);
 
     // Precompute chart data once
     final now = DateTime.now();
     final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> humidityData = List.generate(dataLength, (
+    final List<Map<String, Object>> moistureData = List.generate(dataLength, (
       i,
     ) {
-      // i=0 → oldest (e.g., 6h ago), i=last → most recent
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {
         'x': '${hour.toString().padLeft(2, '0')}:00',
@@ -36,12 +37,12 @@ class HumidityStatisticCard extends StatelessWidget {
       };
     });
 
-    // Static bounds (same length as data)
+    // Static bounds (ideal range: 40–60 g/m³)
     final List<Map<String, Object>> upperBound =
-        List.filled(dataLength, {'x': '', 'y': 65.0}).asMap().entries.map((e) {
+        List.filled(dataLength, {'x': '', 'y': 60.0}).asMap().entries.map((e) {
           final i = e.key;
           final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 65.0};
+          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
         }).toList();
 
     final List<Map<String, Object>> lowerBound =
@@ -56,10 +57,10 @@ class HumidityStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -73,13 +74,13 @@ class HumidityStatisticCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Humidity',
+                'Moisture',
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                '${currentHumidity.toStringAsFixed(0)}%',
+                '${currentMoisture.toStringAsFixed(0)}g/m³',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color,
@@ -117,12 +118,12 @@ class HumidityStatisticCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
-            'Ideal Range: 40–65%',
+            'Ideal Range: 40–60g/m³',
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
-            value: _calculateProgress(currentHumidity),
+            value: _calculateProgress(currentMoisture),
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
@@ -148,8 +149,8 @@ class HumidityStatisticCard extends StatelessWidget {
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
-                minimum: 25,
-                maximum: 105,
+                minimum: 0,
+                maximum: 80, // ← Changed from 100 to 80 to match image
                 interval: 20,
                 majorGridLines: const MajorGridLines(
                   width: 0.5,
@@ -161,7 +162,7 @@ class HumidityStatisticCard extends StatelessWidget {
               margin: EdgeInsets.zero,
               series: <CartesianSeries>[
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: humidityData,
+                  dataSource: moistureData,
                   xValueMapper: (data, _) => data['x'] as String,
                   yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.blue,
@@ -198,10 +199,10 @@ class HumidityStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -210,17 +211,19 @@ class HumidityStatisticCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       child: Center(
         child: Text(
-          'No humidity data',
+          'No moisture data',
           style: TextStyle(color: Colors.grey[600]),
         ),
       ),
     );
   }
 
-  String _getQuality(double humidity) {
-    if (humidity >= 40 && humidity <= 65) return 'Excellent';
-    if ((humidity >= 30 && humidity < 40) || (humidity > 65 && humidity <= 75)) return 'Good';
-    return 'Poor';
+  String _getQuality(double moisture) {
+    if (moisture >= 40 && moisture <= 60) return 'Excellent';
+    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
+      return 'Good';
+    }
+    return 'Critical'; // 👈 Changed from "Poor" to match image
   }
 
   Color _getColorForQuality(String quality) {
@@ -230,12 +233,13 @@ class HumidityStatisticCard extends StatelessWidget {
       case 'Good':
         return Colors.orange;
       default:
-        return Colors.red;
+        return Colors.red; // Critical → red
     }
   }
 
-  double _calculateProgress(double humidity) {
-    return (humidity.clamp(0.0, 100.0) / 100.0);
+  double _calculateProgress(double moisture) {
+    // Scale progress from 0 to 80 (max on chart)
+    return (moisture.clamp(0.0, 80.0) / 80.0);
   }
 
   String _formatDate(DateTime date) {
