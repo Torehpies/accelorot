@@ -50,6 +50,23 @@ class _RegistrationScreenState
     }
   }
 
+  void _onGoogleSignInPressed() async {
+    try {
+      await ref.read(authViewModelProvider.notifier).signInWithGoogle();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Google Signed In')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final registerState = ref.watch(authViewModelProvider);
@@ -372,7 +389,9 @@ class _RegistrationScreenState
 
                       GestureDetector(
                         onTap: () async {
-                          try {} catch (e) {
+                          try {
+														_onGoogleSignInPressed();
+													} catch (e) {
                             showSnackbar(context, 'Error $e');
                           }
                         },
