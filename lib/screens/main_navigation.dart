@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'activity_logs_screen.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
 
