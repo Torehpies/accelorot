@@ -23,7 +23,7 @@ class ActivityListItem extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         leading: CircleAvatar(
-          backgroundColor: iconColor!.withOpacity(0.1),
+          backgroundColor: iconColor!.withAlpha((0.1 * 255).toInt()),
           child: Icon(icon, color: iconColor),
         ),
         title: Text(
