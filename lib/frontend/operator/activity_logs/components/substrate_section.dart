@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../widgets/slide_page_route.dart';
+import '../view_screens/substrates_screen.dart';
+import '../widgets/substrate_box.dart';
 
 class SubstrateSection extends StatelessWidget {
   const SubstrateSection({super.key});
@@ -35,7 +38,9 @@ class SubstrateSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: View all substrate logs
+                      Navigator.of(
+                        context,
+                      ).push(SlidePageRoute(page: const SubstratesScreen()));
                     },
                     child: const Text(
                       'View All >',
@@ -53,12 +58,24 @@ class SubstrateSection extends StatelessWidget {
               // Boxes
               Expanded(
                 child: Row(
-                  children: [
-                    _buildBox(context, Icons.eco, 'Green'),
-                    const SizedBox(width: 8),
-                    _buildBox(context, Icons.energy_savings_leaf, 'Brown'),
-                    const SizedBox(width: 8),
-                    _buildBox(context, Icons.recycling, 'Compost'),
+                  children: const [
+                    SubstrateBox(
+                      icon: Icons.eco,
+                      label: 'Green',
+                      filterValue: 'Greens',
+                    ),
+                    SizedBox(width: 8),
+                    SubstrateBox(
+                      icon: Icons.energy_savings_leaf,
+                      label: 'Brown',
+                      filterValue: 'Browns',
+                    ),
+                    SizedBox(width: 8),
+                    SubstrateBox(
+                      icon: Icons.recycling,
+                      label: 'Compost',
+                      filterValue: 'Compost',
+                    ),
                   ],
                 ),
               ),
@@ -88,12 +105,14 @@ class SubstrateSection extends StatelessWidget {
             children: [
               Icon(icon, size: 26, color: Colors.grey),
               const SizedBox(height: 8),
-              Text(label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  )),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
             ],
           ),
         ),

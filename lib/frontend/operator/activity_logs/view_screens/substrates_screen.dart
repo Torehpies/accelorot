@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 class SubstratesScreen extends StatefulWidget {
-  const SubstratesScreen({super.key});
+  final String initialFilter;
+
+  const SubstratesScreen({
+    super.key,
+    this.initialFilter = 'All', // default
+  });
 
   @override
   State<SubstratesScreen> createState() => _SubstratesScreenState();
 }
 
 class _SubstratesScreenState extends State<SubstratesScreen> {
-  String selectedFilter = 'All';
+  late String selectedFilter;
   final filters = const ['All', 'Greens', 'Browns', 'Compost'];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedFilter = widget.initialFilter;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +37,7 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // 🔹 Filter chips
             Wrap(
               spacing: 8,
               children: filters.map((filter) {
@@ -43,7 +55,10 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
                 );
               }).toList(),
             ),
+
             const SizedBox(height: 16),
+
+            // 🔹 Scrollable list
             Expanded(
               child: ListView.builder(
                 itemCount: 6,
@@ -54,7 +69,11 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
                     child: ListTile(
                       leading: const Icon(Icons.grass, color: Colors.teal),
                       title: Text("Substrate #${index + 1}"),
-                      subtitle: const Text("Substrate details or timestamp"),
+                      subtitle: Text(
+                        selectedFilter == 'All'
+                            ? "Mixed Substrate"
+                            : "$selectedFilter Type",
+                      ),
                     ),
                   );
                 },
