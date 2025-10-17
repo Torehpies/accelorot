@@ -131,7 +131,7 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
                 const SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const RefactoredRegistrationScreen(),

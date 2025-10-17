@@ -1,19 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/auth_wrapper.dart';
-import './frontend/screens/home_screen.dart';
-import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_application_1/routing/app_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
 import 'firebase_options.dart';
-import 'frontend/screens/statistics_screen.dart';
-import 'frontend/screens/main_navigation.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future main() async {
-  await dotenv.load(fileName: ".env");
+  // await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(ProviderScope(child: MyApp()));
+  runApp(
+    ProviderScope(
+      observers: [
+        //		Observers(),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends ConsumerWidget {
@@ -21,10 +26,11 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-    return MaterialApp(
+    final GoRouter router = ref.watch(routerProvider);
+    return MaterialApp.router(
       title: 'Accel-o-Rot',
       debugShowCheckedModeBanner: false,
+      routerConfig: router,
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
@@ -51,14 +57,17 @@ class MyApp extends ConsumerWidget {
           ),
         ),
       ),
-      routes: {
-        '/main': (context) => const MainNavigation(),
-        '/statistics': (context) => const StatisticsScreen(),
-        '/login': (context) => const RefactoredLoginScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
-      //home: const SplashScreen(),
-      home: const AuthWrapper(),
     );
+    //return MaterialApp(
+    //  title: 'Accel-o-Rot',
+    //  routes: {
+    //    '/main': (context) => const MainNavigation(),
+    //    '/statistics': (context) => const StatisticsScreen(),
+    //    '/login': (context) => const RefactoredLoginScreen(),
+    //    '/home': (context) => const HomeScreen(),
+    //  },
+    //  //home: const SplashScreen(),
+    //  home: const AuthWrapper(),
+    //);
   }
 }

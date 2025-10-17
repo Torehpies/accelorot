@@ -52,7 +52,7 @@ class _RegistrationScreenState
 
   void _onGoogleSignInPressed() async {
     try {
-      await ref.read(authViewModelProvider.notifier).signInWithGoogle();
+      // await ref.read(authViewModelProvider.notifier).signInWithGoogle();
       if (mounted) {
         ScaffoldMessenger.of(
           context,

@@ -1,4 +1,3 @@
-import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -6,56 +5,59 @@ part 'auth_view_model.g.dart';
 
 @riverpod
 class AuthViewModel extends _$AuthViewModel {
-  late final FirebaseAuthRepository _repository = ref.read(
-    firebaseAuthRepositoryProvider,
-  );
-
   @override
   FutureOr<void> build() => null;
-
-	Future<void> register(String email, String password, String fullName) async {
-		state = const AsyncValue.loading();
-
-		try {
-			await _repository.register(email, password, fullName);
-      state = const AsyncValue.data(null);
-		} catch(e, st) {
-      state = AsyncValue.error(e, st);
-			rethrow;	
-		}
-	}
 
   Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
 
+    final authRepository = ref.watch(authRepositoryProvider);
     try {
-      await _repository.login(email, password);
+      await authRepository.login(email: email, password: password);
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
+      state = AsyncError(e, st);
     }
   }
-
-	Future<void> signInWithGoogle() async {
-		state = const AsyncValue.loading();
-
-		try {
-			await _repository.signInWithGoogle();
-			state = const AsyncValue.data(null);
-		} catch (e, st) {
-			state = AsyncValue.error(e, st);
-			rethrow;
-		}
-	}
 
   Future<void> logout() async {
     state = const AsyncValue.loading();
 
-    final result = await AsyncValue.guard(() async {
-      await _repository.logout();
-    });
-
-    state = result;
+    final authRepository = ref.watch(authRepositoryProvider);
+    try {
+      await authRepository.logout();
+      state = const AsyncValue.data(null);
+    } on Exception catch (e, st) {
+      state = AsyncError(e, st);
+    }
   }
+
+  Future<void> register(String email, String password, String fullName) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final authRepository = ref.watch(authRepositoryProvider);
+      await authRepository.register(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
+      state = const AsyncValue.data(null);
+    } on Exception catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+//  Future<void> signInWithGoogle() async {
+//    state = const AsyncValue.loading();
+//
+//    try {
+//      final authRepository = ref.watch(authRepositoryProvider);
+//      await authRepository.signInWithGoogle();
+//      state = const AsyncValue.data(null);
+//    } catch (e, st) {
+//      state = AsyncValue.error(e, st);
+//      rethrow;
+//    }
+//  }
 }
