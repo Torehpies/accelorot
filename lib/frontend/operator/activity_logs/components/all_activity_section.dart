@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../view_screens/all_activity_screen.dart';
+import '../widgets/slide_page_route.dart';
 
 class AllActivitySection extends StatelessWidget {
   const AllActivitySection({super.key});
@@ -8,16 +9,17 @@ class AllActivitySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        Navigator.of(
           context,
-          MaterialPageRoute(builder: (context) => const AllActivityScreen()),
-        );
+        ).push(SlidePageRoute(page: const AllActivityScreen()));
       },
       child: SizedBox(
         width: 400,
         height: 80,
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 4,
           color: Colors.white,
           child: Padding(

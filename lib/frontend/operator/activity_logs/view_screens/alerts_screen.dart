@@ -9,12 +9,16 @@ class AlertsScreen extends StatefulWidget {
 
 class _AlertsScreenState extends State<AlertsScreen> {
   String selectedFilter = 'All';
-  final filters = const ['All', 'Temperature', 'Moisture', 'Humidity'];
+  final filters = const ['All', 'Temp', 'Moisture', 'Humidity'];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text("Alerts Logs"),
         backgroundColor: Colors.teal,
       ),
@@ -22,7 +26,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🔹 Filter chips
             Wrap(
               spacing: 8,
               children: filters.map((filter) {
@@ -40,10 +43,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 16),
-
-            // 🔹 Scrollable list
             Expanded(
               child: ListView.builder(
                 itemCount: 5,
@@ -52,22 +52,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     elevation: 3,
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      leading: Icon(
+                      leading: const Icon(
                         Icons.warning_amber_rounded,
-                        color: selectedFilter == 'Temperature'
-                            ? Colors.redAccent
-                            : selectedFilter == 'Moisture'
-                                ? Colors.blue
-                                : selectedFilter == 'Humidity'
-                                    ? Colors.orange
-                                    : Colors.teal,
+                        color: Colors.teal,
                       ),
                       title: Text("Alert #${index + 1}"),
-                      subtitle: Text(
-                        selectedFilter == 'All'
-                            ? "General Alert"
-                            : "$selectedFilter Issue",
-                      ),
+                      subtitle: const Text("Alert details or timestamp"),
                     ),
                   );
                 },
