@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../widgets/slide_page_route.dart';
+import '../view_screens/alerts_screen.dart';
+import '../widgets/alert_box.dart';
 
 class AlertsSection extends StatelessWidget {
   const AlertsSection({super.key});
@@ -36,7 +39,9 @@ class AlertsSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: View all alerts
+                      Navigator.of(context).push(
+                        SlidePageRoute(page: const AlertsScreen()),
+                      );
                     },
                     child: const Text(
                       'View All >',
@@ -54,47 +59,27 @@ class AlertsSection extends StatelessWidget {
               // Boxes
               Expanded(
                 child: Row(
-                  children: [
-                    _buildBox(context, Icons.thermostat, 'Temperature'),
-                    const SizedBox(width: 8),
-                    _buildBox(context, Icons.water_drop, 'Moisture'),
-                    const SizedBox(width: 8),
-                    _buildBox(context, Icons.air, 'Humidity'),
+                  children: const [
+                    AlertBox(
+                      icon: Icons.thermostat,
+                      label: 'Temp',
+                      filterValue: 'Temp',
+                    ),
+                    SizedBox(width: 8),
+                    AlertBox(
+                      icon: Icons.water_drop,
+                      label: 'Moisture',
+                      filterValue: 'Moisture',
+                    ),
+                    SizedBox(width: 8),
+                    AlertBox(
+                      icon: Icons.air,
+                      label: 'Humidity',
+                      filterValue: 'Humidity',
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBox(BuildContext context, IconData icon, String label) {
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () {
-          // TODO: Add box function
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 26, color: Colors.grey),
-              const SizedBox(height: 8),
-              Text(label,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                  )),
             ],
           ),
         ),

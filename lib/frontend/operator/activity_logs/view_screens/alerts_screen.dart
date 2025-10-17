@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AlertsScreen extends StatefulWidget {
-  const AlertsScreen({super.key});
+  final String initialFilter;
+
+  const AlertsScreen({
+    super.key,
+    this.initialFilter = 'All', // default
+  });
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
 }
 
 class _AlertsScreenState extends State<AlertsScreen> {
-  String selectedFilter = 'All';
+  late String selectedFilter;
   final filters = const ['All', 'Temp', 'Moisture', 'Humidity'];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedFilter = widget.initialFilter;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +37,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            // 🔹 Filter chips
             Wrap(
               spacing: 8,
               children: filters.map((filter) {
@@ -43,10 +55,13 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 );
               }).toList(),
             ),
+
             const SizedBox(height: 16),
+
+            // 🔹 Scrollable list
             Expanded(
               child: ListView.builder(
-                itemCount: 5,
+                itemCount: 6,
                 itemBuilder: (context, index) {
                   return Card(
                     elevation: 3,
@@ -57,7 +72,11 @@ class _AlertsScreenState extends State<AlertsScreen> {
                         color: Colors.teal,
                       ),
                       title: Text("Alert #${index + 1}"),
-                      subtitle: const Text("Alert details or timestamp"),
+                      subtitle: Text(
+                        selectedFilter == 'All'
+                            ? "General Alert"
+                            : "$selectedFilter Alert",
+                      ),
                     ),
                   );
                 },
