@@ -1,30 +1,86 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/data/services/firebase_auth_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../models/app_user_model.dart';
+
+part 'firebase_auth_repository.g.dart';
+
+@Riverpod(keepAlive: true)
+FirebaseAuth firebaseAuth(Ref ref) {
+  return FirebaseAuth.instance;
+}
+
+@Riverpod(keepAlive: true)
+FirebaseAuthRepository authRepository(Ref ref) {
+  final auth = ref.watch(firebaseAuthProvider);
+  return FirebaseAuthRepository(auth);
+}
+
+@Riverpod(keepAlive: true)
+Stream<AppUser?> authStateChange(Ref ref) {
+  final auth = ref.watch(authRepositoryProvider);
+  return auth.authStateChanges();
+}
 
 class FirebaseAuthRepository {
-	final FirebaseAuthService _authService;
+  FirebaseAuthRepository(this._firebaseAuth);
 
-	FirebaseAuthRepository(this._authService);	
+  final FirebaseAuth _firebaseAuth;
 
-	Stream<User?> get authStateChanges =>  _authService.authStateChanges;
-	Stream<User?> get idTokenChanges =>  _authService.idTokenChanges;
-	Stream<User?> get userChanges =>  _authService.userChanges;
+  Stream<AppUser?> authStateChanges() {
+    return _firebaseAuth.authStateChanges().map(_convertUser);
+  }
 
-	Future<void> register(String email, String password, String fullName) async {
-		await _authService.registerWithEmail(email, password, fullName);
-	}
+  Stream<AppUser?> idTokenChanges() {
+    return _firebaseAuth.idTokenChanges().map(_convertUser);
+  }
 
-	Future<User?> login(String email, String password) async {
-		final credential = await _authService.signInWithEmail(email, password);
-		return credential?.user;
-	}
+  Stream<AppUser?> userChanges() {
+    return _firebaseAuth.userChanges().map(_convertUser);
+  }
 
-	Future<void> logout() async {
-		FirebaseAuth.instance.signOut();
-	}
+  AppUser? get currentUser => _convertUser(_firebaseAuth.currentUser);
 
-	Future<void> signInWithGoogle() async {
-		await _authService.signInWithGoogle();
-	}
-  
+  AppUser? _convertUser(User? user) =>
+      user == null ? null : AppUser.fromUser(user);
+
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) {
+    return _firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) {
+    return _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  Future<void> logout() async {
+    return _firebaseAuth.signOut();
+  }
+
+  //	Future<void> register(String email, String password, String fullName) async {
+  //		await _firebaseAuth.registerWithEmail(email, password, fullName);
+  //	}
+  //
+  //	Future<User?> login(String email, String password) async {
+  //		final credential = await _firebaseAuth.signInWithEmail(email, password);
+  //		return credential?.user;
+  //	}
+  //
+  //
+  //	Future<void> signInWithGoogle() async {
+  //		await _firebaseAuth.signInWithGoogle();
+  //	}
 }
