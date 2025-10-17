@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/slide_page_route.dart';
 import 'substrates_screen.dart';
 import 'alerts_screen.dart';
 
@@ -11,21 +12,18 @@ class AllActivityScreen extends StatefulWidget {
 
 class _AllActivityScreenState extends State<AllActivityScreen> {
   String selectedFilter = 'All';
-
   final filters = const ['All', 'Substrate', 'Alerts'];
 
   void onFilterSelected(String filter) {
     setState(() => selectedFilter = filter);
 
     if (filter == 'Substrate') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SubstratesScreen()),
+      Navigator.of(context).push(
+        SlidePageRoute(page: const SubstratesScreen()),
       );
     } else if (filter == 'Alerts') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const AlertsScreen()),
+      Navigator.of(context).push(
+        SlidePageRoute(page: const AlertsScreen()),
       );
     }
   }
@@ -34,6 +32,10 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text("All Activity Logs"),
         backgroundColor: Colors.teal,
       ),
@@ -41,7 +43,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Filter chips
             Wrap(
               spacing: 8,
               children: filters.map((filter) {
@@ -58,8 +59,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-
-            // Placeholder for activity list
             Expanded(
               child: ListView.builder(
                 itemCount: 8,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
 
@@ -16,7 +16,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
-    ActivityLogsScreen(),
+    ActivityLogsNavigator(),
     StatisticsScreen(),
     ProfileScreen(),
   ];

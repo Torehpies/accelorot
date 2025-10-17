@@ -15,6 +15,10 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: const Text("Substrate Logs"),
         backgroundColor: Colors.teal,
       ),
@@ -22,7 +26,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 🔹 Filter chips (top section)
             Wrap(
               spacing: 8,
               children: filters.map((filter) {
@@ -40,10 +43,7 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
                 );
               }).toList(),
             ),
-
             const SizedBox(height: 16),
-
-            // 🔹 Scrollable list (filtered items)
             Expanded(
               child: ListView.builder(
                 itemCount: 6,
@@ -52,20 +52,9 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
                     elevation: 3,
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      leading: Icon(
-                        Icons.grass,
-                        color: selectedFilter == 'Browns'
-                            ? Colors.brown
-                            : selectedFilter == 'Compost'
-                                ? Colors.green
-                                : Colors.teal,
-                      ),
+                      leading: const Icon(Icons.grass, color: Colors.teal),
                       title: Text("Substrate #${index + 1}"),
-                      subtitle: Text(
-                        selectedFilter == 'All'
-                            ? "Mixed Substrate"
-                            : "$selectedFilter Type",
-                      ),
+                      subtitle: const Text("Substrate details or timestamp"),
                     ),
                   );
                 },
