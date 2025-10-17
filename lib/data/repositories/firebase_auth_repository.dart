@@ -46,10 +46,7 @@ class FirebaseAuthRepository {
   AppUser? _convertUser(User? user) =>
       user == null ? null : AppUser.fromUser(user);
 
-  Future<void> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) {
+  Future<void> login({required String email, required String password}) {
     return _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -59,12 +56,26 @@ class FirebaseAuthRepository {
   Future<void> createUserWithEmailAndPassword({
     required String email,
     required String password,
-  }) {
-    return _firebaseAuth.createUserWithEmailAndPassword(
+  }) async {
+    await _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
   }
+
+  Future<void> updateDisplayName({required String fullName}) async {
+    final user = _firebaseAuth.currentUser;
+    await user?.updateDisplayName(fullName);
+  }
+
+	Future<void> register({
+		required String email,
+		required String password,
+		required String fullName
+	}) async {
+		createUserWithEmailAndPassword(email: email, password: password);
+		updateDisplayName(fullName: fullName);
+	}
 
   Future<void> logout() async {
     return _firebaseAuth.signOut();
