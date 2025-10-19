@@ -1,3 +1,4 @@
+//activity_logs_screen.dart
 import 'package:flutter/material.dart';
 import 'components/all_activity_section.dart';
 import 'components/substrate_section.dart';
@@ -11,6 +12,7 @@ class ActivityLogsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Activity Logs'),
         backgroundColor: Colors.teal,
       ),

@@ -1,3 +1,4 @@
+//activity_logs_navigator.dart
 import 'package:flutter/material.dart';
 import '../activity_logs_screen.dart';
 import '../view_screens/all_activity_screen.dart';
@@ -30,7 +31,7 @@ class ActivityLogsNavigator extends StatelessWidget {
 
         return SlidePageRoute(
           page: page,
-          routeSettings: settings, // pass Settings through to the route
+          routeSettings: settings,
         );
       },
     );

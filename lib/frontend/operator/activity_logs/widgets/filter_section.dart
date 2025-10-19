@@ -1,13 +1,16 @@
+//filter_section.dart
 import 'package:flutter/material.dart';
 
 class FilterSection extends StatefulWidget {
   final List<String> filters;
   final ValueChanged<String> onSelected;
+  final String initialFilter;
 
   const FilterSection({
     super.key,
     required this.filters,
     required this.onSelected,
+    this.initialFilter = 'All',
   });
 
   @override
@@ -15,34 +18,50 @@ class FilterSection extends StatefulWidget {
 }
 
 class _FilterSectionState extends State<FilterSection> {
-  String selectedFilter = 'All';
+  late String selectedFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedFilter = widget.initialFilter;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: widget.filters.map((filter) {
-          final isSelected = selectedFilter == filter;
-          return ChoiceChip(
-            label: Text(
-              filter,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: widget.filters.map((filter) {
+            final isSelected = selectedFilter == filter;
+            final isFirst = filter == widget.filters.first;
+            final isLast = filter == widget.filters.last;
+            
+            return Padding(
+              padding: EdgeInsets.only(
+                left: isFirst ? 0 : 4,
+                right: isLast ? 0 : 4,
               ),
-            ),
-            selected: isSelected,
-            selectedColor: Colors.teal,
-            backgroundColor: Colors.grey.shade200,
-            onSelected: (_) {
-              setState(() => selectedFilter = filter);
-              widget.onSelected(filter);
-            },
-          );
-        }).toList(),
+              child: ChoiceChip(
+                label: Text(
+                  filter,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black87,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                selected: isSelected,
+                selectedColor: Colors.teal,
+                backgroundColor: Colors.grey.shade200,
+                onSelected: (_) {
+                  setState(() => selectedFilter = filter);
+                  widget.onSelected(filter);
+                },
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }

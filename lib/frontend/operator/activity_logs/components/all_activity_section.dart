@@ -1,3 +1,4 @@
+//all_activity_section.dart
 import 'package:flutter/material.dart';
 import '../view_screens/all_activity_screen.dart';
 import '../widgets/slide_page_route.dart';

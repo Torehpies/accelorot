@@ -1,7 +1,8 @@
+//alerts_section.dart
 import 'package:flutter/material.dart';
 import '../widgets/slide_page_route.dart';
 import '../view_screens/alerts_screen.dart';
-import '../widgets/alert_box.dart';
+import '../widgets/filter_box.dart';
 
 class AlertsSection extends StatelessWidget {
   const AlertsSection({super.key});
@@ -56,26 +57,29 @@ class AlertsSection extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Boxes
+              // Boxes using unified FilterBox
               Expanded(
                 child: Row(
                   children: const [
-                    AlertBox(
+                    FilterBox(
                       icon: Icons.thermostat,
                       label: 'Temp',
                       filterValue: 'Temp',
+                      destination: AlertsScreen(initialFilter: 'Temp'),
                     ),
                     SizedBox(width: 8),
-                    AlertBox(
+                    FilterBox(
                       icon: Icons.water_drop,
                       label: 'Moisture',
                       filterValue: 'Moisture',
+                      destination: AlertsScreen(initialFilter: 'Moisture'),
                     ),
                     SizedBox(width: 8),
-                    AlertBox(
+                    FilterBox(
                       icon: Icons.air,
                       label: 'Humidity',
                       filterValue: 'Humidity',
+                      destination: AlertsScreen(initialFilter: 'Humidity'),
                     ),
                   ],
                 ),
