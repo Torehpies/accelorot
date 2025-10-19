@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
-import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
+import 'package:go_router/go_router.dart';
 
 class RefactoredRegistrationScreen extends ConsumerStatefulWidget {
   const RefactoredRegistrationScreen({super.key});
@@ -408,15 +408,7 @@ class _RegistrationScreenState
                         children: [
                           const Text("Already have an account? "),
                           TextButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RefactoredLoginScreen(),
-                                ),
-                              );
-                            },
+                            onPressed: () => context.go('/login'),
                             child: const Text(
                               "Sign in",
                               style: TextStyle(

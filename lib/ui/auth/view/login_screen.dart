@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/auth/view/registration_screen.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class RefactoredLoginScreen extends ConsumerStatefulWidget {
   const RefactoredLoginScreen({super.key});
@@ -130,14 +130,7 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
                 ),
                 const SizedBox(height: 30),
                 GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RefactoredRegistrationScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => context.go('/register'),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
