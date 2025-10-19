@@ -1,7 +1,10 @@
+//alerts_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
+import '../widgets/search_bar_widget.dart';
 import '../models/activity_item.dart';
+import '../services/mock_data_service.dart';
 
 class AlertsScreen extends StatefulWidget {
   final String initialFilter;
@@ -17,6 +20,8 @@ class AlertsScreen extends StatefulWidget {
 
 class _AlertsScreenState extends State<AlertsScreen> {
   late String selectedFilter;
+  String searchQuery = '';
+  bool isManualFilter = false;
   final filters = const ['All', 'Temp', 'Moisture', 'Humidity'];
 
   @override
@@ -28,67 +33,64 @@ class _AlertsScreenState extends State<AlertsScreen> {
   void _onFilterChanged(String filter) {
     setState(() {
       selectedFilter = filter;
+      isManualFilter = true;
     });
-    // TODO: Add your filtering logic here
   }
 
-  // Mock data for alerts
-  List<ActivityItem> get _mockAlerts => [
-        ActivityItem(
-          title: 'High Temperature',
-          value: '42°C',
-          statusColor: 'red',
-          icon: Icons.thermostat,
-          description: 'Temperature exceeded threshold of 40°C',
-          category: 'Temp',
-          timestamp: DateTime(2024, 8, 25, 13, 45),
-        ),
-        ActivityItem(
-          title: 'Low Moisture',
-          value: '25%',
-          statusColor: 'yellow',
-          icon: Icons.water_drop,
-          description: 'Moisture dropped below optimal level of 30%',
-          category: 'Moisture',
-          timestamp: DateTime(2024, 8, 25, 10, 20),
-        ),
-        ActivityItem(
-          title: 'Temperature Maintained',
-          value: '35°C',
-          statusColor: 'green',
-          icon: Icons.thermostat,
-          description: 'Temperature within optimal range (30-40°C)',
-          category: 'Temp',
-          timestamp: DateTime(2024, 8, 24, 16, 30),
-        ),
-        ActivityItem(
-          title: 'High Humidity',
-          value: '85%',
-          statusColor: 'yellow',
-          icon: Icons.air,
-          description: 'Humidity exceeded threshold of 80%',
-          category: 'Humidity',
-          timestamp: DateTime(2024, 8, 24, 9, 15),
-        ),
-        ActivityItem(
-          title: 'Moisture Optimal',
-          value: '55%',
-          statusColor: 'green',
-          icon: Icons.water_drop,
-          description: 'Moisture maintained within range (50-60%)',
-          category: 'Moisture',
-          timestamp: DateTime(2024, 8, 23, 14, 0),
-        ),
-        ActivityItem(
-          title: 'Temperature Drop',
-          value: '28°C',
-          statusColor: 'yellow',
-          icon: Icons.thermostat,
-          description: 'Temperature dropped below optimal range',
-          category: 'Temp',
-          timestamp: DateTime(2024, 8, 23, 7, 45),
-        ),
-      ];
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      if (query.isEmpty) {
+        isManualFilter = false;
+        selectedFilter = 'All';
+      }
+    });
+  }
+
+  void _onSearchCleared() {
+    setState(() {
+      searchQuery = '';
+      isManualFilter = false;
+      selectedFilter = 'All';
+    });
+  }
+
+  // Get search results
+  List<ActivityItem> get _searchResults {
+    final alerts = MockDataService.getAlerts();
+    if (searchQuery.isEmpty) {
+      return alerts;
+    }
+    return alerts.where((item) {
+      return item.title.toLowerCase().contains(searchQuery) ||
+             item.description.toLowerCase().contains(searchQuery);
+    }).toList();
+  }
+
+  // Get categories present in search results
+  Set<String> get _categoriesInSearchResults {
+    if (searchQuery.isEmpty) return {};
+    final categories = _searchResults.map((item) => item.category).toSet();
+    categories.remove('All');
+    return categories;
+  }
+
+  // Filtered list based on selected filter
+  List<ActivityItem> get _filteredAlerts {
+    if (isManualFilter && selectedFilter != 'All') {
+      return _searchResults
+          .where((item) => item.category == selectedFilter)
+          .toList();
+    }
+    
+    if (selectedFilter == 'All' || !isManualFilter) {
+      return _searchResults;
+    }
+    
+    return _searchResults
+        .where((item) => item.category == selectedFilter)
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,45 +105,74 @@ class _AlertsScreenState extends State<AlertsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+        child: Column(
+          children: [
+            // Search Bar
+            SearchBarWidget(
+              onSearchChanged: _onSearchChanged,
+              onClear: _onSearchCleared,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Fixed filter section at top
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: FilterSection(
-                  filters: filters,
-                  initialFilter: selectedFilter,
-                  onSelected: _onFilterChanged,
+            const SizedBox(height: 12),
+            
+            // White Container with filters and cards
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ),
+                child: Column(
+                  children: [
+                    // Fixed filter section at top
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: FilterSection(
+                        filters: filters,
+                        initialFilter: selectedFilter,
+                        onSelected: _onFilterChanged,
+                        autoHighlightedFilters: _categoriesInSearchResults,
+                      ),
+                    ),
 
-              // Scrollable cards list
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _mockAlerts.length,
-                  itemBuilder: (context, index) {
-                    return ActivityCard(item: _mockAlerts[index]);
-                  },
+                    // Scrollable cards list
+                    Expanded(
+                      child: _filteredAlerts.isEmpty
+                          ? Center(
+                              child: Text(
+                                searchQuery.isNotEmpty
+                                    ? 'No results found for "$searchQuery"'
+                                    : 'No ${selectedFilter.toLowerCase()} alerts found',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: _filteredAlerts.length,
+                              itemBuilder: (context, index) {
+                                return ActivityCard(
+                                    item: _filteredAlerts[index]);
+                              },
+                            ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
