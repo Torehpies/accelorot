@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/screens/profile_screen.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,23 +19,32 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
 
   void _onLoginPressed() async {
     if (!_formKey.currentState!.validate()) return;
+
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    try {
-      await ref.read(authViewModelProvider.notifier).login(email, password);
-      if (mounted) {
+    await ref.read(authViewModelProvider.notifier).login(email, password);
+
+    final state = ref.read(authViewModelProvider);
+
+    if (!mounted) return;
+
+    state.when(
+      data: (_) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Login successful!')));
-      }
-    } catch (e) {
-      if (mounted) {
+      },
+      loading: () {},
+      error: (error, _) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(error.toString()),
+            backgroundColor: Colors.red,
+          ),
         );
-      }
-    }
+      },
+    );
   }
 
   @override

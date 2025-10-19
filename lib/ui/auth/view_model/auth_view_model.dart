@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
+import 'package:flutter_application_1/utils/auth_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_view_model.g.dart';
@@ -16,7 +17,8 @@ class AuthViewModel extends _$AuthViewModel {
       await authRepository.login(email: email, password: password);
       state = const AsyncValue.data(null);
     } catch (e, st) {
-      state = AsyncError(e, st);
+			final message = getFriendlyErrorMessage(e);
+      state = AsyncValue.error(message, st);
     }
   }
 
