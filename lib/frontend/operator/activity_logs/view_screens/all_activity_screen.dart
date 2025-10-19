@@ -1,10 +1,10 @@
+//all_activity_screen.dart
 import 'package:flutter/material.dart';
-import '../widgets/slide_page_route.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
+import '../widgets/search_bar_widget.dart';
 import '../models/activity_item.dart';
-import 'substrates_screen.dart';
-import 'alerts_screen.dart';
+import '../services/mock_data_service.dart';
 
 class AllActivityScreen extends StatefulWidget {
   const AllActivityScreen({super.key});
@@ -15,99 +15,89 @@ class AllActivityScreen extends StatefulWidget {
 
 class _AllActivityScreenState extends State<AllActivityScreen> {
   String selectedFilter = 'All';
+  String searchQuery = '';
+  bool isManualFilter = false;
   final filters = const ['All', 'Substrate', 'Alerts'];
 
   void _onFilterChanged(String filter) {
-    setState(() => selectedFilter = filter);
-
-    // Navigate to specific screens when filter is selected
-    if (filter == 'Substrate') {
-      Navigator.of(context).push(
-        SlidePageRoute(page: const SubstratesScreen()),
-      );
-    } else if (filter == 'Alerts') {
-      Navigator.of(context).push(
-        SlidePageRoute(page: const AlertsScreen()),
-      );
-    }
-    // If 'All' is selected, stay on this screen
+    setState(() {
+      selectedFilter = filter;
+      isManualFilter = true;
+    });
   }
 
-  // Mock data - mix of substrates and alerts
-  List<ActivityItem> get _mockAllActivities => [
-        ActivityItem(
-          title: 'High Temperature',
-          value: '42°C',
-          statusColor: 'red',
-          icon: Icons.thermostat,
-          description: 'Temperature exceeded threshold of 40°C',
-          category: 'Temp Alert',
-          timestamp: DateTime(2024, 8, 25, 13, 45),
-        ),
-        ActivityItem(
-          title: 'Fruit Scraps Added',
-          value: '1.2kg',
-          statusColor: 'green',
-          icon: Icons.eco,
-          description: 'Kitchen scraps: apple peels, banana peel',
-          category: 'Greens',
-          timestamp: DateTime(2024, 8, 25, 0, 12),
-        ),
-        ActivityItem(
-          title: 'Low Moisture',
-          value: '25%',
-          statusColor: 'yellow',
-          icon: Icons.water_drop,
-          description: 'Moisture dropped below optimal level of 30%',
-          category: 'Moisture Alert',
-          timestamp: DateTime(2024, 8, 25, 10, 20),
-        ),
-        ActivityItem(
-          title: 'Dry Leaves Added',
-          value: '0.8kg',
-          statusColor: 'green',
-          icon: Icons.energy_savings_leaf,
-          description: 'Garden waste: dried leaves, small twigs',
-          category: 'Browns',
-          timestamp: DateTime(2024, 8, 24, 14, 30),
-        ),
-        ActivityItem(
-          title: 'Temperature Maintained',
-          value: '35°C',
-          statusColor: 'green',
-          icon: Icons.thermostat,
-          description: 'Temperature within optimal range (30-40°C)',
-          category: 'Temp Alert',
-          timestamp: DateTime(2024, 8, 24, 16, 30),
-        ),
-        ActivityItem(
-          title: 'Coffee Grounds Added',
-          value: '0.3kg',
-          statusColor: 'green',
-          icon: Icons.eco,
-          description: 'Morning coffee grounds from kitchen',
-          category: 'Greens',
-          timestamp: DateTime(2024, 8, 24, 8, 15),
-        ),
-        ActivityItem(
-          title: 'High Humidity',
-          value: '85%',
-          statusColor: 'yellow',
-          icon: Icons.air,
-          description: 'Humidity exceeded threshold of 80%',
-          category: 'Humidity Alert',
-          timestamp: DateTime(2024, 8, 24, 9, 15),
-        ),
-        ActivityItem(
-          title: 'Compost Ready',
-          value: '5.2kg',
-          statusColor: 'green',
-          icon: Icons.recycling,
-          description: 'Batch #12 completed decomposition',
-          category: 'Compost',
-          timestamp: DateTime(2024, 8, 22, 9, 0),
-        ),
-      ];
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      if (query.isEmpty) {
+        isManualFilter = false;
+        selectedFilter = 'All';
+      }
+    });
+  }
+
+  void _onSearchCleared() {
+    setState(() {
+      searchQuery = '';
+      isManualFilter = false;
+      selectedFilter = 'All';
+    });
+  }
+
+  // Get search results
+  List<ActivityItem> get _searchResults {
+    final allActivities = MockDataService.getAllActivities();
+    if (searchQuery.isEmpty) {
+      return allActivities;
+    }
+    return allActivities.where((item) {
+      return item.title.toLowerCase().contains(searchQuery) ||
+             item.description.toLowerCase().contains(searchQuery);
+    }).toList();
+  }
+
+  // Get filter types present in search results (Substrate or Alerts)
+  Set<String> get _filterTypesInSearchResults {
+    if (searchQuery.isEmpty) return {};
+    
+    final categories = _searchResults.map((item) => item.category).toSet();
+    Set<String> filterTypes = {};
+    
+    // Check if any substrate categories exist
+    if (categories.any((cat) => ['Greens', 'Browns', 'Compost'].contains(cat))) {
+      filterTypes.add('Substrate');
+    }
+    
+    // Check if any alert categories exist
+    if (categories.any((cat) => ['Temp', 'Moisture', 'Humidity'].contains(cat))) {
+      filterTypes.add('Alerts');
+    }
+    
+    return filterTypes;
+  }
+
+  // Filtered data based on selected filter
+  List<ActivityItem> get _filteredActivities {
+    List<ActivityItem> results = _searchResults;
+    
+    if (isManualFilter && selectedFilter != 'All') {
+      if (selectedFilter == 'Substrate') {
+        results = results.where((item) {
+          return item.category == 'Greens' || 
+                 item.category == 'Browns' || 
+                 item.category == 'Compost';
+        }).toList();
+      } else if (selectedFilter == 'Alerts') {
+        results = results.where((item) {
+          return item.category == 'Temp' || 
+                 item.category == 'Moisture' || 
+                 item.category == 'Humidity';
+        }).toList();
+      }
+    }
+    
+    return results;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,45 +112,74 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+        child: Column(
+          children: [
+            // Search Bar
+            SearchBarWidget(
+              onSearchChanged: _onSearchChanged,
+              onClear: _onSearchCleared,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Fixed filter section at top
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: FilterSection(
-                  filters: filters,
-                  initialFilter: selectedFilter,
-                  onSelected: _onFilterChanged,
+            const SizedBox(height: 12),
+            
+            // White Container with filters and cards
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ),
+                child: Column(
+                  children: [
+                    // Fixed filter section at top
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: FilterSection(
+                        filters: filters,
+                        initialFilter: selectedFilter,
+                        onSelected: _onFilterChanged,
+                        autoHighlightedFilters: _filterTypesInSearchResults,
+                      ),
+                    ),
 
-              // Scrollable cards list
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _mockAllActivities.length,
-                  itemBuilder: (context, index) {
-                    return ActivityCard(item: _mockAllActivities[index]);
-                  },
+                    // Scrollable cards list
+                    Expanded(
+                      child: _filteredActivities.isEmpty
+                          ? Center(
+                              child: Text(
+                                searchQuery.isNotEmpty
+                                    ? 'No results found for "$searchQuery"'
+                                    : 'No ${selectedFilter.toLowerCase()} activities found',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: _filteredActivities.length,
+                              itemBuilder: (context, index) {
+                                return ActivityCard(
+                                    item: _filteredActivities[index]);
+                              },
+                            ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

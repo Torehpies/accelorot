@@ -5,12 +5,14 @@ class FilterSection extends StatefulWidget {
   final List<String> filters;
   final ValueChanged<String> onSelected;
   final String initialFilter;
+  final Set<String> autoHighlightedFilters; // Filters to auto-highlight from search
 
   const FilterSection({
     super.key,
     required this.filters,
     required this.onSelected,
     this.initialFilter = 'All',
+    this.autoHighlightedFilters = const {},
   });
 
   @override
@@ -19,11 +21,24 @@ class FilterSection extends StatefulWidget {
 
 class _FilterSectionState extends State<FilterSection> {
   late String selectedFilter;
+  bool isManualSelection = false; // Track if user manually selected a filter
 
   @override
   void initState() {
     super.initState();
     selectedFilter = widget.initialFilter;
+  }
+
+  @override
+  void didUpdateWidget(FilterSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // If auto-highlighted filters changed and no manual selection, update display
+    if (!isManualSelection && 
+        widget.autoHighlightedFilters != oldWidget.autoHighlightedFilters) {
+      // Don't change selectedFilter, just rebuild to show highlights
+      setState(() {});
+    }
   }
 
   @override
@@ -35,8 +50,13 @@ class _FilterSectionState extends State<FilterSection> {
         child: Row(
           children: widget.filters.map((filter) {
             final isSelected = selectedFilter == filter;
+            final isAutoHighlighted = widget.autoHighlightedFilters.contains(filter) && 
+                                     !isManualSelection;
             final isFirst = filter == widget.filters.first;
             final isLast = filter == widget.filters.last;
+            
+            // Determine chip appearance
+            final bool shouldHighlight = isSelected || isAutoHighlighted;
             
             return Padding(
               padding: EdgeInsets.only(
@@ -47,15 +67,18 @@ class _FilterSectionState extends State<FilterSection> {
                 label: Text(
                   filter,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: shouldHighlight ? Colors.white : Colors.black87,
+                    fontWeight: shouldHighlight ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                selected: isSelected,
-                selectedColor: Colors.teal,
+                selected: shouldHighlight,
+                selectedColor: isSelected ? Colors.teal : Colors.teal.shade300,
                 backgroundColor: Colors.grey.shade200,
                 onSelected: (_) {
-                  setState(() => selectedFilter = filter);
+                  setState(() {
+                    selectedFilter = filter;
+                    isManualSelection = true; // User manually clicked
+                  });
                   widget.onSelected(filter);
                 },
               ),
@@ -64,5 +87,13 @@ class _FilterSectionState extends State<FilterSection> {
         ),
       ),
     );
+  }
+
+  // Method to reset manual selection (call when search is cleared)
+  void resetManualSelection() {
+    setState(() {
+      isManualSelection = false;
+      selectedFilter = 'All';
+    });
   }
 }
