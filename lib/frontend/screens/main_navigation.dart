@@ -14,14 +14,24 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ActivityLogsNavigator(),
-    StatisticsScreen(),
-    ProfileScreen(),
+  // 🔹 Add a GlobalKey to control the ActivityLogsNavigator
+  final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
+
+  late final List<Widget> _screens = [
+    const HomeScreen(),
+    ActivityLogsNavigator(key: _activityNavigatorKey),
+    const StatisticsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
+    // 🔹 When switching tabs, reset ActivityLogsNavigator to its root
+    if (_selectedIndex == 1) {
+      _activityNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
+
     setState(() {
       _selectedIndex = index;
     });

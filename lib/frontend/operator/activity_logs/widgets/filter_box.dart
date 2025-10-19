@@ -1,18 +1,19 @@
+//filter_box.dart
 import 'package:flutter/material.dart';
-import '../widgets/slide_page_route.dart';
+import 'slide_page_route.dart';
 
-class DashboardBox extends StatelessWidget {
+class FilterBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String filterValue;
-  final Widget Function(String filter)? onTapNavigateTo;
+  final Widget destination;
 
-  const DashboardBox({
+  const FilterBox({
     super.key,
     required this.icon,
     required this.label,
     required this.filterValue,
-    this.onTapNavigateTo,
+    required this.destination,
   });
 
   @override
@@ -21,11 +22,9 @@ class DashboardBox extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {
-          if (onTapNavigateTo != null) {
-            Navigator.of(context).push(
-              SlidePageRoute(page: onTapNavigateTo!(filterValue)),
-            );
-          }
+          Navigator.of(context).push(
+            SlidePageRoute(page: destination),
+          );
         },
         child: Container(
           decoration: BoxDecoration(
