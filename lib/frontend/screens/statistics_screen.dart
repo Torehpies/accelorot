@@ -1,7 +1,11 @@
+// ignore_for_file: unused_field
+
 import 'package:flutter/material.dart';
-import '../widgets/oxygen_statistic_card.dart';
-import '../components/date_filter.dart';
-import '../components/history.dart';
+import '../widgets/humidity_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
+import '../components/system_card.dart';
+import 'date_filter.dart';
 import 'main_navigation.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -44,6 +48,7 @@ Widget build(BuildContext context) {
     body: SafeArea( 
       child: Column(
         children: [
+          // 🔹 Header
           Container(
             padding: const EdgeInsets.symmetric(vertical: 6), 
             decoration: BoxDecoration(
@@ -88,24 +93,39 @@ Widget build(BuildContext context) {
             ),
           ),
 
+          // 🔹 FIXED: SystemCard stays at top (non-scrolling)
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: SystemCard(),
+          ),
+          const SizedBox(height: 16),
+
+          // 🔹 SCROLLABLE: Sensor cards (Temperature before Moisture)
           Expanded(
-            child: _selectedRange == null
-                ? ListView(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    children: [
-                      const SizedBox(height: 16),
-                      OxygenStatisticCard(
-                        currentOxygen: 21.0,
-                        hourlyReadings: [20.8, 21.1, 21.2, 20.9, 21.0, 21.1],
-                        lastUpdated: DateTime.now(),
-                      ),
-                    ],
-                  )
-                : HistoryPage(
-                    filter: _selectedFilterLabel,
-                    range: _selectedRange!,
-                  ),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              children: [
+                HumidityStatisticCard(
+                  currentHumidity: 38.0,
+                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                // 👇 SWAPPED: Temperature comes BEFORE Moisture
+                TemperatureStatisticCard(
+                  currentTemperature: 22.5,
+                  hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+                MoistureStatisticCard(
+                  currentMoisture: 45.0,
+                  hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+                  lastUpdated: DateTime.now(),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ],
       ),

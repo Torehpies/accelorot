@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class HumidityStatisticCard extends StatelessWidget {
-  final double currentHumidity;
+class TemperatureStatisticCard extends StatelessWidget {
+  final double currentTemperature;
   final List<double> hourlyReadings;
   final DateTime? lastUpdated;
 
-  const HumidityStatisticCard({
+  const TemperatureStatisticCard({
     super.key,
-    required this.currentHumidity,
+    required this.currentTemperature,
     required this.hourlyReadings,
     this.lastUpdated,
   });
@@ -19,47 +19,33 @@ class HumidityStatisticCard extends StatelessWidget {
       return _buildEmptyCard(context);
     }
 
-    final quality = _getQuality(currentHumidity);
+    final quality = _getQuality(currentTemperature);
     final color = _getColorForQuality(quality);
-
-    // Precompute chart data once
     final now = DateTime.now();
-    final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> humidityData = List.generate(dataLength, (
-      i,
-    ) {
-      // i=0 → oldest (e.g., 6h ago), i=last → most recent
+    final dataLength = hourlyReadings.length;
+
+    // Generate X-axis labels and data once
+    final temperatureData = <Map<String, Object>>[];
+    final upperBound = <Map<String, Object>>[];
+    final lowerBound = <Map<String, Object>>[];
+
+    for (int i = 0; i < dataLength; i++) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {
-        'x': '${hour.toString().padLeft(2, '0')}:00',
-        'y': hourlyReadings[i],
-      };
-    });
-
-    // Static bounds (same length as data)
-    final List<Map<String, Object>> upperBound =
-        List.filled(dataLength, {'x': '', 'y': 65.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 65.0};
-        }).toList();
-
-    final List<Map<String, Object>> lowerBound =
-        List.filled(dataLength, {'x': '', 'y': 40.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
-        }).toList();
+      final timeLabel = '${hour.toString().padLeft(2, '0')}:00';
+      temperatureData.add({'x': timeLabel, 'y': hourlyReadings[i]});
+      upperBound.add({'x': timeLabel, 'y': 24.0});
+      lowerBound.add({'x': timeLabel, 'y': 18.0});
+    }
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -73,13 +59,13 @@ class HumidityStatisticCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Humidity',
+                'Temperature',
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                '${currentHumidity.toStringAsFixed(0)}%',
+                '${currentTemperature.toStringAsFixed(1)}°C',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color,
@@ -91,11 +77,10 @@ class HumidityStatisticCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'Last updated: ${_formatDate(lastUpdated!)}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
           const SizedBox(height: 12),
-
           Row(
             children: [
               Container(
@@ -115,29 +100,25 @@ class HumidityStatisticCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-
-          Text(
-            'Ideal Range: 40–65%',
+          const Text(
+            'Ideal Range: 18–24°C',
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
-            value: _calculateProgress(currentHumidity),
+            value: _calculateProgress(currentTemperature),
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-
-          Text(
-            // ignore: unnecessary_brace_in_string_interps
-            'Trend (Last ${dataLength} Hours)',
+          const Text(
+            'Trend (Last N Hours)',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
           SizedBox(
             height: 90,
-            width: double.infinity,
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
@@ -148,9 +129,9 @@ class HumidityStatisticCard extends StatelessWidget {
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
-                minimum: 25,
-                maximum: 105,
-                interval: 20,
+                minimum: 0,
+                maximum: 40,
+                interval: 10,
                 majorGridLines: const MajorGridLines(
                   width: 0.5,
                   color: Colors.grey,
@@ -159,9 +140,9 @@ class HumidityStatisticCard extends StatelessWidget {
               ),
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
-              series: <CartesianSeries>[
+              series: [
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: humidityData,
+                  dataSource: temperatureData,
                   xValueMapper: (data, _) => data['x'] as String,
                   yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.blue,
@@ -198,29 +179,29 @@ class HumidityStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       padding: const EdgeInsets.all(18),
-      child: Center(
+      child: const Center(
         child: Text(
-          'No humidity data',
-          style: TextStyle(color: Colors.grey[600]),
+          'No temperature data',
+          style: TextStyle(color: Colors.grey),
         ),
       ),
     );
   }
 
-  String _getQuality(double humidity) {
-    if (humidity >= 40 && humidity <= 65) return 'Excellent';
-    if ((humidity >= 30 && humidity < 40) ||
-        (humidity > 65 && humidity <= 75)) {
+  String _getQuality(double temperature) {
+    if (temperature >= 18 && temperature <= 24) return 'Excellent';
+    if ((temperature >= 15 && temperature < 18) ||
+        (temperature > 24 && temperature <= 27)) {
       return 'Good';
     }
     return 'Poor';
@@ -237,8 +218,8 @@ class HumidityStatisticCard extends StatelessWidget {
     }
   }
 
-  double _calculateProgress(double humidity) {
-    return (humidity.clamp(0.0, 100.0) / 100.0);
+  double _calculateProgress(double temperature) {
+    return (temperature.clamp(0.0, 40.0) / 40.0);
   }
 
   String _formatDate(DateTime date) {
