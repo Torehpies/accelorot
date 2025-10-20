@@ -6,10 +6,12 @@ class AdminProfileScreen extends StatelessWidget {
   const AdminProfileScreen({super.key});
 
   Future<void> _signOut(BuildContext context) async {
+    // Capture NavigatorState synchronously to avoid using BuildContext after
+    // the async gap (prevents use_build_context_synchronously lint).
+    final navigator = Navigator.of(context);
     await FirebaseAuth.instance.signOut();
     // Ensure we leave the admin navigation stack and return to the auth flow.
-    Navigator.pushAndRemoveUntil(
-      context,
+    navigator.pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const AuthWrapper()),
       (route) => false,
     );
