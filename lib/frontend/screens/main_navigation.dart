@@ -5,12 +5,26 @@ import 'statistics_screen.dart';
 import 'profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-void logCurrentUser() {
+void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
+
+  // Remove any current snackbars and show a short message about auth state.
+  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
   if (user != null) {
-    print('Logged-in User: ${user.email}, UID: ${user.uid}');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Logged-in: ${user.email} (UID: ${user.uid})'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   } else {
-    print('No user is currently logged in.');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('No user is currently logged in.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
 
@@ -46,7 +60,8 @@ class _MainNavigationState extends State<MainNavigation> {
     setState(() {
       _selectedIndex = index;
     });
-    logCurrentUser();
+    // show the current auth info in a brief SnackBar
+    logCurrentUser(context);
   }
 
   @override
