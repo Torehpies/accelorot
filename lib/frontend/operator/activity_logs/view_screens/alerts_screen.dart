@@ -3,13 +3,17 @@ import 'package:flutter/material.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/search_bar_widget.dart';
+import '../widgets/date_filter_button.dart';
 import '../models/activity_item.dart';
-import '../services/mock_data_service.dart';
+import '../../../../services/firestore_activity_service.dart';
 
 class AlertsScreen extends StatefulWidget {
   final String initialFilter;
 
-  const AlertsScreen({super.key, this.initialFilter = 'All'});
+  const AlertsScreen({
+    super.key,
+    this.initialFilter = 'All',
+  });
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -19,16 +23,35 @@ class _AlertsScreenState extends State<AlertsScreen> {
   late String selectedFilter;
   String searchQuery = '';
   bool isManualFilter = false;
+  DateFilterRange _dateFilter = DateFilterRange(type: DateFilterType.none);
   final filters = const ['All', 'Temp', 'Moisture', 'Oxygen'];
   final FocusNode _searchFocusNode = FocusNode();
+  
+  late Future<List<ActivityItem>> _alertsFuture;
+  List<ActivityItem> _allAlerts = [];
 
   @override
   void initState() {
     super.initState();
     selectedFilter = widget.initialFilter;
-    // If initialFilter is not 'All', treat it as manual selection
     if (widget.initialFilter != 'All') {
       isManualFilter = true;
+    }
+    
+    // Load data from Firestore
+    _alertsFuture = _loadAlerts();
+  }
+
+  Future<List<ActivityItem>> _loadAlerts() async {
+    try {
+      final alerts = await FirestoreActivityService.getAlerts();
+      setState(() {
+        _allAlerts = alerts;
+      });
+      return alerts;
+    } catch (e) {
+      print('Error loading alerts: $e');
+      return [];
     }
   }
 
@@ -54,18 +77,33 @@ class _AlertsScreenState extends State<AlertsScreen> {
   void _onSearchCleared() {
     setState(() {
       searchQuery = '';
-      // Keep the manually selected filter, don't reset to 'All'
-      // If no manual filter was set, selectedFilter stays 'All'
     });
   }
 
-  // Get search results
-  List<ActivityItem> get _searchResults {
-    final alerts = MockDataService.getAlerts();
-    if (searchQuery.isEmpty) {
-      return alerts;
+  void _onDateFilterChanged(DateFilterRange filter) {
+    setState(() {
+      _dateFilter = filter;
+    });
+  }
+
+  // Apply date filter first
+  List<ActivityItem> get _dateFilteredAlerts {
+    if (!_dateFilter.isActive) {
+      return _allAlerts;
     }
-    return alerts
+
+    return _allAlerts.where((item) {
+      return item.timestamp.isAfter(_dateFilter.startDate!) &&
+             item.timestamp.isBefore(_dateFilter.endDate!);
+    }).toList();
+  }
+
+  // Get search results from date-filtered data
+  List<ActivityItem> get _searchResults {
+    if (searchQuery.isEmpty) {
+      return _dateFilteredAlerts;
+    }
+    return _dateFilteredAlerts
         .where((item) => item.matchesSearchQuery(searchQuery))
         .toList();
   }
@@ -73,27 +111,19 @@ class _AlertsScreenState extends State<AlertsScreen> {
   // Get categories present in search results
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
-
+    
     final categories = _searchResults.map((item) => item.category).toSet();
-
-    // Define the specific categories (excluding 'All')
     final specificCategories = {'Temp', 'Moisture', 'Oxygen'};
-
-    // Check if ALL specific categories have matches
-    final hasAllCategories = specificCategories.every(
-      (cat) => categories.contains(cat),
-    );
+    final hasAllCategories =
+        specificCategories.every((cat) => categories.contains(cat));
 
     Set<String> result = {};
-
-    // Add specific categories that have matches
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
 
-    // Only add 'All' if ALL categories have matches
     if (hasAllCategories) {
       result.add('All');
     }
@@ -122,7 +152,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Unfocus search bar when tapping anywhere on screen
         _searchFocusNode.unfocus();
       },
       child: Scaffold(
@@ -131,85 +160,94 @@ class _AlertsScreenState extends State<AlertsScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
-            "Alerts Logs",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          title: const Text("Alerts Logs", style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.teal,
+          actions: [
+            DateFilterButton(onFilterChanged: _onDateFilterChanged),
+            const SizedBox(width: 8),
+          ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            children: [
-              // Search Bar
-              SearchBarWidget(
-                onSearchChanged: _onSearchChanged,
-                onClear: _onSearchCleared,
-                focusNode: _searchFocusNode,
-              ),
-              const SizedBox(height: 12),
+        body: FutureBuilder<List<ActivityItem>>(
+          future: _alertsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              // White Container with filters and cards
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error loading data: ${snapshot.error}'),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                children: [
+                  SearchBarWidget(
+                    onSearchChanged: _onSearchChanged,
+                    onClear: _onSearchCleared,
+                    focusNode: _searchFocusNode,
                   ),
-                  child: Column(
-                    children: [
-                      // Fixed filter section at top
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: FilterSection(
-                          filters: filters,
-                          initialFilter: selectedFilter,
-                          onSelected: _onFilterChanged,
-                          autoHighlightedFilters: _categoriesInSearchResults,
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-
-                      // Scrollable cards list
-                      Expanded(
-                        child: _filteredAlerts.isEmpty
-                            ? Center(
-                                child: Text(
-                                  searchQuery.isNotEmpty
-                                      ? 'No results found for "$searchQuery"'
-                                      : 'No ${selectedFilter.toLowerCase()} alerts found',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            child: FilterSection(
+                              filters: filters,
+                              initialFilter: selectedFilter,
+                              onSelected: _onFilterChanged,
+                              autoHighlightedFilters: _categoriesInSearchResults,
+                            ),
+                          ),
+                          Expanded(
+                            child: _filteredAlerts.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      searchQuery.isNotEmpty
+                                          ? 'No results found for "$searchQuery"'
+                                          : 'No ${selectedFilter.toLowerCase()} alerts found',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: _filteredAlerts.length,
+                                    itemBuilder: (context, index) {
+                                      return ActivityCard(
+                                          item: _filteredAlerts[index]);
+                                    },
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                                itemCount: _filteredAlerts.length,
-                                itemBuilder: (context, index) {
-                                  return ActivityCard(
-                                    item: _filteredAlerts[index],
-                                  );
-                                },
-                              ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
