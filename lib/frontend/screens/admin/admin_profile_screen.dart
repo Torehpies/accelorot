@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/services/auth_wrapper.dart';
 
 class AdminProfileScreen extends StatelessWidget {
   const AdminProfileScreen({super.key});
 
   Future<void> _signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-    // AuthWrapper will detect sign-out and redirect automatically
+    // Ensure we leave the admin navigation stack and return to the auth flow.
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const AuthWrapper()),
+      (route) => false,
+    );
   }
 
   @override
