@@ -72,10 +72,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
     if (searchQuery.isEmpty) {
       return alerts;
     }
-    return alerts.where((item) {
-      return item.title.toLowerCase().contains(searchQuery) ||
-             item.description.toLowerCase().contains(searchQuery);
-    }).toList();
+    return alerts.where((item) => item.matchesSearchQuery(searchQuery)).toList();
   }
 
   // Get categories present in search results

@@ -72,10 +72,7 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
     if (searchQuery.isEmpty) {
       return substrates;
     }
-    return substrates.where((item) {
-      return item.title.toLowerCase().contains(searchQuery) ||
-             item.description.toLowerCase().contains(searchQuery);
-    }).toList();
+    return substrates.where((item) => item.matchesSearchQuery(searchQuery)).toList();
   }
 
   // Get categories present in search results

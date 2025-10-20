@@ -57,10 +57,7 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     if (searchQuery.isEmpty) {
       return allActivities;
     }
-    return allActivities.where((item) {
-      return item.title.toLowerCase().contains(searchQuery) ||
-             item.description.toLowerCase().contains(searchQuery);
-    }).toList();
+    return allActivities.where((item) => item.matchesSearchQuery(searchQuery)).toList();
   }
 
   // Get filter types present in search results (Substrate or Alerts)
