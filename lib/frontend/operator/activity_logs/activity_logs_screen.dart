@@ -13,12 +13,20 @@ class ActivityLogsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Activity Logs'),
+        title: const Text(
+          "Activity Logs",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.teal,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // space above nav bar
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            80,
+          ), // space above nav bar
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: const [
