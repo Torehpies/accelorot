@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import '../widgets/oxygen_statistic_card.dart'; // ✅ import your oxygen card
+import '../widgets/oxygen_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
 
 class HistoryPage extends StatelessWidget {
   final String filter;
@@ -25,7 +26,7 @@ class HistoryPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
+          // 🔹 Selected filter label
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -34,7 +35,7 @@ class HistoryPage extends StatelessWidget {
             ),
           ),
 
-          // Time Period (Bar Chart)
+          // 🔹 Time Period (Bar Chart placeholder)
           _buildCard(
             title: "Time Period",
             child: const SizedBox(
@@ -44,20 +45,33 @@ class HistoryPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
+
+          // 🔹 Oxygen Card
           OxygenStatisticCard(
             currentOxygen: 21.0,
             hourlyReadings: [20.8, 21.1, 21.2, 20.9, 21.0, 21.1],
             lastUpdated: DateTime.now(),
           ),
 
-          // Temperature Placeholder
-          _buildCard(
-            title: "Temperature",
-            child: const SizedBox(
-              height: 150,
-              child: Center(child: Text("Temperature chart will be here")),
-            ),
+          const SizedBox(height: 16),
+
+          // 🔹 Temperature Card
+          TemperatureStatisticCard(
+            currentTemperature: 23.5,
+            hourlyReadings: [22.0, 22.5, 23.0, 23.5, 24.0, 23.0],
+            lastUpdated: DateTime.now(),
           ),
+
+          const SizedBox(height: 16),
+
+          // 🔹 Moisture Card
+          MoistureStatisticCard(
+            currentMoisture: 48.0,
+            hourlyReadings: [40.0, 42.0, 44.0, 46.0, 48.0, 50.0],
+            lastUpdated: DateTime.now(),
+          ),
+
+          const SizedBox(height: 16),
         ],
       ),
     );
