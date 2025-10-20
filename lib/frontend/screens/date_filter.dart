@@ -8,10 +8,10 @@ class DateFilter extends StatefulWidget {
   const DateFilter({super.key, required this.onChanged});
 
   @override
-  _DateFilterState createState() => _DateFilterState();
+  DateFilterState createState() => DateFilterState();
 }
 
-class _DateFilterState extends State<DateFilter> {
+class DateFilterState extends State<DateFilter> {
   DateTimeRange? _selectedRange;
   String _label = "Date Filter";
 
