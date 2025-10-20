@@ -17,7 +17,7 @@ class PersonalInfoScreen extends StatelessWidget {
 /// The form has fields for the username, full name, email, and role.
 /// The fields are read-only except for the role field, which is editable.
 /// The form has a green save button at the bottom.
-/*******  56dbc691-5248-48ae-9284-ee6b3638d97a  *******/
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
