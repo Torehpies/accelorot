@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class SearchBarWidget extends StatefulWidget {
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClear;
+  final FocusNode focusNode;
 
   const SearchBarWidget({
     super.key,
     required this.onSearchChanged,
     required this.onClear,
+    required this.focusNode,
   });
 
   @override
@@ -27,6 +29,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   void _clearSearch() {
     _controller.clear();
     widget.onClear();
+    widget.focusNode.unfocus();
   }
 
   @override
@@ -46,6 +49,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ),
       child: TextField(
         controller: _controller,
+        focusNode: widget.focusNode,
         onChanged: widget.onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Search....',

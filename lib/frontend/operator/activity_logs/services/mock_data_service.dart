@@ -91,12 +91,12 @@ class MockDataService {
       timestamp: DateTime(2024, 8, 24, 16, 30),
     ),
     ActivityItem(
-      title: 'High Humidity',
+      title: 'High Oxygen',
       value: '85%',
       statusColor: 'yellow',
-      icon: Icons.air,
-      description: 'Humidity exceeded threshold of 80%',
-      category: 'Humidity',
+      icon: Icons.bubble_chart,
+      description: 'Oxygen level exceeded threshold of 80%',
+      category: 'Oxygen',
       timestamp: DateTime(2024, 8, 24, 9, 15),
     ),
     ActivityItem(
