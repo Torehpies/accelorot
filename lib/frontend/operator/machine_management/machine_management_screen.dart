@@ -38,7 +38,7 @@ class MachineManagementScreen extends StatelessWidget {
                     icon: Icons.archive,
                     label: 'Archive',
                     onPressed: () {
-                      // TODO: Implement archive logic
+                     
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Archive feature coming soon')),
                       );
@@ -51,7 +51,7 @@ class MachineManagementScreen extends StatelessWidget {
                     icon: Icons.add_circle_outline,
                     label: 'Add Machine',
                     onPressed: () {
-                      // TODO: Navigate to Add Machine form
+                      
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Add Machine feature coming soon')),
                       );
@@ -76,7 +76,7 @@ class MachineManagementScreen extends StatelessWidget {
             Expanded(
               child: ListView.separated(
                 itemCount: _machines.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final machine = _machines[index];
                   return Card(
@@ -93,7 +93,7 @@ class MachineManagementScreen extends StatelessWidget {
                       subtitle: Text('Product Code/ID: ${machine['code']}'),
                       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                       onTap: () {
-                        // TODO: Navigate to machine details
+                       
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Viewing: ${machine['name']}')),
                         );
