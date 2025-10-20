@@ -5,6 +5,8 @@ import '../components/environmental_sensors_card.dart';
 import '../components/composting_progress_card.dart';
 import '../components/activity_logs.dart';
 import '../components/add_waste_product.dart';
+// ignore: unused_import
+import '../screens/registration_screen.dart'; // 👈 Adjust path if needed
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
