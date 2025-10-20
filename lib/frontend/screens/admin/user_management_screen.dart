@@ -45,7 +45,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   void _editUser(UserModel user) {
-    // TODO: Navigate to edit user screen
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Edit user ${user.name}')));
