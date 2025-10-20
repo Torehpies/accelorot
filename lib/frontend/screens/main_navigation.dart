@@ -3,6 +3,7 @@ import '../operator/dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
+import '../operator/machine_management/machine_management_screen.dart'; // 👈 NEW: Import Machine Management Screen
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -14,7 +15,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  // 🔹 Add a GlobalKey to control the ActivityLogsNavigator
+  // Add a GlobalKey to control the ActivityLogsNavigator
   final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
 
   late final List<Widget> _screens = [
@@ -22,6 +23,7 @@ class _MainNavigationState extends State<MainNavigation> {
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
     const ProfileScreen(),
+    MachineManagementScreen(), 
   ];
 
   void _onItemTapped(int index) {
@@ -52,6 +54,7 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), // 👈 NEW: Machines Tab
         ],
       ),
     );
