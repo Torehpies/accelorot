@@ -6,7 +6,7 @@ import '../widgets/moisture_statistic_card.dart';
 import '../widgets/temperature_statistic_card.dart';
 import '../components/system_card.dart';
 import 'date_filter.dart';
-import 'home_screen.dart';
+import '../operator/dashboard/home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
