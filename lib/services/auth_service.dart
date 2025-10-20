@@ -104,7 +104,8 @@ class AuthService {
   Future<Map<String, dynamic>> registerUser({
     required String email,
     required String password,
-    required String fullName,
+    required String firstName,
+    required String lastName,
     required String role,
   }) async {
     try {
@@ -121,7 +122,10 @@ class AuthService {
         await _firestore.collection('users').doc(user.uid).set({
           'uid': user.uid,
           'email': email,
-          'fullName': fullName,
+          // Store names separately (no concatenation)
+          // Note: keys are intentionally cased to match requested schema
+          'firstname': firstName,
+          'lastname': lastName,
           'role': role,
           'createdAt': FieldValue.serverTimestamp(),
           'isActive': true,

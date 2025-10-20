@@ -39,13 +39,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       setState(() => _isLoading = true);
 
       try {
-        final fullName =
-            '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
-
         final result = await _authService.registerUser(
           email: emailController.text.trim(),
           password: passwordController.text,
-          fullName: fullName,
+          firstName: firstNameController.text.trim(),
+          lastName: lastNameController.text.trim(),
           role: selectedRole ?? 'User',
         );
         if (mounted) {
