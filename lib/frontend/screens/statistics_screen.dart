@@ -1,12 +1,12 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-import '../widgets/humidity_statistic_card.dart';
+import '../widgets/oxygen_statistic_card.dart';
 import '../widgets/moisture_statistic_card.dart';
 import '../widgets/temperature_statistic_card.dart';
-import '../components/system_card.dart';
 import 'date_filter.dart';
 import 'main_navigation.dart';
+import '../components/history.dart'; // make sure this path is correct
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -41,95 +41,84 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
   }
 
+  void _resetFilter() {
+    setState(() {
+      _selectedRange = null;
+      _selectedFilterLabel = "Date Filter";
+    });
+  }
+
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.white,
-    body: SafeArea( 
-      child: Column(
-        children: [
-          // 🔹 Header
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6), 
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.green.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainNavigation(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      'Statistics',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                DateFilter(onChanged: _onDateChanged),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+
+      appBar: AppBar(
+        title: const Text(
+          "Statistics",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MainNavigation()),
+              (route) => false,
+            );
+          },
+        ),
+        actions: [
+          // Date Filter Button
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: DateFilter(onChanged: _onDateChanged),
           ),
 
-          // 🔹 FIXED: SystemCard stays at top (non-scrolling)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
-            child: SystemCard(),
-          ),
-          const SizedBox(height: 16),
-
-          // 🔹 SCROLLABLE: Sensor cards (Temperature before Moisture)
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              children: [
-                HumidityStatisticCard(
-                  currentHumidity: 38.0,
-                  hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                  lastUpdated: DateTime.now(),
-                ),
-                const SizedBox(height: 16),
-                // 👇 SWAPPED: Temperature comes BEFORE Moisture
-                TemperatureStatisticCard(
-                  currentTemperature: 22.5,
-                  hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
-                  lastUpdated: DateTime.now(),
-                ),
-                const SizedBox(height: 16),
-                MoistureStatisticCard(
-                  currentMoisture: 45.0,
-                  hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
-                  lastUpdated: DateTime.now(),
-                ),
-                const SizedBox(height: 16),
-              ],
+          // 👇 Reset Button (only visible when range is selected)
+          if (_selectedRange != null)
+            IconButton(
+              tooltip: "Reset to Default View",
+              icon: const Icon(Icons.refresh),
+              onPressed: _resetFilter,
             ),
-          ),
         ],
       ),
-    ),
-  );
-}
+
+      // Body
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: _selectedRange == null
+            ? ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  const SizedBox(height: 8),
+                  OxygenStatisticCard(
+                    currentOxygen: 38.0,
+                    hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
+                    lastUpdated: DateTime.now(),
+                  ),
+                  const SizedBox(height: 12),
+                  TemperatureStatisticCard(
+                    currentTemperature: 22.5,
+                    hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
+                    lastUpdated: DateTime.now(),
+                  ),
+                  const SizedBox(height: 12),
+                  MoistureStatisticCard(
+                    currentMoisture: 45.0,
+                    hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+                    lastUpdated: DateTime.now(),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              )
+            : HistoryPage(
+                filter: _selectedFilterLabel,
+                range: _selectedRange!,
+              ),
+      ),
+    );
+  }
 }
