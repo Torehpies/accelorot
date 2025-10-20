@@ -59,7 +59,6 @@ class FirestoreActivityService {
 
       await batch.commit();
     } catch (e) {
-      print('Error uploading substrates: $e');
       rethrow;
     }
   }
@@ -89,7 +88,6 @@ class FirestoreActivityService {
 
       await batch.commit();
     } catch (e) {
-      print('Error uploading alerts: $e');
       rethrow;
     }
   }
@@ -188,7 +186,6 @@ class FirestoreActivityService {
       combined.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return combined;
     } catch (e) {
-      print('Error fetching all activities: $e');
       return [];
     }
   }

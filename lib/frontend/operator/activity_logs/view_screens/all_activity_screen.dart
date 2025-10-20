@@ -39,7 +39,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
       });
       return activities;
     } catch (e) {
-      print('Error loading activities: $e');
       return [];
     }
   }
