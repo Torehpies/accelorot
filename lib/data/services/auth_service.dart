@@ -90,7 +90,7 @@ class AuthService extends ChangeNotifier {
       await _googleSignIn.initialize();
       _isGoogleSignInInitialized = true;
     } catch (e) {
-      print('Failed to initialize Google Sign-In: $e');
+      // print('Failed to initialize Google Sign-In: $e');
     }
   }
 
@@ -135,7 +135,7 @@ class AuthService extends ChangeNotifier {
         return result as GoogleSignInAccount?;
       }
     } catch (error) {
-      print('Silent sign-in failed: $error');
+      //print('Silent sign-in failed: $error');
       return null;
     }
   }
@@ -159,7 +159,7 @@ class AuthService extends ChangeNotifier {
 
       return authorization.accessToken;
     } catch (error) {
-      print('Failed to get access token for scopes: $error');
+      //print('Failed to get access token for scopes: $error');
       return null;
     }
   }

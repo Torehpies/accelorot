@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/screens/profile_screen.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,18 +31,11 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
 
     state.when(
       data: (_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+        showSnackbar(context, 'Login successfully!');
       },
       loading: () {},
       error: (error, _) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showSnackbar(context, error.toString(), isError: true);
       },
     );
   }

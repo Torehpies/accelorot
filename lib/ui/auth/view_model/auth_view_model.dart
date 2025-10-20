@@ -17,7 +17,24 @@ class AuthViewModel extends _$AuthViewModel {
       await authRepository.login(email: email, password: password);
       state = const AsyncValue.data(null);
     } catch (e, st) {
-			final message = getFriendlyErrorMessage(e);
+      final message = getFriendlyErrorMessage(e);
+      state = AsyncValue.error(message, st);
+    }
+  }
+
+  Future<void> register(String email, String password, String fullName) async {
+    state = const AsyncValue.loading();
+
+    try {
+      final authRepository = ref.watch(authRepositoryProvider);
+      await authRepository.register(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      final message = getFriendlyErrorMessage(e);
       state = AsyncValue.error(message, st);
     }
   }
@@ -34,32 +51,16 @@ class AuthViewModel extends _$AuthViewModel {
     }
   }
 
-  Future<void> register(String email, String password, String fullName) async {
-    state = const AsyncValue.loading();
-
-    try {
-      final authRepository = ref.watch(authRepositoryProvider);
-      await authRepository.register(
-        email: email,
-        password: password,
-        fullName: fullName,
-      );
-      state = const AsyncValue.data(null);
-    } on Exception catch (e, st) {
-      state = AsyncError(e, st);
-    }
-  }
-
-//  Future<void> signInWithGoogle() async {
-//    state = const AsyncValue.loading();
-//
-//    try {
-//      final authRepository = ref.watch(authRepositoryProvider);
-//      await authRepository.signInWithGoogle();
-//      state = const AsyncValue.data(null);
-//    } catch (e, st) {
-//      state = AsyncValue.error(e, st);
-//      rethrow;
-//    }
-//  }
+  //  Future<void> signInWithGoogle() async {
+  //    state = const AsyncValue.loading();
+  //
+  //    try {
+  //      final authRepository = ref.watch(authRepositoryProvider);
+  //      await authRepository.signInWithGoogle();
+  //      state = const AsyncValue.data(null);
+  //    } catch (e, st) {
+  //      state = AsyncValue.error(e, st);
+  //      rethrow;
+  //    }
+  //  }
 }

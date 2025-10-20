@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
 import 'package:flutter_application_1/frontend/screens/activity_logs_screen.dart';
 import 'package:flutter_application_1/frontend/screens/home_screen.dart';
-import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/profile_screen.dart';
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 import 'package:flutter_application_1/routing/app_route_enum.dart';

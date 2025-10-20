@@ -1,4 +1,13 @@
-enum AppRoutes { home, login, register, activity, statistics, profile, users, machines}
+enum AppRoutes {
+  home,
+  login,
+  register,
+  activity,
+  statistics,
+  profile,
+  users,
+  machines,
+}
 
 extension AppRouteExtension on AppRoutes {
   String get path {

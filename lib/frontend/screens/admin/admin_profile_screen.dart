@@ -25,7 +25,6 @@ class AdminProfileScreen extends StatelessWidget {
           "Admin Profile Screen",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-				
       ),
     );
   }

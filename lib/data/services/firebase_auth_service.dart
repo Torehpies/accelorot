@@ -11,7 +11,7 @@ class FirebaseAuthService {
       await _googleSignIn.initialize();
       _isGoogleSignInInitialized = true;
     } catch (e) {
-      print('Failed to initialize Google Sign-In: $e');
+      // print('Failed to initialize Google Sign-In: $e');
     }
   }
 
@@ -21,12 +21,12 @@ class FirebaseAuthService {
     }
   }
 
-//  Stream<User?> authStateChanges() {
-//    return _auth.authStateChanges();
-//  }
-	Stream<User?> get authStateChanges => _auth.authStateChanges();
-	Stream<User?> get idTokenChanges => _auth.idTokenChanges();
-	Stream<User?> get userChanges => _auth.userChanges();
+  //  Stream<User?> authStateChanges() {
+  //    return _auth.authStateChanges();
+  //  }
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<User?> get idTokenChanges => _auth.idTokenChanges();
+  Stream<User?> get userChanges => _auth.userChanges();
 
   Future<User?> registerWithEmail(
     String email,
@@ -50,7 +50,7 @@ class FirebaseAuthService {
         throw Exception(e.message ?? 'Registration failed');
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
     return null;
   }
@@ -63,7 +63,7 @@ class FirebaseAuthService {
       );
       return credential;
     } on FirebaseAuthException catch (e) {
-      print(e.code);
+      // print(e.code);
       switch (e.code) {
         case 'user-not-found':
           throw 'No account found for that email.';

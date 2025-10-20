@@ -220,7 +220,8 @@ class MoistureStatisticCard extends StatelessWidget {
 
   String _getQuality(double moisture) {
     if (moisture >= 40 && moisture <= 60) return 'Excellent';
-    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
+    if ((moisture >= 30 && moisture < 40) ||
+        (moisture > 60 && moisture <= 70)) {
       return 'Good';
     }
     return 'Critical'; // 👈 Changed from "Poor" to match image

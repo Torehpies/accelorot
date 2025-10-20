@@ -68,14 +68,14 @@ class FirebaseAuthRepository {
     await user?.updateDisplayName(fullName);
   }
 
-	Future<void> register({
-		required String email,
-		required String password,
-		required String fullName
-	}) async {
-		createUserWithEmailAndPassword(email: email, password: password);
-		updateDisplayName(fullName: fullName);
-	}
+  Future<void> register({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    await createUserWithEmailAndPassword(email: email, password: password);
+    await updateDisplayName(fullName: fullName);
+  }
 
   Future<void> logout() async {
     return _firebaseAuth.signOut();

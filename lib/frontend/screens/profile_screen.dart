@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProfileScreen extends ConsumerWidget{
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
@@ -23,9 +23,9 @@ class ProfileScreen extends ConsumerWidget{
                 await ref.read(authViewModelProvider.notifier).logout();
 
                 if (context.mounted) {
-									ScaffoldMessenger.of(context).showSnackBar(
-										const SnackBar(content: Text('Logged out successfully'))
-									);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out successfully')),
+                  );
                 }
               },
             ),

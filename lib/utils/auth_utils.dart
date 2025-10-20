@@ -15,6 +15,8 @@ String getFriendlyErrorMessage(Object error) {
         return 'Unable to connect. Please check your internet connection.';
       case 'invalid-credential':
         return 'Invalid email or password. Please try again.';
+      case 'email-already-in-use':
+        return 'This email is already in use. Please try again.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'user-not-found':
