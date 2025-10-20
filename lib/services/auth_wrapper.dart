@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
 import '../frontend/screens/main_navigation.dart';
+import '../frontend/screens/admin/admin_main_navigation.dart';
 import '../frontend/screens/email_verify.dart';
 import '../services/sess_service.dart';
 
@@ -36,8 +37,23 @@ class AuthWrapper extends StatelessWidget {
           return EmailVerifyScreen(email: user.email ?? '');
         }
         
-        // User is logged in and verified
-        return const MainNavigation();
+        // User is logged in and verified — choose navigation by role
+        return FutureBuilder<String?>(
+          future: sessionService.getCurrentUserRole(),
+          builder: (context, roleSnapshot) {
+            if (roleSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final role = roleSnapshot.data ?? '';
+            if (role.toLowerCase() == 'admin') {
+              return const AdminMainNavigation();
+            }
+            return const MainNavigation();
+          },
+        );
       },
     );
   }

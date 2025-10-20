@@ -14,7 +14,8 @@ class SessionService {
   bool get isUserLoggedIn => currentUser != null && (currentUser?.emailVerified ?? false);
   
 
-  Future<Map<String, dynamic>?> gerCurrentUserData() async {
+  // Returns current user firestore document data or null
+  Future<Map<String, dynamic>?> getCurrentUserData() async {
     final user = currentUser;
     if (user == null) return null;
 
@@ -24,6 +25,15 @@ class SessionService {
     }catch (e) {
       return null;
     }
+  }
+
+  // Convenience helper: returns role string from user doc (or null)
+  Future<String?> getCurrentUserRole() async {
+    final data = await getCurrentUserData();
+    if (data == null) return null;
+    final role = data['role'];
+    if (role is String) return role;
+    return null;
   }
   Future<void> updateLastLogin() async {
     final user = currentUser;

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import '../login_screen.dart'; // Import your login screen (adjust path if needed)
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminProfileScreen extends StatelessWidget {
   const AdminProfileScreen({super.key});
+
+  Future<void> _signOut(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    // AuthWrapper will detect sign-out and redirect automatically
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,13 +16,7 @@ class AdminProfileScreen extends StatelessWidget {
         title: const Text("Admin Profile"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Navigate back to Login Screen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginScreen()),
-            );
-          },
+          onPressed: () => _signOut(context),
         ),
       ),
       body: const Center(
