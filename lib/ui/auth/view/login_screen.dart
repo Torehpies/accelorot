@@ -30,13 +30,9 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
     if (!mounted) return;
 
     state.when(
-      data: (_) {
-        showSnackbar(context, 'Login successfully!');
-      },
+      data: (_) => showSnackbar('Login successfully!'),
       loading: () {},
-      error: (error, _) {
-        showSnackbar(context, error.toString(), isError: true);
-      },
+      error: (error, _) => showSnackbar(error.toString(), isError: true),
     );
   }
 

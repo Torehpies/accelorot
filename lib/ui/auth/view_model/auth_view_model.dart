@@ -32,8 +32,11 @@ class AuthViewModel extends _$AuthViewModel {
         password: password,
         fullName: fullName,
       );
+
+			if(!ref.mounted) return;
       state = const AsyncValue.data(null);
     } catch (e, st) {
+			if(!ref.mounted) return;
       final message = getFriendlyErrorMessage(e);
       state = AsyncValue.error(message, st);
     }

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routing/app_router.dart';
 
-void showSnackbar(
-  BuildContext context,
-  String message, {
-  bool isError = false,
-}) {
-  ScaffoldMessenger.of(context).showSnackBar(
+void showSnackbar(String message, {bool isError = false}) {
+  rootScaffoldMessengerKey.currentState?.showSnackBar(
     SnackBar(
       content: Text(message),
       behavior: SnackBarBehavior.floating,

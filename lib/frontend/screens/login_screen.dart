@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       onLoginError: (message) {
-        showSnackbar(context, message, isError: true);
+        showSnackbar(message, isError: true);
       },
     );
 

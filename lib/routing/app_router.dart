@@ -14,6 +14,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
 
+final rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _dashboardNavigatorKey = GlobalKey<NavigatorState>();
 final _activityNavigatorKey = GlobalKey<NavigatorState>();

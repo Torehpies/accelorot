@@ -52,20 +52,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           setState(() => _isLoading = false);
 
           if (result['success']) {
-            showSnackbar(context, 'Successfully registered as $selectedRole!');
+            showSnackbar('Successfully registered as $selectedRole!');
 
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const MainNavigation()),
             );
           } else {
-            showSnackbar(context, result['message'], isError: true);
+            showSnackbar(result['message'], isError: true);
           }
         }
       } catch (e) {
         if (mounted) {
           setState(() => _isLoading = false);
-          showSnackbar(context, 'An unexpected error occurred', isError: true);
+          showSnackbar('An unexpected error occurred', isError: true);
         }
       }
     }
@@ -418,7 +418,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       GestureDetector(
                         onTap: () async {
                           try {} catch (e) {
-                            showSnackbar(context, 'Error $e');
+                            showSnackbar('Error $e');
                           }
                         },
                         child: Image.asset(

@@ -27,10 +27,12 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final GoRouter router = ref.watch(routerProvider);
+
     return MaterialApp.router(
       title: 'Accel-o-Rot',
       debugShowCheckedModeBanner: false,
       routerConfig: router,
+			scaffoldMessengerKey: rootScaffoldMessengerKey,
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
@@ -58,16 +60,5 @@ class MyApp extends ConsumerWidget {
         ),
       ),
     );
-    //return MaterialApp(
-    //  title: 'Accel-o-Rot',
-    //  routes: {
-    //    '/main': (context) => const MainNavigation(),
-    //    '/statistics': (context) => const StatisticsScreen(),
-    //    '/login': (context) => const RefactoredLoginScreen(),
-    //    '/home': (context) => const HomeScreen(),
-    //  },
-    //  //home: const SplashScreen(),
-    //  home: const AuthWrapper(),
-    //);
   }
 }

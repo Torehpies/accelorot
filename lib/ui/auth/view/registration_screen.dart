@@ -26,6 +26,7 @@ class _RegistrationScreenState
 
   void _onCreateAccountPressed() async {
     if (!_formKey.currentState!.validate()) return;
+
     final fullName =
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
@@ -42,13 +43,9 @@ class _RegistrationScreenState
     if (!mounted) return;
 
     state.when(
-      data: (_) {
-        showSnackbar(context, 'Registered successfully!');
-      },
+      data: (_) => showSnackbar('Registered successfully!'),
       loading: () {},
-      error: (error, _) {
-        showSnackbar(context, error.toString(), isError: true);
-      },
+      error: (error, _) => showSnackbar(error.toString(), isError: true),
     );
   }
 
@@ -224,7 +221,7 @@ class _RegistrationScreenState
                         try {
                           _onGoogleSignInPressed();
                         } catch (e) {
-                          showSnackbar(context, 'Error $e');
+                          showSnackbar('Error $e', isError: true);
                         }
                       },
                       child: Image.asset(
