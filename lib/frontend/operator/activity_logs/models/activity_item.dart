@@ -48,4 +48,19 @@ class ActivityItem {
     
     return '$month/$day/$year, $displayHour:$minute $period';
   }
+
+  // Reusable search method - checks if item matches the search query
+  bool matchesSearchQuery(String query) {
+    if (query.isEmpty) return true;
+    
+    final lowerQuery = query.toLowerCase();
+    final timestampStr = '${timestamp.year}-${timestamp.month}-${timestamp.day} ${timestamp.hour}:${timestamp.minute}';
+    
+    return title.toLowerCase().contains(lowerQuery) ||
+           description.toLowerCase().contains(lowerQuery) ||
+           value.toLowerCase().contains(lowerQuery) ||
+           category.toLowerCase().contains(lowerQuery) ||
+           statusColor.toLowerCase().contains(lowerQuery) ||
+           timestampStr.toLowerCase().contains(lowerQuery);
+  }
 }
