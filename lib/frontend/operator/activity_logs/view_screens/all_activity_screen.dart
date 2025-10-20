@@ -53,59 +53,65 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     if (searchQuery.isEmpty) {
       return allActivities;
     }
-    return allActivities.where((item) => item.matchesSearchQuery(searchQuery)).toList();
+    return allActivities
+        .where((item) => item.matchesSearchQuery(searchQuery))
+        .toList();
   }
 
   // Get filter types present in search results (Substrate or Alerts)
   Set<String> get _filterTypesInSearchResults {
     if (searchQuery.isEmpty) return {};
-    
+
     final categories = _searchResults.map((item) => item.category).toSet();
     Set<String> filterTypes = {};
-    
+
     // Check if any substrate categories exist
-    bool hasSubstrate = categories.any((cat) => ['Greens', 'Browns', 'Compost'].contains(cat));
-    
+    bool hasSubstrate = categories.any(
+      (cat) => ['Greens', 'Browns', 'Compost'].contains(cat),
+    );
+
     // Check if any alert categories exist
-    bool hasAlerts = categories.any((cat) => ['Temp', 'Moisture', 'Oxygen'].contains(cat));
-    
+    bool hasAlerts = categories.any(
+      (cat) => ['Temp', 'Moisture', 'Oxygen'].contains(cat),
+    );
+
     // Add the filter types that have matches
     if (hasSubstrate) {
       filterTypes.add('Substrate');
     }
-    
+
     if (hasAlerts) {
       filterTypes.add('Alerts');
     }
-    
+
     // Only add 'All' if BOTH Substrate AND Alerts have matches
     if (hasSubstrate && hasAlerts) {
       filterTypes.add('All');
     }
-    
+
     return filterTypes;
   }
 
   // Filtered data based on selected filter
   List<ActivityItem> get _filteredActivities {
     List<ActivityItem> results = _searchResults;
-    
+
     if (isManualFilter && selectedFilter != 'All') {
       if (selectedFilter == 'Substrate') {
         results = results.where((item) {
-          return item.category == 'Greens' || 
-                 item.category == 'Browns' || 
-                 item.category == 'Compost';
+          return item.category == 'Greens' ||
+              item.category == 'Browns' ||
+              item.category == 'Compost';
         }).toList();
       } else if (selectedFilter == 'Alerts') {
         results = results.where((item) {
-          return item.category == 'Temp' || 
-                 item.category == 'Moisture' || 
-                 item.category == 'Oxygen';
+          return item.category == 'Temp' ||
+              item.category == 'Moisture' ||
+              item.category == 'Oxygen';
         }).toList();
       }
     }
-    
+
     return results;
   }
 
@@ -122,7 +128,10 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text("All Activity Logs"),
+          title: const Text(
+            "All Activity Logs",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.teal,
         ),
         body: Padding(
@@ -136,7 +145,7 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
                 focusNode: _searchFocusNode,
               ),
               const SizedBox(height: 12),
-              
+
               // White Container with filters and cards
               Expanded(
                 child: Container(
@@ -158,7 +167,7 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
                     children: [
                       // Fixed filter section at top
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                         child: FilterSection(
                           filters: filters,
                           initialFilter: selectedFilter,
@@ -183,11 +192,12 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                                 itemCount: _filteredActivities.length,
                                 itemBuilder: (context, index) {
                                   return ActivityCard(
-                                      item: _filteredActivities[index]);
+                                    item: _filteredActivities[index],
+                                  );
                                 },
                               ),
                       ),

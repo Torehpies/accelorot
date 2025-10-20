@@ -9,10 +9,7 @@ import '../services/mock_data_service.dart';
 class AlertsScreen extends StatefulWidget {
   final String initialFilter;
 
-  const AlertsScreen({
-    super.key,
-    this.initialFilter = 'All',
-  });
+  const AlertsScreen({super.key, this.initialFilter = 'All'});
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -68,35 +65,39 @@ class _AlertsScreenState extends State<AlertsScreen> {
     if (searchQuery.isEmpty) {
       return alerts;
     }
-    return alerts.where((item) => item.matchesSearchQuery(searchQuery)).toList();
+    return alerts
+        .where((item) => item.matchesSearchQuery(searchQuery))
+        .toList();
   }
 
   // Get categories present in search results
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
-    
+
     final categories = _searchResults.map((item) => item.category).toSet();
-    
+
     // Define the specific categories (excluding 'All')
     final specificCategories = {'Temp', 'Moisture', 'Oxygen'};
-    
+
     // Check if ALL specific categories have matches
-    final hasAllCategories = specificCategories.every((cat) => categories.contains(cat));
-    
+    final hasAllCategories = specificCategories.every(
+      (cat) => categories.contains(cat),
+    );
+
     Set<String> result = {};
-    
+
     // Add specific categories that have matches
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-    
+
     // Only add 'All' if ALL categories have matches
     if (hasAllCategories) {
       result.add('All');
     }
-    
+
     return result;
   }
 
@@ -107,11 +108,11 @@ class _AlertsScreenState extends State<AlertsScreen> {
           .where((item) => item.category == selectedFilter)
           .toList();
     }
-    
+
     if (selectedFilter == 'All' || !isManualFilter) {
       return _searchResults;
     }
-    
+
     return _searchResults
         .where((item) => item.category == selectedFilter)
         .toList();
@@ -130,7 +131,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text("Alerts Logs"),
+          title: const Text(
+            "Alerts Logs",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.teal,
         ),
         body: Padding(
@@ -144,7 +148,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                 focusNode: _searchFocusNode,
               ),
               const SizedBox(height: 12),
-              
+
               // White Container with filters and cards
               Expanded(
                 child: Container(
@@ -166,7 +170,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     children: [
                       // Fixed filter section at top
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                         child: FilterSection(
                           filters: filters,
                           initialFilter: selectedFilter,
@@ -191,11 +195,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                                 itemCount: _filteredAlerts.length,
                                 itemBuilder: (context, index) {
                                   return ActivityCard(
-                                      item: _filteredAlerts[index]);
+                                    item: _filteredAlerts[index],
+                                  );
                                 },
                               ),
                       ),
