@@ -1,16 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
+import 'package:flutter_application_1/services/sess_service.dart';
 
 import '../admin/components/edit_profile_modal.dart';
 import '../admin/components/change_password_modal.dart';
 import '../admin_personal_info_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _signOut(BuildContext context) async {
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
+class _ProfileScreenState extends State<ProfileScreen> {
+  final SessionService _session = SessionService();
+  Map<String, dynamic>? _userData;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final data = await _session.getCurrentUserData();
+    if (mounted) {
+      setState(() {
+        _userData = data;
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _signOut(BuildContext context) async {
     final navigator = Navigator.of(context);
     await FirebaseAuth.instance.signOut();
 
@@ -22,6 +47,18 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final first = (_userData != null && _userData!['firstname'] is String)
+        ? (_userData!['firstname'] as String)
+        : (FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '');
+    final last = (_userData != null && _userData!['lastname'] is String)
+        ? (_userData!['lastname'] as String)
+        : (FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '');
+
+    final displayName = [first, last].where((s) => s.isNotEmpty).join(' ').trim();
+    final email = (_userData != null && _userData!['email'] is String)
+        ? (_userData!['email'] as String)
+        : (FirebaseAuth.instance.currentUser?.email ?? '');
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -47,21 +84,24 @@ class ProfileScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 50,
                       backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150/2E7D32/FFFFFF?text=M',
+                        'https://via.placeholder.com/150/2E7D32/FFFFFF?text=${displayName.isNotEmpty ? displayName[0].toUpperCase() : 'M'}',
                       ),
                     ),
                     SizedBox(height: 16),
+                    _loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            displayName.isNotEmpty ? displayName : 'No name',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                    const SizedBox(height: 4),
                     Text(
-                      "Miguel Andres Reyes",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "miguelreyes@email.com",
-                      style: TextStyle(
+                      email,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                       ),
@@ -84,11 +124,11 @@ class ProfileScreen extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) => EditProfileModal(
-                            firstName: "Miguel Andres",
-                            lastName: "Reyes",
-                            username: "MiguelReyes",
-                            email: "miguelreyes@email.com",
-                            role: "User",
+                            firstName: first.isNotEmpty ? first : 'Miguel Andres',
+                            lastName: last.isNotEmpty ? last : 'Reyes',
+                            username: FirebaseAuth.instance.currentUser?.displayName ?? '',
+                            email: email,
+                            role: _userData?['role'] ?? 'User',
                           ),
                         );
                       },
@@ -144,7 +184,7 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF4CAF50)),
+        border: Border.all(color: const Color(0xFF4CAF50)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -157,7 +197,7 @@ class ProfileScreen extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        trailing: Icon(
+        trailing: const Icon(
           Icons.arrow_forward_ios,
           size: 16,
           color: Color(0xFF4CAF50),
