@@ -51,18 +51,14 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
   void _onSearchChanged(String query) {
     setState(() {
       searchQuery = query.toLowerCase();
-      if (query.isEmpty) {
-        isManualFilter = false;
-        selectedFilter = 'All';
-      }
     });
   }
 
   void _onSearchCleared() {
     setState(() {
       searchQuery = '';
-      isManualFilter = false;
-      selectedFilter = 'All';
+      // Keep the manually selected filter, don't reset to 'All'
+      // If no manual filter was set, selectedFilter stays 'All'
     });
   }
 

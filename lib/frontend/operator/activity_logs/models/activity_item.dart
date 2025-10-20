@@ -60,7 +60,6 @@ class ActivityItem {
            description.toLowerCase().contains(lowerQuery) ||
            value.toLowerCase().contains(lowerQuery) ||
            category.toLowerCase().contains(lowerQuery) ||
-           statusColor.toLowerCase().contains(lowerQuery) ||
            timestampStr.toLowerCase().contains(lowerQuery);
   }
 }
