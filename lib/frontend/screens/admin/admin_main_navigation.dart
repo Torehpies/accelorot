@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_home_screen.dart';
 import 'user_management_screen.dart';
-import 'admin_profile_screen.dart';
+import '../profile_screen.dart'; // ✅ Adjust path if needed — this is your existing ProfileScreen
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});
@@ -14,10 +14,11 @@ class AdminMainNavigation extends StatefulWidget {
 class _AdminMainNavigationState extends State<AdminMainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
+  // ✅ No 'const' — and use ProfileScreen (not AdminProfileScreen)
+  final List<Widget> _screens = [
     AdminHomeScreen(),
     UserManagementScreen(),
-    AdminProfileScreen(),
+    ProfileScreen(), // ✅ Use your actual screen
   ];
 
   @override
