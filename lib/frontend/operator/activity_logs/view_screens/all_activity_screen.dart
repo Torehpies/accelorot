@@ -18,6 +18,13 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
   String searchQuery = '';
   bool isManualFilter = false;
   final filters = const ['All', 'Substrate', 'Alerts'];
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   void _onFilterChanged(String filter) {
     setState(() {
@@ -64,13 +71,23 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     Set<String> filterTypes = {};
     
     // Check if any substrate categories exist
-    if (categories.any((cat) => ['Greens', 'Browns', 'Compost'].contains(cat))) {
+    bool hasSubstrate = categories.any((cat) => ['Greens', 'Browns', 'Compost'].contains(cat));
+    
+    // Check if any alert categories exist
+    bool hasAlerts = categories.any((cat) => ['Temp', 'Moisture', 'Oxygen'].contains(cat));
+    
+    // Add the filter types that have matches
+    if (hasSubstrate) {
       filterTypes.add('Substrate');
     }
     
-    // Check if any alert categories exist
-    if (categories.any((cat) => ['Temp', 'Moisture', 'Humidity'].contains(cat))) {
+    if (hasAlerts) {
       filterTypes.add('Alerts');
+    }
+    
+    // Only add 'All' if BOTH Substrate AND Alerts have matches
+    if (hasSubstrate && hasAlerts) {
+      filterTypes.add('All');
     }
     
     return filterTypes;
@@ -91,7 +108,7 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
         results = results.where((item) {
           return item.category == 'Temp' || 
                  item.category == 'Moisture' || 
-                 item.category == 'Humidity';
+                 item.category == 'Oxygen';
         }).toList();
       }
     }
@@ -101,85 +118,92 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+    return GestureDetector(
+      onTap: () {
+        // Unfocus search bar when tapping anywhere on screen
+        _searchFocusNode.unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text("All Activity Logs"),
+          backgroundColor: Colors.teal,
         ),
-        title: const Text("All Activity Logs"),
-        backgroundColor: Colors.teal,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Column(
-          children: [
-            // Search Bar
-            SearchBarWidget(
-              onSearchChanged: _onSearchChanged,
-              onClear: _onSearchCleared,
-            ),
-            const SizedBox(height: 12),
-            
-            // White Container with filters and cards
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            children: [
+              // Search Bar
+              SearchBarWidget(
+                onSearchChanged: _onSearchChanged,
+                onClear: _onSearchCleared,
+                focusNode: _searchFocusNode,
+              ),
+              const SizedBox(height: 12),
+              
+              // White Container with filters and cards
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Fixed filter section at top
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      child: FilterSection(
-                        filters: filters,
-                        initialFilter: selectedFilter,
-                        onSelected: _onFilterChanged,
-                        autoHighlightedFilters: _filterTypesInSearchResults,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Fixed filter section at top
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: FilterSection(
+                          filters: filters,
+                          initialFilter: selectedFilter,
+                          onSelected: _onFilterChanged,
+                          autoHighlightedFilters: _filterTypesInSearchResults,
+                        ),
+                      ),
 
-                    // Scrollable cards list
-                    Expanded(
-                      child: _filteredActivities.isEmpty
-                          ? Center(
-                              child: Text(
-                                searchQuery.isNotEmpty
-                                    ? 'No results found for "$searchQuery"'
-                                    : 'No ${selectedFilter.toLowerCase()} activities found',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
+                      // Scrollable cards list
+                      Expanded(
+                        child: _filteredActivities.isEmpty
+                            ? Center(
+                                child: Text(
+                                  searchQuery.isNotEmpty
+                                      ? 'No results found for "$searchQuery"'
+                                      : 'No ${selectedFilter.toLowerCase()} activities found',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.all(16),
+                                itemCount: _filteredActivities.length,
+                                itemBuilder: (context, index) {
+                                  return ActivityCard(
+                                      item: _filteredActivities[index]);
+                                },
                               ),
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _filteredActivities.length,
-                              itemBuilder: (context, index) {
-                                return ActivityCard(
-                                    item: _filteredActivities[index]);
-                              },
-                            ),
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
