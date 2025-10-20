@@ -50,7 +50,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
       });
       return substrates;
     } catch (e) {
-      print('Error loading substrates: $e');
       return [];
     }
   }

@@ -10,10 +10,7 @@ import '../../../../services/firestore_activity_service.dart';
 class AlertsScreen extends StatefulWidget {
   final String initialFilter;
 
-  const AlertsScreen({
-    super.key,
-    this.initialFilter = 'All',
-  });
+  const AlertsScreen({super.key, this.initialFilter = 'All'});
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -26,7 +23,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
   DateFilterRange _dateFilter = DateFilterRange(type: DateFilterType.none);
   final filters = const ['All', 'Temp', 'Moisture', 'Oxygen'];
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   late Future<List<ActivityItem>> _alertsFuture;
   List<ActivityItem> _allAlerts = [];
 
@@ -37,7 +34,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
     if (widget.initialFilter != 'All') {
       isManualFilter = true;
     }
-    
+
     // Load data from Firestore
     _alertsFuture = _loadAlerts();
   }
@@ -50,7 +47,6 @@ class _AlertsScreenState extends State<AlertsScreen> {
       });
       return alerts;
     } catch (e) {
-      print('Error loading alerts: $e');
       return [];
     }
   }
@@ -94,7 +90,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
 
     return _allAlerts.where((item) {
       return item.timestamp.isAfter(_dateFilter.startDate!) &&
-             item.timestamp.isBefore(_dateFilter.endDate!);
+          item.timestamp.isBefore(_dateFilter.endDate!);
     }).toList();
   }
 
@@ -111,11 +107,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
   // Get categories present in search results
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
-    
+
     final categories = _searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Temp', 'Moisture', 'Oxygen'};
-    final hasAllCategories =
-        specificCategories.every((cat) => categories.contains(cat));
+    final hasAllCategories = specificCategories.every(
+      (cat) => categories.contains(cat),
+    );
 
     Set<String> result = {};
     for (var cat in specificCategories) {
@@ -160,7 +157,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text("Alerts Logs", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text(
+            "Alerts Logs",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.teal,
           actions: [
             DateFilterButton(onFilterChanged: _onDateFilterChanged),
@@ -214,7 +214,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                               filters: filters,
                               initialFilter: selectedFilter,
                               onSelected: _onFilterChanged,
-                              autoHighlightedFilters: _categoriesInSearchResults,
+                              autoHighlightedFilters:
+                                  _categoriesInSearchResults,
                             ),
                           ),
                           Expanded(
@@ -236,7 +237,8 @@ class _AlertsScreenState extends State<AlertsScreen> {
                                     itemCount: _filteredAlerts.length,
                                     itemBuilder: (context, index) {
                                       return ActivityCard(
-                                          item: _filteredAlerts[index]);
+                                        item: _filteredAlerts[index],
+                                      );
                                     },
                                   ),
                           ),
