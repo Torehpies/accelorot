@@ -5,8 +5,7 @@ import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class CyclesRecomScreen extends BaseActivityScreen {
-  const CyclesRecomScreen({super.key, String? initialFilter})
-      : super(initialFilter: initialFilter);
+  const CyclesRecomScreen({super.key, super.initialFilter});
 
   @override
   State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();

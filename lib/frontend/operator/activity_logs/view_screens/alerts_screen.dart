@@ -5,8 +5,7 @@ import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class AlertsScreen extends BaseActivityScreen {
-  const AlertsScreen({super.key, String? initialFilter})
-      : super(initialFilter: initialFilter);
+  const AlertsScreen({super.key, super.initialFilter});
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();

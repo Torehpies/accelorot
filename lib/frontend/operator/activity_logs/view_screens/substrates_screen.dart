@@ -5,8 +5,7 @@ import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class SubstratesScreen extends BaseActivityScreen {
-  const SubstratesScreen({super.key, String? initialFilter})
-      : super(initialFilter: initialFilter);
+  const SubstratesScreen({super.key, super.initialFilter});
 
   @override
   State<SubstratesScreen> createState() => _SubstratesScreenState();
