@@ -1,349 +1,51 @@
-//cycles_recom_screen.dart
+// view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
-import '../widgets/filter_section.dart';
-import '../widgets/activity_card.dart';
-import '../widgets/search_bar_widget.dart';
-import '../widgets/date_filter_button.dart';
+import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
-class CyclesRecomScreen extends StatefulWidget {
-  final String initialFilter;
-
-  const CyclesRecomScreen({
-    super.key,
-    this.initialFilter = 'All',
-  });
+class CyclesRecomScreen extends BaseActivityScreen {
+  const CyclesRecomScreen({super.key, String? initialFilter})
+      : super(initialFilter: initialFilter);
 
   @override
   State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _CyclesRecomScreenState extends State<CyclesRecomScreen> {
-  late String selectedFilter;
-  String searchQuery = '';
-  bool isManualFilter = false;
-  DateFilterRange _dateFilter = DateFilterRange(type: DateFilterType.none);
-  final filters = const ['All', 'Recoms', 'Cycles'];
-  final FocusNode _searchFocusNode = FocusNode();
-  
-  List<ActivityItem> _allCyclesRecom = [];
-  bool _isLoggedIn = false;
-  bool _isLoading = true;
-  String? _errorMessage;
+class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
+  @override
+  String get screenTitle => 'Cycles & Recommendations';
 
   @override
-  void initState() {
-    super.initState();
-    selectedFilter = widget.initialFilter;
-    if (widget.initialFilter != 'All') {
-      isManualFilter = true;
-    }
-    
-    _checkLoginAndLoadData();
-  }
+  List<String> get filters => const ['All', 'Recoms', 'Cycles'];
 
-  Future<void> _checkLoginAndLoadData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final userId = FirestoreActivityService.getCurrentUserId();
-      _isLoggedIn = userId != null;
-      
-      if (_isLoggedIn) {
-        // Upload mock data if needed, then load
-        await FirestoreActivityService.uploadAllMockData();
-        await _loadCyclesRecom();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _loadCyclesRecom() async {
-    try {
-      final cyclesRecom = await FirestoreActivityService.getCyclesRecom();
-      if (mounted) {
-        setState(() {
-          _allCyclesRecom = cyclesRecom;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-        });
-      }
-    }
+  @override
+  Future<List<ActivityItem>> fetchData() async {
+    return await FirestoreActivityService.getCyclesRecom();
   }
 
   @override
-  void dispose() {
-    _searchFocusNode.dispose();
-    super.dispose();
+  List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter) {
+    if (filter == 'All') return items;
+    return items.where((item) => item.category == filter).toList();
   }
 
-  void _onFilterChanged(String filter) {
-    setState(() {
-      selectedFilter = filter;
-      isManualFilter = true;
-    });
-  }
-
-  void _onSearchChanged(String query) {
-    setState(() {
-      searchQuery = query.toLowerCase();
-    });
-  }
-
-  void _onSearchCleared() {
-    setState(() {
-      searchQuery = '';
-    });
-  }
-
-  void _onDateFilterChanged(DateFilterRange filter) {
-    setState(() {
-      _dateFilter = filter;
-    });
-  }
-
-  List<ActivityItem> get _dateFilteredCyclesRecom {
-    if (!_dateFilter.isActive) {
-      return _allCyclesRecom;
-    }
-
-    return _allCyclesRecom.where((item) {
-      return item.timestamp.isAfter(_dateFilter.startDate!) &&
-             item.timestamp.isBefore(_dateFilter.endDate!);
-    }).toList();
-  }
-
-  List<ActivityItem> get _searchResults {
-    if (searchQuery.isEmpty) {
-      return _dateFilteredCyclesRecom;
-    }
-    return _dateFilteredCyclesRecom
-        .where((item) => item.matchesSearchQuery(searchQuery))
-        .toList();
-  }
-
-  Set<String> get _categoriesInSearchResults {
-    if (searchQuery.isEmpty) return {};
-    
-    final categories = _searchResults.map((item) => item.category).toSet();
+  @override
+  Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
+    final categories = searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Recoms', 'Cycles'};
-    final hasAllCategories =
-        specificCategories.every((cat) => categories.contains(cat));
-
+    
     Set<String> result = {};
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-
-    if (hasAllCategories) {
+    
+    if (specificCategories.every((cat) => categories.contains(cat))) {
       result.add('All');
     }
-
+    
     return result;
-  }
-
-  List<ActivityItem> get _filteredCyclesRecom {
-    if (isManualFilter && selectedFilter != 'All') {
-      return _searchResults
-          .where((item) => item.category == selectedFilter)
-          .toList();
-    }
-
-    if (selectedFilter == 'All' || !isManualFilter) {
-      return _searchResults;
-    }
-
-    return _searchResults
-        .where((item) => item.category == selectedFilter)
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        _searchFocusNode.unfocus();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: const Text(
-            "Cycles & Recommendations",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.teal,
-          actions: [
-            DateFilterButton(onFilterChanged: _onDateFilterChanged),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            children: [
-              SearchBarWidget(
-                onSearchChanged: _onSearchChanged,
-                onClear: _onSearchCleared,
-                focusNode: _searchFocusNode,
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: FilterSection(
-                          filters: filters,
-                          initialFilter: selectedFilter,
-                          onSelected: _onFilterChanged,
-                          autoHighlightedFilters: _categoriesInSearchResults,
-                        ),
-                      ),
-                      Expanded(
-                        child: _buildContent(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent() {
-    // Show loading indicator
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.teal),
-      );
-    }
-
-    // Show login prompt
-    if (!_isLoggedIn) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Text(
-            'Please log in to view cycles & recommendations',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    // Show error message
-    if (_errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Error loading data',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _errorMessage!,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _checkLoginAndLoadData,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Show empty state
-    if (_filteredCyclesRecom.isEmpty) {
-      return Center(
-        child: Text(
-          searchQuery.isNotEmpty
-              ? 'No results found for "$searchQuery"'
-              : 'No ${selectedFilter.toLowerCase()} activities found',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
-    // Show list
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _filteredCyclesRecom.length,
-      itemBuilder: (context, index) {
-        return ActivityCard(
-          item: _filteredCyclesRecom[index],
-        );
-      },
-    );
   }
 }
