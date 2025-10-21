@@ -31,7 +31,7 @@ jobs:
 
       - name: Inject Firebase Options (Dart)
         env:
-          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_CONTENT }}
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_CONTENT || 'default_value' }}
         run: |
           mkdir -p lib
           echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
