@@ -22,24 +22,57 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
   final filters = const ['All', 'Substrate', 'Alerts'];
   final FocusNode _searchFocusNode = FocusNode();
   
-  late Future<List<ActivityItem>> _activitiesFuture;
   List<ActivityItem> _allActivities = [];
+  bool _isLoggedIn = false;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _activitiesFuture = _loadActivities();
+    _checkLoginAndLoadData();
   }
 
-  Future<List<ActivityItem>> _loadActivities() async {
+  Future<void> _checkLoginAndLoadData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final userId = FirestoreActivityService.getCurrentUserId();
+      _isLoggedIn = userId != null;
+      
+      if (_isLoggedIn) {
+        // Upload mock data if needed, then load
+        await FirestoreActivityService.uploadAllMockData();
+        await _loadActivities();
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadActivities() async {
     try {
       final activities = await FirestoreActivityService.getAllActivities();
-      setState(() {
-        _allActivities = activities;
-      });
-      return activities;
+      if (mounted) {
+        setState(() {
+          _allActivities = activities;
+        });
+      }
     } catch (e) {
-      return [];
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -74,7 +107,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     });
   }
 
-  // Apply date filter first
   List<ActivityItem> get _dateFilteredActivities {
     if (!_dateFilter.isActive) {
       return _allActivities;
@@ -86,7 +118,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     }).toList();
   }
 
-  // Get search results from date-filtered data
   List<ActivityItem> get _searchResults {
     if (searchQuery.isEmpty) {
       return _dateFilteredActivities;
@@ -96,7 +127,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
         .toList();
   }
 
-  // Get filter types present in search results
   Set<String> get _filterTypesInSearchResults {
     if (searchQuery.isEmpty) return {};
     
@@ -123,7 +153,6 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
     return filterTypes;
   }
 
-  // Filtered data based on selected filter
   List<ActivityItem> get _filteredActivities {
     List<ActivityItem> results = _searchResults;
 
@@ -165,89 +194,151 @@ class _AllActivityScreenState extends State<AllActivityScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        body: FutureBuilder<List<ActivityItem>>(
-          future: _activitiesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error loading data: ${snapshot.error}'),
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                children: [
-                  SearchBarWidget(
-                    onSearchChanged: _onSearchChanged,
-                    onClear: _onSearchCleared,
-                    focusNode: _searchFocusNode,
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                            child: FilterSection(
-                              filters: filters,
-                              initialFilter: selectedFilter,
-                              onSelected: _onFilterChanged,
-                              autoHighlightedFilters: _filterTypesInSearchResults,
-                            ),
-                          ),
-                          Expanded(
-                            child: _filteredActivities.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      searchQuery.isNotEmpty
-                                          ? 'No results found for "$searchQuery"'
-                                          : 'No ${selectedFilter.toLowerCase()} activities found',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.all(16),
-                                    itemCount: _filteredActivities.length,
-                                    itemBuilder: (context, index) {
-                                      return ActivityCard(
-                                          item: _filteredActivities[index]);
-                                    },
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            children: [
+              SearchBarWidget(
+                onSearchChanged: _onSearchChanged,
+                onClear: _onSearchCleared,
+                focusNode: _searchFocusNode,
               ),
-            );
-          },
+              const SizedBox(height: 12),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: FilterSection(
+                          filters: filters,
+                          initialFilter: selectedFilter,
+                          onSelected: _onFilterChanged,
+                          autoHighlightedFilters: _filterTypesInSearchResults,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildContent(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    // Show loading indicator
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.teal),
+      );
+    }
+
+    // Show login prompt
+    if (!_isLoggedIn) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'Please log in to view activity logs',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    // Show error message
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Error loading data',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _checkLoginAndLoadData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show empty state
+    if (_filteredActivities.isEmpty) {
+      return Center(
+        child: Text(
+          searchQuery.isNotEmpty
+              ? 'No results found for "$searchQuery"'
+              : 'No ${selectedFilter.toLowerCase()} activities found',
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    // Show list
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _filteredActivities.length,
+      itemBuilder: (context, index) {
+        return ActivityCard(item: _filteredActivities[index]);
+      },
     );
   }
 }

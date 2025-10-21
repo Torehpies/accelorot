@@ -1,4 +1,4 @@
-//firestore_activity_service.dart
+// firestore_activity_service.dart
 import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,7 +14,8 @@ class FirestoreActivityService {
     return _auth.currentUser?.uid;
   }
 
-  // Get reference to user's activities substrates collection
+  // 🔹 Firestore Collection References
+
   static CollectionReference _getSubstratesCollection(String userId) {
     return _firestore
         .collection('users')
@@ -24,7 +25,6 @@ class FirestoreActivityService {
         .collection('substrates');
   }
 
-  // Get reference to user's activities alerts collection
   static CollectionReference _getAlertsCollection(String userId) {
     return _firestore
         .collection('users')
@@ -34,7 +34,18 @@ class FirestoreActivityService {
         .collection('alerts');
   }
 
-  // Upload mock substrates to Firestore
+  // NEW 🔹 Cycles & Recommendations collection reference
+  static CollectionReference _getCyclesRecomCollection(String userId) {
+    return _firestore
+        .collection('users')
+        .doc(userId)
+        .collection('activities')
+        .doc('docu')
+        .collection('cyclesRecom');
+  }
+
+  // 🔹 Upload mock data to Firestore
+
   static Future<void> uploadSubstrates() async {
     try {
       final userId = getCurrentUserId();
@@ -44,7 +55,8 @@ class FirestoreActivityService {
       final batch = _firestore.batch();
 
       for (var substrate in substrates) {
-        final docRef = _getSubstratesCollection(userId).doc(substrate.timestamp.millisecondsSinceEpoch.toString());
+        final docRef = _getSubstratesCollection(userId)
+            .doc(substrate.timestamp.millisecondsSinceEpoch.toString());
 
         batch.set(docRef, {
           'title': substrate.title,
@@ -63,7 +75,6 @@ class FirestoreActivityService {
     }
   }
 
-  // Upload mock alerts to Firestore
   static Future<void> uploadAlerts() async {
     try {
       final userId = getCurrentUserId();
@@ -73,7 +84,8 @@ class FirestoreActivityService {
       final batch = _firestore.batch();
 
       for (var alert in alerts) {
-        final docRef = _getAlertsCollection(userId).doc(alert.timestamp.millisecondsSinceEpoch.toString());
+        final docRef = _getAlertsCollection(userId)
+            .doc(alert.timestamp.millisecondsSinceEpoch.toString());
 
         batch.set(docRef, {
           'title': alert.title,
@@ -92,7 +104,38 @@ class FirestoreActivityService {
     }
   }
 
-  // Check if data already exists
+  // NEW 🔹 Upload mock Cycles & Recommendations
+  static Future<void> uploadCyclesRecom() async {
+    try {
+      final userId = getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      final cyclesRecom = MockDataService.getCyclesRecom();
+      final batch = _firestore.batch();
+
+      for (var item in cyclesRecom) {
+        final docRef = _getCyclesRecomCollection(userId)
+            .doc(item.timestamp.millisecondsSinceEpoch.toString());
+
+        batch.set(docRef, {
+          'title': item.title,
+          'value': item.value,
+          'statusColor': item.statusColor,
+          'icon': item.icon.codePoint,
+          'description': item.description,
+          'category': item.category,
+          'timestamp': item.timestamp,
+        });
+      }
+
+      await batch.commit();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // 🔹 Data Existence Check
+
   static Future<bool> _dataExists() async {
     try {
       final userId = getCurrentUserId();
@@ -105,22 +148,21 @@ class FirestoreActivityService {
     }
   }
 
-  // Upload all mock data (substrates + alerts) - only if doesn't exist
+  // 🔹 Upload All Mock Data (Substrates + Alerts + CyclesRecom)
   static Future<void> uploadAllMockData() async {
     try {
       final exists = await _dataExists();
-      if (exists) {
-        return;
-      }
+      if (exists) return;
 
       await uploadSubstrates();
       await uploadAlerts();
+      await uploadCyclesRecom(); // 👈 Added here
     } catch (e) {
       rethrow;
     }
   }
 
-  // Force upload (deletes old data and uploads fresh)
+  // 🔹 Force Upload (delete old + upload fresh)
   static Future<void> forceUploadAllMockData() async {
     try {
       final userId = getCurrentUserId();
@@ -137,15 +179,22 @@ class FirestoreActivityService {
         await doc.reference.delete();
       }
 
-      // Upload fresh data
+      final cyclesRecomDocs = await _getCyclesRecomCollection(userId).get();
+      for (var doc in cyclesRecomDocs.docs) {
+        await doc.reference.delete();
+      }
+
+      // Upload fresh mock data
       await uploadSubstrates();
       await uploadAlerts();
+      await uploadCyclesRecom();
     } catch (e) {
       rethrow;
     }
   }
 
-  // Fetch substrates from Firestore
+  // 🔹 Fetch data from Firestore
+
   static Future<List<ActivityItem>> getSubstrates() async {
     try {
       final userId = getCurrentUserId();
@@ -161,7 +210,6 @@ class FirestoreActivityService {
     }
   }
 
-  // Fetch alerts from Firestore
   static Future<List<ActivityItem>> getAlerts() async {
     try {
       final userId = getCurrentUserId();
@@ -177,20 +225,39 @@ class FirestoreActivityService {
     }
   }
 
-  // Fetch all activities (substrates + alerts) combined
+  // NEW 🔹 Fetch Cycles & Recommendations
+  static Future<List<ActivityItem>> getCyclesRecom() async {
+    try {
+      final userId = getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      final snapshot = await _getCyclesRecomCollection(userId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => _documentToActivityItem(doc)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // 🔹 Combined all activities
   static Future<List<ActivityItem>> getAllActivities() async {
     try {
       final substrates = await getSubstrates();
       final alerts = await getAlerts();
-      final combined = [...substrates, ...alerts];
+      final cyclesRecom = await getCyclesRecom(); // 👈 Added here
+
+      final combined = [...substrates, ...alerts, ...cyclesRecom];
       combined.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
       return combined;
     } catch (e) {
       return [];
     }
   }
 
-  // Convert Firestore document to ActivityItem
+  // 🔹 Convert Firestore document to ActivityItem
   static ActivityItem _documentToActivityItem(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final timestamp = (data['timestamp'] as Timestamp).toDate();
@@ -206,7 +273,7 @@ class FirestoreActivityService {
     );
   }
 
-  // Helper to convert icon codepoint back to IconData
+  // 🔹 Helper to map codePoint → IconData
   static IconData _getIconFromCodePoint(int codePoint) {
     switch (codePoint) {
       case 0xe3b6:
@@ -221,6 +288,20 @@ class FirestoreActivityService {
         return Icons.water_drop;
       case 0xeac1:
         return Icons.bubble_chart;
+      case 0xe002:
+        return Icons.warning;
+      case 0xe037:
+        return Icons.play_circle;
+      case 0xe0c2:
+        return Icons.lightbulb;
+      case 0xe86c:
+        return Icons.check_circle;
+      case 0xf8e5:
+        return Icons.thumb_up;
+      case 0xe047:
+        return Icons.pause_circle;
+      case 0xe63d:
+        return Icons.air;
       default:
         return Icons.eco;
     }

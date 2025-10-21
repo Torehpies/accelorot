@@ -27,8 +27,10 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
   final filters = const ['All', 'Greens', 'Browns', 'Compost'];
   final FocusNode _searchFocusNode = FocusNode();
   
-  late Future<List<ActivityItem>> _substratesFuture;
   List<ActivityItem> _allSubstrates = [];
+  bool _isLoggedIn = false;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -38,19 +40,49 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
       isManualFilter = true;
     }
     
-    // Load data from Firestore
-    _substratesFuture = _loadSubstrates();
+    _checkLoginAndLoadData();
   }
 
-  Future<List<ActivityItem>> _loadSubstrates() async {
+  Future<void> _checkLoginAndLoadData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final userId = FirestoreActivityService.getCurrentUserId();
+      _isLoggedIn = userId != null;
+      
+      if (_isLoggedIn) {
+        // Upload mock data if needed, then load
+        await FirestoreActivityService.uploadAllMockData();
+        await _loadSubstrates();
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadSubstrates() async {
     try {
       final substrates = await FirestoreActivityService.getSubstrates();
-      setState(() {
-        _allSubstrates = substrates;
-      });
-      return substrates;
+      if (mounted) {
+        setState(() {
+          _allSubstrates = substrates;
+        });
+      }
     } catch (e) {
-      return [];
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -85,7 +117,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
     });
   }
 
-  // Apply date filter first
   List<ActivityItem> get _dateFilteredSubstrates {
     if (!_dateFilter.isActive) {
       return _allSubstrates;
@@ -97,7 +128,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
     }).toList();
   }
 
-  // Get search results from date-filtered data
   List<ActivityItem> get _searchResults {
     if (searchQuery.isEmpty) {
       return _dateFilteredSubstrates;
@@ -107,7 +137,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
         .toList();
   }
 
-  // Get categories present in search results
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
     
@@ -130,7 +159,6 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
     return result;
   }
 
-  // Filtered list based on selected filter
   List<ActivityItem> get _filteredSubstrates {
     if (isManualFilter && selectedFilter != 'All') {
       return _searchResults
@@ -166,89 +194,151 @@ class _SubstratesScreenState extends State<SubstratesScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        body: FutureBuilder<List<ActivityItem>>(
-          future: _substratesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error loading data: ${snapshot.error}'),
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                children: [
-                  SearchBarWidget(
-                    onSearchChanged: _onSearchChanged,
-                    onClear: _onSearchCleared,
-                    focusNode: _searchFocusNode,
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                            child: FilterSection(
-                              filters: filters,
-                              initialFilter: selectedFilter,
-                              onSelected: _onFilterChanged,
-                              autoHighlightedFilters: _categoriesInSearchResults,
-                            ),
-                          ),
-                          Expanded(
-                            child: _filteredSubstrates.isEmpty
-                                ? Center(
-                                    child: Text(
-                                      searchQuery.isNotEmpty
-                                          ? 'No results found for "$searchQuery"'
-                                          : 'No ${selectedFilter.toLowerCase()} activities found',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.all(16),
-                                    itemCount: _filteredSubstrates.length,
-                                    itemBuilder: (context, index) {
-                                      return ActivityCard(
-                                          item: _filteredSubstrates[index]);
-                                    },
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            children: [
+              SearchBarWidget(
+                onSearchChanged: _onSearchChanged,
+                onClear: _onSearchCleared,
+                focusNode: _searchFocusNode,
               ),
-            );
-          },
+              const SizedBox(height: 12),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: FilterSection(
+                          filters: filters,
+                          initialFilter: selectedFilter,
+                          onSelected: _onFilterChanged,
+                          autoHighlightedFilters: _categoriesInSearchResults,
+                        ),
+                      ),
+                      Expanded(
+                        child: _buildContent(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    // Show loading indicator
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.teal),
+      );
+    }
+
+    // Show login prompt
+    if (!_isLoggedIn) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Text(
+            'Please log in to view substrates',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    // Show error message
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Error loading data',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _checkLoginAndLoadData,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show empty state
+    if (_filteredSubstrates.isEmpty) {
+      return Center(
+        child: Text(
+          searchQuery.isNotEmpty
+              ? 'No results found for "$searchQuery"'
+              : 'No ${selectedFilter.toLowerCase()} activities found',
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    // Show list
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _filteredSubstrates.length,
+      itemBuilder: (context, index) {
+        return ActivityCard(item: _filteredSubstrates[index]);
+      },
     );
   }
 }

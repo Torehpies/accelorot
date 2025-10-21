@@ -1,4 +1,4 @@
-//alert_screen.dart
+//cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
@@ -7,24 +7,27 @@ import '../widgets/date_filter_button.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
-class AlertsScreen extends StatefulWidget {
+class CyclesRecomScreen extends StatefulWidget {
   final String initialFilter;
 
-  const AlertsScreen({super.key, this.initialFilter = 'All'});
+  const CyclesRecomScreen({
+    super.key,
+    this.initialFilter = 'All',
+  });
 
   @override
-  State<AlertsScreen> createState() => _AlertsScreenState();
+  State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _AlertsScreenState extends State<AlertsScreen> {
+class _CyclesRecomScreenState extends State<CyclesRecomScreen> {
   late String selectedFilter;
   String searchQuery = '';
   bool isManualFilter = false;
   DateFilterRange _dateFilter = DateFilterRange(type: DateFilterType.none);
-  final filters = const ['All', 'Temp', 'Moisture', 'Oxygen'];
+  final filters = const ['All', 'Recoms', 'Cycles'];
   final FocusNode _searchFocusNode = FocusNode();
-
-  List<ActivityItem> _allAlerts = [];
+  
+  List<ActivityItem> _allCyclesRecom = [];
   bool _isLoggedIn = false;
   bool _isLoading = true;
   String? _errorMessage;
@@ -36,7 +39,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
     if (widget.initialFilter != 'All') {
       isManualFilter = true;
     }
-
+    
     _checkLoginAndLoadData();
   }
 
@@ -53,7 +56,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
       if (_isLoggedIn) {
         // Upload mock data if needed, then load
         await FirestoreActivityService.uploadAllMockData();
-        await _loadAlerts();
+        await _loadCyclesRecom();
       }
     } catch (e) {
       setState(() {
@@ -66,12 +69,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
     }
   }
 
-  Future<void> _loadAlerts() async {
+  Future<void> _loadCyclesRecom() async {
     try {
-      final alerts = await FirestoreActivityService.getAlerts();
+      final cyclesRecom = await FirestoreActivityService.getCyclesRecom();
       if (mounted) {
         setState(() {
-          _allAlerts = alerts;
+          _allCyclesRecom = cyclesRecom;
         });
       }
     } catch (e) {
@@ -114,34 +117,33 @@ class _AlertsScreenState extends State<AlertsScreen> {
     });
   }
 
-  List<ActivityItem> get _dateFilteredAlerts {
+  List<ActivityItem> get _dateFilteredCyclesRecom {
     if (!_dateFilter.isActive) {
-      return _allAlerts;
+      return _allCyclesRecom;
     }
 
-    return _allAlerts.where((item) {
+    return _allCyclesRecom.where((item) {
       return item.timestamp.isAfter(_dateFilter.startDate!) &&
-          item.timestamp.isBefore(_dateFilter.endDate!);
+             item.timestamp.isBefore(_dateFilter.endDate!);
     }).toList();
   }
 
   List<ActivityItem> get _searchResults {
     if (searchQuery.isEmpty) {
-      return _dateFilteredAlerts;
+      return _dateFilteredCyclesRecom;
     }
-    return _dateFilteredAlerts
+    return _dateFilteredCyclesRecom
         .where((item) => item.matchesSearchQuery(searchQuery))
         .toList();
   }
 
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
-
+    
     final categories = _searchResults.map((item) => item.category).toSet();
-    final specificCategories = {'Temp', 'Moisture', 'Oxygen'};
-    final hasAllCategories = specificCategories.every(
-      (cat) => categories.contains(cat),
-    );
+    final specificCategories = {'Recoms', 'Cycles'};
+    final hasAllCategories =
+        specificCategories.every((cat) => categories.contains(cat));
 
     Set<String> result = {};
     for (var cat in specificCategories) {
@@ -157,7 +159,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
     return result;
   }
 
-  List<ActivityItem> get _filteredAlerts {
+  List<ActivityItem> get _filteredCyclesRecom {
     if (isManualFilter && selectedFilter != 'All') {
       return _searchResults
           .where((item) => item.category == selectedFilter)
@@ -186,7 +188,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: const Text(
-            "Alerts Logs",
+            "Cycles & Recommendations",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.teal,
@@ -229,8 +231,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                           filters: filters,
                           initialFilter: selectedFilter,
                           onSelected: _onFilterChanged,
-                          autoHighlightedFilters:
-                              _categoriesInSearchResults,
+                          autoHighlightedFilters: _categoriesInSearchResults,
                         ),
                       ),
                       Expanded(
@@ -261,7 +262,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
         child: Padding(
           padding: EdgeInsets.all(24.0),
           child: Text(
-            'Please log in to view alerts',
+            'Please log in to view cycles & recommendations',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey,
@@ -319,12 +320,12 @@ class _AlertsScreenState extends State<AlertsScreen> {
     }
 
     // Show empty state
-    if (_filteredAlerts.isEmpty) {
+    if (_filteredCyclesRecom.isEmpty) {
       return Center(
         child: Text(
           searchQuery.isNotEmpty
               ? 'No results found for "$searchQuery"'
-              : 'No ${selectedFilter.toLowerCase()} alerts found',
+              : 'No ${selectedFilter.toLowerCase()} activities found',
           style: const TextStyle(
             fontSize: 16,
             color: Colors.grey,
@@ -337,10 +338,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
     // Show list
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _filteredAlerts.length,
+      itemCount: _filteredCyclesRecom.length,
       itemBuilder: (context, index) {
         return ActivityCard(
-          item: _filteredAlerts[index],
+          item: _filteredCyclesRecom[index],
         );
       },
     );
