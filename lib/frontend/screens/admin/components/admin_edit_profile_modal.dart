@@ -6,7 +6,7 @@ class EditProfileModal extends StatelessWidget {
   final String firstName;
   final String lastName;
   final String username;
-  final String email;
+ 
   final String role;
 
   const EditProfileModal({
@@ -14,7 +14,7 @@ class EditProfileModal extends StatelessWidget {
     required this.firstName,
     required this.lastName,
     required this.username,
-    required this.email,
+    
     required this.role,
   });
 
@@ -24,7 +24,7 @@ class EditProfileModal extends StatelessWidget {
     final firstNameController = TextEditingController(text: firstName);
     final lastNameController = TextEditingController(text: lastName);
     final usernameController = TextEditingController(text: username);
-    final emailController = TextEditingController(text: email);
+
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -75,8 +75,7 @@ class EditProfileModal extends StatelessWidget {
             const SizedBox(height: 16),
             _buildTextField("Username", usernameController),
             const SizedBox(height: 16),
-            _buildTextField("Email", emailController),
-            const SizedBox(height: 16),
+
 
             // Role (Read-only)
             TextField(
@@ -124,13 +123,12 @@ class EditProfileModal extends StatelessWidget {
                       final currentFirstName = firstNameController.text.trim();
                       final currentLastName = lastNameController.text.trim();
                       final currentUsername = usernameController.text.trim();
-                      final currentEmail = emailController.text.trim();
+
 
                       // Check if any field changed
                       if (currentFirstName == firstName &&
                           currentLastName == lastName &&
-                          currentUsername == username &&
-                          currentEmail == email) {
+                          currentUsername == username) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Row(
