@@ -193,6 +193,32 @@ class FirestoreActivityService {
     }
   }
 
+  static Future<void> addWasteProduct(Map<String, dynamic> waste) async {
+  try {
+    final userId = getCurrentUserId();
+    if (userId == null) throw Exception('User not logged in');
+
+    final docRef = _getSubstratesCollection(userId)
+        .doc(waste['timestamp'].millisecondsSinceEpoch.toString());
+
+    await docRef.set({
+      'title': waste['plantTypeLabel'],
+      'value': '${waste['quantity']} kg',
+      'statusColor': waste['category'] == 'greens'
+          ? 'green'
+          : waste['category'] == 'browns'
+              ? 'brown'
+              : 'orange',
+      'icon': Icons.eco.codePoint,
+      'description': waste['description'],
+      'category': waste['category'],
+      'timestamp': waste['timestamp'],
+    });
+  } catch (e) {
+    rethrow;
+  }
+}
+
   // 🔹 Fetch data from Firestore
 
   static Future<List<ActivityItem>> getSubstrates() async {
@@ -210,6 +236,7 @@ class FirestoreActivityService {
     }
   }
 
+  // Fetch Alerts
   static Future<List<ActivityItem>> getAlerts() async {
     try {
       final userId = getCurrentUserId();
@@ -225,7 +252,7 @@ class FirestoreActivityService {
     }
   }
 
-  // NEW 🔹 Fetch Cycles & Recommendations
+  // Fetch Cycles & Recommendations
   static Future<List<ActivityItem>> getCyclesRecom() async {
     try {
       final userId = getCurrentUserId();
