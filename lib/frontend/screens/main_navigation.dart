@@ -48,8 +48,8 @@ class _MainNavigationState extends State<MainNavigation> {
     const HomeScreen(),
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
+    MachineManagementScreen(),
     const ProfileScreen(),
-    MachineManagementScreen(), 
   ];
 
   void _onItemTapped(int index) {
@@ -81,8 +81,8 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), 
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), // 👈 NEW: Machines Tab
         ],
       ),
     );
