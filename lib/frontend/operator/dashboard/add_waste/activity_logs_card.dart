@@ -23,6 +23,8 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
   Future<void> _fetchAllLogs() async {
     try {
       final logs = await FirestoreActivityService.getAllActivities();
+
+      // If there’s no data, still treat as success (empty)
       if (mounted) {
         setState(() {
           _allLogs = logs;
@@ -31,10 +33,12 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
         });
       }
     } catch (e) {
+      // Handle login or Firestore access failures gracefully
       if (mounted) {
         setState(() {
           _loading = false;
           _logsFetchError = true;
+          _allLogs.clear(); // ensure no stale data
         });
       }
     }
@@ -52,11 +56,11 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
+              children: const [
+                Text(
                   'Activity Logs',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -64,33 +68,39 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
                     color: Colors.teal,
                   ),
                 ),
-                const Icon(Icons.history, size: 20, color: Colors.teal),
+                Icon(Icons.history, size: 20, color: Colors.teal),
               ],
             ),
             const SizedBox(height: 12),
 
+            // Loading state
             if (_loading)
               const Center(child: CircularProgressIndicator())
+            // Error state
             else if (_logsFetchError)
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: 18),
                 child: Center(
                   child: Text(
                     'Please log in to view recent activities.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ),
               )
+            // Empty state
             else if (_allLogs.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+                padding: EdgeInsets.symmetric(vertical: 18),
                 child: Center(
                   child: Text(
                     'No logs yet. Add some activity to see updates here.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ),
               )
+            // Data state
             else
               _buildLogsList(),
           ],
@@ -101,7 +111,7 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
 
   Widget _buildLogsList() {
     return SizedBox(
-      height: 140, // fits approximately 2 logs
+      height: 140, // fits ~2 logs
       child: ListView.builder(
         itemCount: _allLogs.length,
         physics: const BouncingScrollPhysics(),
@@ -128,7 +138,7 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // title and quantity row
+                // title + value
                 Row(
                   children: [
                     Expanded(
@@ -152,7 +162,6 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                // description
                 if (log.description.isNotEmpty)
                   Text(
                     log.description,
@@ -161,7 +170,6 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 const SizedBox(height: 4),
-                // category + date row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -189,31 +197,15 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
     );
   }
 
-  // --- helpers ---
-
+  // Helper: detect and format value units properly
   String _formatQuantity(String value) {
     String str = value.trim().toLowerCase();
-
-    // If the string already contains valid unit characters, leave it alone.
-    final hasKnownUnit = str.contains(
-      RegExp(r'(kg|%|°c|min|hr|hours?)', caseSensitive: false),
-    );
-
-    // Remove weird double suffixes (kgkg, %% etc.)
+    final hasKnownUnit =
+        str.contains(RegExp(r'(kg|%|°c|min|hr|hours?)', caseSensitive: false));
     str = str.replaceAll(
-      RegExp(r'(kgkg|%%|°c°c|minmin|hrhr)', caseSensitive: false),
-      '',
-    );
-
-    // Only append kg if truly numeric (for substrates)
-    if (!hasKnownUnit && RegExp(r'^\d+(\.\d+)?$').hasMatch(str)) {
-      str = '$str kg';
-    }
-
-    // Clean leftover spaces between number and unit
-    str = str.replaceAll(RegExp(r'\s+'), '');
-
-    return str;
+        RegExp(r'(kgkg|%%|°c°c|minmin|hrhr)', caseSensitive: false), '');
+    if (!hasKnownUnit && RegExp(r'^\d+(\.\d+)?$').hasMatch(str)) str = '$str kg';
+    return str.replaceAll(RegExp(r'\s+'), '');
   }
 
   String _capitalize(String? text) {
