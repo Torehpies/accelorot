@@ -61,8 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
+    Theme.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -100,6 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.white.withOpacity(0.3),
                           blurRadius: 15,
                           offset: const Offset(0, 5),
@@ -281,6 +281,7 @@ const SizedBox(height: 8),
                 backgroundColor: Colors.teal,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(12),
+                // ignore: deprecated_member_use
                 shadowColor: Colors.black.withOpacity(0.1),
                 elevation: 6,
               ),
@@ -305,6 +306,7 @@ const SizedBox(height: 8),
                 backgroundColor: Colors.teal,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(12),
+                // ignore: deprecated_member_use
                 shadowColor: Colors.black.withOpacity(0.1),
                 elevation: 6,
               ),
