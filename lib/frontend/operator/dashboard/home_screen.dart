@@ -71,30 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               const SystemCard(),
               const SizedBox(height: 16),
-              if (_loadingLogs)
-                const Center(child: CircularProgressIndicator())
-              else if (_logsFetchError)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      'Please log in to view recent logs',
-                      style: const TextStyle(fontSize: 15, color: Colors.grey),
-                    ),
-                  ),
-                )
-              else if (_wasteLogs.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: Text(
-                      'No logs yet. Add waste products to see them here.',
-                      style: const TextStyle(fontSize: 15, color: Colors.grey),
-                    ),
-                  ),
-                )
-              else
-                ActivityLogsCard(),
+              const ActivityLogsCard(),
+
             ],
           ),
         ),

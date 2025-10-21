@@ -1,3 +1,4 @@
+// add_waste_product.dart
 import 'package:flutter/material.dart';
 import 'fields/waste_category_section.dart';
 import 'fields/plant_type_section.dart';
@@ -6,7 +7,7 @@ import 'fields/description_field.dart';
 import 'fields/submit_button.dart';
 import 'fields/waste_config.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
   const AddWasteProduct({super.key});
@@ -63,7 +64,6 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     );
   }
 
-  // Add this helper, works for all plant types in plantTypeOptions
   String getPlantLabel(String? value) {
     if (value == null) return '';
     for (var options in plantTypeOptions.values) {
@@ -77,6 +77,20 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   void _handleSubmit() async {
   if (!_validateForm()) return;
 
+  // Check if user is logged in (but never blocks the fields)
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please log in to log waste product.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
+
+  // Only run if logged in:
   final wasteEntry = {
     'category': _selectedWasteCategory!,
     'plantType': _selectedPlantType!,
@@ -88,12 +102,9 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   await FirestoreActivityService.addWasteProduct(wasteEntry);
 
-  // ✅ Only use context if the widget is still in the tree
   if (!mounted) return;
   Navigator.pop(context, wasteEntry);
 }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +121,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withAlpha(25),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -125,7 +136,11 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 children: [
                   Text(
                     'Add Waste Product',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
