@@ -1,8 +1,35 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../operator/dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../operator/machine_management/machine_management_screen.dart';
+
+
+void logCurrentUser(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+
+  // Remove any current snackbars and show a short message about auth state.
+  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+  if (user != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Logged-in: ${user.email} (UID: ${user.uid})'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('No user is currently logged in.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -14,13 +41,14 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  // 🔹 Add a GlobalKey to control the ActivityLogsNavigator
+  // Add a GlobalKey to control the ActivityLogsNavigator
   final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
 
   late final List<Widget> _screens = [
     const HomeScreen(),
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
+    MachineManagementScreen(),
     const ProfileScreen(),
   ];
 
@@ -35,6 +63,8 @@ class _MainNavigationState extends State<MainNavigation> {
     setState(() {
       _selectedIndex = index;
     });
+    // show the current auth info in a brief SnackBar
+    logCurrentUser(context);
   }
 
   @override
@@ -51,6 +81,7 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), 
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),

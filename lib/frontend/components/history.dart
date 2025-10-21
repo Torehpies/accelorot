@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import '../widgets/oxygen_statistic_card.dart';
+import '../widgets/temperature_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
 
 class HistoryPage extends StatelessWidget {
   final String filter;
@@ -19,123 +21,59 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            filter,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-
-        // Time Period (Bar Chart)
-        _buildCard(
-          title: "Time Period",
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              barTouchData: BarTouchData(enabled: false),
-              titlesData: FlTitlesData(
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: true),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      int index = value.toInt();
-                      if (index >= 0 && index < dayLabels.length) {
-                        return Text(
-                          dayLabels[index],
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ),
-              gridData: const FlGridData(show: true),
-              borderData: FlBorderData(show: false),
-              barGroups: List.generate(numberOfDays, (i) {
-                return BarChartGroupData(
-                  x: i,
-                  barRods: [
-                    BarChartRodData(
-                      toY: (i + 1) * 2.0, // fake data for now
-                      color: Colors.green,
-                      width: 16,
-                    ),
-                  ],
-                );
-              }),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🔹 Selected filter label
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              filter,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-        ),
 
-        // Humidity (Line Chart)
-        _buildCard(
-          title: "Humidity",
-          child: LineChart(
-            LineChartData(
-              titlesData: FlTitlesData(
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: true),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      int index = value.toInt();
-                      if (index >= 0 && index < dayLabels.length) {
-                        return Text(
-                          dayLabels[index],
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ),
-              gridData: const FlGridData(show: true),
-              borderData: FlBorderData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  isCurved: true,
-                  spots: List.generate(
-                    numberOfDays,
-                    (i) => FlSpot(i.toDouble(), 40 + i * 5),
-                  ),
-                  dotData: const FlDotData(show: false),
-                  color: Colors.blue,
-                ),
-                LineChartBarData(
-                  isCurved: true,
-                  spots: List.generate(
-                    numberOfDays,
-                    (i) => FlSpot(i.toDouble(), 60 + i * 3),
-                  ),
-                  dotData: const FlDotData(show: false),
-                  color: Colors.red,
-                ),
-              ],
+          // 🔹 Time Period (Bar Chart placeholder)
+          _buildCard(
+            title: "Time Period",
+            child: const SizedBox(
+              height: 150,
+              child: Center(child: Text("Time Period chart will be here")),
             ),
           ),
-        ),
 
-        // Temperature Placeholder
-        _buildCard(
-          title: "Temperature",
-          child: const SizedBox(
-            height: 150,
-            child: Center(child: Text("Temperature chart will be here")),
+          const SizedBox(height: 16),
+
+          // 🔹 Oxygen Card
+          OxygenStatisticCard(
+            currentOxygen: 21.0,
+            hourlyReadings: [20.8, 21.1, 21.2, 20.9, 21.0, 21.1],
+            lastUpdated: DateTime.now(),
           ),
-        ),
-      ],
+
+          const SizedBox(height: 16),
+
+          // 🔹 Temperature Card
+          TemperatureStatisticCard(
+            currentTemperature: 23.5,
+            hourlyReadings: [22.0, 22.5, 23.0, 23.5, 24.0, 23.0],
+            lastUpdated: DateTime.now(),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 🔹 Moisture Card
+          MoistureStatisticCard(
+            currentMoisture: 48.0,
+            hourlyReadings: [40.0, 42.0, 44.0, 46.0, 48.0, 50.0],
+            lastUpdated: DateTime.now(),
+          ),
+
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 

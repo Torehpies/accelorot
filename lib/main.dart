@@ -1,7 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'frontend/screens/splash_screen.dart';
+import 'package:flutter_application_1/services/auth_wrapper.dart';
 import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' show PlatformDispatcher; // Required for global error handling
@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
+      home: const AuthWrapper(),
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
