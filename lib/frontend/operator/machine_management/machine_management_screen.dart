@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class MachineManagementScreen extends StatefulWidget {
@@ -9,7 +11,7 @@ class MachineManagementScreen extends StatefulWidget {
 
 class _MachineManagementScreenState extends State<MachineManagementScreen> {
   // Generate machines named "Machine 1", "Machine 2", etc.
-  List<Map<String, dynamic>> _machines = List.generate(8, (index) {
+  final List<Map<String, dynamic>> _machines = List.generate(8, (index) {
     return {
       'name': 'Machine ${index + 1}',
       'code': 'MACH${(index + 1).toString().padLeft(4, '0')}',
@@ -69,7 +71,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
   String selectedRole = 'Admin';
 
   // 🔹 Consistent input decoration with teal theming
-  InputDecoration _buildInputDecoration(String labelText) {
+  InputDecoration buildInputDecoration(String labelText) {
     return InputDecoration(
       labelText: labelText,
       labelStyle: const TextStyle(color: Colors.grey),
@@ -122,7 +124,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
             controller: nameController,
             style: const TextStyle(color: Colors.teal),
             cursorColor: Colors.teal,
-            decoration: _buildInputDecoration('Machine Name (optional)'),
+            decoration: buildInputDecoration('Machine Name (optional)'),
           ),
           const SizedBox(height: 16),
           Row(
@@ -132,7 +134,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
                   controller: codeController,
                   style: const TextStyle(color: Colors.teal),
                   cursorColor: Colors.teal,
-                  decoration: _buildInputDecoration('Product Code *'),
+                  decoration: buildInputDecoration('Product Code *'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -153,8 +155,8 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: selectedRole,
-            decoration: _buildInputDecoration('User Role'),
+            initialValue: selectedRole,
+            decoration: buildInputDecoration('User Role'),
             items: ['Admin', 'User']
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
@@ -168,7 +170,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
             controller: dateController,
             style: const TextStyle(color: Colors.teal),
             cursorColor: Colors.teal,
-            decoration: _buildInputDecoration('Date (e.g. Aug-25-2025)'),
+            decoration: buildInputDecoration('Date (e.g. Aug-25-2025)'),
           ),
           const SizedBox(height: 24),
           Row(
@@ -333,7 +335,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
                         child: ListView.separated(
                           padding: const EdgeInsets.all(16),
                           itemCount: currentList.length * 2, // Double count for expanded details
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          separatorBuilder: (_, _) => const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             // Even indices = machine item
                             if (index % 2 == 0) {
