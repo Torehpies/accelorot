@@ -1,4 +1,3 @@
-// firestore_activity_service.dart
 import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,7 +33,6 @@ class FirestoreActivityService {
         .collection('alerts');
   }
 
-  // NEW 🔹 Cycles & Recommendations collection reference
   static CollectionReference _getCyclesRecomCollection(String userId) {
     return _firestore
         .collection('users')
@@ -55,8 +53,9 @@ class FirestoreActivityService {
       final batch = _firestore.batch();
 
       for (var substrate in substrates) {
-        final docRef = _getSubstratesCollection(userId)
-            .doc(substrate.timestamp.millisecondsSinceEpoch.toString());
+        final docRef = _getSubstratesCollection(
+          userId,
+        ).doc(substrate.timestamp.millisecondsSinceEpoch.toString());
 
         batch.set(docRef, {
           'title': substrate.title,
@@ -84,8 +83,9 @@ class FirestoreActivityService {
       final batch = _firestore.batch();
 
       for (var alert in alerts) {
-        final docRef = _getAlertsCollection(userId)
-            .doc(alert.timestamp.millisecondsSinceEpoch.toString());
+        final docRef = _getAlertsCollection(
+          userId,
+        ).doc(alert.timestamp.millisecondsSinceEpoch.toString());
 
         batch.set(docRef, {
           'title': alert.title,
@@ -104,7 +104,6 @@ class FirestoreActivityService {
     }
   }
 
-  // NEW 🔹 Upload mock Cycles & Recommendations
   static Future<void> uploadCyclesRecom() async {
     try {
       final userId = getCurrentUserId();
@@ -114,8 +113,9 @@ class FirestoreActivityService {
       final batch = _firestore.batch();
 
       for (var item in cyclesRecom) {
-        final docRef = _getCyclesRecomCollection(userId)
-            .doc(item.timestamp.millisecondsSinceEpoch.toString());
+        final docRef = _getCyclesRecomCollection(
+          userId,
+        ).doc(item.timestamp.millisecondsSinceEpoch.toString());
 
         batch.set(docRef, {
           'title': item.title,
@@ -156,7 +156,7 @@ class FirestoreActivityService {
 
       await uploadSubstrates();
       await uploadAlerts();
-      await uploadCyclesRecom(); // 👈 Added here
+      await uploadCyclesRecom();
     } catch (e) {
       rethrow;
     }
@@ -193,31 +193,47 @@ class FirestoreActivityService {
     }
   }
 
+  // 🔹 Add Waste Product - Updated with proper icons and colors
   static Future<void> addWasteProduct(Map<String, dynamic> waste) async {
-  try {
-    final userId = getCurrentUserId();
-    if (userId == null) throw Exception('User not logged in');
+    try {
+      final userId = getCurrentUserId();
+      if (userId == null) throw Exception('User not logged in');
 
-    final docRef = _getSubstratesCollection(userId)
-        .doc(waste['timestamp'].millisecondsSinceEpoch.toString());
+      final category = waste['category'];
+      
+      // Determine icon based on category
+      int iconCodePoint;
+      String statusColor;
+      
+      if (category == 'greens') {
+        iconCodePoint = Icons.eco.codePoint;
+        statusColor = 'green';
+      } else if (category == 'browns') {
+        iconCodePoint = Icons.nature.codePoint;
+        statusColor = 'brown';
+      } else {
+        // Default for compost or other categories
+        iconCodePoint = Icons.recycling.codePoint;
+        statusColor = 'yellow';
+      }
 
-    await docRef.set({
-      'title': waste['plantTypeLabel'],
-      'value': '${waste['quantity']} kg',
-      'statusColor': waste['category'] == 'greens'
-          ? 'green'
-          : waste['category'] == 'browns'
-              ? 'brown'
-              : 'orange',
-      'icon': Icons.eco.codePoint,
-      'description': waste['description'],
-      'category': waste['category'],
-      'timestamp': waste['timestamp'],
-    });
-  } catch (e) {
-    rethrow;
+      final docRef = _getSubstratesCollection(
+        userId,
+      ).doc(waste['timestamp'].millisecondsSinceEpoch.toString());
+
+      await docRef.set({
+        'title': waste['plantTypeLabel'],
+        'value': '${waste['quantity']} kg',
+        'statusColor': statusColor,
+        'icon': iconCodePoint,
+        'description': waste['description'],
+        'category': category,
+        'timestamp': waste['timestamp'],
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
   // 🔹 Fetch data from Firestore
 
@@ -226,9 +242,9 @@ class FirestoreActivityService {
       final userId = getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await _getSubstratesCollection(userId)
-          .orderBy('timestamp', descending: true)
-          .get();
+      final snapshot = await _getSubstratesCollection(
+        userId,
+      ).orderBy('timestamp', descending: true).get();
 
       return snapshot.docs.map((doc) => _documentToActivityItem(doc)).toList();
     } catch (e) {
@@ -236,15 +252,14 @@ class FirestoreActivityService {
     }
   }
 
-  // Fetch Alerts
   static Future<List<ActivityItem>> getAlerts() async {
     try {
       final userId = getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await _getAlertsCollection(userId)
-          .orderBy('timestamp', descending: true)
-          .get();
+      final snapshot = await _getAlertsCollection(
+        userId,
+      ).orderBy('timestamp', descending: true).get();
 
       return snapshot.docs.map((doc) => _documentToActivityItem(doc)).toList();
     } catch (e) {
@@ -252,15 +267,14 @@ class FirestoreActivityService {
     }
   }
 
-  // Fetch Cycles & Recommendations
   static Future<List<ActivityItem>> getCyclesRecom() async {
     try {
       final userId = getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await _getCyclesRecomCollection(userId)
-          .orderBy('timestamp', descending: true)
-          .get();
+      final snapshot = await _getCyclesRecomCollection(
+        userId,
+      ).orderBy('timestamp', descending: true).get();
 
       return snapshot.docs.map((doc) => _documentToActivityItem(doc)).toList();
     } catch (e) {
@@ -273,7 +287,7 @@ class FirestoreActivityService {
     try {
       final substrates = await getSubstrates();
       final alerts = await getAlerts();
-      final cyclesRecom = await getCyclesRecom(); // 👈 Added here
+      final cyclesRecom = await getCyclesRecom();
 
       final combined = [...substrates, ...alerts, ...cyclesRecom];
       combined.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -300,15 +314,17 @@ class FirestoreActivityService {
     );
   }
 
-  // 🔹 Helper to map codePoint → IconData
+  // 🔹 Helper to map codePoint → IconData - Updated with new icons
   static IconData _getIconFromCodePoint(int codePoint) {
     switch (codePoint) {
-      case 0xe3b6:
+      case 0xe3b6: // Icons.eco
         return Icons.eco;
+      case 0xe3b7: // Icons.nature
+        return Icons.nature;
+      case 0xe8e0: // Icons.recycling
+        return Icons.recycling;
       case 0xe68c:
         return Icons.energy_savings_leaf;
-      case 0xe8e0:
-        return Icons.recycling;
       case 0xe429:
         return Icons.thermostat;
       case 0xe7ec:

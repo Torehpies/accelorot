@@ -1,5 +1,5 @@
-// activity_logs_card.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/firestore_activity_service.dart';
 import '../../activity_logs/models/activity_item.dart';
 import 'widgets/activity_log_item.dart';
@@ -8,10 +8,10 @@ class ActivityLogsCard extends StatefulWidget {
   const ActivityLogsCard({super.key});
 
   @override
-  State<ActivityLogsCard> createState() => _ActivityLogsCardState();
+  State<ActivityLogsCard> createState() => ActivityLogsCardState();
 }
 
-class _ActivityLogsCardState extends State<ActivityLogsCard> {
+class ActivityLogsCardState extends State<ActivityLogsCard> {
   bool _loading = true;
   bool _logsFetchError = false;
   List<ActivityItem> _allLogs = [];
@@ -22,9 +22,33 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
     _fetchAllLogs();
   }
 
+  // Public method for parent to trigger refresh
+  Future<void> refresh() async {
+    await _fetchAllLogs();
+  }
+
   Future<void> _fetchAllLogs() async {
+    // Check if user is logged in
+    final user = FirebaseAuth.instance.currentUser;
+    
+    if (user == null) {
+      // User not logged in - show login message
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _logsFetchError = true;
+          _allLogs.clear();
+        });
+      }
+      return;
+    }
+
+    // User is logged in - fetch data
     try {
+      setState(() => _loading = true);
+      
       final logs = await FirestoreActivityService.getAllActivities();
+      
       if (mounted) {
         setState(() {
           _allLogs = logs;
@@ -83,22 +107,27 @@ class _ActivityLogsCardState extends State<ActivityLogsCard> {
     // Ensure card always keeps its padding and border
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
-    } else if (_logsFetchError) {
-      return const Center(
-        child: Text(
-          'Please log in to view recent activities.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey, fontSize: 13),
-        ),
-      );
-    } else if (_allLogs.isEmpty) {
-      return const Center(
-        child: Text(
-          'Please log in to view recent activities.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey, fontSize: 13),
-        ),
-      );
+    } else if (_logsFetchError || _allLogs.isEmpty) {
+      // Check if user is logged in to show appropriate message
+      final user = FirebaseAuth.instance.currentUser;
+      
+      if (user == null) {
+        return const Center(
+          child: Text(
+            'Please log in to view recent logs.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+        );
+      } else {
+        return const Center(
+          child: Text(
+            'No logs yet. Add waste to get started!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+        );
+      }
     } else {
       return SizedBox(
         height: 140, // fits ~2 logs, scrollable area

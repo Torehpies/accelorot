@@ -4,7 +4,6 @@ import '../../components/environmental_sensors_card.dart';
 import '../../components/composting_progress_card.dart';
 import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
-import 'services/activity_log_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,35 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> _wasteLogs = [];
-  bool _loadingLogs = true;
-  bool _logsFetchError = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadWasteLogs();
-  }
-
-  Future<void> _loadWasteLogs() async {
-    try {
-      final logs = await ActivityLogRepository.fetchWasteLogs();
-      if (mounted) {
-        setState(() {
-          _wasteLogs = logs;
-          _loadingLogs = false;
-          _logsFetchError = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loadingLogs = false;
-          _logsFetchError = true;
-        });
-      }
-    }
-  }
+  // GlobalKey to access ActivityLogsCard's state and trigger refresh
+  final GlobalKey<ActivityLogsCardState> _activityLogsKey = GlobalKey<ActivityLogsCardState>();
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               const SystemCard(),
               const SizedBox(height: 16),
-              const ActivityLogsCard(),
-
+              ActivityLogsCard(key: _activityLogsKey),
             ],
           ),
         ),
@@ -88,8 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 context: context,
                 builder: (context) => const AddWasteProduct(),
               );
+              
+              // If waste was successfully added, refresh the activity logs
               if (result != null && mounted) {
-                await _loadWasteLogs();
+                _activityLogsKey.currentState?.refresh();
               }
             },
             backgroundColor: Colors.teal,

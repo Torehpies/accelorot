@@ -1,4 +1,3 @@
-// add_waste_product.dart
 import 'package:flutter/material.dart';
 import 'fields/waste_category_section.dart';
 import 'fields/plant_type_section.dart';
@@ -11,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
   const AddWasteProduct({super.key});
+  
   @override
   State<AddWasteProduct> createState() => _AddWasteProductState();
 }
@@ -75,36 +75,51 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   }
 
   void _handleSubmit() async {
-  if (!_validateForm()) return;
+    // Validate form first
+    if (!_validateForm()) return;
 
-  // Check if user is logged in (but never blocks the fields)
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please log in to log waste product.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    return;
+    // Check if user is logged in
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Show snackbar and keep dialog open
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to add waste log.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return; // Dialog stays open
+    }
+
+    // User is logged in - proceed with submission
+    final wasteEntry = {
+      'category': _selectedWasteCategory!,
+      'plantType': _selectedPlantType!,
+      'plantTypeLabel': getPlantLabel(_selectedPlantType),
+      'quantity': double.parse(_quantityController.text),
+      'description': _descriptionController.text.trim(),
+      'timestamp': DateTime.now(),
+    };
+
+    try {
+      await FirestoreActivityService.addWasteProduct(wasteEntry);
+      
+      if (!mounted) return;
+      
+      // Close dialog and return the waste entry
+      Navigator.pop(context, wasteEntry);
+    } catch (e) {
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error adding waste: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
-
-  // Only run if logged in:
-  final wasteEntry = {
-    'category': _selectedWasteCategory!,
-    'plantType': _selectedPlantType!,
-    'plantTypeLabel': getPlantLabel(_selectedPlantType),
-    'quantity': double.parse(_quantityController.text),
-    'description': _descriptionController.text.trim(),
-    'timestamp': DateTime.now(),
-  };
-
-  await FirestoreActivityService.addWasteProduct(wasteEntry);
-
-  if (!mounted) return;
-  Navigator.pop(context, wasteEntry);
-}
 
   @override
   Widget build(BuildContext context) {
