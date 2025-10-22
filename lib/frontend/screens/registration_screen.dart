@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
+import 'login_screen.dart';
+import 'email_verify.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -52,11 +52,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           setState(() => _isLoading = false);
 
           if (result['success']) {
-            showSnackbar('Successfully registered as $selectedRole!');
+            showSnackbar(result['message']);
 
+            // Navigate to email verification screen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const MainNavigation()),
+              MaterialPageRoute(
+                builder: (context) =>
+                    EmailVerifyScreen(email: emailController.text.trim()),
+              ),
             );
           } else {
             showSnackbar(result['message'], isError: true);
@@ -435,13 +439,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           const Text("Already have an account? "),
                           TextButton(
                             onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RefactoredLoginScreen(),
-                                ),
-                              );
+                              //Navigator.pushReplacement(
+                              //  context,
+                              //  MaterialPageRoute(
+                              //    builder: (context) =>
+                              //        const RefactoredLoginScreen(),
+                              //  ),
+                              //);
                             },
                             child: const Text(
                               "Sign in",

@@ -7,6 +7,7 @@ enum AppRoutes {
   profile,
   users,
   machines,
+	userVerify,
 }
 
 extension AppRouteExtension on AppRoutes {
@@ -28,6 +29,8 @@ extension AppRouteExtension on AppRoutes {
         return '/users';
       case AppRoutes.machines:
         return '/machines';
+      case AppRoutes.userVerify:
+        return '/userVerify';
     }
   }
 
@@ -49,6 +52,8 @@ extension AppRouteExtension on AppRoutes {
         return 'Users';
       case AppRoutes.machines:
         return 'machines';
+      case AppRoutes.userVerify:
+        return 'userVerify';
     }
   }
 }

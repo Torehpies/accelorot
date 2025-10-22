@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'activity_logs_screen.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'statistics_screen.dart';
 import 'profile_screen.dart';
 
@@ -14,14 +14,24 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ActivityLogsScreen(),
-    StatisticsScreen(),
-    ProfileScreen(),
+  // 🔹 Add a GlobalKey to control the ActivityLogsNavigator
+  final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
+
+  late final List<Widget> _screens = [
+    const HomeScreen(),
+    ActivityLogsNavigator(key: _activityNavigatorKey),
+    const StatisticsScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+
+    // 🔹 When switching tabs, reset ActivityLogsNavigator to its root
+    if (_selectedIndex == 1) {
+      _activityNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
+
     setState(() {
       _selectedIndex = index;
     });

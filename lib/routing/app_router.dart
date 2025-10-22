@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
-import 'package:flutter_application_1/frontend/screens/activity_logs_screen.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'package:flutter_application_1/frontend/screens/home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/profile_screen.dart';
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_application_1/routing/app_route_enum.dart';
 import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_application_1/ui/auth/view/registration_screen.dart';
 import 'package:flutter_application_1/ui/scaffold_with_navbar.dart';
+import 'package:flutter_application_1/utils/pageTransition.dart';
 import 'package:flutter_application_1/utils/refresh_listenable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -39,7 +40,8 @@ GoRouter router(Ref ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const HomeScreen(),
+                pageBuilder: (context, state) =>
+                    fadeTransition(const HomeScreen(), state),
               ),
             ],
           ),
@@ -48,7 +50,7 @@ GoRouter router(Ref ref) {
             routes: [
               GoRoute(
                 path: '/activity',
-                builder: (context, state) => const ActivityLogsScreen(),
+                builder: (context, state) => const ActivityLogsNavigator(),
               ),
             ],
           ),
@@ -102,23 +104,30 @@ GoRouter router(Ref ref) {
         pageBuilder: (context, state) =>
             const MaterialPage(child: RefactoredRegistrationScreen()),
       ),
+      GoRoute(
+        path: AppRoutes.userVerify.path,
+        name: AppRoutes.userVerify.routeName,
+        pageBuilder: (context, state) =>
+            const MaterialPage(child: RefactoredRegistrationScreen()),
+      ),
     ],
     refreshListenable: GoRouterRefreshStream(auth.authStateChanges()),
     redirect: (context, state) async {
       final bool isLoggedIn = auth.currentUser != null;
-      final bool isLoggingIn =
+      final bool isAuthRoute =
           state.matchedLocation == AppRoutes.login.path ||
           state.matchedLocation == AppRoutes.register.path;
 
       // redirects the user to the login page if not logged in
-      if (!isLoggedIn && !isLoggingIn) {
-        return AppRoutes.login.path;
-      }
+      if (!isLoggedIn && !isAuthRoute) return AppRoutes.login.path;
 
       // redirects user to homescreen/dashboard upon logging in
-      if (isLoggedIn && isLoggingIn) {
+      if (isLoggedIn &&
+          isAuthRoute &&
+          state.matchedLocation != AppRoutes.home.path) {
         return AppRoutes.home.path;
       }
+
       return null;
     },
   );
