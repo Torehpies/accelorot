@@ -5,7 +5,7 @@ import '../../components/environmental_sensors_card.dart';
 import '../../components/composting_progress_card.dart';
 import '../../components/activity_logs.dart';
 import '../../components/add_waste_product.dart';
-
+import '../../operator/dashboard/profile_header_widget.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -20,22 +20,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.teal,
-      ),
+
       body: SafeArea(
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 500),
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(0),
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
-                scrollbars: false, // 👈 Hides scrollbar on all platforms
+                scrollbars: false,
               ),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    // 👇 Add the profile header here
+                    const ProfileHeaderWidget(),
+                    const SizedBox(height: 24),
+
                     EnvironmentalSensorsCard(
                       temperature: 3.0,
                       moisture: 5.0,
