@@ -1,3 +1,4 @@
+//add_waste_product.dart
 import 'package:flutter/material.dart';
 import 'fields/waste_category_section.dart';
 import 'fields/plant_type_section.dart';
@@ -10,7 +11,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
   const AddWasteProduct({super.key});
-  
+
+  // Builds and displays the Add Waste Product dialog.
   @override
   State<AddWasteProduct> createState() => _AddWasteProductState();
 }
@@ -25,6 +27,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   final _descriptionController = TextEditingController();
   String? _quantityError;
 
+  // Disposes controllers to free memory when widget is removed.
   @override
   void dispose() {
     _quantityController.dispose();
@@ -32,6 +35,13 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     super.dispose();
   }
 
+  // Capitalizes the first letter of a given category name.
+  String _capitalizeCategory(String category) {
+    if (category.isEmpty) return category;
+    return category[0].toUpperCase() + category.substring(1);
+  }
+
+  // Validates the entered quantity and ensures it’s within defined limits.
   String? _validateQuantity(String? value) {
     if (value == null || value.isEmpty) return 'Enter quantity';
     final num = double.tryParse(value);
@@ -41,6 +51,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return null;
   }
 
+  // Ensures required fields are selected and valid before submission.
   bool _validateForm() {
     if (_selectedWasteCategory == null) {
       _showError('Please select waste category');
@@ -58,12 +69,14 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return true;
   }
 
+  // Displays a brief error message using SnackBar.
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
   }
 
+  // Retrieves the display label for a given plant type value.
   String getPlantLabel(String? value) {
     if (value == null) return '';
     for (var options in plantTypeOptions.values) {
@@ -74,14 +87,12 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return '';
   }
 
+  // Handles form submission, validates input, and saves data to Firestore.
   void _handleSubmit() async {
-    // Validate form first
     if (!_validateForm()) return;
 
-    // Check if user is logged in
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Show snackbar and keep dialog open
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -89,12 +100,11 @@ class _AddWasteProductState extends State<AddWasteProduct> {
           duration: Duration(seconds: 2),
         ),
       );
-      return; // Dialog stays open
+      return;
     }
 
-    // User is logged in - proceed with submission
     final wasteEntry = {
-      'category': _selectedWasteCategory!,
+      'category': _capitalizeCategory(_selectedWasteCategory!),
       'plantType': _selectedPlantType!,
       'plantTypeLabel': getPlantLabel(_selectedPlantType),
       'quantity': double.parse(_quantityController.text),
@@ -104,14 +114,13 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
     try {
       await FirestoreActivityService.addWasteProduct(wasteEntry);
-      
+      await Future.delayed(const Duration(milliseconds: 1000));
+
+      // ⭐ ADD mounted check before using context
       if (!mounted) return;
-      
-      // Close dialog and return the waste entry
       Navigator.pop(context, wasteEntry);
     } catch (e) {
       if (!mounted) return;
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error adding waste: $e'),
@@ -121,6 +130,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     }
   }
 
+  // Builds the Add Waste Product dialog layout and structure.
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -177,7 +187,8 @@ class _AddWasteProductState extends State<AddWasteProduct> {
               PlantTypeSection(
                 selectedWasteCategory: _selectedWasteCategory,
                 selectedPlantType: _selectedPlantType,
-                onPlantTypeChanged: (value) => setState(() => _selectedPlantType = value),
+                onPlantTypeChanged: (value) =>
+                    setState(() => _selectedPlantType = value),
               ),
               const SizedBox(height: 16),
               QuantityField(
@@ -185,7 +196,8 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 minQuantity: _minQuantity,
                 maxQuantity: _maxQuantity,
                 errorText: _quantityError,
-                onChanged: (value) => setState(() => _quantityError = _validateQuantity(value)),
+                onChanged: (value) =>
+                    setState(() => _quantityError = _validateQuantity(value)),
               ),
               const SizedBox(height: 16),
               DescriptionField(controller: _descriptionController),

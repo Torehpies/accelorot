@@ -92,7 +92,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     try {
       final userId = FirestoreActivityService.getCurrentUserId();
       _isLoggedIn = userId != null;
-      
+        
       if (_isLoggedIn) {
         // Upload mock data if needed, then load
         await FirestoreActivityService.uploadAllMockData();

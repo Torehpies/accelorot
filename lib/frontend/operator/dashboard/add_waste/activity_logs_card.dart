@@ -1,3 +1,4 @@
+// activity_logs_card.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/firestore_activity_service.dart';
@@ -7,6 +8,7 @@ import 'widgets/activity_log_item.dart';
 class ActivityLogsCard extends StatefulWidget {
   const ActivityLogsCard({super.key});
 
+  // Builds and manages the Activity Logs card widget.
   @override
   State<ActivityLogsCard> createState() => ActivityLogsCardState();
 }
@@ -16,23 +18,23 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
   bool _logsFetchError = false;
   List<ActivityItem> _allLogs = [];
 
+  // Initializes the widget state and triggers data fetch.
   @override
   void initState() {
     super.initState();
     _fetchAllLogs();
   }
 
-  // Public method for parent to trigger refresh
+  // Public method to refresh the activity logs from parent widget.
   Future<void> refresh() async {
     await _fetchAllLogs();
   }
 
+  // Fetches activity logs from Firestore for the logged-in user.
   Future<void> _fetchAllLogs() async {
-    // Check if user is logged in
     final user = FirebaseAuth.instance.currentUser;
-    
+
     if (user == null) {
-      // User not logged in - show login message
       if (mounted) {
         setState(() {
           _loading = false;
@@ -43,12 +45,10 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       return;
     }
 
-    // User is logged in - fetch data
     try {
       setState(() => _loading = true);
-      
       final logs = await FirestoreActivityService.getAllActivities();
-      
+
       if (mounted) {
         setState(() {
           _allLogs = logs;
@@ -67,6 +67,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
     }
   }
 
+  // Builds the Activity Logs card layout including header and log list.
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -79,7 +80,6 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Card header (always rendered)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
@@ -95,7 +95,6 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
               ],
             ),
             const SizedBox(height: 12),
-            // Card body - always inside card border
             _buildCardBody(),
           ],
         ),
@@ -103,14 +102,13 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
     );
   }
 
+  // Constructs the card body, showing logs or messages based on state.
   Widget _buildCardBody() {
-    // Ensure card always keeps its padding and border
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     } else if (_logsFetchError || _allLogs.isEmpty) {
-      // Check if user is logged in to show appropriate message
       final user = FirebaseAuth.instance.currentUser;
-      
+
       if (user == null) {
         return const Center(
           child: Text(
@@ -130,7 +128,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       }
     } else {
       return SizedBox(
-        height: 140, // fits ~2 logs, scrollable area
+        height: 140,
         child: ListView.builder(
           itemCount: _allLogs.length,
           physics: const BouncingScrollPhysics(),
