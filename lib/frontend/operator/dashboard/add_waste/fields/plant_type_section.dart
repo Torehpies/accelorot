@@ -43,7 +43,7 @@ class PlantTypeSection extends StatelessWidget {
         if (selectedWasteCategory != null && selectedPlantType != null)
           ...[InfoBox(text: _getPlantNeedsInfo(), color: Colors.blue, emoji: '🌱'), const SizedBox(height: 12)],
         DropdownButtonFormField<String>(
-          value: selectedPlantType,
+          initialValue: selectedPlantType,
           isExpanded: true,
           decoration: InputDecoration(
             labelText: 'Select target type',
