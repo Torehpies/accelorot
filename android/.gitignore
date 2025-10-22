@@ -1,14 +1,53 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Android
+/android/app/build/
+/android/app/.gradle
+/android/.gradle
+/local.properties
 gradle-wrapper.jar
-/.gradle
-/captures/
 /gradlew
 /gradlew.bat
-/local.properties
-GeneratedPluginRegistrant.java
+/captures/
 .cxx/
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
+# Keystore (NEVER commit these)
 key.properties
 **/*.keystore
 **/*.jks
+
+# Generated APKs and AABs
+*.apk
+*.aab
+
+# Native libraries and large binaries (common in debug builds)
+*.so
+*.dll
+*.dylib
+
+# iOS (optional, but good to include if you ever use iOS)
+ios/Flutter/.last_build_id
+ios/Pods/
+ios/.symlinks/
+ios/build/
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/build/
+
+# Windows/Linux (if applicable)
+windows/flutter/ephemeral/
+windows/build/
+linux/flutter/ephemeral/
+linux/build/
+
+# General
+.DS_Store
+Thumbs.db
