@@ -145,7 +145,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             DropdownButtonFormField<String>(
               value: selectedRole,
               decoration: buildInputDecoration('Role'),
-              items: ['Operator', 'Senior Operator', 'Supervisor']
+              items: ['Operator', 'Admin']
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (val) => setState(() => selectedRole = val!),
