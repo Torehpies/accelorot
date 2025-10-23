@@ -1,26 +1,26 @@
-// view_screens/alerts_screen.dart
+// view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
-class AlertsScreen extends BaseActivityScreen {
-  const AlertsScreen({super.key, super.initialFilter});
+class CyclesRecomScreen extends BaseActivityScreen {
+  const CyclesRecomScreen({super.key, super.initialFilter});
 
   @override
-  State<AlertsScreen> createState() => _AlertsScreenState();
+  State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
+class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
-  String get screenTitle => 'Alerts Logs';
+  String get screenTitle => 'Cycles & Recommendations';
 
   @override
-  List<String> get filters => const ['All', 'Temp', 'Moisture', 'Oxygen'];
+  List<String> get filters => const ['All', 'Recoms', 'Cycles'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getAlerts();
+    return await FirestoreActivityService.getCyclesRecom();
   }
 
   @override
@@ -32,7 +32,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   @override
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
-    final specificCategories = {'Temp', 'Moisture', 'Oxygen'};
+    final specificCategories = {'Recoms', 'Cycles'};
     
     Set<String> result = {};
     for (var cat in specificCategories) {

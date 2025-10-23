@@ -1,3 +1,4 @@
+//slide_page_route.dart
 import 'package:flutter/material.dart';
 
 /// Reusable page route with slide (right->left) + slight fade.
