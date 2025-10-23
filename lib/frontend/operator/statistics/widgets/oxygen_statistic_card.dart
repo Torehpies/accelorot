@@ -1,16 +1,14 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class MoistureStatisticCard extends StatelessWidget {
-  final double currentMoisture; // now in g/m³
+class OxygenStatisticCard extends StatelessWidget {
+  final double currentOxygen;
   final List<double> hourlyReadings;
   final DateTime? lastUpdated;
 
-  const MoistureStatisticCard({
+  const OxygenStatisticCard({
     super.key,
-    required this.currentMoisture,
+    required this.currentOxygen,
     required this.hourlyReadings,
     this.lastUpdated,
   });
@@ -21,15 +19,12 @@ class MoistureStatisticCard extends StatelessWidget {
       return _buildEmptyCard(context);
     }
 
-    final quality = _getQuality(currentMoisture);
+    final quality = _getQuality(currentOxygen);
     final color = _getColorForQuality(quality);
 
-    // Precompute chart data once
     final now = DateTime.now();
     final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> moistureData = List.generate(dataLength, (
-      i,
-    ) {
+    final List<Map<String, Object>> oxygenData = List.generate(dataLength, (i) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {
         'x': '${hour.toString().padLeft(2, '0')}:00',
@@ -37,30 +32,28 @@ class MoistureStatisticCard extends StatelessWidget {
       };
     });
 
-    // Static bounds (ideal range: 40–60 g/m³)
+    // Ideal oxygen range: 19.5% – 23.5%
     final List<Map<String, Object>> upperBound =
-        List.filled(dataLength, {'x': '', 'y': 60.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
-        }).toList();
+        List.generate(dataLength, (i) {
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 23.5};
+    });
 
     final List<Map<String, Object>> lowerBound =
-        List.filled(dataLength, {'x': '', 'y': 40.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
-        }).toList();
+        List.generate(dataLength, (i) {
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 19.5};
+    });
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade100),
+        border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.green.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -70,21 +63,23 @@ class MoistureStatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header and current oxygen level
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Moisture',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                'Oxygen Level',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                '${currentMoisture.toStringAsFixed(0)}g/m³',
+                '${currentOxygen.toStringAsFixed(1)}%',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
               ),
             ],
           ),
@@ -97,6 +92,7 @@ class MoistureStatisticCard extends StatelessWidget {
           ],
           const SizedBox(height: 12),
 
+          // Quality indicator
           Row(
             children: [
               Container(
@@ -118,12 +114,12 @@ class MoistureStatisticCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           Text(
-            'Ideal Range: 40–60g/m³',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+            'Ideal Range: 19.5–23.5%',
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
-            value: _calculateProgress(currentMoisture),
+            value: _calculateProgress(currentOxygen),
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
@@ -131,9 +127,8 @@ class MoistureStatisticCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           Text(
-            // ignore: unnecessary_brace_in_string_interps
-            'Trend (Last ${dataLength} Hours)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            'Trend (Last 8 Hours)',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -149,9 +144,9 @@ class MoistureStatisticCard extends StatelessWidget {
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 80, // ← Changed from 100 to 80 to match image
-                interval: 20,
+                minimum: 15,
+                maximum: 25,
+                interval: 2,
                 majorGridLines: const MajorGridLines(
                   width: 0.5,
                   color: Colors.grey,
@@ -162,7 +157,7 @@ class MoistureStatisticCard extends StatelessWidget {
               margin: EdgeInsets.zero,
               series: <CartesianSeries>[
                 LineSeries<Map<String, Object>, String>(
-                  dataSource: moistureData,
+                  dataSource: oxygenData,
                   xValueMapper: (data, _) => data['x'] as String,
                   yValueMapper: (data, _) => data['y'] as double,
                   color: Colors.blue,
@@ -199,10 +194,10 @@ class MoistureStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade100),
+        border: Border.all(color: Colors.green.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.green.withValues(alpha:0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -211,19 +206,19 @@ class MoistureStatisticCard extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       child: Center(
         child: Text(
-          'No moisture data',
+          'No oxygen data',
           style: TextStyle(color: Colors.grey[600]),
         ),
       ),
     );
   }
 
-  String _getQuality(double moisture) {
-    if (moisture >= 40 && moisture <= 60) return 'Excellent';
-    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
+  String _getQuality(double oxygen) {
+    if (oxygen >= 19.5 && oxygen <= 23.5) return 'Excellent';
+    if ((oxygen >= 18.0 && oxygen < 19.5) || (oxygen > 23.5 && oxygen <= 24.0)) {
       return 'Good';
     }
-    return 'Critical'; // 👈 Changed from "Poor" to match image
+    return 'Poor';
   }
 
   Color _getColorForQuality(String quality) {
@@ -233,13 +228,12 @@ class MoistureStatisticCard extends StatelessWidget {
       case 'Good':
         return Colors.orange;
       default:
-        return Colors.red; // Critical → red
+        return Colors.red;
     }
   }
 
-  double _calculateProgress(double moisture) {
-    // Scale progress from 0 to 80 (max on chart)
-    return (moisture.clamp(0.0, 80.0) / 80.0);
+  double _calculateProgress(double oxygen) {
+    return (oxygen.clamp(0.0, 25.0) / 25.0);
   }
 
   String _formatDate(DateTime date) {
