@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';

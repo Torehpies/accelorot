@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'operator_detail_screen.dart'; // ✅ Now used for navigation
 import 'add_operator_screen.dart';
 import 'accept_operator_screen.dart';
+import 'package:flutter_application_1/services/operator_service.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -14,19 +15,36 @@ class OperatorManagementScreen extends StatefulWidget {
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
-  // Sample operators
-  final List<Map<String, dynamic>> _operators = List.generate(6, (index) {
-    return {
-      'name': 'Operator ${index + 1}',
-      'email': 'operator${index + 1}@company.com',
-      'role': index % 2 == 0 ? '' : 'Operator',
-      'isArchived': index >= 4,
-      'dateAdded': 'Aug-${20 + index}-2025',
-    };
-  }).toList();
+  List<Map<String, dynamic>> _operators = [];
+  bool _loading = true;
+  String? _error;
 
   bool _showArchived = false;
   int _nextOperatorNumber = 7;
+  
+  Future<void> _loadOperators() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final list = await OperatorService.fetchOperators();
+      if (mounted) {
+        setState(() {
+          _operators = list;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
+    }
+  }
 
   void _restoreOperator(int globalIndex) {
     setState(() {
@@ -93,6 +111,13 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
 
   List<Map<String, dynamic>> get _archivedOperators =>
       _operators.where((o) => o['isArchived'] == true).toList();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch operators from Firestore on load
+    _loadOperators();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,114 +211,125 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
 
             // Operator List
             Expanded(
-              child: currentList.isEmpty
-                  ? Center(
-                      child: Text(
-                        _showArchived
-                            ? 'No archived operators'
-                            : 'No operators available',
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : Container(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.grey[300]!,
-                          width: 1.0,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: currentList.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final operator = currentList[index];
-                            final globalIndex = _operators.indexWhere((o) =>
-                                o['name'] == operator['name'] &&
-                                o['email'] == operator['email']);
+              child: _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                      ? Center(
+                          child: Text(
+                            'Error loading operators:\n\n' + (_error ?? ''),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        )
+                      : currentList.isEmpty
+                          ? Center(
+                              child: Text(
+                                _showArchived
+                                    ? 'No archived operators'
+                                    : 'No operators available',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            )
+                          : Container(
+                              constraints: const BoxConstraints(maxWidth: 600),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.grey[300]!,
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: ListView.separated(
+                                  padding: const EdgeInsets.all(16),
+                                  itemCount: currentList.length,
+                                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final operator = currentList[index];
+                                    final globalIndex = _operators.indexWhere((o) =>
+                                        o['id'] == operator['id'] ||
+                                        (o['name'] == operator['name'] &&
+                                            o['email'] == operator['email']));
 
-                            return Card(
-                              elevation: 0,
-                              margin: EdgeInsets.zero,
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: BorderSide(
-                                  color: Colors.grey[200]!,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                leading: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.teal.shade100,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Colors.teal.shade700,
-                                    size: 20,
-                                  ),
-                                ),
-                                title: Text(
-                                  operator['name'],
-                                  style: const TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                subtitle: Text(
-                                  operator['email'],
-                                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                                ),
-                                trailing: _showArchived
-                                    ? ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.teal.shade100,
-                                          foregroundColor: Colors.teal.shade800,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 4),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
+                                    return Card(
+                                      elevation: 0,
+                                      margin: EdgeInsets.zero,
+                                      color: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(14),
+                                        side: BorderSide(
+                                          color: Colors.grey[200]!,
+                                          width: 0.5,
                                         ),
-                                        onPressed: () => _restoreOperator(globalIndex),
-                                        child: const Text(
-                                          'Restore',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      )
-                                    : const Icon(
-                                        Icons.chevron_right,
-                                        color: Colors.teal,
                                       ),
-                                onTap: _showArchived
-                                    ? null
-                                    : () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => OperatorDetailScreen(
-                                              operatorName: operator['name'],
-                                              role: operator['role'],
-                                              email: operator['email'],
-                                              dateAdded: operator['dateAdded'],
-                                            ),
+                                      child: ListTile(
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 12),
+                                        leading: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade100,
+                                            shape: BoxShape.circle,
                                           ),
-                                        );
-                                      },
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.teal.shade700,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        title: Text(
+                                          operator['name'] ?? 'Unnamed',
+                                          style: const TextStyle(fontWeight: FontWeight.w600),
+                                        ),
+                                        subtitle: Text(
+                                          operator['email'] ?? '',
+                                          style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                        ),
+                                        trailing: _showArchived
+                                            ? ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.teal.shade100,
+                                                  foregroundColor: Colors.teal.shade800,
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 12, vertical: 4),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                ),
+                                                onPressed: () => _restoreOperator(globalIndex),
+                                                child: const Text(
+                                                  'Restore',
+                                                  style: TextStyle(fontSize: 12),
+                                                ),
+                                              )
+                                            : const Icon(
+                                                Icons.chevron_right,
+                                                color: Colors.teal,
+                                              ),
+                                        onTap: _showArchived
+                                            ? null
+                                            : () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => OperatorDetailScreen(
+                                                      operatorName: operator['name'] ?? '',
+                                                      role: operator['role'] ?? '',
+                                                      email: operator['email'] ?? '',
+                                                      dateAdded: operator['dateAdded'] ?? '',
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+                            ),
             ),
           ],
         ),

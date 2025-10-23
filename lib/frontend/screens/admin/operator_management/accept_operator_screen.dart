@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'invitation_code_screen.dart';
 
 class AcceptOperatorScreen extends StatefulWidget {
 	const AcceptOperatorScreen({super.key});
@@ -36,19 +37,9 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 
 	void _onGenerateCode() {
 		final code = _generateCode();
-		showDialog(
-			context: context,
-			builder: (context) => AlertDialog(
-				title: const Text('Invitation Code'),
-				content: Text('Share this code with the operator:\n\n$code'),
-				actions: [
-					TextButton(
-						onPressed: () => Navigator.of(context).pop(),
-						child: const Text('Close'),
-					),
-				],
-			),
-		);
+		final expiry = DateTime.now().add(const Duration(hours: 24));
+		final expiryStr = '${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
+		showInvitationOverlay(context, code, expiryStr);
 	}
 
 	void _acceptInvitation(int index) {
