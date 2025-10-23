@@ -1,5 +1,7 @@
 // lib/web/operator/web_operator_navigation.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
@@ -7,7 +9,6 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
 import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 // ignore: unused_import
 import 'package:flutter_application_1/web/admin/screens/userlist_screen.dart';
 

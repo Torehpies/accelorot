@@ -7,26 +7,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/registration_screen.dart' show RegistrationScreen;
-import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
-import 'firebase_options.dart';
 
+// ignore: non_constant_identifier_names
 void main(dynamic DefaultFirebaseOptions) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 🌐 Global error handler — safe for web
   FlutterError.onError = (details) {
     final message = details.exceptionAsString();
-    print('Flutter Error: $message');
+    ('Flutter Error: $message');
   };
 
   // 🧵 Handle async errors
   PlatformDispatcher.instance.onError = (error, stack) {
     final errorMessage = error.toString();
-    print('Uncaught async error: $errorMessage');
+    ('Uncaught async error: $errorMessage');
     return true;
   };
 
@@ -36,9 +35,9 @@ void main(dynamic DefaultFirebaseOptions) async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } on FirebaseException catch (e) {
-    print('Firebase init failed: ${e.message ?? "Unknown Firebase error"}');
+    ('Firebase init failed: ${e.message ?? "Unknown Firebase error"}');
   } catch (e) {
-    print('Firebase init failed: $e');
+    ('Firebase init failed: $e');
   }
 
   runApp(const MyApp());

@@ -1,11 +1,14 @@
 // lib/web/navigation/web_navigation.dart
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
+// ignore: unused_import
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 
 class WebNavigation extends StatefulWidget {
@@ -82,7 +85,7 @@ class _WebNavigationState extends State<WebNavigation> {
                           onTap: () {
                             if (index == _navItems.length - 1) {
                               // Logout action
-                              print('Logout clicked');
+                              ('Logout clicked');
                             } else {
                               setState(() => _selectedIndex = index);
                             }

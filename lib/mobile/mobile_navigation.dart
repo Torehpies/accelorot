@@ -6,6 +6,7 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
 import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
+// ignore: unused_import
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 
 class MobileNavigation extends StatefulWidget {
