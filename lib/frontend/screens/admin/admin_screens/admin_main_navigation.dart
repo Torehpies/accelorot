@@ -1,13 +1,12 @@
+// lib/frontend/admin/navigation/admin_main_navigation.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../profile_screen.dart'; 
-import '../../../operator/machine_management/machine_management_screen.dart';
+import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart'; // UPDATED
 import '../operator_management/operator_management_screen.dart';
 import '../home_screen/admin_home_screen.dart';
-
-
-
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});
@@ -22,7 +21,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   final List<Widget> _screens = [
     AdminHomeScreen(),
     OperatorManagementScreen(), 
-    MachineManagementScreen(),
+    const AdminMachineScreen(), // UPDATED: Changed from MachineManagementScreen
     ProfileScreen(),
   ];
 
