@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 // Sample data — replace with real data from API or state management later
 const List<Map<String, String>> machines = [
-  {'name': 'CNC Mill #1', 'code': '2BIZ7340'},
-  {'name': 'Injection Molder A', 'code': '3XYZ9876'},
-  {'name': 'Laser Cutter Pro', 'code': '4LMN5521'},
-  {'name': '3D Printer Station', 'code': '5OPQ1100'},
-  {'name': 'Robotic Arm Beta', 'code': '6RST3344'},
+  {'name': 'Rotary 1', 'code': '2BIZ7340'},
+  {'name': 'Rotary 2', 'code': '3XYZ9876'},
+  {'name': 'Rotary 3', 'code': '4LMN5521'},
+  {'name': 'Rotary 4', 'code': '5OPQ1100'},
+  {'name': 'Rotary 5', 'code': '6RST3344'},
 ];
 
 class MachineManagementScreen extends StatelessWidget {
