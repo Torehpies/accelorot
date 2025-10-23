@@ -8,7 +8,9 @@ import '../widgets/search_bar_widget.dart';
 import 'widgets/admin_machine_list.dart';
 
 class AdminMachineScreen extends StatefulWidget {
-  const AdminMachineScreen({super.key});
+  final String? viewingOperatorId;
+  
+  const AdminMachineScreen ({super.key, this.viewingOperatorId});
 
   @override
   State<AdminMachineScreen> createState() => _AdminMachineScreenState();

@@ -392,20 +392,21 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                                                 color: Colors.teal,
                                               ),
                                         onTap: _showArchived
-                                            ? null
-                                            : () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => OperatorDetailScreen(
-                                                      operatorName: operator['name'] ?? '',
-                                                      role: operator['role'] ?? '',
-                                                      email: operator['email'] ?? '',
-                                                      dateAdded: operator['dateAdded'] ?? '',
+                                              ? null
+                                              : () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => OperatorDetailScreen(
+                                                        operatorId: operator['uid'] ?? operator['id'] ?? '',
+                                                        operatorName: operator['name'] ?? '',
+                                                        role: operator['role'] ?? '',
+                                                        email: operator['email'] ?? '',
+                                                        dateAdded: operator['dateAdded'] ?? '',
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              },
+                                                  );
+                                                },
                                       ),
                                     );
                                   },
