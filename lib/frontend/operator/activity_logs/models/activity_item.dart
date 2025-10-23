@@ -1,10 +1,9 @@
-//activity_item.dart
 import 'package:flutter/material.dart';
 
 class ActivityItem {
   final String title;
   final String value;
-  final String statusColor; // 'red', 'green', 'yellow', 'grey'
+  final String statusColor; // 'red', 'green', 'yellow', 'grey', 'brown', 'orange'
   final IconData icon;
   final String description;
   final String category;
@@ -31,6 +30,10 @@ class ActivityItem {
         return Colors.yellow.shade700;
       case 'grey':
         return Colors.grey;
+      case 'brown':
+        return Colors.brown;
+      case 'orange':
+        return Colors.orange;
       default:
         return Colors.grey;
     }

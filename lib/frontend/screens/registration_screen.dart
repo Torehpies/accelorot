@@ -123,14 +123,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        'Create Account',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: theme.primaryColor,
-                        ),
-                      ),
+Text(
+  'Create Account',
+  style: const TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: Colors.teal,
+  ),
+),
                       const SizedBox(height: 8),
                       Text(
                         'Join us to get started',

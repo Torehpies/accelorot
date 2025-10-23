@@ -44,8 +44,8 @@ class _MainNavigationState extends State<MainNavigation> {
     const HomeScreen(),
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
-    MachineManagementScreen(), // 👈 Moved to index 3 (was 4)
-    const ProfileScreen(),     // 👈 Moved to index 4 (was 3)
+    MachineManagementScreen(),
+    const ProfileScreen(),     
   ];
 
   void _onItemTapped(int index) {
@@ -76,8 +76,8 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), // 👈 Now at position 3
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),   // 👈 Now at position 4
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), 
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );

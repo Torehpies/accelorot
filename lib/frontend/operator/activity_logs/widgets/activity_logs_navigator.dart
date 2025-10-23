@@ -1,9 +1,9 @@
-//activity_logs_navigator.dart
 import 'package:flutter/material.dart';
 import '../activity_logs_screen.dart';
 import '../view_screens/all_activity_screen.dart';
 import '../view_screens/substrates_screen.dart';
 import '../view_screens/alerts_screen.dart';
+import '../view_screens/cycles_recom_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class ActivityLogsNavigator extends StatelessWidget {
@@ -24,6 +24,9 @@ class ActivityLogsNavigator extends StatelessWidget {
             break;
           case '/alerts':
             page = const AlertsScreen();
+            break;
+          case '/cyclesRecom':
+            page = const CyclesRecomScreen();
             break;
           default:
             page = const ActivityLogsScreen();
