@@ -5,6 +5,7 @@ import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
+import 'forgot_pass.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -256,7 +257,11 @@ class _LoginScreenState extends State<LoginScreen> {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: _controller.handleForgotPassword,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ForgotPassScreen()),
+          );
+        },
         child: const Text('Forgot Password?'),
       ),
     );
