@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../frontend/operator/machine_management/models/machine_model.dart';
-import 'firestore_collections.dart';
+import 'firestore_collection.dart';
 import 'machine_mock_data.dart';
 
 class MachineFirestoreUpload {
