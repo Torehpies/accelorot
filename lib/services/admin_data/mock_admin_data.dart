@@ -1,4 +1,4 @@
-import '../models/admin_user_model.dart';
+import '../../frontend/screens/admin/home_screen/models/admin_user_model.dart';
 
 class MockAdminData {
   // Mock stats

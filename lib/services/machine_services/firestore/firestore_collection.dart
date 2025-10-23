@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../mock_data/machine_mock_data.dart';
+import 'machine_mock_data.dart';
 
 class MachineFirestoreCollections {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;

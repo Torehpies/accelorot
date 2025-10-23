@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../mock_data/machine_mock_data.dart';
-import '../../models/machine_model.dart';
-import 'firestore_collections.dart';
+import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import 'firestore_collection.dart';
+import 'machine_mock_data.dart';
 
 class MachineFirestoreUpload {
   // Upload mock machines to Firestore (only if none of the mock IDs exist)
