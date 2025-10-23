@@ -387,7 +387,7 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 																child: ListView.separated(
 																	padding: const EdgeInsets.all(16),
 																	itemCount: _pendingMembers.length,
-																	separatorBuilder: (_, __) => const SizedBox(height: 12),
+																	  separatorBuilder: (context, index) => const SizedBox(height: 12),
 																	itemBuilder: (context, index) {
 																		final member = _pendingMembers[index];
 																		return Card(

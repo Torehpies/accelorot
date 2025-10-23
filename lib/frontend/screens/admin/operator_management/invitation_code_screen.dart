@@ -70,7 +70,14 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                       version: QrVersions.auto,
                       size: 200,
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF2E4F2F),
+                      dataModuleStyle: const QrDataModuleStyle(
+                        dataModuleShape: QrDataModuleShape.square,
+                        color: Color(0xFF2E4F2F),
+                      ),
+                      eyeStyle: const QrEyeStyle(
+                        eyeShape: QrEyeShape.square,
+                        color: Color(0xFF2E4F2F),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
