@@ -7,16 +7,10 @@ class MachineFirestoreUpload {
   // Upload mock machines to Firestore (only if none of the mock IDs exist)
   static Future<void> uploadAllMockMachines() async {
     try {
-      // Check if all required mock machines already exist
       final allExist = await MachineFirestoreCollections.allMockMachinesExist();
-      if (allExist) {
-        print('✅ All mock machines already exist in Firestore. Skipping upload.');
-        return;
-      }
-
+      if (allExist) return;
       await uploadMachines();
     } catch (e) {
-      print('❌ Error uploading mock machines: $e');
       rethrow;
     }
   }
@@ -27,7 +21,6 @@ class MachineFirestoreUpload {
       await MachineFirestoreCollections.deleteAllMachines();
       await uploadMachines();
     } catch (e) {
-      print('❌ Error force uploading machines: $e');
       rethrow;
     }
   }
@@ -41,15 +34,12 @@ class MachineFirestoreUpload {
       for (var data in mockData) {
         final machine = MachineModel.fromMap(data);
         final docRef = MachineFirestoreCollections.getMachinesCollection()
-            .doc(machine.machineId); // Use machineId as document ID
-
+            .doc(machine.machineId);
         batch.set(docRef, machine.toFirestore());
       }
 
       await batch.commit();
-      print('✅ Successfully uploaded ${mockData.length} machines to Firestore');
     } catch (e) {
-      print('❌ Error uploading machines: $e');
       rethrow;
     }
   }
@@ -60,9 +50,7 @@ class MachineFirestoreUpload {
       await MachineFirestoreCollections.getMachinesCollection()
           .doc(machine.machineId)
           .set(machine.toFirestore());
-      print('✅ Machine ${machine.machineId} added successfully');
     } catch (e) {
-      print('❌ Error adding machine: $e');
       rethrow;
     }
   }
@@ -76,9 +64,7 @@ class MachineFirestoreUpload {
       await MachineFirestoreCollections.getMachinesCollection()
           .doc(machineId)
           .update({'isArchived': isArchived});
-      print('✅ Machine $machineId archive status updated');
     } catch (e) {
-      print('❌ Error updating machine: $e');
       rethrow;
     }
   }
@@ -86,20 +72,13 @@ class MachineFirestoreUpload {
   // "Delete" machine → move to archive instead of actual deletion
   static Future<void> archiveMachine(String machineId) async {
     try {
-      final docRef = MachineFirestoreCollections.getMachinesCollection()
-          .doc(machineId);
+      final docRef =
+          MachineFirestoreCollections.getMachinesCollection().doc(machineId);
       final doc = await docRef.get();
 
-      if (!doc.exists) {
-        print('⚠️ Machine $machineId not found.');
-        return;
-      }
-
-      // Mark as archived rather than removing
+      if (!doc.exists) return;
       await docRef.update({'isArchived': true});
-      print('✅ Machine $machineId archived successfully');
     } catch (e) {
-      print('❌ Error archiving machine: $e');
       rethrow;
     }
   }
@@ -107,19 +86,13 @@ class MachineFirestoreUpload {
   // Restore an archived machine
   static Future<void> restoreMachine(String machineId) async {
     try {
-      final docRef = MachineFirestoreCollections.getMachinesCollection()
-          .doc(machineId);
+      final docRef =
+          MachineFirestoreCollections.getMachinesCollection().doc(machineId);
       final doc = await docRef.get();
 
-      if (!doc.exists) {
-        print('⚠️ Machine $machineId not found.');
-        return;
-      }
-
+      if (!doc.exists) return;
       await docRef.update({'isArchived': false});
-      print('✅ Machine $machineId restored successfully');
     } catch (e) {
-      print('❌ Error restoring machine: $e');
       rethrow;
     }
   }

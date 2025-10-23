@@ -16,7 +16,6 @@ class MachineFirestoreFetch {
           .map((doc) => MachineModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('❌ Error fetching active machines: $e');
       return [];
     }
   }
@@ -33,7 +32,6 @@ class MachineFirestoreFetch {
           .map((doc) => MachineModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('❌ Error fetching archived machines: $e');
       return [];
     }
   }
@@ -49,7 +47,6 @@ class MachineFirestoreFetch {
           .map((doc) => MachineModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('❌ Error fetching all machines: $e');
       return [];
     }
   }
@@ -66,7 +63,6 @@ class MachineFirestoreFetch {
       }
       return null;
     } catch (e) {
-      print('❌ Error fetching machine: $e');
       return null;
     }
   }
@@ -83,7 +79,6 @@ class MachineFirestoreFetch {
       }
       return null;
     } catch (e) {
-      print('❌ Error fetching user: $e');
       return null;
     }
   }
@@ -102,7 +97,6 @@ class MachineFirestoreFetch {
               })
           .toList();
     } catch (e) {
-      print('❌ Error fetching users: $e');
       return [];
     }
   }

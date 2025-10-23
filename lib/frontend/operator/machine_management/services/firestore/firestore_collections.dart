@@ -35,7 +35,6 @@ class MachineFirestoreCollections {
       }
       return true; // All mock machines exist
     } catch (e) {
-      print('❌ Error checking mock data existence: $e');
       return false;
     }
   }

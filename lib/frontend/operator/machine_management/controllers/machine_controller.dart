@@ -8,7 +8,7 @@ class MachineController extends ChangeNotifier {
   // State
   List<MachineModel> _machines = [];
   List<Map<String, dynamic>> _users = [];
-  Map<String, bool> _expandedStates = {}; // Track expansion per machineId
+  final Map<String, bool> _expandedStates = {}; // Track expansion per machineId
   bool _showArchived = false;
   bool _isLoading = false;
   String? _errorMessage;
