@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class MoistureStatisticCard extends StatelessWidget {
-  final double currentMoisture; // now in g/m³
+  final double currentMoisture;
   final List<double> hourlyReadings;
   final DateTime? lastUpdated;
 
@@ -23,13 +23,10 @@ class MoistureStatisticCard extends StatelessWidget {
 
     final quality = _getQuality(currentMoisture);
     final color = _getColorForQuality(quality);
-
-    // Precompute chart data once
     final now = DateTime.now();
-    final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> moistureData = List.generate(dataLength, (
-      i,
-    ) {
+    final dataLength = hourlyReadings.length;
+
+    final moistureData = List.generate(dataLength, (i) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {
         'x': '${hour.toString().padLeft(2, '0')}:00',
@@ -37,20 +34,15 @@ class MoistureStatisticCard extends StatelessWidget {
       };
     });
 
-    // Static bounds (ideal range: 40–60 g/m³)
-    final List<Map<String, Object>> upperBound =
-        List.filled(dataLength, {'x': '', 'y': 60.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
-        }).toList();
+    final upperBound = List.generate(dataLength, (i) {
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
+    });
 
-    final List<Map<String, Object>> lowerBound =
-        List.filled(dataLength, {'x': '', 'y': 40.0}).asMap().entries.map((e) {
-          final i = e.key;
-          final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-          return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
-        }).toList();
+    final lowerBound = List.generate(dataLength, (i) {
+      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
+      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 40.0};
+    });
 
     return Container(
       width: double.infinity,
@@ -60,7 +52,7 @@ class MoistureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.blue.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -70,70 +62,33 @@ class MoistureStatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Moisture',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          _buildHeader(context, color),
+          if (lastUpdated != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Last updated: ${_formatDate(lastUpdated!)}',
+                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
               ),
-              Text(
-                '${currentMoisture.toStringAsFixed(0)}g/m³',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-          if (lastUpdated != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Last updated: ${_formatDate(lastUpdated!)}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
             ),
-          ],
           const SizedBox(height: 12),
-
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Quality: $quality',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
+          _buildQualityRow(color, quality),
           const SizedBox(height: 12),
-
           Text(
             'Ideal Range: 40–60g/m³',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
             value: _calculateProgress(currentMoisture),
             backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(color),
+            valueColor: AlwaysStoppedAnimation(color),
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-
           Text(
-            // ignore: unnecessary_brace_in_string_interps
-            'Trend (Last ${dataLength} Hours)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            'Trend (Last 8 Hours)',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -142,20 +97,14 @@ class MoistureStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines: const MajorGridLines(
-                  width: 0.5,
-                  color: Colors.grey,
-                ),
+                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
-                maximum: 80, // ← Changed from 100 to 80 to match image
+                maximum: 80,
                 interval: 20,
-                majorGridLines: const MajorGridLines(
-                  width: 0.5,
-                  color: Colors.grey,
-                ),
+                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
@@ -193,6 +142,41 @@ class MoistureStatisticCard extends StatelessWidget {
     );
   }
 
+  Widget _buildHeader(BuildContext context, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Moisture',
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '${currentMoisture.toStringAsFixed(0)}g/m³',
+          style: Theme.of(context)
+              .textTheme
+              .headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold, color: color),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQualityRow(Color color, String quality) {
+    return Row(
+      children: [
+        Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 6),
+        Text(
+          'Quality: $quality',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
+        ),
+      ],
+    );
+  }
+
   Widget _buildEmptyCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -202,7 +186,7 @@ class MoistureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.blue.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -210,20 +194,15 @@ class MoistureStatisticCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(18),
       child: Center(
-        child: Text(
-          'No moisture data',
-          style: TextStyle(color: Colors.grey[600]),
-        ),
+        child: Text('No moisture data', style: TextStyle(color: Colors.grey[600])),
       ),
     );
   }
 
   String _getQuality(double moisture) {
     if (moisture >= 40 && moisture <= 60) return 'Excellent';
-    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
-      return 'Good';
-    }
-    return 'Critical'; // 👈 Changed from "Poor" to match image
+    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) return 'Good';
+    return 'Critical';
   }
 
   Color _getColorForQuality(String quality) {
@@ -233,13 +212,12 @@ class MoistureStatisticCard extends StatelessWidget {
       case 'Good':
         return Colors.orange;
       default:
-        return Colors.red; // Critical → red
+        return Colors.red;
     }
   }
 
   double _calculateProgress(double moisture) {
-    // Scale progress from 0 to 80 (max on chart)
-    return (moisture.clamp(0.0, 80.0) / 80.0);
+    return moisture.clamp(0.0, 80.0) / 80.0;
   }
 
   String _formatDate(DateTime date) {

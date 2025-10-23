@@ -127,7 +127,7 @@ class OxygenStatisticCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           Text(
-            'Trend (Last $dataLength Hours)',
+            'Trend (Last 8 Hours)',
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),

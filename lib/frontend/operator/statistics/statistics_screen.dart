@@ -1,9 +1,9 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-import 'widgets/oxygen_statistic_card.dart';
-import 'widgets/moisture_statistic_card.dart';
-import 'widgets/temperature_statistic_card.dart';
+import 'view_screens/oxygen_stats_view.dart';
+import 'view_screens/moisture_stats_view.dart';
+import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
 import '../../screens/main_navigation.dart';
 import '../../components/history.dart'; // make sure this path is correct
@@ -60,24 +60,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainNavigation()),
-              (route) => false,
-            );
-          },
-        ),
         actions: [
-          // Date Filter Button
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: DateFilter(onChanged: _onDateChanged),
           ),
-
-          // 👇 Reset Button (only visible when range is selected)
           if (_selectedRange != null)
             IconButton(
               tooltip: "Reset to Default View",
@@ -87,7 +74,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ],
       ),
 
-      // Body
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: _selectedRange == null
@@ -95,23 +81,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 padding: EdgeInsets.zero,
                 children: [
                   const SizedBox(height: 8),
-                  OxygenStatisticCard(
-                    currentOxygen: 38.0,
-                    hourlyReadings: [28.0, 45.0, 60.0, 55.0, 42.0, 38.0],
-                    lastUpdated: DateTime.now(),
-                  ),
+                  const OxygenStatsView(),
                   const SizedBox(height: 12),
-                  TemperatureStatisticCard(
-                    currentTemperature: 22.5,
-                    hourlyReadings: [20.0, 21.5, 22.0, 22.5, 23.0, 21.0],
-                    lastUpdated: DateTime.now(),
-                  ),
+                  const TemperatureStatsView(),
                   const SizedBox(height: 12),
-                  MoistureStatisticCard(
-                    currentMoisture: 45.0,
-                    hourlyReadings: [30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
-                    lastUpdated: DateTime.now(),
-                  ),
+                  const MoistureStatsView(),
                   const SizedBox(height: 12),
                 ],
               )
