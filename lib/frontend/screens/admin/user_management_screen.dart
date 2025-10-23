@@ -1,147 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/components/user_card.dart';
+import 'package:flutter_application_1/frontend/models/user_model.dart';
+import 'package:flutter_application_1/frontend/screens/admin/add_user/archive_screen.dart';
 
-class MachineManagementScreen extends StatelessWidget {
- MachineManagementScreen({super.key});
+class UserManagementScreen extends StatefulWidget {
+  const UserManagementScreen({super.key});
 
-  //  Sample data — replace with real data from API or state management later
-  final List<Map<String, String>> _machines = [
-    {'name': 'Name of the Machine', 'code': '2BIZ7340'},
-    {'name': 'Name of the Machine', 'code': '2BIZ7340'},
-    {'name': 'Name of the Machine', 'code': '2BIZ7340'},
-    {'name': 'Name of the Machine', 'code': '2BIZ7340'},
-    {'name': 'Name of the Machine', 'code': '2BIZ7340'},
+  @override
+  State<UserManagementScreen> createState() => _UserManagementScreenState();
+}
+
+class _UserManagementScreenState extends State<UserManagementScreen> {
+  List<UserModel> users = [
+    UserModel(
+      id: '1',
+      name: 'Joy Merk',
+      email: 'joymerk@gmail.com',
+      isActive: true,
+    ),
+    UserModel(
+      id: '2',
+      name: 'Test User',
+      email: 'test@gmail.com',
+      isActive: false,
+    ),
+    UserModel(
+      id: '3',
+      name: 'John DoeDoe',
+      email: 'johndoe@example.com',
+      isActive: true,
+    ),
   ];
+
+  List<UserModel> archivedUsers = [];
+
+  void _deleteUser(UserModel user) {
+    setState(() {
+      users.remove(user);
+      archivedUsers.add(user);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User moved to archive')),
+    );
+  }
+
+  void _editUser(UserModel user) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Edit user ${user.name}')),
+    );
+  }
+
+  void restoreFromArchive(UserModel user) {
+    setState(() {
+      archivedUsers.remove(user);
+      users.add(user);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User restored successfully')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context), // Go back if needed
-        ),
-        title: const Text('Machine Management'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔹 Action Cards Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.archive,
-                    label: 'Archive',
-                    onPressed: () {
-                     
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Archive feature coming soon')),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.add_circle_outline,
-                    label: 'Add Machine',
-                    onPressed: () {
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Add Machine feature coming soon')),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // 🔹 Section Title
-            const Text(
-              'Lists of Machines',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 🔹 Machine List
-            Expanded(
-              child: ListView.separated(
-                itemCount: _machines.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final machine = _machines[index];
-                  return Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.devices,
-                        color: Colors.blue[300],
-                      ),
-                      title: Text(machine['name']!),
-                      subtitle: Text('Product Code/ID: ${machine['code']}'),
-                      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-                      onTap: () {
-                       
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Viewing: ${machine['name']}')),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🔹 Reusable Action Card Widget
-  Widget _buildActionCard({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 32, color: Colors.blue[300]),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
         title: const Text('User List'),
         backgroundColor: Colors.white,
         foregroundColor: const Color.fromARGB(255, 77, 68, 68),
@@ -160,6 +82,7 @@ class MachineManagementScreen extends StatelessWidget {
               );
             },
             style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
               elevation: 0,
               shadowColor: Colors.transparent,
             ),
@@ -234,7 +157,11 @@ class MachineManagementScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Add user')),
+                          );
+                        },
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text("Add User"),
                         style: ElevatedButton.styleFrom(
