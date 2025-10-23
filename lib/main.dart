@@ -6,7 +6,7 @@ import 'firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:ui' show PlatformDispatcher; // Required for global error handling
 
-import 'frontend/screens/statistics_screen.dart';
+import 'frontend/operator/statistics/statistics_screen.dart';
 import 'frontend/screens/main_navigation.dart';
 
 void main() async {
