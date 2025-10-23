@@ -1,13 +1,13 @@
 // ignore_for_file: unused_field
 
 import 'package:flutter/material.dart';
-import '../widgets/oxygen_statistic_card.dart';
-import '../widgets/moisture_statistic_card.dart';
-import '../widgets/temperature_statistic_card.dart';
-import 'date_filter.dart';
-import 'main_navigation.dart';
-import '../components/history.dart'; // make sure this path is correct
-import '../operator/dashboard/home_screen.dart';
+import 'widgets/oxygen_statistic_card.dart';
+import 'widgets/moisture_statistic_card.dart';
+import 'widgets/temperature_statistic_card.dart';
+import 'widgets/date_filter.dart';
+import '../../screens/main_navigation.dart';
+import '../../components/history.dart'; // make sure this path is correct
+import '../dashboard/home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
