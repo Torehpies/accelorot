@@ -1,30 +1,43 @@
 // lib/main.dart
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/services/auth_wrapper.dart';
-import 'firebase_options.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:ui' show PlatformDispatcher; // Required for global error handling
+import 'package:flutter/foundation.dart' show  PlatformDispatcher;
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/web/web_dashboard_screen.dart';
 
-import 'frontend/screens/statistics_screen.dart';
+import 'firebase_options.dart';
 import 'frontend/screens/main_navigation.dart';
+import 'frontend/screens/statistics_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  PlatformDispatcher.instance.onError = (error, stack) {
-    //print('Uncaught async error: $error');
-    return true;
+  // 🌐 Global error handler — safe for web
+  FlutterError.onError = (details) {
+    // Avoid printing raw error objects on web
+    final message = details.exceptionAsString();
+    // Use print (safe) — never debugPrint or pass to JS directly
+    print('Flutter Error: $message');
   };
 
-  // Only initialize Firebase on supported platforms
+  // 🧵 Handle async errors (e.g., from Firebase)
+  PlatformDispatcher.instance.onError = (error, stack) {
+    // ✅ SAFE: Convert to string before logging
+    final errorMessage = error.toString();
+    print('Uncaught async error: $errorMessage');
+    return true; // Prevents default red screen
+  };
+
+  // 🔥 Initialize Firebase — with web-safe fallback
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  } on FirebaseException catch (e) {
+    // ✅ Only use e.message (String), never raw e
+    print('Firebase init failed: ${e.message ?? "Unknown Firebase error"}');
   } catch (e) {
-    //print('Firebase initialization failed: $e');
-    // App continues, but Firebase features may be disabled
+    // Fallback for non-Firebase errors (e.g., network, config)
+    print('Firebase init failed: $e');
   }
 
   runApp(const MyApp());
@@ -41,7 +54,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey[700])),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Colors.grey),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
@@ -64,7 +79,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AuthWrapper(),
+      home: WebDashboardScreen(), // This handles both web and mobile safely
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
