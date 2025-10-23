@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'qr_scan_screen.dart';
+
 
 class AddOperatorScreen extends StatelessWidget {
   const AddOperatorScreen({super.key});
@@ -123,14 +123,7 @@ class AddOperatorScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // QR section - tappable to open the QR scanner screen
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const QrScanScreen()),
-                  );
-                },
+              Center(
                 child: Column(
                   children: [
                     Container(

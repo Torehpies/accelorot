@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'operator_detail_screen.dart'; // ✅ Now used for navigation
 import 'add_operator_screen.dart';
+import 'accept_operator_screen.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -120,25 +121,38 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             // Action Cards
             Row(
               children: [
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.archive,
-                    label: 'Archive',
-                    onPressed: () {
-                      setState(() {
-                        _showArchived = true;
-                      });
-                    },
-                  ),
+              Expanded(
+                child: _buildActionCard(
+                icon: Icons.archive,
+                label: 'Archive',
+                onPressed: () {
+                  setState(() {
+                  _showArchived = true;
+                  });
+                },
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.person_add_alt_1,
-                    label: 'Add Operator',
-                    onPressed: _showAddOperatorModal,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildActionCard(
+                icon: Icons.person_add_alt_1,
+                label: 'Add Operator',
+                onPressed: _showAddOperatorModal,
                 ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildActionCard(
+                icon: Icons.check_circle,
+                label: 'Accept Operator',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AcceptOperatorScreen()),
+                  );
+                },
+                ),
+              ),
               ],
             ),
             const SizedBox(height: 16),
