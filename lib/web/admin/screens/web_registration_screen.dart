@@ -5,6 +5,7 @@ import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'web_login_screen.dart';
+// ignore: unused_import
 import 'email_verify.dart';
 
 class WebRegistrationScreen extends StatefulWidget {

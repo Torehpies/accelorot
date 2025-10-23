@@ -7,10 +7,6 @@ import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
-import '../../utils/snackbar_utils.dart';
-import '../controllers/login_controller.dart';
-import 'registration_screen.dart';
-import 'email_verify.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});

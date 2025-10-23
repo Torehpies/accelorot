@@ -8,11 +8,11 @@ class MainLayout extends StatefulWidget {
   final List<BottomNavigationBarItem> navItems;
 
   const MainLayout({
-    Key? key,
+    super.key,
     required this.screens,
     required this.navItems,
     this.initialIndex = 0,
-  }) : super(key: key);
+  });
 
   @override
   State<MainLayout> createState() => _MainLayoutState();

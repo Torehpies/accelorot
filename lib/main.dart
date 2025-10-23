@@ -7,13 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/registration_screen.dart' show RegistrationScreen;
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
-import 'package:flutter_application_1/web/admin/screens/web_dashboard_screen.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
-import 'frontend/screens/web_login_screen.dart'; // 👈 ADD THIS
-import 'frontend/screens/web_registration_screen.dart'; // 👈 ADD THIS
 import 'firebase_options.dart';
 
 void main() async {
