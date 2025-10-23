@@ -142,3 +142,131 @@ class MachineManagementScreen extends StatelessWidget {
     );
   }
 }
+        title: const Text('User List'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color.fromARGB(255, 77, 68, 68),
+        elevation: 0,
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ArchiveScreen(
+                    archivedUsers: archivedUsers,
+                    onRestore: restoreFromArchive,
+                  ),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              elevation: 0,
+              shadowColor: Colors.transparent,
+            ),
+            child: const Text(
+              'Archive List',
+              style: TextStyle(color: Color.fromARGB(255, 77, 68, 68)),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Add user')));
+              },
+              icon: const Icon(Icons.add, color: Colors.white, size: 18),
+              label: const Text(
+                'Add User',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: users.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.grey.shade200,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArchiveScreen(
+                                archivedUsers: archivedUsers,
+                                onRestore: restoreFromArchive,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Archive",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text("Add User"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No users found',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                return UserCard(
+                  user: user,
+                  onDelete: () => _deleteUser(user),
+                  onEdit: () => _editUser(user),
+                );
+              },
+            ),
+    );
+  }
+}
