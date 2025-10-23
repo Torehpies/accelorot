@@ -1,26 +1,26 @@
-// view_screens/substrates_screen.dart
+// view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
-class SubstratesScreen extends BaseActivityScreen {
-  const SubstratesScreen({super.key, super.initialFilter});
+class CyclesRecomScreen extends BaseActivityScreen {
+  const CyclesRecomScreen({super.key, super.initialFilter});
 
   @override
-  State<SubstratesScreen> createState() => _SubstratesScreenState();
+  State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
+class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
-  String get screenTitle => 'Substrate Logs';
+  String get screenTitle => 'Cycles & Recommendations';
 
   @override
-  List<String> get filters => const ['All', 'Greens', 'Browns', 'Compost'];
+  List<String> get filters => const ['All', 'Recoms', 'Cycles'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getSubstrates();
+    return await FirestoreActivityService.getCyclesRecom();
   }
 
   @override
@@ -32,7 +32,7 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
-    final specificCategories = {'Greens', 'Browns', 'Compost'};
+    final specificCategories = {'Recoms', 'Cycles'};
     
     Set<String> result = {};
     for (var cat in specificCategories) {
