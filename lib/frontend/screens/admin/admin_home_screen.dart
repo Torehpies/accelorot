@@ -1,5 +1,3 @@
-// lib/frontend/screens/admin/admin_home_screen.dart
-
 import 'package:flutter/material.dart';
 
 class AdminHomeScreen extends StatelessWidget {
@@ -70,6 +68,16 @@ class AdminHomeScreen extends StatelessWidget {
                 const Text(
                   'Machine Management',
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, '/admin/machines'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  child: const Text(
+                    'Manage >',
+                    style: TextStyle(color: Colors.teal, fontSize: 16),
+                  ),
                 ),
               ],
             ),
