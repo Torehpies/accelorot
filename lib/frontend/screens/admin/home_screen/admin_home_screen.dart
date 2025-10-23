@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'components/stat_card.dart';
 import 'components/user_management_section.dart';
 import 'models/admin_user_model.dart';
-import 'data/mock_admin_data.dart';
+import '../../../../services/admin_data/mock_admin_data.dart';
 
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});

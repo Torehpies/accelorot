@@ -7,6 +7,8 @@ import 'statistics_screen.dart';
 import '../operator/profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../operator/machine_management/machine_management_screen.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 
 void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
@@ -31,7 +33,14 @@ void logCurrentUser(BuildContext context) {
 }
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final bool showReferralOverlay;
+  final String? referralCode;
+
+  const MainNavigation({
+    super.key,
+    this.showReferralOverlay = false,
+    this.referralCode,
+  });
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -62,6 +71,70 @@ class _MainNavigationState extends State<MainNavigation> {
       _selectedIndex = index;
     });
     logCurrentUser(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Show initial auth info and optionally the referral overlay once after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      logCurrentUser(context);
+      if (widget.showReferralOverlay) {
+        _maybeShowReferralOverlay();
+      }
+    });
+  }
+
+  Future<void> _maybeShowReferralOverlay() async {
+    try {
+      final auth = AuthService();
+      final user = auth.getCurrentUser();
+      if (user == null) return;
+
+      final code = widget.referralCode ?? user.uid.substring(0, 8).toUpperCase();
+
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return Dialog(
+            insetPadding: const EdgeInsets.all(24),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  QrImageView(
+                    data: code,
+                    version: QrVersions.auto,
+                    size: 180,
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    code,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      // no-op: we no longer mark referralShown in Firestore
+    } catch (e) {
+      // ignore errors
+    }
   }
 
   @override
