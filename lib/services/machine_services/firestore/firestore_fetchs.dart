@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/services/firestore/firestore_fetch.dart
 
 import '../../../frontend/operator/machine_management/models/machine_model.dart';
-import 'firestore_collection.dart ';
+import 'firestore_collection.dart';
 
 class MachineFirestoreFetch {
   // Fetch all active machines
