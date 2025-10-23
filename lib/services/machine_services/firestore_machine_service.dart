@@ -1,5 +1,5 @@
 import '../../frontend/operator/machine_management/models/machine_model.dart';
-import '../../frontend/operator/machine_management/services/firestore/firestore_collections.dart';
+import 'firestore/firestore_collections.dart';
 import 'firestore/firestore_upload.dart';
 import 'firestore/firestore_fetch.dart';
 
