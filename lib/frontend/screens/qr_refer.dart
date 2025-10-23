@@ -180,7 +180,11 @@ class _QRReferScreenState extends State<QRReferScreen> {
                 labelText: 'Referral Code',
                 border: OutlineInputBorder(),
               ),
-              onChanged: (v) => _manualCode = v.trim(),
+              onChanged: (v) {
+                setState(() {
+                  _manualCode = v.trim();
+                });
+              },
             ),
             const SizedBox(height: 12),
             ElevatedButton(
