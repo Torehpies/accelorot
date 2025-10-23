@@ -1,43 +1,30 @@
 // lib/main.dart
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show  PlatformDispatcher;
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/web/web_dashboard_screen.dart';
-
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/services/auth_wrapper.dart';
 import 'firebase_options.dart';
-import 'frontend/screens/main_navigation.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:ui' show PlatformDispatcher; // Required for global error handling
+
 import 'frontend/screens/statistics_screen.dart';
+import 'frontend/screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🌐 Global error handler — safe for web
-  FlutterError.onError = (details) {
-    // Avoid printing raw error objects on web
-    final message = details.exceptionAsString();
-    // Use print (safe) — never debugPrint or pass to JS directly
-    print('Flutter Error: $message');
-  };
-
-  // 🧵 Handle async errors (e.g., from Firebase)
   PlatformDispatcher.instance.onError = (error, stack) {
-    // ✅ SAFE: Convert to string before logging
-    final errorMessage = error.toString();
-    print('Uncaught async error: $errorMessage');
-    return true; // Prevents default red screen
+    //print('Uncaught async error: $error');
+    return true;
   };
 
-  // 🔥 Initialize Firebase — with web-safe fallback
+  // Only initialize Firebase on supported platforms
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  } on FirebaseException catch (e) {
-    // ✅ Only use e.message (String), never raw e
-    print('Firebase init failed: ${e.message ?? "Unknown Firebase error"}');
   } catch (e) {
-    // Fallback for non-Firebase errors (e.g., network, config)
-    print('Firebase init failed: $e');
+    //print('Firebase initialization failed: $e');
+    // App continues, but Firebase features may be disabled
   }
 
   runApp(const MyApp());
@@ -54,9 +41,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.grey),
-        ),
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey[700])),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
@@ -79,7 +64,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: WebDashboardScreen(), // This handles both web and mobile safely
+      home: const AuthWrapper(),
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
