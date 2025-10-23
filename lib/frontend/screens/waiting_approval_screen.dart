@@ -25,7 +25,6 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
     try {
       // Get the pendingTeamId before clearing it
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      if (!mounted) return; // guard after await
       final pendingTeamId = userDoc.data()?['pendingTeamId'] as String?;
 
       if (pendingTeamId != null) {
