@@ -66,24 +66,24 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                         borderColor: Colors.green,
                       ),
                     ),
-                    const SizedBox(width: 4), // Small gap between tiles
+                    const SizedBox(width: 3), // Small gap between tiles
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Moisture',
                         value: moisture != null
-                            ? '${moisture!.toStringAsFixed(1)} g/m³'
+                            ? '${moisture!.toStringAsFixed(1)} %'
                             : '-- g/m³',
                         change: moistureChange,
                         iconColor: Colors.orange,
                         borderColor: Colors.orange,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Oxygen',
                         value: oxygen != null
-                            ? '${oxygen!.toStringAsFixed(0)}%'
+                            ? '${oxygen!.toStringAsFixed(0)}ppm'
                             : '--%',
                         change: oxygenChange,
                         iconColor: Colors.red,
@@ -126,14 +126,14 @@ class EnvironmentalSensorsCard extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           Row(
             children: [
               Icon(Icons.circle, size: 8, color: iconColor),
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               Text(
                 change,
                 style: const TextStyle(fontSize: 7, color: Colors.grey),
