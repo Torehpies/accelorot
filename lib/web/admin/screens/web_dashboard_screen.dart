@@ -5,7 +5,7 @@ import '../../../frontend/operator/dashboard/home_screen.dart';
 import '../../../frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'web_statistics_screen.dart';
 import 'web_profile_screen.dart';
-import '../../../frontend/operator/machine_management/machine_management_screen.dart';
+import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void logCurrentUser(BuildContext context) {
@@ -57,7 +57,7 @@ class _WebDashboardScreenState extends State<WebDashboardScreen> {
       const HomeScreen(),
       ActivityLogsNavigator(key: _activityNavigatorKey),
       const WebStatisticsScreen(),
-      MachineManagementScreen(),
+      const AdminMachineScreen(),
       WebProfileScreen(),
     ];
   }
