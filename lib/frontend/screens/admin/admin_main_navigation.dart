@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_home_screen.dart';
-import 'user_management_screen.dart';
 import '../profile_screen.dart'; 
 import '../../operator/machine_management/machine_management_screen.dart';
 import 'operator_management/operator_management_screen.dart';
@@ -18,8 +17,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
 
   final List<Widget> _screens = [
     AdminHomeScreen(),
-    UserManagementScreen(),
-    OperatorManagementScreen(), // ✅ Now correctly referenced
+    OperatorManagementScreen(), 
     MachineManagementScreen(),
     ProfileScreen(),
   ];
@@ -77,8 +75,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: "Users"),
-          BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: "Operator"), // ✅ NEW ITEM
+          BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: "Operator"), 
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machine"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
