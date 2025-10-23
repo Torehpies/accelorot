@@ -1,17 +1,78 @@
-flutter/ephemeral/
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
 
-# Visual Studio user-specific files.
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+# IntelliJ / VSCode / Xcode
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.lock
 
-# Visual Studio build-related files.
-x64/
-x86/
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
 
-# Visual Studio cache files
-# files ending in .cache can be ignored
-*.[Cc]ache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio build artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Firebase / FlutterFire
+firebase_options.dart
+google-services.json
+
+# Android
+android/.gradle/
+android/captures/
+android/app/*.keystore
+android/app/*.jks
+android/local.properties
+android/key.properties
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Windows
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
+
+# Linux
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugins.cmake
+
+# Web
+web/firebase-messaging-sw.js
+
+notes.md
+
+
+
+
+# Freezed
+*.g.dart
+*.freezed.dart
