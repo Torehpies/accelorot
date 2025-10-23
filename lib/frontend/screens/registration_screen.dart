@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'login_screen.dart';
@@ -89,12 +90,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         setState(() => _isGoogleLoading = false);
 
         if (result['success']) {
-          // Success: Show confirmation and navigate home (or to a dashboard)
           showSnackbar(context, result['message']);
-          // TODO: Replace with your actual home/dashboard screen route
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const QRReferScreen()),
           );
         } else {
           // Failure: Display error message

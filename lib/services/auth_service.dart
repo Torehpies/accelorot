@@ -13,8 +13,7 @@ class AuthService {
       await _googleSignIn.initialize();
       _isGoogleSignInInitialized = true;
     } catch (e) {
-      print('Failed to initialize Google Sign-In: $e');
-			print(e.hashCode);
+      // print('Failed to initialize Google Sign-In: $e');
     }
   }
 
@@ -23,8 +22,9 @@ class AuthService {
       await _initializeGoogleSignIn();
     }
   }
+
   Future<Map<String, dynamic>> signInWithGoogle() async {
-		_ensureGoogleSignInInitialized();
+    _ensureGoogleSignInInitialized();
     final GoogleSignInAccount googleUser = await GoogleSignIn.instance
         .authenticate();
 
@@ -34,12 +34,43 @@ class AuthService {
       idToken: googleAuth.idToken,
     );
 
-		await _auth.signInWithCredential(credential);
+    await _auth.signInWithCredential(credential);
 
-		return {
-			'success': true,
-			'message': 'Signed in with Google successfully'
-		};
+		await _saveGoogleUserToFirestore(user: googleUser, role: 'Operator');
+
+    return {'success': true, 'message': 'Signed in with Google successfully'};
+  }
+
+  Future<void> _saveGoogleUserToFirestore({
+    required GoogleSignInAccount user,
+    required String role,
+  }) async {
+    final userDoc = _firestore.collection('users').doc(getCurrentUser()?.uid);
+    final docSnapshot = await userDoc.get();
+
+    // Parse names from displayName (e.g., "John Doe" -> "John", "Doe")
+    final names = user.displayName?.split(' ');
+    final firstName = names!.isNotEmpty
+        ? names.first
+        : (user.email.split('@').first);
+    final lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
+
+    if (!docSnapshot.exists) {
+      // New user: save full data set
+      await userDoc.set({
+        'uid': user.id,
+        'email': user.email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isActive': true,
+        'emailVerified': true, // Google accounts are considered verified
+      });
+    } else {
+      // Existing user: ensure verification status is marked true
+      await userDoc.update({'isActive': true, 'emailVerified': true});
+    }
   }
 
   Future<Map<String, dynamic>> sendEmailVerify() async {
