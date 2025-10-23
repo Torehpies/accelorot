@@ -1,14 +1,16 @@
-//activity_item.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ActivityItem {
   final String title;
   final String value;
-  final String statusColor; // 'red', 'green', 'yellow', 'grey'
+  final String statusColor;
   final IconData icon;
   final String description;
   final String category;
   final DateTime timestamp;
+  final String? userId;
 
   ActivityItem({
     required this.title,
@@ -18,9 +20,43 @@ class ActivityItem {
     required this.description,
     required this.category,
     required this.timestamp,
+    this.userId,
   });
 
-  // Helper to get color from string
+  // Firestore: Convert document to model
+  factory ActivityItem.fromMap(Map<String, dynamic> data) {
+    return ActivityItem(
+      title: data['title'] ?? '',
+      value: data['value'] ?? '',
+      statusColor: data['statusColor'] ?? 'grey',
+      icon: IconData(data['icon'] ?? Icons.info.codePoint, fontFamily: 'MaterialIcons'),
+      description: data['description'] ?? '',
+      category: data['category'] ?? '',
+      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      userId: data['userId'],
+    );
+  }
+
+  // Firestore: Convert model to document
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'value': value,
+      'statusColor': statusColor,
+      'icon': icon.codePoint,
+      'description': description,
+      'category': category,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'userId': userId,
+    };
+  }
+
+  // UI: Formatted time
+  String get formattedTimestamp {
+    return DateFormat('MM/dd/yyyy, hh:mm a').format(timestamp);
+  }
+
+  // UI: Color parser
   Color get statusColorValue {
     switch (statusColor.toLowerCase()) {
       case 'red':
@@ -31,35 +67,44 @@ class ActivityItem {
         return Colors.yellow.shade700;
       case 'grey':
         return Colors.grey;
+      case 'brown':
+        return Colors.brown;
+      case 'orange':
+        return Colors.orange;
       default:
         return Colors.grey;
     }
   }
 
-  // Format timestamp as MM/DD/YY, HH:MM AM/PM
-  String get formattedTimestamp {
-    final hour = timestamp.hour > 12 ? timestamp.hour - 12 : timestamp.hour;
-    final displayHour = hour == 0 ? 12 : hour;
-    final minute = timestamp.minute.toString().padLeft(2, '0');
-    final period = timestamp.hour >= 12 ? 'PM' : 'AM';
-    final month = timestamp.month.toString().padLeft(2, '0');
-    final day = timestamp.day.toString().padLeft(2, '0');
-    final year = timestamp.year.toString().substring(2);
-    
-    return '$month/$day/$year, $displayHour:$minute $period';
+  // Search utility
+  bool matchesSearchQuery(String query) {
+    final lower = query.toLowerCase();
+    return title.toLowerCase().contains(lower) ||
+           description.toLowerCase().contains(lower) ||
+           category.toLowerCase().contains(lower) ||
+           value.toLowerCase().contains(lower);
   }
 
-  // Reusable search method - checks if item matches the search query
-  bool matchesSearchQuery(String query) {
-    if (query.isEmpty) return true;
-    
-    final lowerQuery = query.toLowerCase();
-    final timestampStr = '${timestamp.year}-${timestamp.month}-${timestamp.day} ${timestamp.hour}:${timestamp.minute}';
-    
-    return title.toLowerCase().contains(lowerQuery) ||
-           description.toLowerCase().contains(lowerQuery) ||
-           value.toLowerCase().contains(lowerQuery) ||
-           category.toLowerCase().contains(lowerQuery) ||
-           timestampStr.toLowerCase().contains(lowerQuery);
+  // Immutable copying
+  ActivityItem copyWith({
+    String? title,
+    String? value,
+    String? statusColor,
+    IconData? icon,
+    String? description,
+    String? category,
+    DateTime? timestamp,
+    String? userId,
+  }) {
+    return ActivityItem(
+      title: title ?? this.title,
+      value: value ?? this.value,
+      statusColor: statusColor ?? this.statusColor,
+      icon: icon ?? this.icon,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      timestamp: timestamp ?? this.timestamp,
+      userId: userId ?? this.userId,
+    );
   }
 }

@@ -6,11 +6,9 @@ import 'profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../operator/machine_management/machine_management_screen.dart';
 
-
 void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
 
-  // Remove any current snackbars and show a short message about auth state.
   ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
   if (user != null) {
@@ -30,7 +28,6 @@ void logCurrentUser(BuildContext context) {
   }
 }
 
-
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 
@@ -41,7 +38,6 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  // Add a GlobalKey to control the ActivityLogsNavigator
   final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
 
   late final List<Widget> _screens = [
@@ -49,13 +45,13 @@ class _MainNavigationState extends State<MainNavigation> {
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
     MachineManagementScreen(),
-    const ProfileScreen(),
+    const ProfileScreen(),     
   ];
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
-    // 🔹 When switching tabs, reset ActivityLogsNavigator to its root
+    // Reset ActivityLogsNavigator when leaving the Activity tab
     if (_selectedIndex == 1) {
       _activityNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
@@ -63,7 +59,6 @@ class _MainNavigationState extends State<MainNavigation> {
     setState(() {
       _selectedIndex = index;
     });
-    // show the current auth info in a brief SnackBar
     logCurrentUser(context);
   }
 

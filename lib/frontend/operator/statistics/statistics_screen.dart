@@ -5,9 +5,7 @@ import 'view_screens/oxygen_stats_view.dart';
 import 'view_screens/moisture_stats_view.dart';
 import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
-import '../../screens/main_navigation.dart';
 import '../../components/history.dart'; // make sure this path is correct
-import '../dashboard/home_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
