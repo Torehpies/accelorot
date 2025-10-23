@@ -1,10 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'operator_detail_screen.dart'; // ✅ Now used for navigation
+import 'operator_detail_screen.dart';
 import 'add_operator_screen.dart';
 import 'accept_operator_screen.dart';
-import 'package:flutter_application_1/services/operator_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -15,13 +16,18 @@ class OperatorManagementScreen extends StatefulWidget {
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _operators = [];
   bool _loading = true;
   String? _error;
-
   bool _showArchived = false;
-  int _nextOperatorNumber = 7;
-  
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOperators();
+  }
+
   Future<void> _loadOperators() async {
     setState(() {
       _loading = true;
@@ -29,10 +35,59 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     });
 
     try {
-      final list = await OperatorService.fetchOperators();
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        setState(() {
+          _error = 'No user logged in';
+          _loading = false;
+        });
+        return;
+      }
+
+      // Get team members from teams/{teamId}/members
+      final teamId = currentUser.uid;
+      final membersSnapshot = await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .orderBy('addedAt', descending: true)
+          .get();
+
+      final List<Map<String, dynamic>> operators = [];
+
+      for (var doc in membersSnapshot.docs) {
+        final data = doc.data();
+        final userId = data['userId'] as String?;
+
+        if (userId != null) {
+          // Fetch full user details from users collection
+          final userDoc = await _firestore
+              .collection('users')
+              .doc(userId)
+              .get();
+
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            final firstName = userData['firstname'] ?? '';
+            final lastName = userData['lastname'] ?? '';
+            final name = '$firstName $lastName'.trim();
+
+            operators.add({
+              'id': userId,
+              'uid': userId,
+              'name': name.isNotEmpty ? name : data['name'] ?? 'Unknown',
+              'email': data['email'] ?? userData['email'] ?? '',
+              'role': data['role'] ?? userData['role'] ?? 'Operator',
+              'isArchived': data['isArchived'] ?? false,
+              'dateAdded': _formatTimestamp(data['addedAt'] as Timestamp?),
+            });
+          }
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _operators = list;
+          _operators = operators;
           _loading = false;
         });
       }
@@ -46,64 +101,64 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     }
   }
 
-  void _restoreOperator(int globalIndex) {
-    setState(() {
-      _operators[globalIndex]['isArchived'] = false;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${_operators[globalIndex]['name']} restored'),
-      ),
-    );
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return 'Unknown';
+    final date = timestamp.toDate();
+    return '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}-${date.year}';
   }
 
-  void _addOperator({
-    required String name,
-    required String email,
-    required String role,
-    String dateAdded = 'Aug-25-2025',
-  }) {
-    final actualName = name.trim().isNotEmpty
-        ? name.trim()
-        : 'Operator $_nextOperatorNumber';
+  void _restoreOperator(int index) async {
+    final operator = _operators[index];
+    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (teamId.isEmpty) return;
 
-    if (!email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email')),
-      );
-      return;
-    }
+    try {
+      await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .doc(operator['uid'])
+          .update({'isArchived': false});
 
-    setState(() {
-      _operators.add({
-        'name': actualName,
-        'email': email.trim(),
-        'role': role,
-        'isArchived': false,
-        'dateAdded': dateAdded,
+      setState(() {
+        _operators[index]['isArchived'] = false;
       });
-      _nextOperatorNumber++;
-    });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('✅ Added: $actualName')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${operator['name']} restored')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error restoring operator: $e')),
+      );
+    }
   }
 
-  void _showAddOperatorModal() {
-    // Push the full-screen AddOperatorScreen and handle returned data
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddOperatorScreen())).then((result) {
-      if (result is Map<String, dynamic>) {
-        final name = result['name'] as String? ?? '';
-        final email = result['email'] as String? ?? '';
-        final role = result['role'] as String? ?? '';
-        final dateAdded = result['dateAdded'] as String? ?? 'Aug-25-2025';
+  void _archiveOperator(int index) async {
+    final operator = _operators[index];
+    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (teamId.isEmpty) return;
 
-        if (name.isNotEmpty && email.isNotEmpty) {
-          _addOperator(name: name, email: email, role: role, dateAdded: dateAdded);
-        }
-      }
-    });
+    try {
+      await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .doc(operator['uid'])
+          .update({'isArchived': true});
+
+      setState(() {
+        _operators[index]['isArchived'] = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${operator['name']} archived')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error archiving operator: $e')),
+      );
+    }
   }
 
   List<Map<String, dynamic>> get _activeOperators =>
@@ -111,13 +166,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
 
   List<Map<String, dynamic>> get _archivedOperators =>
       _operators.where((o) => o['isArchived'] == true).toList();
-
-  @override
-  void initState() {
-    super.initState();
-    // Fetch operators from Firestore on load
-    _loadOperators();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +185,12 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.teal),
+            onPressed: _loadOperators,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -146,38 +200,43 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             // Action Cards
             Row(
               children: [
-              Expanded(
-                child: _buildActionCard(
-                icon: Icons.archive,
-                label: 'Archive',
-                onPressed: () {
-                  setState(() {
-                  _showArchived = true;
-                  });
-                },
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.archive,
+                    label: 'Archive',
+                    onPressed: () {
+                      setState(() {
+                        _showArchived = true;
+                      });
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                icon: Icons.person_add_alt_1,
-                label: 'Add Operator',
-                onPressed: _showAddOperatorModal,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.person_add_alt_1,
+                    label: 'Add Operator',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AddOperatorScreen()),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                icon: Icons.check_circle,
-                label: 'Accept Operator',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AcceptOperatorScreen()),
-                  );
-                },
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.check_circle,
+                    label: 'Accept Operator',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AcceptOperatorScreen()),
+                      ).then((_) => _loadOperators()); // Reload after returning
+                    },
+                  ),
                 ),
-              ),
               ],
             ),
             const SizedBox(height: 16),
@@ -197,9 +256,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                     style: TextButton.styleFrom(foregroundColor: Colors.teal),
                   )
                 else
-                  Text(
+                  const Text(
                     'Lists of Operators',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.teal,
@@ -215,10 +274,26 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
                       ? Center(
-                          child: Text(
-                            'Error loading operators:\n\n' + (_error ?? ''),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.red),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Error loading operators:',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _error ?? '',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.red, fontSize: 12),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _loadOperators,
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           ),
                         )
                       : currentList.isEmpty
@@ -245,7 +320,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                                 child: ListView.separated(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: currentList.length,
-                                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                                   itemBuilder: (context, index) {
                                     final operator = currentList[index];
                                     final globalIndex = _operators.indexWhere((o) =>

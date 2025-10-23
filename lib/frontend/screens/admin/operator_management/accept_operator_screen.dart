@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'invitation_code_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AcceptOperatorScreen extends StatefulWidget {
 	const AcceptOperatorScreen({super.key});
@@ -10,24 +12,26 @@ class AcceptOperatorScreen extends StatefulWidget {
 }
 
 class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
-		// Mock scanned users (people who scanned or entered the code)
-		final List<Map<String, String>> _scannedUsers = [];
+	final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+	
+	// Mock scanned users (people who scanned or entered the code)
+	final List<Map<String, String>> _scannedUsers = [];
 
-		@override
-		void initState() {
-			super.initState();
-			// seed mock users with the current timestamp as entry date
-			final now = DateTime.now();
-			final formatted = (DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+	@override
+	void initState() {
+		super.initState();
+		// seed mock users with the current timestamp as entry date
+		final now = DateTime.now();
+		final formatted = (DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
-			_scannedUsers.addAll([
-				{'name': 'Lina Alvarez', 'email': 'lina.alvarez@example.com', 'date': formatted(now.subtract(const Duration(minutes: 12)))},
-				{'name': 'Marcus Chen', 'email': 'marcus.chen@example.com', 'date': formatted(now.subtract(const Duration(minutes: 46)))},
-				{'name': 'Aisha Mohammed', 'email': 'aisha.mohammed@example.com', 'date': formatted(now.subtract(const Duration(hours: 2, minutes: 5)))},
-				{'name': 'Ethan Brooks', 'email': 'ethan.brooks@example.com', 'date': formatted(now.subtract(const Duration(days: 1, hours: 1)))},
-				{'name': 'Priya Kapoor', 'email': 'priya.kapoor@example.com', 'date': formatted(now.subtract(const Duration(minutes: 3)))},
-			]);
-		}
+		_scannedUsers.addAll([
+			{'name': 'Lina Alvarez', 'email': 'lina.alvarez@example.com', 'date': formatted(now.subtract(const Duration(minutes: 12)))},
+			{'name': 'Marcus Chen', 'email': 'marcus.chen@example.com', 'date': formatted(now.subtract(const Duration(minutes: 46)))},
+			{'name': 'Aisha Mohammed', 'email': 'aisha.mohammed@example.com', 'date': formatted(now.subtract(const Duration(hours: 2, minutes: 5)))},
+			{'name': 'Ethan Brooks', 'email': 'ethan.brooks@example.com', 'date': formatted(now.subtract(const Duration(days: 1, hours: 1)))},
+			{'name': 'Priya Kapoor', 'email': 'priya.kapoor@example.com', 'date': formatted(now.subtract(const Duration(minutes: 3)))},
+		]);
+	}
 
 	String _generateCode() {
 		const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -35,12 +39,73 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 		return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
 	}
 
-	void _onGenerateCode() {
-		final code = _generateCode();
-		final expiry = DateTime.now().add(const Duration(hours: 24));
-		final expiryStr = '${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
-		showInvitationOverlay(context, code, expiryStr);
-	}
+Future<void> _onGenerateCode() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error: No user logged in')),
+    );
+    return;
+  }
+
+  final teamId = user.uid; // each admin's team uses their UID as doc ID
+  try {
+    final teamDocRef = _firestore.collection('teams').doc(teamId);
+    final teamDoc = await teamDocRef.get();
+
+    String code;
+    DateTime expiry;
+
+    if (teamDoc.exists) {
+      final data = teamDoc.data();
+      final existingCode = data?['joinCode'] as String?;
+      final expiresAt = data?['joinCodeExpiresAt'] as Timestamp?;
+
+      if (existingCode != null && expiresAt != null) {
+        final expiryDate = expiresAt.toDate();
+        if (expiryDate.isAfter(DateTime.now())) {
+          // Still valid — just show the QR again
+          final expiryStr =
+              '${expiryDate.year}-${expiryDate.month.toString().padLeft(2, '0')}-${expiryDate.day.toString().padLeft(2, '0')}';
+          showInvitationOverlay(context, existingCode, expiryStr);
+          return;
+        }
+      }
+
+      // Otherwise, generate a new one
+      code = _generateCode();
+      expiry = DateTime.now().add(const Duration(hours: 24));
+
+      await teamDocRef.set({
+        'ownerId': teamId,
+        'joinCode': code,
+        'joinCodeExpiresAt': expiry,
+        'createdAt': data?['createdAt'] ?? FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } else {
+      // New team document
+      code = _generateCode();
+      expiry = DateTime.now().add(const Duration(hours: 24));
+
+      await teamDocRef.set({
+        'ownerId': teamId,
+        'joinCode': code,
+        'joinCodeExpiresAt': expiry,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    }
+
+    final expiryStr =
+        '${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
+    showInvitationOverlay(context, code, expiryStr);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
+  }
+}
 
 	void _acceptInvitation(int index) {
 		final name = _scannedUsers[index]['name'] ?? 'Applicant';

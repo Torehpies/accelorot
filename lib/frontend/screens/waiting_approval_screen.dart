@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
+import 'package:flutter_application_1/frontend/screens/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WaitingApprovalScreen extends StatefulWidget {
   const WaitingApprovalScreen({super.key});
@@ -11,18 +13,53 @@ class WaitingApprovalScreen extends StatefulWidget {
 
 class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
   final AuthService _auth = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _loading = false;
 
   Future<void> _cancelRequest() async {
     final user = _auth.getCurrentUser();
     if (user == null) return;
+    
     setState(() => _loading = true);
-    await _auth.clearPendingTeamId(user.uid);
-    if (!mounted) return;
-    // After cancelling, send user to join screen
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const QRReferScreen()),
-    );
+
+    try {
+      // Get the pendingTeamId before clearing it
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      final pendingTeamId = userDoc.data()?['pendingTeamId'] as String?;
+
+      if (pendingTeamId != null) {
+        final batch = _firestore.batch();
+
+        // 1. Remove from pending_members subcollection
+        final pendingRef = _firestore
+            .collection('teams')
+            .doc(pendingTeamId)
+            .collection('pending_members')
+            .doc(user.uid);
+        batch.delete(pendingRef);
+
+        // 2. Clear pendingTeamId from user document
+        final userRef = _firestore.collection('users').doc(user.uid);
+        batch.update(userRef, {
+          'pendingTeamId': FieldValue.delete(),
+        });
+
+        await batch.commit();
+      }
+
+      if (!mounted) return;
+      
+      // Navigate back to QR refer screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const QRReferScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error canceling request: $e')),
+      );
+    }
   }
 
   @override
@@ -56,7 +93,10 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _loading ? null : _cancelRequest,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child: _loading
                     ? const SizedBox(
                         width: 20,
@@ -67,6 +107,24 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                         ),
                       )
                     : const Text('Cancel Request'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  await _auth.signOut();
+                  if (!mounted) return;
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.teal),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('Back to Login'),
               ),
             ),
           ],

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../services/auth_service.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'waiting_approval_screen.dart';
+import 'login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QRReferScreen extends StatefulWidget {
   const QRReferScreen({super.key});
@@ -12,11 +15,13 @@ class QRReferScreen extends StatefulWidget {
 
 class _QRReferScreenState extends State<QRReferScreen> {
   final AuthService _auth = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _loading = true;
   String? _teamId;
   String? _pendingTeamId;
   bool _scanning = false;
   String _manualCode = '';
+  final TextEditingController _codeController = TextEditingController();
 
   @override
   void initState() {
@@ -24,10 +29,15 @@ class _QRReferScreenState extends State<QRReferScreen> {
     _checkTeamStatus();
   }
 
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkTeamStatus() async {
     final user = _auth.getCurrentUser();
     if (user == null) {
-      // If no user, navigate to login or show simple message
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -45,7 +55,6 @@ class _QRReferScreenState extends State<QRReferScreen> {
 
     // Redirect immediately if already assigned
     if (_teamId != null) {
-      // Navigate to main navigation (operator dashboard)
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -70,61 +79,77 @@ class _QRReferScreenState extends State<QRReferScreen> {
   Future<void> _submitReferralCode(String code) async {
     final user = _auth.getCurrentUser();
     if (user == null) return;
+
     try {
-      await _auth.setPendingTeamId(user.uid, code);
+      // 1. Find the team with this joinCode
+      final teamsQuery = await _firestore
+          .collection('teams')
+          .where('joinCode', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (teamsQuery.docs.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid referral code')),
+        );
+        setState(() => _scanning = false);
+        return;
+      }
+
+      final teamDoc = teamsQuery.docs.first;
+      final teamId = teamDoc.id;
+      final teamData = teamDoc.data();
+
+      // 2. Check if code is expired
+      final expiresAt = teamData['joinCodeExpiresAt'] as Timestamp?;
+      if (expiresAt != null && expiresAt.toDate().isBefore(DateTime.now())) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('This referral code has expired')),
+        );
+        setState(() => _scanning = false);
+        return;
+      }
+
+      // 3. Add to pending_members subcollection
+      await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(user.uid)
+          .set({
+        'requestorId': user.uid,
+        'requestorEmail': user.email ?? '',
+        'requestedAt': FieldValue.serverTimestamp(),
+      });
+
+      // 4. Set pendingTeamId in user document
+      await _auth.setPendingTeamId(user.uid, teamId);
+
       if (!mounted) return;
       setState(() {
-        _pendingTeamId = code;
+        _pendingTeamId = teamId;
+        _scanning = false;
       });
-      // Show waiting for approval
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request submitted! Waiting for approval.')),
+      );
     } catch (e) {
-      // show simple error
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to submit code: $e')),
       );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _scanning = false;
-        });
-      }
+      setState(() => _scanning = false);
     }
   }
 
-  Widget _buildWaiting() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.hourglass_top, size: 72, color: Colors.orange),
-            const SizedBox(height: 16),
-            const Text(
-              'Waiting for Approval',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Your request to join the team is pending. An admin will review and approve your request shortly.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                final user = _auth.getCurrentUser();
-                if (user == null) return;
-                await _auth.clearPendingTeamId(user.uid);
-                setState(() {
-                  _pendingTeamId = null;
-                });
-              },
-              child: const Text('Cancel Request'),
-            ),
-          ],
-        ),
-      ),
+  Future<void> _handleBackToLogin() async {
+    await _auth.signOut();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 
@@ -150,6 +175,7 @@ class _QRReferScreenState extends State<QRReferScreen> {
 
             // Manual code entry
             TextField(
+              controller: _codeController,
               decoration: const InputDecoration(
                 labelText: 'Referral Code',
                 border: OutlineInputBorder(),
@@ -161,6 +187,10 @@ class _QRReferScreenState extends State<QRReferScreen> {
               onPressed: _manualCode.isNotEmpty
                   ? () => _submitReferralCode(_manualCode)
                   : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+              ),
               child: const Text('Submit Code'),
             ),
 
@@ -188,6 +218,20 @@ class _QRReferScreenState extends State<QRReferScreen> {
             ),
             const SizedBox(height: 12),
             if (_scanning) const Center(child: CircularProgressIndicator()),
+
+            const SizedBox(height: 24),
+
+            // Back to Login button
+            TextButton(
+              onPressed: _handleBackToLogin,
+              child: const Text(
+                'Back to Login',
+                style: TextStyle(
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -201,19 +245,18 @@ class _QRReferScreenState extends State<QRReferScreen> {
     }
 
     if (_teamId != null) {
-      // should have already navigated, but show placeholder
       return const Scaffold(body: Center(child: Text('Redirecting to dashboard...')));
     }
 
     if (_pendingTeamId != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Team Status')),
-        body: _buildWaiting(),
-      );
+      return const WaitingApprovalScreen();
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Join a Team')),
+      appBar: AppBar(
+        title: const Text('Join a Team'),
+        backgroundColor: Colors.teal,
+      ),
       body: _buildJoinTeam(),
     );
   }
