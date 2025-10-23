@@ -1,17 +1,69 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'registration_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_wrapper.dart';
 import '../components/edit_profile_modal.dart';
 import '../components/change_password_modal.dart';
 import '../screens/personal_info_screen.dart';
+import 'package:flutter_application_1/services/sess_service.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final SessionService _session = SessionService();
+  Map<String, dynamic>? _userData;
+  bool _loading = true;
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthWrapper()),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final data = await _session.getCurrentUserData();
+    if (mounted) {
+      setState(() {
+        _userData = data;
+        _loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+  // Compute display values with safe fallbacks
+  final first = _userData != null && _userData!['firstname'] is String
+    ? _userData!['firstname'] as String
+    : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
+  final last = _userData != null && _userData!['lastname'] is String
+    ? _userData!['lastname'] as String
+    : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
+  final displayName = [first, last].where((s) => s.isNotEmpty).join(' ').trim();
+  final email = _userData != null && _userData!['email'] is String
+    ? _userData!['email'] as String
+    : FirebaseAuth.instance.currentUser?.email ?? '';
+
+  // build initials for avatar placeholder
+  final initials = ((first.isNotEmpty ? first[0] : '') + (last.isNotEmpty ? last[0] : '')).toUpperCase();
+
+  return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -36,21 +88,24 @@ class ProfileScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 50,
                       backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150/2E7D32/FFFFFF?text=M',
+                        'https://via.placeholder.com/150/2E7D32/FFFFFF?text=${initials.isNotEmpty ? initials : 'M'}',
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    _loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            displayName.isNotEmpty ? displayName : 'No name',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                    const SizedBox(height: 4),
                     Text(
-                      "Miguel Andres Reyes",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "miguelreyes@email.com",
-                      style: TextStyle(
+                      email,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                       ),
@@ -70,14 +125,20 @@ class ProfileScreen extends StatelessWidget {
                       context,
                       label: "Edit Profile",
                       onPressed: () {
+                        final first = _userData != null && _userData!['firstname'] is String
+                            ? _userData!['firstname'] as String
+                            : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
+                        final last = _userData != null && _userData!['Lastname'] is String
+                            ? _userData!['Lastname'] as String
+                            : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
+
                         showDialog(
                           context: context,
                           builder: (context) => EditProfileModal(
-                            firstName: "Miguel Andres",
-                            lastName: "Reyes",
-                            username: "MiguelReyes",
-                            email: "miguelreyes@email.com",
-                            role: "User",
+                            firstName: first.isNotEmpty ? first : 'Miguel Andres',
+                            lastName: last.isNotEmpty ? last : 'Reyes',
+                            username: FirebaseAuth.instance.currentUser?.displayName ?? '',
+                            role: _userData?['role'] ?? 'User',
                           ),
                         );
                       },
@@ -106,21 +167,13 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // Log Out Button
+                    // Log Out Button — sign out and return to AuthWrapper
                     ElevatedButton(
-                      onPressed: () {
-                        _showMessage(context, "Logged out");
-                        Future.delayed(const Duration(seconds: 1), () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegistrationScreen(),
-                            ),
-                          );
-                        });
+                      onPressed: () async {
+                        await _signOut();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2E7D32),
+                        backgroundColor: const Color(0xFF2E7D32),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -166,9 +219,4 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
 }
