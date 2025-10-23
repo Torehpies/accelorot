@@ -1,7 +1,7 @@
-import '../models/machine_model.dart';
-import 'firestore/firestore_collections.dart';
-import 'firestore/firestore_upload.dart';
-import 'firestore/firestore_fetch.dart';
+import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import '../firestore/firestore_collection.dart';
+import '../firestore/firestore_uploads.dart';
+import '../firestore/firestore_fetchs.dart';
 
 /// Main service class for machine management with Firestore.
 /// Provides a unified API for all machine operations.
