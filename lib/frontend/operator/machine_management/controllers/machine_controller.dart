@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../models/machine_model.dart';
-import '../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../../services/machine_services/mock_data/firestore_machine_service.dart';
 
 class MachineController extends ChangeNotifier {
   // State
