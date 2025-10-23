@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_home_screen.dart';
 import 'user_management_screen.dart';
-import '../profile_screen.dart'; // ✅ Adjust path if needed — this is your existing ProfileScreen
+import '../../operator/profile/profile_screen.dart'; // ✅ Adjust path if needed — this is your existing ProfileScreen
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});

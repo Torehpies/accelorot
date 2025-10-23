@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../services/auth_wrapper.dart';
-import '../components/edit_profile_modal.dart';
-import '../components/change_password_modal.dart';
-import '../screens/personal_info_screen.dart';
+import '../../../services/auth_wrapper.dart';
+import '../../components/edit_profile_modal.dart';
+import '../../components/change_password_modal.dart';
+import '../../screens/personal_info_screen.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
 
 class ProfileScreen extends StatefulWidget {

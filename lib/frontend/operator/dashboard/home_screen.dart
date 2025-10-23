@@ -28,7 +28,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: null, // ✅ Top navigation bar is now fully removed
+     appBar: AppBar(
+  title: const Text('Dashboard'),
+  centerTitle: false, // 👈 Ensures title is aligned to the left
+  backgroundColor: Colors.teal, // 👈 Sets the background color
+  // Optional: Ensure text is readable (white by default in light themes)
+  foregroundColor: Colors.white,
+),
       body: SafeArea(
         child: Center(
           child: Container(
@@ -74,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddWasteProductModal(BuildContext context) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AddWasteProduct(), // Removed 'const' unless AddWasteProduct has a const constructor
+      builder: (context) => AddWasteProduct(),
     );
 
     if (result != null) {
