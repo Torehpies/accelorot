@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
 
-import '../admin/components/edit_profile_modal.dart';
-import '../admin/components/change_password_modal.dart';
-import '../admin_personal_info_screen.dart';
+import '../components/edit_profile_modal.dart';
+import '../components/change_password_modal.dart';
+import 'admin_personal_info_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
