@@ -1,125 +1,102 @@
-// lib/web/navigation/web_navigation.dart
-
-// ignore_for_file: deprecated_member_use
-
+// lib/web/admin/navigation/web_admin_main_navigation.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
-import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
-import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-// ignore: unused_import
-import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart';
+import '../../../frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
+import '../screens/web_profile_screen.dart';
+import '../screens/web_admin_home_screen.dart';
+import '../../../frontend/screens/statistics_screen.dart';
 
-class WebNavigation extends StatefulWidget {
-  const WebNavigation({super.key});
+class WebAdminMainNavigation extends StatefulWidget {
+  const WebAdminMainNavigation({super.key});
 
   @override
-  State<WebNavigation> createState() => _WebNavigationState();
+  State<WebAdminMainNavigation> createState() => _WebAdminMainNavigationState();
 }
 
-class _WebNavigationState extends State<WebNavigation> {
+class _WebAdminMainNavigationState extends State<WebAdminMainNavigation> {
   int _selectedIndex = 0;
 
-  late final List<Widget> _screens = [
-    const HomeScreen(),
-    const ActivityLogsScreen(),
-    const StatisticsScreen(),
-    const OperatorMachineScreen(),
-    const ProfileScreen(),
+  final List<_NavItemData> _navItems = [
+    _NavItemData(Icons.dashboard, 'Dashboard'),
+    _NavItemData(Icons.supervisor_account, 'Operators'),
+    _NavItemData(Icons.settings, 'Machines'),
+    _NavItemData(Icons.person, 'Profile'),
   ];
 
-  static const List<_NavItem> _navItems = [
-    _NavItem(Icons.dashboard, 'Dashboard'),
-    _NavItem(Icons.history, 'Activity Logs'),
-    _NavItem(Icons.bar_chart, 'Statistics'),
-    _NavItem(Icons.settings, 'Machines'),
-    _NavItem(Icons.people, 'Users'),
-    _NavItem(Icons.person, 'Profile'),
-    _NavItem(Icons.logout, 'Logout'),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      const WebAdminHomeScreen(),
+      const OperatorManagementScreen(),
+      const AdminMachineScreen(),
+      const WebProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
         children: [
-          // 🟢 Green Sidebar
+          // Sidebar Navigation
           Container(
             width: 250,
-            color: const Color(0xFF1ABC9C), // Teal green
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'Accel-O-Rot',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+            color: Colors.teal,
+            child: Column(
+              children: [
+                const SizedBox(height: 32),
+                // Logo
+                const Text(
+                  'Accel-O-Rot Admin',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const Divider(color: Colors.white30, height: 1),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _navItems.length,
-                      itemBuilder: (context, index) {
-                        final item = _navItems[index];
-                        return ListTile(
-                          leading: Icon(item.icon, color: Colors.white),
-                          title: Text(
-                            item.label,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: _selectedIndex == index ? FontWeight.bold : null,
-                            ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  FirebaseAuth.instance.currentUser?.email ?? '',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                ),
+                const Divider(color: Colors.white30, height: 32),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: _navItems.length,
+                    itemBuilder: (context, index) {
+                      final item = _navItems[index];
+                      final isSelected = _selectedIndex == index;
+                      return ListTile(
+                        leading: Icon(item.icon, color: Colors.white),
+                        title: Text(
+                          item.label,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
-                          selected: _selectedIndex == index,
-                          selectedColor: Colors.white,
-                          selectedTileColor: Colors.white.withOpacity(0.1),
-                          hoverColor: Colors.green.withOpacity(0.05), // 👈 Add this
-                          onTap: () {
-                            if (index == _navItems.length - 1) {
-                              // Logout action
-                              ('Logout clicked');
-                            } else {
-                              setState(() => _selectedIndex = index);
-                            }
-                          },
-                        );
-                      },
-                    ),
+                        ),
+                        selected: isSelected,
+                        selectedTileColor: Colors.white.withOpacity(0.2),
+                        onTap: () {
+                          setState(() => _selectedIndex = index);
+                        },
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          // White Content Area
+          // Main content
           Expanded(
-            child: Scaffold(
-              appBar: AppBar(
-                title: const Text('Operator Dashboard'),
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                elevation: 0,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.account_circle),
-                    onPressed: () => setState(() => _selectedIndex = 5),
-                  ),
-                ],
-              ),
-              body: Padding(
-                padding: const EdgeInsets.all(24),
-                child: SingleChildScrollView(
-                  child: _screens[_selectedIndex],
-                ),
-              ),
-            ),
+            child: _screens[_selectedIndex],
           ),
         ],
       ),
@@ -127,8 +104,8 @@ class _WebNavigationState extends State<WebNavigation> {
   }
 }
 
-class _NavItem {
+class _NavItemData {
   final IconData icon;
   final String label;
-  const _NavItem(this.icon, this.label);
+  const _NavItemData(this.icon, this.label);
 }

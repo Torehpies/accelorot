@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => kIsWeb ? const WebRegistrationScreen() : const RegistrationScreen(),
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
-        '/web': (context) => const WebNavigation(),
+        '/web': (context) => const WebAdminMainNavigation(),
       },
       builder: (context, child) {
         if (child != null) return child;
@@ -112,7 +112,7 @@ class AuthGate extends StatelessWidget {
 
         if (snapshot.hasData) {
           // ✅ User is signed in
-          return kIsWeb ? const WebNavigation() : const MainNavigation();
+          return kIsWeb ? const WebAdminMainNavigation() : const MainNavigation();
         } else {
           // 🚪 User is NOT signed in
           return kIsWeb ? const WebLoginScreen() : const LoginScreen();

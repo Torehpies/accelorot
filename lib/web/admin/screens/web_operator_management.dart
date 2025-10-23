@@ -1,28 +1,31 @@
-// lib/web/admin/screens/web_machine_management.dart
+// lib/web/admin/screens/web_userlist_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class WebMachineManagement extends StatefulWidget {
-  const WebMachineManagement({super.key});
+class WebUserListScreen extends StatefulWidget {
+  const WebUserListScreen({super.key});
 
   @override
-  State<WebMachineManagement> createState() => _WebMachineManagementState();
+  State<WebUserListScreen> createState() => _WebUserListScreenState();
 }
 
-class _WebMachineManagementState extends State<WebMachineManagement> {
+class _WebUserListScreenState extends State<WebUserListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _roleFilter = 'All';
   String _statusFilter = 'All';
   bool _isLoading = true;
-  List<Map<String, dynamic>> _machines = [];
+  List<Map<String, dynamic>> _users = [];
   String? _error;
 
-  final List<String> _statusOptions = ['All', 'Active', 'Inactive', 'Maintenance'];
+  final List<String> _roleOptions = ['All', 'Admin', 'Operator', 'User'];
+  final List<String> _statusOptions = ['All', 'Active', 'Pending', 'Suspended'];
 
   @override
   void initState() {
     super.initState();
-    _loadMachines();
+    _loadUsers();
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -36,64 +39,32 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     super.dispose();
   }
 
-  Future<void> _loadMachines() async {
+  Future<void> _loadUsers() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      // For now, we'll simulate machine data
-      // In a real implementation, this would fetch from Firestore
-      await Future.delayed(const Duration(seconds: 1)); // Simulate loading
+      final usersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+
+      final users = usersSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'email': data['email'] ?? '',
+          'firstname': data['firstname'] ?? '',
+          'lastname': data['lastname'] ?? '',
+          'role': data['role'] ?? 'User',
+          'status': data['status'] ?? 'Active',
+          'createdAt': data['createdAt'] as Timestamp?,
+          'lastLogin': data['lastLogin'] as Timestamp?,
+          'phone': data['phone'] ?? '',
+        };
+      }).toList();
 
       setState(() {
-        _machines = [
-          {
-            'id': 'M001',
-            'name': 'Compost Reactor Alpha',
-            'location': 'Greenhouse A',
-            'status': 'Active',
-            'temperature': 28.5,
-            'oxygen': 15.2,
-            'moisture': 65.0,
-            'lastMaintenance': DateTime.now().subtract(const Duration(days: 7)),
-            'nextMaintenance': DateTime.now().add(const Duration(days: 23)),
-          },
-          {
-            'id': 'M002',
-            'name': 'Compost Reactor Beta',
-            'location': 'Greenhouse B',
-            'status': 'Active',
-            'temperature': 26.8,
-            'oxygen': 18.1,
-            'moisture': 58.3,
-            'lastMaintenance': DateTime.now().subtract(const Duration(days: 14)),
-            'nextMaintenance': DateTime.now().add(const Duration(days: 16)),
-          },
-          {
-            'id': 'M003',
-            'name': 'Compost Reactor Gamma',
-            'location': 'Greenhouse A',
-            'status': 'Maintenance',
-            'temperature': 0.0,
-            'oxygen': 0.0,
-            'moisture': 0.0,
-            'lastMaintenance': DateTime.now().subtract(const Duration(days: 1)),
-            'nextMaintenance': DateTime.now().add(const Duration(days: 29)),
-          },
-          {
-            'id': 'M004',
-            'name': 'Compost Reactor Delta',
-            'location': 'Greenhouse C',
-            'status': 'Inactive',
-            'temperature': 0.0,
-            'oxygen': 0.0,
-            'moisture': 0.0,
-            'lastMaintenance': DateTime.now().subtract(const Duration(days: 30)),
-            'nextMaintenance': DateTime.now().add(const Duration(days: 0)),
-          },
-        ];
+        _users = users;
         _isLoading = false;
       });
     } catch (e) {
@@ -104,15 +75,19 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     }
   }
 
-  List<Map<String, dynamic>> get _filteredMachines {
-    return _machines.where((machine) {
-      final matchesSearch = machine['name'].toString().toLowerCase().contains(_searchQuery) ||
-                           machine['id'].toString().toLowerCase().contains(_searchQuery) ||
-                           machine['location'].toString().toLowerCase().contains(_searchQuery);
+  List<Map<String, dynamic>> get _filteredUsers {
+    return _users.where((user) {
+      final fullName = '${user['firstname']} ${user['lastname']}'.toLowerCase();
+      final email = user['email'].toString().toLowerCase();
 
-      final matchesStatus = _statusFilter == 'All' || machine['status'] == _statusFilter;
+      final matchesSearch = fullName.contains(_searchQuery) ||
+                           email.contains(_searchQuery) ||
+                           user['id'].toString().toLowerCase().contains(_searchQuery);
 
-      return matchesSearch && matchesStatus;
+      final matchesRole = _roleFilter == 'All' || user['role'] == _roleFilter;
+      final matchesStatus = _statusFilter == 'All' || user['status'] == _statusFilter;
+
+      return matchesSearch && matchesRole && matchesStatus;
     }).toList();
   }
 
@@ -122,7 +97,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
-          'Machine Management',
+          'User Management',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -132,14 +107,9 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Add Machine'),
-              onPressed: () {
-                // TODO: Implement add machine dialog
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add Machine feature coming soon!')),
-                );
-              },
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add User'),
+              onPressed: () => _showAddUserDialog(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
@@ -148,7 +118,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadMachines,
+            onPressed: _loadUsers,
             tooltip: 'Refresh',
           ),
         ],
@@ -163,18 +133,18 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               children: [
                 Expanded(
                   child: Text(
-                    'Machine Overview',
+                    'User Directory',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.teal[800],
                     ),
                   ),
                 ),
-                _buildStatsCard('Total Machines', _machines.length.toString(), Colors.blue),
+                _buildStatsCard('Total Users', _users.length.toString(), Colors.blue),
                 const SizedBox(width: 16),
-                _buildStatsCard('Active', _machines.where((m) => m['status'] == 'Active').length.toString(), Colors.green),
+                _buildStatsCard('Active', _users.where((u) => u['status'] == 'Active').length.toString(), Colors.green),
                 const SizedBox(width: 16),
-                _buildStatsCard('Maintenance', _machines.where((m) => m['status'] == 'Maintenance').length.toString(), Colors.orange),
+                _buildStatsCard('Admins', _users.where((u) => u['role'] == 'Admin').length.toString(), Colors.purple),
               ],
             ),
 
@@ -194,7 +164,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search machines...',
+                          hintText: 'Search users by name or email...',
                           prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -202,6 +172,26 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                           filled: true,
                           fillColor: Colors.grey[50],
                         ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    DropdownButton<String>(
+                      value: _roleFilter,
+                      items: _roleOptions.map((role) {
+                        return DropdownMenuItem<String>(
+                          value: role,
+                          child: Text(role),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _roleFilter = value!;
+                        });
+                      },
+                      style: const TextStyle(color: Colors.black87),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.teal,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -231,13 +221,13 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
 
             const SizedBox(height: 24),
 
-            // Machines Table
+            // Users Table
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
                       ? _buildErrorState()
-                      : _buildMachinesTable(),
+                      : _buildUsersTable(),
             ),
           ],
         ),
@@ -284,7 +274,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
           Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
           const SizedBox(height: 16),
           Text(
-            'Error loading machines',
+            'Error loading users',
             style: TextStyle(color: Colors.red[700], fontSize: 18),
           ),
           const SizedBox(height: 8),
@@ -295,7 +285,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: _loadMachines,
+            onPressed: _loadUsers,
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
@@ -308,16 +298,16 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     );
   }
 
-  Widget _buildMachinesTable() {
-    if (_filteredMachines.isEmpty) {
+  Widget _buildUsersTable() {
+    if (_filteredUsers.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+            Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No machines found',
+              'No users found',
               style: TextStyle(color: Colors.grey[600], fontSize: 18),
             ),
             const SizedBox(height: 8),
@@ -338,29 +328,70 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
       child: SingleChildScrollView(
         child: DataTable(
           columns: const [
-            DataColumn(label: Text('ID', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Avatar', style: TextStyle(fontWeight: FontWeight.bold))),
             DataColumn(label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Location', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Role', style: TextStyle(fontWeight: FontWeight.bold))),
             DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Temperature (°C)', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Oxygen (%)', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Moisture (%)', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Last Login', style: TextStyle(fontWeight: FontWeight.bold))),
             DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
           ],
-          rows: _filteredMachines.map((machine) {
+          rows: _filteredUsers.map((user) {
+            final fullName = '${user['firstname']} ${user['lastname']}'.trim();
+            final initials = ((user['firstname']?[0] ?? '') + (user['lastname']?[0] ?? '')).toUpperCase();
+
             return DataRow(
               cells: [
-                DataCell(Text(machine['id'], style: const TextStyle(fontWeight: FontWeight.w500))),
-                DataCell(Text(machine['name'])),
-                DataCell(Text(machine['location'])),
-                DataCell(_buildStatusChip(machine['status'])),
-                DataCell(Text(machine['temperature'].toStringAsFixed(1))),
-                DataCell(Text(machine['oxygen'].toStringAsFixed(1))),
-                DataCell(Text(machine['moisture'].toStringAsFixed(1))),
-                DataCell(_buildActionButtons(machine)),
+                DataCell(CircleAvatar(
+                  backgroundColor: Colors.teal[100],
+                  child: Text(
+                    initials.isNotEmpty ? initials : '?',
+                    style: TextStyle(color: Colors.teal[800], fontWeight: FontWeight.bold),
+                  ),
+                )),
+                DataCell(Text(fullName.isNotEmpty ? fullName : 'Unknown')),
+                DataCell(Text(user['email'] ?? '')),
+                DataCell(_buildRoleChip(user['role'])),
+                DataCell(_buildStatusChip(user['status'])),
+                DataCell(Text(_formatTimestamp(user['lastLogin']))),
+                DataCell(_buildActionButtons(user)),
               ],
             );
           }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleChip(String role) {
+    Color color;
+    switch (role) {
+      case 'Admin':
+        color = Colors.purple;
+        break;
+      case 'Operator':
+        color = Colors.blue;
+        break;
+      case 'User':
+        color = Colors.green;
+        break;
+      default:
+        color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        role,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -372,10 +403,10 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
       case 'Active':
         color = Colors.green;
         break;
-      case 'Maintenance':
+      case 'Pending':
         color = Colors.orange;
         break;
-      case 'Inactive':
+      case 'Suspended':
         color = Colors.red;
         break;
       default:
@@ -400,48 +431,53 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     );
   }
 
-  Widget _buildActionButtons(Map<String, dynamic> machine) {
+  Widget _buildActionButtons(Map<String, dynamic> user) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
           icon: const Icon(Icons.visibility),
           tooltip: 'View Details',
-          onPressed: () => _showMachineDetails(machine),
+          onPressed: () => _showUserDetails(user),
         ),
         IconButton(
           icon: const Icon(Icons.edit),
-          tooltip: 'Edit Machine',
-          onPressed: () => _editMachine(machine),
+          tooltip: 'Edit User',
+          onPressed: () => _editUser(user),
         ),
         IconButton(
-          icon: const Icon(Icons.settings),
-          tooltip: 'Configure',
-          onPressed: () => _configureMachine(machine),
+          icon: const Icon(Icons.admin_panel_settings),
+          tooltip: 'Change Role',
+          onPressed: () => _changeUserRole(user),
+        ),
+        IconButton(
+          icon: user['status'] == 'Suspended' ? const Icon(Icons.check_circle) : const Icon(Icons.block),
+          tooltip: user['status'] == 'Suspended' ? 'Activate User' : 'Suspend User',
+          onPressed: () => _toggleUserStatus(user),
         ),
       ],
     );
   }
 
-  void _showMachineDetails(Map<String, dynamic> machine) {
+  void _showUserDetails(Map<String, dynamic> user) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Machine Details: ${machine['name']}'),
+        title: Text('User Details: ${user['firstname']} ${user['lastname']}'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _detailRow('ID', machine['id']),
-              _detailRow('Name', machine['name']),
-              _detailRow('Location', machine['location']),
-              _detailRow('Status', machine['status']),
-              _detailRow('Temperature', '${machine['temperature']}°C'),
-              _detailRow('Oxygen Level', '${machine['oxygen']}%'),
-              _detailRow('Moisture Level', '${machine['moisture']}%'),
-              _detailRow('Last Maintenance', _formatDate(machine['lastMaintenance'])),
-              _detailRow('Next Maintenance', _formatDate(machine['nextMaintenance'])),
+              _detailRow('ID', user['id']),
+              _detailRow('First Name', user['firstname']),
+              _detailRow('Last Name', user['lastname']),
+              _detailRow('Email', user['email']),
+              _detailRow('Phone', user['phone']),
+              _detailRow('Role', user['role']),
+              _detailRow('Status', user['status']),
+              _detailRow('Created', _formatTimestamp(user['createdAt'])),
+              _detailRow('Last Login', _formatTimestamp(user['lastLogin'])),
             ],
           ),
         ),
@@ -474,21 +510,38 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     );
   }
 
-  void _editMachine(Map<String, dynamic> machine) {
-    // TODO: Implement edit machine dialog
+  void _showAddUserDialog() {
+    // TODO: Implement add user dialog
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit ${machine['name']} - Feature coming soon!')),
+      const SnackBar(content: Text('Add User feature coming soon!')),
     );
   }
 
-  void _configureMachine(Map<String, dynamic> machine) {
-    // TODO: Implement machine configuration
+  void _editUser(Map<String, dynamic> user) {
+    // TODO: Implement edit user dialog
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Configure ${machine['name']} - Feature coming soon!')),
+      SnackBar(content: Text('Edit ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year}';
+  void _changeUserRole(Map<String, dynamic> user) {
+    // TODO: Implement role change dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Change role for ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
+    );
+  }
+
+  void _toggleUserStatus(Map<String, dynamic> user) {
+    // TODO: Implement status toggle
+    final newStatus = user['status'] == 'Suspended' ? 'Active' : 'Suspended';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${user['firstname']} ${user['lastname']} status changed to $newStatus - Feature coming soon!')),
+    );
+  }
+
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return 'Never';
+    final date = timestamp.toDate();
+    return '${date.month}/${date.day}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
