@@ -76,6 +76,6 @@ class FirestoreMachineService {
   static Future<Map<String, dynamic>?> getUserById(String userId) =>
       MachineFirestoreFetch.getUserById(userId);
 
-  static Future<List<Map<String, dynamic>>> getOperatorsAndAdmins() =>
-      MachineFirestoreFetch.getOperatorsAndAdmins();
+  static Future<List<Map<String, dynamic>>> getOperators() =>
+      MachineFirestoreFetch.getOperators();
 }

@@ -136,11 +136,11 @@ class MachineFirestoreFetch {
     }
   }
 
-  // Fetch all users with role Operator or Admin (for dropdown in add/edit machine)
-  static Future<List<Map<String, dynamic>>> getOperatorsAndAdmins() async {
+  // Fetch all users with role Operator (for dropdown in add/edit machine)
+  static Future<List<Map<String, dynamic>>> getOperators() async {
     try {
       final snapshot = await MachineFirestoreCollections.getUsersCollection()
-          .where('role', whereIn: ['Operator', 'Admin'])
+          .where('role', whereIn: ['Operator'])
           .get();
 
       return snapshot.docs

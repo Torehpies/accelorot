@@ -107,7 +107,7 @@ class AdminMachineController extends ChangeNotifier {
 
   Future<void> _fetchUsers() async {
     try {
-      _users = await FirestoreMachineService.getOperatorsAndAdmins();
+      _users = await FirestoreMachineService.getOperators();
       notifyListeners();
     } catch (e) {
       // Don't set error for users fetch, it's not critical
