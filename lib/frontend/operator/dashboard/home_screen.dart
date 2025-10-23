@@ -1,6 +1,7 @@
+// lib/frontend/operator/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import '../../components/system_card.dart';
-import '../../components/environmental_sensors_card.dart';
+import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
 import '../../components/composting_progress_card.dart';
 import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
@@ -8,17 +9,15 @@ import 'add_waste/activity_logs_card.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  // Builds and displays the main home dashboard screen.
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // GlobalKey to control and refresh the ActivityLogsCard widget.
+  // GlobalKey to control and refresh the ActivityLogsCard widget
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
 
-  // Builds the home screen UI including dashboard cards and a floating action button.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,15 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              EnvironmentalSensorsCard(
-                temperature: 3.0,
-                moisture: 5.0,
-                humidity: 8.0,
-              ),
+              // Live Environmental Sensors Card
+              const EnvironmentalSensorsView(),
+
               const SizedBox(height: 16),
               CompostingProgressCard(batchStart: DateTime(2025, 9, 15)),
               const SizedBox(height: 16),
@@ -57,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 58,
           height: 58,
           child: FloatingActionButton(
-            // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs.
+            // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
             onPressed: () async {
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,

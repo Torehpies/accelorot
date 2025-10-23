@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 class EnvironmentalSensorsCard extends StatelessWidget {
   final double? temperature;
   final double? moisture; // in g/m³
-  final double? humidity; // in %
+  final double? oxygen; // in %
 
   final String temperatureChange;
   final String moistureChange;
-  final String humidityChange;
+  final String oxygenChange;
 
   const EnvironmentalSensorsCard({
     super.key,
     this.temperature,
     this.moisture,
-    this.humidity,
+    this.oxygen,
     this.temperatureChange = '+0 this week',
     this.moistureChange = '+0 this week',
-    this.humidityChange = '+0 this week',
+    this.oxygenChange = '+0 this week',
   });
 
   @override
@@ -30,7 +30,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: Colors.white,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -66,7 +66,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                         borderColor: Colors.green,
                       ),
                     ),
-                    const SizedBox(width: 8), // Small gap between tiles
+                    const SizedBox(width: 4), // Small gap between tiles
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Moisture',
@@ -78,14 +78,14 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                         borderColor: Colors.orange,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: _buildSensorTile(
-                        title: 'Humidity',
-                        value: humidity != null
-                            ? '${humidity!.toStringAsFixed(0)}%'
+                        title: 'Oxygen',
+                        value: oxygen != null
+                            ? '${oxygen!.toStringAsFixed(0)}%'
                             : '--%',
-                        change: humidityChange,
+                        change: oxygenChange,
                         iconColor: Colors.red,
                         borderColor: Colors.red,
                       ),
@@ -126,7 +126,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
           ),
           Text(
             value,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
