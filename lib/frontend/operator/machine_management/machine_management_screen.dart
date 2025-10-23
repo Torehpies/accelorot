@@ -7,7 +7,9 @@ import 'widgets/search_bar_widget.dart';
 import 'widgets/machine_list_widget.dart';
 
 class MachineManagementScreen extends StatefulWidget {
-  const MachineManagementScreen({super.key});
+  final String? viewingOperatorId;
+  
+  const MachineManagementScreen ({super.key, this.viewingOperatorId});
 
   @override
   State<MachineManagementScreen> createState() =>

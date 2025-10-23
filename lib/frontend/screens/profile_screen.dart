@@ -9,7 +9,9 @@ import '../screens/personal_info_screen.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? viewingOperatorId;
+  
+  const ProfileScreen ({super.key, this.viewingOperatorId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();

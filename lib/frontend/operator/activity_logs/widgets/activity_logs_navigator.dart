@@ -7,7 +7,9 @@ import '../view_screens/cycles_recom_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class ActivityLogsNavigator extends StatelessWidget {
-  const ActivityLogsNavigator({super.key});
+  final String? viewingOperatorId;
+  
+  const ActivityLogsNavigator({super.key, this.viewingOperatorId});
 
   @override
   Widget build(BuildContext context) {

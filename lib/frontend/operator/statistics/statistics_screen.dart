@@ -8,7 +8,9 @@ import 'widgets/date_filter.dart';
 import '../../components/history.dart'; // make sure this path is correct
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key});
+  final String? viewingOperatorId;
+  
+  const StatisticsScreen({super.key, this.viewingOperatorId});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
