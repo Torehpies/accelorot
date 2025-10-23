@@ -209,14 +209,17 @@ class TemperatureStatisticCard extends StatelessWidget {
     );
   }
 
-  String _getQuality(double temperature) {
-    if (temperature >= 55 && temperature <= 65) return 'Optimal';
-    if ((temperature >= 40 && temperature < 55) ||
-        (temperature > 65 && temperature <= 70)) {
-      return 'Moderate';
-    }
-    return 'Poor';
+ String _getQuality(double temperature) {
+  if (temperature >= 55 && temperature <= 65) {
+    return 'Optimal';
   }
+  if ((temperature >= 40 && temperature < 55) ||
+      (temperature > 65 && temperature <= 70)) {
+    return 'Moderate';
+  }
+  return 'Poor';
+}
+
 
   Color _getColorForQuality(String quality) {
     switch (quality) {

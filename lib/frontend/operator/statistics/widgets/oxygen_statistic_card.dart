@@ -202,13 +202,20 @@ class OxygenStatisticCard extends StatelessWidget {
     );
   }
 
-  // Adjusted for MQ135 range interpretation
+ // Adjusted for MQ135 range interpretation
   String _getQuality(double ppm) {
-    if (ppm <= 1500) return 'Excellent';
-    if (ppm > 1500 && ppm <= 3000) return 'Good';
-    if (ppm > 3000 && ppm <= 4000) return 'Fair';
+    if (ppm <= 1500) {
+      return 'Excellent';
+    }
+    if (ppm > 1500 && ppm <= 3000) {
+      return 'Good';
+    }
+    if (ppm > 3000 && ppm <= 4000) {
+      return 'Fair';
+    }
     return 'Poor';
   }
+
 
   Color _getColorForQuality(String quality) {
     switch (quality) {
