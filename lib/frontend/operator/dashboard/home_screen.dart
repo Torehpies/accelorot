@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
      appBar: AppBar(
   title: const Text('Dashboard'),
-  centerTitle: false, // 👈 Ensures title is aligned to the left
-  backgroundColor: Colors.teal, // 👈 Sets the background color
+  centerTitle: false, //  Ensures title is aligned to the left
+  backgroundColor: Colors.teal, //  Sets the background color
   // Optional: Ensure text is readable (white by default in light themes)
   foregroundColor: Colors.white,
 ),
