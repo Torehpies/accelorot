@@ -1,9 +1,11 @@
 // lib/main.dart
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 👈 ADD THIS
-import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'firebase_options.dart'; // ✅ Make sure this file exists and includes web + android configs
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/registration_screen.dart' show RegistrationScreen;
@@ -12,20 +14,19 @@ import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navig
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
 
-// ignore: non_constant_identifier_names
-void main(dynamic DefaultFirebaseOptions) async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🌐 Global error handler — safe for web
+  // 🌐 Global error handler (safe for web)
   FlutterError.onError = (details) {
     final message = details.exceptionAsString();
-    ('Flutter Error: $message');
+    print('Flutter Error: $message');
   };
 
-  // 🧵 Handle async errors
+  // 🧵 Async error handler
   PlatformDispatcher.instance.onError = (error, stack) {
     final errorMessage = error.toString();
-    ('Uncaught async error: $errorMessage');
+    print('Uncaught async error: $errorMessage');
     return true;
   };
 
@@ -34,10 +35,11 @@ void main(dynamic DefaultFirebaseOptions) async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    print('✅ Firebase initialized successfully for ${kIsWeb ? "Web" : "Mobile"}');
   } on FirebaseException catch (e) {
-    ('Firebase init failed: ${e.message ?? "Unknown Firebase error"}');
+    print('❌ Firebase init failed (FirebaseException): ${e.message}');
   } catch (e) {
-    ('Firebase init failed: $e');
+    print('❌ Firebase init failed: $e');
   }
 
   runApp(const MyApp());
@@ -77,7 +79,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      // ✅ Use AuthGate as home — checks if user is logged in
       home: const AuthGate(),
       routes: {
         '/login': (context) => kIsWeb ? const WebLoginScreen() : const LoginScreen(),
@@ -87,9 +88,7 @@ class MyApp extends StatelessWidget {
         '/web': (context) => const WebNavigation(),
       },
       builder: (context, child) {
-        if (child != null) {
-          return child;
-        }
+        if (child != null) return child;
         return const Scaffold(
           body: Center(child: Text('An unexpected error occurred.')),
         );
@@ -114,17 +113,11 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          // User is signed in → go to appropriate nav
-          if (kIsWeb) {
-            return const WebNavigation();
-          } else {
-            return const MainNavigation();
-          }
+          // ✅ User is signed in
+          return kIsWeb ? const WebNavigation() : const MainNavigation();
         } else {
-          // User is NOT signed in → go to login
-          return kIsWeb
-              ? const WebLoginScreen()
-              : const LoginScreen();
+          // 🚪 User is NOT signed in
+          return kIsWeb ? const WebLoginScreen() : const LoginScreen();
         }
       },
     );
