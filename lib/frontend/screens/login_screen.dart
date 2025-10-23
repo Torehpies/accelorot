@@ -107,52 +107,12 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo
-                Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.teal.shade400, Colors.teal.shade700],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          // ignore: deprecated_member_use
-                          color: Colors.white.withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
-                  ),
-                ),
+                Center(child: _buildLogo()),
                 const SizedBox(height: 24),
 
                 // Title
-                Center(
-  child: Column(
-    children: [
-      Text(
-        'Welcome Back!',
-        style: const TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.teal,
-        ),
-      ),
-      const SizedBox(height: 8),
-      Text(
-        'Sign in to continue',
-        style: const TextStyle(fontSize: 16, color: Colors.teal),
-      ),
-    ],
-  ),
-),
-const SizedBox(height: 32),
+                Center(child: _buildTitle(Theme.of(context))),
+                const SizedBox(height: 32),
 
                 // Form
                 Form(
@@ -161,130 +121,22 @@ const SizedBox(height: 32),
                     children: [
 
                       // Email
-                      TextFormField(
-  controller: _controller.emailController,
-  keyboardType: TextInputType.emailAddress,
-  textInputAction: TextInputAction.next,
-  style: const TextStyle(color: Colors.teal),
-  decoration: InputDecoration(
-    labelText: 'Email Address',
-    labelStyle: const TextStyle(color: Colors.teal),
-    filled: true,
-    fillColor: Colors.grey.shade50,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-  ),
-  validator: _controller.validateEmail,
- ),
-const SizedBox(height: 16),
+                      _buildEmailField(),
+                      const SizedBox(height: 16),
 
                       // Password
-                     TextFormField(
-  controller: _controller.passwordController,
-  obscureText: _controller.obscurePassword,
-  textInputAction: TextInputAction.done,
-  onFieldSubmitted: (_) => _controller.loginUser(),
-  style: const TextStyle(color: Colors.teal),
-  decoration: InputDecoration(
-    labelText: 'Password',
-    labelStyle: const TextStyle(color: Colors.teal),
-    filled: true,
-    fillColor: Colors.grey.shade50,
-    suffixIcon: IconButton(
-      icon: Icon(
-        _controller.obscurePassword
-            ? Icons.visibility_outlined
-            : Icons.visibility_off_outlined,
-        color: Colors.grey,
-      ),
-      onPressed: _controller.togglePasswordVisibility,
-    ),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide.none,
-    ),
-  ),
-  validator: _controller.validatePassword,
-),
-const SizedBox(height: 8),
+                      _buildPasswordField(),
+                      const SizedBox(height: 8),
 
                       // Forgot Password
-                     Align(
-  alignment: Alignment.centerRight,
-  child: TextButton(
-    onPressed: _controller.handleForgotPassword,
-    style: TextButton.styleFrom(
-      foregroundColor: Colors.teal, // This sets the text color
-    ),
-    child: const Text('Forgot Password?'),
-  ),
-),
+                      _buildForgotPassword(),
 
                       // Login Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _controller.isLoading ? null : _controller.loginUser,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _controller.isLoading
-                              ? const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                                )
-                              : const Text(
-                                  'Sign In',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                ),
-                        ),
-                      ),
+                      _buildLoginButton(),
                       const SizedBox(height: 24),
 
                       // Sign Up Link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Don't have an account? "),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegistrationScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              "Sign up",
-                              style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildSignUpLink(),
                     ],
                   ),
                 ),
