@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // 👈 ADD THIS
 import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher;
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/registration_screen.dart' show RegistrationScreen;
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
@@ -13,7 +14,7 @@ import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
 import 'firebase_options.dart';
 
-void main() async {
+void main(dynamic DefaultFirebaseOptions) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 🌐 Global error handler — safe for web

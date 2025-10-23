@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // GlobalKey to control and refresh the ActivityLogsCard widget.
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
+      
 
   // Builds the home screen UI including dashboard cards and a floating action button.
   @override
@@ -80,16 +81,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showAddWasteProductModal(BuildContext context) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => AddWasteProduct(),
-    );
-
-    if (result != null) {
-      setState(() {
-        _wasteLogs.insert(0, result);
-      });
-    }
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
 import 'home_screen/admin_home_screen.dart';
 import 'user_management_screen.dart';
 import '../../operator/profile/profile_screen.dart'; // ✅ Adjust path if needed — this is your existing ProfileScreen
