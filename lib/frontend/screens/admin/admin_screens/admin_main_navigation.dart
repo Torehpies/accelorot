@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../profile_screen.dart'; 
+import '../../../operator/profile/profile_screen.dart'; 
 import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart'; // UPDATED
 import '../operator_management/operator_management_screen.dart';
 import '../home_screen/admin_home_screen.dart';

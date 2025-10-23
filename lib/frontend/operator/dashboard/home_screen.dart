@@ -17,18 +17,18 @@ class _HomeScreenState extends State<HomeScreen> {
   // GlobalKey to control and refresh the ActivityLogsCard widget
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
+      
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.teal,
-      ),
+     appBar: AppBar(
+  title: const Text('Dashboard'),
+  centerTitle: false, //  Ensures title is aligned to the left
+  backgroundColor: Colors.teal, //  Sets the background color
+  // Optional: Ensure text is readable (white by default in light themes)
+  foregroundColor: Colors.white,
+),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -77,4 +77,5 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
+
 }
