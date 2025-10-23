@@ -3,13 +3,14 @@ import 'firestore_collections.dart';
 import 'firestore_helpers.dart';
 
 class FirestoreFetch {
-  // Fetch Substrates
+  // Fetch Substrates - filtered by userId
   static Future<List<ActivityItem>> getSubstrates() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await FirestoreCollections.getSubstratesCollection(userId)
+      final snapshot = await FirestoreCollections.getSubstratesCollection()
+          .where('userId', isEqualTo: userId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -21,13 +22,14 @@ class FirestoreFetch {
     }
   }
 
-  // Fetch Alerts
+  // Fetch Alerts - filtered by userId
   static Future<List<ActivityItem>> getAlerts() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await FirestoreCollections.getAlertsCollection(userId)
+      final snapshot = await FirestoreCollections.getAlertsCollection()
+          .where('userId', isEqualTo: userId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -39,13 +41,14 @@ class FirestoreFetch {
     }
   }
 
-  // Fetch Cycles and Recommendations
+  // Fetch Cycles and Recommendations - filtered by userId
   static Future<List<ActivityItem>> getCyclesRecom() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final snapshot = await FirestoreCollections.getCyclesRecomCollection(userId)
+      final snapshot = await FirestoreCollections.getCyclesRecomCollection()
+          .where('userId', isEqualTo: userId)
           .orderBy('timestamp', descending: true)
           .get();
 

@@ -17,6 +17,7 @@ class FirestoreHelpers {
       category: data['category'] ?? '',
       timestamp: timestamp,
     );
+    // Note: userId is stored in Firestore but not needed in the model
   }
 
   // Helper to map codePoint → IconData
@@ -55,15 +56,17 @@ class FirestoreHelpers {
     }
   }
 
-  // Get icon and color based on waste category
+  // Get icon and color based on waste category (case-insensitive)
   static Map<String, dynamic> getWasteIconAndColor(String category) {
     int iconCodePoint;
     String statusColor;
 
-    if (category == 'greens') {
+    final lowerCategory = category.toLowerCase();
+
+    if (lowerCategory == 'greens') {
       iconCodePoint = Icons.eco.codePoint;
       statusColor = 'green';
-    } else if (category == 'browns') {
+    } else if (lowerCategory == 'browns') {
       iconCodePoint = Icons.nature.codePoint;
       statusColor = 'brown';
     } else {

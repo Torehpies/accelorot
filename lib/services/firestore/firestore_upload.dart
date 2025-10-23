@@ -6,7 +6,8 @@ import 'firestore_helpers.dart';
 class FirestoreUpload {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Upload Substrates
+  // Uploads substrate mock data to Firestore for the current user.
+  // Each document is uniquely identified by combining user ID and timestamp.
   static Future<void> uploadSubstrates() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
@@ -15,18 +16,19 @@ class FirestoreUpload {
       final substrates = MockDataService.getSubstrates();
       final batch = _firestore.batch();
 
-      for (var substrate in substrates) {
-        final docRef = FirestoreCollections.getSubstratesCollection(userId)
-            .doc(substrate.timestamp.millisecondsSinceEpoch.toString());
+      for (var s in substrates) {
+        final docRef = FirestoreCollections.getSubstratesCollection()
+            .doc('${userId}_${s.timestamp.millisecondsSinceEpoch}');
 
         batch.set(docRef, {
-          'title': substrate.title,
-          'value': substrate.value,
-          'statusColor': substrate.statusColor,
-          'icon': substrate.icon.codePoint,
-          'description': substrate.description,
-          'category': substrate.category,
-          'timestamp': substrate.timestamp,
+          'title': s.title,
+          'value': s.value,
+          'statusColor': s.statusColor,
+          'icon': s.icon.codePoint,
+          'description': s.description,
+          'category': s.category,
+          'timestamp': s.timestamp,
+          'userId': userId,
         });
       }
 
@@ -36,7 +38,8 @@ class FirestoreUpload {
     }
   }
 
-  // Upload Alerts
+  // Uploads alert mock data to Firestore for the current user.
+  // Uses batch writing for efficiency and unique IDs based on user ID and timestamp.
   static Future<void> uploadAlerts() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
@@ -45,18 +48,19 @@ class FirestoreUpload {
       final alerts = MockDataService.getAlerts();
       final batch = _firestore.batch();
 
-      for (var alert in alerts) {
-        final docRef = FirestoreCollections.getAlertsCollection(userId)
-            .doc(alert.timestamp.millisecondsSinceEpoch.toString());
+      for (var a in alerts) {
+        final docRef = FirestoreCollections.getAlertsCollection()
+            .doc('${userId}_${a.timestamp.millisecondsSinceEpoch}');
 
         batch.set(docRef, {
-          'title': alert.title,
-          'value': alert.value,
-          'statusColor': alert.statusColor,
-          'icon': alert.icon.codePoint,
-          'description': alert.description,
-          'category': alert.category,
-          'timestamp': alert.timestamp,
+          'title': a.title,
+          'value': a.value,
+          'statusColor': a.statusColor,
+          'icon': a.icon.codePoint,
+          'description': a.description,
+          'category': a.category,
+          'timestamp': a.timestamp,
+          'userId': userId,
         });
       }
 
@@ -66,27 +70,29 @@ class FirestoreUpload {
     }
   }
 
-  // Upload Cycles and Recommendations
+  // Uploads cycle and recommendation mock data to Firestore.
+  // Uses batch operations to upload efficiently and prevent duplicate IDs.
   static Future<void> uploadCyclesRecom() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final cyclesRecom = MockDataService.getCyclesRecom();
+      final cycles = MockDataService.getCyclesRecom();
       final batch = _firestore.batch();
 
-      for (var item in cyclesRecom) {
-        final docRef = FirestoreCollections.getCyclesRecomCollection(userId)
-            .doc(item.timestamp.millisecondsSinceEpoch.toString());
+      for (var c in cycles) {
+        final docRef = FirestoreCollections.getCyclesRecomCollection()
+            .doc('${userId}_${c.timestamp.millisecondsSinceEpoch}');
 
         batch.set(docRef, {
-          'title': item.title,
-          'value': item.value,
-          'statusColor': item.statusColor,
-          'icon': item.icon.codePoint,
-          'description': item.description,
-          'category': item.category,
-          'timestamp': item.timestamp,
+          'title': c.title,
+          'value': c.value,
+          'statusColor': c.statusColor,
+          'icon': c.icon.codePoint,
+          'description': c.description,
+          'category': c.category,
+          'timestamp': c.timestamp,
+          'userId': userId,
         });
       }
 
@@ -96,7 +102,8 @@ class FirestoreUpload {
     }
   }
 
-  // Upload All Mock Data (if doesn't exist)
+  // Uploads all available mock data only if user data does not already exist.
+  // Calls helper functions to upload substrates, alerts, and cycles.
   static Future<void> uploadAllMockData() async {
     try {
       final exists = await FirestoreCollections.dataExists();
@@ -110,32 +117,15 @@ class FirestoreUpload {
     }
   }
 
-  // Force Upload (delete old + upload fresh)
+  // Forcefully re-uploads all mock data by deleting existing user data first.
+  // Ensures that the Firestore collections are completely refreshed.
   static Future<void> forceUploadAllMockData() async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      // Delete existing data
-      final substrateDocs =
-          await FirestoreCollections.getSubstratesCollection(userId).get();
-      for (var doc in substrateDocs.docs) {
-        await doc.reference.delete();
-      }
+      await FirestoreCollections.deleteUserData();
 
-      final alertDocs =
-          await FirestoreCollections.getAlertsCollection(userId).get();
-      for (var doc in alertDocs.docs) {
-        await doc.reference.delete();
-      }
-
-      final cyclesRecomDocs =
-          await FirestoreCollections.getCyclesRecomCollection(userId).get();
-      for (var doc in cyclesRecomDocs.docs) {
-        await doc.reference.delete();
-      }
-
-      // Upload fresh mock data
       await uploadSubstrates();
       await uploadAlerts();
       await uploadCyclesRecom();
@@ -144,7 +134,9 @@ class FirestoreUpload {
     }
   }
 
-  // Add Waste Product
+  // Adds a new waste product document to the user's substrates collection.
+  // Automatically assigns an icon and status color based on the waste category.
+  // Verifies that the document exists after saving.
   static Future<void> addWasteProduct(Map<String, dynamic> waste) async {
     try {
       final userId = FirestoreCollections.getCurrentUserId();
@@ -153,18 +145,26 @@ class FirestoreUpload {
       final category = waste['category'];
       final iconAndColor = FirestoreHelpers.getWasteIconAndColor(category);
 
-      final docRef = FirestoreCollections.getSubstratesCollection(userId)
-          .doc(waste['timestamp'].millisecondsSinceEpoch.toString());
+      final timestamp = waste['timestamp'] as DateTime;
+      final docRef = FirestoreCollections.getSubstratesCollection()
+          .doc('${userId}_${timestamp.millisecondsSinceEpoch}');
 
-      await docRef.set({
+      final data = {
         'title': waste['plantTypeLabel'],
-        'value': '${waste['quantity']} kg',
+        'value': '${waste['quantity']}kg',
         'statusColor': iconAndColor['statusColor'],
         'icon': iconAndColor['iconCodePoint'],
         'description': waste['description'],
         'category': category,
-        'timestamp': waste['timestamp'],
-      });
+        'timestamp': Timestamp.fromDate(timestamp),
+        'userId': userId,
+      };
+
+      await docRef.set(data);
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final verify = await docRef.get();
+      if (!verify.exists) throw Exception('Document not saved');
     } catch (e) {
       rethrow;
     }

@@ -24,10 +24,18 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   }
 
   @override
-  List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter) {
-    if (filter == 'All') return items;
-    return items.where((item) => item.category == filter).toList();
-  }
+List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter) {
+  if (filter == 'All') return items;
+  
+  // ⭐ Only debug newly added items
+  final filtered = items.where((item) {
+    if (item.title == 'Fruit Trees' || item.title == 'Compost') {  // Your newly added titles
+    }
+    return item.category == filter;
+  }).toList();
+  
+  return filtered;
+}
 
   @override
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {

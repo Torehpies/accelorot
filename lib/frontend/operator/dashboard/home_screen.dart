@@ -8,14 +8,17 @@ import 'add_waste/activity_logs_card.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  // Builds and displays the main home dashboard screen.
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // GlobalKey to access ActivityLogsCard's state and trigger refresh
-  final GlobalKey<ActivityLogsCardState> _activityLogsKey = GlobalKey<ActivityLogsCardState>();
+  // GlobalKey to control and refresh the ActivityLogsCard widget.
+  final GlobalKey<ActivityLogsCardState> _activityLogsKey =
+      GlobalKey<ActivityLogsCardState>();
 
+  // Builds the home screen UI including dashboard cards and a floating action button.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,20 +57,22 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 58,
           height: 58,
           child: FloatingActionButton(
+            // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs.
             onPressed: () async {
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,
                 builder: (context) => const AddWasteProduct(),
               );
-              
-              // If waste was successfully added, refresh the activity logs
+
               if (result != null && mounted) {
-                _activityLogsKey.currentState?.refresh();
+                await _activityLogsKey.currentState?.refresh();
               }
             },
             backgroundColor: Colors.teal,
             elevation: 5,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: const Icon(Icons.add, size: 28, color: Colors.white),
           ),
         ),
