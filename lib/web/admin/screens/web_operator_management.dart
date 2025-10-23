@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'web_operator_view_nav.dart';
 
 class WebUserListScreen extends StatefulWidget {
   const WebUserListScreen({super.key});
@@ -440,6 +441,12 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
           tooltip: 'View Details',
           onPressed: () => _showUserDetails(user),
         ),
+        if (user['role'] == 'Operator')
+          IconButton(
+            icon: const Icon(Icons.remove_red_eye),
+            tooltip: 'View Operator Dashboard',
+            onPressed: () => _viewOperatorDashboard(user),
+          ),
         IconButton(
           icon: const Icon(Icons.edit),
           tooltip: 'Edit User',
@@ -536,6 +543,19 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
     final newStatus = user['status'] == 'Suspended' ? 'Active' : 'Suspended';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${user['firstname']} ${user['lastname']} status changed to $newStatus - Feature coming soon!')),
+    );
+  }
+
+  void _viewOperatorDashboard(Map<String, dynamic> user) {
+    final fullName = '${user['firstname']} ${user['lastname']}'.trim();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WebOperatorViewNavigation(
+          operatorId: user['id'],
+          operatorName: fullName.isNotEmpty ? fullName : 'Unknown Operator',
+        ),
+      ),
     );
   }
 

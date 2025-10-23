@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
 import '../frontend/screens/main_navigation.dart';
 import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
@@ -8,6 +9,7 @@ import '../services/sess_service.dart';
 import 'auth_service.dart';
 import '../frontend/screens/qr_refer.dart';
 import '../frontend/screens/waiting_approval_screen.dart';
+import '../web/operator/web_operator_navigation.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -55,7 +57,7 @@ class AuthWrapper extends StatelessWidget {
             final pendingTeamId = status['pendingTeamId'];
 
             if (teamId != null) {
-              return const MainNavigation();
+              return kIsWeb ? const WebOperatorNavigation() : const MainNavigation();
             } else if (pendingTeamId != null) {
               return const WaitingApprovalScreen();
             } else {

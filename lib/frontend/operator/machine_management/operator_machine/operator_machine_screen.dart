@@ -6,7 +6,9 @@ import 'widgets/operator_machine_list.dart';
 import '../widgets/search_bar_widget.dart';
 
 class OperatorMachineScreen extends StatefulWidget {
-  const OperatorMachineScreen({super.key});
+  final String? viewingOperatorId;
+
+  const OperatorMachineScreen({super.key, this.viewingOperatorId});
 
   @override
   State<OperatorMachineScreen> createState() => _OperatorMachineScreenState();
@@ -19,7 +21,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = OperatorMachineController();
+    _controller = OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
     _controller.initialize();
   }
 

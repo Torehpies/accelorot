@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/email_verify.dart';
-import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
 
 class WebLoginScreen extends StatefulWidget {
@@ -54,7 +54,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
+            MaterialPageRoute(builder: (context) => const WebOperatorNavigation()),
           );
         }
       },

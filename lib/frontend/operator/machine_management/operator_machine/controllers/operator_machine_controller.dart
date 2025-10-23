@@ -13,6 +13,9 @@ class OperatorMachineController extends ChangeNotifier {
   String? _errorMessage;
   String _searchQuery = '';
   bool _isAuthenticated = false;
+  final String? viewingOperatorId;
+
+  OperatorMachineController({this.viewingOperatorId});
 
   // ==================== GETTERS ====================
   
@@ -60,10 +63,12 @@ class OperatorMachineController extends ChangeNotifier {
       // Upload mock data if needed (works without auth)
       await FirestoreMachineService.uploadAllMockMachines();
 
-      if (_isAuthenticated) {
-        // User is logged in - fetch their specific machines
+      final targetUserId = viewingOperatorId ?? currentUserId;
+
+      if (targetUserId != null) {
+        // Fetch machines for the target user (viewingOperatorId or current user)
         await Future.wait([
-          _fetchMachinesByUserId(currentUserId!),
+          _fetchMachinesByUserId(targetUserId),
           _fetchUsers(),
         ]);
       } else {
@@ -122,8 +127,10 @@ class OperatorMachineController extends ChangeNotifier {
     final currentUserId = FirestoreMachineService.getCurrentUserId();
     _isAuthenticated = currentUserId != null;
     
-    if (_isAuthenticated) {
-      await _fetchMachinesByUserId(currentUserId!);
+    final targetUserId = viewingOperatorId ?? currentUserId;
+    
+    if (targetUserId != null) {
+      await _fetchMachinesByUserId(targetUserId);
     } else {
       await _fetchAllMachines();
     }

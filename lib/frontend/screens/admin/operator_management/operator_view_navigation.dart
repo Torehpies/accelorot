@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../operator/dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import '../../../operator/statistics/statistics_screen.dart';
-import '../../profile_screen.dart';
-import '../../../operator/machine_management/machine_management_screen.dart';
+import '../../../operator/profile/profile_screen.dart';
+import '../../../operator/machine_management/operator_machine/operator_machine_screen.dart';
 
 /// Navigation screen for admins to view operator's dashboard
 class OperatorViewNavigation extends StatefulWidget {
@@ -39,7 +39,7 @@ class _OperatorViewNavigationState extends State<OperatorViewNavigation> {
         viewingOperatorId: widget.operatorId,
       ),
       StatisticsScreen(viewingOperatorId: widget.operatorId),
-      MachineManagementScreen(viewingOperatorId: widget.operatorId),
+      OperatorMachineScreen(viewingOperatorId: widget.operatorId),
       ProfileScreen(viewingOperatorId: widget.operatorId),
     ];
   }

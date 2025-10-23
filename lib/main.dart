@@ -13,6 +13,7 @@ import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
+import 'package:flutter_application_1/services/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -111,8 +112,8 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          // ✅ User is signed in
-          return kIsWeb ? const WebAdminMainNavigation() : const MainNavigation();
+          // ✅ User is signed in - use AuthWrapper to determine navigation
+          return const AuthWrapper();
         } else {
           // 🚪 User is NOT signed in
           return kIsWeb ? const WebLoginScreen() : const LoginScreen();
