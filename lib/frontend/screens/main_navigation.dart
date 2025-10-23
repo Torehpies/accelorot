@@ -5,6 +5,8 @@ import 'statistics_screen.dart';
 import 'profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../operator/machine_management/machine_management_screen.dart';
+import 'qr_refer.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 
 
 void logCurrentUser(BuildContext context) {
@@ -32,7 +34,14 @@ void logCurrentUser(BuildContext context) {
 
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final bool showReferralOverlay;
+  final String? referralCode;
+
+  const MainNavigation({
+    super.key,
+    this.showReferralOverlay = false,
+    this.referralCode,
+  });
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -65,6 +74,54 @@ class _MainNavigationState extends State<MainNavigation> {
     });
     // show the current auth info in a brief SnackBar
     logCurrentUser(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Show initial auth info and optionally the referral overlay once after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      logCurrentUser(context);
+      if (widget.showReferralOverlay) {
+        _maybeShowReferralOverlay();
+      }
+    });
+  }
+
+  Future<void> _maybeShowReferralOverlay() async {
+    try {
+      final auth = AuthService();
+      final user = auth.getCurrentUser();
+      if (user == null) return;
+
+      final hasShown = await auth.hasShownReferral(user.uid);
+      if (hasShown) return;
+
+      final code = widget.referralCode ?? user.uid.substring(0, 8).toUpperCase();
+
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.all(24),
+            child: ReferralOverlay(
+              referralCode: code,
+              onSkip: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+          );
+        },
+      );
+
+      await auth.markReferralShown(user.uid);
+    } catch (e) {
+      // ignore errors
+    }
   }
 
   @override

@@ -185,6 +185,32 @@ class AuthService {
     return _auth.currentUser;
   }
 
+  // Mark that referral overlay was shown for the given user (stored in users doc)
+  Future<void> markReferralShown(String uid) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'referralShown': true,
+      });
+    } catch (e) {
+      // ignore errors intentionally — non-critical
+    }
+  }
+
+  // Check whether referral overlay was already shown
+  Future<bool> hasShownReferral(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (!doc.exists) return false;
+      final data = doc.data();
+      if (data == null) return false;
+      final val = data['referralShown'];
+      if (val is bool) return val;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Get user data from Firestore
   Future<DocumentSnapshot> getUserData(String uid) async {
     return await _firestore.collection('users').doc(uid).get();

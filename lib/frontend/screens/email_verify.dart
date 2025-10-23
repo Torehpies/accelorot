@@ -44,12 +44,18 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         final user = _authService.getCurrentUser();
         if (user != null) {
           await _authService.updateEmailVerificationStatus(user.uid, true);
+          // After verification navigate to main navigation and ask it to show referral overlay once
         }
         
         if (!mounted) return; 
         showSnackbar(context, 'Email verified successfully!');
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(
+              showReferralOverlay: true,
+              referralCode: user?.uid.substring(0, 8).toUpperCase(),
+            ),
+          ),
         );
       }
     });
@@ -108,18 +114,26 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
   Future<void> _checkVerificationStatus() async {
     bool isVerified = await _authService.isEmailVerified();
-    if (!mounted) return; // Add this check after the first await
-    
+    if (!mounted) return;
+
     if (isVerified) {
       final user = _authService.getCurrentUser();
       if (user != null) {
+        // Update Firestore with verification status
         await _authService.updateEmailVerificationStatus(user.uid, true);
+
+        // After verification navigate to main navigation and ask it to show referral overlay once
       }
-      
-      if (!mounted) return; 
+
+      if (!mounted) return;
       showSnackbar(context, 'Email verified successfully!');
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(
+            showReferralOverlay: true,
+            referralCode: user?.uid.substring(0, 8).toUpperCase(),
+          ),
+        ),
       );
     } else {
       showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
