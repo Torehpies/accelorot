@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/models/app_user_model.dart';
 import 'package:flutter_application_1/data/repositories/firebase_auth_repository.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 import 'package:flutter_application_1/frontend/screens/home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/profile_screen.dart';
 import 'package:flutter_application_1/frontend/screens/statistics_screen.dart';
 import 'package:flutter_application_1/routing/app_route_enum.dart';
+import 'package:flutter_application_1/ui/auth/view/email_verify.dart';
 import 'package:flutter_application_1/ui/auth/view/login_screen.dart';
 import 'package:flutter_application_1/ui/auth/view/registration_screen.dart';
 import 'package:flutter_application_1/ui/scaffold_with_navbar.dart';
@@ -105,30 +108,49 @@ GoRouter router(Ref ref) {
             const MaterialPage(child: RefactoredRegistrationScreen()),
       ),
       GoRoute(
-        path: AppRoutes.userVerify.path,
+        path: '${AppRoutes.userVerify.path}/:email',
         name: AppRoutes.userVerify.routeName,
-        pageBuilder: (context, state) =>
-            const MaterialPage(child: RefactoredRegistrationScreen()),
+        pageBuilder: (context, state) {
+          final email =
+              state.pathParameters['email'] ?? auth.currentUser?.email ?? '';
+          return MaterialPage(child: EmailVerifyScreen(email: email));
+        },
       ),
     ],
     refreshListenable: GoRouterRefreshStream(auth.authStateChanges()),
     redirect: (context, state) async {
       final bool isLoggedIn = auth.currentUser != null;
+      final AppUser? user = auth.currentUser;
+      final bool isVerified = user?.emailVerified == true;
+
       final bool isAuthRoute =
           state.matchedLocation == AppRoutes.login.path ||
           state.matchedLocation == AppRoutes.register.path;
+      final isVerifyingRoute = state.matchedLocation.startsWith(
+        AppRoutes.userVerify.path,
+      );
+      final bool isOnUnprotectedRotue = isAuthRoute || isVerifyingRoute;
 
-      // redirects the user to the login page if not logged in
-      if (!isLoggedIn && !isAuthRoute) return AppRoutes.login.path;
-
-      // redirects user to homescreen/dashboard upon logging in
-      if (isLoggedIn &&
-          isAuthRoute &&
-          state.matchedLocation != AppRoutes.home.path) {
-        return AppRoutes.home.path;
+			/// if NOT logged in go back to login screen
+      if (!isLoggedIn) {
+        return isOnUnprotectedRotue ? null : AppRoutes.login.path;
       }
 
-      return null;
+			/// user is logged in but NOT verified. Go to verification screen
+      if (isLoggedIn && !isVerified) {
+        if (isVerifyingRoute) return null;
+
+				final email = user?.email ?? 'no-email';
+				return '${AppRoutes.userVerify.path}/$email';
+      }
+
+			/// User is logged in and is Verified. prevent access to auth/verify screen
+			if (isLoggedIn && isVerified && isOnUnprotectedRotue) {
+				return AppRoutes.home.path;
+			}
+
+			/// user is logged in and verified and on protected route, allow navigation
+			return null;
     },
   );
 }

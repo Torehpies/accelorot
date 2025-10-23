@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routing/app_route_enum.dart';
 import 'package:flutter_application_1/utils/input_decoration.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ class _RegistrationScreenState
   void _onCreateAccountPressed() async {
     if (!_formKey.currentState!.validate()) return;
 
+		final email = _emailController.text.trim();
     final fullName =
         '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
 
@@ -43,7 +45,14 @@ class _RegistrationScreenState
     if (!mounted) return;
 
     state.when(
-      data: (_) => showSnackbar('Registered successfully!'),
+      data: (_) {
+        showSnackbar('Registered successfully!');
+
+        context.goNamed(
+          AppRoutes.userVerify.routeName,
+          queryParameters: {'email': email},
+        );
+      },
       loading: () {},
       error: (error, _) => showSnackbar(error.toString(), isError: true),
     );
@@ -161,7 +170,7 @@ class _RegistrationScreenState
                           return 'Password is required';
                         }
                         if (value.length < 8) {
-                          return 'Password must be at least 6 characters';
+                          return 'Password must be at least 8 characters';
                         }
                         return null;
                       },

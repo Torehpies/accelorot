@@ -25,6 +25,7 @@ Stream<AppUser?> authStateChange(Ref ref) {
 }
 
 class FirebaseAuthRepository {
+  /// Constructor ulit duh
   FirebaseAuthRepository(this._firebaseAuth);
 
   final FirebaseAuth _firebaseAuth;
@@ -43,21 +44,50 @@ class FirebaseAuthRepository {
 
   AppUser? get currentUser => _convertUser(_firebaseAuth.currentUser);
 
-  AppUser? _convertUser(User? user) =>
-      user == null ? null : AppUser.fromUser(user);
+  /// Moved sendEmailVerification function here
+  Future<void> sendEmailVerification() async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    } else if (user == null) {
+      throw FirebaseAuthException(
+        code: 'no-current-user',
+        message: 'No user is currently signed in.',
+      );
+    }
+  }
 
-  Future<void> login({required String email, required String password}) {
+  Future<bool> isEmailVerified() async {
+    final user = _firebaseAuth.currentUser;
+    await user?.reload();
+    return user?.emailVerified ?? false;
+  }
+
+  Future<UserCredential> signInUser({
+    required String email,
+    required String password,
+  }) async {
     return _firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
   }
 
-  Future<void> createUserWithEmailAndPassword({
+  AppUser? _convertUser(User? user) =>
+      user == null ? null : AppUser.fromUser(user);
+
+ // Future<void> login({required String email, required String password}) {
+ //   return _firebaseAuth.signInWithEmailAndPassword(
+ //     email: email,
+ //     password: password,
+ //   );
+ // }
+
+  Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
+    return _firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
@@ -68,29 +98,19 @@ class FirebaseAuthRepository {
     await user?.updateDisplayName(fullName);
   }
 
-  Future<void> register({
-    required String email,
-    required String password,
-    required String fullName,
-  }) async {
-    await createUserWithEmailAndPassword(email: email, password: password);
-    await updateDisplayName(fullName: fullName);
-  }
+ // Future<void> register({
+ //   required String email,
+ //   required String password,
+ //   required String fullName,
+ // }) async {
+ //   await createUserWithEmailAndPassword(email: email, password: password);
+ //   await updateDisplayName(fullName: fullName);
+ // }
 
   Future<void> logout() async {
     return _firebaseAuth.signOut();
   }
 
-  //	Future<void> register(String email, String password, String fullName) async {
-  //		await _firebaseAuth.registerWithEmail(email, password, fullName);
-  //	}
-  //
-  //	Future<User?> login(String email, String password) async {
-  //		final credential = await _firebaseAuth.signInWithEmail(email, password);
-  //		return credential?.user;
-  //	}
-  //
-  //
   //	Future<void> signInWithGoogle() async {
   //		await _firebaseAuth.signInWithGoogle();
   //	}

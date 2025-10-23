@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routing/app_route_enum.dart';
 import 'package:flutter_application_1/ui/auth/view_model/auth_view_model.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,7 +33,18 @@ class _LoginScreenState extends ConsumerState<RefactoredLoginScreen> {
     state.when(
       data: (_) => showSnackbar('Login successfully!'),
       loading: () {},
-      error: (error, _) => showSnackbar(error.toString(), isError: true),
+      error: (error, _) {
+        final message = error.toString();
+        showSnackbar(message, isError: true);
+
+        if (message.contains('Email not verified') ||
+            message.contains('email not verified')) {
+          context.goNamed(
+            AppRoutes.userVerify.routeName,
+            queryParameters: {'email': email},
+          );
+        }
+      },
     );
   }
 
