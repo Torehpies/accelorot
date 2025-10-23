@@ -19,14 +19,13 @@ void main() async {
 
   // 🌐 Global error handler (safe for web)
   FlutterError.onError = (details) {
-    final message = details.exceptionAsString();
-    print('Flutter Error: $message');
+    // Consider using a logging service here in production
+    // e.g., Sentry.captureException(details.exception, stackTrace: details.stack);
   };
 
   // 🧵 Async error handler
   PlatformDispatcher.instance.onError = (error, stack) {
-    final errorMessage = error.toString();
-    print('Uncaught async error: $errorMessage');
+    // Consider using a logging service here in production
     return true;
   };
 
@@ -35,11 +34,10 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('✅ Firebase initialized successfully for ${kIsWeb ? "Web" : "Mobile"}');
-  } on FirebaseException catch (e) {
-    print('❌ Firebase init failed (FirebaseException): ${e.message}');
+  } on FirebaseException {
+    // Handle or log Firebase initialization errors appropriately
   } catch (e) {
-    print('❌ Firebase init failed: $e');
+    // Handle or log general initialization errors appropriately
   }
 
   runApp(const MyApp());
