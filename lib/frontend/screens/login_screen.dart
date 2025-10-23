@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
         Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
-        String userRole = userData['role'] ?? 'User';
+        String userRole = userData['role'] ?? 'Operator';
 
         // Navigate based on role
         if (userRole == 'Admin') {

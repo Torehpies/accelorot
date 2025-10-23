@@ -19,7 +19,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
-  String? selectedRole = 'User';
+  String? selectedRole = 'Operator';
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
@@ -44,7 +44,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           password: passwordController.text,
           firstName: firstNameController.text.trim(),
           lastName: lastNameController.text.trim(),
-          role: selectedRole ?? 'User',
+          // Force registration role to Operator
+          role: 'Operator',
         );
         if (mounted) {
           setState(() => _isLoading = false);
