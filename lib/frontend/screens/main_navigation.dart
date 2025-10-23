@@ -5,7 +5,7 @@ import 'statistics_screen.dart';
 import 'profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../operator/machine_management/machine_management_screen.dart';
-import 'qr_refer.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 
 void logCurrentUser(BuildContext context) {
@@ -90,9 +90,6 @@ class _MainNavigationState extends State<MainNavigation> {
       final user = auth.getCurrentUser();
       if (user == null) return;
 
-      final hasShown = await auth.hasShownReferral(user.uid);
-      if (hasShown) return;
-
       final code = widget.referralCode ?? user.uid.substring(0, 8).toUpperCase();
 
       if (!mounted) return;
@@ -101,19 +98,38 @@ class _MainNavigationState extends State<MainNavigation> {
         barrierDismissible: false,
         builder: (ctx) {
           return Dialog(
-            backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.all(24),
-            child: ReferralOverlay(
-              referralCode: code,
-              onSkip: () {
-                Navigator.of(ctx).pop();
-              },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  QrImageView(
+                    data: code,
+                    version: QrVersions.auto,
+                    size: 180,
+                  ),
+                  const SizedBox(height: 12),
+                  SelectableText(
+                    code,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
       );
 
-      await auth.markReferralShown(user.uid);
+      // no-op: we no longer mark referralShown in Firestore
     } catch (e) {
       // ignore errors
     }

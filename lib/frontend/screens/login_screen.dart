@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
+import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
 import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -27,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onLoadingChanged: (isLoading) => setState(() {}),
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
-      onLoginSuccess: (result) {
+      onLoginSuccess: (result) async {
         if (result['needsVerification'] == true) {
           Navigator.pushReplacement(
             context,
@@ -39,21 +41,37 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           return;
         }
-        Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
-        String userRole = userData['role'] ?? 'Operator';
 
-        // Navigate based on role
+        final Map<String, dynamic> userData = (result['userData'] ?? {}) as Map<String, dynamic>;
+        final String userRole = userData['role'] ?? 'Operator';
+
+        // If admin -> admin nav immediately
         if (userRole == 'Admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AdminMainNavigation(),
-            ),
+            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+          );
+          return;
+        }
+
+        // For non-admin users, route based on team status
+        final teamId = userData['teamId'];
+        final pendingTeamId = userData['pendingTeamId'];
+
+        if (teamId != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        } else if (pendingTeamId != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
           );
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
+            MaterialPageRoute(builder: (context) => const QRReferScreen()),
           );
         }
       },

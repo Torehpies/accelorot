@@ -186,33 +186,50 @@ class AuthService {
   }
 
   // Mark that referral overlay was shown for the given user (stored in users doc)
-  Future<void> markReferralShown(String uid) async {
-    try {
-      await _firestore.collection('users').doc(uid).update({
-        'referralShown': true,
-      });
-    } catch (e) {
-      // ignore errors intentionally — non-critical
-    }
-  }
+
 
   // Check whether referral overlay was already shown
-  Future<bool> hasShownReferral(String uid) async {
-    try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      if (!doc.exists) return false;
-      final data = doc.data();
-      if (data == null) return false;
-      final val = data['referralShown'];
-      if (val is bool) return val;
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
+
 
   // Get user data from Firestore
   Future<DocumentSnapshot> getUserData(String uid) async {
     return await _firestore.collection('users').doc(uid).get();
+  }
+
+  // Get team status for a user: returns map with teamId and pendingTeamId (both may be null)
+  Future<Map<String, dynamic>> getUserTeamStatus(String uid) async {
+    try {
+      final doc = await getUserData(uid);
+      if (!doc.exists) return {'teamId': null, 'pendingTeamId': null};
+      final data = doc.data() as Map<String, dynamic>?;
+      return {
+        'teamId': data?['teamId'],
+        'pendingTeamId': data?['pendingTeamId'],
+      };
+    } catch (e) {
+      return {'teamId': null, 'pendingTeamId': null};
+    }
+  }
+
+  // Set a pendingTeamId on the user document (when they enter/scan a referral code)
+  Future<void> setPendingTeamId(String uid, String teamCode) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'pendingTeamId': teamCode,
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Clear pendingTeamId (e.g., if cancelled)
+  Future<void> clearPendingTeamId(String uid) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'pendingTeamId': FieldValue.delete(),
+      });
+    } catch (e) {
+      // ignore
+    }
   }
 }
