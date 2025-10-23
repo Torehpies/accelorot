@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
 import '../frontend/screens/main_navigation.dart';
-import '../frontend/screens/admin/admin_main_navigation.dart';
+import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import '../frontend/screens/email_verify.dart';
 import '../services/sess_service.dart';
+import 'auth_service.dart';
+import '../frontend/screens/qr_refer.dart';
+import '../frontend/screens/waiting_approval_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -37,21 +40,38 @@ class AuthWrapper extends StatelessWidget {
           return EmailVerifyScreen(email: user.email ?? '');
         }
         
-        // User is logged in and verified — choose navigation by role
-        return FutureBuilder<String?>(
-          future: sessionService.getCurrentUserRole(),
-          builder: (context, roleSnapshot) {
-            if (roleSnapshot.connectionState == ConnectionState.waiting) {
+        // User is logged in and verified — choose navigation by role and team status
+        return FutureBuilder<Widget>(
+          future: () async {
+            final role = await sessionService.getCurrentUserRole() ?? '';
+            if (role.toLowerCase() == 'admin') {
+              return const AdminMainNavigation();
+            }
+
+            // For non-admin users, check team status
+            final auth = AuthService();
+            final status = await auth.getUserTeamStatus(user.uid);
+            final teamId = status['teamId'];
+            final pendingTeamId = status['pendingTeamId'];
+
+            if (teamId != null) {
+              return const MainNavigation();
+            } else if (pendingTeamId != null) {
+              return const WaitingApprovalScreen();
+            } else {
+              return const QRReferScreen();
+            }
+          }(),
+          builder: (context, snap) {
+            if (snap.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-
-            final role = roleSnapshot.data ?? '';
-            if (role.toLowerCase() == 'admin') {
-              return const AdminMainNavigation();
+            if (snap.hasError) {
+              return const MainNavigation();
             }
-            return const MainNavigation();
+            return snap.data ?? const MainNavigation();
           },
         );
       },

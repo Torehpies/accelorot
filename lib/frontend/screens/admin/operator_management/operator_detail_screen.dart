@@ -1,18 +1,18 @@
-// lib/frontend/screens/machine_detail_screen.dart
+// lib/frontend/screens/admin/operator_management/operator_detail_screen.dart
 import 'package:flutter/material.dart';
 
-class MachineDetailScreen extends StatelessWidget {
-  final String machineName;
-  final String productCode;
-  final String userRole;
-  final String date;
+class OperatorDetailScreen extends StatelessWidget {
+  final String operatorName;
+  final String role;
+  final String email;
+  final String dateAdded;
 
-  const MachineDetailScreen({
+  const OperatorDetailScreen({
     super.key,
-    required this.machineName,
-    required this.productCode,
-    this.userRole = 'Admin',
-    this.date = 'Aug-25-2025',
+    required this.operatorName,
+    this.role = 'Operator',
+    this.email = 'operator@example.com',
+    this.dateAdded = 'Aug-25-2025',
   });
 
   @override
@@ -25,12 +25,23 @@ class MachineDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Machine Details',
-          style: TextStyle(color: Colors.teal), // ✅ Teal title
+          'Operator Details',
+          style: TextStyle(color: Colors.teal),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.teal, // Affects system icons if any
+        foregroundColor: Colors.teal,
         elevation: 0,
+        // 🔜 Optional: Add Edit/Delete actions later
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.edit, color: Colors.teal),
+        //     onPressed: () {},
+        //   ),
+        //   IconButton(
+        //     icon: const Icon(Icons.delete, color: Colors.red),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -54,7 +65,7 @@ class MachineDetailScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.devices,
+                        Icons.person,
                         color: Colors.teal.shade700,
                         size: 24,
                       ),
@@ -62,22 +73,22 @@ class MachineDetailScreen extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        machineName,
+                        operatorName,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal, // ✅ Teal name
+                          color: Colors.teal,
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                _buildDetailRow('Product Code/ID:', productCode),
+                _buildDetailRow('Role:', role),
                 const SizedBox(height: 12),
-                _buildDetailRow('User Role:', userRole),
+                _buildDetailRow('Email:', email),
                 const SizedBox(height: 12),
-                _buildDetailRow('Date:', date),
+                _buildDetailRow('Date Added:', dateAdded),
               ],
             ),
           ),
@@ -93,7 +104,7 @@ class MachineDetailScreen extends StatelessWidget {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.w500,
-            color: Colors.grey, // Keep label grey for readability
+            color: Colors.grey,
           ),
         ),
         const SizedBox(width: 8),
@@ -102,7 +113,7 @@ class MachineDetailScreen extends StatelessWidget {
             value,
             style: const TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.teal, // ✅ Teal value
+              color: Colors.teal,
             ),
           ),
         ),

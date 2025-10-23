@@ -4,6 +4,8 @@ import 'dart:async';
 import '../../utils/snackbar_utils.dart';
 import 'login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
+import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
 
 class EmailVerifyScreen extends StatefulWidget {
   final String email;
@@ -40,17 +42,36 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       bool isVerified = await _authService.isEmailVerified();
       if (isVerified && mounted) {
         timer.cancel();
-        // Update Firestore with verification status
         final user = _authService.getCurrentUser();
         if (user != null) {
           await _authService.updateEmailVerificationStatus(user.uid, true);
         }
-        
-        if (!mounted) return; 
+
+        if (!mounted) return;
         showSnackbar(context, 'Email verified successfully!');
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainNavigation()),
-        );
+
+        // Determine team status and route accordingly
+        final userObj = _authService.getCurrentUser();
+        if (userObj == null) return;
+        final status = await _authService.getUserTeamStatus(userObj.uid);
+        final teamId = status['teamId'];
+        final pendingTeamId = status['pendingTeamId'];
+
+        if (!mounted) return;
+
+        if (teamId != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const MainNavigation()),
+          );
+        } else if (pendingTeamId != null) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const QRReferScreen()),
+          );
+        }
       }
     });
   }
@@ -108,18 +129,26 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
   Future<void> _checkVerificationStatus() async {
     bool isVerified = await _authService.isEmailVerified();
-    if (!mounted) return; // Add this check after the first await
-    
+    if (!mounted) return;
+
     if (isVerified) {
       final user = _authService.getCurrentUser();
       if (user != null) {
+        // Update Firestore with verification status
         await _authService.updateEmailVerificationStatus(user.uid, true);
+
+        // After verification navigate to main navigation and ask it to show referral overlay once
       }
-      
-      if (!mounted) return; 
+
+      if (!mounted) return;
       showSnackbar(context, 'Email verified successfully!');
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainNavigation()),
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(
+            showReferralOverlay: true,
+            referralCode: user?.uid.substring(0, 8).toUpperCase(),
+          ),
+        ),
       );
     } else {
       showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
