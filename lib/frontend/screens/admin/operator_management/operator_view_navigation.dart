@@ -83,11 +83,12 @@ class _OperatorViewNavigationState extends State<OperatorViewNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Handle back button press
-        _exitOperatorView();
-        return false; // Prevent default back action
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _exitOperatorView();
+        }
       },
       child: Scaffold(
         appBar: AppBar(
