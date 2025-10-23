@@ -40,7 +40,8 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
   void _startVerificationCheck() {
     _verificationTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       bool isVerified = await _authService.isEmailVerified();
-      if (isVerified && mounted) {
+      if (!mounted) return; // guard immediately after await
+      if (isVerified) {
         timer.cancel();
         final user = _authService.getCurrentUser();
         if (user != null) {
@@ -54,18 +55,22 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         final userObj = _authService.getCurrentUser();
         if (userObj == null) return;
         final status = await _authService.getUserTeamStatus(userObj.uid);
+        if (!mounted) return; // guard after async
         final teamId = status['teamId'];
         final pendingTeamId = status['pendingTeamId'];
 
         if (teamId != null) {
+          if (!mounted) return;
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const MainNavigation()),
           );
         } else if (pendingTeamId != null) {
+          if (!mounted) return;
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
           );
         } else {
+          if (!mounted) return;
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const QRReferScreen()),
           );
@@ -134,12 +139,11 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       if (user != null) {
         // Update Firestore with verification status
         await _authService.updateEmailVerificationStatus(user.uid, true);
-
-        // After verification navigate to main navigation and ask it to show referral overlay once
       }
 
       if (!mounted) return;
       showSnackbar(context, 'Email verified successfully!');
+      if (!mounted) return; // guard before navigation
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => MainNavigation(
