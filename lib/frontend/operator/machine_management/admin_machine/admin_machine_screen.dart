@@ -1,27 +1,27 @@
-// lib/frontend/operator/machine_management/machine_management_screen.dart
-import 'package:flutter/material.dart';
-import 'controllers/machine_controller.dart';
-import 'components/machine_action_card.dart';
-import 'widgets/add_machine_modal.dart';
-import 'widgets/search_bar_widget.dart';
-import 'widgets/machine_list_widget.dart';
+// lib/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart
 
-class MachineManagementScreen extends StatefulWidget {
-  const MachineManagementScreen({super.key});
+import 'package:flutter/material.dart';
+import 'controllers/admin_machine_controller.dart';
+import '../components/machine_action_card.dart';
+import 'widgets/add_machine_modal.dart';
+import '../widgets/search_bar_widget.dart';
+import 'widgets/admin_machine_list.dart';
+
+class AdminMachineScreen extends StatefulWidget {
+  const AdminMachineScreen({super.key});
 
   @override
-  State<MachineManagementScreen> createState() =>
-      _MachineManagementScreenState();
+  State<AdminMachineScreen> createState() => _AdminMachineScreenState();
 }
 
-class _MachineManagementScreenState extends State<MachineManagementScreen> {
-  late final MachineController _controller;
+class _AdminMachineScreenState extends State<AdminMachineScreen> {
+  late final AdminMachineController _controller;
   final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _controller = MachineController();
+    _controller = AdminMachineController();
     _controller.initialize();
   }
 
@@ -50,7 +50,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
       appBar: AppBar(
         title: const Text(
           'Machine Management',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
         elevation: 0,
@@ -59,41 +59,12 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
       body: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
-          if (_controller.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (_controller.errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    _controller.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      _controller.clearError();
-                      _controller.initialize();
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
           return Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Action Cards Row
+                // Action Cards Row - Always Visible
                 Row(
                   children: [
                     Expanded(
@@ -125,7 +96,7 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
                   ),
                 const SizedBox(height: 8),
 
-                // Main Container
+                // Main Container - Always Visible
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -169,8 +140,10 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
+                        
+                        // Content with Error/Loading States Inside
                         Expanded(
-                          child: MachineListWidget(controller: _controller),
+                          child: _buildContent(),
                         ),
                       ],
                     ),
@@ -182,5 +155,53 @@ class _MachineManagementScreenState extends State<MachineManagementScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildContent() {
+    // Loading State - inside container
+    if (_controller.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Error State - inside container
+    if (_controller.errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+              const SizedBox(height: 16),
+              Text(
+                _controller.errorMessage!,
+                style: TextStyle(color: Colors.red.shade700, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _controller.clearError();
+                  _controller.initialize();
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Content - Machine List
+    return AdminMachineList(controller: _controller);
   }
 }

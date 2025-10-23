@@ -1,12 +1,13 @@
-// lib/frontend/operator/machine_management/widgets/machine_list_widget.dart
+// lib/frontend/operator/machine_management/operator_machine/widgets/operator_machine_list.dart
+
 import 'package:flutter/material.dart';
-import '../controllers/machine_controller.dart';
-import 'machine_card_widget.dart';
+import '../controllers/operator_machine_controller.dart';
+import 'operator_machine_card.dart';
 
-class MachineListWidget extends StatelessWidget {
-  final MachineController controller;
+class OperatorMachineList extends StatelessWidget {
+  final OperatorMachineController controller;
 
-  const MachineListWidget({
+  const OperatorMachineList({
     super.key,
     required this.controller,
   });
@@ -21,18 +22,21 @@ class MachineListWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              controller.showArchived ? Icons.archive : Icons.inbox_outlined,
+              controller.searchQuery.isNotEmpty
+                  ? Icons.search_off
+                  : Icons.inbox_outlined,
               size: 64,
               color: Colors.grey[400],
             ),
             const SizedBox(height: 16),
             Text(
               controller.searchQuery.isNotEmpty
-                  ? 'No machines found'
-                  : controller.showArchived
-                      ? 'No archived machines'
-                      : 'No machines available. Add one to get started!',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  ? 'No machines found matching "${controller.searchQuery}"'
+                  : 'No machines assigned to you yet.\nContact your admin for machine assignment.',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -45,7 +49,7 @@ class MachineListWidget extends StatelessWidget {
       itemCount: machines.length,
       itemBuilder: (context, index) {
         final machine = machines[index];
-        return MachineCardWidget(
+        return OperatorMachineCard(
           machine: machine,
           controller: controller,
         );

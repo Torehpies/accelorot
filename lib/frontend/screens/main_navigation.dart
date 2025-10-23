@@ -1,3 +1,5 @@
+// lib/frontend/screens/main_navigation.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import '../operator/dashboard/home_screen.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/ac
 import 'statistics_screen.dart';
 import '../operator/profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../operator/machine_management/machine_management_screen.dart';
+import '../operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 
@@ -55,7 +57,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const HomeScreen(),
     ActivityLogsNavigator(key: _activityNavigatorKey),
     const StatisticsScreen(),
-    MachineManagementScreen(),
+    const OperatorMachineScreen(),
     const ProfileScreen(),     
   ];
 

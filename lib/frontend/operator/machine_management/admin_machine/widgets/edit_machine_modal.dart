@@ -1,25 +1,36 @@
-// lib/frontend/operator/machine_management/widgets/add_machine_modal.dart
+// lib/frontend/operator/machine_management/admin_machine/widgets/edit_machine_modal.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/machine_controller.dart';
+import '../controllers/admin_machine_controller.dart';
+import '../../models/machine_model.dart';
 
-class AddMachineModal extends StatefulWidget {
-  final MachineController controller;
+class EditMachineModal extends StatefulWidget {
+  final AdminMachineController controller;
+  final MachineModel machine;
 
-  const AddMachineModal({
+  const EditMachineModal({
     super.key,
     required this.controller,
+    required this.machine,
   });
 
   @override
-  State<AddMachineModal> createState() => _AddMachineModalState();
+  State<EditMachineModal> createState() => _EditMachineModalState();
 }
 
-class _AddMachineModalState extends State<AddMachineModal> {
-  final _nameController = TextEditingController();
-  final _idController = TextEditingController();
-  String? _selectedUserId;
+class _EditMachineModalState extends State<EditMachineModal> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _idController; // Read-only
+  late String _selectedUserId;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.machine.machineName);
+    _idController = TextEditingController(text: widget.machine.machineId);
+    _selectedUserId = widget.machine.userId;
+  }
 
   @override
   void dispose() {
@@ -28,32 +39,44 @@ class _AddMachineModalState extends State<AddMachineModal> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText) {
+  InputDecoration _buildInputDecoration(String labelText, {bool readOnly = false}) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.grey),
-      floatingLabelStyle: const TextStyle(color: Colors.teal),
+      labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.grey),
+      floatingLabelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.teal),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.teal, width: 2),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : Colors.teal,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.grey, width: 1),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : Colors.grey,
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
+      filled: readOnly,
+      fillColor: readOnly ? Colors.grey[100] : null,
     );
   }
 
   Future<void> _handleSubmit() async {
-    final name = _nameController.text.trim();
-    final id = _idController.text.trim();
-
-    if (id.isEmpty) {
+    // Check authentication first
+    if (!widget.controller.isAuthenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Machine ID is required')),
+        const SnackBar(
+          content: Text('⚠️ You must be logged in to edit machines'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
       );
       return;
     }
+
+    final name = _nameController.text.trim();
 
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,9 +85,11 @@ class _AddMachineModalState extends State<AddMachineModal> {
       return;
     }
 
-    if (_selectedUserId == null) {
+    // Check if anything changed
+    if (name == widget.machine.machineName &&
+        _selectedUserId == widget.machine.userId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a user')),
+        const SnackBar(content: Text('No changes detected')),
       );
       return;
     }
@@ -72,21 +97,34 @@ class _AddMachineModalState extends State<AddMachineModal> {
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.controller.addMachine(
+      await widget.controller.updateMachine(
+        machineId: widget.machine.machineId,
         machineName: name,
-        machineId: id,
-        userId: _selectedUserId!,
+        userId: _selectedUserId,
       );
 
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ Added: $name')),
+        SnackBar(
+          content: Text('✅ Machine "$name" updated successfully'),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
       if (!mounted) return;
+      
+      // Show user-friendly error message
+      final errorMessage = e.toString().contains('logged in')
+          ? 'You must be logged in to edit machines'
+          : 'Failed to update machine: $e';
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add machine: $e')),
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
       );
     } finally {
       if (mounted) {
@@ -97,6 +135,8 @@ class _AddMachineModalState extends State<AddMachineModal> {
 
   @override
   Widget build(BuildContext context) {
+    final isAuthenticated = widget.controller.isAuthenticated;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -112,7 +152,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Add Machine',
+                'Edit Machine',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               IconButton(
@@ -121,11 +161,18 @@ class _AddMachineModalState extends State<AddMachineModal> {
               ),
             ],
           ),
-          const Text(
-            'Fill in the details to register a new machine',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            isAuthenticated
+                ? 'Update machine details'
+                : 'You can preview the form, but must be logged in to save changes',
+            style: TextStyle(
+              color: isAuthenticated ? Colors.grey : Colors.orange.shade700,
+              fontWeight: isAuthenticated ? FontWeight.normal : FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 20),
+          
+          // Machine Name (Editable)
           TextField(
             controller: _nameController,
             style: const TextStyle(color: Colors.teal),
@@ -134,18 +181,21 @@ class _AddMachineModalState extends State<AddMachineModal> {
             enabled: !_isSubmitting,
           ),
           const SizedBox(height: 16),
+          
+          // Machine ID (Read-only, grayed out)
           TextField(
             controller: _idController,
-            style: const TextStyle(color: Colors.teal),
-            cursorColor: Colors.teal,
-            decoration: _buildInputDecoration('Machine ID *'),
-            enabled: !_isSubmitting,
+            style: TextStyle(color: Colors.grey[600]),
+            decoration: _buildInputDecoration('Machine ID (Cannot be changed)', readOnly: true),
+            enabled: false,
+            readOnly: true,
           ),
           const SizedBox(height: 16),
+          
+          // Assign to User (Editable)
           DropdownButtonFormField<String>(
             initialValue: _selectedUserId,
             decoration: _buildInputDecoration('Assign to User *'),
-            hint: const Text('Select User'),
             items: widget.controller.users.map((user) {
               return DropdownMenuItem<String>(
                 value: user['uid'],
@@ -157,12 +207,18 @@ class _AddMachineModalState extends State<AddMachineModal> {
             }).toList(),
             onChanged: _isSubmitting
                 ? null
-                : (value) => setState(() => _selectedUserId = value),
+                : (value) {
+                    if (value != null) {
+                      setState(() => _selectedUserId = value);
+                    }
+                  },
             dropdownColor: Colors.white,
             icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
             style: const TextStyle(color: Colors.teal),
           ),
           const SizedBox(height: 24),
+          
+          // Buttons
           Row(
             children: [
               Expanded(
@@ -186,7 +242,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: isAuthenticated ? Colors.teal : Colors.orange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -203,7 +259,17 @@ class _AddMachineModalState extends State<AddMachineModal> {
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text('Add Machine'),
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (!isAuthenticated)
+                              const Padding(
+                                padding: EdgeInsets.only(right: 6),
+                                child: Icon(Icons.lock_outline, size: 16),
+                              ),
+                            Text(isAuthenticated ? 'Update Machine' : 'Login Required'),
+                          ],
+                        ),
                 ),
               ),
             ],

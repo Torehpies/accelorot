@@ -1,3 +1,5 @@
+// lib/services/machine_services/firestore_machine_service.dart
+
 import '../../../frontend/operator/machine_management/models/machine_model.dart';
 import '../firestore/firestore_collection.dart';
 import '../firestore/firestore_uploads.dart';
@@ -7,6 +9,7 @@ import '../firestore/firestore_fetchs.dart';
 /// Provides a unified API for all machine operations.
 class FirestoreMachineService {
   // ==================== AUTH & COLLECTIONS ====================
+  
   static String? getCurrentUserId() =>
       MachineFirestoreCollections.getCurrentUserId();
 
@@ -17,6 +20,7 @@ class FirestoreMachineService {
       MachineFirestoreCollections.machineExists(machineId);
 
   // ==================== UPLOAD METHODS ====================
+  
   static Future<void> uploadAllMockMachines() =>
       MachineFirestoreUpload.uploadAllMockMachines();
 
@@ -25,6 +29,10 @@ class FirestoreMachineService {
 
   static Future<void> addMachine(MachineModel machine) =>
       MachineFirestoreUpload.addMachine(machine);
+
+  /// Update machine (Admin only) - Can update machineName and userId
+  static Future<void> updateMachine(MachineModel machine) =>
+      MachineFirestoreUpload.updateMachine(machine);
 
   static Future<void> updateMachineArchiveStatus(
     String machineId,
@@ -41,7 +49,18 @@ class FirestoreMachineService {
   static Future<void> restoreMachine(String machineId) =>
       MachineFirestoreUpload.restoreMachine(machineId);
 
-  // ==================== FETCH METHODS ====================
+  // ==================== FETCH METHODS - ROLE-SPECIFIC ====================
+  
+  /// Fetch machines for Operators (by userId)
+  static Future<List<MachineModel>> getMachinesByUserId(String userId) =>
+      MachineFirestoreFetch.getMachinesByUserId(userId);
+
+  /// Fetch machines for Admins (by teamId + mock data)
+  static Future<List<MachineModel>> getMachinesByTeamId(String teamId) =>
+      MachineFirestoreFetch.getMachinesByTeamId(teamId);
+
+  // ==================== FETCH METHODS - GENERAL ====================
+  
   static Future<List<MachineModel>> getActiveMachines() =>
       MachineFirestoreFetch.getActiveMachines();
 
@@ -57,6 +76,6 @@ class FirestoreMachineService {
   static Future<Map<String, dynamic>?> getUserById(String userId) =>
       MachineFirestoreFetch.getUserById(userId);
 
-  static Future<List<Map<String, dynamic>>> getOperatorsAndAdmins() =>
-      MachineFirestoreFetch.getOperatorsAndAdmins();
+  static Future<List<Map<String, dynamic>>> getOperators() =>
+      MachineFirestoreFetch.getOperators();
 }
