@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'operator_detail_screen.dart'; // ✅ Now used for navigation
+import 'add_operator_screen.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -12,20 +12,33 @@ class OperatorManagementScreen extends StatefulWidget {
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
-  // Sample operators — no 'isExpanded' needed anymore
+  // Fixed mock data: every operator now has a valid role
   final List<Map<String, dynamic>> _operators = List.generate(6, (index) {
     return {
       'name': 'Operator ${index + 1}',
       'email': 'operator${index + 1}@company.com',
-      'role': index % 2 == 0 ? '' : 'Operator',
+      'role': index % 2 == 0 ? 'Admin' : 'Operator', // ✅ No empty roles
       'isArchived': index >= 4,
       'dateAdded': 'Aug-${20 + index}-2025',
     };
   }).toList();
 
   bool _showArchived = false;
-  int _nextOperatorNumber = 7;
 
+  // Navigate to AddOperatorScreen in "Add" mode
+  void _navigateToAddOperator() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddOperatorScreen(), // No args = Add mode
+      ),
+    ).then((result) {
+      // Optional: Refresh or show feedback if needed
+      // For now, AddOperatorScreen handles its own success message
+    });
+  }
+
+  // Restore an archived operator
   void _restoreOperator(int globalIndex) {
     setState(() {
       _operators[globalIndex]['isArchived'] = false;
@@ -37,189 +50,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     );
   }
 
-  void _addOperator({
-    required String name,
-    required String email,
-    required String role,
-    String dateAdded = 'Aug-25-2025',
-  }) {
-    final actualName = name.trim().isNotEmpty
-        ? name.trim()
-        : 'Operator $_nextOperatorNumber';
-
-    if (!email.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email')),
-      );
-      return;
-    }
-
-    setState(() {
-      _operators.add({
-        'name': actualName,
-        'email': email.trim(),
-        'role': role,
-        'isArchived': false,
-        'dateAdded': dateAdded,
-      });
-      _nextOperatorNumber++;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('✅ Added: $actualName')),
-    );
-  }
-
-  void _showAddOperatorModal() {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final dateController = TextEditingController();
-    String selectedRole = 'Operator';
-
-    InputDecoration buildInputDecoration(String labelText) {
-      return InputDecoration(
-        labelText: labelText,
-        labelStyle: const TextStyle(color: Colors.grey),
-        floatingLabelStyle: const TextStyle(color: Colors.teal),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.teal, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-      );
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Add Operator',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: Navigator.of(context).pop,
-                ),
-              ],
-            ),
-            const Text(
-              'Fill in the details to register a new operator',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: nameController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              decoration: buildInputDecoration('Full Name *'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              keyboardType: TextInputType.emailAddress,
-              decoration: buildInputDecoration('Email *'),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedRole,
-              decoration: buildInputDecoration('Role'),
-              items: ['Operator', 'Admin']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) => setState(() => selectedRole = val!),
-              dropdownColor: Colors.white,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-              style: const TextStyle(color: Colors.teal),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: dateController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              decoration: buildInputDecoration('Date Added (e.g. Aug-25-2025)'),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final name = nameController.text.trim();
-                      final email = emailController.text.trim();
-                      if (name.isEmpty || email.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Name and Email are required')),
-                        );
-                        return;
-                      }
-                      _addOperator(
-                        name: name,
-                        email: email,
-                        role: selectedRole,
-                        dateAdded: dateController.text.isEmpty
-                            ? 'Aug-25-2025'
-                            : dateController.text,
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Add Operator'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
+  // Helper getters
   List<Map<String, dynamic>> get _activeOperators =>
       _operators.where((o) => o['isArchived'] == false).toList();
 
@@ -269,7 +100,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                   child: _buildActionCard(
                     icon: Icons.person_add_alt_1,
                     label: 'Add Operator',
-                    onPressed: _showAddOperatorModal,
+                    onPressed: _navigateToAddOperator, // ✅ Now uses full screen
                   ),
                 ),
               ],
@@ -398,9 +229,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => OperatorDetailScreen(
+                                            builder: (context) => AddOperatorScreen(
                                               operatorName: operator['name'],
-                                              role: operator['role'],
                                               email: operator['email'],
                                               dateAdded: operator['dateAdded'],
                                             ),
