@@ -49,16 +49,22 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
       if (!mounted) return;
       
-      // Navigate back to QR refer screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const QRReferScreen()),
-      );
+      // Navigate back to QR refer screen on next frame to ensure context is valid
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const QRReferScreen()),
+        );
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error canceling request: $e')),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error canceling request: $e')),
+        );
+      });
     }
   }
 
@@ -116,9 +122,12 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                 onPressed: () async {
                   await _auth.signOut();
                   if (!mounted) return;
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  });
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.teal),
