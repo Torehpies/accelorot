@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'admin_home_screen.dart';
+import 'home_screen/admin_home_screen.dart';
 import 'user_management_screen.dart';
 import '../../operator/profile/profile_screen.dart'; // ✅ Adjust path if needed — this is your existing ProfileScreen
 
@@ -18,6 +18,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   final List<Widget> _screens = [
     AdminHomeScreen(),
     UserManagementScreen(),
+    MachineManagementScreen(),
     ProfileScreen(), // ✅ Use your actual screen
   ];
 
@@ -78,6 +79,7 @@ void logCurrentUser(BuildContext context) {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.group), label: "Users"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machine"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),

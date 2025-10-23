@@ -138,9 +138,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             firstName: first.isNotEmpty ? first : 'Miguel Andres',
                             lastName: last.isNotEmpty ? last : 'Reyes',
                             username: FirebaseAuth.instance.currentUser?.displayName ?? '',
-                            email: _userData != null && _userData!['email'] is String
-                                ? _userData!['email'] as String
-                                : FirebaseAuth.instance.currentUser?.email ?? '',
                             role: _userData?['role'] ?? 'User',
                           ),
                         );

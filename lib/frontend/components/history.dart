@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/oxygen_statistic_card.dart';
-import '../widgets/temperature_statistic_card.dart';
-import '../widgets/moisture_statistic_card.dart';
+import '../operator/statistics/widgets/oxygen_statistic_card.dart';
+import '../operator/statistics/widgets/temperature_statistic_card.dart';
+import '../operator/statistics/widgets/moisture_statistic_card.dart';
 
 class HistoryPage extends StatelessWidget {
   final String filter;

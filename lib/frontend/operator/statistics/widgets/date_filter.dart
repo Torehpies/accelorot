@@ -1,3 +1,4 @@
+// date_filter_button.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart' as dp;
 import 'package:intl/intl.dart';
@@ -15,7 +16,6 @@ class DateFilterState extends State<DateFilter> {
   DateTimeRange? _selectedRange;
   String _label = "Date Filter";
 
-  // Handle preset selections
   void _setPresetRange(int days) {
     final now = DateTime.now();
     final start = now.subtract(Duration(days: days - 1));
@@ -29,19 +29,16 @@ class DateFilterState extends State<DateFilter> {
     widget.onChanged(range);
   }
 
-  // Handle custom selection
-  void _pickCustomRange() {
+  Future<void> _pickCustomRange() async {
     DateTime now = DateTime.now();
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
-    DateTime start =
-        _selectedRange?.start ?? now.subtract(const Duration(days: 7));
+    DateTime start = _selectedRange?.start ?? now.subtract(const Duration(days: 7));
     DateTime end = _selectedRange?.end ?? now;
-
     DateTimeRange tempRange = DateTimeRange(start: start, end: end);
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -65,15 +62,15 @@ class DateFilterState extends State<DateFilter> {
                   lastDate: lastDate,
                   datePickerStyles: dp.DatePickerRangeStyles(
                     selectedPeriodLastDecoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.teal,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     selectedPeriodStartDecoration: BoxDecoration(
-                      color: Colors.green,
+                      color: Colors.teal,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     selectedPeriodMiddleDecoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.5),
+                      color: Colors.teal.withAlpha(100),
                       shape: BoxShape.rectangle,
                     ),
                   ),
@@ -103,12 +100,10 @@ class DateFilterState extends State<DateFilter> {
     );
   }
 
-  // Format range label for custom selection
   String _formatRange(DateTimeRange range) {
     final start = range.start;
     final end = range.end;
     final fmt = DateFormat('MMM d');
-
     if (start.month == end.month) {
       return "${fmt.format(start)}–${end.day}";
     } else {
@@ -116,71 +111,97 @@ class DateFilterState extends State<DateFilter> {
     }
   }
 
-  // Show dialog with options
-  void _showFilterOptions() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  void _showDropdownMenu() {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.calendar_view_day),
-                title: const Text("Last 3 Days"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _setPresetRange(3);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_view_week),
-                title: const Text("Last 7 Days"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _setPresetRange(7);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text("Last 14 Days"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _setPresetRange(14);
-                },
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.date_range),
-                title: const Text("Custom Range"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickCustomRange();
-                },
-              ),
-            ],
-          ),
-        );
-      },
+      Offset.zero & overlay.size,
     );
+
+    showMenu<String>(
+      context: context,
+      position: position,
+      items: [
+        const PopupMenuItem(value: '3', child: Text("Last 3 Days")),
+        const PopupMenuItem(value: '7', child: Text("Last 7 Days")),
+        const PopupMenuItem(value: '14', child: Text("Last 14 Days")),
+        const PopupMenuItem(value: 'custom', child: Text("Custom Range")),
+        if (_selectedRange != null)
+          const PopupMenuItem(value: 'clear', child: Text("Clear Filter")),
+      ],
+    ).then((selected) {
+      if (selected == null) return;
+
+      switch (selected) {
+        case '3':
+          _setPresetRange(3);
+          break;
+        case '7':
+          _setPresetRange(7);
+          break;
+        case '14':
+          _setPresetRange(14);
+          break;
+        case 'custom':
+          _pickCustomRange();
+          break;
+        case 'clear':
+          setState(() {
+            _selectedRange = null;
+            _label = "Date Filter";
+          });
+          widget.onChanged(null);
+          break;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: _showFilterOptions,
-      style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.white,
-        side: BorderSide(color: Colors.grey.shade400),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      ),
-      child: Text(
-        _label,
-        style: const TextStyle(color: Colors.black, fontSize: 13),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: _showDropdownMenu,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: _selectedRange != null ? Colors.teal.shade100 : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 20,
+                  color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _label,
+                  style: TextStyle(
+                    color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Icon(
+                  Icons.arrow_drop_down,
+                  size: 20,
+                  color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -54,9 +54,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.grey),
-        ),
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Colors.grey[700])),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,

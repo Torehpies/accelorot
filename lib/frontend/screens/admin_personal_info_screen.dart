@@ -37,7 +37,6 @@ class PersonalInfoScreen extends StatelessWidget {
                   firstName: "Miguel Andres",
                   lastName: "Reyes",
                   username: "MiguelReyes",
-                  email: "miguelreyes@email.com",
                   role: "User",
                 ),
               );
