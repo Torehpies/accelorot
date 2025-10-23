@@ -120,6 +120,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           .doc(operator['uid'])
           .update({'isArchived': false});
 
+      if (!mounted) return;
+
       setState(() {
         _operators[index]['isArchived'] = false;
       });
@@ -128,12 +130,14 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         SnackBar(content: Text('${operator['name']} restored')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error restoring operator: $e')),
       );
     }
   }
 
+  // ignore: unused_element
   void _archiveOperator(int index) async {
     final operator = _operators[index];
     final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -147,6 +151,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           .doc(operator['uid'])
           .update({'isArchived': true});
 
+      if (!mounted) return;
+
       setState(() {
         _operators[index]['isArchived'] = true;
       });
@@ -155,6 +161,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         SnackBar(content: Text('${operator['name']} archived')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error archiving operator: $e')),
       );
@@ -320,7 +327,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                                 child: ListView.separated(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: currentList.length,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                                  separatorBuilder: (context, index) => const SizedBox(height: 12),
                                   itemBuilder: (context, index) {
                                     final operator = currentList[index];
                                     final globalIndex = _operators.indexWhere((o) =>
@@ -442,7 +449,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.teal.withOpacity(0.3),
+                      color: Colors.teal.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),

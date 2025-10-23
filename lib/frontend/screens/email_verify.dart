@@ -57,6 +57,8 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         final teamId = status['teamId'];
         final pendingTeamId = status['pendingTeamId'];
 
+        if (!mounted) return;
+
         if (teamId != null) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const MainNavigation()),

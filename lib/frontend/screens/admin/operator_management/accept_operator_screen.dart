@@ -133,11 +133,12 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 				if (existingCode != null && expiresAt != null) {
 					final expiryDate = expiresAt.toDate();
 					if (expiryDate.isAfter(DateTime.now())) {
-						// Still valid – just show the QR again
-						final expiryStr =
-								'${expiryDate.year}-${expiryDate.month.toString().padLeft(2, '0')}-${expiryDate.day.toString().padLeft(2, '0')}';
-						showInvitationOverlay(context, existingCode, expiryStr);
-						return;
+				// Still valid – just show the QR again
+					final expiryStr =
+						'${expiryDate.year}-${expiryDate.month.toString().padLeft(2, '0')}-${expiryDate.day.toString().padLeft(2, '0')}';
+					if (!mounted) return;
+					showInvitationOverlay(context, existingCode, expiryStr);
+					return;
 					}
 				}
 
@@ -168,8 +169,10 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 
 			final expiryStr =
 					'${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
+			if (!mounted) return;
 			showInvitationOverlay(context, code, expiryStr);
 		} catch (e) {
+			if (!mounted) return;
 			ScaffoldMessenger.of(context).showSnackBar(
 				SnackBar(content: Text('Error: $e')),
 			);
@@ -221,21 +224,20 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 
 			await batch.commit();
 
+			if (!mounted) return;
+
 			setState(() {
 				_pendingMembers.removeAt(index);
 			});
 
-			if (mounted) {
-				ScaffoldMessenger.of(context).showSnackBar(
-					SnackBar(content: Text('Accepted $name to the team')),
-				);
-			}
+			ScaffoldMessenger.of(context).showSnackBar(
+				SnackBar(content: Text('Accepted $name to the team')),
+			);
 		} catch (e) {
-			if (mounted) {
-				ScaffoldMessenger.of(context).showSnackBar(
-					SnackBar(content: Text('Error accepting invitation: $e')),
-				);
-			}
+			if (!mounted) return;
+			ScaffoldMessenger.of(context).showSnackBar(
+				SnackBar(content: Text('Error accepting invitation: $e')),
+			);
 		}
 	}
 
@@ -267,21 +269,20 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 
 			await batch.commit();
 
+			if (!mounted) return;
+
 			setState(() {
 				_pendingMembers.removeAt(index);
 			});
 
-			if (mounted) {
-				ScaffoldMessenger.of(context).showSnackBar(
-					SnackBar(content: Text('Declined invitation from $name')),
-				);
-			}
+			ScaffoldMessenger.of(context).showSnackBar(
+				SnackBar(content: Text('Declined invitation from $name')),
+			);
 		} catch (e) {
-			if (mounted) {
-				ScaffoldMessenger.of(context).showSnackBar(
-					SnackBar(content: Text('Error declining invitation: $e')),
-				);
-			}
+			if (!mounted) return;
+			ScaffoldMessenger.of(context).showSnackBar(
+				SnackBar(content: Text('Error declining invitation: $e')),
+			);
 		}
 	}
 
@@ -509,7 +510,7 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 									shape: BoxShape.circle,
 									boxShadow: [
 										BoxShadow(
-											color: Colors.teal.withOpacity(0.3),
+											color: Colors.teal.withValues(alpha: 0.3),
 											blurRadius: 10,
 											offset: const Offset(0, 3),
 										),
