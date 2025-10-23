@@ -1,9 +1,46 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize();
+      _isGoogleSignInInitialized = true;
+    } catch (e) {
+      print('Failed to initialize Google Sign-In: $e');
+			print(e.hashCode);
+    }
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_isGoogleSignInInitialized) {
+      await _initializeGoogleSignIn();
+    }
+  }
+  Future<Map<String, dynamic>> signInWithGoogle() async {
+		_ensureGoogleSignInInitialized();
+    final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+        .authenticate();
+
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+    );
+
+		await _auth.signInWithCredential(credential);
+
+		return {
+			'success': true,
+			'message': 'Signed in with Google successfully'
+		};
+  }
 
   Future<Map<String, dynamic>> sendEmailVerify() async {
     try {
@@ -164,8 +201,12 @@ class AuthService {
       };
     }
   }
+
   //verification email status
-  Future<void> updateEmailVerificationStatus(String uid, bool isVerified) async {
+  Future<void> updateEmailVerificationStatus(
+    String uid,
+    bool isVerified,
+  ) async {
     try {
       await _firestore.collection('users').doc(uid).update({
         'emailVerified': isVerified,
@@ -187,9 +228,7 @@ class AuthService {
 
   // Mark that referral overlay was shown for the given user (stored in users doc)
 
-
   // Check whether referral overlay was already shown
-
 
   // Get user data from Firestore
   Future<DocumentSnapshot> getUserData(String uid) async {

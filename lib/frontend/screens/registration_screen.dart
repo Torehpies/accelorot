@@ -3,6 +3,7 @@ import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'login_screen.dart';
 import 'email_verify.dart';
+import 'dart:developer';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -23,6 +24,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -57,9 +59,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => EmailVerifyScreen(
-                  email: emailController.text.trim(),
-                ),
+                builder: (context) =>
+                    EmailVerifyScreen(email: emailController.text.trim()),
               ),
             );
           } else {
@@ -75,9 +76,48 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    // Prevent multiple clicks and interaction with other buttons
+    if (_isGoogleLoading || _isLoading) return;
+
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final Map<String, dynamic> result = await _authService.signInWithGoogle();
+
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+
+        if (result['success']) {
+          // Success: Show confirmation and navigate home (or to a dashboard)
+          showSnackbar(context, result['message']);
+          // TODO: Replace with your actual home/dashboard screen route
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        } else {
+          // Failure: Display error message
+          showSnackbar(context, result['message'], isError: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+				print(e.toString());
+        showSnackbar(
+          context,
+          'Google Sign-In failed unexpectedly.',
+          isError: true,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+		final bool isAnyLoading = _isLoading || _isGoogleLoading;
 
     return Scaffold(
       backgroundColor: Colors.white, // White background
@@ -124,14 +164,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-Text(
-  'Create Account',
-  style: const TextStyle(
-    fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: Colors.teal,
-  ),
-),
+                      Text(
+                        'Create Account',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Join us to get started',
@@ -420,11 +460,7 @@ Text(
                       const SizedBox(height: 24),
 
                       GestureDetector(
-                        onTap: () {
-                          // Implement Google Sign-In
-                          //
-                          //
-                        },
+                        onTap: isAnyLoading ? null : _signInWithGoogle,
                         child: Image.asset(
                           'assets/icons/Google_logo.png',
                           height: 48,
