@@ -1,3 +1,5 @@
+// lib/frontend/screens/admin/admin_home_screen.dart
+
 import 'package:flutter/material.dart';
 
 class AdminHomeScreen extends StatelessWidget {
