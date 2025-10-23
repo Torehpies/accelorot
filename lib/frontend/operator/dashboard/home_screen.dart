@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+// lib/screens/home_screen.dart
 
+import 'package:flutter/material.dart';
 import '../../components/system_card.dart';
 import '../../components/environmental_sensors_card.dart';
 import '../../components/composting_progress_card.dart';
@@ -7,23 +8,27 @@ import '../../components/activity_logs.dart';
 import '../../components/add_waste_product.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final List<Map<String, dynamic>> wasteLogs;
+
+  const HomeScreen({super.key, this.wasteLogs = const []});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Store logged waste products
-  final List<Map<String, dynamic>> _wasteLogs = [];
+  late List<Map<String, dynamic>> _wasteLogs;
+
+  @override
+  void initState() {
+    super.initState();
+    _wasteLogs = List.from(widget.wasteLogs);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        backgroundColor: Colors.teal,
-      ),
+      appBar: null, // ✅ Top navigation bar is now fully removed
       body: SafeArea(
         child: Center(
           child: Container(
@@ -31,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(24),
             child: ScrollConfiguration(
               behavior: ScrollConfiguration.of(context).copyWith(
-                scrollbars: false, // 👈 Hides scrollbar on all platforms
+                scrollbars: false,
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -69,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddWasteProductModal(BuildContext context) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const AddWasteProduct(),
+      builder: (context) => AddWasteProduct(), // Removed 'const' unless AddWasteProduct has a const constructor
     );
 
     if (result != null) {

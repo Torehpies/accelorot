@@ -1,8 +1,8 @@
 // lib/main.dart
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show PlatformDispatcher;
+import 'package:flutter/foundation.dart' show  PlatformDispatcher;
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/services/auth_wrapper.dart';
+import 'package:flutter_application_1/web/web_dashboard_screen.dart';
 
 import 'firebase_options.dart';
 import 'frontend/screens/main_navigation.dart';
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const AuthWrapper(),
+      home: WebDashboardScreen(), // This handles both web and mobile safely
       routes: {
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
