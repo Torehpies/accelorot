@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'operator_detail_screen.dart'; // ✅ Now used for navigation
+import 'add_operator_screen.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -12,7 +13,7 @@ class OperatorManagementScreen extends StatefulWidget {
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
-  // Sample operators — no 'isExpanded' needed anymore
+  // Sample operators
   final List<Map<String, dynamic>> _operators = List.generate(6, (index) {
     return {
       'name': 'Operator ${index + 1}',
@@ -71,153 +72,19 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
   }
 
   void _showAddOperatorModal() {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
-    final dateController = TextEditingController();
-    String selectedRole = 'Operator';
+    // Push the full-screen AddOperatorScreen and handle returned data
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddOperatorScreen())).then((result) {
+      if (result is Map<String, dynamic>) {
+        final name = result['name'] as String? ?? '';
+        final email = result['email'] as String? ?? '';
+        final role = result['role'] as String? ?? '';
+        final dateAdded = result['dateAdded'] as String? ?? 'Aug-25-2025';
 
-    InputDecoration buildInputDecoration(String labelText) {
-      return InputDecoration(
-        labelText: labelText,
-        labelStyle: const TextStyle(color: Colors.grey),
-        floatingLabelStyle: const TextStyle(color: Colors.teal),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.teal, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-      );
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Add Operator',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: Navigator.of(context).pop,
-                ),
-              ],
-            ),
-            const Text(
-              'Fill in the details to register a new operator',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: nameController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              decoration: buildInputDecoration('Full Name *'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              keyboardType: TextInputType.emailAddress,
-              decoration: buildInputDecoration('Email *'),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: selectedRole,
-              decoration: buildInputDecoration('Role'),
-              items: ['Operator', 'Admin']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) => setState(() => selectedRole = val!),
-              dropdownColor: Colors.white,
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-              style: const TextStyle(color: Colors.teal),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: dateController,
-              style: const TextStyle(color: Colors.teal),
-              cursorColor: Colors.teal,
-              decoration: buildInputDecoration('Date Added (e.g. Aug-25-2025)'),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: Navigator.of(context).pop,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                      foregroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final name = nameController.text.trim();
-                      final email = emailController.text.trim();
-                      if (name.isEmpty || email.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Name and Email are required')),
-                        );
-                        return;
-                      }
-                      _addOperator(
-                        name: name,
-                        email: email,
-                        role: selectedRole,
-                        dateAdded: dateController.text.isEmpty
-                            ? 'Aug-25-2025'
-                            : dateController.text,
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('Add Operator'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
+        if (name.isNotEmpty && email.isNotEmpty) {
+          _addOperator(name: name, email: email, role: role, dateAdded: dateAdded);
+        }
+      }
+    });
   }
 
   List<Map<String, dynamic>> get _activeOperators =>
