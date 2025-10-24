@@ -36,6 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) async {
+        // Avoid using BuildContext across async gaps by returning early if
+        // the State has been unmounted.
+        if (!mounted) return;
+
         if (result['needsVerification'] == true) {
           Navigator.pushReplacement(
             context,
@@ -54,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // If admin -> admin nav immediately
         if (userRole == 'Admin') {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -86,6 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Block archived users
                 if (isArchived) {
+                  if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -99,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // If user has left, send to QR screen
                 if (hasLeft) {
+                  if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const QRReferScreen()),
@@ -109,16 +116,19 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           } catch (e) {
             // If check fails, show error
+            if (!mounted) return;
             showSnackbar(context, 'Error checking account status: $e', isError: true);
             return;
           }
 
           // User is active member, proceed to main navigation
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MainNavigation()),
           );
         } else if (pendingTeamId != null) {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -126,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const QRReferScreen()),
@@ -133,6 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       onLoginError: (message) {
+        if (!mounted) return;
         showSnackbar(context, message, isError: true);
       },
     );
