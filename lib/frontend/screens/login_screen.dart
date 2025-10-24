@@ -11,6 +11,8 @@ import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
 import 'forgot_pass.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'restricted_access_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -66,6 +68,52 @@ class _LoginScreenState extends State<LoginScreen> {
         final pendingTeamId = userData['pendingTeamId'];
 
         if (teamId != null) {
+          try {
+            final user = _authService.getCurrentUser();
+            if (user != null) {
+              // Check member status in the team
+              final memberDoc = await FirebaseFirestore.instance
+                  .collection('teams')
+                  .doc(teamId)
+                  .collection('members')
+                  .doc(user.uid)
+                  .get();
+
+              if (memberDoc.exists) {
+                final memberData = memberDoc.data()!;
+                final isArchived = memberData['isArchived'] ?? false;
+                final hasLeft = memberData['hasLeft'] ?? false;
+
+                // Block archived users
+                if (isArchived) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RestrictedAccessScreen(
+                        reason: 'archived',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                // If user has left, send to QR screen
+                if (hasLeft) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const QRReferScreen()),
+                  );
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+            // If check fails, show error
+            showSnackbar(context, 'Error checking account status: $e', isError: true);
+            return;
+          }
+
+          // User is active member, proceed to main navigation
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MainNavigation()),
