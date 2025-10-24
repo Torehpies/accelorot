@@ -136,7 +136,7 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
       if (!mounted) return;
 
       await _loadOperators();
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${operator['name']} restored successfully')),
       );
