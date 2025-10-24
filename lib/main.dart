@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => kIsWeb ? const WebRegistrationScreen() : const RegistrationScreen(),
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
-        '/web': (context) => const WebAdminMainNavigation(),
+        '/web': (context) => const WebAdminNavigation(),
       },
       builder: (context, child) {
         if (child != null) return child;

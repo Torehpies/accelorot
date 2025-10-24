@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
+import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
 import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
 import 'forgot_pass.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'restricted_access_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +23,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late LoginController _controller;
+  final AuthService _authService = AuthService();
+  bool _isGoogleLoading = false;
 
   @override
   void initState() {
@@ -29,6 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) async {
+        // Avoid using BuildContext across async gaps by returning early if
+        // the State has been unmounted.
+        if (!mounted) return;
+
         if (result['needsVerification'] == true) {
           Navigator.pushReplacement(
             context,
@@ -41,14 +52,18 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
-        final Map<String, dynamic> userData = (result['userData'] ?? {}) as Map<String, dynamic>;
+        final Map<String, dynamic> userData =
+            (result['userData'] ?? {}) as Map<String, dynamic>;
         final String userRole = userData['role'] ?? 'Operator';
 
         // If admin -> admin nav immediately
         if (userRole == 'Admin') {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+            MaterialPageRoute(
+              builder: (context) => const AdminMainNavigation(),
+            ),
           );
           return;
         }
@@ -58,16 +73,70 @@ class _LoginScreenState extends State<LoginScreen> {
         final pendingTeamId = userData['pendingTeamId'];
 
         if (teamId != null) {
+          try {
+            final user = _authService.getCurrentUser();
+            if (user != null) {
+              // Check member status in the team
+              final memberDoc = await FirebaseFirestore.instance
+                  .collection('teams')
+                  .doc(teamId)
+                  .collection('members')
+                  .doc(user.uid)
+                  .get();
+
+              if (memberDoc.exists) {
+                final memberData = memberDoc.data()!;
+                final isArchived = memberData['isArchived'] ?? false;
+                final hasLeft = memberData['hasLeft'] ?? false;
+
+                // Block archived users
+                if (isArchived) {
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RestrictedAccessScreen(
+                        reason: 'archived',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                // If user has left, send to QR screen
+                if (hasLeft) {
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const QRReferScreen()),
+                  );
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+            // If check fails, show error
+            if (!mounted) return;
+            showSnackbar(context, 'Error checking account status: $e', isError: true);
+            return;
+          }
+
+          // User is active member, proceed to main navigation
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MainNavigation()),
           );
         } else if (pendingTeamId != null) {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+            MaterialPageRoute(
+              builder: (context) => const WaitingApprovalScreen(),
+            ),
           );
         } else {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const QRReferScreen()),
@@ -75,9 +144,49 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       onLoginError: (message) {
+        if (!mounted) return;
         showSnackbar(context, message, isError: true);
       },
     );
+  }
+
+  Future<void> _signInWithGoogle() async {
+		if (_isGoogleLoading) return;
+		
+		setState(() => _isGoogleLoading = true);
+
+    try {
+      final Map<String, dynamic> result = await _authService.signInWithGoogle();
+
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+        if (result['success']) {
+          showSnackbar(context, result['message']);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const QRReferScreen()),
+          );
+        } else {
+          // Failure: Display error message
+          showSnackbar(context, result['message'], isError: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+        showSnackbar(
+          context,
+          'Google Sign-In failed unexpectedly.',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -86,114 +195,128 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Full-screen background (optional)
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Colors.white],
-              ),
-            ),
-          ),
-
-          // Main content
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo
-                Center(child: _buildLogo()),
-                const SizedBox(height: 24),
-
-                // Title
-                Center(child: _buildTitle(Theme.of(context))),
-                const SizedBox(height: 32),
-
-                // Form
-                Form(
-                  key: _controller.formKey,
-                  child: Column(
-                    children: [
-
-                      // Email
-                      _buildEmailField(),
-                      const SizedBox(height: 16),
-
-                      // Password
-                      _buildPasswordField(),
-                      const SizedBox(height: 8),
-
-                      // Forgot Password
-                      _buildForgotPassword(),
-
-                      // Login Button
-                      _buildLoginButton(),
-                      const SizedBox(height: 24),
-
-                      // Sign Up Link
-                      _buildSignUpLink(),
-                    ],
-                  ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Full-screen background (optional)
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.white],
                 ),
-              ],
-            ),
-          ),
-
-          // Top-left Home button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.home, color: Colors.white, size: 28),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(12),
-                // ignore: deprecated_member_use
-                shadowColor: Colors.black.withOpacity(0.1),
-                elevation: 6,
               ),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MainNavigation(),
-                  ),
-                );
-              },
             ),
-          ),
 
-          // Top-right Admin button
-          Positioned(
-            top: 40,
-            right: 16,
-            child: IconButton(
-              icon: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 28),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(12),
-                // ignore: deprecated_member_use
-                shadowColor: Colors.black.withOpacity(0.1),
-                elevation: 6,
+            // Main content
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 100,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Logo
+                    Center(child: _buildLogo()),
+                    const SizedBox(height: 24),
+
+                    // Title
+                    Center(child: _buildTitle(Theme.of(context))),
+                    const SizedBox(height: 32),
+
+                    // Form
+                    Form(
+                      key: _controller.formKey,
+                      child: Column(
+                        children: [
+                          // Email
+                          _buildEmailField(),
+                          const SizedBox(height: 16),
+
+                          // Password
+                          _buildPasswordField(),
+                          const SizedBox(height: 8),
+
+                          // Forgot Password
+                          _buildForgotPassword(),
+
+                          // Login Button
+                          _buildLoginButton(),
+                          const SizedBox(height: 24),
+
+
+													OrDivider(),
+													SizedBox(height: 20),
+													GoogleSignInButton(onPressed: _signInWithGoogle, isLoading: _isGoogleLoading,),
+                          // Sign Up Link
+                          _buildSignUpLink(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminMainNavigation(),
-                  ),
-                );
-              },
             ),
-          ),
-        ],
+
+            // Top-left Home button
+            Positioned(
+              top: 40,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.home, color: Colors.white, size: 28),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(12),
+                  // ignore: deprecated_member_use
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  elevation: 6,
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MainNavigation(),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Top-right Admin button
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.admin_panel_settings,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(12),
+                  // ignore: deprecated_member_use
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  elevation: 6,
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminMainNavigation(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -282,9 +405,9 @@ class _LoginScreenState extends State<LoginScreen> {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ForgotPassScreen()),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => const ForgotPassScreen()));
         },
         child: const Text('Forgot Password?'),
       ),

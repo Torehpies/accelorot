@@ -1,8 +1,11 @@
-// lib/web/admin/screens/web_userlist_screen.dart
+// lib/web/admin/screens/web_operator_management.dart
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'web_operator_view_nav.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/frontend/screens/admin/operator_management/add_operator_screen.dart';
+import 'package:flutter_application_1/frontend/screens/admin/operator_management/accept_operator_screen.dart';
+import 'web_operator_detail_screen.dart';
 
 class WebUserListScreen extends StatefulWidget {
   const WebUserListScreen({super.key});
@@ -12,286 +15,324 @@ class WebUserListScreen extends StatefulWidget {
 }
 
 class _WebUserListScreenState extends State<WebUserListScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
-  String _roleFilter = 'All';
-  String _statusFilter = 'All';
-  bool _isLoading = true;
-  List<Map<String, dynamic>> _users = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> _operators = [];
+  bool _loading = true;
   String? _error;
-
-  final List<String> _roleOptions = ['All', 'Admin', 'Operator', 'User'];
-  final List<String> _statusOptions = ['All', 'Active', 'Pending', 'Suspended'];
+  bool _showArchived = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _loadUsers();
-    _searchController.addListener(() {
-      setState(() {
-        _searchQuery = _searchController.text.toLowerCase();
-      });
-    });
+    _loadOperators();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadUsers() async {
+  Future<void> _loadOperators() async {
     setState(() {
-      _isLoading = true;
+      _loading = true;
       _error = null;
     });
 
     try {
-      final usersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        setState(() {
+          _error = 'No user logged in';
+          _loading = false;
+        });
+        return;
+      }
 
-      final users = usersSnapshot.docs.map((doc) {
+      final teamId = currentUser.uid;
+      final membersSnapshot = await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .orderBy('addedAt', descending: true)
+          .get();
+
+      final List<Map<String, dynamic>> operators = [];
+
+      for (var doc in membersSnapshot.docs) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          'email': data['email'] ?? '',
-          'firstname': data['firstname'] ?? '',
-          'lastname': data['lastname'] ?? '',
-          'role': data['role'] ?? 'User',
-          'status': data['status'] ?? 'Active',
-          'createdAt': data['createdAt'] as Timestamp?,
-          'lastLogin': data['lastLogin'] as Timestamp?,
-          'phone': data['phone'] ?? '',
-        };
-      }).toList();
+        final userId = data['userId'] as String?;
 
-      setState(() {
-        _users = users;
-        _isLoading = false;
-      });
+        if (userId != null) {
+          final userDoc = await _firestore
+              .collection('users')
+              .doc(userId)
+              .get();
+
+          if (userDoc.exists) {
+            final userData = userDoc.data()!;
+            final firstName = userData['firstname'] ?? '';
+            final lastName = userData['lastname'] ?? '';
+            final name = '$firstName $lastName'.trim();
+
+            operators.add({
+              'id': userId,
+              'uid': userId,
+              'name': name.isNotEmpty ? name : data['name'] ?? 'Unknown',
+              'email': data['email'] ?? userData['email'] ?? '',
+              'role': data['role'] ?? userData['role'] ?? 'Operator',
+              'isArchived': data['isArchived'] ?? false,
+              'hasLeft': data['hasLeft'] ?? false,
+              'leftAt': data['leftAt'] as Timestamp?,
+              'archivedAt': data['archivedAt'] as Timestamp?,
+              'dateAdded': _formatTimestamp(data['addedAt'] as Timestamp?),
+            });
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _operators = operators;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
     }
   }
 
-  List<Map<String, dynamic>> get _filteredUsers {
-    return _users.where((user) {
-      final fullName = '${user['firstname']} ${user['lastname']}'.toLowerCase();
-      final email = user['email'].toString().toLowerCase();
+  String _formatTimestamp(Timestamp? timestamp) {
+    if (timestamp == null) return 'Unknown';
+    final date = timestamp.toDate();
+    return '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}-${date.year}';
+  }
 
-      final matchesSearch = fullName.contains(_searchQuery) ||
-                           email.contains(_searchQuery) ||
-                           user['id'].toString().toLowerCase().contains(_searchQuery);
+  Future<void> _restoreOperator(Map<String, dynamic> operator) async {
+    if (operator['hasLeft'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot restore operators who have left the team'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
-      final matchesRole = _roleFilter == 'All' || user['role'] == _roleFilter;
-      final matchesStatus = _statusFilter == 'All' || user['status'] == _statusFilter;
+    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    if (teamId.isEmpty) return;
 
-      return matchesSearch && matchesRole && matchesStatus;
+    try {
+      await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .doc(operator['uid'])
+          .update({
+        'isArchived': false,
+        'archivedAt': FieldValue.delete(),
+      });
+
+      if (!mounted) return;
+
+      await _loadOperators();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${operator['name']} restored successfully')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error restoring operator: $e')),
+      );
+    }
+  }
+
+  List<Map<String, dynamic>> get _filteredOperators {
+    final currentList = _showArchived
+        ? _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).toList()
+        : _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).toList();
+
+    if (_searchQuery.isEmpty) return currentList;
+
+    return currentList.where((operator) {
+      final name = (operator['name'] ?? '').toLowerCase();
+      final email = (operator['email'] ?? '').toLowerCase();
+      final query = _searchQuery.toLowerCase();
+      return name.contains(query) || email.contains(query);
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'User Management',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.person_add),
-              label: const Text('Add User'),
-              onPressed: () => _showAddUserDialog(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Operator Management',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
               ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadUsers,
-            tooltip: 'Refresh',
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'User Directory',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal[800],
+              if (_showArchived)
+                TextButton.icon(
+                  onPressed: () => setState(() => _showArchived = false),
+                  icon: const Icon(Icons.arrow_back, size: 18),
+                  label: const Text('Back to Active Operators'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                   ),
                 ),
-                _buildStatsCard('Total Users', _users.length.toString(), Colors.blue),
-                const SizedBox(width: 16),
-                _buildStatsCard('Active', _users.where((u) => u['status'] == 'Active').length.toString(), Colors.green),
-                const SizedBox(width: 16),
-                _buildStatsCard('Admins', _users.where((u) => u['role'] == 'Admin').length.toString(), Colors.purple),
-              ],
-            ),
+            ],
+          ),
+          const SizedBox(height: 24),
 
-            const SizedBox(height: 24),
-
-            // Filters and Search
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search users by name or email...',
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: _roleFilter,
-                      items: _roleOptions.map((role) {
-                        return DropdownMenuItem<String>(
-                          value: role,
-                          child: Text(role),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _roleFilter = value!;
-                        });
-                      },
-                      style: const TextStyle(color: Colors.black87),
-                      underline: Container(
-                        height: 2,
-                        color: Colors.teal,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: _statusFilter,
-                      items: _statusOptions.map((status) {
-                        return DropdownMenuItem<String>(
-                          value: status,
-                          child: Text(status),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _statusFilter = value!;
-                        });
-                      },
-                      style: const TextStyle(color: Colors.black87),
-                      underline: Container(
-                        height: 2,
-                        color: Colors.teal,
-                      ),
-                    ),
-                  ],
+          // Action Cards Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionCard(
+                  icon: Icons.archive,
+                  label: 'Archive',
+                  count: _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).length,
+                  onPressed: () => setState(() => _showArchived = true),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Users Table
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _error != null
-                      ? _buildErrorState()
-                      : _buildUsersTable(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsCard(String title, String value, Color color) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildActionCard(
+                  icon: Icons.person_add_alt_1,
+                  label: 'Add Operator',
+                  count: null,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
+                          child: AddOperatorScreen(),
+                        ),
+                      ),
+                    ).then((_) => _loadOperators());
+                  },
+                ),
               ),
-            ),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildActionCard(
+                  icon: Icons.check_circle,
+                  label: 'Accept Operator',
+                  count: null,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
+                          child: AcceptOperatorScreen(),
+                        ),
+                      ),
+                    ).then((_) => _loadOperators());
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildInfoCard(
+                  icon: Icons.people,
+                  label: 'Active Operators',
+                  count: _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).length,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
 
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-          const SizedBox(height: 16),
-          Text(
-            'Error loading users',
-            style: TextStyle(color: Colors.red[700], fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? '',
-            style: TextStyle(color: Colors.red[600], fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: _loadUsers,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              foregroundColor: Colors.white,
+          // Main Container
+          Container(
+            constraints: const BoxConstraints(minHeight: 500),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey[300]!, width: 1.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Search Bar Header
+                Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextField(
+                          onChanged: (value) => setState(() => _searchQuery = value),
+                          decoration: InputDecoration(
+                            hintText: 'Search operators...',
+                            prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () => setState(() => _searchQuery = ''),
+                                  )
+                                : null,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.teal, width: 2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: const Icon(Icons.refresh, color: Colors.teal),
+                        onPressed: _loadOperators,
+                        tooltip: 'Refresh',
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                
+                // Content
+                SizedBox(
+                  height: 500,
+                  child: _buildContent(),
+                ),
+              ],
             ),
           ),
         ],
@@ -299,265 +340,321 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
     );
   }
 
-  Widget _buildUsersTable() {
-    if (_filteredUsers.isEmpty) {
+  Widget _buildContent() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+              const SizedBox(height: 16),
+              const Text(
+                'Error loading operators:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _loadOperators,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final displayList = _filteredOperators;
+
+    if (displayList.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_outline, size: 64, color: Colors.grey[400]),
+            Icon(
+              _searchQuery.isNotEmpty ? Icons.search_off : Icons.people_outline,
+              size: 64,
+              color: Colors.grey[400],
+            ),
             const SizedBox(height: 16),
             Text(
-              'No users found',
-              style: TextStyle(color: Colors.grey[600], fontSize: 18),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Try adjusting your search or filter criteria',
-              style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              _searchQuery.isNotEmpty
+                  ? 'No operators found matching "$_searchQuery"'
+                  : _showArchived
+                      ? 'No archived operators'
+                      : 'No operators available',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
         ),
       );
     }
 
+    return ListView.separated(
+      padding: const EdgeInsets.all(20),
+      itemCount: displayList.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final operator = displayList[index];
+        final hasLeft = operator['hasLeft'] == true;
+        final isArchived = operator['isArchived'] == true;
+
+        return Card(
+          elevation: 1,
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey[200]!, width: 1),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            leading: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: hasLeft
+                    ? Colors.red.shade100
+                    : isArchived
+                        ? Colors.orange.shade100
+                        : Colors.teal.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.person,
+                color: hasLeft
+                    ? Colors.red.shade700
+                    : isArchived
+                        ? Colors.orange.shade700
+                        : Colors.teal.shade700,
+                size: 24,
+              ),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    operator['name'] ?? 'Unnamed',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if (hasLeft)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(
+                      'Left Team',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  operator['email'] ?? '',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                if (_showArchived) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    hasLeft
+                        ? 'Left: ${_formatTimestamp(operator['leftAt'] as Timestamp?)}'
+                        : 'Archived: ${_formatTimestamp(operator['archivedAt'] as Timestamp?)}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
+                ],
+              ],
+            ),
+            trailing: _showArchived
+                ? (hasLeft
+                    ? null
+                    : ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal.shade100,
+                          foregroundColor: Colors.teal.shade800,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        onPressed: () => _restoreOperator(operator),
+                        icon: const Icon(Icons.restore, size: 16),
+                        label: const Text('Restore'),
+                      ))
+                : const Icon(Icons.chevron_right, color: Colors.teal),
+            onTap: (_showArchived && hasLeft)
+                ? null
+                : _showArchived
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WebOperatorDetailScreen(
+                              operatorId: operator['uid'] ?? operator['id'] ?? '',
+                              operatorName: operator['name'] ?? '',
+                              role: operator['role'] ?? '',
+                              email: operator['email'] ?? '',
+                              dateAdded: operator['dateAdded'] ?? '',
+                            ),
+                          ),
+                        ).then((shouldRefresh) {
+                          if (shouldRefresh == true) {
+                            _loadOperators();
+                          }
+                        });
+                      },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required String label,
+    required int? count,
+    required VoidCallback onPressed,
+  }) {
     return Card(
-      elevation: 4,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Avatar', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Name', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Role', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Last Login', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: _filteredUsers.map((user) {
-            final fullName = '${user['firstname']} ${user['lastname']}'.trim();
-            final initials = ((user['firstname']?[0] ?? '') + (user['lastname']?[0] ?? '')).toUpperCase();
-
-            return DataRow(
-              cells: [
-                DataCell(CircleAvatar(
-                  backgroundColor: Colors.teal[100],
-                  child: Text(
-                    initials.isNotEmpty ? initials : '?',
-                    style: TextStyle(color: Colors.teal[800], fontWeight: FontWeight.bold),
-                  ),
-                )),
-                DataCell(Text(fullName.isNotEmpty ? fullName : 'Unknown')),
-                DataCell(Text(user['email'] ?? '')),
-                DataCell(_buildRoleChip(user['role'])),
-                DataCell(_buildStatusChip(user['status'])),
-                DataCell(Text(_formatTimestamp(user['lastLogin']))),
-                DataCell(_buildActionButtons(user)),
-              ],
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRoleChip(String role) {
-    Color color;
-    switch (role) {
-      case 'Admin':
-        color = Colors.purple;
-        break;
-      case 'Operator':
-        color = Colors.blue;
-        break;
-      case 'User':
-        color = Colors.green;
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+      child: InkWell(
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        role,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color color;
-    switch (status) {
-      case 'Active':
-        color = Colors.green;
-        break;
-      case 'Pending':
-        color = Colors.orange;
-        break;
-      case 'Suspended':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.grey;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(Map<String, dynamic> user) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.visibility),
-          tooltip: 'View Details',
-          onPressed: () => _showUserDetails(user),
-        ),
-        if (user['role'] == 'Operator')
-          IconButton(
-            icon: const Icon(Icons.remove_red_eye),
-            tooltip: 'View Operator Dashboard',
-            onPressed: () => _viewOperatorDashboard(user),
-          ),
-        IconButton(
-          icon: const Icon(Icons.edit),
-          tooltip: 'Edit User',
-          onPressed: () => _editUser(user),
-        ),
-        IconButton(
-          icon: const Icon(Icons.admin_panel_settings),
-          tooltip: 'Change Role',
-          onPressed: () => _changeUserRole(user),
-        ),
-        IconButton(
-          icon: user['status'] == 'Suspended' ? const Icon(Icons.check_circle) : const Icon(Icons.block),
-          tooltip: user['status'] == 'Suspended' ? 'Activate User' : 'Suspend User',
-          onPressed: () => _toggleUserStatus(user),
-        ),
-      ],
-    );
-  }
-
-  void _showUserDetails(Map<String, dynamic> user) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('User Details: ${user['firstname']} ${user['lastname']}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
             children: [
-              _detailRow('ID', user['id']),
-              _detailRow('First Name', user['firstname']),
-              _detailRow('Last Name', user['lastname']),
-              _detailRow('Email', user['email']),
-              _detailRow('Phone', user['phone']),
-              _detailRow('Role', user['role']),
-              _detailRow('Status', user['status']),
-              _detailRow('Created', _formatTimestamp(user['createdAt'])),
-              _detailRow('Last Login', _formatTimestamp(user['lastLogin'])),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.teal.shade400, Colors.teal.shade700],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 24, color: Colors.white),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    if (count != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        count.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal.shade700,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required int count,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.teal.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 24, color: Colors.teal.shade700),
             ),
-          ),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
-
-  void _showAddUserDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add User feature coming soon!')),
-    );
-  }
-
-  void _editUser(Map<String, dynamic> user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
-    );
-  }
-
-  void _changeUserRole(Map<String, dynamic> user) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Change role for ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
-    );
-  }
-
-  void _toggleUserStatus(Map<String, dynamic> user) {
-    final newStatus = user['status'] == 'Suspended' ? 'Active' : 'Suspended';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${user['firstname']} ${user['lastname']} status changed to $newStatus - Feature coming soon!')),
-    );
-  }
-
-  void _viewOperatorDashboard(Map<String, dynamic> user) {
-    final fullName = '${user['firstname']} ${user['lastname']}'.trim();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WebOperatorViewNavigation(
-          operatorId: user['id'],
-          operatorName: fullName.isNotEmpty ? fullName : 'Unknown Operator',
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    count.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  String _formatTimestamp(Timestamp? timestamp) {
-    if (timestamp == null) return 'Never';
-    final date = timestamp.toDate();
-    return '${date.month}/${date.day}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
