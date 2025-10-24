@@ -7,7 +7,9 @@ import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String? viewingOperatorId;
+  
+  const HomeScreen({super.key, this.viewingOperatorId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
