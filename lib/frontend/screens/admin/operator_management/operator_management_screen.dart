@@ -137,37 +137,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     }
   }
 
-  // ignore: unused_element
-  void _archiveOperator(int index) async {
-    final operator = _operators[index];
-    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    if (teamId.isEmpty) return;
-
-    try {
-      await _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('members')
-          .doc(operator['uid'])
-          .update({'isArchived': true});
-
-      if (!mounted) return;
-
-      setState(() {
-        _operators[index]['isArchived'] = true;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${operator['name']} archived')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error archiving operator: $e')),
-      );
-    }
-  }
-
   List<Map<String, dynamic>> get _activeOperators =>
       _operators.where((o) => o['isArchived'] == false).toList();
 
@@ -284,10 +253,10 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 'Error loading operators:',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.red),
                               ),
                               const SizedBox(height: 8),
                               Text(
@@ -392,21 +361,27 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                                                 color: Colors.teal,
                                               ),
                                         onTap: _showArchived
-                                              ? null
-                                              : () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => OperatorDetailScreen(
-                                                        operatorId: operator['uid'] ?? operator['id'] ?? '',
-                                                        operatorName: operator['name'] ?? '',
-                                                        role: operator['role'] ?? '',
-                                                        email: operator['email'] ?? '',
-                                                        dateAdded: operator['dateAdded'] ?? '',
-                                                      ),
+                                            ? null
+                                            : () async {
+                                                // Navigate to detail screen and wait for result
+                                                final shouldRefresh = await Navigator.push<bool>(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => OperatorDetailScreen(
+                                                      operatorId: operator['uid'] ?? operator['id'] ?? '',
+                                                      operatorName: operator['name'] ?? '',
+                                                      role: operator['role'] ?? '',
+                                                      email: operator['email'] ?? '',
+                                                      dateAdded: operator['dateAdded'] ?? '',
                                                     ),
-                                                  );
-                                                },
+                                                  ),
+                                                );
+                                                
+                                                // Reload if operator was archived
+                                                if (shouldRefresh == true) {
+                                                  _loadOperators();
+                                                }
+                                              },
                                       ),
                                     );
                                   },
