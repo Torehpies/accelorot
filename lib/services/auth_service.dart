@@ -1,9 +1,76 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _isGoogleSignInInitialized = false;
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize();
+      _isGoogleSignInInitialized = true;
+    } catch (e) {
+      // print('Failed to initialize Google Sign-In: $e');
+    }
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_isGoogleSignInInitialized) {
+      await _initializeGoogleSignIn();
+    }
+  }
+
+  Future<Map<String, dynamic>> signInWithGoogle() async {
+    await _ensureGoogleSignInInitialized();
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+    );
+
+    await _auth.signInWithCredential(credential);
+
+		await _saveGoogleUserToFirestore(user: googleUser, role: 'Operator');
+
+    return {'success': true, 'message': 'Signed in with Google successfully'};
+  }
+
+  Future<void> _saveGoogleUserToFirestore({
+    required GoogleSignInAccount user,
+    required String role,
+  }) async {
+    final userDoc = _firestore.collection('users').doc(getCurrentUser()?.uid);
+    final docSnapshot = await userDoc.get();
+
+    // Parse names from displayName (e.g., "John Doe" -> "John", "Doe")
+    final names = user.displayName?.split(' ');
+    final firstName = (names?.isNotEmpty ?? false)
+        ? names?.first
+        : (user.email.split('@').first);
+    final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
+
+    if (!docSnapshot.exists) {
+      // New user: save full data set
+      await userDoc.set({
+        'uid': user.id,
+        'email': user.email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isActive': true,
+        'emailVerified': true, // Google accounts are considered verified
+      });
+    } else {
+      // Existing user: ensure verification status is marked true
+      await userDoc.update({'isActive': true, 'emailVerified': true});
+    }
+  }
 
   Future<Map<String, dynamic>> sendEmailVerify() async {
     try {
@@ -164,8 +231,12 @@ class AuthService {
       };
     }
   }
+
   //verification email status
-  Future<void> updateEmailVerificationStatus(String uid, bool isVerified) async {
+  Future<void> updateEmailVerificationStatus(
+    String uid,
+    bool isVerified,
+  ) async {
     try {
       await _firestore.collection('users').doc(uid).update({
         'emailVerified': isVerified,
@@ -187,9 +258,7 @@ class AuthService {
 
   // Mark that referral overlay was shown for the given user (stored in users doc)
 
-
   // Check whether referral overlay was already shown
-
 
   // Get user data from Firestore
   Future<DocumentSnapshot> getUserData(String uid) async {
