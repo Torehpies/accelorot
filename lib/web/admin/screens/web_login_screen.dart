@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
+import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
@@ -48,7 +48,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const AdminMainNavigation(),
+              builder: (context) => const WebAdminNavigation(),
             ),
           );
         } else {
