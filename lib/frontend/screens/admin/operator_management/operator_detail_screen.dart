@@ -26,17 +26,132 @@ class OperatorDetailScreen extends StatefulWidget {
 
 class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _isArchiving = false;
+  bool _isProcessing = false;
 
   Future<void> _archiveOperator() async {
-    // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Archive Operator'),
-        content: Text(
-          'Are you sure you want to archive ${widget.operatorName}?\n\n'
-          'They will be moved to the archived list and can be restored later.',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Archive ${widget.operatorName}?'),
+            const SizedBox(height: 12),
+            const Text(
+              '• Operator will be temporarily restricted',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Text(
+              '• Can be restored later',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Text(
+              '• Operator cannot login while archived',
+              style: TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isProcessing = true);
+
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) throw Exception('No user logged in');
+
+      final teamId = currentUser.uid;
+      final batch = _firestore.batch();
+
+      // Update member document
+      final memberRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .doc(widget.operatorId);
+
+      batch.update(memberRef, {
+        'isArchived': true,
+        'archivedAt': FieldValue.serverTimestamp(),
+      });
+
+      await batch.commit();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.operatorName} has been archived'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isProcessing = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error archiving operator: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _removeOperator() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove from Team'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Remove ${widget.operatorName} from this team?'),
+            const SizedBox(height: 12),
+            const Text(
+              '⚠️ This action is permanent:',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• Operator will be marked as "Left Team"',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Text(
+              '• Cannot be restored (must rejoin via invite)',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Text(
+              '• Operator can join other teams',
+              style: TextStyle(fontSize: 13),
+            ),
+            const Text(
+              '• Data retained in archive for records',
+              style: TextStyle(fontSize: 13),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -49,7 +164,7 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Archive'),
+            child: const Text('Remove'),
           ),
         ],
       ),
@@ -57,48 +172,55 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    setState(() {
-      _isArchiving = true;
-    });
+    setState(() => _isProcessing = true);
 
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        throw Exception('No user logged in');
-      }
+      if (currentUser == null) throw Exception('No user logged in');
 
       final teamId = currentUser.uid;
+      final batch = _firestore.batch();
 
-      // Update the member document to set isArchived = true
-      await _firestore
+      // Update member document - mark as left
+      final memberRef = _firestore
           .collection('teams')
           .doc(teamId)
           .collection('members')
-          .doc(widget.operatorId)
-          .update({'isArchived': true});
+          .doc(widget.operatorId);
+
+      batch.update(memberRef, {
+        'hasLeft': true,
+        'leftAt': FieldValue.serverTimestamp(),
+        'isArchived': false, // Clear archived status
+        'archivedAt': FieldValue.delete(),
+      });
+
+      // Clear teamId from user document
+      final userRef = _firestore.collection('users').doc(widget.operatorId);
+      batch.update(userRef, {
+        'teamId': FieldValue.delete(),
+      });
+
+      await batch.commit();
 
       if (!mounted) return;
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.operatorName} has been archived'),
-          backgroundColor: Colors.green,
+          content: Text('${widget.operatorName} has been removed from the team'),
+          backgroundColor: Colors.red,
         ),
       );
 
-      // Go back to operator management screen
-      Navigator.pop(context, true); // Return true to indicate refresh needed
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
 
-      setState(() {
-        _isArchiving = false;
-      });
+      setState(() => _isProcessing = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error archiving operator: $e'),
+          content: Text('Error removing operator: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -121,18 +243,12 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.teal,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.archive, color: Colors.red),
-            onPressed: _isArchiving ? null : _archiveOperator,
-            tooltip: 'Archive Operator',
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
+            // Operator Info Card
             Card(
               elevation: 6,
               shape: RoundedRectangleBorder(
@@ -187,7 +303,7 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _isArchiving
+                onPressed: _isProcessing
                     ? null
                     : () {
                         Navigator.push(
@@ -214,21 +330,44 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
             ),
             const SizedBox(height: 12),
             
-            // Archive button
+            // Archive button (temporary restriction)
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: _isArchiving ? null : _archiveOperator,
-                icon: _isArchiving
+                onPressed: _isProcessing ? null : _archiveOperator,
+                icon: _isProcessing
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.archive),
-                label: Text(_isArchiving ? 'Archiving...' : 'Archive Operator'),
+                label: Text(_isProcessing ? 'Processing...' : 'Archive (Temporary)'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.orange,
+                  side: const BorderSide(color: Colors.orange),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Remove button (permanent)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _isProcessing ? null : _removeOperator,
+                icon: _isProcessing
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.exit_to_app),
+                label: Text(_isProcessing ? 'Processing...' : 'Remove from Team (Permanent)'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),
@@ -237,6 +376,30 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Info text
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Archive: Temporary restriction, can be restored.\nRemove: Permanent, operator must rejoin via invite.',
+                      style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
