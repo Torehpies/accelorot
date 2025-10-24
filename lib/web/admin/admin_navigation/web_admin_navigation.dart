@@ -82,7 +82,7 @@ class _WebAdminMainNavigationState extends State<WebAdminMainNavigation> {
                           ),
                         ),
                         selected: isSelected,
-                        selectedTileColor: Colors.white.withOpacity(0.2),
+                        selectedTileColor: Colors.white.withValues(alpha: 0.2),
                         onTap: () {
                           setState(() => _selectedIndex = index);
                         },
