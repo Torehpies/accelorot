@@ -1,9 +1,13 @@
+// lib/services/machine_services/firestore/firestore_uploads.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../frontend/operator/machine_management/models/machine_model.dart';
 import 'firestore_collection.dart';
 import 'machine_mock_data.dart';
 
 class MachineFirestoreUpload {
+  // ==================== MOCK DATA UPLOAD ====================
+  
   // Upload mock machines to Firestore (only if none of the mock IDs exist)
   static Future<void> uploadAllMockMachines() async {
     try {
@@ -44,6 +48,8 @@ class MachineFirestoreUpload {
     }
   }
 
+  // ==================== CRUD OPERATIONS ====================
+  
   // Add a new machine
   static Future<void> addMachine(MachineModel machine) async {
     try {
@@ -55,6 +61,25 @@ class MachineFirestoreUpload {
     }
   }
 
+  /// Update machine details (Admin only)
+  /// Can update: machineName, userId
+  /// Cannot update: machineId (immutable), teamId (immutable)
+  static Future<void> updateMachine(MachineModel machine) async {
+    try {
+      await MachineFirestoreCollections.getMachinesCollection()
+          .doc(machine.machineId)
+          .update({
+            'machineName': machine.machineName,
+            'userId': machine.userId,
+            // Note: machineId and teamId are NOT updated (immutable)
+          });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // ==================== ARCHIVE OPERATIONS ====================
+  
   // Update machine archive status
   static Future<void> updateMachineArchiveStatus(
     String machineId,

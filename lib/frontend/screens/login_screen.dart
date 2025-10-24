@@ -11,6 +11,8 @@ import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
 import 'forgot_pass.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'restricted_access_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,6 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) async {
+        // Avoid using BuildContext across async gaps by returning early if
+        // the State has been unmounted.
+        if (!mounted) return;
+
         if (result['needsVerification'] == true) {
           Navigator.pushReplacement(
             context,
@@ -52,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // If admin -> admin nav immediately
         if (userRole == 'Admin') {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -66,11 +73,62 @@ class _LoginScreenState extends State<LoginScreen> {
         final pendingTeamId = userData['pendingTeamId'];
 
         if (teamId != null) {
+          try {
+            final user = _authService.getCurrentUser();
+            if (user != null) {
+              // Check member status in the team
+              final memberDoc = await FirebaseFirestore.instance
+                  .collection('teams')
+                  .doc(teamId)
+                  .collection('members')
+                  .doc(user.uid)
+                  .get();
+
+              if (memberDoc.exists) {
+                final memberData = memberDoc.data()!;
+                final isArchived = memberData['isArchived'] ?? false;
+                final hasLeft = memberData['hasLeft'] ?? false;
+
+                // Block archived users
+                if (isArchived) {
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RestrictedAccessScreen(
+                        reason: 'archived',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                // If user has left, send to QR screen
+                if (hasLeft) {
+                  if (!mounted) return;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const QRReferScreen()),
+                  );
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+            // If check fails, show error
+            if (!mounted) return;
+            showSnackbar(context, 'Error checking account status: $e', isError: true);
+            return;
+          }
+
+          // User is active member, proceed to main navigation
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const MainNavigation()),
           );
         } else if (pendingTeamId != null) {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -78,6 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         } else {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const QRReferScreen()),
@@ -85,6 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       },
       onLoginError: (message) {
+        if (!mounted) return;
         showSnackbar(context, message, isError: true);
       },
     );
