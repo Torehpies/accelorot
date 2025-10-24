@@ -115,7 +115,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white, // White background
