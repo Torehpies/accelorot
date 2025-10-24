@@ -7,11 +7,12 @@ import '../../components/edit_profile_modal.dart';
 import '../../components/change_password_modal.dart';
 import '../../screens/personal_info_screen.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
+import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_view_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? viewingOperatorId;
   
-  const ProfileScreen ({super.key, this.viewingOperatorId});
+  const ProfileScreen({super.key, this.viewingOperatorId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -21,6 +22,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final SessionService _session = SessionService();
   Map<String, dynamic>? _userData;
   bool _loading = true;
+  bool _isViewingAsAdmin = false;
+
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
     if (mounted) {
@@ -35,11 +38,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _isViewingAsAdmin = widget.viewingOperatorId != null;
     _loadUser();
   }
 
   Future<void> _loadUser() async {
-    final data = await _session.getCurrentUserData();
+    setState(() => _loading = true);
+    
+    Map<String, dynamic>? data;
+    
+    // If viewing as admin, fetch the operator's data
+    if (widget.viewingOperatorId != null) {
+      data = await OperatorViewService.getOperatorDetails(widget.viewingOperatorId!);
+    } else {
+      // Otherwise, fetch current user's data
+      data = await _session.getCurrentUserData();
+    }
+    
     if (mounted) {
       setState(() {
         _userData = data;
@@ -50,27 +65,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-  // Compute display values with safe fallbacks
-  final first = _userData != null && _userData!['firstname'] is String
-    ? _userData!['firstname'] as String
-    : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
-  final last = _userData != null && _userData!['lastname'] is String
-    ? _userData!['lastname'] as String
-    : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
-  final displayName = [first, last].where((s) => s.isNotEmpty).join(' ').trim();
-  final email = _userData != null && _userData!['email'] is String
-    ? _userData!['email'] as String
-    : FirebaseAuth.instance.currentUser?.email ?? '';
+    // Compute display values with safe fallbacks
+    final first = _userData != null && _userData!['firstname'] is String
+        ? _userData!['firstname'] as String
+        : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
+    final last = _userData != null && _userData!['lastname'] is String
+        ? _userData!['lastname'] as String
+        : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
+    final displayName = [first, last].where((s) => s.isNotEmpty).join(' ').trim();
+    final email = _userData != null && _userData!['email'] is String
+        ? _userData!['email'] as String
+        : FirebaseAuth.instance.currentUser?.email ?? '';
 
-  // build initials for avatar placeholder
-  final initials = ((first.isNotEmpty ? first[0] : '') + (last.isNotEmpty ? last[0] : '')).toUpperCase();
+    // Build initials for avatar placeholder
+    final initials = ((first.isNotEmpty ? first[0] : '') + (last.isNotEmpty ? last[0] : '')).toUpperCase();
 
-  return Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header (without back button)
+            // Header
             Container(
               height: 180,
               decoration: BoxDecoration(
@@ -112,6 +127,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontSize: 14,
                       ),
                     ),
+                    // Show viewing badge if admin is viewing
+                    if (_isViewingAsAdmin)
+                      Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          '👁️ Viewing as Admin',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -123,37 +156,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
+                    // Disable edit actions when viewing as admin
                     _buildButton(
                       context,
                       label: "Edit Profile",
-                      onPressed: () {
-                        final first = _userData != null && _userData!['firstname'] is String
-                            ? _userData!['firstname'] as String
-                            : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
-                        final last = _userData != null && _userData!['Lastname'] is String
-                            ? _userData!['Lastname'] as String
-                            : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
+                      onPressed: _isViewingAsAdmin
+                          ? null
+                          : () {
+                              final first = _userData != null && _userData!['firstname'] is String
+                                  ? _userData!['firstname'] as String
+                                  : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '';
+                              final last = _userData != null && _userData!['lastname'] is String
+                                  ? _userData!['lastname'] as String
+                                  : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '';
 
-                        showDialog(
-                          context: context,
-                          builder: (context) => EditProfileModal(
-                            firstName: first.isNotEmpty ? first : 'Miguel Andres',
-                            lastName: last.isNotEmpty ? last : 'Reyes',
-                            username: FirebaseAuth.instance.currentUser?.displayName ?? '',
-                            role: _userData?['role'] ?? 'User',
-                          ),
-                        );
-                      },
+                              showDialog(
+                                context: context,
+                                builder: (context) => EditProfileModal(
+                                  firstName: first.isNotEmpty ? first : 'Miguel Andres',
+                                  lastName: last.isNotEmpty ? last : 'Reyes',
+                                  username: FirebaseAuth.instance.currentUser?.displayName ?? '',
+                                  role: _userData?['role'] ?? 'User',
+                                ),
+                              );
+                            },
                     ),
                     _buildButton(
                       context,
                       label: "Change Password",
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => const ChangePasswordModal(),
-                        );
-                      },
+                      onPressed: _isViewingAsAdmin
+                          ? null
+                          : () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => const ChangePasswordModal(),
+                              );
+                            },
                     ),
                     _buildButton(
                       context,
@@ -162,28 +200,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PersonalInfoScreen(),
+                            builder: (context) => PersonalInfoScreen(
+                              viewingOperatorId: widget.viewingOperatorId,
+                            ),
                           ),
                         );
                       },
                     ),
                     const SizedBox(height: 32),
 
-                    // Log Out Button — sign out and return to AuthWrapper
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _signOut();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E7D32),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    // Only show Log Out button if not viewing as admin
+                    if (!_isViewingAsAdmin)
+                      ElevatedButton(
+                        onPressed: () async {
+                          await _signOut();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
+                        child: const Text("Log Out", style: TextStyle(fontSize: 16)),
                       ),
-                      child: const Text("Log Out", style: TextStyle(fontSize: 16)),
-                    ),
                   ],
                 ),
               ),
@@ -194,19 +235,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildButton(BuildContext context, {required String label, required VoidCallback onPressed}) {
+  Widget _buildButton(BuildContext context, {required String label, VoidCallback? onPressed}) {
+    final isDisabled = onPressed == null;
+    
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFF4CAF50)),
+        border: Border.all(
+          color: isDisabled ? Colors.grey.shade300 : Color(0xFF4CAF50),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         title: Text(
           label,
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: isDisabled ? Colors.grey : Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -214,11 +259,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         trailing: Icon(
           Icons.arrow_forward_ios,
           size: 16,
-          color: Color(0xFF4CAF50),
+          color: isDisabled ? Colors.grey : Color(0xFF4CAF50),
         ),
         onTap: onPressed,
+        enabled: !isDisabled,
       ),
     );
   }
-
 }
