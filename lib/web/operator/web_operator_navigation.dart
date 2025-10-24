@@ -7,7 +7,7 @@ import '../operator/screens/web_home_screen.dart';
 import 'screens/web_activity_logs_screen.dart';
 import 'screens/web_statistics_screen.dart';
 import 'screens/web_operator_machine_screen.dart';
-import 'screens/web_profile_screen.dart';
+import 'screens/operator_web_profile_screen.dart';
 import '../../../web/admin/screens/web_login_screen.dart';
 
 class WebOperatorNavigation extends StatefulWidget {

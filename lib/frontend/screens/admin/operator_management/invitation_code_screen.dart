@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 void showInvitationOverlay(BuildContext context, String initialCode, String initialExpiryDate) {
+  // ignore: no_leading_underscores_for_local_identifiers
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
   // local generator used for "Generate New"
