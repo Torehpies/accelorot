@@ -14,6 +14,7 @@ class DashboardFloatingActionButton extends StatelessWidget {
     return FloatingActionButton(
       onPressed: onPressed ?? () {},
       backgroundColor: Colors.green,
+      // ignore: sort_child_properties_last
       child: const Icon(Icons.add, color: Colors.white, size: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
