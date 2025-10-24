@@ -17,10 +17,6 @@ class GoogleSignInButton extends StatelessWidget {
     this.isLoading = false,
   });
 
-  // A publicly accessible URL for the Google logo to use as a widget icon.
-  static const String _googleLogoUrl =
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/48px-Google_%22G%22_logo.svg.png';
-
   @override
   Widget build(BuildContext context) {
     const double buttonSize = 60;
@@ -50,14 +46,6 @@ class GoogleSignInButton extends StatelessWidget {
                 'assets/images/google_logo_sq.png',
                 height: buttonSize,
                 width: buttonSize,
-                // Add a fallback in case the network image fails to load
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.g_mobiledata, // Fallback icon
-                    color: Colors.red,
-                    size: buttonSize,
-                  );
-                },
               ),
       ),
     );
