@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart' show HomeScreen;
-import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
+// removed missing external import; local stub is provided below
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 // ignore: unused_import
@@ -72,6 +72,20 @@ class _MobileNavigationState extends State<MobileNavigation> {
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+}
+
+/// Simple local stub for MachineManagementScreen so the missing package file is not required.
+/// Replace this with your real implementation or move it to its own file later.
+class MachineManagementScreen extends StatelessWidget {
+  // ignore: use_super_parameters
+  const MachineManagementScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Machine Management'),
     );
   }
 }

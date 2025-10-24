@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';

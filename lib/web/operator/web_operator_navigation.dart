@@ -6,11 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/machine_management_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-// ignore: unused_import
-import 'package:flutter_application_1/web/admin/screens/userlist_screen.dart';
+import 'package:flutter_application_1/mobile/mobile_navigation.dart' show MachineManagementScreen;
+// Import the web-specific screens if they exist
+// import 'package:flutter_application_1/web/operator/web_home_screen.dart';
 
 class WebOperatorNavigation extends StatefulWidget {
   const WebOperatorNavigation({super.key});
@@ -22,23 +22,50 @@ class WebOperatorNavigation extends StatefulWidget {
 class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
   int _selectedIndex = 0;
 
+  // ✅ Define screens - matching the nav items
   late final List<Widget> _screens = [
-    const HomeScreen(),
-    const ActivityLogsScreen(),
-    const StatisticsScreen(),
-    const MachineManagementScreen(),
-    const ProfileScreen(),
+    const HomeScreen(),              // 0 - Dashboard
+    const ActivityLogsScreen(),      // 1 - Activity Logs
+    const StatisticsScreen(),        // 2 - Statistics
+    const MachineManagementScreen(), // 3 - Machines
+    const ProfileScreen(),           // 4 - Users (placeholder, needs proper screen)
+    const ProfileScreen(),           // 5 - Profile
   ];
 
   static const List<_NavItem> _navItems = [
-    _NavItem(Icons.dashboard, 'Dashboard'),
-    _NavItem(Icons.history, 'Activity Logs'),
-    _NavItem(Icons.bar_chart, 'Statistics'),
-    _NavItem(Icons.settings, 'Machines'),
-    _NavItem(Icons.people, 'Users'),
-    _NavItem(Icons.person, 'Profile'),
-    _NavItem(Icons.logout, 'Logout'),
+    _NavItem(Icons.dashboard, 'Dashboard'),      // Index 0
+    _NavItem(Icons.history, 'Activity Logs'),    // Index 1
+    _NavItem(Icons.bar_chart, 'Statistics'),     // Index 2
+    _NavItem(Icons.settings, 'Machines'),        // Index 3
+    _NavItem(Icons.people, 'Users'),             // Index 4
+    _NavItem(Icons.person, 'Profile'),           // Index 5
+    _NavItem(Icons.logout, 'Logout'),            // Index 6 (special)
   ];
+
+  void _handleNavigation(int index) async {
+    // Handle logout separately
+    if (index == _navItems.length - 1) {
+      await _handleLogout();
+      return;
+    }
+
+    // Update selected index for regular navigation
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (mounted) {
+        // Navigate to login screen
+        Navigator.of(context).pushReplacementNamed('/login'); // Adjust route
+      }
+    } catch (e) {
+      ('Logout error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +80,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(
@@ -65,32 +93,39 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                     ),
                   ),
                   const Divider(color: Colors.white30, height: 1),
-                  Expanded( // ✅ CRITICAL: Wrap ListTiles in Expanded
+                  
+                  // Navigation Items
+                  Expanded(
                     child: ListView.builder(
                       itemCount: _navItems.length,
                       itemBuilder: (context, index) {
                         final item = _navItems[index];
+                        final isLogout = index == _navItems.length - 1;
+                        final isSelected = _selectedIndex == index && !isLogout;
+
                         return ListTile(
-                          leading: Icon(item.icon, color: Colors.white),
+                          leading: Icon(
+                            item.icon,
+                            color: Colors.white,
+                          ),
                           title: Text(
                             item.label,
                             style: TextStyle(
                               color: Colors.white,
-                              fontWeight: _selectedIndex == index ? FontWeight.bold : null,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
-                          selected: _selectedIndex == index,
+                          selected: isSelected,
                           selectedColor: Colors.white,
-                          selectedTileColor: Colors.white.withOpacity(0.1),
-                          onTap: () async { // ✅ Add async if needed for logout
-                            if (index == _navItems.length - 1) {
-                              // Logout action
-                              await FirebaseAuth.instance.signOut();
-                              // Optional: Navigate back to login
-                            } else {
-                              setState(() => _selectedIndex = index);
-                            }
-                          },
+                          selectedTileColor: Colors.white.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
+                          onTap: () => _handleNavigation(index),
                         );
                       },
                     ),
@@ -99,23 +134,39 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
               ),
             ),
           ),
+
           // White Content Area
           Expanded(
             child: Scaffold(
               appBar: AppBar(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
-                elevation: 0,
+                elevation: 1,
+                title: Text(
+                  _navItems[_selectedIndex].label,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.account_circle),
-                    onPressed: () => setState(() => _selectedIndex = 5),
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      // Handle notifications
+                    },
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.account_circle),
+                    onPressed: () => setState(() => _selectedIndex = 5), // Profile
+                  ),
+                  const SizedBox(width: 8),
                 ],
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(24),
-                child: SingleChildScrollView(
+              body: Container(
+                color: Colors.grey[50],
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
                   child: _screens[_selectedIndex],
                 ),
               ),

@@ -1,6 +1,6 @@
-// lib/web/navigation/web_navigation_layout.dart
 
-// ignore_for_file: unused_element, deprecated_member_use
+
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,9 +8,9 @@ import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/navigation/nav_item.dart';
 
 class WebNavigationLayout extends StatelessWidget {
-   final int selectedIndex;
+  final int selectedIndex;
   final List<Widget> screens;
-  final List<NavItem> navItems; // ✅ updated type
+  final List<NavItem> navItems;
   final ValueChanged<int> onItemSelected;
 
   const WebNavigationLayout({
@@ -64,7 +64,7 @@ class WebNavigationLayout extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.notifications_outlined),
                     onPressed: () {
-                     
+                      
                     },
                   ),
                   IconButton(
@@ -180,10 +180,4 @@ class WebNavigationLayout extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NavItem {
-  final IconData icon;
-  final String label;
-  const _NavItem(this.icon, this.label);
 }
