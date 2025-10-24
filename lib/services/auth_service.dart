@@ -24,9 +24,8 @@ class AuthService {
   }
 
   Future<Map<String, dynamic>> signInWithGoogle() async {
-    _ensureGoogleSignInInitialized();
-    final GoogleSignInAccount googleUser = await GoogleSignIn.instance
-        .authenticate();
+    await _ensureGoogleSignInInitialized();
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
@@ -50,10 +49,10 @@ class AuthService {
 
     // Parse names from displayName (e.g., "John Doe" -> "John", "Doe")
     final names = user.displayName?.split(' ');
-    final firstName = names!.isNotEmpty
-        ? names.first
+    final firstName = (names?.isNotEmpty ?? false)
+        ? names?.first
         : (user.email.split('@').first);
-    final lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
+    final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
 
     if (!docSnapshot.exists) {
       // New user: save full data set
