@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/web/admin/screens/web_dashboard_screen.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart' show WebRegistrationScreen;
 import 'package:flutter_application_1/services/auth_wrapper.dart';
+import "package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

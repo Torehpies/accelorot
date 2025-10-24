@@ -116,7 +116,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool isAnyLoading = _isLoading || _isGoogleLoading;
 
     return Scaffold(
       backgroundColor: Colors.white, // White background
