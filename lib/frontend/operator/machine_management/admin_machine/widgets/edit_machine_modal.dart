@@ -195,12 +195,12 @@ class _EditMachineModalState extends State<EditMachineModal> {
           // Assign to User (Editable)
           DropdownButtonFormField<String>(
             initialValue: _selectedUserId,
-            decoration: _buildInputDecoration('Assign to User *'),
+            decoration: _buildInputDecoration('Assign to Team Member *'),
             items: widget.controller.users.map((user) {
               return DropdownMenuItem<String>(
                 value: user['uid'],
                 child: Text(
-                  '${user['fullName']} (${user['role']})',
+                  '${user['name']} (${user['role']})',
                   style: const TextStyle(color: Colors.teal),
                 ),
               );

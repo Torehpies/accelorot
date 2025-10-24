@@ -1,4 +1,4 @@
-// lib/services/machine_services/firestore/firestore_fetchs.dart
+//firestore_fetchs.dart
 
 import '../../frontend/operator/machine_management/models/machine_model.dart';
 import 'firestore_collection.dart';
@@ -148,6 +148,35 @@ class MachineFirestoreFetch {
                 'uid': doc.id,
                 ...doc.data() as Map<String, dynamic>,
               })
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // ==================== TEAM MEMBER FETCH METHODS ====================
+  
+  /// Fetch all members from a specific team (for Admin dropdown)
+  /// Returns members from teams/{teamId}/members subcollection
+  /// Filters out archived members
+  static Future<List<Map<String, dynamic>>> getTeamMembers(String teamId) async {
+    try {
+      final snapshot = await MachineFirestoreCollections.getTeamMembersCollection(teamId)
+          .where('isArchived', isEqualTo: false)
+          .get();
+
+      return snapshot.docs
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return {
+              'uid': data['userId'] ?? doc.id, // Use userId field, fallback to doc.id
+              'memberId': doc.id, // Keep track of member document ID
+              'name': data['name'] ?? 'Unknown', // Use 'name' field from members
+              'role': data['role'] ?? 'Unknown',
+              'email': data['email'] ?? '',
+              ...data,
+            };
+          })
           .toList();
     } catch (e) {
       return [];

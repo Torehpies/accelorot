@@ -1,4 +1,4 @@
-// lib/services/machine_services/firestore/firestore_uploads.dart
+//firestore_uploads.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../frontend/operator/machine_management/models/machine_model.dart';
@@ -7,7 +7,7 @@ import 'machine_mock_data.dart';
 
 class MachineFirestoreUpload {
   // ==================== MOCK DATA UPLOAD ====================
-  
+
   // Upload mock machines to Firestore (only if none of the mock IDs exist)
   static Future<void> uploadAllMockMachines() async {
     try {
@@ -30,6 +30,7 @@ class MachineFirestoreUpload {
   }
 
   // Upload machines from mock data
+  // Upload machines from mock data
   static Future<void> uploadMachines() async {
     try {
       final mockData = MachineMockData.getMockMachines();
@@ -37,9 +38,17 @@ class MachineFirestoreUpload {
 
       for (var data in mockData) {
         final machine = MachineModel.fromMap(data);
-        final docRef = MachineFirestoreCollections.getMachinesCollection()
-            .doc(machine.machineId);
-        batch.set(docRef, machine.toFirestore());
+
+        // Check if machine already exists to prevent duplicates
+        final exists = await MachineFirestoreCollections.machineExists(
+          machine.machineId,
+        );
+
+        if (!exists) {
+          final docRef = MachineFirestoreCollections.getMachinesCollection()
+              .doc(machine.machineId);
+          batch.set(docRef, machine.toFirestore());
+        }
       }
 
       await batch.commit();
@@ -49,7 +58,7 @@ class MachineFirestoreUpload {
   }
 
   // ==================== CRUD OPERATIONS ====================
-  
+
   // Add a new machine
   static Future<void> addMachine(MachineModel machine) async {
     try {
@@ -79,7 +88,7 @@ class MachineFirestoreUpload {
   }
 
   // ==================== ARCHIVE OPERATIONS ====================
-  
+
   // Update machine archive status
   static Future<void> updateMachineArchiveStatus(
     String machineId,
@@ -97,8 +106,9 @@ class MachineFirestoreUpload {
   // "Delete" machine → move to archive instead of actual deletion
   static Future<void> archiveMachine(String machineId) async {
     try {
-      final docRef =
-          MachineFirestoreCollections.getMachinesCollection().doc(machineId);
+      final docRef = MachineFirestoreCollections.getMachinesCollection().doc(
+        machineId,
+      );
       final doc = await docRef.get();
 
       if (!doc.exists) return;
@@ -111,8 +121,9 @@ class MachineFirestoreUpload {
   // Restore an archived machine
   static Future<void> restoreMachine(String machineId) async {
     try {
-      final docRef =
-          MachineFirestoreCollections.getMachinesCollection().doc(machineId);
+      final docRef = MachineFirestoreCollections.getMachinesCollection().doc(
+        machineId,
+      );
       final doc = await docRef.get();
 
       if (!doc.exists) return;

@@ -8,7 +8,7 @@ class AdminMachineController extends ChangeNotifier {
   // ==================== STATE ====================
   
   List<MachineModel> _machines = [];
-  List<Map<String, dynamic>> _users = [];
+  List<Map<String, dynamic>> _teamMembers = []; // Changed from _users to _teamMembers
   final Map<String, bool> _expandedStates = {};
   bool _showArchived = false;
   bool _isLoading = false;
@@ -19,7 +19,7 @@ class AdminMachineController extends ChangeNotifier {
   // ==================== GETTERS ====================
   
   List<MachineModel> get machines => _machines;
-  List<Map<String, dynamic>> get users => _users;
+  List<Map<String, dynamic>> get users => _teamMembers; // Keep getter name for backward compatibility
   bool get showArchived => _showArchived;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -60,16 +60,16 @@ class AdminMachineController extends ChangeNotifier {
       await FirestoreMachineService.uploadAllMockMachines();
 
       if (_isAuthenticated) {
-        // Admin is logged in - fetch their team's machines
+        // Admin is logged in - fetch their team's machines and team members
         await Future.wait([
           _fetchMachinesByTeamId(currentUserId!),
-          _fetchUsers(),
+          _fetchTeamMembers(currentUserId), // Changed from _fetchUsers
         ]);
       } else {
         // Not logged in - show all machines for preview
         await Future.wait([
           _fetchAllMachines(),
-          _fetchUsers(),
+          _fetchTeamMembers(''), // Empty list when not authenticated
         ]);
       }
 
@@ -105,13 +105,21 @@ class AdminMachineController extends ChangeNotifier {
     }
   }
 
-  Future<void> _fetchUsers() async {
+  /// Fetch team members from teams/{teamId}/members subcollection
+  /// Only fetches active (non-archived) members
+  Future<void> _fetchTeamMembers(String teamId) async {
     try {
-      _users = await FirestoreMachineService.getOperators();
+      if (teamId.isEmpty) {
+        _teamMembers = [];
+        notifyListeners();
+        return;
+      }
+
+      _teamMembers = await FirestoreMachineService.getTeamMembers(teamId);
       notifyListeners();
     } catch (e) {
-      // Don't set error for users fetch, it's not critical
-      _users = [];
+      // Don't set error for team members fetch, it's not critical
+      _teamMembers = [];
       notifyListeners();
     }
   }
@@ -121,9 +129,15 @@ class AdminMachineController extends ChangeNotifier {
     _isAuthenticated = currentUserId != null;
     
     if (_isAuthenticated) {
-      await _fetchMachinesByTeamId(currentUserId!);
+      await Future.wait([
+        _fetchMachinesByTeamId(currentUserId!),
+        _fetchTeamMembers(currentUserId),
+      ]);
     } else {
-      await _fetchAllMachines();
+      await Future.wait([
+        _fetchAllMachines(),
+        _fetchTeamMembers(''),
+      ]);
     }
   }
 
@@ -266,12 +280,14 @@ class AdminMachineController extends ChangeNotifier {
 
   // ==================== HELPER METHODS ====================
   
+  /// Get member name by userId
+  /// Now uses 'name' field from team members instead of 'fullName' from users
   String? getUserName(String userId) {
-    final user = _users.firstWhere(
-      (u) => u['uid'] == userId,
+    final member = _teamMembers.firstWhere(
+      (m) => m['uid'] == userId,
       orElse: () => {},
     );
-    return user.isNotEmpty ? user['fullName'] : null;
+    return member.isNotEmpty ? member['name'] : null;
   }
 
   void clearError() {
