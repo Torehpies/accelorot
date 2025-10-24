@@ -383,9 +383,9 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         role,
@@ -417,9 +417,9 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         status,
@@ -518,28 +518,24 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
   }
 
   void _showAddUserDialog() {
-    // TODO: Implement add user dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Add User feature coming soon!')),
     );
   }
 
   void _editUser(Map<String, dynamic> user) {
-    // TODO: Implement edit user dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
     );
   }
 
   void _changeUserRole(Map<String, dynamic> user) {
-    // TODO: Implement role change dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Change role for ${user['firstname']} ${user['lastname']} - Feature coming soon!')),
     );
   }
 
   void _toggleUserStatus(Map<String, dynamic> user) {
-    // TODO: Implement status toggle
     final newStatus = user['status'] == 'Suspended' ? 'Active' : 'Suspended';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('${user['firstname']} ${user['lastname']} status changed to $newStatus - Feature coming soon!')),

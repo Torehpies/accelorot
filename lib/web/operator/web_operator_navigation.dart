@@ -96,7 +96,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -118,7 +118,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                   Text(
                     'Operator Portal',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),
@@ -128,14 +128,14 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundColor: Colors.white.withValues(alpha: 0.2),
                           child: const Icon(
                             Icons.person,
                             size: 16,
@@ -185,7 +185,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                                 ),
                               ),
                               selected: isSelected,
-                              selectedTileColor: Colors.white.withOpacity(0.15),
+                              selectedTileColor: Colors.white.withValues(alpha: 0.15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -213,7 +213,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
                         ),
                         onTap: _handleLogout,
                       ),

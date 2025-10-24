@@ -5,7 +5,6 @@ import '../../../frontend/screens/admin/operator_management/operator_management_
 import '../../../frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import '../screens/web_profile_screen.dart';
 import '../screens/web_admin_home_screen.dart';
-import '../../../frontend/screens/statistics_screen.dart';
 
 class WebAdminMainNavigation extends StatefulWidget {
   const WebAdminMainNavigation({super.key});

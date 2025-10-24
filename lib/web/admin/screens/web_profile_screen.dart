@@ -131,7 +131,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -229,7 +229,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                   title: "Help & Support",
                   description: "Get help and contact support",
                   onPressed: () {
-                    // TODO: Implement help screen
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Help & Support coming soon!')),
                     );

@@ -144,7 +144,7 @@ class _WebOperatorViewNavigationState extends State<WebOperatorViewNavigation> {
                           ),
                           selected: _selectedIndex == index,
                           selectedColor: Colors.white,
-                          selectedTileColor: Colors.white.withOpacity(0.1),
+                          selectedTileColor: Colors.white.withValues(alpha: 0.1),
                           onTap: () => _onItemTapped(index),
                         );
                       },

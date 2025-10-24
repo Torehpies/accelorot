@@ -135,7 +135,6 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               icon: const Icon(Icons.add),
               label: const Text('Add Machine'),
               onPressed: () {
-                // TODO: Implement add machine dialog
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Add Machine feature coming soon!')),
                 );
@@ -385,9 +384,9 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         status,
@@ -475,14 +474,12 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
   }
 
   void _editMachine(Map<String, dynamic> machine) {
-    // TODO: Implement edit machine dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit ${machine['name']} - Feature coming soon!')),
     );
   }
 
   void _configureMachine(Map<String, dynamic> machine) {
-    // TODO: Implement machine configuration
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Configure ${machine['name']} - Feature coming soon!')),
     );
