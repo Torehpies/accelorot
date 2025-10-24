@@ -9,6 +9,8 @@ import 'screens/web_statistics_screen.dart';
 import 'screens/web_operator_machine_screen.dart';
 import 'screens/web_profile_screen.dart';
 import '../../../web/admin/screens/web_login_screen.dart';
+// Import the web-specific screens if they exist
+// import 'package:flutter_application_1/web/operator/web_home_screen.dart';
 
 class WebOperatorNavigation extends StatefulWidget {
   const WebOperatorNavigation({super.key});
@@ -29,6 +31,19 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
     _NavItem(Icons.settings, 'Machines'),
     _NavItem(Icons.person, 'Profile'),
   ];
+
+  void _handleNavigation(int index) async {
+    // Handle logout separately
+    if (index == _navItems.length - 1) {
+      await _handleLogout();
+      return;
+    }
+
+    // Update selected index for regular navigation
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   void initState() {
@@ -165,34 +180,42 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
                       itemCount: _navItems.length,
                       itemBuilder: (context, index) {
                         final item = _navItems[index];
-                        final isSelected = _selectedIndex == index;
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 4),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: ListTile(
-                              leading: Icon(
-                                item.icon,
-                                color: isSelected ? Colors.white : Colors.white70,
-                                size: 22,
-                              ),
-                              title: Text(
-                                item.label,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.white70,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              selected: isSelected,
-                              selectedTileColor: Colors.white.withValues(alpha: 0.15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              onTap: () => setState(() => _selectedIndex = index),
-                            ),
-                          ),
-                        );
+
+                        final isLogout = index == _navItems.length - 1;
+final isSelected = _selectedIndex == index && !isLogout;
+
+return Container(
+  margin: const EdgeInsets.only(bottom: 4),
+  child: Material(
+    color: Colors.transparent,
+    child: ListTile(
+      leading: Icon(
+        item.icon,
+        color: isSelected ? Colors.white : Colors.white70,
+        size: 22,
+      ),
+      title: Text(
+        item.label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.white70,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 14,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: Colors.white,
+      selectedTileColor: Colors.white.withValues(alpha: 0.2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 4,
+      ),
+      onTap: () => _handleNavigation(index),
+    ),
+  ),
+);
                       },
                     ),
                   ),
@@ -223,12 +246,42 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
               ),
             ),
           ),
-          
-          // Main Content Area
+
+          // White Content Area
           Expanded(
-            child: Container(
-              color: Colors.grey[50],
-              child: _screens[_selectedIndex],
+            child: Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                elevation: 1,
+                title: Text(
+                  _navItems[_selectedIndex].label,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      // Handle notifications
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.account_circle),
+                    onPressed: () => setState(() => _selectedIndex = 5), // Profile
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+              body: Container(
+                color: Colors.grey[50],
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: _screens[_selectedIndex],
+                ),
+              ),
             ),
           ),
         ],
