@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
 import '../frontend/screens/main_navigation.dart';
 import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
+import '../web/admin/admin_navigation/web_admin_navigation.dart';
 import '../frontend/screens/email_verify.dart';
 import '../frontend/screens/restricted_access_screen.dart';
 import '../services/sess_service.dart';
@@ -49,8 +50,9 @@ class AuthWrapper extends StatelessWidget {
 
             // Admins bypass all checks
             if (role.toLowerCase() == 'admin') {
-              debugPrint('AuthWrapper: User is admin, redirecting to AdminMainNavigation');
-              return const AdminMainNavigation();
+              debugPrint('AuthWrapper: User is admin, redirecting to AdminMainNavigation (web-aware)');
+              // On web, use the web-specific admin navigation; otherwise use the native AdminMainNavigation
+              return kIsWeb ? const WebAdminNavigation() : const AdminMainNavigation();
             }
 
             // For non-admin users, check team status
