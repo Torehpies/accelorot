@@ -34,7 +34,6 @@ class MoistureStatisticCard extends StatelessWidget {
       };
     });
 
-    // Ideal upper/lower range (40–60%)
     final upperBound = List.generate(dataLength, (i) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 60.0};
@@ -53,7 +52,7 @@ class MoistureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha:0.1),
+            color: Colors.blue.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -76,7 +75,7 @@ class MoistureStatisticCard extends StatelessWidget {
           _buildQualityRow(color, quality),
           const SizedBox(height: 12),
           Text(
-            'Ideal Range: 40–60%',
+            'Ideal Range: 40–60g/m³',
             style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
@@ -98,16 +97,14 @@ class MoistureStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
-                maximum: 100,
+                maximum: 80,
                 interval: 20,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
@@ -157,7 +154,7 @@ class MoistureStatisticCard extends StatelessWidget {
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          '${currentMoisture.toStringAsFixed(0)}%',
+          '${currentMoisture.toStringAsFixed(0)}g/m³',
           style: Theme.of(context)
               .textTheme
               .headlineSmall
@@ -170,15 +167,11 @@ class MoistureStatisticCard extends StatelessWidget {
   Widget _buildQualityRow(Color color, String quality) {
     return Row(
       children: [
-        Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(
           'Quality: $quality',
-          style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w600, color: color),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
         ),
       ],
     );
@@ -193,7 +186,7 @@ class MoistureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
+            color: Colors.blue.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -201,20 +194,14 @@ class MoistureStatisticCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(18),
       child: Center(
-        child:
-            Text('No moisture data', style: TextStyle(color: Colors.grey[600])),
+        child: Text('No moisture data', style: TextStyle(color: Colors.grey[600])),
       ),
     );
   }
 
   String _getQuality(double moisture) {
-    if (moisture >= 40 && moisture <= 60) {
-      return 'Excellent';
-    }
-    if ((moisture >= 30 && moisture < 40) ||
-        (moisture > 60 && moisture <= 70)) {
-      return 'Good';
-    }
+    if (moisture >= 40 && moisture <= 60) return 'Excellent';
+    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) return 'Good';
     return 'Critical';
   }
 
@@ -230,7 +217,7 @@ class MoistureStatisticCard extends StatelessWidget {
   }
 
   double _calculateProgress(double moisture) {
-    return moisture.clamp(0.0, 100.0) / 100.0;
+    return moisture.clamp(0.0, 80.0) / 80.0;
   }
 
   String _formatDate(DateTime date) {

@@ -162,14 +162,14 @@ class _SystemCardState extends State<SystemCard> {
                   value: selectedPeriod,
                   onChanged: (value) => setState(() => selectedPeriod = value!),
                   items: const [
-                    DropdownMenuItem(value: '15 minutes', child: Text('15 minutes')),
+                    DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
                     DropdownMenuItem(
-                      value: '30 minutes',
-                      child: Text('30 minutes'),
+                      value: '12 hours',
+                      child: Text('12 hours'),
                     ),
                     DropdownMenuItem(
-                      value: '1 hour',
-                      child: Text('1 hour'),
+                      value: '24 hours',
+                      child: Text('24 hours'),
                     ),
                   ],
                 ),

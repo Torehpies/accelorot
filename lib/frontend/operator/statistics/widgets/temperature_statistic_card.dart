@@ -24,7 +24,7 @@ class TemperatureStatisticCard extends StatelessWidget {
     final now = DateTime.now();
     final dataLength = hourlyReadings.length;
 
-    // Generate X-axis labels and data
+    // Generate X-axis labels and data once
     final temperatureData = <Map<String, Object>>[];
     final upperBound = <Map<String, Object>>[];
     final lowerBound = <Map<String, Object>>[];
@@ -33,8 +33,8 @@ class TemperatureStatisticCard extends StatelessWidget {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       final timeLabel = '${hour.toString().padLeft(2, '0')}:00';
       temperatureData.add({'x': timeLabel, 'y': hourlyReadings[i]});
-      upperBound.add({'x': timeLabel, 'y': 65.0}); // upper ideal limit
-      lowerBound.add({'x': timeLabel, 'y': 55.0}); // lower ideal limit
+      upperBound.add({'x': timeLabel, 'y': 24.0});
+      lowerBound.add({'x': timeLabel, 'y': 18.0});
     }
 
     return Container(
@@ -42,10 +42,10 @@ class TemperatureStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -55,27 +55,24 @@ class TemperatureStatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Temperature',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '${currentTemperature.toStringAsFixed(1)}°C',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
-
           if (lastUpdated != null) ...[
             const SizedBox(height: 4),
             Text(
@@ -83,10 +80,7 @@ class TemperatureStatisticCard extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
-
           const SizedBox(height: 12),
-
-          // Quality indicator
           Row(
             children: [
               Container(
@@ -105,12 +99,9 @@ class TemperatureStatisticCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Ideal range and progress
           const Text(
-            'Ideal Range: 55–65°C',
+            'Ideal Range: 18–24°C',
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
@@ -120,44 +111,44 @@ class TemperatureStatisticCard extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
-
           const SizedBox(height: 16),
-
           const Text(
             'Trend (Last 8 Hours)',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
-
           SizedBox(
             height: 90,
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
-                maximum: 80,
+                maximum: 40,
                 interval: 10,
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
               series: [
-                // Temperature line
                 LineSeries<Map<String, Object>, String>(
                   dataSource: temperatureData,
                   xValueMapper: (data, _) => data['x'] as String,
                   yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.orange,
+                  color: Colors.blue,
                   width: 2,
                   markerSettings: const MarkerSettings(isVisible: true),
                 ),
-
-                // Upper bound
                 LineSeries<Map<String, Object>, String>(
                   dataSource: upperBound,
                   xValueMapper: (data, _) => data['x'] as String,
@@ -166,8 +157,6 @@ class TemperatureStatisticCard extends StatelessWidget {
                   dashArray: const [5, 5],
                   width: 1,
                 ),
-
-                // Lower bound
                 LineSeries<Map<String, Object>, String>(
                   dataSource: lowerBound,
                   xValueMapper: (data, _) => data['x'] as String,
@@ -190,10 +179,10 @@ class TemperatureStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade100),
+        border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -209,23 +198,20 @@ class TemperatureStatisticCard extends StatelessWidget {
     );
   }
 
- String _getQuality(double temperature) {
-  if (temperature >= 55 && temperature <= 65) {
-    return 'Optimal';
+  String _getQuality(double temperature) {
+    if (temperature >= 18 && temperature <= 24) return 'Excellent';
+    if ((temperature >= 15 && temperature < 18) ||
+        (temperature > 24 && temperature <= 27)) {
+      return 'Good';
+    }
+    return 'Poor';
   }
-  if ((temperature >= 40 && temperature < 55) ||
-      (temperature > 65 && temperature <= 70)) {
-    return 'Moderate';
-  }
-  return 'Poor';
-}
-
 
   Color _getColorForQuality(String quality) {
     switch (quality) {
-      case 'Optimal':
+      case 'Excellent':
         return Colors.green;
-      case 'Moderate':
+      case 'Good':
         return Colors.orange;
       default:
         return Colors.red;
@@ -233,8 +219,7 @@ class TemperatureStatisticCard extends StatelessWidget {
   }
 
   double _calculateProgress(double temperature) {
-    // Scale progress relative to 0–80°C
-    return (temperature.clamp(0.0, 80.0) / 80.0);
+    return (temperature.clamp(0.0, 40.0) / 40.0);
   }
 
   String _formatDate(DateTime date) {

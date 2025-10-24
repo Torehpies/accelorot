@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/utils/snackbar_utils.dart';
 
 class LoginController {
   final AuthService _authService = AuthService();
@@ -13,7 +12,6 @@ class LoginController {
   // State variables
   bool obscurePassword = true;
   bool isLoading = false;
-	bool isGoogleLoading = false;
 
   // Callback functions
   Function(bool)? onLoadingChanged;
@@ -41,11 +39,6 @@ class LoginController {
 
   void setLoading(bool loading) {
     isLoading = loading;
-    onLoadingChanged?.call(loading);
-  }
-
-  void setGoogleLoading(bool loading) {
-    isGoogleLoading = loading;
     onLoadingChanged?.call(loading);
   }
 
