@@ -16,8 +16,11 @@ class DateFilterState extends State<DateFilter> {
   DateTimeRange? _selectedRange;
   String _label = "Date Filter";
 
+  /// Normalize any DateTime to midnight
+  DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
   void _setPresetRange(int days) {
-    final now = DateTime.now();
+    final now = _normalize(DateTime.now());
     final start = now.subtract(Duration(days: days - 1));
     final range = DateTimeRange(start: start, end: now);
 
@@ -30,7 +33,7 @@ class DateFilterState extends State<DateFilter> {
   }
 
   Future<void> _pickCustomRange() async {
-    DateTime now = DateTime.now();
+    DateTime now = _normalize(DateTime.now());
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
@@ -53,8 +56,8 @@ class DateFilterState extends State<DateFilter> {
                   onChanged: (dp.DatePeriod newPeriod) {
                     setDialogState(() {
                       tempRange = DateTimeRange(
-                        start: newPeriod.start,
-                        end: newPeriod.end,
+                        start: _normalize(newPeriod.start),
+                        end: _normalize(newPeriod.end),
                       );
                     });
                   },
@@ -84,8 +87,11 @@ class DateFilterState extends State<DateFilter> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      _selectedRange = tempRange;
-                      _label = _formatRange(tempRange);
+                      _selectedRange = DateTimeRange(
+                        start: _normalize(tempRange.start),
+                        end: _normalize(tempRange.end),
+                      );
+                      _label = _formatRange(_selectedRange!);
                     });
                     widget.onChanged(_selectedRange);
                     Navigator.pop(context);
