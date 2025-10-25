@@ -16,8 +16,8 @@ class GoogleSignInHandler {
     setLoadingState(true);
 
     try {
-      final UserCredential userCredential =
-          await _authService.signInWithGoogle();
+      final UserCredential userCredential = await _authService
+          .signInWithGoogle();
       final User? user = userCredential.user;
 
       if (user != null) {
@@ -26,13 +26,18 @@ class GoogleSignInHandler {
           role: 'Operator',
         );
 
-        final username = user.displayName?.split(' ').first ?? 'friend';
+        final username = user.displayName ?? 'friend';
         if (context.mounted) {
           showSnackbar(context, 'Signed in successfully! Welcome $username');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
+
+          await Future.delayed(const Duration(milliseconds: 1000));
+
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const QRReferScreen()),
+            );
+          }
         }
       }
     } catch (e) {

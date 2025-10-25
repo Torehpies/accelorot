@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import '../../utils/snackbar_utils.dart';
 import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
@@ -26,6 +26,15 @@ class _LoginScreenState extends State<LoginScreen> {
   late LoginController _controller;
   final AuthService _authService = AuthService();
   bool _isGoogleLoading = false;
+	bool _isLoading = false;
+
+	void _setLoadingState(bool isLoading) {
+		if (mounted) {
+		setState(() {
+				  _isGoogleLoading = isLoading;
+				});
+		}
+	}
 
   @override
   void initState() {
@@ -156,48 +165,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _signInWithGoogle() async {
-    if (_isGoogleLoading) return;
+	Future<void> _handleGoogleSignIn() async {
+		if (_isGoogleLoading || _isLoading) return;
 
-    if (mounted) {
-      setState(() => _isGoogleLoading = true);
-    }
+		final handler = GoogleSignInHandler(_authService, context);
+		await handler.signInWithGoogle(setLoadingState: _setLoadingState);
+	}
 
-    try {
-      final UserCredential userCredential = await _authService
-          .signInWithGoogle();
-      final User? user = userCredential.user;
-
-      if (user != null) {
-        await _authService.saveGoogleUserToFirestore(
-          user: user,
-          role: 'Operator',
-        );
-      }
-
-      if (user != null && mounted) {
-        final username = user.displayName?.split(' ').first ?? 'friend';
-        showSnackbar(context, 'Signed in successfully! Welcome $username');
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const QRReferScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-        showSnackbar(
-          context,
-          'Google Sign-In failed unexpectedly.',
-          isError: true,
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-      }
-    }
-  }
 
   @override
   void dispose() {
@@ -267,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           OrDivider(),
                           SizedBox(height: 20),
                           GoogleSignInButton(
-                            onPressed: _signInWithGoogle,
+                            onPressed: _handleGoogleSignIn,
                             isLoading: _isGoogleLoading,
                           ),
                           // Sign Up Link
@@ -319,8 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   backgroundColor: Colors.teal,
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(12),
-                  // ignore: deprecated_member_use
-                  shadowColor: Colors.black.withOpacity(0.1),
+                  shadowColor: Colors.black.withValues(alpha: 0.1),
                   elevation: 6,
                 ),
                 onPressed: () {

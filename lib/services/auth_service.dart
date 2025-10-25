@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/utils/app_exceptions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:developer';
 
@@ -29,39 +29,39 @@ class AuthService {
     }
   }
 
-  //Future<Map<String, dynamic>> signInWithGoogle() async {
-  //  await _ensureGoogleSignInInitialized();
-  //  final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-
-  //  final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-
-  //  final credential = GoogleAuthProvider.credential(
-  //    idToken: googleAuth.idToken,
-  //  );
-
-  //  await _auth.signInWithCredential(credential);
-
-  //	await _saveGoogleUserToFirestore(user: googleUser, role: 'Operator');
-
-  //  return {'success': true, 'message': 'Signed in with Google successfully'};
-  //}
-
   Future<UserCredential> signInWithGoogle() async {
-    await _ensureGoogleSignInInitialized();
+    if (kIsWeb) {
+      try {
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-    try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-			final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-			final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken);
-			return await _auth.signInWithCredential(credential);
-    } on GoogleSignInException catch (e) {
-      log(
-        'Google Sign In error: code: ${e.code.name} description:${e.description}',
-      );
-			rethrow;
-    } catch (error) {
-      log('Unexpected Google Sign-In error: $error');
-      rethrow;
+        return await _auth.signInWithPopup(googleProvider);
+      } on FirebaseAuthException catch (e) {
+        log('Firebase Web Sign In Error: ${e.code} - ${e.message}');
+        rethrow;
+      } catch (error) {
+        log('Unexpected Web Sign-In Error: $error');
+        rethrow;
+      }
+    } else {
+      await _ensureGoogleSignInInitialized();
+
+      try {
+        final GoogleSignInAccount googleUser = await _googleSignIn
+            .authenticate();
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        return await _auth.signInWithCredential(credential);
+      } on GoogleSignInException catch (e) {
+        log(
+          'Google Sign In error: code: ${e.code.name} description:${e.description}',
+        );
+        rethrow;
+      } catch (error) {
+        log('Unexpected Google Sign-In error: $error');
+        rethrow;
+      }
     }
   }
 

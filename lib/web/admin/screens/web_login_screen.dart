@@ -1,12 +1,14 @@
-// lib/frontend/screens/web_login_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
+import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
-import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/email_verify.dart';
+import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
-import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
+import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
+import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});
@@ -17,7 +19,24 @@ class WebLoginScreen extends StatefulWidget {
 
 class _WebLoginScreenState extends State<WebLoginScreen> {
   late LoginController _controller;
+  final AuthService _authService = AuthService();
+  bool _isGoogleLoading = false;
+	bool _isLoading = false;
 
+	void _setLoadingState(bool isLoading) {
+		if (mounted) {
+		setState(() {
+				  _isGoogleLoading = isLoading;
+				});
+		}
+	}
+
+	Future<void> _handleGoogleSignIn() async {
+		if (_isGoogleLoading || _isLoading) return;
+
+		final handler = GoogleSignInHandler(_authService, context);
+		await handler.signInWithGoogle(setLoadingState: _setLoadingState);
+	}
   @override
   void initState() {
     super.initState();
@@ -40,21 +59,22 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
           );
           return;
         }
-        Map<String, dynamic> userData = result['userData'] as Map<String, dynamic>;
+        Map<String, dynamic> userData =
+            result['userData'] as Map<String, dynamic>;
         String userRole = userData['role'] ?? 'User';
 
         // Navigate based on role
         if (userRole == 'Admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => const WebAdminNavigation(),
-            ),
+            MaterialPageRoute(builder: (context) => const WebAdminNavigation()),
           );
         } else {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const WebOperatorNavigation()),
+            MaterialPageRoute(
+              builder: (context) => const WebOperatorNavigation(),
+            ),
           );
         }
       },
@@ -88,22 +108,27 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
                   children: [
                     // Logo
                     _buildLogo(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     // Title
                     _buildTitle(theme),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 16),
                     // Email Field
                     _buildEmailField(),
                     const SizedBox(height: 16),
                     // Password Field
                     _buildPasswordField(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 6),
                     // Forgot Password
                     _buildForgotPassword(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 6),
                     // Login Button
                     _buildLoginButton(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+                    OrDivider(),
+                    GoogleSignInButton(
+                      onPressed: _handleGoogleSignIn,
+                      isLoading: _isGoogleLoading,
+                    ),
                     // Sign Up Link
                     _buildSignUpLink(),
                   ],
@@ -246,7 +271,8 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const WebRegistrationScreen(), // 👈 We'll create this next
+                builder: (context) =>
+                    const WebRegistrationScreen(), // 👈 We'll create this next
               ),
             );
           },
@@ -259,3 +285,4 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     );
   }
 }
+
