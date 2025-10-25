@@ -8,7 +8,7 @@ import '../../../frontend/operator/activity_logs/components/cycles_recom_section
 class WebActivityLogsScreen extends StatefulWidget {
   final String? viewingOperatorId;
   
-  const WebActivityLogsScreen({super.key, this.viewingOperatorId});
+  const WebActivityLogsScreen({super.key, this.viewingOperatorId, required bool shouldRefresh});
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
