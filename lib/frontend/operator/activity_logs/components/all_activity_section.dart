@@ -1,18 +1,26 @@
-//all_activity_section.dart
 import 'package:flutter/material.dart';
 import '../view_screens/all_activity_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class AllActivitySection extends StatelessWidget {
-  const AllActivitySection({super.key});
+  final String? viewingOperatorId; 
+
+  const AllActivitySection({
+    super.key,
+    this.viewingOperatorId, 
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(
-          context,
-        ).push(SlidePageRoute(page: const AllActivityScreen()));
+        Navigator.of(context).push(
+          SlidePageRoute(
+            page: AllActivityScreen(
+              viewingOperatorId: viewingOperatorId, 
+            ),
+          ),
+        );
       },
       child: SizedBox(
         width: 400,

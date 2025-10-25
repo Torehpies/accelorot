@@ -10,7 +10,12 @@ import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
-  const AddWasteProduct({super.key});
+  final String? viewingOperatorId; // ⭐ NEW: Add this parameter
+  
+  const AddWasteProduct({
+    super.key,
+    this.viewingOperatorId, // ⭐ NEW: Add this parameter
+  });
 
   // Builds and displays the Add Waste Product dialog.
   @override
@@ -41,7 +46,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return category[0].toUpperCase() + category.substring(1);
   }
 
-  // Validates the entered quantity and ensures it’s within defined limits.
+  // Validates the entered quantity and ensures it's within defined limits.
   String? _validateQuantity(String? value) {
     if (value == null || value.isEmpty) return 'Enter quantity';
     final num = double.tryParse(value);
@@ -113,10 +118,14 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     };
 
     try {
-      await FirestoreActivityService.addWasteProduct(wasteEntry);
+      // ⭐ CRITICAL FIX: Pass viewingOperatorId to the service!
+      print('🔍 FORM DEBUG: widget.viewingOperatorId = ${widget.viewingOperatorId}');
+      await FirestoreActivityService.addWasteProduct(
+        wasteEntry,
+        viewingOperatorId: widget.viewingOperatorId, // ⭐ THIS IS THE KEY FIX!
+      );
       await Future.delayed(const Duration(milliseconds: 1000));
 
-      // ⭐ ADD mounted check before using context
       if (!mounted) return;
       Navigator.pop(context, wasteEntry);
     } catch (e) {

@@ -1,11 +1,15 @@
-//substrate_section.dart
 import 'package:flutter/material.dart';
 import '../widgets/slide_page_route.dart';
 import '../view_screens/substrates_screen.dart';
 import '../widgets/filter_box.dart';
 
 class SubstrateSection extends StatelessWidget {
-  const SubstrateSection({super.key});
+  final String? viewingOperatorId; 
+
+  const SubstrateSection({
+    super.key,
+    this.viewingOperatorId, 
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +44,11 @@ class SubstrateSection extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
-                        SlidePageRoute(page: const SubstratesScreen()),
+                        SlidePageRoute(
+                          page: SubstratesScreen(
+                            viewingOperatorId: viewingOperatorId, 
+                          ),
+                        ),
                       );
                     },
                     child: const Text(
@@ -59,26 +67,35 @@ class SubstrateSection extends StatelessWidget {
               // Boxes using unified FilterBox
               Expanded(
                 child: Row(
-                  children: const [
+                  children: [
                     FilterBox(
                       icon: Icons.eco,
                       label: 'Green',
                       filterValue: 'Greens',
-                      destination: SubstratesScreen(initialFilter: 'Greens'),
+                      destination: SubstratesScreen(
+                        initialFilter: 'Greens',
+                        viewingOperatorId: viewingOperatorId, 
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.energy_savings_leaf,
                       label: 'Brown',
                       filterValue: 'Browns',
-                      destination: SubstratesScreen(initialFilter: 'Browns'),
+                      destination: SubstratesScreen(
+                        initialFilter: 'Browns',
+                        viewingOperatorId: viewingOperatorId, 
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.recycling,
                       label: 'Compost',
                       filterValue: 'Compost',
-                      destination: SubstratesScreen(initialFilter: 'Compost'),
+                      destination: SubstratesScreen(
+                        initialFilter: 'Compost',
+                        viewingOperatorId: viewingOperatorId, 
+                      ),
                     ),
                   ],
                 ),

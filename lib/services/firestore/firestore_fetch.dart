@@ -3,14 +3,21 @@ import 'firestore_collections.dart';
 import 'firestore_helpers.dart';
 
 class FirestoreFetch {
-  // Fetch Substrates - filtered by userId
-  static Future<List<ActivityItem>> getSubstrates() async {
-    try {
-      final userId = FirestoreCollections.getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
+  /// ⭐ Validate that userId is provided (should never be null from service layer)
+  static String _validateUserId(String? userId) {
+    if (userId == null || userId.isEmpty) {
+      throw Exception('User ID must be provided. This is a programming error - FirestoreActivityService should always resolve the user ID before calling fetch methods.');
+    }
+    return userId;
+  }
 
-      final snapshot = await FirestoreCollections.getSubstratesCollection()
-          .where('userId', isEqualTo: userId)
+  // Fetch Substrates - filtered by userId
+  static Future<List<ActivityItem>> getSubstrates(String? userId) async {
+    try {
+      final targetUserId = _validateUserId(userId);
+
+      final snapshot = await FirestoreCollections.getSubstratesCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -23,13 +30,12 @@ class FirestoreFetch {
   }
 
   // Fetch Alerts - filtered by userId
-  static Future<List<ActivityItem>> getAlerts() async {
+  static Future<List<ActivityItem>> getAlerts(String? userId) async {
     try {
-      final userId = FirestoreCollections.getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
+      final targetUserId = _validateUserId(userId);
 
-      final snapshot = await FirestoreCollections.getAlertsCollection()
-          .where('userId', isEqualTo: userId)
+      final snapshot = await FirestoreCollections.getAlertsCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -42,13 +48,12 @@ class FirestoreFetch {
   }
 
   // Fetch Cycles and Recommendations - filtered by userId
-  static Future<List<ActivityItem>> getCyclesRecom() async {
+  static Future<List<ActivityItem>> getCyclesRecom(String? userId) async {
     try {
-      final userId = FirestoreCollections.getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
+      final targetUserId = _validateUserId(userId);
 
-      final snapshot = await FirestoreCollections.getCyclesRecomCollection()
-          .where('userId', isEqualTo: userId)
+      final snapshot = await FirestoreCollections.getCyclesRecomCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .orderBy('timestamp', descending: true)
           .get();
 
@@ -61,11 +66,11 @@ class FirestoreFetch {
   }
 
   // Fetch All Activities Combined
-  static Future<List<ActivityItem>> getAllActivities() async {
+  static Future<List<ActivityItem>> getAllActivities(String? userId) async {
     try {
-      final substrates = await getSubstrates();
-      final alerts = await getAlerts();
-      final cyclesRecom = await getCyclesRecom();
+      final substrates = await getSubstrates(userId);
+      final alerts = await getAlerts(userId);
+      final cyclesRecom = await getCyclesRecom(userId);
 
       final combined = [...substrates, ...alerts, ...cyclesRecom];
       combined.sort((a, b) => b.timestamp.compareTo(a.timestamp));

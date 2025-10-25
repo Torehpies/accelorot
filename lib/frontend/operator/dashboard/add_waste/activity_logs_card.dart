@@ -6,7 +6,12 @@ import '../../activity_logs/models/activity_item.dart';
 import 'widgets/activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
-  const ActivityLogsCard({super.key});
+  final String? viewingOperatorId; // ⭐ NEW: Add parameter
+  
+  const ActivityLogsCard({
+    super.key,
+    this.viewingOperatorId, // ⭐ NEW: Add parameter
+  });
 
   // Builds and manages the Activity Logs card widget.
   @override
@@ -30,7 +35,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
     await _fetchAllLogs();
   }
 
-  // Fetches activity logs from Firestore for the logged-in user.
+  // Fetches activity logs from Firestore for the logged-in user or viewed operator.
   Future<void> _fetchAllLogs() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -47,7 +52,11 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
 
     try {
       setState(() => _loading = true);
-      final logs = await FirestoreActivityService.getAllActivities();
+      
+      // ⭐ UPDATED: Pass viewingOperatorId to get correct user's logs
+      final logs = await FirestoreActivityService.getAllActivities(
+        viewingOperatorId: widget.viewingOperatorId,
+      );
 
       if (mounted) {
         setState(() {

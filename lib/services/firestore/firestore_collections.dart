@@ -11,27 +11,27 @@ class FirestoreCollections {
     return _auth.currentUser?.uid;
   }
 
-  // Collection References - FLAT STRUCTURE (no userId parameter needed)
-  static CollectionReference getSubstratesCollection() {
+  // Collection References - accepts optional userId for admin viewing operators
+  static CollectionReference getSubstratesCollection([String? userId]) {
     return _firestore.collection('substrates');
   }
 
-  static CollectionReference getAlertsCollection() {
+  static CollectionReference getAlertsCollection([String? userId]) {
     return _firestore.collection('alerts');
   }
 
-  static CollectionReference getCyclesRecomCollection() {
+  static CollectionReference getCyclesRecomCollection([String? userId]) {
     return _firestore.collection('cyclesRecom');
   }
 
-  // Data Existence Check - checks if current user has any substrates
-  static Future<bool> dataExists() async {
+  // Data Existence Check - checks if specified user has any substrates
+  static Future<bool> dataExists([String? userId]) async {
     try {
-      final userId = getCurrentUserId();
-      if (userId == null) return false;
+      final targetUserId = userId ?? getCurrentUserId();
+      if (targetUserId == null) return false;
 
-      final substrates = await getSubstratesCollection()
-          .where('userId', isEqualTo: userId)
+      final substrates = await getSubstratesCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .limit(1)
           .get();
       return substrates.docs.isNotEmpty;
@@ -40,31 +40,31 @@ class FirestoreCollections {
     }
   }
 
-  // Delete all data for current user (for fresh start)
-  static Future<void> deleteUserData() async {
+  // Delete all data for specified user (for fresh start)
+  static Future<void> deleteUserData([String? userId]) async {
     try {
-      final userId = getCurrentUserId();
-      if (userId == null) throw Exception('User not logged in');
+      final targetUserId = userId ?? getCurrentUserId();
+      if (targetUserId == null) throw Exception('User not logged in');
 
       // Delete substrates
-      final substrateDocs = await getSubstratesCollection()
-          .where('userId', isEqualTo: userId)
+      final substrateDocs = await getSubstratesCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .get();
       for (var doc in substrateDocs.docs) {
         await doc.reference.delete();
       }
 
       // Delete alerts
-      final alertDocs = await getAlertsCollection()
-          .where('userId', isEqualTo: userId)
+      final alertDocs = await getAlertsCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .get();
       for (var doc in alertDocs.docs) {
         await doc.reference.delete();
       }
 
       // Delete cyclesRecom
-      final cyclesRecomDocs = await getCyclesRecomCollection()
-          .where('userId', isEqualTo: userId)
+      final cyclesRecomDocs = await getCyclesRecomCollection(targetUserId)
+          .where('userId', isEqualTo: targetUserId)
           .get();
       for (var doc in cyclesRecomDocs.docs) {
         await doc.reference.delete();
