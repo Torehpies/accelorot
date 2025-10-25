@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
+import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'login_screen.dart';
@@ -27,6 +28,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+
+  void _setLoadingState(bool isLoading) {
+    if (mounted) {
+      setState(() {
+        _isGoogleLoading = isLoading;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -78,44 +87,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
+  Future<void> _handleGoogleSignIn() async {
     // Prevent multiple clicks and interaction with other buttons
     if (_isGoogleLoading || _isLoading) return;
 
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      final Map<String, dynamic> result = await _authService.signInWithGoogle();
-
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-
-        if (result['success']) {
-          showSnackbar(context, result['message']);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
-        } else {
-          // Failure: Display error message
-          showSnackbar(context, result['message'], isError: true);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-        showSnackbar(
-          context,
-          'Google Sign-In failed unexpectedly.',
-          isError: true,
-        );
-      }
-    }
+    final handler = GoogleSignInHandler(_authService, context);
+    await handler.signInWithGoogle(setLoadingState: _setLoadingState);
   }
 
   @override
   Widget build(BuildContext context) {
-  final theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white, // White background
@@ -426,7 +408,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     OrDivider(),
                     const SizedBox(height: 16),
 
-										GoogleSignInButton(onPressed: _signInWithGoogle, isLoading: _isGoogleLoading),
+                    GoogleSignInButton(
+                      onPressed: _handleGoogleSignIn,
+                      isLoading: _isGoogleLoading,
+                    ),
 
                     // Sign In Link
                     Row(

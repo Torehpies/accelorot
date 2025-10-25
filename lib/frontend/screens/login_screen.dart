@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
@@ -95,9 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const RestrictedAccessScreen(
-                        reason: 'archived',
-                      ),
+                      builder: (context) =>
+                          const RestrictedAccessScreen(reason: 'archived'),
                     ),
                   );
                   return;
@@ -108,7 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (!mounted) return;
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const QRReferScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const QRReferScreen(),
+                    ),
                   );
                   return;
                 }
@@ -117,7 +119,11 @@ class _LoginScreenState extends State<LoginScreen> {
           } catch (e) {
             // If check fails, show error
             if (!mounted) return;
-            showSnackbar(context, 'Error checking account status: $e', isError: true);
+            showSnackbar(
+              context,
+              'Error checking account status: $e',
+              isError: true,
+            );
             return;
           }
 
@@ -151,25 +157,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
-		if (_isGoogleLoading) return;
-		
-		setState(() => _isGoogleLoading = true);
+    if (_isGoogleLoading) return;
+
+    if (mounted) {
+      setState(() => _isGoogleLoading = true);
+    }
 
     try {
-      final Map<String, dynamic> result = await _authService.signInWithGoogle();
+      final UserCredential userCredential = await _authService
+          .signInWithGoogle();
+      final User? user = userCredential.user;
 
-      if (mounted) {
-        setState(() => _isGoogleLoading = false);
-        if (result['success']) {
-          showSnackbar(context, result['message']);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
-        } else {
-          // Failure: Display error message
-          showSnackbar(context, result['message'], isError: true);
-        }
+      if (user != null) {
+        await _authService.saveGoogleUserToFirestore(
+          user: user,
+          role: 'Operator',
+        );
+      }
+
+      if (user != null && mounted) {
+        final username = user.displayName?.split(' ').first ?? 'friend';
+        showSnackbar(context, 'Signed in successfully! Welcome $username');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const QRReferScreen()),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -179,6 +191,10 @@ class _LoginScreenState extends State<LoginScreen> {
           'Google Sign-In failed unexpectedly.',
           isError: true,
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -248,10 +264,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           _buildLoginButton(),
                           const SizedBox(height: 24),
 
-
-													OrDivider(),
-													SizedBox(height: 20),
-													GoogleSignInButton(onPressed: _signInWithGoogle, isLoading: _isGoogleLoading,),
+                          OrDivider(),
+                          SizedBox(height: 20),
+                          GoogleSignInButton(
+                            onPressed: _signInWithGoogle,
+                            isLoading: _isGoogleLoading,
+                          ),
                           // Sign Up Link
                           _buildSignUpLink(),
                         ],

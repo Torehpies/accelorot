@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/utils/app_exceptions.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:developer';
 
@@ -45,20 +46,19 @@ class AuthService {
   //  return {'success': true, 'message': 'Signed in with Google successfully'};
   //}
 
-  /// Sign in with Google, returns a GoogleSignInAccount
-  Future<GoogleSignInAccount> signInWithGoogle() async {
+  Future<UserCredential> signInWithGoogle() async {
     await _ensureGoogleSignInInitialized();
 
     try {
-      final GoogleSignInAccount account = await _googleSignIn.authenticate(
-        scopeHint: ['email'],
-      );
-      return account;
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+			final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+			final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken);
+			return await _auth.signInWithCredential(credential);
     } on GoogleSignInException catch (e) {
       log(
         'Google Sign In error: code: ${e.code.name} description:${e.description}',
       );
-      rethrow;
+			rethrow;
     } catch (error) {
       log('Unexpected Google Sign-In error: $error');
       rethrow;
@@ -78,13 +78,13 @@ class AuthService {
         return result;
       }
     } catch (error) {
-			log('Silent sign-in failed: $error');
-			return null;
-		}
+      log('Silent sign-in failed: $error');
+      return null;
+    }
   }
 
-  Future<void> _saveGoogleUserToFirestore({
-    required GoogleSignInAccount user,
+  Future<void> saveGoogleUserToFirestore({
+    required User user,
     required String role,
   }) async {
     final userDoc = _firestore.collection('users').doc(getCurrentUser()?.uid);
@@ -94,13 +94,13 @@ class AuthService {
     final names = user.displayName?.split(' ');
     final firstName = (names?.isNotEmpty ?? false)
         ? names?.first
-        : (user.email.split('@').first);
+        : (user.email?.split('@').first);
     final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
 
     if (!docSnapshot.exists) {
       // New user: save full data set
       await userDoc.set({
-        'uid': user.id,
+        'uid': user.uid,
         'email': user.email,
         'firstname': firstName,
         'lastname': lastName,
