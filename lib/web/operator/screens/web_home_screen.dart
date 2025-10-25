@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
-
-import '../components/stat_card.dart';
 import '../components/environmental_sensors_card.dart';
 import '../components/system_card.dart';
 import '../components/composting_progress_card.dart';
@@ -26,7 +24,13 @@ class WebHomeScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
-        backgroundColor: Colors.teal,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
         elevation: 2,
         actions: [
@@ -52,73 +56,53 @@ class WebHomeScreen extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 1400),
                 padding: EdgeInsets.symmetric(
                   horizontal: isDesktop ? 32 : 24,
-                  vertical: 16,
+                  vertical: 24,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // ROW 1: STAT CARDS - Fixed height
-                    if (isDesktop)
-                      SizedBox(
-                        height: 100,
-                        child: Row(
-                          children: [
-                            const Expanded(child: StatCard(title: 'Total Machines', value: '10', icon: Icons.factory)),
-                            const SizedBox(width: 16),
-                            const Expanded(child: StatCard(title: 'Total Admin', value: '10', icon: Icons.person)),
-                            const SizedBox(width: 16),
-                            const Expanded(child: StatCard(title: 'Total User', value: '10', icon: Icons.person_outline)),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ROW 1: Environmental Sensors + System Card (side by side)
+                      if (isDesktop)
+                        SizedBox(
+                          height: 280,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: const [
+                              Expanded(
+                                flex: 3,
+                                child: EnvironmentalSensorsCard(),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                flex: 2,
+                                child: SystemCard(),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Column(
+                          children: const [
+                            EnvironmentalSensorsCard(),
+                            SizedBox(height: 16),
+                            SystemCard(),
                           ],
                         ),
-                      )
-                    else
-                      Column(
-                        children: const [
-                          StatCard(title: 'Total Machines', value: '10', icon: Icons.factory),
-                          SizedBox(height: 12),
-                          StatCard(title: 'Total Admin', value: '10', icon: Icons.person),
-                          SizedBox(height: 12),
-                          StatCard(title: 'Total User', value: '10', icon: Icons.person_outline),
-                        ],
-                      ),
-                    const SizedBox(height: 16),
+                      
+                      const SizedBox(height: 16),
 
-                    // ROW 2: ENVIRONMENTAL + SYSTEM - Flexible
-                    Expanded(
-                      flex: 2,
-                      child: isDesktop
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: const [
-                                Expanded(flex: 2, child: EnvironmentalSensorsCard()),
-                                SizedBox(width: 16),
-                                Expanded(flex: 1, child: SystemCard()),
-                              ],
-                            )
-                          : Column(
-                              children: const [
-                                Expanded(child: EnvironmentalSensorsCard()),
-                                SizedBox(height: 16),
-                                Expanded(child: SystemCard()),
-                              ],
-                            ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ROW 3: COMPOSTING PROGRESS - Flexible
-                    const Expanded(
-                      flex: 1,
-                      child: CompostingProgressCard(),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                      // ROW 2: Composting Progress
+                      const CompostingProgressCard(),
+                    ],
+                  ),
                 ),
               ),
             );
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await showDialog<Map<String, dynamic>>(
             context: context,
@@ -135,8 +119,12 @@ class WebHomeScreen extends StatelessWidget {
             );
           }
         },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.teal,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Add Waste',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

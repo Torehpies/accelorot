@@ -202,7 +202,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
               const SizedBox(height: 16),
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
-              SubmitButton(onPressed: _handleSubmit),
+              SubmitButton(
+                onPressed: _handleSubmit,
+                style: ElevatedButton.styleFrom(), // Provide your desired ButtonStyle here
+              ),
             ],
           ),
         ),
