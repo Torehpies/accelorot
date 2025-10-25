@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:developer';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -8,12 +9,16 @@ class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _isGoogleSignInInitialized = false;
 
+  AuthService() {
+    _initializeGoogleSignIn();
+  }
+
   Future<void> _initializeGoogleSignIn() async {
     try {
       await _googleSignIn.initialize();
       _isGoogleSignInInitialized = true;
     } catch (e) {
-      // print('Failed to initialize Google Sign-In: $e');
+      log('Failed to initialize Google Sign-In: $e');
     }
   }
 
@@ -23,21 +28,59 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> signInWithGoogle() async {
+  //Future<Map<String, dynamic>> signInWithGoogle() async {
+  //  await _ensureGoogleSignInInitialized();
+  //  final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+
+  //  final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+  //  final credential = GoogleAuthProvider.credential(
+  //    idToken: googleAuth.idToken,
+  //  );
+
+  //  await _auth.signInWithCredential(credential);
+
+  //	await _saveGoogleUserToFirestore(user: googleUser, role: 'Operator');
+
+  //  return {'success': true, 'message': 'Signed in with Google successfully'};
+  //}
+
+  /// Sign in with Google, returns a GoogleSignInAccount
+  Future<GoogleSignInAccount> signInWithGoogle() async {
     await _ensureGoogleSignInInitialized();
-    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+    try {
+      final GoogleSignInAccount account = await _googleSignIn.authenticate(
+        scopeHint: ['email'],
+      );
+      return account;
+    } on GoogleSignInException catch (e) {
+      log(
+        'Google Sign In error: code: ${e.code.name} description:${e.description}',
+      );
+      rethrow;
+    } catch (error) {
+      log('Unexpected Google Sign-In error: $error');
+      rethrow;
+    }
+  }
 
-    final credential = GoogleAuthProvider.credential(
-      idToken: googleAuth.idToken,
-    );
+  /// Silent sign in with Google
+  Future<GoogleSignInAccount?> attemptSilentSignIn() async {
+    await _ensureGoogleSignInInitialized();
 
-    await _auth.signInWithCredential(credential);
+    try {
+      final result = _googleSignIn.attemptLightweightAuthentication();
 
-		await _saveGoogleUserToFirestore(user: googleUser, role: 'Operator');
-
-    return {'success': true, 'message': 'Signed in with Google successfully'};
+      if (result is Future<GoogleSignInAccount?>) {
+        return await result;
+      } else {
+        return result;
+      }
+    } catch (error) {
+			log('Silent sign-in failed: $error');
+			return null;
+		}
   }
 
   Future<void> _saveGoogleUserToFirestore({
