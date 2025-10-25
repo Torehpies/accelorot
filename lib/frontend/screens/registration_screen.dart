@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
-import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';

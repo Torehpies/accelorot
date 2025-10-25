@@ -21,22 +21,23 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
   late LoginController _controller;
   final AuthService _authService = AuthService();
   bool _isGoogleLoading = false;
-	bool _isLoading = false;
+  final bool _isLoading = false;
 
-	void _setLoadingState(bool isLoading) {
-		if (mounted) {
-		setState(() {
-				  _isGoogleLoading = isLoading;
-				});
-		}
-	}
+  void _setLoadingState(bool isLoading) {
+    if (mounted) {
+      setState(() {
+        _isGoogleLoading = isLoading;
+      });
+    }
+  }
 
-	Future<void> _handleGoogleSignIn() async {
-		if (_isGoogleLoading || _isLoading) return;
+  Future<void> _handleGoogleSignIn() async {
+    if (_isGoogleLoading || _isLoading) return;
 
-		final handler = GoogleSignInHandler(_authService, context);
-		await handler.signInWithGoogle(setLoadingState: _setLoadingState);
-	}
+    final handler = GoogleSignInHandler(_authService, context);
+    await handler.signInWithGoogle(setLoadingState: _setLoadingState);
+  }
+
   @override
   void initState() {
     super.initState();
