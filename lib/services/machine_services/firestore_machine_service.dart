@@ -1,9 +1,9 @@
-// lib/services/machine_services/firestore_machine_service.dart
+//firestore_machine_service.dart
 
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
-import '../firestore/firestore_collection.dart';
-import '../firestore/firestore_uploads.dart';
-import '../firestore/firestore_fetchs.dart';
+import '../../frontend/operator/machine_management/models/machine_model.dart';
+import 'firestore_collection.dart';
+import 'firestore_uploads.dart';
+import 'firestore_fetchs.dart';
 
 /// Main service class for machine management with Firestore.
 /// Provides a unified API for all machine operations.
@@ -78,4 +78,11 @@ class FirestoreMachineService {
 
   static Future<List<Map<String, dynamic>>> getOperators() =>
       MachineFirestoreFetch.getOperators();
+
+  // ==================== TEAM MEMBER METHODS ====================
+  
+  /// Fetch all active members from a specific team
+  /// Used by admins to populate the user dropdown when adding/editing machines
+  static Future<List<Map<String, dynamic>>> getTeamMembers(String teamId) =>
+      MachineFirestoreFetch.getTeamMembers(teamId);
 }

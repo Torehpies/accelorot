@@ -1,3 +1,4 @@
+//firestore_collection.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_mock_data.dart';
@@ -18,6 +19,16 @@ class MachineFirestoreCollections {
 
   static CollectionReference getUsersCollection() {
     return _firestore.collection('users');
+  }
+
+  static CollectionReference getTeamsCollection() {
+    return _firestore.collection('teams');
+  }
+
+  /// Get team members subcollection for a specific team
+  /// Path: teams/{teamId}/members
+  static CollectionReference getTeamMembersCollection(String teamId) {
+    return _firestore.collection('teams').doc(teamId).collection('members');
   }
 
   // Check if all mock machine data already exists
