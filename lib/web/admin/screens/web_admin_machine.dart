@@ -50,133 +50,123 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Machine Management',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Machine Management',
+          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.teal),
+            onPressed: () {
+              _controller.initialize();
+            },
+          ),
+        ],
+      ),
+      body: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Action Cards Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildActionCard(
+                        icon: Icons.archive,
+                        label: 'Archive',
+                        count: null,
+                        onPressed: () => _controller.setShowArchived(true),
+                      ),
                     ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildActionCard(
+                        icon: Icons.add_circle_outline,
+                        label: 'Add Machine',
+                        count: null,
+                        onPressed: _showAddMachineModal,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildInfoCard(
+                        icon: Icons.devices,
+                        label: 'Total Machines',
+                        count: _controller.filteredMachines.length,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Main Container
+                Container(
+                  constraints: const BoxConstraints(minHeight: 500),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  if (_controller.showArchived)
-                    TextButton.icon(
-                      onPressed: () => _controller.setShowArchived(false),
-                      icon: const Icon(Icons.arrow_back, size: 18),
-                      label: const Text('Back to Active Machines'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.teal,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                  child: Column(
+                    children: [
+                      // Search Bar Header
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: SearchBarWidget(
+                                onSearchChanged: _controller.setSearchQuery,
+                                onClear: _controller.clearSearch,
+                                focusNode: _searchFocusNode,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              _controller.showArchived
+                                  ? 'Archived Machines'
+                                  : 'Active Machines',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Action Cards Row
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildActionCard(
-                      icon: Icons.archive,
-                      label: 'Archive',
-                      count: null,
-                      onPressed: () => _controller.setShowArchived(true),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildActionCard(
-                      icon: Icons.add_circle_outline,
-                      label: 'Add Machine',
-                      count: null,
-                      onPressed: _showAddMachineModal,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildInfoCard(
-                      icon: Icons.devices,
-                      label: 'Total Machines',
-                      count: _controller.filteredMachines.length,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Main Container
-              Container(
-                constraints: const BoxConstraints(minHeight: 500),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[300]!, width: 1.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Search Bar Header
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: SearchBarWidget(
-                              onSearchChanged: _controller.setSearchQuery,
-                              onClear: _controller.clearSearch,
-                              focusNode: _searchFocusNode,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            _controller.showArchived
-                                ? 'Archived Machines'
-                                : 'Active Machines',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal,
-                            ),
-                          ),
-                        ],
+                      const Divider(height: 1),
+                      
+                      // Content
+                      SizedBox(
+                        height: 500,
+                        child: _buildContent(),
                       ),
-                    ),
-                    const Divider(height: 1),
-                    
-                    // Content
-                    SizedBox(
-                      height: 500,
-                      child: _buildContent(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
