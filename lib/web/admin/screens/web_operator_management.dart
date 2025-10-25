@@ -7,14 +7,14 @@ import 'package:flutter_application_1/frontend/screens/admin/operator_management
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/accept_operator_screen.dart';
 import 'web_operator_detail_screen.dart';
 
-class WebUserListScreen extends StatefulWidget {
-  const WebUserListScreen({super.key});
+class WebOperatorManagement extends StatefulWidget {
+  const WebOperatorManagement({super.key});
 
   @override
-  State<WebUserListScreen> createState() => _WebUserListScreenState();
+  State<WebOperatorManagement> createState() => _WebOperatorManagementState();
 }
 
-class _WebUserListScreenState extends State<WebUserListScreen> {
+class _WebOperatorManagementState extends State<WebOperatorManagement> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _operators = [];
   bool _loading = true;
@@ -37,10 +37,12 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        setState(() {
-          _error = 'No user logged in';
-          _loading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _error = 'No user logged in';
+            _loading = false;
+          });
+        }
         return;
       }
 
@@ -165,177 +167,149 @@ class _WebUserListScreenState extends State<WebUserListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Operator Management',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal,
-                ),
-              ),
-              if (_showArchived)
-                TextButton.icon(
-                  onPressed: () => setState(() => _showArchived = false),
-                  icon: const Icon(Icons.arrow_back, size: 18),
-                  label: const Text('Back to Active Operators'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Action Cards Row
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionCard(
-                  icon: Icons.archive,
-                  label: 'Archive',
-                  count: _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).length,
-                  onPressed: () => setState(() => _showArchived = true),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                  icon: Icons.person_add_alt_1,
-                  label: 'Add Operator',
-                  count: null,
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
-                          child: AddOperatorScreen(),
-                        ),
-                      ),
-                    ).then((_) => _loadOperators());
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildActionCard(
-                  icon: Icons.check_circle,
-                  label: 'Accept Operator',
-                  count: null,
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => Dialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
-                          child: AcceptOperatorScreen(),
-                        ),
-                      ),
-                    ).then((_) => _loadOperators());
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildInfoCard(
-                  icon: Icons.people,
-                  label: 'Active Operators',
-                  count: _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).length,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Main Container
-          Container(
-            constraints: const BoxConstraints(minHeight: 500),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[300]!, width: 1.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Search Bar Header
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          onChanged: (value) => setState(() => _searchQuery = value),
-                          decoration: InputDecoration(
-                            hintText: 'Search operators...',
-                            prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                            suffixIcon: _searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () => setState(() => _searchQuery = ''),
-                                  )
-                                : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.teal, width: 2),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        icon: const Icon(Icons.refresh, color: Colors.teal),
-                        onPressed: _loadOperators,
-                        tooltip: 'Refresh',
-                      ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1),
-                
-                // Content
-                SizedBox(
-                  height: 500,
-                  child: _buildContent(),
-                ),
-              ],
-            ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text(
+          'Operator Management',
+          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.teal),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.teal),
+            onPressed: _loadOperators,
           ),
         ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Action Cards Row
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.archive,
+                    label: 'Archive',
+                    count: _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).length,
+                    onPressed: () => setState(() => _showArchived = true),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.person_add_alt_1,
+                    label: 'Add Operator',
+                    count: null,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+                            child: AddOperatorScreen(),
+                          ),
+                        ),
+                      ).then((_) => _loadOperators());
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.check_circle,
+                    label: 'Accept Operator',
+                    count: null,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+                            child: AcceptOperatorScreen(),
+                          ),
+                        ),
+                      ).then((_) => _loadOperators());
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildInfoCard(
+                    icon: Icons.people,
+                    label: 'Active Operators',
+                    count: _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).length,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      onChanged: (value) => setState(() => _searchQuery = value),
+                      decoration: InputDecoration(
+                        hintText: 'Search operators...',
+                        prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () => setState(() => _searchQuery = ''),
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.teal, width: 2),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.teal),
+                    onPressed: _loadOperators,
+                    tooltip: 'Refresh',
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+
+            // Content
+            SizedBox(
+              height: 500,
+              child: _buildContent(),
+            ),
+          ],
+        ),
       ),
     );
   }

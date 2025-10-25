@@ -35,8 +35,11 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
   void initState() {
     super.initState();
     _screens = [
-      const WebAdminHomeScreen(),
-      const WebUserListScreen(),
+      WebAdminHomeScreen(
+        onManageOperators: () => setState(() => _selectedIndex = 1),
+        onManageMachines: () => setState(() => _selectedIndex = 2),
+      ),
+      const WebOperatorManagement(),
 
       const WebMachineManagement(),
       const WebProfileScreen(),

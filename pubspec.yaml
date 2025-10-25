@@ -8,6 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
   syncfusion_flutter_charts: ^31.1.22
   firebase_core: ^4.1.1
   firebase_auth: ^6.1.0
@@ -30,5 +31,6 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+
 
 
