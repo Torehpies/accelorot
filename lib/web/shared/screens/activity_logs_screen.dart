@@ -1,152 +1,294 @@
+// lib/frontend/operator/web/web_activity_logs_screen.dart
 import 'package:flutter/material.dart';
+import '../../../frontend/operator/activity_logs/components/all_activity_section.dart';
+import '../../../frontend/operator/activity_logs/components/substrate_section.dart';
+import '../../../frontend/operator/activity_logs/components/alerts_section.dart';
+import '../../../frontend/operator/activity_logs/components/cycles_recom_section.dart';
 
-class WebAdminHomeScreen extends StatefulWidget {
-  const WebAdminHomeScreen({super.key});
+class WebActivityLogsScreen extends StatefulWidget {
+  final String? viewingOperatorId;
+  
+  const WebActivityLogsScreen({super.key, this.viewingOperatorId, required bool shouldRefresh});
 
   @override
-  State<WebAdminHomeScreen> createState() => _WebAdminHomeScreenState();
+  State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
 }
 
-class _WebAdminHomeScreenState extends State<WebAdminHomeScreen> {
-  String currentPage = 'dashboard'; // default page
+class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
+  String _selectedTab = 'all';
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 1200;
+    final isMediumScreen = screenWidth > 800 && screenWidth <= 1200;
+
     return Scaffold(
-      body: Row(
-        children: [
-          // Sidebar
-          Container(
-            width: 220,
-            color: Colors.green.shade700,
-            child: Column(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Activity Logs",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: () {
+              setState(() {}); // Trigger rebuild to refresh data
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Tab Navigation Bar
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                isWideScreen ? 32 : 24,
+                isWideScreen ? 24 : 16,
+                isWideScreen ? 32 : 24,
+                0,
+              ),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  _buildTabButton('all', 'All Activity', Icons.list),
+                  _buildTabButton('substrate', 'Substrate', Icons.eco),
+                  _buildTabButton('alerts', 'Alerts', Icons.warning),
+                  _buildTabButton('cycles', 'Cycles', Icons.refresh),
+                ],
+              ),
+            ),
+
+            // Content Area
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(isWideScreen ? 32 : 24),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: _buildContent(isWideScreen, isMediumScreen),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(String value, String label, IconData icon) {
+    final isSelected = _selectedTab == value;
+    
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _selectedTab = value),
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.teal
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 40),
-                _buildNavItem('Dashboard', 'dashboard'),
-                _buildNavItem('Activity Logs', 'activity_logs'),
+                Icon(
+                  icon,
+                  size: 18,
+                  color: isSelected ? Colors.white : Colors.grey[700],
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey[700],
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ],
             ),
           ),
-
-          // Main content area
-          Expanded(
-            child: Container(
-              color: Colors.grey[100],
-              padding: const EdgeInsets.all(16),
-              child: _buildPage(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildNavItem(String title, String page) {
-    return ListTile(
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-      onTap: () => setState(() => currentPage = page),
-    );
-  }
-
-  // This changes what appears on the right side
-  Widget _buildPage() {
-    switch (currentPage) {
-      case 'activity_logs':
-        return ActivityLogsPage(onViewAll: (section) {
-          setState(() => currentPage = section);
-        });
+  Widget _buildContent(bool isWideScreen, bool isMediumScreen) {
+    switch (_selectedTab) {
       case 'substrate':
-        return const SubstrateLogsPage();
+        return _buildSubstrateView();
       case 'alerts':
-        return const AlertLogsPage();
+        return _buildAlertsView();
       case 'cycles':
-        return const CycleLogsPage();
+        return _buildCyclesView();
+      case 'all':
       default:
-        return const Center(child: Text("Dashboard"));
+        return isWideScreen
+            ? _buildWideLayout()
+            : isMediumScreen
+                ? _buildMediumLayout()
+                : _buildNarrowLayout();
     }
   }
-}
 
-class ActivityLogsPage extends StatelessWidget {
-  final Function(String) onViewAll;
-
-  const ActivityLogsPage({super.key, required this.onViewAll});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildWideLayout() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSection("Substrate", () => onViewAll('substrate')),
-        const SizedBox(height: 16),
-        _buildSection("Alerts", () => onViewAll('alerts')),
-        const SizedBox(height: 16),
-        _buildSection("Cycles", () => onViewAll('cycles')),
+        // All Activity Section (full width)
+        const AllActivitySection(),
+        const SizedBox(height: 24),
+        
+        // Substrate + Alerts side by side
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Expanded(child: SubstrateSection()),
+            SizedBox(width: 24),
+            Expanded(child: AlertsSection()),
+          ],
+        ),
+        const SizedBox(height: 24),
+        
+        // Cycles & Recommendations (full width)
+        const CyclesRecomSection(),
       ],
     );
   }
 
-  Widget _buildSection(String title, VoidCallback onViewAll) {
+  Widget _buildMediumLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const AllActivitySection(),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Expanded(child: SubstrateSection()),
+            SizedBox(width: 20),
+            Expanded(child: AlertsSection()),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const CyclesRecomSection(),
+      ],
+    );
+  }
+
+  Widget _buildNarrowLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: const [
+        AllActivitySection(),
+        SizedBox(height: 20),
+        SubstrateSection(),
+        SizedBox(height: 20),
+        AlertsSection(),
+        SizedBox(height: 20),
+        CyclesRecomSection(),
+      ],
+    );
+  }
+
+  Widget _buildSubstrateView() {
+    return Column(
+      children: [
+        _buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
+        const SizedBox(height: 16),
+        const SubstrateSection(),
+      ],
+    );
+  }
+
+  Widget _buildAlertsView() {
+    return Column(
+      children: [
+        _buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
+        const SizedBox(height: 16),
+        const AlertsSection(),
+      ],
+    );
+  }
+
+  Widget _buildCyclesView() {
+    return Column(
+      children: [
+        _buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
+        const SizedBox(height: 16),
+        const CyclesRecomSection(),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon, MaterialColor color) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        gradient: LinearGradient(
+          colors: [color.shade50, color.shade100],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.shade200),
       ),
       child: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const Spacer(),
-          GestureDetector(
-            onTap: onViewAll,
-            child: const Text("View All >", style: TextStyle(color: Colors.green)),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.shade700,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: color.shade900,
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Example of the detailed Substrate page
-class SubstrateLogsPage extends StatelessWidget {
-  const SubstrateLogsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Image.asset('assets/substrate.png', fit: BoxFit.contain),
-    );
-  }
-}
-
-class AlertLogsPage extends StatelessWidget {
-  const AlertLogsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Image.asset('assets/alerts.png', fit: BoxFit.contain),
-    );
-  }
-}
-
-class CycleLogsPage extends StatelessWidget {
-  const CycleLogsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Image.asset('assets/cycles.png', fit: BoxFit.contain),
     );
   }
 }
