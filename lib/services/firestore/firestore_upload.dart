@@ -25,8 +25,8 @@ class FirestoreUpload {
       final batch = _firestore.batch();
 
       for (var s in substrates) {
-        // ⭐ Use timestamp + userId for unique doc ID
-        final docId = '${s.timestamp.millisecondsSinceEpoch}_${userId}';
+        //  Use timestamp + userId for unique doc ID
+        final docId = '${s.timestamp.millisecondsSinceEpoch}_$userId';
         final docRef = FirestoreCollections.getSubstratesCollection(userId).doc(docId);
 
         batch.set(docRef, {
@@ -56,8 +56,8 @@ class FirestoreUpload {
       final batch = _firestore.batch();
 
       for (var a in alerts) {
-        // ⭐ Use timestamp + userId for unique doc ID
-        final docId = '${a.timestamp.millisecondsSinceEpoch}_${userId}';
+        //  Use timestamp + userId for unique doc ID
+        final docId = '${a.timestamp.millisecondsSinceEpoch}_$userId';
         final docRef = FirestoreCollections.getAlertsCollection(userId).doc(docId);
 
         batch.set(docRef, {
@@ -87,8 +87,8 @@ class FirestoreUpload {
       final batch = _firestore.batch();
 
       for (var c in cycles) {
-        // ⭐ Use timestamp + userId for unique doc ID
-        final docId = '${c.timestamp.millisecondsSinceEpoch}_${userId}';
+        //  Use timestamp + userId for unique doc ID
+        final docId = '${c.timestamp.millisecondsSinceEpoch}_$userId';
         final docRef = FirestoreCollections.getCyclesRecomCollection(userId).doc(docId);
 
         batch.set(docRef, {

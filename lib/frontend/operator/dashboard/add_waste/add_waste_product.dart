@@ -118,11 +118,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     };
 
     try {
-      // ⭐ CRITICAL FIX: Pass viewingOperatorId to the service!
-      print('🔍 FORM DEBUG: widget.viewingOperatorId = ${widget.viewingOperatorId}');
+
       await FirestoreActivityService.addWasteProduct(
         wasteEntry,
-        viewingOperatorId: widget.viewingOperatorId, // ⭐ THIS IS THE KEY FIX!
+        viewingOperatorId: widget.viewingOperatorId,
       );
       await Future.delayed(const Duration(milliseconds: 1000));
 

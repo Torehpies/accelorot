@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FloatingActionButton(
             // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
             onPressed: () async {
-              print('🔍 HOME DEBUG: Passing viewingOperatorId = ${widget.viewingOperatorId}');
+           
               
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,
