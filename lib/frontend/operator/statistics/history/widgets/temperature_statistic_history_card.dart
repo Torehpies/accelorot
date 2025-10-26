@@ -1,57 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
 
-class OxygenStatisticCard extends StatelessWidget {
-  final double currentOxygen;
-  final List<double> hourlyReadings;
+class TemperatureStatisticHistoryCard extends StatelessWidget {
+  final double currentTemperature;
+  final List<double> dailyReadings; // ✅ Changed from hourlyReadings
   final DateTime? lastUpdated;
+  final List<String>? labels; 
 
-  const OxygenStatisticCard({
+  const TemperatureStatisticHistoryCard({
     super.key,
-    required this.currentOxygen,
-    required this.hourlyReadings,
+    required this.currentTemperature,
+    required this.dailyReadings,
     this.lastUpdated,
+    this.labels,
+    
   });
 
   @override
   Widget build(BuildContext context) {
-    if (hourlyReadings.isEmpty) {
+    if (dailyReadings.isEmpty) {
       return _buildEmptyCard(context);
     }
 
-    final quality = _getQuality(currentOxygen);
+    final quality = _getQuality(currentTemperature);
     final color = _getColorForQuality(quality);
-
     final now = DateTime.now();
-    final int dataLength = hourlyReadings.length;
-    final List<Map<String, Object>> oxygenData = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {
-        'x': '${hour.toString().padLeft(2, '0')}:00',
-        'y': hourlyReadings[i],
-      };
-    });
+    final dataLength = dailyReadings.length;
 
-    // Ideal MQ135 (Oxygen proxy) range: 0 – 1500 ppm
-    final List<Map<String, Object>> upperBound = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 1500.0};
-    });
+    // ✅ Use strongly typed data class
+    final List<_ChartPoint> temperatureData = [];
+    final List<_ChartPoint> upperBound = [];
+    final List<_ChartPoint> lowerBound = [];
 
-    final List<Map<String, Object>> lowerBound = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 0.0};
-    });
+    // ✅ Generate past N days as labels (e.g., Mon, Tue, ...)
+    for (int i = 0; i < dataLength; i++) {
+      final day = now.subtract(Duration(days: dataLength - 1 - i));
+      final dayLabel = DateFormat('MMM d').format(day); // 👉 e.g., "Oct 23"
+      temperatureData.add(_ChartPoint(dayLabel, dailyReadings[i]));
+      upperBound.add(_ChartPoint(dayLabel, 65.0));
+      lowerBound.add(_ChartPoint(dayLabel, 55.0));
+    }
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.orange.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.orange.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -61,19 +60,19 @@ class OxygenStatisticCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header and current oxygen level
+          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Oxygen Level',
+                'Temperature (Daily)',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
-                '${currentOxygen.toStringAsFixed(0)} ppm',
+                '${currentTemperature.toStringAsFixed(1)}°C',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: color,
@@ -81,13 +80,15 @@ class OxygenStatisticCard extends StatelessWidget {
               ),
             ],
           ),
+
           if (lastUpdated != null) ...[
             const SizedBox(height: 4),
             Text(
               'Last updated: ${_formatDate(lastUpdated!)}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
+
           const SizedBox(height: 12),
 
           // Quality indicator
@@ -109,66 +110,76 @@ class OxygenStatisticCard extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
 
-          Text(
-            'Ideal Range: 0–1500 ppm',
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+          // Ideal range and progress
+          const Text(
+            'Ideal Range: 55–65°C',
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
-            value: _calculateProgress(currentOxygen),
+            value: _calculateProgress(currentTemperature),
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
+
           const SizedBox(height: 16),
 
-          Text(
-            'Trend (Last 8 Hours)',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          const Text(
+            'Trend (Last 7 Days)',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
+
           SizedBox(
-            height: 90,
-            width: double.infinity,
+            height: 120,
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines:
+                    const MajorGridLines(width: 0.5, color: Colors.grey),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
-                maximum: 5000, // full MQ135 sensor range
-                interval: 1000,
-                majorGridLines: const MajorGridLines(width: 0.5, color: Colors.grey),
+                maximum: 80,
+                interval: 10,
+                majorGridLines:
+                    const MajorGridLines(width: 0.5, color: Colors.grey),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
               margin: EdgeInsets.zero,
-              series: <CartesianSeries>[
-                LineSeries<Map<String, Object>, String>(
-                  dataSource: oxygenData,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.blue,
+              series: [
+                // Temperature line
+                LineSeries<_ChartPoint, String>(
+                  dataSource: temperatureData,
+                  xValueMapper: (data, _) => data.x,
+                  yValueMapper: (data, _) => data.y,
+                  color: Colors.orange,
                   width: 2,
                   markerSettings: const MarkerSettings(isVisible: true),
                 ),
-                LineSeries<Map<String, Object>, String>(
+
+                // Upper bound
+                LineSeries<_ChartPoint, String>(
                   dataSource: upperBound,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
+                  xValueMapper: (data, _) => data.x,
+                  yValueMapper: (data, _) => data.y,
                   color: Colors.red,
                   dashArray: const [5, 5],
                   width: 1,
                 ),
-                LineSeries<Map<String, Object>, String>(
+
+                // Lower bound
+                LineSeries<_ChartPoint, String>(
                   dataSource: lowerBound,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.green,
+                  xValueMapper: (data, _) => data.x,
+                  yValueMapper: (data, _) => data.y,
+                  color: Colors.red,
                   dashArray: const [5, 5],
                   width: 1,
                 ),
@@ -186,56 +197,63 @@ class OxygenStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
+        border: Border.all(color: Colors.orange.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: Colors.orange.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       padding: const EdgeInsets.all(18),
-      child: Center(
-        child: Text('No air quality data', style: TextStyle(color: Colors.grey[600])),
+      child: const Center(
+        child: Text(
+          'No temperature data available',
+          style: TextStyle(color: Colors.grey),
+        ),
       ),
     );
   }
 
- // Adjusted for MQ135 range interpretation
-  String _getQuality(double ppm) {
-    if (ppm <= 1500) {
-      return 'Excellent';
-    }
-    if (ppm > 1500 && ppm <= 3000) {
-      return 'Good';
-    }
-    if (ppm > 3000 && ppm <= 4000) {
-      return 'Fair';
+  String _getDayLabel(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[(weekday - 1) % 7];
+  }
+
+  String _getQuality(double temperature) {
+    if (temperature >= 55 && temperature <= 65) return 'Optimal';
+    if ((temperature >= 40 && temperature < 55) ||
+        (temperature > 65 && temperature <= 70)) {
+      return 'Moderate';
     }
     return 'Poor';
   }
 
-
   Color _getColorForQuality(String quality) {
     switch (quality) {
-      case 'Excellent':
+      case 'Optimal':
         return Colors.green;
-      case 'Good':
+      case 'Moderate':
         return Colors.orange;
-      case 'Fair':
-        return Colors.amber;
       default:
         return Colors.red;
     }
   }
 
-  double _calculateProgress(double ppm) {
-    return (ppm.clamp(0.0, 5000.0) / 5000.0);
+  double _calculateProgress(double temperature) {
+    return (temperature.clamp(0.0, 80.0) / 80.0);
   }
 
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year} '
         '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
+}
+
+// ✅ Data model for chart points
+class _ChartPoint {
+  final String x;
+  final double y;
+  _ChartPoint(this.x, this.y);
 }

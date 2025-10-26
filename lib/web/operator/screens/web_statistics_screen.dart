@@ -4,7 +4,7 @@ import '../../../frontend/operator/statistics/view_screens/oxygen_stats_view.dar
 import '../../../frontend/operator/statistics/view_screens/moisture_stats_view.dart';
 import '../../../frontend/operator/statistics/view_screens/temperature_stats_view.dart';
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
-import '../../../frontend/components/history.dart';
+import '../../../frontend/operator/statistics/history/history.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
   final String? viewingOperatorId;

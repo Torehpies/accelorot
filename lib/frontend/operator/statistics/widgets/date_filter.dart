@@ -16,21 +16,28 @@ class DateFilterState extends State<DateFilter> {
   DateTimeRange? _selectedRange;
   String _label = "Date Filter";
 
+  /// Normalize any DateTime to midnight
+  DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
   void _setPresetRange(int days) {
-    final now = DateTime.now();
-    final start = now.subtract(Duration(days: days - 1));
-    final range = DateTimeRange(start: start, end: now);
+  final now = _normalize(DateTime.now());
+  final start = now.subtract(Duration(days: days - 1));
+  // Make end represent end of the current day (23:59:59)
+  final end = now.add(const Duration(hours: 23, minutes: 59, seconds: 59));
 
-    setState(() {
-      _selectedRange = range;
-      _label = "Last $days Days";
-    });
+  final range = DateTimeRange(start: start, end: end);
 
-    widget.onChanged(range);
-  }
+  setState(() {
+    _selectedRange = range;
+    _label = "Last $days Days";
+  });
+
+  widget.onChanged(range);
+}
+
 
   Future<void> _pickCustomRange() async {
-    DateTime now = DateTime.now();
+    DateTime now = _normalize(DateTime.now());
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
@@ -53,8 +60,8 @@ class DateFilterState extends State<DateFilter> {
                   onChanged: (dp.DatePeriod newPeriod) {
                     setDialogState(() {
                       tempRange = DateTimeRange(
-                        start: newPeriod.start,
-                        end: newPeriod.end,
+                        start: _normalize(newPeriod.start),
+                        end: _normalize(newPeriod.end),
                       );
                     });
                   },
@@ -84,8 +91,11 @@ class DateFilterState extends State<DateFilter> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      _selectedRange = tempRange;
-                      _label = _formatRange(tempRange);
+                      _selectedRange = DateTimeRange(
+                        start: _normalize(tempRange.start),
+                        end: _normalize(tempRange.end),
+                      );
+                      _label = _formatRange(_selectedRange!);
                     });
                     widget.onChanged(_selectedRange);
                     Navigator.pop(context);

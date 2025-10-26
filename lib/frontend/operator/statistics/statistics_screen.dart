@@ -5,7 +5,7 @@ import 'view_screens/oxygen_stats_view.dart';
 import 'view_screens/moisture_stats_view.dart';
 import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
-import '../../components/history.dart'; // make sure this path is correct
+import 'history/history.dart'; // make sure this path is correct
 
 class StatisticsScreen extends StatefulWidget {
   final String? viewingOperatorId;
