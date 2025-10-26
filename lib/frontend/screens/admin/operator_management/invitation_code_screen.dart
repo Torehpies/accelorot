@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void showInvitationOverlay(BuildContext context, String initialCode, String initialExpiryDate) {
+  // ignore: no_leading_underscores_for_local_identifiers
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
   // local generator used for "Generate New"
   String generateCode() {
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -16,6 +21,7 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
     builder: (BuildContext context) {
       String currentCode = initialCode;
       String currentExpiry = initialExpiryDate;
+      bool isGenerating = false;
 
       String formatExpiry(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
@@ -93,14 +99,54 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            // generate a fresh code and update expiry to 24h from now
-                            final newCode = generateCode();
-                            final newExpiry = DateTime.now().add(const Duration(hours: 24));
-                            setState(() {
-                              currentCode = newCode;
-                              currentExpiry = formatExpiry(newExpiry);
-                            });
+                          onPressed: isGenerating ? null : () async {
+                            setState(() => isGenerating = true);
+                            
+                            try {
+                              final user = FirebaseAuth.instance.currentUser;
+                              if (user == null) {
+                                throw Exception('No user logged in');
+                              }
+
+                              final teamId = user.uid;
+                              final newCode = generateCode();
+                              final newExpiry = DateTime.now().add(const Duration(hours: 24));
+
+                              // Save new code to Firestore
+                              await _firestore.collection('teams').doc(teamId).update({
+                                'joinCode': newCode,
+                                'joinCodeExpiresAt': newExpiry,
+                                'updatedAt': FieldValue.serverTimestamp(),
+                              });
+
+                              setState(() {
+                                currentCode = newCode;
+                                currentExpiry = formatExpiry(newExpiry);
+                                isGenerating = false;
+                              });
+
+                              // Show success message
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('✅ New invitation code generated'),
+                                    backgroundColor: Colors.green,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              setState(() => isGenerating = false);
+                              
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error generating code: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2E4F2F),
@@ -109,11 +155,20 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text("Generate New"),
+                          child: isGenerating
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                  ),
+                                )
+                              : const Text("Generate New"),
                         ),
                         const SizedBox(width: 12),
                         OutlinedButton(
-                          onPressed: () {
+                          onPressed: isGenerating ? null : () {
                             Navigator.pop(context);
                           },
                           style: OutlinedButton.styleFrom(

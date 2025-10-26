@@ -1,4 +1,4 @@
-// lib/frontend/operator/machine_management/services/mock_data/machine_mock_data.dart
+//machine_mock_data.dart
 
 class MachineMockData {
   static List<Map<String, dynamic>> getMockMachines() {

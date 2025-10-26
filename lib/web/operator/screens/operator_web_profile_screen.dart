@@ -7,9 +7,7 @@ import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
 
 class WebProfileScreen extends StatefulWidget {
-  final String? viewingOperatorId;
-  
-  const WebProfileScreen({super.key, this.viewingOperatorId});
+  const WebProfileScreen({super.key});
 
   @override
   State<WebProfileScreen> createState() => _WebProfileScreenState();
@@ -133,10 +131,15 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text(
+          'Profile',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.teal,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle),
+            icon: const Icon(Icons.notifications_outlined, color: Colors.teal),
             onPressed: () {},
           ),
         ],
