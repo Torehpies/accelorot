@@ -1,259 +1,152 @@
-// activity_logs_screen.dart
-
 import 'package:flutter/material.dart';
 
-class ActivityLogsScreen extends StatelessWidget {
-  const ActivityLogsScreen({super.key});
+class WebAdminHomeScreen extends StatefulWidget {
+  const WebAdminHomeScreen({super.key});
+
+  @override
+  State<WebAdminHomeScreen> createState() => _WebAdminHomeScreenState();
+}
+
+class _WebAdminHomeScreenState extends State<WebAdminHomeScreen> {
+  String currentPage = 'dashboard'; // default page
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        backgroundColor: Colors.grey[100],
-        elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search',
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-            ),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {},
-              color: Colors.black,
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // View All Activity Section
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey,
-                    spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.history, color: Colors.grey),
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    'View All Activity',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.arrow_forward_ios, size: 16.0, color: Colors.grey),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24.0),
-
-            // Substrates Section
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey,
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.leak_add, color: Colors.grey),
-                            const SizedBox(width: 8.0),
-                            const Text(
-                              'Substrates',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'View All >',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16.0),
-                        Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-                _createSubstrateCard('Green', Icons.eco),
-                _createSubstrateCard('Brown', Icons.eco),
-                _createSubstrateCard('Compost', Icons.recycling),
-                ],
-                    ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24.0),
-
-            // Alerts Section
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey,
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.warning, color: Colors.grey),
-                            const SizedBox(width: 8.0),
-                            const Text(
-                              'Alerts',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'View All >',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _createAlertCard('Temp', Icons.thermostat),
-                            _createAlertCard('Moisture', Icons.water_drop),
-                            _createAlertCard('Oxygen', Icons.bubble_chart),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _createSubstrateCard(String title, IconData icon) {
-    return Container(
-      width: 80.0,
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[50] ?? Colors.grey[100]!, // Safe fallback if null
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey[300] ?? Colors.grey[200]!, width: 1.0), // Safe fallback
-      ),
-      child: Column(
+      body: Row(
         children: [
-          Icon(icon, size: 32.0, color: Colors.grey[700]),
-          const SizedBox(height: 8.0),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
+          // Sidebar
+          Container(
+            width: 220,
+            color: Colors.green.shade700,
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+                _buildNavItem('Dashboard', 'dashboard'),
+                _buildNavItem('Activity Logs', 'activity_logs'),
+              ],
             ),
-            textAlign: TextAlign.center,
+          ),
+
+          // Main content area
+          Expanded(
+            child: Container(
+              color: Colors.grey[100],
+              padding: const EdgeInsets.all(16),
+              child: _buildPage(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _createAlertCard(String title, IconData icon) {
-    return Container(
-      width: 80.0,
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[50] ?? Colors.grey[100]!, // Safe fallback if null
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey[300] ?? Colors.grey[200]!, width: 1.0), // Safe fallback
+  Widget _buildNavItem(String title, String page) {
+    return ListTile(
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32.0, color: Colors.grey[700]),
-          const SizedBox(height: 8.0),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
+      onTap: () => setState(() => currentPage = page),
+    );
+  }
+
+  // This changes what appears on the right side
+  Widget _buildPage() {
+    switch (currentPage) {
+      case 'activity_logs':
+        return ActivityLogsPage(onViewAll: (section) {
+          setState(() => currentPage = section);
+        });
+      case 'substrate':
+        return const SubstrateLogsPage();
+      case 'alerts':
+        return const AlertLogsPage();
+      case 'cycles':
+        return const CycleLogsPage();
+      default:
+        return const Center(child: Text("Dashboard"));
+    }
+  }
+}
+
+class ActivityLogsPage extends StatelessWidget {
+  final Function(String) onViewAll;
+
+  const ActivityLogsPage({super.key, required this.onViewAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _buildSection("Substrate", () => onViewAll('substrate')),
+        const SizedBox(height: 16),
+        _buildSection("Alerts", () => onViewAll('alerts')),
+        const SizedBox(height: 16),
+        _buildSection("Cycles", () => onViewAll('cycles')),
+      ],
+    );
+  }
+
+  Widget _buildSection(String title, VoidCallback onViewAll) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child: Row(
+        children: [
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Spacer(),
+          GestureDetector(
+            onTap: onViewAll,
+            child: const Text("View All >", style: TextStyle(color: Colors.green)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Example of the detailed Substrate page
+class SubstrateLogsPage extends StatelessWidget {
+  const SubstrateLogsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset('assets/substrate.png', fit: BoxFit.contain),
+    );
+  }
+}
+
+class AlertLogsPage extends StatelessWidget {
+  const AlertLogsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset('assets/alerts.png', fit: BoxFit.contain),
+    );
+  }
+}
+
+class CycleLogsPage extends StatelessWidget {
+  const CycleLogsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset('assets/cycles.png', fit: BoxFit.contain),
     );
   }
 }
