@@ -40,8 +40,9 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _loading = true;
   int _activeOperators = 0;
-  int _pendingInvitations = 0;
-  int _totalMachines = 0;
+  int _archivedOperators = 0;
+  int _activeMachines = 0;
+  int _archivedMachines = 0;
 
   @override
   void initState() {
@@ -68,15 +69,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           .get();
 
       final activeCount = membersSnapshot.docs
-          .where((doc) =>
-              doc.data()['isArchived'] != true && doc.data()['hasLeft'] != true)
+          .where((doc) => doc.data()['isArchived'] != true)
           .length;
 
-      final pendingSnapshot = await _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('pending_members')
-          .get();
+      final archivedCount = membersSnapshot.docs
+          .where((doc) => doc.data()['isArchived'] == true)
+          .length;
 
       final machinesSnapshot = await _firestore
           .collection('teams')
@@ -84,11 +82,20 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           .collection('machines')
           .get();
 
+      final activeMachines = machinesSnapshot.docs
+          .where((doc) => doc.data()['isArchived'] != true)
+          .length;
+
+      final archivedMachines = machinesSnapshot.docs
+          .where((doc) => doc.data()['isArchived'] == true)
+          .length;
+
       if (mounted) {
         setState(() {
           _activeOperators = activeCount;
-          _pendingInvitations = pendingSnapshot.docs.length;
-          _totalMachines = machinesSnapshot.docs.length;
+          _archivedOperators = archivedCount;
+          _activeMachines = activeMachines;
+          _archivedMachines = archivedMachines;
           _loading = false;
         });
       }
@@ -100,23 +107,14 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    const borderColor = Color.fromARGB(255, 170, 169, 169); // unified border color
+    const borderColor = Color.fromARGB(255, 170, 169, 169);
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.teal.shade700,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title:
-            const Text('Admin Dashboard', style: TextStyle(color: Colors.white)),
+        title: const Text('Admin Dashboard', style: TextStyle(color: Colors.white)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.white),
-            onPressed: () {},
-          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _loadStats,
@@ -128,7 +126,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
-                height: screenHeight, // Fit screen height
+                height: screenHeight,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -140,32 +138,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: _buildModernStatCard(
-                                label: 'Add Operator',
-                                value: '',
-                                icon: Icons.person_add_outlined,
-                                onTap: widget.onManageOperators,
-                                borderColor: borderColor,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: _buildModernStatCard(
-                                label: 'Accept Operator',
-                                value: _pendingInvitations.toString(),
-                                icon: Icons.check_circle_outline,
-                                borderColor: borderColor,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
                               child: _buildModernStatCard(
                                 label: 'Active Operators',
                                 value: _activeOperators.toString(),
@@ -176,12 +149,33 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                           ),
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
                               child: _buildModernStatCard(
-                                label: 'Total Machines',
-                                value: _totalMachines.toString(),
-                                icon: Icons.devices_outlined,
-                                onTap: widget.onManageMachines,
+                                label: 'Archived Operators',
+                                value: _archivedOperators.toString(),
+                                icon: Icons.archive_outlined,
+                                borderColor: borderColor,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: _buildModernStatCard(
+                                label: 'Active Machines',
+                                value: _activeMachines.toString(),
+                                icon: Icons.devices_other_outlined,
+                                borderColor: borderColor,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: _buildModernStatCard(
+                                label: 'Archived Machines',
+                                value: _archivedMachines.toString(),
+                                icon: Icons.archive_rounded,
                                 borderColor: borderColor,
                               ),
                             ),
@@ -200,18 +194,18 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: borderColor, width: 1),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
-                              color: const Color.fromARGB(255, 155, 155, 155),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
+                              color: Color.fromARGB(100, 0, 0, 0),
+                              blurRadius: 8,
+                              offset: Offset(2, 3),
                             ),
                           ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSectionHeader('User Management',
+                            _buildSectionHeader('Operator Management',
                                 onTapManage: widget.onManageOperators),
                             const SizedBox(height: 16),
                             Expanded(
@@ -220,10 +214,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 itemCount: usersList.length,
                                 itemBuilder: (context, index) {
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 16.0),
-                                    child:
-                                        _buildUserCard(usersList[index], borderColor),
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child: _buildUserCard(usersList[index], borderColor),
                                   );
                                 },
                               ),
@@ -243,11 +235,11 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: borderColor, width: 1),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
-                              color: const Color.fromARGB(255, 155, 155, 155),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
+                              color: Color.fromARGB(100, 0, 0, 0),
+                              blurRadius: 8,
+                              offset: Offset(2, 3),
                             ),
                           ],
                         ),
@@ -263,10 +255,9 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 itemCount: machinesList.length,
                                 itemBuilder: (context, index) {
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 16.0),
-                                    child: _buildMachineCard(
-                                        machinesList[index], borderColor),
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child:
+                                        _buildMachineCard(machinesList[index], borderColor),
                                   );
                                 },
                               ),
@@ -287,23 +278,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     'Zoe Jop',
     'Aurélie Ford',
     'Troy Kim',
-    'Troy Kim',
-    'Troy Kim',
-    'Troy Kim',
-    'Troy Kim',
-
   ];
 
   final List<String> machinesList = [
     'Machine A',
     'Machine B',
     'Machine C',
-    'Machine D',
-    'Machine D',
-    'Machine D',
-    'Machine D',
-    'Machine D',
-    'Machine D',
     'Machine D',
   ];
 
@@ -312,47 +292,49 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     required String value,
     required IconData icon,
     required Color borderColor,
-    VoidCallback? onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor, width: 1), // unified border
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 24, color: const Color(0xFF2E7D32)),
-            const SizedBox(width: 8),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(100, 0, 0, 0),
+            blurRadius: 8,
+            offset: Offset(2, 3),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 26, color: Color(0xFF2E7D32)),
+          const SizedBox(width: 8),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
                 ),
-                if (value.isNotEmpty)
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -364,19 +346,15 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
       children: [
         Text(title,
             style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2E7D32))),
+                fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF2E7D32))),
         TextButton(
           onPressed: onTapManage,
           child: const Row(
             children: [
               Text('Manage',
                   style: TextStyle(
-                      color: Color(0xFF2E7D32),
-                      fontWeight: FontWeight.bold)),
-              Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Color(0xFF2E7D32)),
+                      color: Color(0xFF2E7D32), fontWeight: FontWeight.bold)),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF2E7D32)),
             ],
           ),
         ),
@@ -391,14 +369,20 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(80, 0, 0, 0),
+            blurRadius: 6,
+            offset: Offset(2, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Center(
         child: Text(
           name,
           textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -411,14 +395,20 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(80, 0, 0, 0),
+            blurRadius: 6,
+            offset: Offset(2, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Center(
         child: Text(
           name,
           textAlign: TextAlign.center,
-          style:
-              const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
     );
