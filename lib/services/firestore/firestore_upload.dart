@@ -151,7 +151,7 @@ class FirestoreUpload {
       
       // ⭐ Use auto-generated ID or timestamp-based ID (not userId prefix)
       // This ensures uniqueness across all documents in the collection
-      final docId = '${timestamp.millisecondsSinceEpoch}_${userId}';
+      final docId = '${timestamp.millisecondsSinceEpoch}_$userId';
       final docRef = FirestoreCollections.getSubstratesCollection(userId).doc(docId);
 
       final data = {
