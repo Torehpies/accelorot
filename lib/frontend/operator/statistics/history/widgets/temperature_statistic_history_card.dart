@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
 
 class TemperatureStatisticHistoryCard extends StatelessWidget {
   final double currentTemperature;
@@ -35,10 +36,10 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     // ✅ Generate past N days as labels (e.g., Mon, Tue, ...)
     for (int i = 0; i < dataLength; i++) {
       final day = now.subtract(Duration(days: dataLength - 1 - i));
-      final dayLabel = _getDayLabel(day.weekday);
+      final dayLabel = DateFormat('MMM d').format(day); // 👉 e.g., "Oct 23"
       temperatureData.add(_ChartPoint(dayLabel, dailyReadings[i]));
-      upperBound.add(_ChartPoint(dayLabel, 65.0)); // upper ideal limit
-      lowerBound.add(_ChartPoint(dayLabel, 55.0)); // lower ideal limit
+      upperBound.add(_ChartPoint(dayLabel, 65.0));
+      lowerBound.add(_ChartPoint(dayLabel, 55.0));
     }
 
     return Container(

@@ -20,17 +20,21 @@ class DateFilterState extends State<DateFilter> {
   DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   void _setPresetRange(int days) {
-    final now = _normalize(DateTime.now());
-    final start = now.subtract(Duration(days: days - 1));
-    final range = DateTimeRange(start: start, end: now);
+  final now = _normalize(DateTime.now());
+  final start = now.subtract(Duration(days: days - 1));
+  // Make end represent end of the current day (23:59:59)
+  final end = now.add(const Duration(hours: 23, minutes: 59, seconds: 59));
 
-    setState(() {
-      _selectedRange = range;
-      _label = "Last $days Days";
-    });
+  final range = DateTimeRange(start: start, end: end);
 
-    widget.onChanged(range);
-  }
+  setState(() {
+    _selectedRange = range;
+    _label = "Last $days Days";
+  });
+
+  widget.onChanged(range);
+}
+
 
   Future<void> _pickCustomRange() async {
     DateTime now = _normalize(DateTime.now());
