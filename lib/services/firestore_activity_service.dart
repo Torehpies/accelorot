@@ -1,30 +1,75 @@
+import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_view_service.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
 import 'firestore/firestore_collections.dart';
 import 'firestore/firestore_upload.dart';
 import 'firestore/firestore_fetch.dart';
 
-/// Main service class that provides a unified API for Firestore activity operations.
-/// This delegates to specialized classes for different concerns.
 class FirestoreActivityService {
-  // Auth & Collections
-  static String? getCurrentUserId() => FirestoreCollections.getCurrentUserId();
+  // ⭐ CRITICAL: Get the current logged-in user ID (for authentication checks only)
+  static String? getCurrentUserId() {
+    return FirestoreCollections.getCurrentUserId();
+  }
 
-  // Upload Methods
-  static Future<void> uploadSubstrates() => FirestoreUpload.uploadSubstrates();
-  static Future<void> uploadAlerts() => FirestoreUpload.uploadAlerts();
-  static Future<void> uploadCyclesRecom() => FirestoreUpload.uploadCyclesRecom();
-  static Future<void> uploadAllMockData() => FirestoreUpload.uploadAllMockData();
-  static Future<void> forceUploadAllMockData() =>
-      FirestoreUpload.forceUploadAllMockData();
-  static Future<void> addWasteProduct(Map<String, dynamic> waste) =>
-      FirestoreUpload.addWasteProduct(waste);
+  // Auth & Collections - Get effective user ID (operator being viewed or current user)
+  static String getEffectiveUserId([String? viewingOperatorId]) {
+    return OperatorViewService.getEffectiveUserId(viewingOperatorId);
+  }
 
-  // Fetch Methods
-  static Future<List<ActivityItem>> getSubstrates() =>
-      FirestoreFetch.getSubstrates();
-  static Future<List<ActivityItem>> getAlerts() => FirestoreFetch.getAlerts();
-  static Future<List<ActivityItem>> getCyclesRecom() =>
-      FirestoreFetch.getCyclesRecom();
-  static Future<List<ActivityItem>> getAllActivities() =>
-      FirestoreFetch.getAllActivities();
+  // Upload Methods - ALL pass the resolved effective user ID
+  static Future<void> uploadSubstrates({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.uploadSubstrates(effectiveUserId);
+  }
+
+  static Future<void> uploadAlerts({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.uploadAlerts(effectiveUserId);
+  }
+
+  static Future<void> uploadCyclesRecom({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.uploadCyclesRecom(effectiveUserId);
+  }
+
+  // Fetch Methods - ALL pass the resolved effective user ID
+  static Future<List<ActivityItem>> getSubstrates({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreFetch.getSubstrates(effectiveUserId);
+  }
+
+  static Future<List<ActivityItem>> getAlerts({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreFetch.getAlerts(effectiveUserId);
+  }
+
+  static Future<List<ActivityItem>> getCyclesRecom({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreFetch.getCyclesRecom(effectiveUserId);
+  }
+
+  static Future<List<ActivityItem>> getAllActivities({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreFetch.getAllActivities(effectiveUserId);
+  }
+
+  // ⭐ CRITICAL: Add waste product with proper user context
+  static Future<void> addWasteProduct(
+    Map<String, dynamic> waste, {
+    String? viewingOperatorId,
+  }) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.addWasteProduct(waste, effectiveUserId);
+  }
+
+  // ⭐ Upload all mock data with proper user context
+  static Future<void> uploadAllMockData({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.uploadAllMockData(effectiveUserId);
+  }
+
+  // ⭐ Force upload with proper user context
+  static Future<void> forceUploadAllMockData({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreUpload.forceUploadAllMockData(effectiveUserId);
+  }
 }

@@ -1,11 +1,15 @@
-//alerts_section.dart
 import 'package:flutter/material.dart';
 import '../widgets/slide_page_route.dart';
 import '../view_screens/alerts_screen.dart';
 import '../widgets/filter_box.dart';
 
 class AlertsSection extends StatelessWidget {
-  const AlertsSection({super.key});
+  final String? viewingOperatorId; // ⭐ NEW
+
+  const AlertsSection({
+    super.key,
+    this.viewingOperatorId, // ⭐ NEW
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +45,11 @@ class AlertsSection extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
-                        SlidePageRoute(page: const AlertsScreen()),
+                        SlidePageRoute(
+                          page: AlertsScreen(
+                            viewingOperatorId: viewingOperatorId, 
+                          ),
+                        ),
                       );
                     },
                     child: const Text(
@@ -60,26 +68,35 @@ class AlertsSection extends StatelessWidget {
               // Boxes using unified FilterBox
               Expanded(
                 child: Row(
-                  children: const [
+                  children: [
                     FilterBox(
                       icon: Icons.thermostat,
                       label: 'Temp',
                       filterValue: 'Temp',
-                      destination: AlertsScreen(initialFilter: 'Temp'),
+                      destination: AlertsScreen(
+                        initialFilter: 'Temp',
+                        viewingOperatorId: viewingOperatorId,
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.water_drop,
                       label: 'Moisture',
                       filterValue: 'Moisture',
-                      destination: AlertsScreen(initialFilter: 'Moisture'),
+                      destination: AlertsScreen(
+                        initialFilter: 'Moisture',
+                        viewingOperatorId: viewingOperatorId, 
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.bubble_chart,
                       label: 'Oxygen',
                       filterValue: 'Oxygen',
-                      destination: AlertsScreen(initialFilter: 'Oxygen'),
+                      destination: AlertsScreen(
+                        initialFilter: 'Oxygen',
+                        viewingOperatorId: viewingOperatorId, 
+                      ),
                     ),
                   ],
                 ),
