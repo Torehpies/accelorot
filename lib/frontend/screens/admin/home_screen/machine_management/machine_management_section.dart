@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
-import '../models/admin_user_model.dart';
-import 'user_card.dart';
+import '../models/machine_model.dart';
+import 'widgets/machine_card.dart';
+import 'widgets/machine_detail_dialog.dart';
 
-class UserManagementSection extends StatelessWidget {
-  final String title;
-  final List<AdminUserModel> users;
+/// Section widget for displaying and managing machines
+class MachineManagementSection extends StatelessWidget {
+  final List<MachineModel> machines;
   final VoidCallback? onManageTap;
-  final Function(AdminUserModel)? onUserTap;
 
-  const UserManagementSection({
+  const MachineManagementSection({
     super.key,
-    this.title = 'User Management',
-    required this.users,
+    required this.machines,
     this.onManageTap,
-    this.onUserTap,
   });
+
+  void _showMachineDetails(BuildContext context, MachineModel machine) {
+    showDialog(
+      context: context,
+      builder: (context) => MachineDetailDialog(machine: machine),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -29,7 +36,7 @@ class UserManagementSection extends StatelessWidget {
           children: [
             _buildHeader(),
             const SizedBox(height: 16),
-            _buildUserList(),
+            _buildMachineList(context),
           ],
         ),
       ),
@@ -40,9 +47,9 @@ class UserManagementSection extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
+        const Text(
+          'Machine Management',
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -63,8 +70,8 @@ class UserManagementSection extends StatelessWidget {
     );
   }
 
-  Widget _buildUserList() {
-    if (users.isEmpty) {
+  Widget _buildMachineList(BuildContext context) {
+    if (machines.isEmpty) {
       return Container(
         height: 140,
         decoration: BoxDecoration(
@@ -73,7 +80,7 @@ class UserManagementSection extends StatelessWidget {
         ),
         child: const Center(
           child: Text(
-            'No users available',
+            'No machines available',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -87,15 +94,15 @@ class UserManagementSection extends StatelessWidget {
       height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: users.length,
+        itemCount: machines.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
-              right: index < users.length - 1 ? 12 : 0,
+              right: index < machines.length - 1 ? 12 : 0,
             ),
-            child: UserCard(
-              user: users[index],
-              onTap: onUserTap != null ? () => onUserTap!(users[index]) : null,
+            child: MachineCard(
+              machine: machines[index],
+              onTap: () => _showMachineDetails(context, machines[index]),
             ),
           );
         },

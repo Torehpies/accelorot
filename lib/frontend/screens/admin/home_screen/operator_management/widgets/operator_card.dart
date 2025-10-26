@@ -1,28 +1,18 @@
 import 'package:flutter/material.dart';
-import '../models/admin_user_model.dart';
+import '../../models/operator_model.dart';
+import '../../widgets/status_indicator.dart';
 
-class UserCard extends StatelessWidget {
-  final AdminUserModel user;
+/// Card widget displaying operator information
+/// Shows profile placeholder, name, and status indicator
+class OperatorCard extends StatelessWidget {
+  final OperatorModel operator;
   final VoidCallback? onTap;
 
-  const UserCard({
+  const OperatorCard({
     super.key,
-    required this.user,
+    required this.operator,
     this.onTap,
   });
-
-  // Get border color based on user role
-  Color _getBorderColor() {
-    switch (user.role.toLowerCase()) {
-      case 'admin':
-        return Colors.blue;
-      case 'operator':
-        return Colors.orange;
-      case 'user':
-      default:
-        return Colors.green;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +26,38 @@ class UserCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _getBorderColor(),
+            color: const Color(0xFF4CAF50),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withOpacity(0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            _buildAvatar(),
-            const SizedBox(height: 8),
-            _buildName(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildAvatar(),
+                const SizedBox(height: 8),
+                _buildName(),
+              ],
+            ),
+            // Status indicator in top-right corner
+            Positioned(
+              top: 4,
+              right: 4,
+              child: StatusIndicator(
+                isArchived: operator.isArchived,
+                showText: false,
+                size: 12,
+              ),
+            ),
           ],
         ),
       ),
@@ -61,27 +65,6 @@ class UserCard extends StatelessWidget {
   }
 
   Widget _buildAvatar() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(40),
-      child: user.imageUrl.isNotEmpty
-          ? Image.network(
-              user.imageUrl,
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return _buildPlaceholderAvatar();
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return _buildPlaceholderAvatar();
-              },
-            )
-          : _buildPlaceholderAvatar(),
-    );
-  }
-
-  Widget _buildPlaceholderAvatar() {
     return Container(
       width: 70,
       height: 70,
@@ -101,7 +84,7 @@ class UserCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
-        user.name,
+        operator.name,
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
