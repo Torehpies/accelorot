@@ -1,7 +1,7 @@
+// machine_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Model representing a machine
-/// Data source: machines/{machineId}
 class MachineModel {
   final String id; // Document ID
   final String machineId;
@@ -21,7 +21,7 @@ class MachineModel {
     required this.dateCreated,
   });
 
-  /// Create from Firestore document (machines/{machineId})
+  /// Create machine from Firestore document
   factory MachineModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return MachineModel(

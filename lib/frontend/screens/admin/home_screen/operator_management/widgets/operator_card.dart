@@ -1,9 +1,9 @@
+// operator_card.dart
 import 'package:flutter/material.dart';
 import '../../models/operator_model.dart';
 import '../../widgets/status_indicator.dart';
 
-/// Card widget displaying operator information
-/// Shows profile placeholder, name, and status indicator
+/// Card widget displaying operator information with teal theme
 class OperatorCard extends StatelessWidget {
   final OperatorModel operator;
   final VoidCallback? onTap;
@@ -14,6 +14,7 @@ class OperatorCard extends StatelessWidget {
     this.onTap,
   });
 
+  /// Build the card widget with grey border
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -26,8 +27,8 @@ class OperatorCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFF4CAF50),
-            width: 2,
+            color: Colors.grey.shade400,
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -64,22 +65,24 @@ class OperatorCard extends StatelessWidget {
     );
   }
 
+  /// Build teal person icon instead of avatar image
   Widget _buildAvatar() {
     return Container(
       width: 70,
       height: 70,
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
+        color: Colors.teal.shade50,
         shape: BoxShape.circle,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.person,
         size: 40,
-        color: Colors.white,
+        color: Colors.teal.shade600,
       ),
     );
   }
 
+  /// Build operator name text
   Widget _buildName() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),

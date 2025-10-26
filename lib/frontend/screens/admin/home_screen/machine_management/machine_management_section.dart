@@ -1,9 +1,10 @@
+// machine_management_section.dart
 import 'package:flutter/material.dart';
 import '../models/machine_model.dart';
 import 'widgets/machine_card.dart';
 import 'widgets/machine_detail_dialog.dart';
 
-/// Section widget for displaying and managing machines
+/// Section widget for displaying and managing machines with unlimited scroll
 class MachineManagementSection extends StatelessWidget {
   final List<MachineModel> machines;
   final VoidCallback? onManageTap;
@@ -14,6 +15,7 @@ class MachineManagementSection extends StatelessWidget {
     this.onManageTap,
   });
 
+  /// Show machine detail dialog on card tap
   void _showMachineDetails(BuildContext context, MachineModel machine) {
     showDialog(
       context: context,
@@ -21,6 +23,7 @@ class MachineManagementSection extends StatelessWidget {
     );
   }
 
+  /// Build main card container
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -43,10 +46,18 @@ class MachineManagementSection extends StatelessWidget {
     );
   }
 
+  /// Build header with small icon, title, and manage link
   Widget _buildHeader() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Small teal machine icon (same size as text)
+        Icon(
+          Icons.precision_manufacturing,
+          color: Colors.teal.shade600,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        // Section title
         const Text(
           'Machine Management',
           style: TextStyle(
@@ -55,6 +66,8 @@ class MachineManagementSection extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
+        const Spacer(),
+        // Manage link
         GestureDetector(
           onTap: onManageTap,
           child: const Text(
@@ -70,6 +83,7 @@ class MachineManagementSection extends StatelessWidget {
     );
   }
 
+  /// Build horizontal scrolling list of machine cards (unlimited scroll)
   Widget _buildMachineList(BuildContext context) {
     if (machines.isEmpty) {
       return Container(

@@ -1,9 +1,10 @@
+// machine_detail_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/machine_model.dart';
 import '../../widgets/status_indicator.dart';
 
-/// Dialog showing detailed machine information
+/// Dialog showing detailed machine information with white background
 class MachineDetailDialog extends StatelessWidget {
   final MachineModel machine;
 
@@ -12,19 +13,26 @@ class MachineDetailDialog extends StatelessWidget {
     required this.machine,
   });
 
+  /// Format date to readable string (e.g., "October 24, 2025")
   String _formatDate(DateTime date) {
     return DateFormat('MMMM d, y').format(date);
   }
 
+  /// Build the dialog widget with white background
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
         padding: const EdgeInsets.all(24),
         constraints: const BoxConstraints(maxWidth: 400),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,6 +52,7 @@ class MachineDetailDialog extends StatelessWidget {
     );
   }
 
+  /// Build header row with title and status indicator
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,6 +74,7 @@ class MachineDetailDialog extends StatelessWidget {
     );
   }
 
+  /// Build detail row showing label and value
   Widget _buildDetailRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,13 +100,14 @@ class MachineDetailDialog extends StatelessWidget {
     );
   }
 
+  /// Build teal close button
   Widget _buildCloseButton(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue.shade600,
+          backgroundColor: Colors.teal.shade600,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

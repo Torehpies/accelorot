@@ -1,9 +1,9 @@
+// machine_card.dart
 import 'package:flutter/material.dart';
 import '../../models/machine_model.dart';
 import '../../widgets/status_indicator.dart';
 
-/// Card widget displaying machine information
-/// Shows machine icon placeholder, name, and status indicator
+/// Card widget displaying machine information with teal theme
 class MachineCard extends StatelessWidget {
   final MachineModel machine;
   final VoidCallback? onTap;
@@ -14,6 +14,7 @@ class MachineCard extends StatelessWidget {
     this.onTap,
   });
 
+  /// Build the card widget with grey border
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -26,8 +27,8 @@ class MachineCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.blue.shade600,
-            width: 2,
+            color: Colors.grey.shade400,
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
@@ -64,22 +65,24 @@ class MachineCard extends StatelessWidget {
     );
   }
 
+  /// Build teal machine icon
   Widget _buildMachineIcon() {
     return Container(
       width: 70,
       height: 70,
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: Colors.teal.shade50,
         shape: BoxShape.circle,
       ),
       child: Icon(
         Icons.precision_manufacturing,
         size: 40,
-        color: Colors.blue.shade600,
+        color: Colors.teal.shade600,
       ),
     );
   }
 
+  /// Build machine name text
   Widget _buildName() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),

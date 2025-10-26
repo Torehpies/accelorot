@@ -1,3 +1,4 @@
+// admin_home_screen.dart
 import 'package:flutter/material.dart';
 import 'widgets/stat_card.dart';
 import 'operator_management/operator_management_section.dart';
@@ -9,6 +10,7 @@ import '../../../../services/admin_dashboard/mock_admin_data.dart';
 import '../../../../services/admin_dashboard/admin_firestore_service.dart';
 import '../../../../services/sess_service.dart';
 
+/// Admin home screen with teal theme and auth-based data loading
 class AdminHomeScreen extends StatefulWidget {
   const AdminHomeScreen({super.key});
 
@@ -32,9 +34,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     _loadData();
   }
 
-  /// Load data based on authentication status
-  /// - If logged in: fetch from Firestore
-  /// - If not logged in: show mock data
+  /// Load data based on authentication status (mock vs Firestore)
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -69,7 +69,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-  /// Load data from Firestore for logged-in admin
+  /// Load data from Firestore for authenticated admin
   Future<void> _loadFirestoreData(String adminUid) async {
     try {
       // Admin's UID is their teamId
@@ -92,7 +92,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-  /// Load mock data for non-logged-in users
+  /// Load mock data for non-authenticated users
   void _loadMockData() {
     _stats = MockAdminData.getStats();
     _operators = MockAdminData.getOperatorsPreview();
@@ -138,27 +138,29 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
+  /// Build teal app bar with bold black text
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: Colors.teal.shade600,
       automaticallyImplyLeading: false,
       title: Text(
         _isLoggedIn ? 'Admin Dashboard' : 'Machine Name',
         style: const TextStyle(
-          color: Colors.white,
+          color: Colors.black,
           fontSize: 18,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.bold,
         ),
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+          icon: const Icon(Icons.notifications_outlined, color: Colors.black),
           onPressed: _onNotificationTap,
         ),
       ],
     );
   }
 
+  /// Build loading indicator
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
@@ -167,6 +169,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
+  /// Build main scrollable content with pull-to-refresh
   Widget _buildContent() {
     return RefreshIndicator(
       onRefresh: _loadData,
@@ -197,6 +200,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
+  /// Build stats row with operator and machine counts (no icons)
   Widget _buildStatsRow() {
     return Row(
       children: [
@@ -204,7 +208,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           child: StatCard(
             count: _stats.userCount,
             label: 'Operators',
-            icon: Icons.person,
           ),
         ),
         const SizedBox(width: 16),

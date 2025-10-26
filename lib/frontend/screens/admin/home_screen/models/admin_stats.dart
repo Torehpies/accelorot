@@ -1,3 +1,5 @@
+// admin_stats.dart
+
 /// Model for admin dashboard statistics
 class AdminStats {
   final int userCount; // Total operators (including archived)

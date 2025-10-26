@@ -1,10 +1,10 @@
+// operator_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Model representing an operator (team member with role "Operator")
-/// Data source: teams/{teamId}/members/{userId}
 class OperatorModel {
   final String userId;
-  final String name; // Full name (firstname + lastname combined)
+  final String name;
   final String email;
   final String role;
   final bool isArchived;
@@ -19,7 +19,7 @@ class OperatorModel {
     required this.addedAt,
   });
 
-  /// Create from Firestore document (teams/{teamId}/members/{userId})
+  /// Create operator from Firestore document
   factory OperatorModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return OperatorModel(
