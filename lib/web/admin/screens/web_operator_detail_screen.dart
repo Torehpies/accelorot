@@ -18,7 +18,7 @@ class WebOperatorDetailScreen extends StatefulWidget {
     required this.operatorName,
     required this.role,
     required this.email,
-    required this.dateAdded,
+    required this.dateAdded, required Null Function() onBack,
   });
 
   @override
@@ -33,6 +33,7 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Archive Operator'),
         content: Text('Are you sure you want to archive ${widget.operatorName}?'),
         actions: [
@@ -42,7 +43,10 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             child: const Text('Archive'),
           ),
         ],
@@ -99,47 +103,287 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        backgroundColor: Colors.teal.shade700,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Operator Details',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header Section
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.teal.shade600, Colors.teal.shade800],
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24.0),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Profile Header Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[300]!, width: 1),
+                  ),
+                  padding: const EdgeInsets.all(32.0),
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
+                      // Avatar
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.teal.shade100,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.teal.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      // Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.operatorName,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.teal.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.teal.shade200),
+                              ),
+                              child: Text(
+                                widget.role,
+                                style: TextStyle(
+                                  color: Colors.teal.shade800,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Actions
+                      Column(
+                        children: [
+                          SizedBox(
+                            width: 180,
+                            child: ElevatedButton.icon(
+                              onPressed: _viewOperatorDashboard,
+                              icon: const Icon(Icons.visibility, size: 18),
+                              label: const Text('View Dashboard'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal.shade700,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: 180,
+                            child: OutlinedButton.icon(
+                              onPressed: _isArchiving ? null : _archiveOperator,
+                              icon: Icon(
+                                _isArchiving ? Icons.hourglass_empty : Icons.archive,
+                                size: 18,
+                              ),
+                              label: Text(_isArchiving ? 'Archiving...' : 'Archive'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.orange.shade700,
+                                side: BorderSide(color: Colors.orange.shade300),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Information Grid
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Contact Information
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey[300]!, width: 1),
+                        ),
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.teal.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.contact_mail,
+                                    color: Colors.teal.shade700,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Contact Information',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            _buildInfoRow(Icons.email_outlined, 'Email Address', widget.email),
+                            const SizedBox(height: 20),
+                            _buildInfoRow(Icons.calendar_today_outlined, 'Date Added', widget.dateAdded),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+
+                    // Statistics/Activity
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey[300]!, width: 1),
+                        ),
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.analytics_outlined,
+                                    color: Colors.blue.shade700,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Quick Stats',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            _buildStatRow('Status', 'Active', Colors.green),
+                            const SizedBox(height: 20),
+                            _buildStatRow('Account Type', widget.role, Colors.teal),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Info Banner
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.blue.shade50, Colors.blue.shade100],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blue.shade200, width: 1),
+                  ),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.info_outline,
+                          color: Colors.blue.shade700,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Operator Details',
+                            Text(
+                              'Operator Dashboard Access',
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade900,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.operatorName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                              'Click "View Dashboard" to access detailed activity logs, performance metrics, and machine management for this operator.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.blue.shade800,
                               ),
                             ),
                           ],
@@ -148,197 +392,9 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-
-            // Content Section
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left Column - Info Cards
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Profile Card
-                        Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [Colors.teal.shade400, Colors.teal.shade700],
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.person,
-                                    size: 50,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  widget.operatorName,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.teal.shade50,
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: Colors.teal.shade200),
-                                  ),
-                                  child: Text(
-                                    widget.role,
-                                    style: TextStyle(
-                                      color: Colors.teal.shade800,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Contact Information Card
-                        Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Contact Information',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                _buildInfoRow(Icons.email, 'Email', widget.email),
-                                const SizedBox(height: 12),
-                                _buildInfoRow(Icons.calendar_today, 'Date Added', widget.dateAdded),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-
-                  // Right Column - Actions
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Actions Card
-                        Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Actions',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.teal,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                _buildActionButton(
-                                  icon: Icons.visibility,
-                                  label: 'View Dashboard',
-                                  color: Colors.blue,
-                                  onPressed: _viewOperatorDashboard,
-                                ),
-                                const SizedBox(height: 12),
-                                _buildActionButton(
-                                  icon: Icons.archive,
-                                  label: _isArchiving ? 'Archiving...' : 'Archive Operator',
-                                  color: Colors.orange,
-                                  onPressed: _isArchiving ? null : _archiveOperator,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Info Card
-                        Card(
-                          elevation: 2,
-                          color: Colors.blue.shade50,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Column(
-                              children: [
-                                Icon(Icons.info_outline, size: 40, color: Colors.blue.shade700),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'View Dashboard',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade900,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Click "View Dashboard" to see this operator\'s full activity, statistics, and machine management.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.blue.shade800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -351,10 +407,10 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.teal.shade50,
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: Colors.teal.shade700, size: 20),
+          child: Icon(icon, color: Colors.grey[700], size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -369,12 +425,13 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
                 value,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
               ),
             ],
@@ -384,28 +441,44 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback? onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+  Widget _buildStatRow(String label, String value, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
           ),
-          elevation: 0,
+          child: Icon(Icons.check_circle, color: color, size: 20),
         ),
-      ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
