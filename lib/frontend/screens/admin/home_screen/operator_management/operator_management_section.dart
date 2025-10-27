@@ -1,27 +1,37 @@
+// operator_management_section.dart
 import 'package:flutter/material.dart';
-import '../models/admin_user_model.dart';
-import 'user_card.dart';
+import '../models/operator_model.dart';
+import 'widgets/operator_card.dart';
+import 'widgets/operator_detail_dialog.dart';
 
-class UserManagementSection extends StatelessWidget {
-  final String title;
-  final List<AdminUserModel> users;
+/// Section widget for displaying and managing operators with unlimited scroll
+class OperatorManagementSection extends StatelessWidget {
+  final List<OperatorModel> operators;
   final VoidCallback? onManageTap;
-  final Function(AdminUserModel)? onUserTap;
 
-  const UserManagementSection({
+  const OperatorManagementSection({
     super.key,
-    this.title = 'User Management',
-    required this.users,
+    required this.operators,
     this.onManageTap,
-    this.onUserTap,
   });
 
+  /// Show operator detail dialog on card tap
+  void _showOperatorDetails(BuildContext context, OperatorModel operator) {
+    showDialog(
+      context: context,
+      builder: (context) => OperatorDetailDialog(operator: operator),
+    );
+  }
+
+  /// Build main card container
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -29,25 +39,35 @@ class UserManagementSection extends StatelessWidget {
           children: [
             _buildHeader(),
             const SizedBox(height: 16),
-            _buildUserList(),
+            _buildOperatorList(context),
           ],
         ),
       ),
     );
   }
 
+  /// Build header with small icon, title, and manage link
   Widget _buildHeader() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
+        // Small teal person icon (same size as text)
+        Icon(
+          Icons.person,
+          color: Colors.teal.shade600,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        // Section title
+        const Text(
+          'Operator Management',
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
+        const Spacer(),
+        // Manage link
         GestureDetector(
           onTap: onManageTap,
           child: const Text(
@@ -63,8 +83,9 @@ class UserManagementSection extends StatelessWidget {
     );
   }
 
-  Widget _buildUserList() {
-    if (users.isEmpty) {
+  /// Build horizontal scrolling list of operator cards (unlimited scroll)
+  Widget _buildOperatorList(BuildContext context) {
+    if (operators.isEmpty) {
       return Container(
         height: 140,
         decoration: BoxDecoration(
@@ -73,7 +94,7 @@ class UserManagementSection extends StatelessWidget {
         ),
         child: const Center(
           child: Text(
-            'No users available',
+            'No operators available',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -87,15 +108,15 @@ class UserManagementSection extends StatelessWidget {
       height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: users.length,
+        itemCount: operators.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
-              right: index < users.length - 1 ? 12 : 0,
+              right: index < operators.length - 1 ? 12 : 0,
             ),
-            child: UserCard(
-              user: users[index],
-              onTap: onUserTap != null ? () => onUserTap!(users[index]) : null,
+            child: OperatorCard(
+              operator: operators[index],
+              onTap: () => _showOperatorDetails(context, operators[index]),
             ),
           );
         },
