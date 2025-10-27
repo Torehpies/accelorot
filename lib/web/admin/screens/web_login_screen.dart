@@ -9,6 +9,7 @@ import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
 import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
+import 'package:flutter_application_1/widgets/common/primary_button.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});
@@ -234,31 +235,36 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
   Widget _buildLoginButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _controller.isLoading ? null : _controller.loginUser,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-        ),
-        child: _controller.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-              )
-            : const Text(
-                'Sign In',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+      child: PrimaryButton(
+        text: 'Login',
+        onPressed: _controller.loginUser,
+        isLoading: _controller.isLoading,
       ),
+      //child: ElevatedButton(
+      //  onPressed: _controller.isLoading ? null : _controller.loginUser,
+      //  style: ElevatedButton.styleFrom(
+      //    backgroundColor: Colors.teal,
+      //    foregroundColor: Colors.white,
+      //    padding: const EdgeInsets.symmetric(vertical: 16),
+      //    shape: RoundedRectangleBorder(
+      //      borderRadius: BorderRadius.circular(12),
+      //    ),
+      //    elevation: 4,
+      //  ),
+      //  child: _controller.isLoading
+      //      ? const SizedBox(
+      //          width: 20,
+      //          height: 20,
+      //          child: CircularProgressIndicator(
+      //            strokeWidth: 2,
+      //            valueColor: AlwaysStoppedAnimation(Colors.white),
+      //          ),
+      //        )
+      //      : const Text(
+      //          'Sign In',
+      //          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      //        ),
+      //),
     );
   }
 
@@ -286,4 +292,3 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     );
   }
 }
-

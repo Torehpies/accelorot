@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/email_verify.dart';
+import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'web_login_screen.dart';
@@ -439,7 +440,7 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const WebLoginScreen(),
+                              builder: (context) => const LoginScreen(),
                             ),
                           );
                         },

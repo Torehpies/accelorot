@@ -5,14 +5,14 @@ import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin
 import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
-import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/services/google_sign_in_handler.dart';
+import 'package:flutter_application_1/utils/login_flow_result.dart';
+import 'package:flutter_application_1/viewmodels/login_viewmodel.dart';
+import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:provider/provider.dart';
 import '../../utils/snackbar_utils.dart';
-import '../controllers/login_controller.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
 import 'forgot_pass.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'restricted_access_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,291 +23,254 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late LoginController _controller;
-  final AuthService _authService = AuthService();
+  final _formKey = GlobalKey<FormState>();
   bool _isGoogleLoading = false;
-  final bool _isLoading = false;
-
-  void _setLoadingState(bool isLoading) {
-    if (mounted) {
-      setState(() {
-        _isGoogleLoading = isLoading;
-      });
-    }
-  }
+  
+  // Define a max width for the login form on wide screens (web/desktop)
+  static const double _kMaxContentWidth = 450.0;
 
   @override
   void initState() {
     super.initState();
-    _controller = LoginController();
-
-    _controller.setCallbacks(
-      onLoadingChanged: (isLoading) => setState(() {}),
-      onPasswordVisibilityChanged: (obscured) => setState(() {}),
-
-      onLoginSuccess: (result) async {
-        // Avoid using BuildContext across async gaps by returning early if
-        // the State has been unmounted.
-        if (!mounted) return;
-
-        if (result['needsVerification'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EmailVerifyScreen(
-                email: _controller.emailController.text.trim(),
-              ),
-            ),
-          );
-          return;
-        }
-
-        final Map<String, dynamic> userData =
-            (result['userData'] ?? {}) as Map<String, dynamic>;
-        final String userRole = userData['role'] ?? 'Operator';
-
-        // If admin -> admin nav immediately
-        if (userRole == 'Admin') {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AdminMainNavigation(),
-            ),
-          );
-          return;
-        }
-
-        // For non-admin users, route based on team status
-        final teamId = userData['teamId'];
-        final pendingTeamId = userData['pendingTeamId'];
-
-        if (teamId != null) {
-          try {
-            final user = _authService.getCurrentUser();
-            if (user != null) {
-              // Check member status in the team
-              final memberDoc = await FirebaseFirestore.instance
-                  .collection('teams')
-                  .doc(teamId)
-                  .collection('members')
-                  .doc(user.uid)
-                  .get();
-
-              if (memberDoc.exists) {
-                final memberData = memberDoc.data()!;
-                final isArchived = memberData['isArchived'] ?? false;
-                final hasLeft = memberData['hasLeft'] ?? false;
-
-                // Block archived users
-                if (isArchived) {
-                  if (!mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const RestrictedAccessScreen(reason: 'archived'),
-                    ),
-                  );
-                  return;
-                }
-
-                // If user has left, send to QR screen
-                if (hasLeft) {
-                  if (!mounted) return;
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const QRReferScreen(),
-                    ),
-                  );
-                  return;
-                }
-              }
-            }
-          } catch (e) {
-            // If check fails, show error
-            if (!mounted) return;
-            showSnackbar(
-              context,
-              'Error checking account status: $e',
-              isError: true,
-            );
-            return;
-          }
-
-          // User is active member, proceed to main navigation
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
-          );
-        } else if (pendingTeamId != null) {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const WaitingApprovalScreen(),
-            ),
-          );
-        } else {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
-        }
-      },
-      onLoginError: (message) {
-        if (!mounted) return;
-        showSnackbar(context, message, isError: true);
-      },
-    );
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    if (_isGoogleLoading || _isLoading) return;
+  Future<void> _submitLogin(LoginViewModel viewModel) async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-    final handler = GoogleSignInHandler(_authService, context);
-    await handler.signInWithGoogle(setLoadingState: _setLoadingState);
+    final result = await viewModel.loginUser();
+
+    _handleLoginFlow(result, viewModel.emailController.text.trim());
+  }
+
+  void _handleLoginFlow(LoginFlowResult result, String email) {
+    if (!mounted) return;
+
+    switch (result) {
+      case LoginFlowSuccess():
+        showSnackbar(context, 'Login Successful!', isError: false);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+        );
+      case LoginFlowSuccessAdmin():
+        showSnackbar(context, 'Admin Login Successful!', isError: false);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminMainNavigation()),
+        );
+      case LoginFlowNeedsVerification():
+        showSnackbar(
+          context,
+          'Check your email for verification!',
+          isError: false,
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmailVerifyScreen(email: email),
+          ),
+        );
+      case LoginFlowPendingApproval():
+        showSnackbar(context, 'Waiting for team approval!', isError: false);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const WaitingApprovalScreen(),
+          ),
+        );
+      case LoginFlowNeedsReferral():
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const QRReferScreen()),
+        );
+      case LoginFlowRestricted(reason: final reason):
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                RestrictedAccessScreen(reason: reason.toString()),
+          ),
+        );
+      case LoginFlowError(message: final message):
+        showSnackbar(context, message.toString(), isError: true);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn(LoginViewModel viewModel) async {
+    if (_isGoogleLoading || viewModel.isLoading) return;
+
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final result = await viewModel.signInWithGoogleAndCheckStatus();
+      _handleLoginFlow(result, '');
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(
+          context,
+          'A connection error occured during sign-in.',
+          isError: true,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
+    // Theme.of(context) is implicitly used later, so this line is redundant
+    // Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Full-screen background (optional)
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white, Colors.white],
+    // Get screen width to calculate dynamic padding/positioning
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Consumer<LoginViewModel>(
+      builder: (context, viewModel, child) {
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                // Full-screen background
+                Container(
+                  decoration: const BoxDecoration( // Made const
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.white, Colors.white],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Main content
-            SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 100,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo
-                    Center(child: _buildLogo()),
-                    const SizedBox(height: 24),
+                // Main content: Constrained and Centered for responsiveness
+                SingleChildScrollView(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: _kMaxContentWidth,
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.0,
+                          // Use less vertical padding on wider screens to center the form better
+                          vertical: screenWidth > 600 ? 48.0 : 100.0,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Logo
+                            Center(child: _buildLogo()),
+                            const SizedBox(height: 24),
 
-                    // Title
-                    Center(child: _buildTitle(Theme.of(context))),
-                    const SizedBox(height: 32),
+                            // Title
+                            Center(child: _buildTitle(Theme.of(context))),
+                            const SizedBox(height: 32),
 
-                    // Form
-                    Form(
-                      key: _controller.formKey,
-                      child: Column(
-                        children: [
-                          // Email
-                          _buildEmailField(),
-                          const SizedBox(height: 16),
+                            // Form
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  // Email
+                                  _buildEmailField(viewModel),
+                                  const SizedBox(height: 16),
 
-                          // Password
-                          _buildPasswordField(),
-                          const SizedBox(height: 8),
+                                  // Password
+                                  _buildPasswordField(viewModel),
+                                  const SizedBox(height: 8),
 
-                          // Forgot Password
-                          _buildForgotPassword(),
+                                  // Forgot Password
+                                  _buildForgotPassword(),
 
-                          // Login Button
-                          _buildLoginButton(),
-                          const SizedBox(height: 24),
+                                  // Login Button
+                                  _buildLoginButton(viewModel),
+                                  const SizedBox(height: 24),
 
-                          OrDivider(),
-                          SizedBox(height: 20),
-                          GoogleSignInButton(
-                            onPressed: _handleGoogleSignIn,
-                            isLoading: _isGoogleLoading,
-                          ),
-                          // Sign Up Link
-                          _buildSignUpLink(),
-                        ],
+                                  const OrDivider(), // Made const
+                                  const SizedBox(height: 20),
+                                  GoogleSignInButton(
+                                    onPressed: () => _handleGoogleSignIn(viewModel),
+                                    isLoading: _isGoogleLoading,
+                                  ),
+                                  // Sign Up Link
+                                  _buildSignUpLink(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
 
-            // Top-left Home button
-            Positioned(
-              top: 40,
-              left: 16,
-              child: IconButton(
-                icon: const Icon(Icons.home, color: Colors.white, size: 28),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(12),
-                  // ignore: deprecated_member_use
-                  shadowColor: Colors.black.withOpacity(0.1),
-                  elevation: 6,
-                ),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainNavigation(),
+                // Top-left Home button (Kept position)
+                Positioned(
+                  top: 40,
+                  left: 16,
+                  child: IconButton(
+                    icon: const Icon(Icons.home, color: Colors.white, size: 28),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(12),
+                      shadowColor: Colors.black.withOpacity(0.1), // Fixed usage of .withValues
+                      elevation: 6,
                     ),
-                  );
-                },
-              ),
-            ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MainNavigation(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
 
-            // Top-right Admin button
-            Positioned(
-              top: 40,
-              right: 16,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.admin_panel_settings,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(12),
-                  shadowColor: Colors.black.withValues(alpha: 0.1),
-                  elevation: 6,
-                ),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminMainNavigation(),
+                // Top-right Admin button (Kept position)
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.admin_panel_settings,
+                      color: Colors.white,
+                      size: 28,
                     ),
-                  );
-                },
-              ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(12),
+                      shadowColor: Colors.black.withOpacity(0.1), // Fixed usage of .withValues
+                      elevation: 6,
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminMainNavigation(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -324,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.teal..withValues(alpha: 0.3),
+            color: Colors.teal.withOpacity(0.3), // Fixed usage of .withValues
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -354,39 +317,40 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildEmailField(LoginViewModel viewModel) {
     return TextFormField(
-      controller: _controller.emailController,
+      controller: viewModel.emailController,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         labelText: 'Email Address',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      validator: _controller.validateEmail,
+      validator: viewModel.validateEmail,
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(LoginViewModel viewModel) {
     return TextFormField(
-      controller: _controller.passwordController,
-      obscureText: _controller.obscurePassword,
+      controller: viewModel.passwordController,
+      obscureText: viewModel.obscurePassword,
       textInputAction: TextInputAction.done,
-      onFieldSubmitted: (_) => _controller.loginUser(),
+      // Fixed: ensures login is submitted when 'Done' is pressed on keyboard
+      onFieldSubmitted: (_) => _submitLogin(viewModel), 
       decoration: InputDecoration(
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            _controller.obscurePassword
+            viewModel.obscurePassword
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
-          onPressed: _controller.togglePasswordVisibility,
+          onPressed: viewModel.togglePasswordVisibility,
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      validator: _controller.validatePassword,
+      validator: viewModel.validatePassword,
     );
   }
 
@@ -404,33 +368,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton() {
+  Widget _buildLoginButton(LoginViewModel viewModel) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _controller.isLoading ? null : _controller.loginUser,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-        ),
-        child: _controller.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-              )
-            : const Text(
-                'Sign In',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+      child: PrimaryButton(
+        text: 'Login',
+        onPressed: viewModel.isLoading ? null : () => _submitLogin(viewModel),
+        isLoading: viewModel.isLoading,
       ),
     );
   }
@@ -458,3 +402,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+
