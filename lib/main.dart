@@ -1,11 +1,8 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/viewmodels/login_viewmodel.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
@@ -45,10 +42,9 @@ void main() async {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => LoginViewModel(),
+		const ProviderScope(
       child: const MyApp(),
-    ),
+		),
   );
 }
 

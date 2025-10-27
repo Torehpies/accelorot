@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
@@ -6,27 +7,29 @@ import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/waiting_approval_screen.dart';
 import 'package:flutter_application_1/utils/login_flow_result.dart';
-import 'package:flutter_application_1/viewmodels/login_viewmodel.dart';
+import 'package:flutter_application_1/viewmodels/login_notifier.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/snackbar_utils.dart';
 import 'registration_screen.dart';
 import 'email_verify.dart';
 import 'forgot_pass.dart';
 import 'restricted_access_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isGoogleLoading = false;
-  
-  // Define a max width for the login form on wide screens (web/desktop)
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
   static const double _kMaxContentWidth = 450.0;
 
   @override
@@ -34,14 +37,30 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
-  Future<void> _submitLogin(LoginViewModel viewModel) async {
+  Future<void> _submitLogin() async {
+		if (!mounted) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    final result = await viewModel.loginUser();
+		final email = emailController.text;
+		final password = passwordController.text;
 
-    _handleLoginFlow(result, viewModel.emailController.text.trim());
+    final notifier = ref.read(loginProvider.notifier);
+
+    final result = await notifier.loginUser(
+      email: email,
+      password: password,
+    );
+
+		if (!mounted) return;
+
+    _handleLoginFlow(result, emailController.text.trim());
+
+    final error = ref.read(loginProvider).errorMessage;
+    if (mounted && error != null) {
+      showSnackbar(context, error, isError: true);
+    }
   }
 
   void _handleLoginFlow(LoginFlowResult result, String email) {
@@ -98,13 +117,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleSignIn(LoginViewModel viewModel) async {
-    if (_isGoogleLoading || viewModel.isLoading) return;
+  Future<void> _handleGoogleSignIn() async {
+    if (_isGoogleLoading) return;
 
     setState(() => _isGoogleLoading = true);
 
     try {
-      final result = await viewModel.signInWithGoogleAndCheckStatus();
+      final notifier = ref.read(loginProvider.notifier);
+      final result = await notifier.signInWithGoogleAndCheckStatus();
       _handleLoginFlow(result, '');
     } catch (e) {
       if (mounted) {
@@ -123,154 +143,159 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+		emailController.dispose();
+		passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Theme.of(context) is implicitly used later, so this line is redundant
-    // Theme.of(context);
+    final state = ref.watch(loginProvider);
+    final notifier = ref.read(loginProvider.notifier);
 
-    // Get screen width to calculate dynamic padding/positioning
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Consumer<LoginViewModel>(
-      builder: (context, viewModel, child) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                // Full-screen background
-                Container(
-                  decoration: const BoxDecoration( // Made const
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.white, Colors.white],
-                    ),
-                  ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Full-screen background
+            Container(
+              decoration: const BoxDecoration(
+                // Made const
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.white],
                 ),
-
-                // Main content: Constrained and Centered for responsiveness
-                SingleChildScrollView(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: _kMaxContentWidth,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 24.0,
-                          // Use less vertical padding on wider screens to center the form better
-                          vertical: screenWidth > 600 ? 48.0 : 100.0,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Logo
-                            Center(child: _buildLogo()),
-                            const SizedBox(height: 24),
-
-                            // Title
-                            Center(child: _buildTitle(Theme.of(context))),
-                            const SizedBox(height: 32),
-
-                            // Form
-                            Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  // Email
-                                  _buildEmailField(viewModel),
-                                  const SizedBox(height: 16),
-
-                                  // Password
-                                  _buildPasswordField(viewModel),
-                                  const SizedBox(height: 8),
-
-                                  // Forgot Password
-                                  _buildForgotPassword(),
-
-                                  // Login Button
-                                  _buildLoginButton(viewModel),
-                                  const SizedBox(height: 24),
-
-                                  const OrDivider(), // Made const
-                                  const SizedBox(height: 20),
-                                  GoogleSignInButton(
-                                    onPressed: () => _handleGoogleSignIn(viewModel),
-                                    isLoading: _isGoogleLoading,
-                                  ),
-                                  // Sign Up Link
-                                  _buildSignUpLink(),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Top-left Home button (Kept position)
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.home, color: Colors.white, size: 28),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(12),
-                      shadowColor: Colors.black.withOpacity(0.1), // Fixed usage of .withValues
-                      elevation: 6,
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainNavigation(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Top-right Admin button (Kept position)
-                Positioned(
-                  top: 40,
-                  right: 16,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.admin_panel_settings,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(12),
-                      shadowColor: Colors.black.withOpacity(0.1), // Fixed usage of .withValues
-                      elevation: 6,
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AdminMainNavigation(),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+
+            // Main content: Constrained and Centered for responsiveness
+            SingleChildScrollView(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _kMaxContentWidth,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      // Use less vertical padding on wider screens to center the form better
+                      vertical: screenWidth > 600 ? 48.0 : 100.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Logo
+                        Center(child: _buildLogo()),
+                        const SizedBox(height: 24),
+
+                        // Title
+                        Center(child: _buildTitle(Theme.of(context))),
+                        const SizedBox(height: 32),
+
+                        // Form
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              // Email
+                              _buildEmailField(),
+                              const SizedBox(height: 16),
+
+                              // Password
+                              _buildPasswordField(
+                                state.obscurePassword,
+                                notifier.togglePasswordVisibility,
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Forgot Password
+                              _buildForgotPassword(),
+
+                              // Login Button
+                              _buildLoginButton(state.isLoading),
+                              const SizedBox(height: 24),
+
+                              const OrDivider(), // Made const
+                              const SizedBox(height: 20),
+                              GoogleSignInButton(
+                                onPressed: () => _handleGoogleSignIn(),
+                                isLoading: _isGoogleLoading,
+                              ),
+                              // Sign Up Link
+                              _buildSignUpLink(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Top-left Home button (Kept position)
+            Positioned(
+              top: 40,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.home, color: Colors.white, size: 28),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(12),
+                  shadowColor: Colors.black.withValues(
+                    alpha: 0.1,
+                  ), // Fixed usage of .withValues
+                  elevation: 6,
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MainNavigation(),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Top-right Admin button (Kept position)
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.admin_panel_settings,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(12),
+                  shadowColor: Colors.black.withValues(
+                    alpha: 0.1,
+                  ), // Fixed usage of .withValues
+                  elevation: 6,
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminMainNavigation(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -287,7 +312,9 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withOpacity(0.3), // Fixed usage of .withValues
+            color: Colors.teal.withValues(
+              alpha: 0.3,
+            ), // Fixed usage of .withValues
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -317,40 +344,45 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildEmailField(LoginViewModel viewModel) {
+  Widget _buildEmailField() {
     return TextFormField(
-      controller: viewModel.emailController,
+      controller: emailController,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         labelText: 'Email Address',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      validator: viewModel.validateEmail,
+      validator: (value) =>
+          value == null || value.isEmpty ? 'Email is required' : null,
     );
   }
 
-  Widget _buildPasswordField(LoginViewModel viewModel) {
+  Widget _buildPasswordField(
+    bool obscurePassword,
+    VoidCallback toggleVisibility,
+  ) {
     return TextFormField(
-      controller: viewModel.passwordController,
-      obscureText: viewModel.obscurePassword,
+      controller: passwordController,
+      obscureText: obscurePassword,
       textInputAction: TextInputAction.done,
       // Fixed: ensures login is submitted when 'Done' is pressed on keyboard
-      onFieldSubmitted: (_) => _submitLogin(viewModel), 
+      onFieldSubmitted: (_) => _submitLogin(),
       decoration: InputDecoration(
         labelText: 'Password',
         suffixIcon: IconButton(
           icon: Icon(
-            viewModel.obscurePassword
+            obscurePassword
                 ? Icons.visibility_outlined
                 : Icons.visibility_off_outlined,
             color: Colors.grey,
           ),
-          onPressed: viewModel.togglePasswordVisibility,
+          onPressed: toggleVisibility,
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      validator: viewModel.validatePassword,
+      validator: (value) =>
+          value == null || value.isEmpty ? 'Password is required' : null,
     );
   }
 
@@ -368,13 +400,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginButton(LoginViewModel viewModel) {
+  Widget _buildLoginButton(bool isLoading) {
     return SizedBox(
       width: double.infinity,
       child: PrimaryButton(
         text: 'Login',
-        onPressed: viewModel.isLoading ? null : () => _submitLogin(viewModel),
-        isLoading: viewModel.isLoading,
+        onPressed: isLoading ? null : () => _submitLogin,
+        isLoading: isLoading,
       ),
     );
   }
@@ -402,4 +434,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-
