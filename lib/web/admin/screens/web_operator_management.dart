@@ -37,12 +37,10 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) {
-        if (mounted) {
-          setState(() {
-            _error = 'No user logged in';
-            _loading = false;
-          });
-        }
+        setState(() {
+          _error = 'No user logged in';
+          _loading = false;
+        });
         return;
       }
 
@@ -168,26 +166,32 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        backgroundColor: Colors.teal.shade700,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
           'Operator Management',
-          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.teal),
-          onPressed: () => Navigator.pop(context),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.teal),
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _loadOperators,
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,11 +218,11 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
                         context: context,
                         builder: (context) => Dialog(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-                            child: AddOperatorScreen(),
+                            constraints: const BoxConstraints(maxWidth: 450, maxHeight: 550),
+                            child: const AddOperatorScreen(),
                           ),
                         ),
                       ).then((_) => _loadOperators());
@@ -236,11 +240,11 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
                         context: context,
                         builder: (context) => Dialog(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-                            child: AcceptOperatorScreen(),
+                            child: const AcceptOperatorScreen(),
                           ),
                         ),
                       ).then((_) => _loadOperators());
@@ -259,54 +263,109 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
             ),
             const SizedBox(height: 24),
 
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      onChanged: (value) => setState(() => _searchQuery = value),
-                      decoration: InputDecoration(
-                        hintText: 'Search operators...',
-                        prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () => setState(() => _searchQuery = ''),
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.teal, width: 2),
-                        ),
+            // Main Container with flexible height
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey[300]!, width: 1.0),
+                ),
+                child: Column(
+                  children: [
+                    // Search Bar Header with Title
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title Row - only show when archived
+                          if (_showArchived) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Archived Operators',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.teal,
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () => setState(() => _showArchived = false),
+                                  icon: const Icon(Icons.arrow_back, size: 18),
+                                  label: const Text('Back to Active'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.teal,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          // Search Bar
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  onChanged: (value) => setState(() => _searchQuery = value),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search....',
+                                    hintStyle: TextStyle(color: Colors.grey[400]),
+                                    prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                                    suffixIcon: _searchQuery.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () => setState(() => _searchQuery = ''),
+                                          )
+                                        : null,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: Colors.grey[300]!),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: Colors.teal, width: 2),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              IconButton(
+                                icon: const Icon(Icons.refresh, color: Colors.teal),
+                                onPressed: _loadOperators,
+                                tooltip: 'Refresh',
+                                style: IconButton.styleFrom(
+                                  side: BorderSide(color: Colors.grey[300]!),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.refresh, color: Colors.teal),
-                    onPressed: _loadOperators,
-                    tooltip: 'Refresh',
-                  ),
-                ],
+                    const Divider(height: 1),
+                    
+                    // Content - takes remaining space
+                    Expanded(
+                      child: _buildContent(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 1),
-
-            // Content
-            SizedBox(
-              height: 500,
-              child: _buildContent(),
             ),
           ],
         ),
@@ -381,7 +440,7 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       itemCount: displayList.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
@@ -389,12 +448,11 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
         final hasLeft = operator['hasLeft'] == true;
         final isArchived = operator['isArchived'] == true;
 
-        return Card(
-          elevation: 1,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey[200]!, width: 1),
+            border: Border.all(color: Colors.grey[300]!, width: 1),
           ),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -498,7 +556,7 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
                               operatorName: operator['name'] ?? '',
                               role: operator['role'] ?? '',
                               email: operator['email'] ?? '',
-                              dateAdded: operator['dateAdded'] ?? '',
+                              dateAdded: operator['dateAdded'] ?? '', onBack: () {  },
                             ),
                           ),
                         ).then((shouldRefresh) {
@@ -548,6 +606,7 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       label,
@@ -605,6 +664,7 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     label,

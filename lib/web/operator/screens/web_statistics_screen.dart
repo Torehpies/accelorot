@@ -4,7 +4,7 @@ import '../../../frontend/operator/statistics/view_screens/oxygen_stats_view.dar
 import '../../../frontend/operator/statistics/view_screens/moisture_stats_view.dart';
 import '../../../frontend/operator/statistics/view_screens/temperature_stats_view.dart';
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
-import '../../../frontend/components/history.dart';
+import '../../../frontend/operator/statistics/history/history.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
   final String? viewingOperatorId;
@@ -61,10 +61,16 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
           "Statistics",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.teal,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
         elevation: 2,
-        centerTitle: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -99,41 +105,92 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
   }
 
   Widget _buildWideLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Top Row: Oxygen + Temperature
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Expanded(child: OxygenStatsView()),
-            SizedBox(width: 24),
-            Expanded(child: TemperatureStatsView()),
-          ],
-        ),
-        const SizedBox(height: 24),
-        
-        // Bottom Row: Moisture (full width or centered)
-        Row(
-          children: const [
-            Expanded(child: MoistureStatsView()),
-            Expanded(child: SizedBox()), // Empty space for balance
-          ],
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 24) / 2; // Account for 24px gap
+        final cardHeight = 300.0;
+
+        return SizedBox(
+          height: cardHeight * 2 + 24, // Two rows + gap
+          child: Stack(
+            children: [
+              // Oxygen (top-left)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: SizedBox(
+                  width: cardWidth,
+                  height: cardHeight,
+                  child: const OxygenStatsView(),
+                ),
+              ),
+              // Temperature (top-right)
+              Positioned(
+                top: 0,
+                left: cardWidth + 24,
+                child: SizedBox(
+                  width: cardWidth,
+                  height: cardHeight,
+                  child: const TemperatureStatsView(),
+                ),
+              ),
+              // Moisture (bottom, full width)
+              Positioned(
+                top: cardHeight + 24,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: cardHeight,
+                  child: const MoistureStatsView(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   Widget _buildNarrowLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        OxygenStatsView(),
-        SizedBox(height: 20),
-        TemperatureStatsView(),
-        SizedBox(height: 20),
-        MoistureStatsView(),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardHeight = 280.0;
+
+        return SizedBox(
+          height: cardHeight * 3 + 40, // 3 cards + 2 gaps (20px each)
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: cardHeight,
+                  child: const OxygenStatsView(),
+                ),
+              ),
+              Positioned(
+                top: cardHeight + 20,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: cardHeight,
+                  child: const TemperatureStatsView(),
+                ),
+              ),
+              Positioned(
+                top: (cardHeight + 20) * 2,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: cardHeight,
+                  child: const MoistureStatsView(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Stat card widget for displaying dashboard statistics
 class StatCard extends StatelessWidget {
   final int count;
   final String label;
@@ -18,7 +19,9 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
