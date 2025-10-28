@@ -7,10 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'package:flutter_application_1/frontend/screens/login_screen.dart';
-import 'package:flutter_application_1/frontend/screens/registration_screen.dart'
-    show RegistrationScreen;
-import 'package:flutter_application_1/frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/registration_screen.dart' show RegistrationScreen;
+import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart'
     show WebRegistrationScreen;
