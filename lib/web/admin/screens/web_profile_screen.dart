@@ -131,15 +131,16 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () {},
-          ),
-        ],
+        title: const Text(
+          'Profile',
+          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+       
+        
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
