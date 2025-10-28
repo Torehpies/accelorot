@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
+import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../operator/screens/web_home_screen.dart';
 import 'screens/web_activity_logs_screen.dart';

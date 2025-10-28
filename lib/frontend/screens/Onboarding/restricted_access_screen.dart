@@ -1,8 +1,7 @@
-// lib/frontend/screens/restricted_access_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login_screen.dart';
+import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'qr_refer.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';

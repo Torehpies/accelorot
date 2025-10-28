@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
-import 'login_screen.dart';
+import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
