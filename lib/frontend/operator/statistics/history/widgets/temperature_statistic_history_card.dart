@@ -216,7 +216,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     );
   }
 
-
   String _getQuality(double temperature) {
     if (temperature >= 55 && temperature <= 65) return 'Optimal';
     if ((temperature >= 40 && temperature < 55) ||

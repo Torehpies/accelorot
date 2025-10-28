@@ -81,5 +81,4 @@ class HistoryPage extends StatelessWidget {
   String _formatDate(DateTime date) {
     return "${date.month}/${date.day}/${date.year}";
   }
-
 }
