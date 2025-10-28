@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'qr_refer.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
 class RestrictedAccessScreen extends StatefulWidget {
   final String reason;
@@ -26,27 +28,48 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Leave Team Permanently?'),
-        content: const Text(
-          'This will remove you from the team completely. You will need a new invitation code to rejoin.\n\n'
-          'Are you sure you want to continue?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder: (context) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isDesktop = screenWidth > 600;
+
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+          title: Text(
+            'Leave Team Permanently?',
+            style: TextStyle(
+              fontSize: isDesktop ? 22 : 18,
+              fontWeight: FontWeight.bold,
             ),
-            child: const Text('Leave Team'),
           ),
-        ],
-      ),
+          content: Text(
+            'This will remove you from the team completely. You will need a new invitation code to rejoin.\n\n'
+            'Are you sure you want to continue?',
+            style: TextStyle(
+              fontSize: isDesktop ? 16 : 14,
+              height: 1.5,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Leave Team'),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed != true) return;
@@ -140,26 +163,32 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 600;
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: isDesktop ? 600 : double.infinity,
+            ),
+            padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
             child: Card(
-              elevation: 8,
+              elevation: isDesktop ? 10 : 8,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: EdgeInsets.all(isDesktop ? 48.0 : 32.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Icon
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: isDesktop ? 100 : 80,
+                      height: isDesktop ? 100 : 80,
                       decoration: BoxDecoration(
                         color: widget.reason == 'archived'
                             ? Colors.orange.shade100
@@ -170,39 +199,39 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                         widget.reason == 'archived'
                             ? Icons.lock
                             : Icons.exit_to_app,
-                        size: 40,
+                        size: isDesktop ? 50 : 40,
                         color: widget.reason == 'archived'
                             ? Colors.orange.shade700
                             : Colors.red.shade700,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: isDesktop ? 32 : 24),
 
                     // Title
                     Text(
                       widget.reason == 'archived'
                           ? 'Account Archived'
                           : 'Team Access Removed',
-                      style: const TextStyle(
-                        fontSize: 24,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 28 : 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: isDesktop ? 20 : 16),
 
                     // Message
                     Text(
                       _getMessage(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        height: 1.5,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 16 : 14,
+                        color: Colors.grey[700],
+                        height: 1.6,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: isDesktop ? 48 : 32),
 
                     // Leave Team Button (only for archived users)
                     if (widget.reason == 'archived') ...[
@@ -226,22 +255,25 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                             _isLeaving
                                 ? 'Leaving...'
                                 : 'Leave Team Permanently',
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: isDesktop ? 16 : 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isDesktop ? 18 : 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 4,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12), 
+                      SizedBox(height: isDesktop ? 16 : 12),
                     ],
 
                     // Back to Login Button
@@ -254,24 +286,28 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                                 await FirebaseAuth.instance.signOut();
                                 if (!context.mounted) return;
                                 Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginScreen(),
-                                  ),
-                                  (route) => false,
-                                );
+                                MaterialPageRoute(
+                                  builder: (context) => kIsWeb
+                                      ? const WebLoginScreen()
+                                      : const LoginScreen(),
+                                ),
+                                (route) => false,
+                              );
                               },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.teal,
-                          side: const BorderSide(color: Colors.teal),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(color: Colors.teal, width: 2),
+                          padding: EdgeInsets.symmetric(
+                            vertical: isDesktop ? 18 : 16,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Back to Login',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: isDesktop ? 16 : 14,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

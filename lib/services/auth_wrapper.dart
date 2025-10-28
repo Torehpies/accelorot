@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/frontend/screens/splash_screen.dart';
-import '../frontend/screens/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
+import '../frontend/operator/main_navigation.dart';
 import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import '../web/admin/admin_navigation/web_admin_navigation.dart';
-import '../frontend/screens/email_verify.dart';
-import '../frontend/screens/restricted_access_screen.dart';
+import '../frontend/screens/Onboarding/email_verify.dart';
+import '../frontend/screens/Onboarding/restricted_access_screen.dart';
 import '../services/sess_service.dart';
 import 'auth_service.dart';
-import '../frontend/screens/qr_refer.dart';
-import '../frontend/screens/waiting_approval_screen.dart';
+import '../frontend/screens/Onboarding/qr_refer.dart';
+import '../frontend/screens/Onboarding/waiting_approval_screen.dart';
 import '../web/operator/web_operator_navigation.dart';
 
 class AuthWrapper extends StatelessWidget {
