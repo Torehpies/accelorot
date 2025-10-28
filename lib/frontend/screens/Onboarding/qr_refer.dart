@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../services/auth_service.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
