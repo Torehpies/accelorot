@@ -65,6 +65,7 @@ class LoginController {
       setLoading(true);
 
       try {
+        // ignore: unused_local_variable
         final result = await _authService.signInUser(
           email: emailController.text.trim(),
           password: passwordController.text,

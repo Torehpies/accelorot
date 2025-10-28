@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import, unused_field
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/frontend/screens/qr_refer.dart';

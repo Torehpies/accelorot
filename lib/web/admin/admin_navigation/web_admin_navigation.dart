@@ -1,4 +1,3 @@
-// lib/web/operator/web_operator_navigation.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,7 +6,6 @@ import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
 import '../screens/web_admin_machine.dart';
 import '../screens/web_profile_screen.dart';
-import '../../../web/admin/screens/web_login_screen.dart';
 import '../../../web/admin/screens/web_operator_management.dart';
 
 

@@ -13,7 +13,6 @@ class HistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final start = DateTime(range.start.year, range.start.month, range.start.day);
     final end = DateTime(range.end.year, range.end.month, range.end.day);
-    final days = end.difference(start).inDays + 1;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 16),
@@ -83,32 +82,4 @@ class HistoryPage extends StatelessWidget {
     return "${date.month}/${date.day}/${date.year}";
   }
 
-  Widget _buildCard({required String title, required Widget child}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withAlpha(50),
-            blurRadius: 6,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          child,
-        ],
-      ),
-    );
-  }
 }

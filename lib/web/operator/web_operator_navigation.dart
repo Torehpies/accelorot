@@ -1,4 +1,3 @@
-// lib/web/operator/web_operator_navigation.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -9,7 +8,6 @@ import 'screens/web_activity_logs_screen.dart';
 import 'screens/web_statistics_screen.dart';
 import 'screens/web_operator_machine_screen.dart';
 import 'screens/operator_web_profile_screen.dart';
-import '../../../web/admin/screens/web_login_screen.dart';
 
 class WebOperatorNavigation extends StatefulWidget {
   const WebOperatorNavigation({super.key});
