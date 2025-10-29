@@ -297,7 +297,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                   child: Text(
                                                     '${index + 1}',
                                                     style: const TextStyle(
-                                                        fontSize: 12),
+                                                        fontSize: 13),
                                                   )),
                                               Expanded(
                                                   flex: 3,
@@ -305,7 +305,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                     _getSurname(
                                                         operator['name']),
                                                     style: const TextStyle(
-                                                        fontSize: 12),
+                                                        fontSize: 14),
                                                   )),
                                               Expanded(
                                                   flex: 4,
