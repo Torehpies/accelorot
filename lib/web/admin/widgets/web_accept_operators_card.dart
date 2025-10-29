@@ -11,6 +11,7 @@ class WebAcceptOperatorsScreen extends StatefulWidget {
 	State<WebAcceptOperatorsScreen> createState() => _WebAcceptOperatorsScreenState();
 }
 
+
 class _WebAcceptOperatorsScreenState extends State<WebAcceptOperatorsScreen> {
 	final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 	

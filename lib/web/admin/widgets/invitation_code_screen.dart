@@ -14,6 +14,7 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
     final rnd = Random.secure();
     return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
   }
+  
 
   showDialog(
     context: context,

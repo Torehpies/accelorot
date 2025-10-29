@@ -12,6 +12,7 @@ class WebOperatorSearchBar extends StatelessWidget {
     required this.onRefresh,
   });
 
+
   @override
   Widget build(BuildContext context) {
     return Row(

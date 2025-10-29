@@ -246,6 +246,7 @@ class _WebAddOperatorCardState extends State<WebAddOperatorCard> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
+                  
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20,
