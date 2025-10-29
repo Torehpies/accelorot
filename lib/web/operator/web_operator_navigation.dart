@@ -35,7 +35,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
     super.initState();
     _screens = [
       const WebHomeScreen(),
-      const WebActivityLogsScreen(),
+      const WebActivityLogsScreen(shouldRefresh: false),
       const WebStatisticsScreen(),
       const WebOperatorMachineScreen(),
       const WebProfileScreen(),
