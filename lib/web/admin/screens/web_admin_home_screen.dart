@@ -125,8 +125,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           _archivedOperators = archivedOperators;
           _activeMachines = activeMachines;
           _archivedMachines = archivedMachines;
-          _operators = operators;
-          _machines = machines;
+          _operators = operators.take(6).toList();
+          _machines = machines.take(6).toList();
           _loading = false;
         });
       }
