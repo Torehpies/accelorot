@@ -151,222 +151,19 @@ class _QRReferScreenState extends State<QRReferScreen> {
     await _auth.signOut();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => kIsWeb
-                  ? const WebLoginScreen()
-                  : const LoginScreen(),
-            ),
-
-    );
-  }
-
-  Widget _buildJoinTeam() {
-    final isWeb = kIsWeb;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 600;
-
-    return Center(
-      child: Container(
-        constraints: BoxConstraints(
-          maxWidth: isDesktop ? 600 : double.infinity,
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
-            child: Card(
-              elevation: isDesktop ? 8 : 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(isDesktop ? 20 : 0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(isDesktop ? 40.0 : 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo
-                    if (isDesktop) ...[
-                      Center(
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.teal.shade400, Colors.teal.shade700],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.teal.withValues(alpha: 0.3),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ] else
-                      const SizedBox(height: 24),
-
-                    Text(
-                      'Join a Team',
-                      style: TextStyle(
-                        fontSize: isDesktop ? 32 : 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isDesktop ? 16 : 12),
-                    Text(
-                      'Enter a referral code or scan a team QR code to request joining.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: isDesktop ? 16 : 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    SizedBox(height: isDesktop ? 32 : 24),
-
-                    // Manual code entry
-                    TextField(
-                      controller: _codeController,
-                      decoration: InputDecoration(
-                        labelText: 'Referral Code',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        prefixIcon: const Icon(Icons.qr_code),
-                      ),
-                      onChanged: (v) {
-                        setState(() {
-                          _manualCode = v.trim();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _manualCode.isNotEmpty
-                            ? () => _submitReferralCode(_manualCode)
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            vertical: isDesktop ? 18 : 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 4,
-                        ),
-                        child: Text(
-                          'Submit Code',
-                          style: TextStyle(
-                            fontSize: isDesktop ? 16 : 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: isDesktop ? 32 : 24),
-
-                    const Divider(),
-                    SizedBox(height: isDesktop ? 20 : 12),
-
-                    Text(
-                      isWeb ? 'Or enter QR code manually' : 'Or scan QR code',
-                      style: TextStyle(
-                        fontSize: isDesktop ? 20 : 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isDesktop ? 16 : 12),
-
-                    // Scanner preview (hide on web)
-                    if (!isWeb) ...[
-                      SizedBox(
-                        height: isDesktop ? 350 : 300,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: MobileScanner(
-                            onDetect: _onDetect,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (_scanning) const Center(child: CircularProgressIndicator()),
-                    ] else
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.qr_code_scanner,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'QR scanning is not available on web.\nPlease enter the code manually above.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    SizedBox(height: isDesktop ? 32 : 24),
-
-                    // Back to Login button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _handleBackToLogin,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.teal,
-                          side: const BorderSide(color: Colors.teal),
-                          padding: EdgeInsets.symmetric(
-                            vertical: isDesktop ? 18 : 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Back to Login',
-                          style: TextStyle(
-                            fontSize: isDesktop ? 16 : 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      MaterialPageRoute(
+        builder: (context) => kIsWeb
+            ? const WebLoginScreen()
+            : const LoginScreen(),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWebDesktop = kIsWeb && screenWidth > 900;
+
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -379,17 +176,428 @@ class _QRReferScreenState extends State<QRReferScreen> {
       return const WaitingApprovalScreen();
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 600;
+    if (isWebDesktop) {
+      return _buildWebLayout();
+    } else {
+      return _buildMobileLayout();
+    }
+  }
 
+  Widget _buildWebLayout() {
     return Scaffold(
-      appBar: isDesktop
-          ? null
-          : AppBar(
-              title: const Text('Join a Team'),
-              backgroundColor: Colors.teal,
+      backgroundColor: const Color(0xFFF5F7FA),
+      body: Row(
+        children: [
+          // Left side - Branding
+          Expanded(
+            flex: 5,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.teal.shade700,
+                    Colors.teal.shade900,
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(60),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.qr_code_scanner,
+                          size: 64,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      const Text(
+                        'Join Your Team',
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Enter your team\'s invitation code to request access. An administrator will review your request.',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          height: 1.6,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      _buildFeatureItem('Secure team access'),
+                      const SizedBox(height: 16),
+                      _buildFeatureItem('Admin approval required'),
+                      const SizedBox(height: 16),
+                      _buildFeatureItem('One-time invitation code'),
+                    ],
+                  ),
+                ),
+              ),
             ),
-      body: _buildJoinTeam(),
+          ),
+
+          // Right side - Form
+          Expanded(
+            flex: 4,
+            child: Container(
+              color: Colors.white,
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(60),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Join a Team',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A202C),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Enter your team invitation code below',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Manual code entry
+                        TextField(
+                          controller: _codeController,
+                          decoration: InputDecoration(
+                            labelText: 'Invitation Code',
+                            hintText: 'Enter code here',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            prefixIcon: const Icon(Icons.qr_code),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                          ),
+                          onChanged: (v) {
+                            setState(() {
+                              _manualCode = v.trim();
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Submit button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton.icon(
+                            onPressed: _manualCode.isNotEmpty
+                                ? () => _submitReferralCode(_manualCode)
+                                : null,
+                            icon: const Icon(Icons.login),
+                            label: const Text(
+                              'Submit Code',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Info box
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blue.shade100),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.info_outline, color: Colors.blue.shade700),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'QR code scanning is not available on web. Please ask your team administrator for the invitation code.',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.blue.shade900,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Back to Login
+                        Center(
+                          child: TextButton.icon(
+                            onPressed: _handleBackToLogin,
+                            icon: const Icon(Icons.arrow_back, size: 18),
+                            label: const Text(
+                              'Back to Login',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.check, color: Colors.white, size: 16),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Join a Team'),
+        backgroundColor: Colors.teal,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: Column(
+                children: [
+                  // Icon
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.teal.shade400, Colors.teal.shade700],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.teal.withValues(alpha: 0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.qr_code_scanner, size: 40, color: Colors.white),
+                  ),
+                  const SizedBox(height: 24),
+
+                  const Text(
+                    'Join Your Team',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    'Enter a referral code or scan a team QR code to request joining.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Manual code entry
+                  TextField(
+                    controller: _codeController,
+                    decoration: InputDecoration(
+                      labelText: 'Invitation Code',
+                      hintText: 'Enter code here',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.qr_code),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    onChanged: (v) {
+                      setState(() {
+                        _manualCode = v.trim();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _manualCode.isNotEmpty
+                          ? () => _submitReferralCode(_manualCode)
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'Submit Code',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 12),
+
+                  Text(
+                    kIsWeb ? 'Or enter QR code manually' : 'Or scan QR code',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Scanner preview (hide on web)
+                  if (!kIsWeb) ...[
+                    SizedBox(
+                      height: 300,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: MobileScanner(
+                          onDetect: _onDetect,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (_scanning) const Center(child: CircularProgressIndicator()),
+                  ] else
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.qr_code_scanner,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'QR scanning is not available on web.\nPlease enter the code manually above.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+
+                  // Back to Login button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: _handleBackToLogin,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.teal,
+                        side: const BorderSide(color: Colors.teal, width: 2),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Back to Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
