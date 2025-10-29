@@ -120,7 +120,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Operator Portal',
+                    'Admin Portal',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
