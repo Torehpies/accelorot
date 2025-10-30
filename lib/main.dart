@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, PlatformDispatcher;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'firebase_options.dart'; // ✅ Make sure this file exists and includes web + android configs
+import 'firebase_options.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/login_screen.dart';
 import 'package:flutter_application_1/frontend/screens/registration_screen.dart' show RegistrationScreen;
