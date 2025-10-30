@@ -21,7 +21,6 @@ class WebAdminNavigation extends StatefulWidget {
 
 class _WebAdminNavigationState extends State<WebAdminNavigation> {
   int _selectedIndex = 0;
-  
 
   late final List<Widget> _screens;
   
@@ -121,7 +120,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Operator Portal',
+                    'Admin Portal',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
