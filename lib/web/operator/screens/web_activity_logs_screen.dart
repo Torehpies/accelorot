@@ -25,7 +25,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-     appBar: AppBar(
+   appBar: AppBar(
   title: const Text(
     'Activity Logs',
     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -41,12 +41,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   ),
   foregroundColor: Colors.white,
   elevation: 0,
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-      onPressed: () {},
-    ),
-  ],
+  actions: [], // <-- Now empty; notification icon removed
 ),
       body: SafeArea(
         child: Column(
