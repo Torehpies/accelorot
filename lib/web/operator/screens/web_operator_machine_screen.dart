@@ -17,30 +17,30 @@ class WebOperatorMachineScreen extends StatefulWidget {
 }
 
 class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
-  late final OperatorMachineController _controller;
-  final FocusNode _searchFocusNode = FocusNode();
-  String _viewMode = 'grid'; // 'grid' or 'list'
+  late final OperatorMachineController controller;
+  final FocusNode searchFocusNode = FocusNode();
+  String viewMode = 'grid'; // 'grid' or 'list'
 
   @override
   void initState() {
     super.initState();
-    _controller =
+    controller =
         OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
-    _controller.initialize();
+    controller.initialize();
   }
 
   @override
   void dispose() {
-    _searchFocusNode.dispose();
-    _controller.dispose();
+    searchFocusNode.dispose();
+    controller.dispose();
     super.dispose();
   }
 
-  Future<void> _handleRefresh() async {
-    await _controller.refresh();
+  Future<void> handleRefresh() async {
+    await controller.refresh();
   }
 
-  void _handleMachineTap(String machineName) {
+  void handleMachineTap(String machineName) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Opening $machineName details')),
     );
@@ -71,24 +71,24 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         elevation: 2,
         actions: [
           IconButton(
-            icon: Icon(_viewMode == 'grid' ? Icons.list : Icons.grid_view),
-            tooltip: _viewMode == 'grid' ? 'List View' : 'Grid View',
+            icon: Icon(viewMode == 'grid' ? Icons.list : Icons.grid_view),
+            tooltip: viewMode == 'grid' ? 'List View' : 'Grid View',
             onPressed: () {
               setState(() {
-                _viewMode = _viewMode == 'grid' ? 'list' : 'grid';
+                viewMode = viewMode == 'grid' ? 'list' : 'grid';
               });
             },
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _handleRefresh,
+            onPressed: handleRefresh,
             tooltip: 'Refresh',
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: (context, _) {
           return SafeArea(
             child: Padding(
@@ -107,7 +107,9 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.grey[300]!, width: 1.0),
+                              color: Colors.grey[300]!,
+                              width: 1.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.08),
@@ -143,10 +145,11 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                             border: Border.all(
-                                                color: Colors.teal.shade200),
+                                              color: Colors.teal.shade200,
+                                            ),
                                           ),
                                           child: Text(
-                                            '${_controller.filteredMachines.length} machine(s)',
+                                            '${controller.filteredMachines.length} machine(s)',
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
@@ -158,10 +161,9 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     SearchBarWidget(
-                                      onSearchChanged:
-                                          _controller.setSearchQuery,
-                                      onClear: _controller.clearSearch,
-                                      focusNode: _searchFocusNode,
+                                      onSearchChanged: controller.setSearchQuery,
+                                      onClear: controller.clearSearch,
+                                      focusNode: searchFocusNode,
                                     ),
                                   ],
                                 ),
@@ -191,7 +193,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               Expanded(
                 child: SummaryCardWidget(
                   title: 'Active Machines',
-                  value: _controller.activeMachinesCount.toString(),
+                  value: controller.activeMachinesCount.toString(),
                   icon: Icons.check_circle,
                   color: Colors.green,
                 ),
@@ -200,7 +202,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               Expanded(
                 child: SummaryCardWidget(
                   title: 'Disabled Machines',
-                  value: _controller.archivedMachinesCount.toString(),
+                  value: controller.archivedMachinesCount.toString(),
                   icon: Icons.cancel,
                   color: Colors.orange,
                 ),
@@ -209,8 +211,8 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               Expanded(
                 child: SummaryCardWidget(
                   title: 'Total Machines',
-                  value: (_controller.activeMachinesCount +
-                          _controller.archivedMachinesCount)
+                  value: (controller.activeMachinesCount +
+                          controller.archivedMachinesCount)
                       .toString(),
                   icon: Icons.devices,
                   color: Colors.blue,
@@ -222,7 +224,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
             children: [
               SummaryCardWidget(
                 title: 'Active Machines',
-                value: _controller.activeMachinesCount.toString(),
+                value: controller.activeMachinesCount.toString(),
                 icon: Icons.check_circle,
                 color: Colors.green,
               ),
@@ -232,7 +234,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   Expanded(
                     child: SummaryCardWidget(
                       title: 'Disabled',
-                      value: _controller.archivedMachinesCount.toString(),
+                      value: controller.archivedMachinesCount.toString(),
                       icon: Icons.cancel,
                       color: Colors.orange,
                     ),
@@ -241,8 +243,8 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   Expanded(
                     child: SummaryCardWidget(
                       title: 'Total',
-                      value: (_controller.activeMachinesCount +
-                              _controller.archivedMachinesCount)
+                      value: (controller.activeMachinesCount +
+                              controller.archivedMachinesCount)
                           .toString(),
                       icon: Icons.devices,
                       color: Colors.blue,
@@ -255,11 +257,11 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   }
 
   Widget _buildContent() {
-    if (_controller.isLoading) {
+    if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_controller.errorMessage != null) {
+    if (controller.errorMessage != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -278,15 +280,15 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                _controller.errorMessage!,
+                controller.errorMessage!,
                 style: TextStyle(color: Colors.red.shade600, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  _controller.clearError();
-                  _controller.initialize();
+                  controller.clearError();
+                  controller.initialize();
                 },
                 icon: const Icon(Icons.refresh, size: 20),
                 label: const Text('Retry'),
@@ -305,7 +307,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       );
     }
 
-    if (_controller.filteredMachines.isEmpty) {
+    if (controller.filteredMachines.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -328,7 +330,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                _controller.searchQuery.isEmpty
+                controller.searchQuery.isEmpty
                     ? 'You don\'t have any machines yet.'
                     : 'No machines match your search.',
                 style: TextStyle(
@@ -343,7 +345,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       );
     }
 
-    return _viewMode == 'grid' ? _buildGridView() : _buildListView();
+    return viewMode == 'grid' ? _buildGridView() : _buildListView();
   }
 
   Widget _buildGridView() {
@@ -362,12 +364,12 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.3,
       ),
-      itemCount: _controller.filteredMachines.length,
+      itemCount: controller.filteredMachines.length,
       itemBuilder: (context, index) {
-        final machine = _controller.filteredMachines[index];
+        final machine = controller.filteredMachines[index];
         return MachineCardWidget(
           machine: machine,
-          onTap: () => _handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine.machineName),
         );
       },
     );
@@ -376,13 +378,13 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   Widget _buildListView() {
     return ListView.separated(
       padding: const EdgeInsets.all(24),
-      itemCount: _controller.filteredMachines.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),  
+      itemCount: controller.filteredMachines.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final machine = _controller.filteredMachines[index];
+        final machine = controller.filteredMachines[index];
         return MachineListTileWidget(
           machine: machine,
-          onTap: () => _handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine.machineName),
         );
       },
     );
