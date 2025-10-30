@@ -127,16 +127,18 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-       
-        
+      backgroundColor: Colors.grey[50],
+     appBar: AppBar(
+  title: const Text(
+    'Profile',
+    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  ),
+  automaticallyImplyLeading: false,
+  centerTitle: false,
+  flexibleSpace: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.teal.shade700, Colors.teal.shade900],
       ),
     ),
   ),
