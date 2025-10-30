@@ -32,7 +32,7 @@ void main() async {
 
   // 🔥 Initialize Firebase
   try {
-    await Firebase.initializeApp( 
+    await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } on FirebaseException {

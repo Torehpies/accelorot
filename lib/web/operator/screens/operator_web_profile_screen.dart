@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart' show WebLoginScreen;
 import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
+import '../../operator/widgets/profile_header_widget.dart';
+import '../../operator/widgets/profile_edit_form_widget.dart';
+import '../../operator/widgets/profile_info_view_widget.dart';
 
 class WebProfileScreen extends StatefulWidget {
   const WebProfileScreen({super.key});
@@ -117,6 +120,22 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     }
   }
 
+  void _handleDiscard() {
+    setState(() {
+      _isEditing = false;
+      _usernameController.text = displayName;
+      _fullNameController.text = fullName;
+    });
+  }
+
+  void _handleEdit() {
+    setState(() {
+      _isEditing = true;
+      _usernameController.text = displayName;
+      _fullNameController.text = fullName;
+    });
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -128,7 +147,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-     appBar: AppBar(
+      appBar: AppBar(
   title: const Text(
     'Profile',
     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -144,19 +163,14 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   ),
   foregroundColor: Colors.white,
   elevation: 0,
-  actions: [
-    IconButton(
-      icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-      onPressed: () {},
-    ),
-  ],
+  actions: [], // <-- Now empty; notification icon removed
 ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(32.0),
               child: Align(
-                alignment: Alignment.center, // 👈 Centers card horizontally
+                alignment: Alignment.center,
                 child: Card(
                   elevation: 4,
                   color: Colors.white,
@@ -166,59 +180,15 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: NetworkImage(
-                                'https://via.placeholder.com/150/2E7D32/FFFFFF?text=$initials',
-                              ),
-                            ),
-                            const SizedBox(width: 32),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    displayName,
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    email,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.teal[50],
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      role,
-                                      style: TextStyle(
-                                        color: Colors.teal[800],
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                        ProfileHeaderWidget(
+                          initials: initials,
+                          displayName: displayName,
+                          email: email,
+                          role: role,
                         ),
                         const SizedBox(height: 32),
                         Divider(color: Colors.grey[300]),
                         const SizedBox(height: 24),
-                        // 👇 Personal Info Header + Edit Button on same line
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -231,13 +201,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                             ),
                             if (!_isEditing)
                               ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isEditing = true;
-                                    _usernameController.text = displayName;
-                                    _fullNameController.text = fullName;
-                                  });
-                                },
+                                onPressed: _handleEdit,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.teal,
                                   foregroundColor: Colors.white,
@@ -252,133 +216,20 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                         ),
                         const SizedBox(height: 24),
                         if (_isEditing)
-                          Form(
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _usernameController,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Username',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 24),
-                                    Expanded(
-                                      child: TextFormField(
-                                        controller: _fullNameController,
-                                        decoration: const InputDecoration(
-                                          labelText: 'Full Name',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        initialValue: email,
-                                        decoration: InputDecoration(
-                                          labelText: 'Email Address',
-                                          border: const OutlineInputBorder(),
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
-                                        ),
-                                        enabled: false,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 24),
-                                    Expanded(
-                                      child: TextFormField(
-                                        initialValue: role,
-                                        decoration: InputDecoration(
-                                          labelText: 'Role',
-                                          border: const OutlineInputBorder(),
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
-                                        ),
-                                        enabled: false,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 32),
-                              Row(
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    // Discard Button – styled to match Save
-    OutlinedButton(
-      onPressed: () {
-        setState(() {
-          _isEditing = false;
-          _usernameController.text = displayName;
-          _fullNameController.text = fullName;
-        });
-      },
-      style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.teal, // teal text
-        side: BorderSide(color: Colors.teal),
-        backgroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: const Text('Discard'),
-    ),
-    const SizedBox(width: 16),
-    // Save Button
-    ElevatedButton(
-      onPressed: _saveProfile,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: const Text('Save'),
-    ),
-  ],
-),
-                              ],
-                            ),
+                          ProfileEditFormWidget(
+                            usernameController: _usernameController,
+                            fullNameController: _fullNameController,
+                            email: email,
+                            role: role,
+                            onSave: _saveProfile,
+                            onDiscard: _handleDiscard,
                           )
                         else
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildInfoField('Username', displayName),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  Expanded(
-                                    child: _buildInfoField('Full Name', fullName),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildInfoField('Email Address', email),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  Expanded(
-                                    child: _buildInfoField('Role', role),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          ProfileInfoViewWidget(
+                            displayName: displayName,
+                            fullName: fullName,
+                            email: email,
+                            role: role,
                           ),
                       ],
                     ),
@@ -386,36 +237,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildInfoField(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
