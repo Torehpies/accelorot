@@ -20,17 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
       
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
-  title: const Text('Dashboard'),
-  centerTitle: false, //  Ensures title is aligned to the left
-  backgroundColor: Colors.teal, //  Sets the background color
-  // Optional: Ensure text is readable (white by default in light themes)
-  foregroundColor: Colors.white,
-),
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        centerTitle: false,
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -45,7 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               const SystemCard(),
               const SizedBox(height: 16),
-              ActivityLogsCard(key: _activityLogsKey),
+              ActivityLogsCard(
+                key: _activityLogsKey,
+                viewingOperatorId: widget.viewingOperatorId, // ⭐ Pass it here too!
+              ),
             ],
           ),
         ),
@@ -58,9 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FloatingActionButton(
             // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
             onPressed: () async {
+           
+              
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,
-                builder: (context) => const AddWasteProduct(),
+                builder: (context) => AddWasteProduct(
+                  viewingOperatorId: widget.viewingOperatorId, // ⭐ CRITICAL: Pass it here!
+                ),
               );
 
               if (result != null && mounted) {
@@ -79,5 +84,4 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
-
 }

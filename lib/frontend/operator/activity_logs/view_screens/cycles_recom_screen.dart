@@ -1,11 +1,14 @@
-// view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class CyclesRecomScreen extends BaseActivityScreen {
-  const CyclesRecomScreen({super.key, super.initialFilter});
+  const CyclesRecomScreen({
+    super.key, 
+    super.initialFilter,
+    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+  });
 
   @override
   State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
@@ -20,7 +23,10 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getCyclesRecom();
+    // ⭐ UPDATED: Pass viewingOperatorId to service
+    return await FirestoreActivityService.getCyclesRecom(
+      viewingOperatorId: widget.viewingOperatorId,
+    );
   }
 
   @override

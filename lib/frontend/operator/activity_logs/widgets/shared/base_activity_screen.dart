@@ -11,8 +11,13 @@ import '../../../../../services/firestore_activity_service.dart';
 /// Provides common functionality: search, filters, date filtering, data loading, and UI
 abstract class BaseActivityScreen extends StatefulWidget {
   final String? initialFilter;
+  final String? viewingOperatorId; // ⭐ NEW: Support for admin viewing operator
 
-  const BaseActivityScreen({super.key, this.initialFilter});
+  const BaseActivityScreen({
+    super.key, 
+    this.initialFilter,
+    this.viewingOperatorId, // ⭐ NEW
+  });
 
   @override
   State<BaseActivityScreen> createState();
@@ -90,12 +95,15 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     });
 
     try {
-      final userId = FirestoreActivityService.getCurrentUserId();
-      _isLoggedIn = userId != null;
+      // ⭐ UPDATED: Get effective user ID (operator being viewed or current user)
+      final effectiveUserId = FirestoreActivityService.getEffectiveUserId(widget.viewingOperatorId);
+      _isLoggedIn = effectiveUserId.isNotEmpty;
         
       if (_isLoggedIn) {
-        // Upload mock data if needed, then load
-        await FirestoreActivityService.uploadAllMockData();
+        // ⭐ UPDATED: Upload mock data for the correct user
+        await FirestoreActivityService.uploadAllMockData(
+          viewingOperatorId: widget.viewingOperatorId,
+        );
         await _loadActivities();
       }
     } catch (e) {

@@ -1,11 +1,14 @@
-// view_screens/substrates_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class SubstratesScreen extends BaseActivityScreen {
-  const SubstratesScreen({super.key, super.initialFilter});
+  const SubstratesScreen({
+    super.key, 
+    super.initialFilter,
+    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+  });
 
   @override
   State<SubstratesScreen> createState() => _SubstratesScreenState();
@@ -20,22 +23,17 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getSubstrates();
+    // ⭐ UPDATED: Pass viewingOperatorId to service
+    return await FirestoreActivityService.getSubstrates(
+      viewingOperatorId: widget.viewingOperatorId,
+    );
   }
 
   @override
-List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter) {
-  if (filter == 'All') return items;
-  
-  // ⭐ Only debug newly added items
-  final filtered = items.where((item) {
-    if (item.title == 'Fruit Trees' || item.title == 'Compost') {  // Your newly added titles
-    }
-    return item.category == filter;
-  }).toList();
-  
-  return filtered;
-}
+  List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter) {
+    if (filter == 'All') return items;
+    return items.where((item) => item.category == filter).toList();
+  }
 
   @override
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {

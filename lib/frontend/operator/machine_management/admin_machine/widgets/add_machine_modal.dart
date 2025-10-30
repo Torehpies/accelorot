@@ -76,7 +76,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
 
     if (_selectedUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a user')),
+        const SnackBar(content: Text('Please select a team member')),
       );
       return;
     }
@@ -123,6 +123,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
   @override
   Widget build(BuildContext context) {
     final isAuthenticated = widget.controller.isAuthenticated;
+    final teamMembers = widget.controller.users; // Uses team members now
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -179,18 +180,22 @@ class _AddMachineModalState extends State<AddMachineModal> {
           
           DropdownButtonFormField<String>(
             initialValue: _selectedUserId,
-            decoration: _buildInputDecoration('Assign to User *'),
-            hint: const Text('Select User'),
-            items: widget.controller.users.map((user) {
+            decoration: _buildInputDecoration('Assign to Team Member *'),
+            hint: Text(
+              teamMembers.isEmpty 
+                  ? 'No team members available' 
+                  : 'Select Team Member',
+            ),
+            items: teamMembers.map((member) {
               return DropdownMenuItem<String>(
-                value: user['uid'],
+                value: member['uid'],
                 child: Text(
-                  '${user['fullName']} (${user['role']})',
+                  '${member['name']} (${member['role']})', // Now uses 'name' instead of 'fullName'
                   style: const TextStyle(color: Colors.teal),
                 ),
               );
             }).toList(),
-            onChanged: _isSubmitting
+            onChanged: _isSubmitting || teamMembers.isEmpty
                 ? null
                 : (value) => setState(() => _selectedUserId = value),
             dropdownColor: Colors.white,

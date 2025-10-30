@@ -1,28 +1,20 @@
-// lib/frontend/operator/web/web_home_screen.dart
+// lib/web/operator/screens/web_home_screen.dart
+
 import 'package:flutter/material.dart';
-import '../../../frontend/components/system_card.dart';
-import '../../../frontend/operator/dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
-import '../../../frontend/components/composting_progress_card.dart';
-import '../../../frontend/operator/dashboard/add_waste/add_waste_product.dart';
-import '../../../frontend/operator/dashboard/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
+import '../components/environmental_sensors_card.dart';
+import '../components/system_card.dart';
+import '../components/composting_progress_card.dart';
 
-class WebHomeScreen extends StatefulWidget {
+class WebHomeScreen extends StatelessWidget {
   final String? viewingOperatorId;
-  
+
   const WebHomeScreen({super.key, this.viewingOperatorId});
-
-  @override
-  State<WebHomeScreen> createState() => _WebHomeScreenState();
-}
-
-class _WebHomeScreenState extends State<WebHomeScreen> {
-  final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-      GlobalKey<ActivityLogsCardState>();
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 1200;
+    final isDesktop = screenWidth > 1024;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -32,21 +24,82 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        elevation: 2,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(isWideScreen ? 32 : 24),
-          child: Center(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 1400),
-              child: isWideScreen
-                  ? _buildWideLayout()
-                  : _buildNarrowLayout(),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
             ),
           ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No new notifications'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 32 : 24,
+                  vertical: 24,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ROW 1: Environmental Sensors + System Card (side by side)
+                      if (isDesktop)
+                        SizedBox(
+                          height: 280,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: const [
+                              Expanded(
+                                flex: 3,
+                                child: EnvironmentalSensorsCard(),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                flex: 2,
+                                child: SystemCard(),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Column(
+                          children: const [
+                            EnvironmentalSensorsCard(),
+                            SizedBox(height: 16),
+                            SystemCard(),
+                          ],
+                        ),
+                      
+                      const SizedBox(height: 16),
+
+                      // ROW 2: Composting Progress
+                      const CompostingProgressCard(),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -56,72 +109,24 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             builder: (context) => const AddWasteProduct(),
           );
 
-          if (result != null && mounted) {
-            await _activityLogsKey.currentState?.refresh();
+          if (result != null) {
+            // ignore: use_build_context_synchronously
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Waste entry added successfully!'),
+                backgroundColor: Colors.teal,
+              ),
+            );
           }
         },
         backgroundColor: Colors.teal,
-        elevation: 4,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Waste',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
-    );
-  }
-
-  Widget _buildWideLayout() {
-    return Column(
-      children: [
-        // Top Row: Environmental Sensors + Progress
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 2,
-              child: const EnvironmentalSensorsView(),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              flex: 1,
-              child: CompostingProgressCard(batchStart: DateTime(2025, 9, 15)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        
-        // Bottom Row: System Card + Activity Logs
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Expanded(
-              flex: 1,
-              child: SystemCard(),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              flex: 2,
-              child: ActivityLogsCard(key: _activityLogsKey),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNarrowLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const EnvironmentalSensorsView(),
-        const SizedBox(height: 20),
-        CompostingProgressCard(batchStart: DateTime(2025, 9, 15)),
-        const SizedBox(height: 20),
-        const SystemCard(),
-        const SizedBox(height: 20),
-        ActivityLogsCard(key: _activityLogsKey),
-      ],
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

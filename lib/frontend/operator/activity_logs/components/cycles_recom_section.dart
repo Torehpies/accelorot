@@ -3,16 +3,19 @@ import '../view_screens/cycles_recom_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class CyclesRecomSection extends StatelessWidget {
-  const CyclesRecomSection({super.key});
+  final String? viewingOperatorId; 
+
+  const CyclesRecomSection({
+    super.key,
+    this.viewingOperatorId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(
-          context,
-        ).push(
-          SlidePageRoute(page: const CyclesRecomScreen()),
+        Navigator.of(context).push(
+          SlidePageRoute(page: CyclesRecomScreen(viewingOperatorId: viewingOperatorId,)),
         );
       },
       child: SizedBox(

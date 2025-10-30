@@ -66,7 +66,7 @@ class OxygenStatisticCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Air Quality (MQ135)',
+                'Oxygen Level',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium

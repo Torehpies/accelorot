@@ -1,11 +1,14 @@
-// view_screens/alerts_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class AlertsScreen extends BaseActivityScreen {
-  const AlertsScreen({super.key, super.initialFilter});
+  const AlertsScreen({
+    super.key, 
+    super.initialFilter,
+    super.viewingOperatorId, 
+  });
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -20,7 +23,10 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getAlerts();
+    // ⭐ UPDATED: Pass viewingOperatorId to service
+    return await FirestoreActivityService.getAlerts(
+      viewingOperatorId: widget.viewingOperatorId,
+    );
   }
 
   @override

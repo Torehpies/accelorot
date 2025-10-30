@@ -78,7 +78,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         animation: _controller,
         builder: (context, _) {
           return SafeArea(
-            child: SingleChildScrollView(
+            child: Padding(
               padding: EdgeInsets.all(isWideScreen ? 32 : 24),
               child: Center(
                 child: Container(
@@ -86,7 +86,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Summary Cards Row
+                      // Summary Cards Row - Fixed at top
                       isWideScreen
                           ? Row(
                               children: [
@@ -159,79 +159,80 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                             ),
                       const SizedBox(height: 24),
 
-                      // Main Content Card
-                      Container(
-                        constraints: const BoxConstraints(minHeight: 500),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                              color: Colors.grey[300]!, width: 1.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 15,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            // Header with Search
-                            Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        'Your Machines',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.teal,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.teal.shade50,
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          border: Border.all(
-                                              color: Colors.teal.shade200),
-                                        ),
-                                        child: Text(
-                                          '${_controller.filteredMachines.length} machine(s)',
+                      // Main Content Card - Expanded to fill remaining space
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: Colors.grey[300]!, width: 1.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 15,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // Header with Search - Fixed
+                              Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          'Your Machines',
                                           style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.teal.shade700,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.teal,
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SearchBarWidget(
-                                    onSearchChanged: _controller.setSearchQuery,
-                                    onClear: _controller.clearSearch,
-                                    focusNode: _searchFocusNode,
-                                  ),
-                                ],
+                                        const Spacer(),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal.shade50,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                                color: Colors.teal.shade200),
+                                          ),
+                                          child: Text(
+                                            '${_controller.filteredMachines.length} machine(s)',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.teal.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    SearchBarWidget(
+                                      onSearchChanged:
+                                          _controller.setSearchQuery,
+                                      onClear: _controller.clearSearch,
+                                      focusNode: _searchFocusNode,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
 
-                            // Machine Content
-                            SizedBox(
-                              height: 500,
-                              child: _buildContent(),
-                            ),
-                          ],
+                              // Machine Content - Expanded to scroll within container
+                              Expanded(
+                                child: _buildContent(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -402,9 +403,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     }
 
     // Content - Grid or List View
-    return _viewMode == 'grid'
-        ? _buildGridView()
-        : _buildListView();
+    return _viewMode == 'grid' ? _buildGridView() : _buildListView();
   }
 
   Widget _buildGridView() {
@@ -459,7 +458,6 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       ),
       child: InkWell(
         onTap: () {
-          // Navigate to machine details
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Opening $machineName details')),
           );
@@ -597,8 +595,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
           ),
           child: Icon(
             Icons.precision_manufacturing,
-            color:
-                isActive ? Colors.teal.shade700 : Colors.grey.shade600,
+            color: isActive ? Colors.teal.shade700 : Colors.grey.shade600,
             size: 24,
           ),
         ),

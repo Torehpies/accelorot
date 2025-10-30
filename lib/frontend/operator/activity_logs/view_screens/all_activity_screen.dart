@@ -1,11 +1,13 @@
-// view_screens/all_activity_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
 import '../../../../services/firestore_activity_service.dart';
 
 class AllActivityScreen extends BaseActivityScreen {
-  const AllActivityScreen({super.key}) : super(initialFilter: 'All');
+  const AllActivityScreen({
+    super.key,
+    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+  }) : super(initialFilter: 'All');
 
   @override
   State<AllActivityScreen> createState() => _AllActivityScreenState();
@@ -20,7 +22,10 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    return await FirestoreActivityService.getAllActivities();
+    // ⭐ UPDATED: Pass viewingOperatorId to service
+    return await FirestoreActivityService.getAllActivities(
+      viewingOperatorId: widget.viewingOperatorId,
+    );
   }
 
   @override

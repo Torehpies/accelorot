@@ -4,11 +4,11 @@ import '../../../frontend/operator/statistics/view_screens/oxygen_stats_view.dar
 import '../../../frontend/operator/statistics/view_screens/moisture_stats_view.dart';
 import '../../../frontend/operator/statistics/view_screens/temperature_stats_view.dart';
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
-import '../../../frontend/components/history.dart';
+import '../../../frontend/operator/statistics/history/history.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
   final String? viewingOperatorId;
-  
+
   const WebStatisticsScreen({super.key, this.viewingOperatorId});
 
   @override
@@ -59,12 +59,18 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
         automaticallyImplyLeading: false,
         title: const Text(
           "Statistics",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        backgroundColor: Colors.teal,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
         elevation: 2,
-        centerTitle: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
@@ -81,12 +87,12 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(isWideScreen ? 32 : 24),
+          padding: EdgeInsets.all(isWideScreen ? 32 : 16),
           child: Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 1400),
               child: _selectedRange == null
-                  ? (isWideScreen ? _buildWideLayout() : _buildNarrowLayout())
+                  ? _buildFlatLayout()
                   : HistoryPage(
                       filter: _selectedFilterLabel,
                       range: _selectedRange!,
@@ -98,41 +104,23 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildWideLayout() {
+  // FLAT LAYOUT — NO CARDS, JUST DIRECT CONTENT WITH SPACING
+  Widget _buildFlatLayout() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top Row: Oxygen + Temperature
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Expanded(child: OxygenStatsView()),
-            SizedBox(width: 24),
-            Expanded(child: TemperatureStatsView()),
-          ],
+        // Oxygen Stats
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24), // Space between sections
+          child: const OxygenStatsView(),
         ),
-        const SizedBox(height: 24),
-        
-        // Bottom Row: Moisture (full width or centered)
-        Row(
-          children: const [
-            Expanded(child: MoistureStatsView()),
-            Expanded(child: SizedBox()), // Empty space for balance
-          ],
+        // Temperature Stats
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: const TemperatureStatsView(),
         ),
-      ],
-    );
-  }
-
-  Widget _buildNarrowLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        OxygenStatsView(),
-        SizedBox(height: 20),
-        TemperatureStatsView(),
-        SizedBox(height: 20),
-        MoistureStatsView(),
+        // Moisture Stats
+        const MoistureStatsView(),
       ],
     );
   }
