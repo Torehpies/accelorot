@@ -30,8 +30,9 @@ class SummaryCardWidget extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12),  
               ),
               child: Icon(icon, color: color, size: 22),
             ),
