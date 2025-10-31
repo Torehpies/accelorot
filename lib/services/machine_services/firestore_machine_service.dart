@@ -30,7 +30,8 @@ class FirestoreMachineService {
   static Future<void> addMachine(MachineModel machine) =>
       MachineFirestoreUpload.addMachine(machine);
 
-  /// Update machine (Admin only) - Can update machineName and userId
+  /// Update machine (Admin only) - Can update machineName only
+  /// userId is no longer editable (machines are team-wide)
   static Future<void> updateMachine(MachineModel machine) =>
       MachineFirestoreUpload.updateMachine(machine);
 
@@ -51,11 +52,12 @@ class FirestoreMachineService {
 
   // ==================== FETCH METHODS - ROLE-SPECIFIC ====================
   
-  /// Fetch machines for Operators (by userId)
-  static Future<List<MachineModel>> getMachinesByUserId(String userId) =>
-      MachineFirestoreFetch.getMachinesByUserId(userId);
+  /// Fetch machines for Operators (by operatorId)
+  /// Looks up operator's teamId and returns all team machines
+  static Future<List<MachineModel>> getMachinesByOperatorId(String operatorId) =>
+      MachineFirestoreFetch.getMachinesByOperatorId(operatorId);
 
-  /// Fetch machines for Admins (by teamId + mock data)
+  /// Fetch machines for Admins and Operators (by teamId + mock data)
   static Future<List<MachineModel>> getMachinesByTeamId(String teamId) =>
       MachineFirestoreFetch.getMachinesByTeamId(teamId);
 
