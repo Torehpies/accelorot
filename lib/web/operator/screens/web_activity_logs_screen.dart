@@ -1,10 +1,79 @@
 // lib/frontend/operator/web/web_activity_logs_screen.dart
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/activity_logs/components/all_activity_section.dart';
-import '../../../frontend/operator/activity_logs/components/substrate_section.dart';
-import '../../../frontend/operator/activity_logs/components/alerts_section.dart';
-import '../../../frontend/operator/activity_logs/components/cycles_recom_section.dart';
+import '../../../frontend/operator/activity_logs/web/web_all_activity_section.dart';
+import '../../../frontend/operator/activity_logs/web/web_substrate_section.dart';
+import '../../../frontend/operator/activity_logs/web/web_alerts_section.dart';
+import '../../../frontend/operator/activity_logs/web/web_cycles_recom_section.dart';
 
+// ===== Web Detail Panel Component (Embedded) =====
+class WebDetailPanel extends StatelessWidget {
+  final Widget child;
+  final String title;
+  final VoidCallback onClose;
+  final bool isVisible;
+
+  const WebDetailPanel({
+    super.key,
+    required this.child,
+    required this.title,
+    required this.onClose,
+    required this.isVisible,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: isVisible ? 500 : 0,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black,
+            blurRadius: 10,
+            offset: const Offset(-4, 0),
+          ),
+        ],
+      ),
+      child: isVisible
+          ? Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: const BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey)),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: onClose,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: child,
+                  ),
+                ),
+              ],
+            )
+          : const SizedBox(),
+    );
+  }
+}
+
+// ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
 
   
@@ -15,7 +84,25 @@ class WebActivityLogsScreen extends StatefulWidget {
 }
 
 class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
-  String _selectedTab = 'all';
+  String selectedTab = 'all'; // ✅ No leading underscore
+  bool isDetailPanelOpen = false;
+  Widget? detailContent;
+  String detailTitle = '';
+
+  void openDetailPanel(String title, Widget content) { // ✅ No leading underscore
+    setState(() {
+      detailTitle = title;
+      detailContent = content;
+      isDetailPanelOpen = true;
+    });
+  }
+
+  void closeDetailPanel() { // ✅ No leading underscore
+    setState(() {
+      isDetailPanelOpen = false;
+      detailContent = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,71 +131,88 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   actions: [], // <-- Now empty; notification icon removed
 ),
       body: SafeArea(
-        child: Column(
+        child: Row(
           children: [
-            // Tab Navigation Bar
-            Container(
-              margin: EdgeInsets.fromLTRB(
-                isWideScreen ? 32 : 24,
-                isWideScreen ? 24 : 16,
-                isWideScreen ? 32 : 24,
-                0,
-              ),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
+            // Main Content Area
+            Expanded(
+              child: Column(
                 children: [
-                  _buildTabButton('all', 'All Activity', Icons.list),
-                  _buildTabButton('substrate', 'Substrate', Icons.eco),
-                  _buildTabButton('alerts', 'Alerts', Icons.warning),
-                  _buildTabButton('cycles', 'Cycles', Icons.refresh),
+                  // Tab Navigation Bar
+                  Container(
+                    margin: EdgeInsets.fromLTRB(
+                      isWideScreen ? 32 : 24,
+                      isWideScreen ? 24 : 16,
+                      isWideScreen ? 32 : 24,
+                      0,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        buildTabButton('all', 'All Activity', Icons.list),
+                        buildTabButton('substrate', 'Substrate', Icons.eco),
+                        buildTabButton('alerts', 'Alerts', Icons.warning),
+                        buildTabButton('cycles', 'Cycles', Icons.refresh),
+                      ],
+                    ),
+                  ),
+
+                  // Scrollable Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(isWideScreen ? 32 : 24),
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 1400),
+                          child: buildContent(isWideScreen, isMediumScreen),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
 
-            // Content Area
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(isWideScreen ? 32 : 24),
-                child: Center(
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 1400),
-                    child: _buildContent(isWideScreen, isMediumScreen),
-                  ),
-                ),
+            // Detail Panel (Web/Desktop Only)
+            if (isWideScreen)
+              WebDetailPanel(
+                isVisible: isDetailPanelOpen,
+                title: detailTitle,
+                onClose: closeDetailPanel,
+                child: detailContent ?? const SizedBox(),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTabButton(String value, String label, IconData icon) {
-    final isSelected = _selectedTab == value;
-    
+  Widget buildTabButton(String value, String label, IconData icon) {
+    final isSelected = selectedTab == value;
+
     return Expanded(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => setState(() => _selectedTab = value),
+          onTap: () {
+            if (isDetailPanelOpen) closeDetailPanel();
+            setState(() => selectedTab = value);
+          },
           borderRadius: BorderRadius.circular(8),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Colors.teal
-                  : Colors.transparent,
+              color: isSelected ? Colors.teal : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -139,115 +243,110 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     );
   }
 
-  Widget _buildContent(bool isWideScreen, bool isMediumScreen) {
-    switch (_selectedTab) {
+  Widget buildContent(bool isWideScreen, bool isMediumScreen) {
+    switch (selectedTab) {
       case 'substrate':
-        return _buildSubstrateView();
+        return buildSubstrateView();
       case 'alerts':
-        return _buildAlertsView();
+        return buildAlertsView();
       case 'cycles':
-        return _buildCyclesView();
+        return buildCyclesView();
       case 'all':
       default:
         return isWideScreen
-            ? _buildWideLayout()
+            ? buildWideLayout()
             : isMediumScreen
-                ? _buildMediumLayout()
-                : _buildNarrowLayout();
+                ? buildMediumLayout()
+                : buildNarrowLayout();
     }
   }
 
-  Widget _buildWideLayout() {
+  Widget buildWideLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // All Activity Section (full width)
-        const AllActivitySection(),
+        WebAllActivitySection(),
         const SizedBox(height: 24),
-        
-        // Substrate + Alerts side by side
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Expanded(child: SubstrateSection()),
-            SizedBox(width: 24),
-            Expanded(child: AlertsSection()),
+          children: [
+            Expanded(child: WebSubstrateSection()),
+            const SizedBox(width: 24),
+            Expanded(child: WebAlertsSection()),
           ],
         ),
         const SizedBox(height: 24),
-        
-        // Cycles & Recommendations (full width)
-        const CyclesRecomSection(),
+        WebCyclesRecomSection(),
       ],
     );
   }
 
-  Widget _buildMediumLayout() {
+  Widget buildMediumLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const AllActivitySection(),
+        WebAllActivitySection(),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Expanded(child: SubstrateSection()),
-            SizedBox(width: 20),
-            Expanded(child: AlertsSection()),
+          children: [
+            Expanded(child: WebSubstrateSection()),
+            const SizedBox(width: 20),
+            Expanded(child: WebAlertsSection()),
           ],
         ),
         const SizedBox(height: 20),
-        const CyclesRecomSection(),
+        WebCyclesRecomSection(),
       ],
     );
   }
 
-  Widget _buildNarrowLayout() {
+  Widget buildNarrowLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: const [
-        AllActivitySection(),
-        SizedBox(height: 20),
-        SubstrateSection(),
-        SizedBox(height: 20),
-        AlertsSection(),
-        SizedBox(height: 20),
-        CyclesRecomSection(),
+      children: [
+        WebAllActivitySection(),
+        const SizedBox(height: 20),
+        WebSubstrateSection(),
+        const SizedBox(height: 20),
+        WebAlertsSection(),
+        const SizedBox(height: 20),
+        WebCyclesRecomSection(),
       ],
     );
   }
 
-  Widget _buildSubstrateView() {
+  Widget buildSubstrateView() {
     return Column(
       children: [
-        _buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
+        buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
         const SizedBox(height: 16),
-        const SubstrateSection(),
+        WebSubstrateSection(),
       ],
     );
   }
 
-  Widget _buildAlertsView() {
+  Widget buildAlertsView() {
     return Column(
       children: [
-        _buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
+        buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
         const SizedBox(height: 16),
-        const AlertsSection(),
+        WebAlertsSection(),
       ],
     );
   }
 
-  Widget _buildCyclesView() {
+  Widget buildCyclesView() {
     return Column(
       children: [
-        _buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
+        buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
         const SizedBox(height: 16),
-        const CyclesRecomSection(),
+        WebCyclesRecomSection(),
       ],
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon, MaterialColor color) {
+  Widget buildSectionHeader(String title, IconData icon, MaterialColor color) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -278,8 +377,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
             child: Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontWeight: FontWeight.bold,  
+                fontSize: 13,
                 color: color.shade900,
               ),
             ),
