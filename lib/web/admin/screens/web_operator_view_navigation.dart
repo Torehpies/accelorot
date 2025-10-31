@@ -107,7 +107,7 @@ class _WebOperatorViewNavigationState extends State<WebOperatorViewNavigation> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.blue.shade700, Colors.blue.shade900],
+                  colors: [Colors.teal.shade700, Colors.teal.shade900],
                 ),
               ),
               child: SafeArea(
@@ -310,7 +310,7 @@ class _WebOperatorViewNavigationState extends State<WebOperatorViewNavigation> {
                             icon: const Icon(Icons.admin_panel_settings),
                             onPressed: _exitOperatorView,
                             tooltip: 'Exit to Admin Dashboard',
-                            color: Colors.blue.shade700,
+                            color: Colors.teal.shade700,
                           ),
                         ],
                       ),
