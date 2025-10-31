@@ -129,7 +129,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
                 Text(
-                  value!,
+                  value,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
