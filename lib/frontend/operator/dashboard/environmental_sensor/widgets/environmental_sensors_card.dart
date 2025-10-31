@@ -62,9 +62,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Temperature',
-                        value: temperature != null
-                            ? '${temperature!.toStringAsFixed(1)}°C'
-                            : null,
+                        value: temperature?.toStringAsFixed(0),
                         change: temperatureChange,
                         status: tempStatus.$1,
                         color: tempStatus.$2,
@@ -75,9 +73,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Moisture',
-                        value: moisture != null
-                            ? '${moisture!.toStringAsFixed(1)} %'
-                            : null,
+                        value: moisture?.toStringAsFixed(0),
                         change: moistureChange,
                         status: moistStatus.$1,
                         color: moistStatus.$2,
@@ -88,9 +84,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Air Quality',
-                        value: oxygen != null
-                            ? oxygen!.toStringAsFixed(0)
-                            : null,
+                        value: oxygen?.toStringAsFixed(0),
                         change: oxygenChange,
                         status: oxyStatus.$1,
                         color: oxyStatus.$2,
