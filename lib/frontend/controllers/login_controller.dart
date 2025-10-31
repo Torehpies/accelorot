@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 
-
 class LoginController {
   final AuthService _authService = AuthService();
 
@@ -13,7 +12,7 @@ class LoginController {
   // State variables
   bool obscurePassword = true;
   bool isLoading = false;
-	bool isGoogleLoading = false;
+  bool isGoogleLoading = false;
 
   // Callback functions
   Function(bool)? onLoadingChanged;
@@ -66,6 +65,7 @@ class LoginController {
       setLoading(true);
 
       try {
+        // ignore: unused_local_variable
         final result = await _authService.signInUser(
           email: emailController.text.trim(),
           password: passwordController.text,
@@ -73,11 +73,11 @@ class LoginController {
 
         setLoading(false);
 
-        if (result['success']) {
-          onLoginSuccess?.call(result);
-        } else {
-          onLoginError?.call(result['message']);
-        }
+        //if (['success']) {
+        //  onLoginSuccess?.call(result);
+        //} else {
+        //  onLoginError?.call(result['message']);
+        //}
       } catch (e) {
         setLoading(false);
         onLoginError?.call('An unexpected error occurred');

@@ -38,7 +38,10 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
         _currentMoisture = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        _errorMessage = 'No moisture data found for machine $_machineId';
+        // ✅ Treat “no data” as empty — not an error
+        _hourlyReadings = [];
+        _currentMoisture = 0;
+        _lastUpdated = null;
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -56,6 +59,7 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
       );
     }
 
+    // ❌ Only show this when there’s an *actual error* (e.g., connection failure)
     if (_errorMessage != null) {
       return SizedBox(
         height: 200,
@@ -82,8 +86,9 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
       );
     }
 
+    // ✅ Always show the MoistureStatisticCard, even with no data
     return SizedBox(
-      height: 300, // minimum height ensures card is visible
+      height: 300,
       child: MoistureStatisticCard(
         currentMoisture: _currentMoisture,
         hourlyReadings: _hourlyReadings,
