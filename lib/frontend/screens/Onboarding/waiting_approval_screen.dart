@@ -5,6 +5,7 @@ import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
+import 'package:go_router/go_router.dart';
 
 
 class WaitingApprovalScreen extends StatefulWidget {
@@ -50,15 +51,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
         await batch.commit();
       }
 
-      if (!mounted) return;
-      
-      // Navigate back to QR refer screen on next frame to ensure context is valid
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QRReferScreen()),
-        );
-      });
+			context.go('/referral');
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
@@ -198,19 +191,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                       child: OutlinedButton(
                         onPressed: () async {
                           await _auth.signOut();
-                          if (!mounted) return;
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (!mounted) return;
-                            Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => kIsWeb
-                                  ? const WebLoginScreen()
-                                  : const LoginScreen(),
-                            ),
-                     
-                          );
-                          
-                          });
+													context.go('/login');
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.teal,

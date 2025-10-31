@@ -15,12 +15,14 @@ class UserEntity {
     this.hasLeft = false,
   });
 
-  factory UserEntity.fromUserRoot(String uid, Map<String, dynamic> data) {
+  factory UserEntity.fromMap(String uid, Map<String, dynamic> data) {
     return UserEntity(
       uid: uid,
       role: data['role'] ?? 'Operator',
       teamId: data['teamId'] as String?,
       pendingTeamId: data['pendingTeamId'] as String?,
+			isArchived: data['isArchived'] ?? false,
+			hasLeft: data['hasLeft'] ?? false,
     );
   }
 

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/screens/login/login_screen.dart';
-import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
 
 class WebProfileScreen extends StatefulWidget {
@@ -29,7 +27,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
         (route) => false,
       );
     }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
+import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
-import 'package:flutter_application_1/services/auth_wrapper.dart'; // Import AuthWrapper
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
 
@@ -55,7 +55,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
         // This will trigger the StreamBuilder and route correctly
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const AuthWrapper()),
+          MaterialPageRoute(builder: (context) =>  const LoginScreen()),
           (route) => false,
         );
       },

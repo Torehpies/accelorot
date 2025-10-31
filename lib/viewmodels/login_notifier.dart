@@ -1,32 +1,43 @@
-import '../models/user_entity.dart';
-import '../providers/service_providers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/repositories/auth_repository.dart';
+
 import '../utils/google_auth_result.dart';
-import '../utils/login_flow_result.dart';
-import '../utils/login_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_notifier.g.dart';
 
 class LoginState {
+  final String email;
+  final String password;
   final bool isLoading;
   final bool obscurePassword;
   final String? errorMessage;
+  final bool isFormValid;
 
   const LoginState({
+    this.email = '',
+    this.password = '',
     this.isLoading = false,
     this.obscurePassword = true,
     this.errorMessage,
+    this.isFormValid = false,
   });
 
   LoginState copyWith({
+    String? email,
+    String? password,
     bool? isLoading,
     bool? obscurePassword,
     String? errorMessage,
+    bool? isFormValid,
   }) {
     return LoginState(
+      email: email ?? this.email,
+      password: password ?? this.password,
       isLoading: isLoading ?? this.isLoading,
       obscurePassword: obscurePassword ?? this.obscurePassword,
       errorMessage: errorMessage,
+      isFormValid: isFormValid ?? this.isFormValid,
     );
   }
 }
@@ -38,116 +49,78 @@ class LoginNotifier extends _$LoginNotifier {
     return const LoginState();
   }
 
+  void updateEmail(String email) =>
+      state = state.copyWith(email: email, errorMessage: null);
+  void updatePassword(String password) =>
+      state = state.copyWith(password: password, errorMessage: null);
+  void togglePasswordVisibility() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
+  void updateFormValidity(bool isValid) =>
+      state = state.copyWith(isFormValid: isValid);
+
+  void clearError() => state = state.copyWith(errorMessage: null);
+
   void handleForgotPassword() {
     // TODO
   }
 
-  Future<LoginFlowResult> loginUser({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signInWithEmail() async {
+    final authRepo = ref.read(authRepositoryProvider);
+
+    /// start loading
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    final authService = ref.read(authServiceProvider);
-    final userRepository = ref.read(userRepositoryProvider);
-
     try {
-      final result = await authService.signInUser(
-        email: email.trim(),
-        password: password,
+      await authRepo.signInWithEmail(state.email, state.password);
+      // stop loading on success
+      state = state.copyWith(isLoading: false, errorMessage: null);
+    } on FirebaseAuthException catch (e) {
+      /// stop loading on auth error
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: _mapAuthErrorCodeToMessage(e.code),
       );
-
-      switch (result) {
-        case LoginSuccess(uid: final uid):
-          final userEntity = await userRepository.fetchUserStatus(uid);
-
-          if (userEntity == null) {
-            state = state.copyWith(errorMessage: 'User data not found');
-            return LoginFlowError('User data not found');
-          }
-
-          return _mapEntityToFlowResult(userEntity);
-
-        case LoginFailure(
-          message: final message,
-          needsVerification: final needsVerification,
-        ):
-          if (needsVerification) {
-            return LoginFlowNeedsVerification(email);
-          }
-          state = state.copyWith(errorMessage: message);
-          return LoginFlowError(message);
-      }
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Unexpected error occurred');
-      return LoginFlowError('Unexpected error occurred');
-    } finally {
-      state = state.copyWith(isLoading: false);
+      /// stop loading on error
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'A connection error occurred. Please check your network.',
+      );
     }
   }
 
-  Future<LoginFlowResult> signInWithGoogleAndCheckStatus() async {
-		state = state.copyWith(isLoading: true, errorMessage: null);
-
-		final authService = ref.read(authServiceProvider);
-		final userRepository = ref.read(userRepositoryProvider);
+  Future<void> signInWithGoogle() async {
+    final authRepo = ref.read(authRepositoryProvider);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final googleResult = await authService.signInWithGoogle();
+      final result = await authRepo.signInWithGoogle();
 
-      switch (googleResult) {
-        case GoogleLoginSuccess(uid: final uid):
-          final userEntity = await userRepository.fetchUserStatus(uid);
-
-          if (userEntity == null) return LoginFlowError('User data not found');
-
-          return _mapEntityToFlowResult(userEntity);
-
-        case GoogleLoginFailure(message: final message):
-          return LoginFlowError(message);
+      if (result is GoogleLoginSuccess) {
+        /// stop loading on google sign-in success
+        state = state.copyWith(isLoading: false, errorMessage: null);
+      } else if (result is GoogleLoginFailure) {
+        /// stop loading on google sign-in failure
+        state = state.copyWith(isLoading: false, errorMessage: result.message);
       }
-    } catch (e) {
-			state = state.copyWith(errorMessage: 'Unexpected Google sign-in');
-      return LoginFlowError('Unexpected Google sign-in');
-    } finally {
-			state = state.copyWith(isLoading: false);
-		}
+    } on Exception {
+      // Catch unexpected errors during the sign-in call itself
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'An unexpected error occurred during Google sign-in.',
+      );
+    }
   }
 
-  void togglePasswordVisibility() {
-		state = state.copyWith(obscurePassword: !state.obscurePassword);
-  }
-
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) return 'Email is required';
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'Enter a valid email address';
-    }
-    return null;
-  }
-
-  String? validatePassword(String? value) {
-    return value == null || value.isEmpty ? 'Password is required' : null;
-  }
-
-  LoginFlowResult _mapEntityToFlowResult(UserEntity user) {
-    if (user.isAdmin) {
-      return LoginFlowSuccessAdmin();
-    }
-
-    if (user.isRestricted) {
-      final reason = user.isArchived ? 'archived' : 'left';
-      return LoginFlowRestricted(reason);
-    }
-
-    if (user.teamId != null) {
-      return LoginFlowSuccess();
-    }
-
-    if (user.pendingTeamId != null) {
-      return LoginFlowPendingApproval();
-    }
-
-    return LoginFlowNeedsReferral();
+  String _mapAuthErrorCodeToMessage(String code) {
+    return switch (code) {
+      'user-not-found' => 'No user found with that email.',
+      'wrong-password' => 'Wrong password provided.',
+      'invalid-email' => 'The email address is not valid.',
+      'user-disabled' => 'This account has been disabled.',
+      'operation-not-allowed' => 'Email/Password sign-in is not enabled.',
+      'network-request-failed' => 'Network error. Check your connection.',
+      _ => 'Login failed. Please try again.',
+    };
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const double kMaxFormWidth = 450.0;
 
@@ -11,7 +12,6 @@ class LoginHandlers {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final bool isLoading;
-  final bool isGoogleLoading;
   final bool obscurePassword;
   final VoidCallback togglePasswordVisibility;
   final VoidCallback onSubmitLogin;
@@ -24,7 +24,6 @@ class LoginHandlers {
     required this.emailController,
     required this.passwordController,
     required this.isLoading,
-    required this.isGoogleLoading,
     required this.obscurePassword,
     required this.togglePasswordVisibility,
     required this.onSubmitLogin,
@@ -34,9 +33,7 @@ class LoginHandlers {
   });
 }
 
-/// Encapsulates the core login form content, receiving data via LoginHandlers.
-/// This widget is used by both MobileLoginView and DesktopLoginView.
-class LoginFormContent extends StatelessWidget {
+class LoginFormContent extends ConsumerWidget {
   final LoginHandlers handlers;
   final bool isDesktop;
 
@@ -47,9 +44,8 @@ class LoginFormContent extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,12 +66,20 @@ class LoginFormContent extends StatelessWidget {
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   labelText: 'Email Address',
+                  prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Email is required' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Email is required';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Enter a valid email';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -87,6 +91,7 @@ class LoginFormContent extends StatelessWidget {
                 onFieldSubmitted: (_) => handlers.onSubmitLogin(),
                 decoration: InputDecoration(
                   labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       handlers.obscurePassword
@@ -100,9 +105,15 @@ class LoginFormContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) => value == null || value.isEmpty
-                    ? 'Password is required'
-                    : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password is required';
+                  }
+                  if (value.length < 8) {
+                    return 'Password must be at least 8 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 8),
 
@@ -120,8 +131,8 @@ class LoginFormContent extends StatelessWidget {
                 width: double.infinity,
                 child: PrimaryButton(
                   text: 'Login',
-                  onPressed: handlers.isLoading ? null : handlers.onSubmitLogin,
                   isLoading: handlers.isLoading,
+                  onPressed: handlers.onSubmitLogin,
                 ),
               ),
               const SizedBox(height: 24),
@@ -131,8 +142,8 @@ class LoginFormContent extends StatelessWidget {
 
               // Google Sign-In Button
               GoogleSignInButton(
+                isLoading: handlers.isLoading,
                 onPressed: handlers.onGoogleSignIn,
-                isLoading: handlers.isGoogleLoading,
               ),
 
               // Sign Up Link

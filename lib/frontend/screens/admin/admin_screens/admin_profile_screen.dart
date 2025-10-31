@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/services/auth_wrapper.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
 
 import '../components/edit_profile_modal.dart';
@@ -36,13 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _signOut(BuildContext context) async {
-    final navigator = Navigator.of(context);
     await FirebaseAuth.instance.signOut();
 
-    navigator.pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const AuthWrapper()),
-      (route) => false,
-    );
   }
 
   @override

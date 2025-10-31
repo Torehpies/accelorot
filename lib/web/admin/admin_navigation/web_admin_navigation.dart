@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
 import '../screens/web_admin_machine.dart';
 import '../screens/web_profile_screen.dart';
@@ -71,7 +69,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
     }

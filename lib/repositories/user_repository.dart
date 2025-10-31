@@ -1,43 +1,34 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/models/user_entity.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'user_repository.g.dart';
+
+@Riverpod(keepAlive: true)
+UserRepository userRepository(Ref ref) {
+  return UserRepository(FirebaseFirestore.instance);
+}
 
 class UserRepository {
   final FirebaseFirestore _firestore;
 
   UserRepository(this._firestore);
 
-  Future<UserEntity?> fetchUserStatus(String uid) async {
-    final userDoc = await _firestore.collection('users').doc(uid).get();
+  Future<UserEntity> fetchUserEntity(String uid) async {
+    try {
+      final docSnapshot = await _firestore.collection('users').doc(uid).get();
 
-    if (!userDoc.exists || userDoc.data() == null) {
-      return null;
-    }
-
-    UserEntity user = UserEntity.fromUserRoot(uid, userDoc.data()!);
-
-    if (user.teamId != null) {
-      try {
-        final memberDoc = await _firestore
-            .collection('teams')
-            .doc(user.teamId)
-            .collection('members')
-            .doc(uid)
-            .get();
-
-        if (memberDoc.exists && memberDoc.data() != null) {
-          final memberData = memberDoc.data()!;
-          final isArchived = memberData['isArchived'] ?? false;
-          final hasLeft = memberData['hasLeft'] ?? false;
-
-          user = user.copyWith(hasLeft: hasLeft, isArchived: isArchived);
-        }
-      } catch (e) {
-        log('Error fetching member status for $uid: e');
+      if (!docSnapshot.exists) {
+        throw Exception('User profile not found in Firestore for UID: $uid');
       }
-    }
 
-		return user;
+			return UserEntity.fromMap(uid, docSnapshot.data()!);
+    } on FirebaseException catch (e) {
+      throw Exception('Firebase fetch error: ${e.message} (Code: ${e.code})');
+    } catch (e) {
+      throw Exception(
+        'An unexpected error occurred while fetching user profile.',
+      );
+    }
   }
 }

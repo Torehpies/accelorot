@@ -3,9 +3,8 @@ import 'package:flutter_application_1/services/auth_service.dart';
 import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class EmailVerifyScreen extends StatefulWidget {
   final String email;
@@ -38,7 +37,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
   }
 
   void _startVerificationCheck() {
-    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
+      timer,
+    ) async {
       bool isVerified = await _authService.isEmailVerified();
       if (isVerified && mounted) {
         timer.cancel();
@@ -60,17 +61,11 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         if (!mounted) return;
 
         if (teamId != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
-          );
+          context.go('/dashboard');
         } else if (pendingTeamId != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
-          );
+          context.go('/pending-approval');
         } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
+          context.go('/referral');
         }
       }
     });
@@ -88,11 +83,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
     if (!mounted) return;
     setState(() => _isResendingEmail = false);
-    showSnackbar(
-      context,
-      result['message'],
-      isError: !result['success'],
-    );
+    showSnackbar(context, result['message'], isError: !result['success']);
     if (result['success']) {
       _startResendCooldown();
     } else {
@@ -138,13 +129,17 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
       if (!mounted) return;
       showSnackbar(context, 'Email verified successfully!');
-      
+
       // Redirect to QR referral screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const QRReferScreen()),
       );
     } else {
-      showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
+      showSnackbar(
+        context,
+        'Email not yet verified. Please check your inbox.',
+        isError: true,
+      );
     }
   }
 
@@ -214,10 +209,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
                       const Text(
                         'We\'ve sent a verification email to:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
@@ -243,7 +235,10 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, color: Colors.blue.shade700),
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.blue.shade700,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -268,7 +263,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: isWideScreen ? 18 : 16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isWideScreen ? 18 : 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -295,7 +292,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: isWideScreen ? 18 : 16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isWideScreen ? 18 : 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -307,7 +306,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : Text(

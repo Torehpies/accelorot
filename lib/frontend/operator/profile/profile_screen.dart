@@ -1,8 +1,5 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../services/auth_wrapper.dart';
 import '../../components/edit_profile_modal.dart';
 import '../../components/change_password_modal.dart';
 import '../../screens/personal_info_screen.dart';
@@ -26,13 +23,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthWrapper()),
-        (route) => false,
-      );
-    }
   }
 
   @override
