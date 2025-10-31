@@ -1,11 +1,10 @@
-// lib/frontend/operator/dashboard/cycles/components/active_state.dart
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/drum_rotation_settings.dart';
 import '../models/system_status.dart';
 import '../widgets/drum_input_fields.dart';
 import '../widgets/system_action_buttons.dart';
+import 'info_item.dart';
 
 class ActiveState extends StatefulWidget {
   final String batchNumber;
@@ -57,15 +56,13 @@ class _ActiveStateState extends State<ActiveState> {
 
   Duration _getUptime() {
     if (_startTime == null) return Duration.zero;
-    
     var elapsed = DateTime.now().difference(_startTime!);
     var pausedTime = _totalPausedTime;
-    
-    // If currently paused, add the current pause duration
+
     if (widget.status == SystemStatus.paused && _lastPausedAt != null) {
       pausedTime += DateTime.now().difference(_lastPausedAt!);
     }
-    
+
     return elapsed - pausedTime;
   }
 
@@ -81,10 +78,10 @@ class _ActiveStateState extends State<ActiveState> {
     if (widget.settings.lastCycleCompleted == null) {
       return 'Never';
     }
-    
+
     final now = DateTime.now();
     final difference = now.difference(widget.settings.lastCycleCompleted!);
-    
+
     if (difference.inSeconds < 60) {
       return 'Just now';
     } else if (difference.inMinutes < 60) {
@@ -112,7 +109,6 @@ class _ActiveStateState extends State<ActiveState> {
       });
       widget.onStatusChanged(SystemStatus.paused);
     } else if (widget.status == SystemStatus.paused) {
-      // Resume
       if (_lastPausedAt != null) {
         setState(() {
           _totalPausedTime += DateTime.now().difference(_lastPausedAt!);
@@ -133,8 +129,8 @@ class _ActiveStateState extends State<ActiveState> {
   }
 
   bool get _isSettingsLocked {
-    return widget.status == SystemStatus.running || 
-           widget.status == SystemStatus.paused;
+    return widget.status == SystemStatus.running ||
+        widget.status == SystemStatus.paused;
   }
 
   @override
@@ -143,40 +139,27 @@ class _ActiveStateState extends State<ActiveState> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Batch info
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.science_outlined, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Batch: ${widget.batchNumber}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ],
+        Row(
+          children: [
+            Icon(Icons.science_outlined, size: 16, color: Colors.grey[600]),
+            const SizedBox(width: 6),
+            Text(
+              'Batch: ${widget.batchNumber}',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildInfoItem('Uptime', _formatUptime()),
-                  _buildInfoItem('Last Cycle', _getLastCycleText()),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            InfoItem(label: 'Uptime', value: _formatUptime()),
+            InfoItem(label: 'Last Cycle', value: _getLastCycleText()),
+          ],
         ),
         const SizedBox(height: 20),
 
@@ -197,9 +180,8 @@ class _ActiveStateState extends State<ActiveState> {
           isLocked: _isSettingsLocked,
           onCycleChanged: (value) {
             if (value != null) {
-              final updated = widget.settings.copyWith(
-                cycles: int.parse(value),
-              );
+              final updated =
+                  widget.settings.copyWith(cycles: int.parse(value));
               widget.onSettingsChanged(updated);
             }
           },
@@ -218,31 +200,6 @@ class _ActiveStateState extends State<ActiveState> {
           onStart: _handleStart,
           onStop: _handleStop,
           onTogglePause: _handlePause,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
         ),
       ],
     );
