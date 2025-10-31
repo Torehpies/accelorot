@@ -1,312 +1,199 @@
-// lib/web/admin/screens/web_operator_management.dart
+// lib/screens/operator_management_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/frontend/screens/admin/operator_management/add_operator_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/operator_management/accept_operator_screen.dart';
-import 'web_operator_detail_screen.dart';
+import '../controllers/operator_management_controller.dart';
+import '../widgets/operator_action_card.dart';
+import '../widgets/operator_list_item.dart';
+import '../widgets/operator_detail_panel.dart';
+import '../widgets/operator_empty_state.dart';
+import '../widgets/operator_error_state.dart';
+import '../widgets/operator_list_header.dart';
+import '../../utils/operator_dialogs.dart';
+import '../../utils/theme_constants.dart';
+import '../widgets/accept_operators_card.dart';
+import '../../../web/admin/widgets/add_operator_screen.dart';
+import '../../admin/screens/web_operator_view_navigation.dart';
 
-class WebOperatorManagement extends StatefulWidget {
-  const WebOperatorManagement({super.key});
+class OperatorManagementScreen extends StatefulWidget {
+  const OperatorManagementScreen({super.key});
 
   @override
-  State<WebOperatorManagement> createState() => _WebOperatorManagementState();
+  State<OperatorManagementScreen> createState() => _OperatorManagementScreenState();
 }
 
-class _WebOperatorManagementState extends State<WebOperatorManagement> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<Map<String, dynamic>> _operators = [];
-  bool _loading = true;
-  String? _error;
-  bool _showArchived = false;
-  String _searchQuery = '';
+class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
+  late OperatorManagementController _controller;
 
   @override
   void initState() {
     super.initState();
-    _loadOperators();
+    _controller = OperatorManagementController();
+    _controller.addListener(_onControllerUpdate);
+    _controller.loadOperators();
   }
 
-  Future<void> _loadOperators() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerUpdate);
+    _controller.dispose();
+    super.dispose();
+  }
 
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) {
-        if (mounted) {
-          setState(() {
-            _error = 'No user logged in';
-            _loading = false;
-          });
-        }
-        return;
-      }
-
-      final teamId = currentUser.uid;
-      final membersSnapshot = await _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('members')
-          .orderBy('addedAt', descending: true)
-          .get();
-
-      final List<Map<String, dynamic>> operators = [];
-
-      for (var doc in membersSnapshot.docs) {
-        final data = doc.data();
-        final userId = data['userId'] as String?;
-
-        if (userId != null) {
-          final userDoc = await _firestore
-              .collection('users')
-              .doc(userId)
-              .get();
-
-          if (userDoc.exists) {
-            final userData = userDoc.data()!;
-            final firstName = userData['firstname'] ?? '';
-            final lastName = userData['lastname'] ?? '';
-            final name = '$firstName $lastName'.trim();
-
-            operators.add({
-              'id': userId,
-              'uid': userId,
-              'name': name.isNotEmpty ? name : data['name'] ?? 'Unknown',
-              'email': data['email'] ?? userData['email'] ?? '',
-              'role': data['role'] ?? userData['role'] ?? 'Operator',
-              'isArchived': data['isArchived'] ?? false,
-              'hasLeft': data['hasLeft'] ?? false,
-              'leftAt': data['leftAt'] as Timestamp?,
-              'archivedAt': data['archivedAt'] as Timestamp?,
-              'dateAdded': _formatTimestamp(data['addedAt'] as Timestamp?),
-            });
-          }
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _operators = operators;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _loading = false;
-        });
-      }
+  void _onControllerUpdate() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  String _formatTimestamp(Timestamp? timestamp) {
-    if (timestamp == null) return 'Unknown';
-    final date = timestamp.toDate();
-    return '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}-${date.year}';
+  void _showAddOperatorDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius12),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 450, maxHeight: 800),
+          child: AddOperatorScreen(),
+        ),
+      ),
+    ).then((_) => _controller.loadOperators());
   }
 
-  Future<void> _restoreOperator(Map<String, dynamic> operator) async {
-    if (operator['hasLeft'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cannot restore operators who have left the team'),
-          backgroundColor: Colors.orange,
-        ),
+  void _showAcceptOperatorDialog() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => const AcceptOperatorsScreen(),
+    ).then((_) => _controller.loadOperators());
+  }
+
+  Future<void> _handleArchive() async {
+    final operator = _controller.selectedOperator;
+    if (operator == null) return;
+
+    final confirm = await OperatorDialogs.showArchiveConfirmation(
+      context,
+      operator.name,
+    );
+
+    if (confirm != true || !mounted) return;
+
+    final success = await _controller.archiveOperator(operator);
+    if (!mounted) return;
+
+    if (success) {
+      _controller.clearSelectedOperator();
+      OperatorDialogs.showSuccessSnackbar(
+        context,
+        '${operator.name} archived successfully',
+      );
+    } else {
+      OperatorDialogs.showErrorSnackbar(
+        context,
+        'Error archiving operator',
+      );
+    }
+  }
+
+  Future<void> _handleRestore() async {
+    final operator = _controller.selectedOperator;
+    if (operator == null) return;
+
+    if (operator.hasLeft) {
+      OperatorDialogs.showWarningSnackbar(
+        context,
+        'Cannot restore operators who have left the team',
       );
       return;
     }
 
-    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    if (teamId.isEmpty) return;
+    final success = await _controller.restoreOperator(operator);
+    if (!mounted) return;
 
-    try {
-      await _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('members')
-          .doc(operator['uid'])
-          .update({
-        'isArchived': false,
-        'archivedAt': FieldValue.delete(),
-      });
-
-      if (!mounted) return;
-
-      await _loadOperators();
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${operator['name']} restored successfully')),
+    if (success) {
+      _controller.clearSelectedOperator();
+      OperatorDialogs.showSuccessSnackbar(
+        context,
+        '${operator.name} restored successfully',
       );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error restoring operator: $e')),
+    } else {
+      OperatorDialogs.showErrorSnackbar(
+        context,
+        'Error restoring operator',
       );
     }
   }
 
-  List<Map<String, dynamic>> get _filteredOperators {
-    final currentList = _showArchived
-        ? _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).toList()
-        : _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).toList();
+  void _handleViewDashboard() {
+    final operator = _controller.selectedOperator;
+    if (operator == null) return;
 
-    if (_searchQuery.isEmpty) return currentList;
-
-    return currentList.where((operator) {
-      final name = (operator['name'] ?? '').toLowerCase();
-      final email = (operator['email'] ?? '').toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return name.contains(query) || email.contains(query);
-    }).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WebOperatorViewNavigation(
+          operatorId: operator.uid,
+          operatorName: operator.name,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ThemeConstants.greyShade50,
       appBar: AppBar(
+        backgroundColor: ThemeConstants.tealShade700,
+        elevation: 0,
         title: const Text(
           'Operator Management',
-          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.teal),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.teal),
-            onPressed: _loadOperators,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
-        ],
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: Padding(
+        padding: const EdgeInsets.all(ThemeConstants.spacing12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Action Cards Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.archive,
-                    label: 'Archive',
-                    count: _operators.where((o) => o['isArchived'] == true || o['hasLeft'] == true).length,
-                    onPressed: () => setState(() => _showArchived = true),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.person_add_alt_1,
-                    label: 'Add Operator',
-                    count: null,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Dialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-                            child: AddOperatorScreen(),
-                          ),
-                        ),
-                      ).then((_) => _loadOperators());
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.check_circle,
-                    label: 'Accept Operator',
-                    count: null,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Dialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-                            child: AcceptOperatorScreen(),
-                          ),
-                        ),
-                      ).then((_) => _loadOperators());
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildInfoCard(
-                    icon: Icons.people,
-                    label: 'Active Operators',
-                    count: _operators.where((o) => o['isArchived'] == false && o['hasLeft'] == false).length,
-                  ),
-                ),
-              ],
+            // Action Cards Row - Always visible
+            SizedBox(
+              height: 100,
+              child: _buildActionCards(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: ThemeConstants.spacing12),
 
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.all(20.0),
+            // Main Content Area
+            Expanded(
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Left Side - Operator List
                   Expanded(
-                    flex: 2,
-                    child: TextField(
-                      onChanged: (value) => setState(() => _searchQuery = value),
-                      decoration: InputDecoration(
-                        hintText: 'Search operators...',
-                        prefixIcon: const Icon(Icons.search, color: Colors.teal),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear),
-                                onPressed: () => setState(() => _searchQuery = ''),
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.teal, width: 2),
-                        ),
+                    child: _buildOperatorList(),
+                  ),
+                  // Spacing
+                  if (_controller.selectedOperator != null)
+                    const SizedBox(width: ThemeConstants.spacing12),
+                  // Right Side - Detail Panel (full height)
+                  if (_controller.selectedOperator != null)
+                    SizedBox(
+                      width: 320,
+                      child: OperatorDetailPanel(
+                        operator: _controller.selectedOperator!,
+                        onClose: () => _controller.clearSelectedOperator(),
+                        onArchive: _handleArchive,
+                        onRestore: _handleRestore,
+                        onViewDashboard: _handleViewDashboard,
+                        showArchived: _controller.showArchived,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.refresh, color: Colors.teal),
-                    onPressed: _loadOperators,
-                    tooltip: 'Refresh',
-                  ),
                 ],
               ),
-            ),
-            const Divider(height: 1),
-
-            // Content
-            SizedBox(
-              height: 500,
-              child: _buildContent(),
             ),
           ],
         ),
@@ -314,321 +201,125 @@ class _WebOperatorManagementState extends State<WebOperatorManagement> {
     );
   }
 
-  Widget _buildContent() {
-    if (_loading) {
+  Widget _buildActionCards() {
+    return Row(
+      children: [
+        Expanded(
+          child: OperatorActionCard(
+            icon: Icons.archive,
+            label: 'Archive',
+            count: _controller.archivedCount,
+            onPressed: () => _controller.setShowArchived(true),
+            showCountBelow: true,
+            iconBackgroundColor: ThemeConstants.orangeShade50,
+            iconColor: ThemeConstants.orangeShade600,
+            isActive: _controller.showArchived,
+          ),
+        ),
+        const SizedBox(width: ThemeConstants.spacing12),
+        Expanded(
+          child: OperatorActionCard(
+            icon: Icons.person_add_alt_1,
+            label: 'Add Operator',
+            count: null,
+            onPressed: _showAddOperatorDialog,
+            showCountBelow: false,
+            iconBackgroundColor: ThemeConstants.blueShade50,
+            iconColor: ThemeConstants.blueShade600,
+          ),
+        ),
+        const SizedBox(width: ThemeConstants.spacing12),
+        Expanded(
+          child: OperatorActionCard(
+            icon: Icons.check_circle,
+            label: 'Accept Operator',
+            count: null,
+            onPressed: _showAcceptOperatorDialog,
+            showCountBelow: false,
+            iconBackgroundColor: ThemeConstants.greenShade50,
+            iconColor: ThemeConstants.greenShade600,
+          ),
+        ),
+        const SizedBox(width: ThemeConstants.spacing12),
+        Expanded(
+          child: OperatorActionCard(
+            icon: Icons.people,
+            label: 'Active Operators',
+            count: _controller.activeCount,
+            onPressed: () => _controller.setShowArchived(false),
+            showCountBelow: true,
+            isActive: !_controller.showArchived,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOperatorList() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius20),
+        border: Border.all(color: ThemeConstants.greyShade300, width: 1.0),
+      ),
+      child: Column(
+        children: [
+          // Header
+          OperatorListHeader(
+            showArchived: _controller.showArchived,
+            searchQuery: _controller.searchQuery,
+            onSearchChanged: (value) => _controller.setSearchQuery(value),
+            onRefresh: () => _controller.loadOperators(),
+          ),
+          const Divider(height: 1),
+          // Content
+          Expanded(
+            child: _buildListContent(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListContent() {
+    if (_controller.loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-              const SizedBox(height: 16),
-              const Text(
-                'Error loading operators:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _loadOperators,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
+    if (_controller.error != null) {
+      return OperatorErrorState(
+        error: _controller.error!,
+        onRetry: () => _controller.loadOperators(),
       );
     }
 
-    final displayList = _filteredOperators;
+    final displayList = _controller.filteredOperators;
 
     if (displayList.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _searchQuery.isNotEmpty ? Icons.search_off : Icons.people_outline,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isNotEmpty
-                  ? 'No operators found matching "$_searchQuery"'
-                  : _showArchived
-                      ? 'No archived operators'
-                      : 'No operators available',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
-            ),
-          ],
-        ),
+      return OperatorEmptyState(
+        isSearching: _controller.searchQuery.isNotEmpty,
+        isArchived: _controller.showArchived,
+        searchQuery: _controller.searchQuery,
       );
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ThemeConstants.spacing12,
+        vertical: ThemeConstants.spacing8,
+      ),
       itemCount: displayList.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: ThemeConstants.spacing8),
       itemBuilder: (context, index) {
         final operator = displayList[index];
-        final hasLeft = operator['hasLeft'] == true;
-        final isArchived = operator['isArchived'] == true;
+        final isSelected = _controller.selectedOperator?.id == operator.id;
 
-        return Card(
-          elevation: 1,
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey[200]!, width: 1),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            leading: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: hasLeft
-                    ? Colors.red.shade100
-                    : isArchived
-                        ? Colors.orange.shade100
-                        : Colors.teal.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Icons.person,
-                color: hasLeft
-                    ? Colors.red.shade700
-                    : isArchived
-                        ? Colors.orange.shade700
-                        : Colors.teal.shade700,
-                size: 24,
-              ),
-            ),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    operator['name'] ?? 'Unnamed',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                if (hasLeft)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Text(
-                      'Left Team',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text(
-                  operator['email'] ?? '',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-                if (_showArchived) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    hasLeft
-                        ? 'Left: ${_formatTimestamp(operator['leftAt'] as Timestamp?)}'
-                        : 'Archived: ${_formatTimestamp(operator['archivedAt'] as Timestamp?)}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                  ),
-                ],
-              ],
-            ),
-            trailing: _showArchived
-                ? (hasLeft
-                    ? null
-                    : ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal.shade100,
-                          foregroundColor: Colors.teal.shade800,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
-                        onPressed: () => _restoreOperator(operator),
-                        icon: const Icon(Icons.restore, size: 16),
-                        label: const Text('Restore'),
-                      ))
-                : const Icon(Icons.chevron_right, color: Colors.teal),
-            onTap: (_showArchived && hasLeft)
-                ? null
-                : _showArchived
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => WebOperatorDetailScreen(
-                              operatorId: operator['uid'] ?? operator['id'] ?? '',
-                              operatorName: operator['name'] ?? '',
-                              role: operator['role'] ?? '',
-                              email: operator['email'] ?? '',
-                              dateAdded: operator['dateAdded'] ?? '',
-                            ),
-                          ),
-                        ).then((shouldRefresh) {
-                          if (shouldRefresh == true) {
-                            _loadOperators();
-                          }
-                        });
-                      },
-          ),
+        return OperatorListItem(
+          operator: operator,
+          isSelected: isSelected,
+          onTap: () => _controller.setSelectedOperator(operator),
         );
       },
-    );
-  }
-
-  Widget _buildActionCard({
-    required IconData icon,
-    required String label,
-    required int? count,
-    required VoidCallback onPressed,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.teal.shade400, Colors.teal.shade700],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 24, color: Colors.white),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    if (count != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        count.toString(),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.teal.shade700,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String label,
-    required int count,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 24, color: Colors.teal.shade700),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    count.toString(),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

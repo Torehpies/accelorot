@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../../services/firestore_statistic_history_service.dart';
 import '../widgets/temperature_statistic_history_card.dart';
 

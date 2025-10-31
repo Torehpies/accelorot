@@ -216,11 +216,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     );
   }
 
-  String _getDayLabel(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[(weekday - 1) % 7];
-  }
-
   String _getQuality(double temperature) {
     if (temperature >= 55 && temperature <= 65) return 'Optimal';
     if ((temperature >= 40 && temperature < 55) ||
