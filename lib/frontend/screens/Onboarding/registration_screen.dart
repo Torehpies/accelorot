@@ -8,7 +8,7 @@ import 'package:flutter_application_1/widgets/common/primary_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'email_verify.dart';
-import 'waiting_approval_screen.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -134,37 +134,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           setState(() => _isLoading = false);
           showSnackbar(context, 'An unexpected error occurred', isError: true);
         }
-      }
-    }
-  }
-
-  Future<void> _sendTeamJoinRequest(String userId, String teamId) async {
-    try {
-      final batch = _firestore.batch();
-
-      // Add to pending_members subcollection
-      final pendingRef = _firestore
-          .collection('teams')
-          .doc(teamId)
-          .collection('pending_members')
-          .doc(userId);
-      
-      batch.set(pendingRef, {
-        'requestorId': userId,
-        'requestorEmail': emailController.text.trim(),
-        'requestedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Set pendingTeamId in user document
-      final userRef = _firestore.collection('users').doc(userId);
-      batch.update(userRef, {
-        'pendingTeamId': teamId,
-      });
-
-      await batch.commit();
-    } catch (e) {
-      if (mounted) {
-        showSnackbar(context, 'Failed to send team request: $e', isError: true);
       }
     }
   }
@@ -348,9 +317,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     _isLoadingTeams
                         ? const Center(child: CircularProgressIndicator())
                         : DropdownButtonFormField<String>(
-                            value: selectedTeamId,
+                            initialValue: selectedTeamId,
                             decoration: InputDecoration(
-                              labelText: 'Select Team (Optional)',
+                              labelText: 'Select Team',
                               hintText: 'Choose a team to join',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -372,11 +341,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 ),
                               ),
                             ),
+                            validator: (value) => value == null ? 'Please select a team' : null,
                             items: [
-                              const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text('None - I\'ll join later'),
-                              ),
                               ..._teams.map((team) {
                                 return DropdownMenuItem<String>(
                                   value: team['id'] as String,

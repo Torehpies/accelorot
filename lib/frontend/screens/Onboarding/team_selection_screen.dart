@@ -287,7 +287,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
                       else ...[
                         // Team Dropdown
                         DropdownButtonFormField<String>(
-                          value: _selectedTeamId,
+                          initialValue: _selectedTeamId,
                           decoration: InputDecoration(
                             labelText: 'Select Team',
                             hintText: 'Choose a team to join',

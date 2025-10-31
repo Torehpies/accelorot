@@ -10,7 +10,7 @@ import '../frontend/screens/Onboarding/email_verify.dart';
 import '../frontend/screens/Onboarding/restricted_access_screen.dart';
 import '../services/sess_service.dart';
 import 'auth_service.dart';
-import '../frontend/screens/Onboarding/login_screen.dart';
+
 import '../frontend/screens/Onboarding/waiting_approval_screen.dart';
 import '../frontend/screens/Onboarding/team_selection_screen.dart';
 import '../web/operator/web_operator_navigation.dart';
