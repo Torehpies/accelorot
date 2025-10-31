@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/controllers/login_controller.dart';
-import 'package:flutter_application_1/frontend/screens/email_verify.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
-import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
+import 'package:flutter_application_1/services/auth_wrapper.dart'; // Import AuthWrapper
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
-import 'package:flutter_application_1/web/operator/web_operator_navigation.dart';
+import 'package:flutter_application_1/widgets/common/primary_button.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});
@@ -49,35 +48,16 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
       onPasswordVisibilityChanged: (obscured) => setState(() {}),
 
       onLoginSuccess: (result) {
-        if (result['needsVerification'] == true) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EmailVerifyScreen(
-                email: _controller.emailController.text.trim(),
-              ),
-            ),
-          );
-          return;
-        }
-        Map<String, dynamic> userData =
-            result['userData'] as Map<String, dynamic>;
-        String userRole = userData['role'] ?? 'User';
-
-        // Navigate based on role
-        if (userRole == 'Admin') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const WebAdminNavigation()),
-          );
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const WebOperatorNavigation(),
-            ),
-          );
-        }
+        // Don't manually navigate - let AuthWrapper handle routing
+        if (!mounted) return;
+        
+        // Replace the entire navigation stack with AuthWrapper
+        // This will trigger the StreamBuilder and route correctly
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthWrapper()),
+          (route) => false,
+        );
       },
       onLoginError: (message) {
         showSnackbar(context, message, isError: true);
@@ -234,31 +214,36 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
   Widget _buildLoginButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _controller.isLoading ? null : _controller.loginUser,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-        ),
-        child: _controller.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
-              )
-            : const Text(
-                'Sign In',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+      child: PrimaryButton(
+        text: 'Login',
+        onPressed: _controller.loginUser,
+        isLoading: _controller.isLoading,
       ),
+      //child: ElevatedButton(
+      //  onPressed: _controller.isLoading ? null : _controller.loginUser,
+      //  style: ElevatedButton.styleFrom(
+      //    backgroundColor: Colors.teal,
+      //    foregroundColor: Colors.white,
+      //    padding: const EdgeInsets.symmetric(vertical: 16),
+      //    shape: RoundedRectangleBorder(
+      //      borderRadius: BorderRadius.circular(12),
+      //    ),
+      //    elevation: 4,
+      //  ),
+      //  child: _controller.isLoading
+      //      ? const SizedBox(
+      //          width: 20,
+      //          height: 20,
+      //          child: CircularProgressIndicator(
+      //            strokeWidth: 2,
+      //            valueColor: AlwaysStoppedAnimation(Colors.white),
+      //          ),
+      //        )
+      //      : const Text(
+      //          'Sign In',
+      //          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      //        ),
+      //),
     );
   }
 
@@ -272,8 +257,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    const WebRegistrationScreen(), // 👈 We'll create this next
+                builder: (context) => const WebRegistrationScreen(),
               ),
             );
           },
@@ -286,4 +270,3 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
     );
   }
 }
-

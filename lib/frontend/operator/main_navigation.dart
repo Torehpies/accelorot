@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import '../operator/dashboard/home_screen.dart';
+import 'dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
 // ignore: unused_import
-import 'statistics_screen.dart';
-import '../operator/profile/profile_screen.dart';
+import '../screens/statistics_screen.dart';
+import 'profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../operator/machine_management/operator_machine/operator_machine_screen.dart';
+import 'machine_management/operator_machine/operator_machine_screen.dart';
 
 
 void logCurrentUser(BuildContext context) {
