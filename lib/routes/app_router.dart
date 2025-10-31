@@ -20,8 +20,10 @@ import 'package:flutter_application_1/routes/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/admin_web_shell.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/mobile_shell.dart';
+import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/routes/web_shell.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
+import 'package:flutter_application_1/viewmodels/auth_state_notifier.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,8 +51,10 @@ enum RoutePath {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
+	final authListenable = ref.watch(authListenableProvider);
+
   return GoRouter(
-    //refreshListenable: listenable,
+    refreshListenable: authListenable,
     initialLocation: RoutePath.signin.path, // Start at the splash screen
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
