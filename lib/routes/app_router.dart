@@ -10,108 +10,64 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart'
 import 'package:flutter_application_1/frontend/screens/Onboarding/registration_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
+import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart'; // Corrected import reference
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_management_screen.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
+import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/routes/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/admin_web_shell.dart';
+import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/mobile_shell.dart';
 import 'package:flutter_application_1/routes/web_shell.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'package:flutter_application_1/viewmodels/auth_state_notifier.dart';
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-const double kDesktopBreakpoint = 900.0;
-const String dashboardPath = '/dashboard';
-const String loginPath = '/login';
-const String registrationPath = '/signup';
-const String forgotPasswordPath = '/forgot-password';
-// Correct route constants to match their intended screens
-const String verifyEmailPath = '/verify-email';
-const String pendingApprovalPath = '/pending-approval';
-const String referralPath = '/referral';
-const String restrictedPath = '/restricted';
+const int kDesktopBreakpoint = 1024;
 
-final List<String> unauthenticatedPaths = [
-  loginPath,
-  registrationPath,
-  forgotPasswordPath,
-];
+enum RoutePath {
+  initial(path: '/'),
+  signin(path: '/signin'),
+  signup(path: '/signup'),
+  qrRefer(path: '/qr-refer'),
+  pending(path: '/pending'),
+  verifyEmail(path: '/verify-email'),
+  restricted(path: '/restricted'),
+  forgotPassword(path: '/forgot-password'),
+  dashboard(path: '/dashboard'),
+  activity(path: '/activity'),
+  machines(path: '/machines'),
+  statistics(path: '/statistics'),
+  profile(path: '/profile');
+
+  const RoutePath({required this.path});
+  final String path;
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
-
-  final redirect = (BuildContext context, GoRouterState state) {
-    if (authState.isLoading) {
-      return null;
-    }
-
-    final AuthState status = authState.value!;
-    final String locationPath = state.uri.path;
-    final bool isUnauthenticatedLocation = unauthenticatedPaths.contains(
-      locationPath,
-    );
-
-    if (!status.isInitialCheckDone) {
-      return null;
-    }
-
-    final bool isLoggedIn = status.firebaseUser != null;
-    final bool isVerified = status.isVerified;
-    final bool hasProfile = status.userEntity != null;
-    final bool isRestricted = status.isRestricted;
-    final bool isPendingApproval = status.isPendingApproval;
-    final bool isVerificationLocation = locationPath == verifyEmailPath;
-
-    if (!isLoggedIn) {
-      return isUnauthenticatedLocation ? null : loginPath;
-    }
-
-    // Strict authorization order:
-    // 1) Unverified email -> verify email
-    // 2) No profile -> referral (enter code / complete profile)
-    // 3) Restricted (archived/left) -> restricted
-    // 4) Pending approval -> waiting approval
-    if (!isVerified) {
-      return isVerificationLocation ? null : verifyEmailPath;
-    }
-
-    if (!hasProfile) {
-      return (locationPath == referralPath) ? null : referralPath;
-    }
-
-    if (isRestricted) {
-      return (locationPath == restrictedPath) ? null : restrictedPath;
-    }
-
-    if (isPendingApproval) {
-      return (locationPath == pendingApprovalPath) ? null : pendingApprovalPath;
-    }
-
-    if (isUnauthenticatedLocation ||
-        isVerificationLocation ||
-        locationPath == referralPath ||
-        locationPath == restrictedPath ||
-        locationPath == pendingApprovalPath) {
-      return status.isAdmin ? '/admin/dashboard' : dashboardPath;
-    }
-
-    return null;
-  };
-
   return GoRouter(
-    initialLocation: loginPath,
+    //refreshListenable: listenable,
+    initialLocation: RoutePath.signin.path, // Start at the splash screen
     debugLogDiagnostics: true,
+    redirect: (context, state) => appRouteRedirect(context, ref, state),
     routes: [
       GoRoute(
-        path: loginPath,
+        path: RoutePath.initial.path,
+        name: RoutePath.initial.name,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePath.signin.path,
+        name: RoutePath.signin.name,
         builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: registrationPath,
+        path: RoutePath.signup.path,
+        name: RoutePath.signup.name,
         pageBuilder: (context, state) {
           final isWeb = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
           return NoTransitionPage(
@@ -123,35 +79,39 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: forgotPasswordPath,
+        path: RoutePath.forgotPassword.path,
+        name: RoutePath.forgotPassword.name,
         builder: (context, state) => const ForgotPassScreen(),
       ),
       GoRoute(
-        path: verifyEmailPath,
+        path: RoutePath.verifyEmail.path,
+        name: RoutePath.verifyEmail.name,
         builder: (context, state) {
           final email =
               (state.extra as String?) ??
               FirebaseAuth.instance.currentUser?.email;
           if (email == null) {
+            // This case should be handled by redirect, but as a fallback:
             return const LoginScreen();
           }
           return EmailVerifyScreen(email: email);
         },
       ),
       GoRoute(
-        path: pendingApprovalPath,
+        path: RoutePath.pending.path,
+        name: RoutePath.pending.name,
         builder: (context, state) => const WaitingApprovalScreen(),
       ),
       GoRoute(
-        path: referralPath,
+        path: RoutePath.qrRefer.path,
         builder: (context, state) => const QRReferScreen(),
       ),
       GoRoute(
-        path: restrictedPath,
+        path: RoutePath.restricted.path,
+        name: RoutePath.restricted.name,
         builder: (context, state) {
           final reason = state.extra as String?;
           return RestrictedAccessScreen(reason: reason ?? 'Unknown reason');
-          //unknown amp
         },
       ),
       ShellRoute(
@@ -167,12 +127,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
         routes: [
           GoRoute(
-            path: '/dashboard',
+            path: RoutePath.dashboard.path,
+            name: RoutePath.dashboard.name,
             pageBuilder: (context, state) =>
                 NoTransitionPage(child: const HomeScreen(), key: state.pageKey),
           ),
           GoRoute(
-            path: '/activity',
+            path: RoutePath.activity.path,
+            name: RoutePath.activity.name,
             pageBuilder: (context, state) => NoTransitionPage(
               child: const ActivityLogsScreen(),
               key: state.pageKey,
@@ -243,6 +205,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
     ],
-    redirect: redirect,
   );
 });
+
+// The custom GoRouterRefreshStream class is no longer needed 
+// because we are using ValueNotifier and ref.listen.
+

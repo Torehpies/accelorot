@@ -9,8 +9,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'auth_repository.g.dart';
 
 @Riverpod(keepAlive: true)
+FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
+
+@Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
-  return AuthRepository(FirebaseAuth.instance, GoogleSignIn.instance);
+  return AuthRepository(ref.watch(firebaseAuthProvider), GoogleSignIn.instance);
 }
 
 class AuthRepository {
@@ -21,6 +24,7 @@ class AuthRepository {
   AuthRepository(this._auth, this._googleSignIn);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+	User? get currentUser => _auth.currentUser;
 
   Future<User?> signInWithEmail(String email, String password) async {
     try {

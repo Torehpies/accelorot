@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/repositories/auth_repository.dart';
 
 class NavItem {
   final IconData icon;
@@ -10,7 +12,7 @@ class NavItem {
 }
 
 const List<NavItem> operatorNavItems = [
-  NavItem(Icons.home, "Dashboard", "/home"),
+  NavItem(Icons.home, "Dashboard", "/dashboard"),
   NavItem(Icons.history, "Activity", "/activity"),
   NavItem(Icons.bar_chart, "Stats", "/stats"),
   NavItem(Icons.settings, "Machines", "/machines"),
@@ -18,10 +20,10 @@ const List<NavItem> operatorNavItems = [
 ];
 
 const List<NavItem> adminNavItems = [
-  NavItem(Icons.home, "Dashboard", "/home"),
-  NavItem(Icons.history, "Operators", "/operators"),
-  NavItem(Icons.bar_chart, "Machines", "/machines"),
-  NavItem(Icons.person, "Profile", "/profile"),
+  NavItem(Icons.home, "Dashboard", "/admin/dashboard"),
+  NavItem(Icons.history, "Operators", "/admin/operators"),
+  NavItem(Icons.bar_chart, "Machines", "/admin/machines"),
+  NavItem(Icons.person, "Profile", "/admin/profile"),
 ];
 
 int getSelectedIndex(BuildContext context, List<NavItem> navItems) {
@@ -55,7 +57,7 @@ Future<void> handleLogout(
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(ctx, true),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+          style: ElevatedButton.styleFrom(backgroundColor: confirmColor),
           child: const Text('Logout', style: TextStyle(color: Colors.white)),
         ),
       ],
@@ -63,9 +65,14 @@ Future<void> handleLogout(
   );
 
   if (shouldLogout == true && context.mounted) {
-    await FirebaseAuth.instance.signOut();
-    if (!context.mounted) return;
-    context.go('/login');
+    // Read providers from the nearest ProviderScope without requiring a WidgetRef.
+    final container = ProviderScope.containerOf(context, listen: false);
+    try {
+      await container.read(authRepositoryProvider).signOut();
+    } catch (_) {
+      // Fallback to direct Firebase sign out (e.g., if GoogleSignIn signOut throws on web)
+      await FirebaseAuth.instance.signOut();
+    }
   }
 }
 
@@ -92,7 +99,10 @@ Widget buildOperatorWebBranding(BuildContext context) {
       const SizedBox(height: 4),
       Text(
         'Operator Portal',
-        style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.7),
+          fontSize: 12,
+        ),
       ),
       const SizedBox(height: 8),
       Container(

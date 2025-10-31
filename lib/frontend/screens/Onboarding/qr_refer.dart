@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../services/auth_service.dart';
-import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'waiting_approval_screen.dart';
-import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
 class QRReferScreen extends StatefulWidget {
   const QRReferScreen({super.key});
@@ -58,11 +56,7 @@ class _QRReferScreenState extends State<QRReferScreen> {
     // Redirect immediately if already assigned
     if (_teamId != null) {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const MainNavigation(),
-        ),
-      );
+			context.go('/dashboard');
     }
   }
 
@@ -149,15 +143,7 @@ class _QRReferScreenState extends State<QRReferScreen> {
 
   Future<void> _handleBackToLogin() async {
     await _auth.signOut();
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => kIsWeb
-                  ? const WebLoginScreen()
-                  : const LoginScreen(),
-            ),
-
-    );
+		context.go('/login');
   }
 
   Widget _buildJoinTeam() {

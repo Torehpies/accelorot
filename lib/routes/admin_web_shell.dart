@@ -10,11 +10,11 @@ class AdminWebShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveWebShell(
-      navItems: operatorNavItems,
+      navItems: adminNavItems,
       primaryColor: Colors.red.shade700,
       secondaryColor: Colors.red.shade900,
       roleName: 'Admin',
-      brandingWidget: buildOperatorWebBranding(context),
+      brandingWidget: buildAdminWebBranding(context),
       sidebarWidth: 250,
       child: child,
     );

@@ -5,7 +5,6 @@ import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
-import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'email_verify.dart';
 
