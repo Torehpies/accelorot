@@ -1,8 +1,8 @@
 // lib/frontend/operator/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import '../../components/system_card.dart';
+import 'system/system_card.dart';
 import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
-import '../../components/composting_progress_card.dart';
+import 'compost_progress/composting_progress_card.dart';
 import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
 

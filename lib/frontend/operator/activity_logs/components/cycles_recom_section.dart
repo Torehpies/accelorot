@@ -1,9 +1,10 @@
+// lib/frontend/operator/activity_logs/components/cycles_recom_section.dart
 import 'package:flutter/material.dart';
 import '../view_screens/cycles_recom_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class CyclesRecomSection extends StatelessWidget {
-  final String? viewingOperatorId; 
+  final String? viewingOperatorId;
 
   const CyclesRecomSection({
     super.key,
@@ -20,13 +21,21 @@ class CyclesRecomSection extends StatelessWidget {
       },
       child: SizedBox(
         width: 400,
-        height: 80,
-        child: Card(
-          shape: RoundedRectangleBorder(
+        height: 70,
+        child: Container( // Replaced Card with Container for shadow styling
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300, width: 1.0),
+            boxShadow: [ // ⭐ ADDED: Shadow styling
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-          elevation: 4,
-          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
