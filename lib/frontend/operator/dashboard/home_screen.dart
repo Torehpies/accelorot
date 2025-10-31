@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'cycles/system_card.dart';
 import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
 import 'compost_progress/composting_progress_card.dart';
+import 'compost_progress/models/compost_batch_model.dart';
 import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
 
@@ -19,6 +20,23 @@ class _HomeScreenState extends State<HomeScreen> {
   // GlobalKey to control and refresh the ActivityLogsCard widget
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
+  
+  // State lifted from CompostingProgressCard - shared between cards
+  CompostBatch? _currentBatch;
+
+  // Callback when batch is started from CompostingProgressCard
+  void _handleBatchStarted(CompostBatch batch) {
+    setState(() {
+      _currentBatch = batch;
+    });
+  }
+
+  // Callback when batch is completed from CompostingProgressCard
+  void _handleBatchCompleted() {
+    setState(() {
+      _currentBatch = null;
+    });
+  }
       
   @override
   Widget build(BuildContext context) {
@@ -40,13 +58,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 16),
               
-              // Composting Progress Card - now self-managing
-              const CompostingProgressCard(),
+              // Composting Progress Card - now receives batch and callbacks
+              CompostingProgressCard(
+                currentBatch: _currentBatch,
+                onBatchStarted: _handleBatchStarted,
+                onBatchCompleted: _handleBatchCompleted,
+              ),
               
               const SizedBox(height: 16),
               
-              // System Card - Drum rotation controls
-              const SystemCard(),
+              // System Card - Drum rotation controls (receives current batch)
+              SystemCard(
+                currentBatch: _currentBatch,
+              ),
               
               const SizedBox(height: 16),
               

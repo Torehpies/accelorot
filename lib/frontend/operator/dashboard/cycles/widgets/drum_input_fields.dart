@@ -1,4 +1,4 @@
-// lib/frontend/operator/dashboard/cycles/system_card_widgets/drum_input_fields.dart
+// lib/frontend/operator/dashboard/cycles/widgets/drum_input_fields.dart
 
 import 'package:flutter/material.dart';
 
@@ -7,6 +7,7 @@ class DrumInputFields extends StatelessWidget {
   final String selectedPeriod;
   final ValueChanged<String?> onCycleChanged;
   final ValueChanged<String?> onPeriodChanged;
+  final bool isLocked; // Lock when running or paused
 
   const DrumInputFields({
     super.key,
@@ -14,6 +15,7 @@ class DrumInputFields extends StatelessWidget {
     required this.selectedPeriod,
     required this.onCycleChanged,
     required this.onPeriodChanged,
+    this.isLocked = false,
   });
 
   @override
@@ -24,7 +26,7 @@ class DrumInputFields extends StatelessWidget {
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Set number of Cycles',
+              labelText: 'Cycles',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -33,9 +35,10 @@ class DrumInputFields extends StatelessWidget {
                 horizontal: 12,
                 vertical: 10,
               ),
+              enabled: !isLocked,
             ),
             initialValue: selectedCycle,
-            onChanged: onCycleChanged,
+            onChanged: isLocked ? null : onCycleChanged,
             items: const [
               DropdownMenuItem(value: "50", child: Text("50")),
               DropdownMenuItem(value: "100", child: Text("100")),
@@ -49,7 +52,7 @@ class DrumInputFields extends StatelessWidget {
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Set Period',
+              labelText: 'Period',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -58,19 +61,14 @@ class DrumInputFields extends StatelessWidget {
                 horizontal: 12,
                 vertical: 10,
               ),
+              enabled: !isLocked,
             ),
             initialValue: selectedPeriod,
-            onChanged: onPeriodChanged,
+            onChanged: isLocked ? null : onPeriodChanged,
             items: const [
-              DropdownMenuItem(value: '15 minutes', child: Text('15 minutes')),
-              DropdownMenuItem(
-                value: '30 minutes',
-                child: Text('30 minutes'),
-              ),
-              DropdownMenuItem(
-                value: '1 hour',
-                child: Text('1 hour'),
-              ),
+              DropdownMenuItem(value: '15 minutes', child: Text('15 min')),
+              DropdownMenuItem(value: '30 minutes', child: Text('30 min')),
+              DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
             ],
           ),
         ),

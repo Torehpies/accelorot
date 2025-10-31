@@ -1,171 +1,163 @@
 // lib/frontend/operator/dashboard/cycles/system_card.dart
 
 import 'package:flutter/material.dart';
-import 'widgets/input_fields.dart';
-import 'widgets/action_buttons.dart';
+import 'models/drum_rotation_settings.dart';
+import 'models/system_status.dart';
+import 'components/empty_state.dart';
+import 'components/active_state.dart';
+import '../compost_progress/models/compost_batch_model.dart';
 
 class SystemCard extends StatefulWidget {
-  const SystemCard({super.key});
+  final CompostBatch? currentBatch;
+  
+  const SystemCard({
+    super.key,
+    required this.currentBatch,
+  });
 
   @override
   State<SystemCard> createState() => _SystemCardState();
 }
 
 class _SystemCardState extends State<SystemCard> {
-  // --- 1. STATE MANAGEMENT ---
-  String status = "Excellent"; // "Excellent", "Warning", "Error"
-  String selectedPeriod = "1 hour";
-  String selectedCycle = "100";
-  bool isRunning = false;
-  bool isPaused = false;
+  DrumRotationSettings _settings = DrumRotationSettings();
+  SystemStatus _status = SystemStatus.idle;
 
-  // --- 2. HELPER FUNCTIONS ---
-  Color getStatusColor() {
-    switch (status) {
-      case "Excellent":
-        return Colors.green;
-      case "Warning":
-        return Colors.orange;
-      case "Error":
-        return Colors.red;
-      default:
-        return Colors.grey;
+  @override
+  void didUpdateWidget(SystemCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Reset when batch changes
+    if (oldWidget.currentBatch != widget.currentBatch) {
+      if (widget.currentBatch == null) {
+        // Batch completed/removed - reset everything
+        setState(() {
+          _settings.reset();
+          _status = SystemStatus.idle;
+        });
+      }
     }
   }
 
-  IconData getStatusIcon() {
-    switch (status) {
-      case "Excellent":
-        return Icons.check_circle;
-      case "Warning":
-        return Icons.warning;
-      case "Error":
-        return Icons.error;
-      default:
-        return Icons.info;
-    }
-  }
+  bool get _hasActiveBatch => widget.currentBatch != null;
 
-  // Method to update state from child widgets - **FIXED NAMED PARAMETER**
-  void updateState({
-    String? newStatus,
-    String? newCycle,
-    String? newPeriod,
-    bool? isRunning,
-    bool? paused,
-  }) {
-    setState(() {
-      status = newStatus ?? status;
-      selectedCycle = newCycle ?? selectedCycle;
-      selectedPeriod = newPeriod ?? selectedPeriod;
-      this.isRunning =
-          isRunning ??
-          this.isRunning; // Correctly uses the 'isRunning' parameter
-      isPaused = paused ?? isPaused;
-    });
-  }
+  String get _batchNumber => widget.currentBatch?.batchNumber ?? '';
+
+  DateTime get _batchStartTime => 
+      widget.currentBatch?.batchStart ?? DateTime.now();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.grey.withValues(alpha: 0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // --- Header ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: const [
-                  Icon(Icons.settings, size: 18, color: Colors.black54),
-                  SizedBox(width: 6),
-                  Text(
-                    'System',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            _buildHeader(),
+            const SizedBox(height: 16),
+
+            // Content - Empty or Active state
+            if (!_hasActiveBatch)
+              const EmptyState()
+            else
+              ActiveState(
+                batchNumber: _batchNumber,
+                batchStartTime: _batchStartTime,
+                settings: _settings,
+                status: _status,
+                onStatusChanged: (newStatus) {
+                  setState(() => _status = newStatus);
+                },
+                onSettingsChanged: (newSettings) {
+                  setState(() => _settings = newSettings);
+                },
               ),
-              Row(
-                children: [
-                  const Text(
-                    'Status: ',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  Text(
-                    status,
-                    style: TextStyle(
-                      color: getStatusColor(),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(getStatusIcon(), color: getStatusColor(), size: 18),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Uptime info
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('Uptime\n12:12:12', style: TextStyle(color: Colors.black87)),
-              Text(
-                'Last Update\n12:12:13 Aug 30, 2025',
-                textAlign: TextAlign.right,
-                style: TextStyle(color: Colors.black87),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          const Text(
-            'Drum Rotation',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
-          const SizedBox(height: 12),
-
-          // 1. Drum Input Fields
-          DrumInputFields(
-            selectedCycle: selectedCycle,
-            selectedPeriod: selectedPeriod,
-            onCycleChanged: (value) => updateState(newCycle: value),
-            onPeriodChanged: (value) => updateState(newPeriod: value),
-          ),
-
-          const SizedBox(height: 20),
-
-          // 2. Action Buttons (The calls now match the function definition)
-          SystemActionButtons(
-            isRunning: isRunning,
-            isPaused: isPaused,
-            onStart: () => updateState(isRunning: true, newStatus: "Excellent"),
-            onStop: () => updateState(
-              isRunning: false,
-              paused: false,
-              newStatus: "Excellent",
-            ), // FIXED
-            onTogglePause: () => updateState(
-              paused: !isPaused,
-              newStatus: !isPaused ? "Warning" : "Excellent",
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.settings,
+              color: Colors.teal.shade700,
+              size: 20,
             ),
+            const SizedBox(width: 8),
+            const Text(
+              'System',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        if (_hasActiveBatch)
+          Row(
+            children: [
+              Text(
+                'Status: ',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: _status.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _status.color.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _status.icon,
+                      size: 14,
+                      color: _status.color,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _status.displayName,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _status.color,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+      ],
     );
   }
 }

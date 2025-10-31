@@ -4,45 +4,41 @@ import 'components/batch_start_dialog.dart';
 import 'components/batch_complete_dialog.dart';
 import 'models/compost_batch_model.dart';
 
-class CompostingProgressCard extends StatefulWidget {
-  const CompostingProgressCard({super.key});
-
-  @override
-  State<CompostingProgressCard> createState() => _CompostingProgressCardState();
-}
-
-class _CompostingProgressCardState extends State<CompostingProgressCard> {
+class CompostingProgressCard extends StatelessWidget {
   static const int totalDays = 12; // Fixed 12-day cycle
-  
-  CompostBatch? currentBatch;
+
+  final CompostBatch? currentBatch;
+  final Function(CompostBatch) onBatchStarted;
+  final VoidCallback onBatchCompleted;
+
+  const CompostingProgressCard({
+    super.key,
+    required this.currentBatch,
+    required this.onBatchStarted,
+    required this.onBatchCompleted,
+  });
 
   // Start batch - opens dialog to get batch info
-  void _startBatch() async {
+  void _startBatch(BuildContext context) async {
     final batch = await showDialog<CompostBatch>(
       context: context,
       builder: (ctx) => const BatchStartDialog(),
     );
-    
+
     if (batch != null) {
-      setState(() {
-        currentBatch = batch;
-      });
+      onBatchStarted(batch);
     }
   }
 
   // Show detailed view dialog
-  void _showDetailsDialog() {
+  void _showDetailsDialog(BuildContext context) {
     if (currentBatch == null) return;
-    
+
     showDialog(
       context: context,
       builder: (ctx) => BatchCompleteDialog(
         batch: currentBatch!,
-        onComplete: () {
-          setState(() {
-            currentBatch = null;
-          });
-        },
+        onComplete: onBatchCompleted,
       ),
     );
   }
@@ -63,7 +59,7 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
     final progress = _getProgress();
 
     return GestureDetector(
-      onTap: isStarted ? _showDetailsDialog : null,
+      onTap: isStarted ? () => _showDetailsDialog(context) : null,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -89,7 +85,11 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.compost_outlined, color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.compost_outlined,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Composting Progress',
@@ -103,7 +103,10 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
                   ),
                   if (isStarted)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.teal.shade50,
                         borderRadius: BorderRadius.circular(12),
@@ -145,14 +148,16 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
                 ],
               ),
               const SizedBox(height: 8),
-              
+
               // Progress bar
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: progress,
                   backgroundColor: Colors.grey.shade200,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.teal.shade600),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.teal.shade600,
+                  ),
                   minHeight: 8,
                 ),
               ),
@@ -162,7 +167,7 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
               if (!isStarted)
                 Center(
                   child: ElevatedButton.icon(
-                    onPressed: _startBatch,
+                    onPressed: () => _startBatch(context),
                     icon: const Icon(Icons.play_arrow, size: 18),
                     label: const Text(
                       'Start Composting',
@@ -193,15 +198,24 @@ class _CompostingProgressCardState extends State<CompostingProgressCard> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildInfoColumn('Batch Name', currentBatch!.batchName),
-                        _buildInfoColumn('Batch Number', currentBatch!.batchNumber),
+                        _buildInfoColumn(
+                          'Batch Number',
+                          currentBatch!.batchNumber,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildInfoColumn('Started By', currentBatch!.startedBy ?? 'null'),
-                        _buildInfoColumn('Days Passed', '${_getDaysPassed()} days'),
+                        _buildInfoColumn(
+                          'Started By',
+                          currentBatch!.startedBy ?? 'null',
+                        ),
+                        _buildInfoColumn(
+                          'Days Passed',
+                          '${_getDaysPassed()} days',
+                        ),
                       ],
                     ),
                   ],
