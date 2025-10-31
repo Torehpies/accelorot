@@ -1,6 +1,6 @@
 // lib/frontend/operator/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'system/system_card.dart';
+import 'cycles/system_card.dart';
 import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
 import 'compost_progress/composting_progress_card.dart';
 import 'add_waste/add_waste_product.dart';
@@ -39,13 +39,21 @@ class _HomeScreenState extends State<HomeScreen> {
               const EnvironmentalSensorsView(),
 
               const SizedBox(height: 16),
-              CompostingProgressCard(batchStart: DateTime(2025, 9, 15)),
+              
+              // Composting Progress Card - now self-managing
+              const CompostingProgressCard(),
+              
               const SizedBox(height: 16),
+              
+              // System Card - Drum rotation controls
               const SystemCard(),
+              
               const SizedBox(height: 16),
+              
+              // Activity Logs Card - Recent waste activities
               ActivityLogsCard(
                 key: _activityLogsKey,
-                viewingOperatorId: widget.viewingOperatorId, // ⭐ Pass it here too!
+                viewingOperatorId: widget.viewingOperatorId,
               ),
             ],
           ),
@@ -57,17 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 58,
           height: 58,
           child: FloatingActionButton(
-            // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
             onPressed: () async {
-           
-              
+              // Open Add Waste Product dialog
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,
                 builder: (context) => AddWasteProduct(
-                  viewingOperatorId: widget.viewingOperatorId, // ⭐ CRITICAL: Pass it here!
+                  viewingOperatorId: widget.viewingOperatorId,
                 ),
               );
 
+              // Refresh activity logs if waste was added
               if (result != null && mounted) {
                 await _activityLogsKey.currentState?.refresh();
               }
