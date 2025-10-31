@@ -5,8 +5,10 @@ import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'email_verify.dart';
+import 'waiting_approval_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -23,11 +25,47 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
   String? selectedRole = 'Operator';
+  String? selectedTeamId;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+  bool _isLoadingTeams = true;
+  List<Map<String, dynamic>> _teams = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTeams();
+  }
+
+  Future<void> _loadTeams() async {
+    try {
+      final teamsSnapshot = await _firestore.collection('teams').get();
+      final teams = teamsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          'name': data['teamName'] ?? 'Unnamed Team',
+        };
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _teams = teams;
+          _isLoadingTeams = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingTeams = false);
+        showSnackbar(context, 'Failed to load teams', isError: true);
+      }
+    }
+  }
 
   void _setLoadingState(bool isLoading) {
     if (mounted) {
@@ -57,16 +95,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           password: passwordController.text,
           firstName: firstNameController.text.trim(),
           lastName: lastNameController.text.trim(),
-          // Force registration role to Operator
           role: 'Operator',
         );
+
         if (mounted) {
           setState(() => _isLoading = false);
 
           if (result['success']) {
-            showSnackbar(context, result['message']);
-
-            // Navigate to email verification screen
+            final user = _authService.getCurrentUser();
+            
+            // If a team was selected, save it for later (after email verification)
+            if (selectedTeamId != null && user != null) {
+              // Store the selected team ID temporarily in user document
+              await _firestore.collection('users').doc(user.uid).update({
+                'pendingTeamSelection': selectedTeamId,
+              });
+              
+              if (!mounted) return;
+              showSnackbar(context, 'Registration successful! Please verify your email first.');
+            } else {
+              showSnackbar(context, result['message']);
+            }
+            
+            // Always navigate to email verification screen first
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -87,8 +138,38 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  Future<void> _sendTeamJoinRequest(String userId, String teamId) async {
+    try {
+      final batch = _firestore.batch();
+
+      // Add to pending_members subcollection
+      final pendingRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(userId);
+      
+      batch.set(pendingRef, {
+        'requestorId': userId,
+        'requestorEmail': emailController.text.trim(),
+        'requestedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Set pendingTeamId in user document
+      final userRef = _firestore.collection('users').doc(userId);
+      batch.update(userRef, {
+        'pendingTeamId': teamId,
+      });
+
+      await batch.commit();
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(context, 'Failed to send team request: $e', isError: true);
+      }
+    }
+  }
+
   Future<void> _handleGoogleSignIn() async {
-    // Prevent multiple clicks and interaction with other buttons
     if (_isGoogleLoading || _isLoading) return;
 
     final handler = GoogleSignInHandler(_authService, context);
@@ -100,7 +181,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white, // White background
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -139,9 +220,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    const Text(
                       'Create Account',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.teal,
@@ -157,7 +238,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     // First Name and Last Name Row
                     Row(
                       children: [
-                        // First Name Field
                         Expanded(
                           child: TextFormField(
                             controller: firstNameController,
@@ -190,7 +270,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        // Last Name Field
                         Expanded(
                           child: TextFormField(
                             controller: lastNameController,
@@ -263,6 +342,54 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 16),
+
+                    // Team Dropdown (Optional)
+                    _isLoadingTeams
+                        ? const Center(child: CircularProgressIndicator())
+                        : DropdownButtonFormField<String>(
+                            value: selectedTeamId,
+                            decoration: InputDecoration(
+                              labelText: 'Select Team (Optional)',
+                              hintText: 'Choose a team to join',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF2B7326),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF2B7326),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF2B7326),
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('None - I\'ll join later'),
+                              ),
+                              ..._teams.map((team) {
+                                return DropdownMenuItem<String>(
+                                  value: team['id'] as String,
+                                  child: Text(team['name'] as String),
+                                );
+                              }),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                selectedTeamId = value;
+                              });
+                            },
+                          ),
                     const SizedBox(height: 16),
 
                     // Password Field
@@ -370,6 +497,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Info message about team selection
+                    if (selectedTeamId != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline, 
+                              color: Colors.blue.shade700, 
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'A join request will be sent to the team admin for approval.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+
                     // Register Button
                     SizedBox(
                       width: double.infinity,
@@ -380,7 +537,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    OrDivider(),
+                    const OrDivider(),
                     const SizedBox(height: 16),
 
                     GoogleSignInButton(

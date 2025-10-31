@@ -148,6 +148,6 @@ class LoginNotifier extends _$LoginNotifier {
       return LoginFlowPendingApproval();
     }
 
-    return LoginFlowNeedsReferral();
+    return LoginFlowError('Unable to determine user status. Please contact support.');
   }
 }

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
+
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 

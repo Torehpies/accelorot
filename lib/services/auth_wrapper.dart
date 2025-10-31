@@ -10,8 +10,9 @@ import '../frontend/screens/Onboarding/email_verify.dart';
 import '../frontend/screens/Onboarding/restricted_access_screen.dart';
 import '../services/sess_service.dart';
 import 'auth_service.dart';
-import '../frontend/screens/Onboarding/qr_refer.dart';
+import '../frontend/screens/Onboarding/login_screen.dart';
 import '../frontend/screens/Onboarding/waiting_approval_screen.dart';
+import '../frontend/screens/Onboarding/team_selection_screen.dart';
 import '../web/operator/web_operator_navigation.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -51,7 +52,6 @@ class AuthWrapper extends StatelessWidget {
             // Admins bypass all checks
             if (role.toLowerCase() == 'admin') {
               debugPrint('AuthWrapper: User is admin, redirecting to AdminMainNavigation (web-aware)');
-              // On web, use the web-specific admin navigation; otherwise use the native AdminMainNavigation
               return kIsWeb ? const WebAdminNavigation() : const AdminMainNavigation();
             }
 
@@ -92,10 +92,10 @@ class AuthWrapper extends StatelessWidget {
                     return const RestrictedAccessScreen(reason: 'archived');
                   }
 
-                  // If user has left, clear their teamId and send to QR screen
+                  // If user has left, show team selection screen
                   if (hasLeft) {
-                    debugPrint('AuthWrapper: User has left, redirecting to QRReferScreen');
-                    return const QRReferScreen();
+                    debugPrint('AuthWrapper: User has left, redirecting to TeamSelectionScreen');
+                    return const TeamSelectionScreen();
                   }
 
                   // Found as active member with teamId
@@ -115,12 +115,12 @@ class AuthWrapper extends StatelessWidget {
                 debugPrint('AuthWrapper: Has pendingTeamId, showing WaitingApprovalScreen');
                 return const WaitingApprovalScreen();
               } else {
-                debugPrint('AuthWrapper: No team, showing QRReferScreen');
-                return const QRReferScreen();
+                debugPrint('AuthWrapper: No team, showing TeamSelectionScreen');
+                return const TeamSelectionScreen();
               }
             } catch (e) {
               debugPrint('AuthWrapper error: $e');
-              return const QRReferScreen();
+              return const TeamSelectionScreen();
             }
           }(),
           builder: (context, snap) {
@@ -131,9 +131,9 @@ class AuthWrapper extends StatelessWidget {
             }
             if (snap.hasError) {
               debugPrint('AuthWrapper FutureBuilder error: ${snap.error}');
-              return const QRReferScreen();
+              return const TeamSelectionScreen();
             }
-            return snap.data ?? const QRReferScreen();
+            return snap.data ?? const TeamSelectionScreen();
           },
         );
       },

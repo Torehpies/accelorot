@@ -4,8 +4,9 @@ import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
 import 'login_screen.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EmailVerifyScreen extends StatefulWidget {
   final String email;
@@ -18,6 +19,7 @@ class EmailVerifyScreen extends StatefulWidget {
 
 class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
   final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isResendingEmail = false;
   bool _canResendEmail = true;
   int _resendCooldown = 0;
@@ -45,35 +47,90 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         final user = _authService.getCurrentUser();
         if (user != null) {
           await _authService.updateEmailVerificationStatus(user.uid, true);
-        }
-
-        if (!mounted) return;
-        showSnackbar(context, 'Email verified successfully!');
-
-        // Determine team status and route accordingly
-        final userObj = _authService.getCurrentUser();
-        if (userObj == null) return;
-        final status = await _authService.getUserTeamStatus(userObj.uid);
-        final teamId = status['teamId'];
-        final pendingTeamId = status['pendingTeamId'];
-
-        if (!mounted) return;
-
-        if (teamId != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const MainNavigation()),
-          );
-        } else if (pendingTeamId != null) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const QRReferScreen()),
-          );
+          await _handlePostVerification(user.uid);
         }
       }
     });
+  }
+
+  Future<void> _handlePostVerification(String userId) async {
+    if (!mounted) return;
+    showSnackbar(context, 'Email verified successfully!');
+
+    // Check if user selected a team during registration
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final pendingTeamSelection = userDoc.data()?['pendingTeamSelection'] as String?;
+
+    if (pendingTeamSelection != null) {
+      // Send team join request
+      await _sendTeamJoinRequest(userId, pendingTeamSelection);
+      
+      // Clear the pending team selection
+      await _firestore.collection('users').doc(userId).update({
+        'pendingTeamSelection': FieldValue.delete(),
+      });
+
+      if (!mounted) return;
+      // Navigate to waiting approval screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+      );
+    } else {
+      // Check regular team status
+      final status = await _authService.getUserTeamStatus(userId);
+      final teamId = status['teamId'];
+      final pendingTeamId = status['pendingTeamId'];
+
+      if (!mounted) return;
+
+      if (teamId != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+        );
+      } else if (pendingTeamId != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const TeamSelectionScreen()),
+        );
+      }
+    }
+  }
+
+  Future<void> _sendTeamJoinRequest(String userId, String teamId) async {
+    try {
+      final batch = _firestore.batch();
+
+      // Add to pending_members subcollection
+      final pendingRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(userId);
+      
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final email = userDoc.data()?['email'] as String? ?? '';
+      
+      batch.set(pendingRef, {
+        'requestorId': userId,
+        'requestorEmail': email,
+        'requestedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Set pendingTeamId in user document
+      final userRef = _firestore.collection('users').doc(userId);
+      batch.update(userRef, {
+        'pendingTeamId': teamId,
+      });
+
+      await batch.commit();
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(context, 'Failed to send team request', isError: true);
+      }
+    }
   }
 
   Future<void> _resendVerifyEmail() async {
@@ -134,15 +191,8 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
       final user = _authService.getCurrentUser();
       if (user != null) {
         await _authService.updateEmailVerificationStatus(user.uid, true);
+        await _handlePostVerification(user.uid);
       }
-
-      if (!mounted) return;
-      showSnackbar(context, 'Email verified successfully!');
-      
-      // Redirect to QR referral screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const QRReferScreen()),
-      );
     } else {
       showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
     }
@@ -247,7 +297,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'After verification, you\'ll need to scan or enter a team invitation code.',
+                                'After verification, you\'ll be directed to join a team or wait for approval if you selected one.',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.blue.shade900,

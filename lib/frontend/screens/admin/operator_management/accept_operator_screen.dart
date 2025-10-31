@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'invitation_code_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -102,82 +101,6 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 		return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 	}
 
-	String _generateCode() {
-		const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-		final rnd = Random.secure();
-		return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
-	}
-
-	Future<void> _onGenerateCode() async {
-		final user = FirebaseAuth.instance.currentUser;
-		if (user == null) {
-			ScaffoldMessenger.of(context).showSnackBar(
-				const SnackBar(content: Text('Error: No user logged in')),
-			);
-			return;
-		}
-
-		final teamId = user.uid;
-		try {
-			final teamDocRef = _firestore.collection('teams').doc(teamId);
-			final teamDoc = await teamDocRef.get();
-
-			String code;
-			DateTime expiry;
-
-			if (teamDoc.exists) {
-				final data = teamDoc.data();
-				final existingCode = data?['joinCode'] as String?;
-				final expiresAt = data?['joinCodeExpiresAt'] as Timestamp?;
-
-				if (existingCode != null && expiresAt != null) {
-					final expiryDate = expiresAt.toDate();
-					if (expiryDate.isAfter(DateTime.now())) {
-				// Still valid – just show the QR again
-					final expiryStr =
-						'${expiryDate.year}-${expiryDate.month.toString().padLeft(2, '0')}-${expiryDate.day.toString().padLeft(2, '0')}';
-					if (!mounted) return;
-					showInvitationOverlay(context, existingCode, expiryStr);
-					return;
-					}
-				}
-
-				// Otherwise, generate a new one
-				code = _generateCode();
-				expiry = DateTime.now().add(const Duration(hours: 24));
-
-				await teamDocRef.set({
-					'ownerId': teamId,
-					'joinCode': code,
-					'joinCodeExpiresAt': expiry,
-					'createdAt': data?['createdAt'] ?? FieldValue.serverTimestamp(),
-					'updatedAt': FieldValue.serverTimestamp(),
-				}, SetOptions(merge: true));
-			} else {
-				// New team document
-				code = _generateCode();
-				expiry = DateTime.now().add(const Duration(hours: 24));
-
-				await teamDocRef.set({
-					'ownerId': teamId,
-					'joinCode': code,
-					'joinCodeExpiresAt': expiry,
-					'createdAt': FieldValue.serverTimestamp(),
-					'updatedAt': FieldValue.serverTimestamp(),
-				});
-			}
-
-			final expiryStr =
-					'${expiry.year}-${expiry.month.toString().padLeft(2, '0')}-${expiry.day.toString().padLeft(2, '0')}';
-			if (!mounted) return;
-			showInvitationOverlay(context, code, expiryStr);
-		} catch (e) {
-			if (!mounted) return;
-			ScaffoldMessenger.of(context).showSnackBar(
-				SnackBar(content: Text('Error: $e')),
-			);
-		}
-	}
 
 	Future<void> _acceptInvitation(int index) async {
 		final member = _pendingMembers[index];
@@ -314,19 +237,8 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 				child: Column(
 					crossAxisAlignment: CrossAxisAlignment.start,
 					children: [
-						// Single Action Card: Generate Invitation Code
-						Row(
-							children: [
-								Expanded(
-									child: _buildActionCard(
-										icon: Icons.qr_code,
-										label: 'Generate Invitation Code',
-										onPressed: _onGenerateCode,
-									),
-								),
-							],
-						),
-						const SizedBox(height: 16),
+
+
 
 						const Text(
 							'Pending Invitations',
@@ -480,58 +392,5 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 		);
 	}
 
-	Widget _buildActionCard({
-		required IconData icon,
-		required String label,
-		required VoidCallback onPressed,
-	}) {
-		return Card(
-			elevation: 8,
-			shape: RoundedRectangleBorder(
-				borderRadius: BorderRadius.circular(16),
-			),
-			child: InkWell(
-				onTap: onPressed,
-				borderRadius: BorderRadius.circular(16),
-				child: Padding(
-					padding: const EdgeInsets.all(16.0),
-					child: Column(
-						mainAxisSize: MainAxisSize.min,
-						children: [
-							Container(
-								width: 50,
-								height: 50,
-								decoration: BoxDecoration(
-									gradient: LinearGradient(
-										colors: [Colors.teal.shade400, Colors.teal.shade700],
-										begin: Alignment.topLeft,
-										end: Alignment.bottomRight,
-									),
-									shape: BoxShape.circle,
-									boxShadow: [
-										BoxShadow(
-											color: Colors.teal.withValues(alpha: 0.3),
-											blurRadius: 10,
-											offset: const Offset(0, 3),
-										),
-									],
-								),
-								child: Icon(icon, size: 24, color: Colors.white),
-							),
-							const SizedBox(height: 10),
-							Text(
-								label,
-								textAlign: TextAlign.center,
-								style: const TextStyle(
-									fontSize: 14,
-									fontWeight: FontWeight.w600,
-									color: Colors.black87,
-								),
-							),
-						],
-					),
-				),
-			),
-		);
+	
 	}
-}

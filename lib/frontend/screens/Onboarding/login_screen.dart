@@ -7,7 +7,6 @@ import 'package:flutter_application_1/viewmodels/login_notifier.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import '../../../utils/snackbar_utils.dart';
 import 'registration_screen.dart';
@@ -97,11 +96,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           MaterialPageRoute(
             builder: (context) => const WaitingApprovalScreen(),
           ),
-        );
-      case LoginFlowNeedsReferral():
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const QRReferScreen()),
         );
       case LoginFlowRestricted(reason: final reason):
         Navigator.pushReplacement(

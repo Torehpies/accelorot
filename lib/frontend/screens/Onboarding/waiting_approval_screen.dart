@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -52,11 +52,11 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
       if (!mounted) return;
       
-      // Navigate back to QR refer screen on next frame to ensure context is valid
+      // Navigate back to team selection screen on next frame to ensure context is valid
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const QRReferScreen()),
+          MaterialPageRoute(builder: (_) => const TeamSelectionScreen()),
         );
       });
     } catch (e) {
@@ -83,6 +83,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
           : AppBar(
               title: const Text('Waiting for Approval'),
               backgroundColor: Colors.teal,
+              automaticallyImplyLeading: false,
             ),
       body: Center(
         child: Container(
@@ -121,7 +122,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
                     // Title
                     if (isDesktop) ...[
-                      Text(
+                      const Text(
                         'Waiting for Approval',
                         style: TextStyle(
                           fontSize: 28,
