@@ -6,10 +6,7 @@ import '../controllers/admin_machine_controller.dart';
 class AddMachineModal extends StatefulWidget {
   final AdminMachineController controller;
 
-  const AddMachineModal({
-    super.key,
-    required this.controller,
-  });
+  const AddMachineModal({super.key, required this.controller});
 
   @override
   State<AddMachineModal> createState() => _AddMachineModalState();
@@ -18,8 +15,9 @@ class AddMachineModal extends StatefulWidget {
 class _AddMachineModalState extends State<AddMachineModal> {
   final _nameController = TextEditingController();
   final _idController = TextEditingController();
-  String? _selectedUserId;
   bool _isSubmitting = false;
+  bool _idAlreadyExists = false;
+  bool _isCheckingId = false;
 
   @override
   void dispose() {
@@ -28,28 +26,76 @@ class _AddMachineModalState extends State<AddMachineModal> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText) {
+  InputDecoration _buildInputDecoration(
+    String labelText, {
+    bool readOnly = false,
+  }) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.grey),
-      floatingLabelStyle: const TextStyle(color: Colors.teal),
+      labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.grey),
+      floatingLabelStyle: TextStyle(
+        color: readOnly ? Colors.grey[400] : Colors.teal,
+      ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.teal, width: 2),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : Colors.teal,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.grey, width: 1),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : Colors.grey,
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.red, width: 2),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      filled: readOnly,
+      fillColor: readOnly ? Colors.grey[100] : null,
     );
   }
 
+  Future<void> _validateMachineId() async {
+    final id = _idController.text.trim();
+    if (id.isEmpty) {
+      setState(() => _idAlreadyExists = false);
+      return;
+    }
+
+    setState(() => _isCheckingId = true);
+
+    try {
+      final exists = await widget.controller.machineExists(id);
+      if (mounted) {
+        setState(() {
+          _idAlreadyExists = exists;
+          _isCheckingId = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _idAlreadyExists = false;
+          _isCheckingId = false;
+        });
+      }
+    }
+  }
+
   Future<void> _handleSubmit() async {
-    // Check authentication first
     if (!widget.controller.isAuthenticated) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('⚠️ You must be logged in to add machines'),
+          content: Text('You must be logged in to add machines'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 3),
         ),
@@ -61,22 +107,31 @@ class _AddMachineModalState extends State<AddMachineModal> {
     final id = _idController.text.trim();
 
     if (id.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Machine ID is required')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Machine ID is required')));
       return;
     }
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Machine Name is required')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Machine Name is required')));
       return;
     }
 
-    if (_selectedUserId == null) {
+    await _validateMachineId();
+    if (_idAlreadyExists) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a team member')),
+        const SnackBar(
+          content: Text(
+            'Machine ID already exists. Please use a different ID.',
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -84,11 +139,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.controller.addMachine(
-        machineName: name,
-        machineId: id,
-        userId: _selectedUserId!,
-      );
+      await widget.controller.addMachine(machineName: name, machineId: id);
 
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -100,12 +151,9 @@ class _AddMachineModalState extends State<AddMachineModal> {
       );
     } catch (e) {
       if (!mounted) return;
-      
-      // Show user-friendly error message
       final errorMessage = e.toString().contains('logged in')
           ? 'You must be logged in to add machines'
           : 'Failed to add machine: $e';
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -114,16 +162,13 @@ class _AddMachineModalState extends State<AddMachineModal> {
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isAuthenticated = widget.controller.isAuthenticated;
-    final teamMembers = widget.controller.users; // Uses team members now
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -159,7 +204,7 @@ class _AddMachineModalState extends State<AddMachineModal> {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           TextField(
             controller: _nameController,
             style: const TextStyle(color: Colors.teal),
@@ -168,42 +213,43 @@ class _AddMachineModalState extends State<AddMachineModal> {
             enabled: !_isSubmitting,
           ),
           const SizedBox(height: 16),
-          
+
           TextField(
             controller: _idController,
             style: const TextStyle(color: Colors.teal),
             cursorColor: Colors.teal,
-            decoration: _buildInputDecoration('Machine ID *'),
+            onEditingComplete: _validateMachineId,
+            decoration: _buildInputDecoration('Machine ID *').copyWith(
+              errorText: _idAlreadyExists ? 'Machine ID already exists' : null,
+              suffixIcon: _isCheckingId
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : _idAlreadyExists
+                  ? const Icon(Icons.error, color: Colors.red)
+                  : _idController.text.isNotEmpty && !_isCheckingId
+                  ? const Icon(Icons.check_circle, color: Colors.green)
+                  : null,
+            ),
             enabled: !_isSubmitting,
           ),
           const SizedBox(height: 16),
-          
-          DropdownButtonFormField<String>(
-            initialValue: _selectedUserId,
-            decoration: _buildInputDecoration('Assign to Team Member *'),
-            hint: Text(
-              teamMembers.isEmpty 
-                  ? 'No team members available' 
-                  : 'Select Team Member',
-            ),
-            items: teamMembers.map((member) {
-              return DropdownMenuItem<String>(
-                value: member['uid'],
-                child: Text(
-                  '${member['name']} (${member['role']})', // Now uses 'name' instead of 'fullName'
-                  style: const TextStyle(color: Colors.teal),
-                ),
-              );
-            }).toList(),
-            onChanged: _isSubmitting || teamMembers.isEmpty
-                ? null
-                : (value) => setState(() => _selectedUserId = value),
-            dropdownColor: Colors.white,
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-            style: const TextStyle(color: Colors.teal),
+
+          // Assigned Users - Read-only field showing "All Team Members"
+          TextField(
+            controller: TextEditingController(text: 'All Team Members'),
+            decoration: _buildInputDecoration('Assigned Users', readOnly: true),
+            enabled: false,
+            readOnly: true,
+            style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-          
+
           Row(
             children: [
               Expanded(
@@ -227,7 +273,9 @@ class _AddMachineModalState extends State<AddMachineModal> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isAuthenticated ? Colors.teal : Colors.orange,
+                    backgroundColor: isAuthenticated
+                        ? Colors.teal
+                        : Colors.orange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -240,8 +288,9 @@ class _AddMachineModalState extends State<AddMachineModal> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Row(
@@ -252,7 +301,11 @@ class _AddMachineModalState extends State<AddMachineModal> {
                                 padding: EdgeInsets.only(right: 6),
                                 child: Icon(Icons.lock_outline, size: 16),
                               ),
-                            Text(isAuthenticated ? 'Add Machine' : 'Login Required'),
+                            Text(
+                              isAuthenticated
+                                  ? 'Add Machine'
+                                  : 'Login Required',
+                            ),
                           ],
                         ),
                 ),

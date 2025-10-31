@@ -1,3 +1,5 @@
+// lib/frontend/operator/machine_management/admin_machine/widgets/admin_machine_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../controllers/admin_machine_controller.dart';
@@ -32,7 +34,6 @@ class AdminMachineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpanded = controller.isExpanded(machine.machineId);
-    final userName = controller.getUserName(machine.userId) ?? 'Unknown User';
     final dateStr = DateFormat('MMM-dd-yyyy').format(machine.dateCreated);
 
     return Column(
@@ -242,8 +243,8 @@ class AdminMachineCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 MachineDetailRow(
-                  label: 'Assigned User:',
-                  value: userName,
+                  label: 'Assigned Users:',
+                  value: 'All Team Members',
                 ),
                 const SizedBox(height: 8),
                 MachineDetailRow(

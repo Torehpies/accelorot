@@ -14,9 +14,10 @@ class OperatorMachineList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final machines = controller.filteredMachines;
+    final filteredMachines = controller.filteredMachines;
+    final displayedMachines = controller.displayedMachines;
 
-    if (machines.isEmpty) {
+    if (filteredMachines.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -32,7 +33,7 @@ class OperatorMachineList extends StatelessWidget {
             Text(
               controller.searchQuery.isNotEmpty
                   ? 'No machines found matching "${controller.searchQuery}"'
-                  : 'No machines assigned to you yet.\nContact your admin for machine assignment.',
+                  : 'No machines available in your team.\nContact your admin for machine assignment.',
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 16,
@@ -46,9 +47,37 @@ class OperatorMachineList extends StatelessWidget {
 
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: machines.length,
+      itemCount: displayedMachines.length + (controller.hasMoreToLoad ? 1 : 0),
       itemBuilder: (context, index) {
-        final machine = machines[index];
+        // Show "Load More" button at the end
+        if (index == displayedMachines.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: controller.loadMore,
+                icon: const Icon(Icons.add_circle_outline, size: 18),
+                label: Text(
+                  'Load More (${controller.remainingCount} remaining)',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final machine = displayedMachines[index];
         return OperatorMachineCard(
           machine: machine,
           controller: controller,
