@@ -6,9 +6,9 @@ import '../../../frontend/operator/activity_logs/components/alerts_section.dart'
 import '../../../frontend/operator/activity_logs/components/cycles_recom_section.dart';
 
 class WebActivityLogsScreen extends StatefulWidget {
-  final String? viewingOperatorId;
+
   
-  const WebActivityLogsScreen({super.key, this.viewingOperatorId, required bool shouldRefresh});
+  const WebActivityLogsScreen({super.key, required bool shouldRefresh});
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();

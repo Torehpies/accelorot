@@ -7,9 +7,7 @@ import 'add_waste/add_waste_product.dart';
 import 'add_waste/activity_logs_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String? viewingOperatorId;
-  
-  const HomeScreen({super.key, this.viewingOperatorId});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -45,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               ActivityLogsCard(
                 key: _activityLogsKey,
-                viewingOperatorId: widget.viewingOperatorId, // ⭐ Pass it here too!
               ),
             ],
           ),
@@ -59,13 +56,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FloatingActionButton(
             // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
             onPressed: () async {
-           
-              
               final result = await showDialog<Map<String, dynamic>>(
                 context: context,
-                builder: (context) => AddWasteProduct(
-                  viewingOperatorId: widget.viewingOperatorId, // ⭐ CRITICAL: Pass it here!
-                ),
+                builder: (context) => const AddWasteProduct(),
               );
 
               if (result != null && mounted) {

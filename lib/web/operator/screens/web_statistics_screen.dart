@@ -7,9 +7,9 @@ import '../../../frontend/operator/statistics/widgets/date_filter.dart';
 import '../../../frontend/operator/statistics/history/history.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
-  final String? viewingOperatorId;
 
-  const WebStatisticsScreen({super.key, this.viewingOperatorId});
+
+  const WebStatisticsScreen({super.key});
 
   @override
   State<WebStatisticsScreen> createState() => _WebStatisticsScreenState();
