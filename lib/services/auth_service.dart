@@ -2,8 +2,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/utils/google_auth_result.dart';
-import 'package:flutter_application_1/utils/login_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:developer';
 
@@ -32,24 +30,18 @@ class AuthService {
     }
   }
 
-  Future<GoogleAuthResult> signInWithGoogle() async {
+  Future<UserCredential> signInWithGoogle() async {
     if (kIsWeb) {
       try {
-        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        final UserCredential credential = await _auth.signInWithPopup(
-          googleProvider,
-        );
+        GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-        if (credential.user?.uid != null) {
-          return GoogleLoginSuccess(credential.user!.uid);
-        }
-        return GoogleLoginFailure('Google sign-in but user id is empty.');
+        return await _auth.signInWithPopup(googleProvider);
       } on FirebaseAuthException catch (e) {
         log('Firebase Web Sign In Error: ${e.code} - ${e.message}');
-        return GoogleLoginFailure('Google sign-in failed: $e');
+        rethrow;
       } catch (error) {
         log('Unexpected Web Sign-In Error: $error');
-        return GoogleLoginFailure('An unexpected error occured.');
+        rethrow;
       }
     } else {
       await _ensureGoogleSignInInitialized();
@@ -57,22 +49,19 @@ class AuthService {
       try {
         final GoogleSignInAccount googleUser = await _googleSignIn
             .authenticate();
-
         final GoogleSignInAuthentication googleAuth = googleUser.authentication;
         final credential = GoogleAuthProvider.credential(
           idToken: googleAuth.idToken,
         );
-        await _auth.signInWithCredential(credential);
-
-        return GoogleLoginSuccess(getCurrentUser()!.uid);
+        return await _auth.signInWithCredential(credential);
       } on GoogleSignInException catch (e) {
         log(
           'Google Sign In error: code: ${e.code.name} description:${e.description}',
         );
-        return GoogleLoginFailure('Google sign-in error occured.');
+        rethrow;
       } catch (error) {
         log('Unexpected Google Sign-In error: $error');
-        return GoogleLoginFailure('An unexpected error occured.');
+        rethrow;
       }
     }
   }
@@ -152,7 +141,7 @@ class AuthService {
     return user?.emailVerified ?? false;
   }
 
-  Future<LoginResult> signInUser({
+  Future<Map<String, dynamic>> signInUser({
     required String email,
     required String password,
   }) async {
@@ -161,15 +150,17 @@ class AuthService {
         email: email,
         password: password,
       );
-      User? user = result.user;
 
+      User? user = result.user;
       if (user != null) {
         if (!user.emailVerified) {
           await _auth.signOut();
-          return LoginFailure(
-            'Email not verified. Please verify your email.',
-            needsVerification: true,
-          );
+          return {
+            'success': false,
+            'message': 'Email not verified. Please verify your email.',
+            'needsVerification': true,
+            'uid': user.uid,
+          };
         }
         // Get user data from Firestore
         DocumentSnapshot userDoc = await _firestore
@@ -178,12 +169,17 @@ class AuthService {
             .get();
 
         if (userDoc.exists) {
-          return LoginSuccess(user.displayName, user.uid);
+          return {
+            'success': true,
+            'message': 'Sign in successful',
+            'uid': user.uid,
+            'userData': userDoc.data(),
+          };
         } else {
-          return LoginFailure('User data not found.');
+          return {'success': false, 'message': 'User data not found'};
         }
       } else {
-        return LoginFailure('Failed to sign in.');
+        return {'success': false, 'message': 'Failed to sign in'};
       }
     } on FirebaseAuthException catch (e) {
       String message;
@@ -206,9 +202,12 @@ class AuthService {
         default:
           message = e.message ?? 'An error occurred during sign in.';
       }
-      return LoginFailure(message);
+      return {'success': false, 'message': message};
     } catch (e) {
-      return LoginFailure('An unexpected error occurred: ${e.toString()}');
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: ${e.toString()}',
+      };
     }
   }
 

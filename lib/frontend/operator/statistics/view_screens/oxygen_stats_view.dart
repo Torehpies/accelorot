@@ -21,10 +21,10 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
   @override
   void initState() {
     super.initState();
-    _loadOxygenData();
+    _loadData();
   }
 
-  Future<void> _loadOxygenData() async {
+  Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -38,10 +38,7 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
         _currentOxygen = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        // ✅ No data is not treated as an error anymore — keep showing the chart
-        _hourlyReadings = [];
-        _currentOxygen = 0;
-        _lastUpdated = null;
+        _errorMessage = 'No oxygen data found for machine $_machineId';
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -59,7 +56,6 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
       );
     }
 
-    // ❌ Only show full error view for actual exceptions
     if (_errorMessage != null) {
       return SizedBox(
         height: 200,
@@ -76,7 +72,7 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: _loadOxygenData,
+                onPressed: _loadData,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
               ),
@@ -86,8 +82,6 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
       );
     }
 
-    // ✅ Always show the OxygenStatisticCard
-    // It will handle “No data” display inside itself
     return SizedBox(
       height: 300,
       child: OxygenStatisticCard(
