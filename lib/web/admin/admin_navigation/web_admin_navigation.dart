@@ -39,7 +39,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
         onManageOperators: () => setState(() => _selectedIndex = 1),
         onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
-      const WebOperatorManagement(),
+      const OperatorManagementScreen(),
 
       const WebMachineManagement(),
       const WebProfileScreen(),
