@@ -1,8 +1,10 @@
 // lib/frontend/operator/web/web_operator_machine_screen.dart
 import 'package:flutter/material.dart';
 import '../../../frontend/operator/machine_management/operator_machine/controllers/operator_machine_controller.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
 import '../../../frontend/operator/machine_management/widgets/search_bar_widget.dart';
+import '../../operator/widgets/summary_card_widget.dart';
+import '../../operator/widgets/machine_card_widget.dart';
+import '../../operator/widgets/machine_list_tile_widget.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
   final String? viewingOperatorId;
@@ -15,27 +17,33 @@ class WebOperatorMachineScreen extends StatefulWidget {
 }
 
 class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
-  late final OperatorMachineController _controller;
-  final FocusNode _searchFocusNode = FocusNode();
-  String _viewMode = 'grid'; // 'grid' or 'list'
+  late final OperatorMachineController controller;
+  final FocusNode searchFocusNode = FocusNode();
+  String viewMode = 'grid'; // 'grid' or 'list'
 
   @override
   void initState() {
     super.initState();
-    _controller =
+    controller =
         OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
-    _controller.initialize();
+    controller.initialize();
   }
 
   @override
   void dispose() {
-    _searchFocusNode.dispose();
-    _controller.dispose();
+    searchFocusNode.dispose();
+    controller.dispose();
     super.dispose();
   }
 
-  Future<void> _handleRefresh() async {
-    await _controller.refresh();
+  Future<void> handleRefresh() async {
+    await controller.refresh();
+  }
+
+  void handleMachineTap(String machineName) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Opening $machineName details')),
+    );
   }
 
   @override
@@ -48,34 +56,39 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
-          'My Machines',
+          'My Machine',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.teal,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
         elevation: 2,
-        centerTitle: false,
         actions: [
-          // View Mode Toggle
           IconButton(
-            icon: Icon(_viewMode == 'grid' ? Icons.list : Icons.grid_view),
-            tooltip: _viewMode == 'grid' ? 'List View' : 'Grid View',
+            icon: Icon(viewMode == 'grid' ? Icons.list : Icons.grid_view),
+            tooltip: viewMode == 'grid' ? 'List View' : 'Grid View',
             onPressed: () {
               setState(() {
-                _viewMode = _viewMode == 'grid' ? 'list' : 'grid';
+                viewMode = viewMode == 'grid' ? 'list' : 'grid';
               });
             },
           ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _handleRefresh,
+            onPressed: handleRefresh,
             tooltip: 'Refresh',
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: (context, _) {
           return SafeArea(
             child: Padding(
@@ -86,87 +99,17 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Summary Cards Row - Fixed at top
-                      isWideScreen
-                          ? Row(
-                              children: [
-                                Expanded(
-                                  child: _buildSummaryCard(
-                                    'Active Machines',
-                                    _controller.activeMachinesCount.toString(),
-                                    Icons.check_circle,
-                                    Colors.green,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildSummaryCard(
-                                    'Disabled Machines',
-                                    _controller.archivedMachinesCount
-                                        .toString(),
-                                    Icons.cancel,
-                                    Colors.orange,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildSummaryCard(
-                                    'Total Machines',
-                                    (_controller.activeMachinesCount +
-                                            _controller.archivedMachinesCount)
-                                        .toString(),
-                                    Icons.devices,
-                                    Colors.blue,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                _buildSummaryCard(
-                                  'Active Machines',
-                                  _controller.activeMachinesCount.toString(),
-                                  Icons.check_circle,
-                                  Colors.green,
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildSummaryCard(
-                                        'Disabled',
-                                        _controller.archivedMachinesCount
-                                            .toString(),
-                                        Icons.cancel,
-                                        Colors.orange,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: _buildSummaryCard(
-                                        'Total',
-                                        (_controller.activeMachinesCount +
-                                                _controller
-                                                    .archivedMachinesCount)
-                                            .toString(),
-                                        Icons.devices,
-                                        Colors.blue,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                      _buildSummaryCards(isWideScreen),
                       const SizedBox(height: 24),
-
-                      // Main Content Card - Expanded to fill remaining space
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.grey[300]!, width: 1.0),
+                              color: Colors.grey[300]!,
+                              width: 1.0,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(alpha: 0.08),
@@ -177,7 +120,6 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                           ),
                           child: Column(
                             children: [
-                              // Header with Search - Fixed
                               Padding(
                                 padding: const EdgeInsets.all(24),
                                 child: Column(
@@ -203,10 +145,11 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                             border: Border.all(
-                                                color: Colors.teal.shade200),
+                                              color: Colors.teal.shade200,
+                                            ),
                                           ),
                                           child: Text(
-                                            '${_controller.filteredMachines.length} machine(s)',
+                                            '${controller.filteredMachines.length} machine(s)',
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
@@ -218,16 +161,13 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     SearchBarWidget(
-                                      onSearchChanged:
-                                          _controller.setSearchQuery,
-                                      onClear: _controller.clearSearch,
-                                      focusNode: _searchFocusNode,
+                                      onSearchChanged: controller.setSearchQuery,
+                                      onClear: controller.clearSearch,
+                                      focusNode: searchFocusNode,
                                     ),
                                   ],
                                 ),
                               ),
-
-                              // Machine Content - Expanded to scroll within container
                               Expanded(
                                 child: _buildContent(),
                               ),
@@ -246,78 +186,82 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     );
   }
 
-  Widget _buildSummaryCard(
-      String title, String value, IconData icon, MaterialColor color) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.shade50, color.shade100],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.shade700,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: color.shade900,
-                  ),
+  Widget _buildSummaryCards(bool isWideScreen) {
+    return isWideScreen
+        ? Row(
+            children: [
+              Expanded(
+                child: SummaryCardWidget(
+                  title: 'Active Machines',
+                  value: controller.activeMachinesCount.toString(),
+                  icon: Icons.check_circle,
+                  color: Colors.green,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: color.shade700,
-                    fontWeight: FontWeight.w500,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: SummaryCardWidget(
+                  title: 'Disabled Machines',
+                  value: controller.archivedMachinesCount.toString(),
+                  icon: Icons.cancel,
+                  color: Colors.orange,
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: SummaryCardWidget(
+                  title: 'Total Machines',
+                  value: (controller.activeMachinesCount +
+                          controller.archivedMachinesCount)
+                      .toString(),
+                  icon: Icons.devices,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          )
+        : Column(
+            children: [
+              SummaryCardWidget(
+                title: 'Active Machines',
+                value: controller.activeMachinesCount.toString(),
+                icon: Icons.check_circle,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SummaryCardWidget(
+                      title: 'Disabled',
+                      value: controller.archivedMachinesCount.toString(),
+                      icon: Icons.cancel,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SummaryCardWidget(
+                      title: 'Total',
+                      value: (controller.activeMachinesCount +
+                              controller.archivedMachinesCount)
+                          .toString(),
+                      icon: Icons.devices,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
   }
 
   Widget _buildContent() {
-    // Loading State
-    if (_controller.isLoading) {
+    if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error State
-    if (_controller.errorMessage != null) {
+    if (controller.errorMessage != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -336,15 +280,15 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                _controller.errorMessage!,
+                controller.errorMessage!,
                 style: TextStyle(color: Colors.red.shade600, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
-                  _controller.clearError();
-                  _controller.initialize();
+                  controller.clearError();
+                  controller.initialize();
                 },
                 icon: const Icon(Icons.refresh, size: 20),
                 label: const Text('Retry'),
@@ -363,8 +307,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       );
     }
 
-    // Empty State
-    if (_controller.filteredMachines.isEmpty) {
+    if (controller.filteredMachines.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -387,7 +330,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                _controller.searchQuery.isEmpty
+                controller.searchQuery.isEmpty
                     ? 'You don\'t have any machines yet.'
                     : 'No machines match your search.',
                 style: TextStyle(
@@ -402,8 +345,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
       );
     }
 
-    // Content - Grid or List View
-    return _viewMode == 'grid' ? _buildGridView() : _buildListView();
+    return viewMode == 'grid' ? _buildGridView() : _buildListView();
   }
 
   Widget _buildGridView() {
@@ -422,10 +364,13 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.3,
       ),
-      itemCount: _controller.filteredMachines.length,
+      itemCount: controller.filteredMachines.length,
       itemBuilder: (context, index) {
-        final machine = _controller.filteredMachines[index];
-        return _buildMachineCard(machine);
+        final machine = controller.filteredMachines[index];
+        return MachineCardWidget(
+          machine: machine,
+          onTap: () => handleMachineTap(machine.machineName),
+        );
       },
     );
   }
@@ -433,231 +378,15 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   Widget _buildListView() {
     return ListView.separated(
       padding: const EdgeInsets.all(24),
-      itemCount: _controller.filteredMachines.length,
+      itemCount: controller.filteredMachines.length,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final machine = _controller.filteredMachines[index];
-        return _buildMachineListTile(machine);
+        final machine = controller.filteredMachines[index];
+        return MachineListTileWidget(
+          machine: machine,
+          onTap: () => handleMachineTap(machine.machineName),
+        );
       },
-    );
-  }
-
-  Widget _buildMachineCard(MachineModel machine) {
-    final isActive = !machine.isArchived;
-    final machineId = machine.machineId;
-    final machineName = machine.machineName;
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isActive ? Colors.teal.shade200 : Colors.grey.shade300,
-          width: 2,
-        ),
-      ),
-      child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Opening $machineName details')),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? Colors.teal.shade100
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.precision_manufacturing,
-                      color: isActive
-                          ? Colors.teal.shade700
-                          : Colors.grey.shade600,
-                      size: 28,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive ? Colors.green : Colors.orange,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isActive ? Icons.check_circle : Icons.cancel,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isActive ? 'Active' : 'Disabled',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                machineName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'ID: $machineId',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Viewing $machineName details'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.info_outline, size: 16),
-                      label: const Text('Details'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.teal,
-                        side: const BorderSide(color: Colors.teal),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMachineListTile(MachineModel machine) {
-    final isActive = !machine.isArchived;
-    final machineId = machine.machineId;
-    final machineName = machine.machineName;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isActive ? Colors.teal.shade100 : Colors.grey.shade200,
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 12,
-        ),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: isActive ? Colors.teal.shade100 : Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            Icons.precision_manufacturing,
-            color: isActive ? Colors.teal.shade700 : Colors.grey.shade600,
-            size: 24,
-          ),
-        ),
-        title: Text(
-          machineName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            'ID: $machineId',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-            ),
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: isActive ? Colors.green : Colors.orange,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isActive ? Icons.check_circle : Icons.cancel,
-                    size: 14,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    isActive ? 'Active' : 'Disabled',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Icon(Icons.chevron_right, color: Colors.teal),
-          ],
-        ),
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Opening $machineName details')),
-          );
-        },
-      ),
     );
   }
 }

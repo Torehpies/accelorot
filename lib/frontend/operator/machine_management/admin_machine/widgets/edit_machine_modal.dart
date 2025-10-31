@@ -20,8 +20,7 @@ class EditMachineModal extends StatefulWidget {
 
 class _EditMachineModalState extends State<EditMachineModal> {
   late final TextEditingController _nameController;
-  late final TextEditingController _idController; // Read-only
-  late String _selectedUserId;
+  late final TextEditingController _idController;
   bool _isSubmitting = false;
 
   @override
@@ -29,7 +28,6 @@ class _EditMachineModalState extends State<EditMachineModal> {
     super.initState();
     _nameController = TextEditingController(text: widget.machine.machineName);
     _idController = TextEditingController(text: widget.machine.machineId);
-    _selectedUserId = widget.machine.userId;
   }
 
   @override
@@ -86,8 +84,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
     }
 
     // Check if anything changed
-    if (name == widget.machine.machineName &&
-        _selectedUserId == widget.machine.userId) {
+    if (name == widget.machine.machineName) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No changes detected')),
       );
@@ -100,7 +97,6 @@ class _EditMachineModalState extends State<EditMachineModal> {
       await widget.controller.updateMachine(
         machineId: widget.machine.machineId,
         machineName: name,
-        userId: _selectedUserId,
       );
 
       if (!mounted) return;
@@ -192,29 +188,13 @@ class _EditMachineModalState extends State<EditMachineModal> {
           ),
           const SizedBox(height: 16),
           
-          // Assign to User (Editable)
-          DropdownButtonFormField<String>(
-            initialValue: _selectedUserId,
-            decoration: _buildInputDecoration('Assign to Team Member *'),
-            items: widget.controller.users.map((user) {
-              return DropdownMenuItem<String>(
-                value: user['uid'],
-                child: Text(
-                  '${user['name']} (${user['role']})',
-                  style: const TextStyle(color: Colors.teal),
-                ),
-              );
-            }).toList(),
-            onChanged: _isSubmitting
-                ? null
-                : (value) {
-                    if (value != null) {
-                      setState(() => _selectedUserId = value);
-                    }
-                  },
-            dropdownColor: Colors.white,
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-            style: const TextStyle(color: Colors.teal),
+          // Assigned Users - Read-only field showing "All Team Members"
+          TextField(
+            controller: TextEditingController(text: 'All Team Members'),
+            decoration: _buildInputDecoration('Assigned Users', readOnly: true),
+            enabled: false,
+            readOnly: true,
+            style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           

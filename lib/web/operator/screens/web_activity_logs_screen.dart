@@ -112,27 +112,24 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Activity Logs",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.teal.shade700,
-        foregroundColor: Colors.white,
-        elevation: 2,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
-            onPressed: () {
-              setState(() {}); // Trigger rebuild
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
+   appBar: AppBar(
+  title: const Text(
+    'Activity Logs',
+    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  ),
+  automaticallyImplyLeading: false,
+  centerTitle: false,
+  flexibleSpace: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.teal.shade700, Colors.teal.shade900],
       ),
+    ),
+  ),
+  foregroundColor: Colors.white,
+  elevation: 0,
+  actions: [], // <-- Now empty; notification icon removed
+),
       body: SafeArea(
         child: Row(
           children: [
