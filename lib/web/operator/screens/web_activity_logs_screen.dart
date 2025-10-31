@@ -7,6 +7,7 @@ import '../../../frontend/operator/activity_logs/web/web_cycles_recom_section.da
 
 // ===== Web Detail Panel Component (Embedded) =====
 class WebDetailPanel extends StatelessWidget {
+  
   final Widget child;
   final String title;
   final VoidCallback onClose;
@@ -75,9 +76,10 @@ class WebDetailPanel extends StatelessWidget {
 
 // ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
+  final bool shouldRefresh;
 
   
-  const WebActivityLogsScreen({super.key, required bool shouldRefresh});
+  const WebActivityLogsScreen({super.key, this.shouldRefresh = false});
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();

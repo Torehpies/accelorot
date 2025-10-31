@@ -21,7 +21,13 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   final FocusNode searchFocusNode = FocusNode();
   String viewMode = 'grid'; // 'grid' or 'list'
 
-
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        OperatorMachineController();
+    controller.initialize();
+  }
 
   @override
   void dispose() {
