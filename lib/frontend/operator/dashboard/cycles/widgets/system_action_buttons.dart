@@ -47,7 +47,7 @@ class SystemActionButtons extends StatelessWidget {
         ),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF14B8A6),
+        backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

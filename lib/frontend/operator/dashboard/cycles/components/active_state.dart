@@ -134,34 +134,22 @@ class _ActiveStateState extends State<ActiveState> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Batch info
-        Row(
-          children: [
-            Icon(Icons.science_outlined, size: 16, color: Colors.grey[600]),
-            const SizedBox(width: 6),
-            Text(
-              'Batch: ${widget.batchNumber}',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
+Widget build(BuildContext context) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // Batch info
+      Padding(
+        padding: const EdgeInsets.only(right: 40.0, left: 5.0),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             InfoItem(label: 'Uptime', value: _formatUptime()),
             InfoItem(label: 'Last Cycle', value: _getLastCycleText()),
           ],
         ),
-        const SizedBox(height: 20),
+      ),
+      const SizedBox(height: 20),
 
         // Drum Rotation Settings Header
         const Text(
