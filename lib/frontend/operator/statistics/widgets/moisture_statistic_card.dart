@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -17,20 +15,17 @@ class MoistureStatisticCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (hourlyReadings.isEmpty) {
-      return _buildEmptyCard(context);
-    }
-
     final quality = _getQuality(currentMoisture);
     final color = _getColorForQuality(quality);
     final now = DateTime.now();
-    final dataLength = hourlyReadings.length;
+    final dataLength = hourlyReadings.isEmpty ? 8 : hourlyReadings.length;
 
+    // Use dummy data when empty
     final moistureData = List.generate(dataLength, (i) {
       final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
       return {
         'x': '${hour.toString().padLeft(2, '0')}:00',
-        'y': hourlyReadings[i],
+        'y': hourlyReadings.isNotEmpty ? hourlyReadings[i] : 0.0,
       };
     });
 
@@ -53,7 +48,7 @@ class MoistureStatisticCard extends StatelessWidget {
         border: Border.all(color: Colors.blue.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withValues(alpha:0.1),
+            color: Colors.blue.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -92,6 +87,23 @@ class MoistureStatisticCard extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
+
+          // ✅ Message when no data (like Temperature)
+          if (hourlyReadings.isEmpty) ...[
+            Center(
+              child: Text(
+                '⚠️ No moisture data available',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+
           SizedBox(
             height: 90,
             width: double.infinity,
@@ -171,9 +183,10 @@ class MoistureStatisticCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
         Text(
           'Quality: $quality',
@@ -184,35 +197,9 @@ class MoistureStatisticCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Center(
-        child:
-            Text('No moisture data', style: TextStyle(color: Colors.grey[600])),
-      ),
-    );
-  }
-
   String _getQuality(double moisture) {
-    if (moisture >= 40 && moisture <= 60) {
-      return 'Excellent';
-    }
-    if ((moisture >= 30 && moisture < 40) ||
-        (moisture > 60 && moisture <= 70)) {
+    if (moisture >= 40 && moisture <= 60) return 'Excellent';
+    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
       return 'Good';
     }
     return 'Critical';
