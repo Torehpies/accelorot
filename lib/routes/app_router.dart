@@ -7,15 +7,12 @@ import 'package:flutter_application_1/frontend/operator/statistics/statistics_sc
 import 'package:flutter_application_1/frontend/screens/Onboarding/email_verify.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/registration_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart'; // Corrected import reference
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_management_screen.dart';
-import 'package:flutter_application_1/providers/auth_providers.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/routes/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/admin_web_shell.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
@@ -23,8 +20,7 @@ import 'package:flutter_application_1/routes/mobile_shell.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/routes/web_shell.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'package:flutter_application_1/viewmodels/auth_state_notifier.dart';
-import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
+import 'package:flutter_application_1/screens/registration/registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,16 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePath.signup.path,
         name: RoutePath.signup.name,
-        pageBuilder: (context, state) {
-          final isWeb = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
-          return NoTransitionPage(
-            child: isWeb
-                ? const WebRegistrationScreen()
-                : const RegistrationScreen(),
-            key: state.pageKey,
-          );
-        },
-      ),
+        builder: (context, state) => const RegistrationScreen(),
+			),
       GoRoute(
         path: RoutePath.forgotPassword.path,
         name: RoutePath.forgotPassword.name,

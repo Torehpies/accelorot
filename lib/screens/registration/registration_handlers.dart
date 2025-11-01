@@ -1,0 +1,305 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
+import 'package:flutter_application_1/frontend/components/or_divider.dart';
+import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+const double kMaxFormWidth = 450.0;
+
+/// Simple class to bundle all the methods/controllers/state needed by the UI.
+class RegistrationHandlers {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController firstNameController;
+  final TextEditingController lastNameController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final bool isLoading;
+  final bool isGoogleLoading;
+  final bool obscurePassword;
+  final bool obscureConfirmPassword;
+  final VoidCallback togglePasswordVisibility;
+  final VoidCallback toggleConfirmPasswordVisibility;
+  final VoidCallback onSubmitRegistration;
+  final VoidCallback onGoogleSignIn;
+  final VoidCallback onNavigateToLogin;
+
+  RegistrationHandlers({
+    required this.formKey,
+    required this.firstNameController,
+    required this.lastNameController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.isLoading,
+    required this.isGoogleLoading,
+    required this.obscurePassword,
+    required this.obscureConfirmPassword,
+    required this.togglePasswordVisibility,
+    required this.toggleConfirmPasswordVisibility,
+    required this.onSubmitRegistration,
+    required this.onGoogleSignIn,
+    required this.onNavigateToLogin,
+  });
+  
+  // --- Validators ---
+  String? nameValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    return null;
+  }
+
+  String? emailValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? passwordValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? confirmPasswordValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    // Check against the current state's password value, not the controller.
+    // However, since the controller updates the state, checking the controller is fine
+    // as long as the check happens on form submit.
+    if (value != passwordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+}
+
+// --- Shared Form UI Component ---
+
+class RegistrationFormContent extends ConsumerWidget {
+  final RegistrationHandlers handlers;
+  final bool isDesktop;
+
+  const RegistrationFormContent({
+    super.key,
+    required this.handlers,
+    this.isDesktop = false,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    // Common Text Field Decoration style (based on your original screen)
+    InputDecoration inputDecoration(String labelText, {Widget? suffixIcon, Icon? prefixIcon}) => InputDecoration(
+          labelText: labelText,
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF2B7326)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+          ),
+        );
+
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(child: _buildLogo()),
+        const SizedBox(height: 16),
+        Center(child: _buildTitle(theme)),
+        SizedBox(height: isDesktop ? 40 : 32),
+
+        Form(
+          key: handlers.formKey,
+          child: Column(
+            children: [
+              // First Name and Last Name Row
+              Row(
+                children: [
+                  // First Name Field
+                  Expanded(
+                    child: TextFormField(
+                      controller: handlers.firstNameController,
+                      textInputAction: TextInputAction.next,
+                      decoration: inputDecoration('First Name'),
+                      validator: handlers.nameValidator,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Last Name Field
+                  Expanded(
+                    child: TextFormField(
+                      controller: handlers.lastNameController,
+                      textInputAction: TextInputAction.next,
+                      decoration: inputDecoration('Last Name'),
+                      validator: handlers.nameValidator,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Email Field
+              TextFormField(
+                controller: handlers.emailController,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                decoration: inputDecoration(
+                  'Email Address',
+                  prefixIcon: const Icon(Icons.email_outlined)
+                ),
+                validator: handlers.emailValidator,
+              ),
+              const SizedBox(height: 16),
+
+              // Password Field
+              TextFormField(
+                controller: handlers.passwordController,
+                obscureText: handlers.obscurePassword,
+                textInputAction: TextInputAction.next,
+                decoration: inputDecoration(
+                  'Password',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      handlers.obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.grey,
+                    ),
+                    onPressed: handlers.togglePasswordVisibility,
+                  ),
+                ),
+                validator: handlers.passwordValidator,
+              ),
+              const SizedBox(height: 16),
+
+              // Confirm Password Field
+              TextFormField(
+                controller: handlers.confirmPasswordController,
+                obscureText: handlers.obscureConfirmPassword,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) => handlers.onSubmitRegistration(),
+                decoration: inputDecoration(
+                  'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock_open_outlined),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      handlers.obscureConfirmPassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: Colors.grey,
+                    ),
+                    onPressed: handlers.toggleConfirmPasswordVisibility,
+                  ),
+                ),
+                validator: handlers.confirmPasswordValidator,
+              ),
+              const SizedBox(height: 24),
+
+              // Register Button
+              SizedBox(
+                width: double.infinity,
+                child: PrimaryButton(
+                  text: 'Register',
+                  isLoading: handlers.isLoading,
+                  onPressed: handlers.onSubmitRegistration,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              const OrDivider(),
+              const SizedBox(height: 20),
+
+              // Google Sign-In Button
+              GoogleSignInButton(
+                isLoading: handlers.isGoogleLoading,
+                onPressed: handlers.onGoogleSignIn,
+              ),
+
+              // Sign In Link
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account? "),
+                  TextButton(
+                    onPressed: handlers.onNavigateToLogin,
+                    child: const Text(
+                      "Sign in",
+                      style: TextStyle(
+                        color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Helper Widgets (Copied from your original login file) ---
+  Widget _buildLogo() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.teal.shade400, Colors.teal.shade700],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.teal.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
+    );
+  }
+
+  Widget _buildTitle(ThemeData theme) {
+    return Column(
+      children: [
+        Text(
+          'Create Account',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.teal,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Join us to get started',
+          style: TextStyle(fontSize: 16, color: theme.hintColor),
+        ),
+      ],
+    );
+  }
+}

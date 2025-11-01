@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
+import 'package:flutter_application_1/routes/router_notifier.dart';
 
 import '../utils/google_auth_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -66,12 +67,11 @@ class LoginNotifier extends _$LoginNotifier {
 
   Future<void> signInWithEmail() async {
     final authRepo = ref.read(authRepositoryProvider);
-
-    /// start loading
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       await authRepo.signInWithEmail(state.email, state.password);
+			ref.read(authListenableProvider).refreshUser();
       // stop loading on success
       state = state.copyWith(isLoading: false, errorMessage: null);
     } on FirebaseAuthException catch (e) {

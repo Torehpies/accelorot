@@ -402,4 +402,15 @@ class AuthService {
       log('Failed to initialize Google Sign-In: $e');
     }
   }
+
+	Future<void> refreshUser() async {
+		try {
+			User? user = _auth.currentUser;
+			if (user != null) {
+			await user.reload();
+			} 
+		} catch (e) {
+			print('Error refreshing user: $e');
+		}
+	}
 }

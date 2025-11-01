@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
@@ -12,19 +13,91 @@ part 'auth_repository.g.dart';
 FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
 
 @Riverpod(keepAlive: true)
+FirebaseFirestore firebaseFirestore(Ref ref) => FirebaseFirestore.instance;
+
+@Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
-  return AuthRepository(ref.watch(firebaseAuthProvider), GoogleSignIn.instance);
+  return AuthRepository(
+    ref.watch(firebaseAuthProvider),
+    ref.watch(firebaseFirestoreProvider),
+    GoogleSignIn.instance,
+  );
 }
 
 class AuthRepository {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
+  final FirebaseFirestore _firestore;
   bool _isGoogleSignInInitialized = false;
 
-  AuthRepository(this._auth, this._googleSignIn);
+  AuthRepository(this._auth, this._firestore, this._googleSignIn);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
-	User? get currentUser => _auth.currentUser;
+  User? get currentUser => _auth.currentUser;
+
+  Future<Map<String, dynamic>> registerUser({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String role,
+  }) async {
+    try {
+      // Create user with Firebase Auth
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      User? user = result.user;
+      if (user != null) {
+        await user.sendEmailVerification();
+        // Save additional user data to Firestore
+        await _firestore.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'email': email,
+          // Store names separately (no concatenation)
+          // Note: keys are intentionally cased to match requested schema
+          'firstname': firstName,
+          'lastname': lastName,
+          'role': role,
+          'createdAt': FieldValue.serverTimestamp(),
+          'isActive': true,
+          'emailVerified': false,
+        });
+
+        return {
+          'success': true,
+          'message': 'User registered successfully',
+          'uid': user.uid,
+          'needsVerification': true,
+        };
+      } else {
+        return {'success': false, 'message': 'Failed to create user account'};
+      }
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          message = 'The account already exists for that email.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is not valid.';
+          break;
+        default:
+          message = e.message ?? 'An error occurred during registration.';
+      }
+      return {'success': false, 'message': message};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'An unexpected error occurred: ${e.toString()}',
+      };
+    }
+  }
 
   Future<User?> signInWithEmail(String email, String password) async {
     try {
@@ -32,6 +105,7 @@ class AuthRepository {
         email: email,
         password: password,
       );
+      //await ref.read(authListenableProvider).refreshUser();
       return credential.user;
     } on FirebaseAuthException {
       rethrow;
