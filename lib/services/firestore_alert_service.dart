@@ -59,11 +59,9 @@ class FirestoreAlertService {
           'readings': data['readings'] ?? {},
         };
       } else {
-        print('⚠️ Alert not found: $alertId');
         return null;
       }
     } catch (e) {
-      print('❌ Error fetching alert $alertId: $e');
       return null;
     }
   }
