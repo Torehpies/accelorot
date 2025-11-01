@@ -1,4 +1,3 @@
-// lib/components/environmental_sensors_card.dart
 import 'package:flutter/material.dart';
 
 class EnvironmentalSensorsCard extends StatelessWidget {
@@ -63,9 +62,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Temperature',
-                        value: temperature != null
-                            ? '${temperature!.toStringAsFixed(1)}°C'
-                            : '--°C',
+                        value: temperature?.toStringAsFixed(0),
                         change: temperatureChange,
                         status: tempStatus.$1,
                         color: tempStatus.$2,
@@ -76,9 +73,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Moisture',
-                        value: moisture != null
-                            ? '${moisture!.toStringAsFixed(1)} %'
-                            : '-- %',
+                        value: moisture?.toStringAsFixed(0),
                         change: moistureChange,
                         status: moistStatus.$1,
                         color: moistStatus.$2,
@@ -89,9 +84,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: _buildSensorTile(
                         title: 'Air Quality',
-                        value: oxygen != null
-                            ? oxygen!.toStringAsFixed(0)
-                            : '--',
+                        value: oxygen?.toStringAsFixed(0),
                         change: oxygenChange,
                         status: oxyStatus.$1,
                         color: oxyStatus.$2,
@@ -111,12 +104,14 @@ class EnvironmentalSensorsCard extends StatelessWidget {
   /// Builds an individual sensor display tile
   Widget _buildSensorTile({
     required String title,
-    required String value,
+    required String? value,
     required String change,
     required String status,
     required Color color,
     required String ideal,
   }) {
+    final hasData = value != null;
+
     return Container(
       height: 110,
       decoration: BoxDecoration(
@@ -124,53 +119,56 @@ class EnvironmentalSensorsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Title
-          Text(
-            title,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          // Value
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          // Ideal range
-          Text(
-            'Ideal: $ideal',
-            style: const TextStyle(fontSize: 9, color: Colors.grey),
-          ),
-
-          // Status + change
-          Row(
-            children: [
-              Icon(Icons.circle, size: 8, color: color),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  '$status • $change',
-                  style: const TextStyle(fontSize: 8, color: Colors.grey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+      child: hasData
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  'Ideal: $ideal',
+                  style: const TextStyle(fontSize: 9, color: Colors.grey),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 8, color: color),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '$status • $change',
+                        style: const TextStyle(
+                            fontSize: 8, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : // 🟡 Centered No Data Message
+          Center(
+              child: Text(
+                '⚠️ No $title data available',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
     );
   }
 

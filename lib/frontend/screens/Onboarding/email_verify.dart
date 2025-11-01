@@ -6,7 +6,13 @@ import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
-import 'package:go_router/go_router.dart';
+// TODO
+//import 'package:go_router/go_router.dart';
+import 'login_screen.dart';
+import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EmailVerifyScreen extends ConsumerStatefulWidget {
   final String email;
@@ -19,6 +25,7 @@ class EmailVerifyScreen extends ConsumerStatefulWidget {
 
 class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
   final AuthService _authService = AuthService();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isResendingEmail = false;
   bool _canResendEmail = true;
   int _resendCooldown = 0;
@@ -40,8 +47,115 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
     super.dispose();
   }
 
-  void _onVerificationSuccess() {
-    _verificationTimer?.cancel();
+  //TODO refactor email_verify
+  //  void _onVerificationSuccess() {
+  //    _verificationTimer?.cancel();
+  void _startVerificationCheck() {
+    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
+      timer,
+    ) async {
+      bool isVerified = await _authService.isEmailVerified();
+      if (isVerified && mounted) {
+        timer.cancel();
+        final user = _authService.getCurrentUser();
+        if (user != null) {
+          await _authService.updateEmailVerificationStatus(user.uid, true);
+          await _handlePostVerification(user.uid);
+        }
+      }
+    });
+  }
+
+  Future<void> _handlePostVerification(String userId) async {
+    if (!mounted) return;
+    showSnackbar(context, 'Email verified successfully!');
+
+    // Check if user selected a team during registration
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final pendingTeamSelection =
+        userDoc.data()?['pendingTeamSelection'] as String?;
+
+    if (pendingTeamSelection != null) {
+      // Send team join request
+      await _sendTeamJoinRequest(userId, pendingTeamSelection);
+
+      // Clear the pending team selection
+      await _firestore.collection('users').doc(userId).update({
+        'pendingTeamSelection': FieldValue.delete(),
+      });
+
+      if (!mounted) return;
+      // Navigate to waiting approval screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+      );
+    } else {
+      // Check regular team status
+      final status = await _authService.getUserTeamStatus(userId);
+      final teamId = status['teamId'];
+      final pendingTeamId = status['pendingTeamId'];
+
+      if (!mounted) return;
+
+      if (teamId != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+        );
+      } else if (pendingTeamId != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const WaitingApprovalScreen(),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const TeamSelectionScreen()),
+        );
+      }
+    }
+  }
+
+  Future<void> _sendTeamJoinRequest(String userId, String teamId) async {
+    try {
+      final batch = _firestore.batch();
+
+      // Add to pending_members subcollection
+      final pendingRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(userId);
+
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final email = userDoc.data()?['email'] as String? ?? '';
+
+      batch.set(pendingRef, {
+        'requestorId': userId,
+        'requestorEmail': email,
+        'requestedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Set pendingTeamId in user document
+      final userRef = _firestore.collection('users').doc(userId);
+      batch.update(userRef, {'pendingTeamId': teamId});
+
+      await batch.commit();
+    } catch (e) {
+      if (mounted) {
+        showSnackbar(context, 'Failed to send team request', isError: true);
+      }
+    }
+  }
+
+  Future<void> _resendVerifyEmail() async {
+    if (!_canResendEmail) return;
+
+    setState(() {
+      _isResendingEmail = true;
+      _canResendEmail = false;
+      _resendCooldown = 60;
+    });
+    final result = await _authService.sendEmailVerify();
 
     if (!mounted) return;
 
@@ -134,39 +248,55 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
     }
   }
 
-  void _startVerificationCheck() {
-    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
-      timer,
-    ) async {
-      final user = _authService.currentUser;
-      if (user != null) {
-        // Reload the user to get the latest email verification status from Firebase
-        await user.reload();
-
-        if (user.emailVerified) {
-          timer.cancel();
-
-          _onVerificationSuccess();
-          // Also update the Firestore field to ensure consistency
-          await _authService.updateEmailVerificationStatus(user.uid, true);
-          return;
-
-          // if (mounted) {
-          //   // Router will now handle the redirection based on the new AuthState
-          //   context.go('/dashboard');
-          // }
-        }
+  //  void _startVerificationCheck() {
+  //    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
+  //      timer,
+  //    ) async {
+  //      final user = _authService.currentUser;
+  //      if (user != null) {
+  //        // Reload the user to get the latest email verification status from Firebase
+  //        await user.reload();
+  //
+  //        if (user.emailVerified) {
+  //          timer.cancel();
+  //
+  //          _onVerificationSuccess();
+  //          // Also update the Firestore field to ensure consistency
+  //          await _authService.updateEmailVerificationStatus(user.uid, true);
+  //          return;
+  //
+  //          // if (mounted) {
+  //          //   // Router will now handle the redirection based on the new AuthState
+  //          //   context.go('/dashboard');
+  //          // }
+  //        }
+  //      } else {
+  //        // If the user logs out while on this screen
+  //        timer.cancel();
+  //        if (mounted) {
+  //          context.go('/signin');
+  //        }
+  //      }
+  //    });
+  //  }
+  //
+  /// Signs out the user and navigates to the login screen.
+  void _startResendCooldown() {
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _resendCooldown--;
+          if (_resendCooldown <= 0) {
+            _canResendEmail = true;
+            timer.cancel();
+          }
+        });
       } else {
-        // If the user logs out while on this screen
         timer.cancel();
-        if (mounted) {
-          context.go('/signin');
-        }
       }
     });
   }
 
-  /// Signs out the user and navigates to the login screen.
   void _navigateToLogin() async {
     final container = ProviderScope.containerOf(context, listen: false);
     try {
@@ -174,6 +304,25 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
     } catch (_) {
       // Fallback to direct Firebase sign out (e.g., if GoogleSignIn signOut throws on web)
       await FirebaseAuth.instance.signOut();
+    }
+  }
+
+  Future<void> _checkVerificationStatus() async {
+    bool isVerified = await _authService.isEmailVerified();
+    if (!mounted) return;
+
+    if (isVerified) {
+      final user = _authService.getCurrentUser();
+      if (user != null) {
+        await _authService.updateEmailVerificationStatus(user.uid, true);
+        await _handlePostVerification(user.uid);
+      }
+    } else {
+      showSnackbar(
+        context,
+        'Email not yet verified. Please check your inbox.',
+        isError: true,
+      );
     }
   }
 
@@ -206,13 +355,68 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
                         color: Colors.green.shade600,
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'Verification Complete!',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                      //TODO
+                      //                      const Text(
+                      //                        'Verification Complete!',
+                      //                        textAlign: TextAlign.center,
+                      //                        style: TextStyle(
+                      //                          fontSize: 24,
+                      //                          fontWeight: FontWeight.bold,
+                      //                          color: Colors.green,
+
+                      // Info box about next steps
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.blue.shade700,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'After verification, you\'ll be directed to join a team or wait for approval if you selected one.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue.shade900,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: isDesktop ? 32 : 24),
+
+                      // Manual check button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _checkVerificationStatus,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isDesktop ? 18 : 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 4,
+                          ),
+                          child: const Text(
+                            'I\'ve Verified My Email',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),

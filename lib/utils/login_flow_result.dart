@@ -11,8 +11,6 @@ class LoginFlowNeedsVerification extends LoginFlowResult {
 
 class LoginFlowPendingApproval extends LoginFlowResult {}
 
-class LoginFlowNeedsReferral extends LoginFlowResult {}
-
 class LoginFlowRestricted extends LoginFlowResult {
   final String reason;
   LoginFlowRestricted(this.reason);

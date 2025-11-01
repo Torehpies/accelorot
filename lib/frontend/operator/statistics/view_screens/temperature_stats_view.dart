@@ -38,7 +38,10 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
         _currentTemperature = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        _errorMessage = 'No temperature data found for machine $_machineId';
+        // ✅ No data is not treated as an error anymore — keep showing the chart
+        _hourlyReadings = [];
+        _currentTemperature = 0;
+        _lastUpdated = null;
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -56,6 +59,7 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
       );
     }
 
+    // ❌ Only show full error view for actual exceptions
     if (_errorMessage != null) {
       return SizedBox(
         height: 200,
@@ -82,8 +86,10 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
       );
     }
 
+    // ✅ Always show the TemperatureStatisticCard
+    // It will handle “No data” display inside itself
     return SizedBox(
-      height: 300, // gives minimum height
+      height: 300,
       child: TemperatureStatisticCard(
         currentTemperature: _currentTemperature,
         hourlyReadings: _hourlyReadings,

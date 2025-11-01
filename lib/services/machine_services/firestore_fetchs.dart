@@ -6,18 +6,37 @@ import 'firestore_collection.dart';
 class MachineFirestoreFetch {
   // ==================== OPERATOR METHODS ====================
   
-  /// Fetch machines assigned to a specific user (for Operators)
-  /// Returns all machines where userId matches the provided userId
-  static Future<List<MachineModel>> getMachinesByUserId(String userId) async {
+  /// Fetch machines for an operator by looking up their teamId
+  /// 1. Query teams/{teamId}/members where userId matches operatorId
+  /// 2. Get teamId from the member document
+  /// 3. Fetch all machines with that teamId + mock data (empty teamId)
+  static Future<List<MachineModel>> getMachinesByOperatorId(String operatorId) async {
     try {
-      final snapshot = await MachineFirestoreCollections.getMachinesCollection()
-          .where('userId', isEqualTo: userId)
-          .orderBy('dateCreated', descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => MachineModel.fromFirestore(doc))
-          .toList();
+      // Step 1: Find which team this operator belongs to
+      final teamsSnapshot = await MachineFirestoreCollections.getTeamsCollection().get();
+      
+      String? operatorTeamId;
+      
+      for (var teamDoc in teamsSnapshot.docs) {
+        final membersSnapshot = await MachineFirestoreCollections
+            .getTeamMembersCollection(teamDoc.id)
+            .where('userId', isEqualTo: operatorId)
+            .limit(1)
+            .get();
+        
+        if (membersSnapshot.docs.isNotEmpty) {
+          operatorTeamId = teamDoc.id;
+          break;
+        }
+      }
+      
+      // Step 2: If operator belongs to a team, fetch team machines
+      if (operatorTeamId != null) {
+        return await getMachinesByTeamId(operatorTeamId);
+      }
+      
+      // Step 3: If no team found, return empty list
+      return [];
     } catch (e) {
       return [];
     }
@@ -25,8 +44,8 @@ class MachineFirestoreFetch {
 
   // ==================== ADMIN METHODS ====================
   
-  /// Fetch machines by teamId OR empty teamId (for Admins)
-  /// Admins see: machines with their teamId + mock data (empty teamId)
+  /// Fetch machines by teamId OR empty teamId (for Admins and Operators)
+  /// Shows: machines with their teamId + mock data (empty teamId)
   static Future<List<MachineModel>> getMachinesByTeamId(String teamId) async {
     try {
       // Get machines with matching teamId
@@ -35,7 +54,7 @@ class MachineFirestoreFetch {
           .orderBy('dateCreated', descending: true)
           .get();
 
-      // Get machines with empty teamId (mock data visible to all admins)
+      // Get machines with empty teamId (mock data visible to all)
       final mockDataSnapshot = await MachineFirestoreCollections.getMachinesCollection()
           .where('teamId', isEqualTo: '')
           .orderBy('dateCreated', descending: true)
@@ -43,7 +62,7 @@ class MachineFirestoreFetch {
 
       // Combine both lists and remove duplicates (just in case)
       final allDocs = [...ownTeamSnapshot.docs, ...mockDataSnapshot.docs];
-      final uniqueDocs = allDocs.toSet().toList(); // Remove any duplicates
+      final uniqueDocs = allDocs.toSet().toList();
       
       return uniqueDocs
           .map((doc) => MachineModel.fromFirestore(doc))
@@ -169,9 +188,9 @@ class MachineFirestoreFetch {
           .map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return {
-              'uid': data['userId'] ?? doc.id, // Use userId field, fallback to doc.id
-              'memberId': doc.id, // Keep track of member document ID
-              'name': data['name'] ?? 'Unknown', // Use 'name' field from members
+              'uid': data['userId'] ?? doc.id,
+              'memberId': doc.id,
+              'name': data['name'] ?? 'Unknown',
               'role': data['role'] ?? 'Unknown',
               'email': data['email'] ?? '',
               ...data,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'qr_refer.dart';
+import 'login_screen.dart';
+import 'team_selection_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
@@ -43,7 +43,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
             ),
           ),
           content: Text(
-            'This will remove you from the team completely. You will need a new invitation code to rejoin.\n\n'
+            'This will remove you from the team completely. You can request to join another team or rejoin this one later.\n\n'
             'Are you sure you want to continue?',
             style: TextStyle(
               fontSize: isDesktop ? 16 : 14,
@@ -126,10 +126,10 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
             ),
           );
 
-          // Navigate to QR Refer screen
+          // Navigate to Team Selection screen
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => const QRReferScreen(),
+              builder: (context) => const TeamSelectionScreen(),
             ),
             (route) => false,
           );
@@ -327,10 +327,10 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
       return 'Your account has been temporarily archived by an administrator.\n\n'
           'You can choose to:\n'
           '• Wait for the admin to restore your access\n'
-          '• Leave the team permanently and request a new invitation';
+          '• Leave the team permanently and request to join another team';
     } else {
       return 'You have been removed from ${widget.teamName ?? 'the team'}.\n\n'
-          'To rejoin, please request a new invitation code from the team administrator.';
+          'To rejoin or join another team, please select from the available teams.';
     }
   }
 }

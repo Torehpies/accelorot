@@ -3,6 +3,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/theme_constants.dart';
 
 void showInvitationOverlay(BuildContext context, String initialCode, String initialExpiryDate) {
   // ignore: no_leading_underscores_for_local_identifiers
@@ -14,6 +15,7 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
     final rnd = Random.secure();
     return List.generate(6, (_) => chars[rnd.nextInt(chars.length)]).join();
   }
+  
 
   showDialog(
     context: context,
@@ -35,8 +37,8 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                 width: 320,
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.15),
@@ -60,7 +62,7 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                     Container(
                       width: 60,
                       height: 2,
-                      color: const Color(0xFF2E4F2F),
+                      color: ThemeConstants.tealShade600,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -75,14 +77,14 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                       data: currentCode,
                       version: QrVersions.auto,
                       size: 200,
-                      backgroundColor: Colors.white,
-                      dataModuleStyle: const QrDataModuleStyle(
+                      backgroundColor: Colors.grey[50]!,
+                      dataModuleStyle: QrDataModuleStyle(
                         dataModuleShape: QrDataModuleShape.square,
-                        color: Color(0xFF2E4F2F),
+                        color: ThemeConstants.tealShade600,
                       ),
-                      eyeStyle: const QrEyeStyle(
+                      eyeStyle: QrEyeStyle(
                         eyeShape: QrEyeShape.square,
-                        color: Color(0xFF2E4F2F),
+                        color: ThemeConstants.tealShade600,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -149,7 +151,8 @@ void showInvitationOverlay(BuildContext context, String initialCode, String init
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2E4F2F),
+                            backgroundColor: ThemeConstants.tealShade600,
+                            foregroundColor: Colors.white,
                             minimumSize: const Size(140, 44),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
