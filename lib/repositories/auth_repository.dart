@@ -99,6 +99,24 @@ class AuthRepository {
     }
   }
 
+  Future<DocumentSnapshot> getUserData(String uid) async {
+    return await _firestore.collection('users').doc(uid).get();
+  }
+
+	Future<String?> getUserRole(String uid) async {
+		try {
+			final doc = await _firestore.collection('users').doc(uid).get();
+			final data = doc.data();
+			if (doc.exists && data != null) {
+			return data['role'] as String?;
+			}
+			return null;
+		} catch (e) {
+			log('Error fetching user role for $uid: $e');
+			return null;
+		}
+	}
+
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(

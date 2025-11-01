@@ -13,6 +13,7 @@ FutureOr<String?> appRouteRedirect(
 
   final isLoggedIn = authListenable.isLoggedIn;
   final isVerified = authListenable.isEmailVerified;
+  final userRole = authListenable.userRole;
 
   final isGoingToLogin = state.matchedLocation == '/signin';
   final isGoingToSignup = state.matchedLocation == '/signup';
@@ -28,9 +29,29 @@ FutureOr<String?> appRouteRedirect(
     return isGoingToVerify ? null : '/verify-email';
   }
 
-  if (isLoggedIn && isVerified) {
+  if (isLoggedIn && isVerified && userRole != null) {
+    final isAdmin = userRole == 'Admin';
+    final adminDashboardPath = '/admin/dashboard';
+    final operatorDashboardPath = '/dashboard';
+    final correctHomePath = isAdmin
+        ? adminDashboardPath
+        : operatorDashboardPath;
+
     if (isGoingToPublicPath || isGoingToVerify) {
-      return '/dashboard';
+      return correctHomePath;
+    }
+
+    final isGoingToAdminPath = state.matchedLocation.startsWith('/admin');
+    final isGoingToOperatorPath = state.matchedLocation.startsWith(
+      '/dashboard',
+    );
+
+    if (isAdmin && isGoingToOperatorPath) {
+      return adminDashboardPath;
+    }
+
+    if (!isAdmin && isGoingToAdminPath) {
+      return operatorDashboardPath;
     }
   }
   return null;

@@ -93,11 +93,11 @@ class RegistrationNotifier extends _$RegistrationNotifier {
   // --- Core Logic ---
 
   Future<void> registerUser() async {
-    final authRepo = ref.read(authRepositoryProvider);
+    final routerNotifier = ref.read(authListenableProvider.notifier);
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final result = await authRepo.registerUser(
+      final result = await routerNotifier.registerAndSetState(
         email: state.email,
         password: state.password,
         firstName: state.firstName,
@@ -105,10 +105,9 @@ class RegistrationNotifier extends _$RegistrationNotifier {
         role: 'Operator', // Force role
       );
 
-      if (result['success']) {
-        // Successful registration, no local error needed.
-        // The router will handle navigation based on successful auth status.
-        await ref.read(authListenableProvider.notifier).refreshUser();
+      if (result['success'] == true) {
+				state = state.copyWith(isLoading: false);
+        //showSnackbar(context, 'Successfully registered! Redirecting to verify email.');
       } else {
         state = state.copyWith(
           errorMessage: result['message'],

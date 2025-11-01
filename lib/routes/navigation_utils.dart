@@ -140,7 +140,7 @@ Widget buildAdminWebBranding(BuildContext context) {
       const Icon(Icons.security, size: 50, color: Colors.white),
       const SizedBox(height: 8),
       const Text(
-        'ADMIN CONSOLE',
+        'Admin Portal',
         style: TextStyle(
           color: Colors.white,
           fontSize: 22,

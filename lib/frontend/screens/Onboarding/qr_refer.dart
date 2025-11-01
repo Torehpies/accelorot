@@ -143,7 +143,7 @@ class _QRReferScreenState extends State<QRReferScreen> {
 
   Future<void> _handleBackToLogin() async {
     await _auth.signOut();
-		context.go('/login');
+		// context.go('/signin');
   }
 
   Widget _buildJoinTeam() {
