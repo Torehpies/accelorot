@@ -38,11 +38,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      final targetUserId = widget.viewingOperatorId ?? currentUserId;
 
-      if (targetUserId != null) {
-        _machines = await FirestoreMachineService.getMachinesByOperatorId(targetUserId);
+
+
+      final currentUserId = FirestoreMachineService.getCurrentUserId();
+      // always load machines for current user (or all if null)
+      if (currentUserId != null) {
+        _machines = await FirestoreMachineService.getMachinesByOperatorId(currentUserId);
       } else {
         _machines = await FirestoreMachineService.getAllMachines();
       }
