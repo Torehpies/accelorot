@@ -30,7 +30,6 @@ class FirestoreAlertService {
         };
       }).toList();
     } catch (e) {
-      print('❌ Error fetching alerts for batch $batchId: $e');
       return [];
     }
   }
