@@ -7,11 +7,11 @@ import '../components/cycles_recom_section.dart';
 import '../components/batch_filter_section.dart';
 
 class ActivityLogsNavigator extends StatelessWidget {
-  final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const ActivityLogsNavigator({
     super.key,
-    this.viewingOperatorId,
+    this.focusedMachineId,
   });
 
   @override
@@ -20,9 +20,9 @@ class ActivityLogsNavigator extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5), // Light grey background
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          "Activity Logs",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          focusedMachineId != null ? "Machine Activity Logs" : "Activity Logs",
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
       ),
@@ -38,7 +38,7 @@ class ActivityLogsNavigator extends StatelessWidget {
                   // Main White Content Container
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    // ⭐ UPDATED: Only top-left and top-right corners are rounded
+                    // Only top-left and top-right corners are rounded
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -65,20 +65,49 @@ class ActivityLogsNavigator extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              // Show banner when in machine view
+                              if (focusedMachineId != null)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [Colors.teal.shade50, Colors.teal.shade100],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.teal.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Showing activities for this machine only',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.teal.shade900,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               AllActivitySection(
-                                viewingOperatorId: viewingOperatorId,
+                                focusedMachineId: focusedMachineId,
                               ),
                               const SizedBox(height: 16),
                               SubstrateSection(
-                                viewingOperatorId: viewingOperatorId,
+                                focusedMachineId: focusedMachineId,
                               ),
                               const SizedBox(height: 16),
                               AlertsSection(
-                                viewingOperatorId: viewingOperatorId,
+                                focusedMachineId: focusedMachineId,
                               ),
                               const SizedBox(height: 16),
                               CyclesRecomSection(
-                                viewingOperatorId: viewingOperatorId,
+                                focusedMachineId: focusedMachineId,
                               ),
                             ],
                           ),

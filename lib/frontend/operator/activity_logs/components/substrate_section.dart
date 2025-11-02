@@ -5,11 +5,13 @@ import '../view_screens/substrates_screen.dart';
 import '../widgets/filter_box.dart';
 
 class SubstrateSection extends StatelessWidget {
-  final String? viewingOperatorId;
+
+  final String? focusedMachineId; 
 
   const SubstrateSection({
     super.key,
-    this.viewingOperatorId,
+
+    this.focusedMachineId, 
   });
 
   @override
@@ -57,7 +59,8 @@ class SubstrateSection extends StatelessWidget {
                       Navigator.of(context).push(
                         SlidePageRoute(
                           page: SubstratesScreen(
-                            viewingOperatorId: viewingOperatorId,
+
+                            focusedMachineId: focusedMachineId, 
                           ),
                         ),
                       );
@@ -85,7 +88,7 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Greens',
                       destination: SubstratesScreen(
                         initialFilter: 'Greens',
-                        viewingOperatorId: viewingOperatorId,
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -95,7 +98,8 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Browns',
                       destination: SubstratesScreen(
                         initialFilter: 'Browns',
-                        viewingOperatorId: viewingOperatorId,
+
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -105,7 +109,8 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Compost',
                       destination: SubstratesScreen(
                         initialFilter: 'Compost',
-                        viewingOperatorId: viewingOperatorId,
+  
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                   ],

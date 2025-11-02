@@ -1,74 +1,151 @@
-// widgets/activity_log_item.dart
 import 'package:flutter/material.dart';
 import '../../../activity_logs/models/activity_item.dart';
-import 'activity_logs_helpers.dart';
 
 class ActivityLogItem extends StatelessWidget {
   final ActivityItem log;
+
   const ActivityLogItem({super.key, required this.log});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(log.icon, color: Colors.black54, size: 32),
-          const SizedBox(width: 10),
+          // Icon
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: log.statusColorValue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              log.icon,
+              color: log.statusColorValue,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title and Value
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         log.title,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.black87,
+                          fontSize: 13,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Text(
-                      formatQuantity(log.value),
-                      style: const TextStyle(
+                      log.value,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: log.statusColorValue,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                if (log.description.isNotEmpty)
-                  Text(
-                    log.description,
-                    style: const TextStyle(fontSize: 12, color: Colors.black87),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                
+                // Machine Info
+                if (log.machineName != null || log.machineId != null)
+                  Row(
+                    children: [
+                      Icon(Icons.precision_manufacturing, 
+                        size: 12, 
+                        color: Colors.grey[600]
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          log.machineName ?? log.machineId ?? '',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      capitalize(log.category),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black87,
-                      ),
+                
+                // Batch Info
+                if (log.batchId != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.inventory_2, 
+                          size: 12, 
+                          color: Colors.grey[600]
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            'Batch: ${log.batchId}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      log.formattedTimestamp,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                      ),
+                  ),
+                
+                // Operator Info
+                if (log.operatorName != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        Icon(Icons.person, 
+                          size: 12, 
+                          color: Colors.grey[600]
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            log.operatorName!,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                
+                const SizedBox(height: 2),
+                
+                // Timestamp
+                Text(
+                  log.formattedTimestamp,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[500],
+                  ),
                 ),
               ],
             ),

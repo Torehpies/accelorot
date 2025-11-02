@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'web_operator_view_navigation.dart';
+
 
 class WebOperatorDetailScreen extends StatefulWidget {
   final String operatorId;
@@ -87,17 +87,7 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
     }
   }
 
-  void _viewOperatorDashboard() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WebOperatorViewNavigation(
-          operatorId: widget.operatorId,
-          operatorName: widget.operatorName,
-        ),
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,23 +185,7 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                       // Actions
                       Column(
                         children: [
-                          SizedBox(
-                            width: 180,
-                            child: ElevatedButton.icon(
-                              onPressed: _viewOperatorDashboard,
-                              icon: const Icon(Icons.visibility, size: 18),
-                              label: const Text('View Dashboard'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.teal.shade700,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                              ),
-                            ),
-                          ),
+                          
                           const SizedBox(height: 12),
                           SizedBox(
                             width: 180,

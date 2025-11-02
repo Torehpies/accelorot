@@ -6,11 +6,13 @@ import '../../activity_logs/models/activity_item.dart';
 import 'widgets/activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
-  final String? viewingOperatorId; // ⭐ NEW: Add parameter
-  
+    final String? focusedMachineId;
+
+
   const ActivityLogsCard({
     super.key,
-    this.viewingOperatorId, // ⭐ NEW: Add parameter
+    this.focusedMachineId,
+
   });
 
   // Builds and manages the Activity Logs card widget.
@@ -53,9 +55,9 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
     try {
       setState(() => _loading = true);
       
-      // ⭐ UPDATED: Pass viewingOperatorId to get correct user's logs
+
       final logs = await FirestoreActivityService.getAllActivities(
-        viewingOperatorId: widget.viewingOperatorId,
+
       );
 
       if (mounted) {
@@ -77,7 +79,6 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
   }
 
   // Builds the Activity Logs card layout including header and log list.
-  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 3,
@@ -91,16 +92,18 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 Text(
-                  'Activity Logs',
-                  style: TextStyle(
+                  widget.focusedMachineId != null
+                      ? 'Machine Activity Logs'
+                      : 'Activity Logs',
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: Colors.teal,
                   ),
                 ),
-                Icon(Icons.history, size: 20, color: Colors.teal),
+                const Icon(Icons.history, size: 20, color: Colors.teal),
               ],
             ),
             const SizedBox(height: 12),
@@ -127,24 +130,41 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
           ),
         );
       } else {
+        return Center(
+          child: Text(
+            widget.focusedMachineId != null
+                ? 'No activity logs for this machine yet.'
+                : 'No logs yet. Add waste to get started!',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey, fontSize: 13),
+          ),
+        );
+      }
+    } else {
+      // ⭐ Filter logs by machine if focusedMachineId is provided
+      final filteredLogs = widget.focusedMachineId != null
+          ? _allLogs.where((log) => log.machineId == widget.focusedMachineId).toList()
+          : _allLogs;
+
+      if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
         return const Center(
           child: Text(
-            'No logs yet. Add waste to get started!',
+            'No activity logs for this machine yet.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey, fontSize: 13),
           ),
         );
       }
-    } else {
+
       return SizedBox(
         height: 140,
         child: ListView.builder(
-          itemCount: _allLogs.length,
+          itemCount: filteredLogs.length,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: ActivityLogItem(log: _allLogs[index]),
+              child: ActivityLogItem(log: filteredLogs[index]),
             );
           },
         ),
