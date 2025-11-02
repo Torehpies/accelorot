@@ -9,6 +9,7 @@ import '../screens/statistics_screen.dart';
 import 'profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_management/operator_machine/operator_machine_screen.dart';
+import 'machine_management/models/machine_model.dart';
 
 
 void logCurrentUser(BuildContext context) {
@@ -36,11 +37,13 @@ void logCurrentUser(BuildContext context) {
 class MainNavigation extends StatefulWidget {
   final bool showReferralOverlay;
   final String? referralCode;
+  final MachineModel? focusedMachine;
 
   const MainNavigation({
     super.key,
     this.showReferralOverlay = false,
     this.referralCode,
+    this.focusedMachine, 
   });
 
   @override
@@ -52,13 +55,23 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
 
-  late final List<Widget> _screens = [
-    const HomeScreen(),
-    ActivityLogsNavigator(key: _activityNavigatorKey),
-    const StatisticsScreen(),
-    const OperatorMachineScreen(),
-    const ProfileScreen(),     
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⭐ Initialize screens with focused machine if provided
+    _screens = [
+      HomeScreen(focusedMachine: widget.focusedMachine),
+      ActivityLogsNavigator(
+        key: _activityNavigatorKey,
+        focusedMachineId: widget.focusedMachine?.machineId, // ⭐ Pass machine filter
+      ),
+      StatisticsScreen(focusedMachineId: widget.focusedMachine?.machineId),
+      const OperatorMachineScreen(),
+      const ProfileScreen(),     
+    ];
+  }
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
@@ -74,19 +87,45 @@ class _MainNavigationState extends State<MainNavigation> {
     logCurrentUser(context);
   }
 
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Show machine info in AppBar when in machine-focused mode
+      appBar: widget.focusedMachine != null
+          ? AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.focusedMachine!.machineName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Machine View • ID: ${widget.focusedMachine!.machineId}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+              elevation: 2,
+            )
+          : null,
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: widget.focusedMachine != null ? Colors.teal : Colors.blue,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [

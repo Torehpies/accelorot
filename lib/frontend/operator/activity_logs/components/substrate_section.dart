@@ -1,24 +1,37 @@
+// lib/frontend/operator/activity_logs/components/substrate_section.dart
 import 'package:flutter/material.dart';
 import '../widgets/slide_page_route.dart';
 import '../view_screens/substrates_screen.dart';
 import '../widgets/filter_box.dart';
 
 class SubstrateSection extends StatelessWidget {
-  final String? viewingOperatorId; 
+
+  final String? focusedMachineId; 
 
   const SubstrateSection({
     super.key,
-    this.viewingOperatorId, 
+
+    this.focusedMachineId, 
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
-      child: Card(
-        color: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container( // Replaced Card with Container for shadow styling
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300, width: 1.0),
+          boxShadow: [ // ⭐ ADDED: Shadow styling
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -28,10 +41,10 @@ class SubstrateSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    children: const [
-                      Icon(Icons.eco_outlined, color: Colors.grey, size: 20),
-                      SizedBox(width: 8),
-                      Text(
+                    children: [
+                      Icon(Icons.eco_outlined, color: Colors.teal.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
                         'Substrate',
                         style: TextStyle(
                           fontSize: 18,
@@ -46,16 +59,17 @@ class SubstrateSection extends StatelessWidget {
                       Navigator.of(context).push(
                         SlidePageRoute(
                           page: SubstratesScreen(
-                            viewingOperatorId: viewingOperatorId, 
+
+                            focusedMachineId: focusedMachineId, 
                           ),
                         ),
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       'View All >',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.blue,
+                        color: Colors.teal.shade600,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -74,7 +88,7 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Greens',
                       destination: SubstratesScreen(
                         initialFilter: 'Greens',
-                        viewingOperatorId: viewingOperatorId, 
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -84,7 +98,8 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Browns',
                       destination: SubstratesScreen(
                         initialFilter: 'Browns',
-                        viewingOperatorId: viewingOperatorId, 
+
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -94,7 +109,8 @@ class SubstrateSection extends StatelessWidget {
                       filterValue: 'Compost',
                       destination: SubstratesScreen(
                         initialFilter: 'Compost',
-                        viewingOperatorId: viewingOperatorId, 
+  
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                   ],

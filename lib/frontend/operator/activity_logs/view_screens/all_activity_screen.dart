@@ -6,7 +6,7 @@ import '../../../../services/firestore_activity_service.dart';
 class AllActivityScreen extends BaseActivityScreen {
   const AllActivityScreen({
     super.key,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   }) : super(initialFilter: 'All');
 
   @override
@@ -15,7 +15,9 @@ class AllActivityScreen extends BaseActivityScreen {
 
 class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen> {
   @override
-  String get screenTitle => 'All Activity Logs';
+  String get screenTitle => widget.focusedMachineId != null 
+      ? 'Machine Activity Logs' 
+      : 'All Activity Logs'; // ⭐ Dynamic title
 
   @override
   List<String> get filters => const ['All', 'Substrate', 'Alerts'];
@@ -24,7 +26,7 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
   Future<List<ActivityItem>> fetchData() async {
     // ⭐ UPDATED: Pass viewingOperatorId to service
     return await FirestoreActivityService.getAllActivities(
-      viewingOperatorId: widget.viewingOperatorId,
+
     );
   }
 

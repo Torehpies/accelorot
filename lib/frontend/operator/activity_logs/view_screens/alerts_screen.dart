@@ -8,6 +8,7 @@ class AlertsScreen extends BaseActivityScreen {
     super.key,
     super.initialFilter,
     super.viewingOperatorId,
+    super.focusedMachineId
   });
 
   @override
@@ -16,7 +17,9 @@ class AlertsScreen extends BaseActivityScreen {
 
 class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   @override
-  String get screenTitle => 'Alerts Logs';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Alerts'
+      : 'Alerts Logs';
 
   @override
   List<String> get filters => const ['All', 'Temperature', 'Moisture', 'Oxygen'];

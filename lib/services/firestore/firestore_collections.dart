@@ -12,8 +12,11 @@ class FirestoreCollections {
   }
 
   // Collection References - accepts optional userId for admin viewing operators
-  static CollectionReference getSubstratesCollection([String? userId]) {
-    return _firestore.collection('substrates');
+  static CollectionReference getSubstratesCollection(String batchId, [String? userId]) {
+    return _firestore
+        .collection('batches')
+        .doc(batchId)
+        .collection('substrates');
   }
 
   static CollectionReference getAlertsCollection([String? userId]) {
@@ -24,17 +27,23 @@ class FirestoreCollections {
     return _firestore.collection('cyclesRecom');
   }
 
+  static CollectionReference getBatchesCollection() {
+    return _firestore.collection('batches');
+  }
+
   // Data Existence Check - checks if specified user has any substrates
   static Future<bool> dataExists([String? userId]) async {
     try {
       final targetUserId = userId ?? getCurrentUserId();
       if (targetUserId == null) return false;
 
-      final substrates = await getSubstratesCollection(targetUserId)
+      // Query batches collection for user's batches
+      final batches = await getBatchesCollection()
           .where('userId', isEqualTo: targetUserId)
           .limit(1)
           .get();
-      return substrates.docs.isNotEmpty;
+      
+      return batches.docs.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -46,12 +55,22 @@ class FirestoreCollections {
       final targetUserId = userId ?? getCurrentUserId();
       if (targetUserId == null) throw Exception('User not logged in');
 
-      // Delete substrates
-      final substrateDocs = await getSubstratesCollection(targetUserId)
+      // Delete all batches and their subcollections
+      final batchDocs = await getBatchesCollection()
           .where('userId', isEqualTo: targetUserId)
           .get();
-      for (var doc in substrateDocs.docs) {
-        await doc.reference.delete();
+      
+      for (var batchDoc in batchDocs.docs) {
+        // Delete substrates subcollection
+        final substrateDocs = await batchDoc.reference
+            .collection('substrates')
+            .get();
+        for (var substrateDoc in substrateDocs.docs) {
+          await substrateDoc.reference.delete();
+        }
+        
+        // Delete batch document
+        await batchDoc.reference.delete();
       }
 
       // Delete alerts

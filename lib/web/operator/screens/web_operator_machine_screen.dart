@@ -7,9 +7,9 @@ import '../../operator/widgets/machine_card_widget.dart';
 import '../../operator/widgets/machine_list_tile_widget.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
-  final String? viewingOperatorId;
 
-  const WebOperatorMachineScreen({super.key, this.viewingOperatorId});
+
+  const WebOperatorMachineScreen({super.key});
 
   @override
   State<WebOperatorMachineScreen> createState() =>
@@ -25,7 +25,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   void initState() {
     super.initState();
     controller =
-        OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
+        OperatorMachineController();
     controller.initialize();
   }
 
