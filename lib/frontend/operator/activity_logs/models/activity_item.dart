@@ -13,6 +13,11 @@ class ActivityItem {
   final DateTime timestamp;
   final String? userId;
 
+  final String? machineId;
+  final String? machineName;
+  final String? operatorName;
+  final String? batchId;
+
   ActivityItem({
     required this.title,
     required this.value,
@@ -22,10 +27,25 @@ class ActivityItem {
     required this.category,
     required this.timestamp,
     this.userId,
+    this.machineId,
+    this.machineName,
+    this.operatorName,
+    this.batchId,
   });
 
   // Firestore: Convert document to model
   factory ActivityItem.fromMap(Map<String, dynamic> data) {
+    // handle timestamp being either Timestamp or DateTime (defensive)
+    DateTime ts;
+    final rawTs = data['timestamp'];
+    if (rawTs is Timestamp) {
+      ts = rawTs.toDate();
+    } else if (rawTs is DateTime) {
+      ts = rawTs;
+    } else {
+      ts = DateTime.now();
+    }
+
     return ActivityItem(
       title: data['title'] ?? '',
       value: data['value'] ?? '',
@@ -33,8 +53,12 @@ class ActivityItem {
       icon: IconData(data['icon'] ?? Icons.info.codePoint, fontFamily: 'MaterialIcons'),
       description: data['description'] ?? '',
       category: data['category'] ?? '',
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      timestamp: ts,
       userId: data['userId'],
+      machineId: data['machineId'],
+      machineName: data['machineName'],
+      operatorName: data['operatorName'],
+      batchId: data['batchId'],
     );
   }
 
@@ -49,6 +73,10 @@ class ActivityItem {
       'category': category,
       'timestamp': Timestamp.fromDate(timestamp),
       'userId': userId,
+      'machineId': machineId,
+      'machineName': machineName,
+      'operatorName': operatorName,
+      'batchId': batchId, 
     };
   }
 
@@ -83,7 +111,10 @@ class ActivityItem {
     return title.toLowerCase().contains(lower) ||
            description.toLowerCase().contains(lower) ||
            category.toLowerCase().contains(lower) ||
-           value.toLowerCase().contains(lower);
+           value.toLowerCase().contains(lower) ||
+           (machineName ?? machineId ?? '').toLowerCase().contains(lower) ||
+           (operatorName ?? '').toLowerCase().contains(lower) ||
+           (batchId ?? '').toLowerCase().contains(lower); 
   }
 
   // Immutable copying
@@ -96,6 +127,10 @@ class ActivityItem {
     String? category,
     DateTime? timestamp,
     String? userId,
+    String? machineId,
+    String? machineName,
+    String? operatorName,
+    String? batchId,
   }) {
     return ActivityItem(
       title: title ?? this.title,
@@ -106,6 +141,10 @@ class ActivityItem {
       category: category ?? this.category,
       timestamp: timestamp ?? this.timestamp,
       userId: userId ?? this.userId,
+      machineId: machineId ?? this.machineId,
+      machineName: machineName ?? this.machineName,
+      operatorName: operatorName ?? this.operatorName,
+      batchId: batchId ?? this.batchId,
     );
   }
 }

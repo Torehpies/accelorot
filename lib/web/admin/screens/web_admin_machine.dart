@@ -7,9 +7,9 @@ import 'package:flutter_application_1/frontend/operator/machine_management/widge
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/admin_machine_list.dart';
 
 class WebMachineManagement extends StatefulWidget {
-  final String? viewingOperatorId;
+
   
-  const WebMachineManagement({super.key, this.viewingOperatorId});
+  const WebMachineManagement({super.key});
 
   @override
   State<WebMachineManagement> createState() => _WebMachineManagementState();

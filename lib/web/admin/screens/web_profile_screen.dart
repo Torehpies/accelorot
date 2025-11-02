@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart' show WebLoginScreen;
+import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
 
@@ -30,7 +30,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => kIsWeb ? const WebLoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(builder: (context) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
         (route) => false,
       );
     }

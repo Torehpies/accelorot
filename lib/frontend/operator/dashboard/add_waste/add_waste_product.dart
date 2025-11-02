@@ -6,16 +6,18 @@ import 'fields/quantity_field.dart';
 import 'fields/description_field.dart';
 import 'fields/submit_button.dart';
 import 'fields/waste_config.dart';
+import 'fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
-  final String? viewingOperatorId; // ⭐ NEW: Add this parameter
-  
+  final String? preSelectedMachineId; 
+
   const AddWasteProduct({
     super.key,
-    this.viewingOperatorId, // ⭐ NEW: Add this parameter
+    this.preSelectedMachineId,
   });
+
 
   // Builds and displays the Add Waste Product dialog.
   @override
@@ -28,6 +30,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   String? _selectedWasteCategory;
   String? _selectedPlantType;
+  String? _selectedMachineId;
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
   String? _quantityError;
@@ -38,6 +41,12 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     _quantityController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+    @override
+  void initState() {
+    super.initState();
+
+    _selectedMachineId = widget.preSelectedMachineId;
   }
 
   // Capitalizes the first letter of a given category name.
@@ -64,6 +73,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     }
     if (_selectedPlantType == null) {
       _showError('Please select target plant type');
+      return false;
+    }
+    if (_selectedMachineId == null) {
+      _showError('Please select a machine');
       return false;
     }
     final qtyError = _validateQuantity(_quantityController.text);
@@ -93,20 +106,20 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   }
 
   // Handles form submission, validates input, and saves data to Firestore.
-  void _handleSubmit() async {
-    if (!_validateForm()) return;
+void _handleSubmit() async {
+  if (!_validateForm()) return;
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to add waste log.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please log in to add waste log.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
 
     final wasteEntry = {
       'category': _capitalizeCategory(_selectedWasteCategory!),
@@ -115,25 +128,23 @@ class _AddWasteProductState extends State<AddWasteProduct> {
       'quantity': double.parse(_quantityController.text),
       'description': _descriptionController.text.trim(),
       'timestamp': DateTime.now(),
+      'machineId': _selectedMachineId!,
+      // add operator info so the activity doc contains the operator name and userId
+      'operatorName': user.displayName ?? user.email ?? 'Operator',
+      'userId': user.uid,
+      // If you also have a selected machine name, add it here:
+      // 'machineName': _selectedMachineName,
     };
 
     try {
-
-      await FirestoreActivityService.addWasteProduct(
-        wasteEntry,
-        viewingOperatorId: widget.viewingOperatorId,
-      );
+      await FirestoreActivityService.addWasteProduct(wasteEntry);
       await Future.delayed(const Duration(milliseconds: 1000));
-
       if (!mounted) return;
       Navigator.pop(context, wasteEntry);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error adding waste: $e'),
-          duration: const Duration(seconds: 2),
-        ),
+        SnackBar(content: Text('Failed to add waste: ${e.toString()}')),
       );
     }
   }
@@ -197,6 +208,14 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 selectedPlantType: _selectedPlantType,
                 onPlantTypeChanged: (value) =>
                     setState(() => _selectedPlantType = value),
+              ),
+              const SizedBox(height: 16),
+              MachineSelectionField(
+                selectedMachineId: _selectedMachineId,
+                onChanged: widget.preSelectedMachineId == null
+                    ? (value) => setState(() => _selectedMachineId = value)
+                    : null, 
+                isLocked: widget.preSelectedMachineId != null,
               ),
               const SizedBox(height: 16),
               QuantityField(

@@ -3,7 +3,9 @@ import '../../../../services/firestore_statistics_service.dart';
 import '../widgets/temperature_statistic_card.dart';
 
 class TemperatureStatsView extends StatefulWidget {
-  const TemperatureStatsView({super.key});
+  final String? machineId;
+  
+  const TemperatureStatsView({super.key, this.machineId});
 
   @override
   State<TemperatureStatsView> createState() => _TemperatureStatsViewState();
@@ -16,12 +18,22 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  static const String _machineId = "01";
+  static const String _defaultMachineId = "01";
+
+  String get _machineId => widget.machineId ?? _defaultMachineId;
 
   @override
   void initState() {
     super.initState();
     _loadTemperatureData();
+  }
+
+  @override
+  void didUpdateWidget(TemperatureStatsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.machineId != widget.machineId) {
+      _loadTemperatureData();
+    }
   }
 
   Future<void> _loadTemperatureData() async {
@@ -38,7 +50,9 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
         _currentTemperature = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        _errorMessage = 'No temperature data found for machine $_machineId';
+        _hourlyReadings = [];
+        _currentTemperature = 0;
+        _lastUpdated = null;
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -83,7 +97,7 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
     }
 
     return SizedBox(
-      height: 300, // gives minimum height
+      height: 300,
       child: TemperatureStatisticCard(
         currentTemperature: _currentTemperature,
         hourlyReadings: _hourlyReadings,

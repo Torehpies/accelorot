@@ -7,7 +7,8 @@ class EnvironmentalSensorsView extends StatefulWidget {
   const EnvironmentalSensorsView({super.key});
 
   @override
-  State<EnvironmentalSensorsView> createState() => _EnvironmentalSensorsViewState();
+  State<EnvironmentalSensorsView> createState() =>
+      _EnvironmentalSensorsViewState();
 }
 
 class _EnvironmentalSensorsViewState extends State<EnvironmentalSensorsView> {
@@ -37,21 +38,24 @@ class _EnvironmentalSensorsViewState extends State<EnvironmentalSensorsView> {
     });
 
     try {
-      final tempData = await FirestoreStatisticsService.getTemperatureData(_machineId);
-      final moistureData = await FirestoreStatisticsService.getMoistureData(_machineId);
-      final oxygenData = await FirestoreStatisticsService.getOxygenData(_machineId);
+      final tempData =
+          await FirestoreStatisticsService.getTemperatureData(_machineId);
+      final moistureData =
+          await FirestoreStatisticsService.getMoistureData(_machineId);
+      final oxygenData =
+          await FirestoreStatisticsService.getOxygenData(_machineId);
 
-      if (tempData.isEmpty && moistureData.isEmpty && oxygenData.isEmpty) {
-        _errorMessage = 'No sensor data found for machine $_machineId';
-      } else {
-        _temperatureReadings = tempData.map((e) => e['value'] as double).toList();
-        _moistureReadings = moistureData.map((e) => e['value'] as double).toList();
-        _oxygenReadings = oxygenData.map((e) => e['value'] as double).toList();
+      // Convert readings (even if empty)
+      _temperatureReadings =
+          tempData.map((e) => e['value'] as double).toList();
+      _moistureReadings = moistureData.map((e) => e['value'] as double).toList();
+      _oxygenReadings = oxygenData.map((e) => e['value'] as double).toList();
 
-        _temperature = _temperatureReadings.isNotEmpty ? _temperatureReadings.last : null;
-        _moisture = _moistureReadings.isNotEmpty ? _moistureReadings.last : null;
-        _oxygen = _oxygenReadings.isNotEmpty ? _oxygenReadings.last : null;
-      }
+      _temperature =
+          _temperatureReadings.isNotEmpty ? _temperatureReadings.last : null;
+      _moisture =
+          _moistureReadings.isNotEmpty ? _moistureReadings.last : null;
+      _oxygen = _oxygenReadings.isNotEmpty ? _oxygenReadings.last : null;
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
     } finally {
@@ -74,7 +78,8 @@ class _EnvironmentalSensorsViewState extends State<EnvironmentalSensorsView> {
       );
     }
 
-    if (_errorMessage != null) {
+    // ⚠️ Only show this if a real Firestore/network error occurred
+    if (_errorMessage != null && _errorMessage!.startsWith('Error')) {
       return SizedBox(
         height: 210,
         child: Center(
@@ -100,10 +105,11 @@ class _EnvironmentalSensorsViewState extends State<EnvironmentalSensorsView> {
       );
     }
 
+    // ✅ Always show the card — even if all data is missing
     return EnvironmentalSensorsCard(
       temperature: _temperature,
       moisture: _moisture,
-      oxygen: _oxygen, // now showing oxygen instead of humidity
+      oxygen: _oxygen,
       temperatureChange: _calculateChange(_temperatureReadings),
       moistureChange: _calculateChange(_moistureReadings),
       oxygenChange: _calculateChange(_oxygenReadings),

@@ -4,11 +4,11 @@ import '../view_screens/all_activity_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class AllActivitySection extends StatelessWidget {
-  final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const AllActivitySection({
     super.key,
-    this.viewingOperatorId,
+    this.focusedMachineId,
   });
 
   @override
@@ -18,7 +18,7 @@ class AllActivitySection extends StatelessWidget {
         Navigator.of(context).push(
           SlidePageRoute(
             page: AllActivityScreen(
-              viewingOperatorId: viewingOperatorId,
+              focusedMachineId: focusedMachineId,
             ),
           ),
         );
