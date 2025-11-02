@@ -13,7 +13,7 @@ class ChartPoint {
 
 class MoistureStatisticHistoryCard extends StatelessWidget {
   final double currentMoisture;
-  final List<double> dailyReadings; // Daily readings (e.g., 8 days)
+  final List<double> dailyReadings;
   final DateTime? lastUpdated;
   final List<String>? labels;
 
@@ -33,21 +33,23 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
 
     final quality = _getQuality(currentMoisture);
     final color = _getColorForQuality(quality);
-    final now = DateTime.now();
     final dataLength = dailyReadings.length;
 
-    // Generate daily chart data (e.g., "Oct 18", "Oct 19", ...)
-    final List<ChartPoint> moistureData = List.generate(dataLength, (i) {
-      final day = now.subtract(Duration(days: dataLength - 1 - i));
-      final label = DateFormat('MMM d').format(day);
-      return ChartPoint(label, dailyReadings[i].toDouble());
-    });
+    // ✅ Use actual labels from data instead of generating from now()
+    final List<ChartPoint> moistureData = [];
+    final List<ChartPoint> upperBound = [];
+    final List<ChartPoint> lowerBound = [];
 
-    // Ideal range lines (40–60%)
-    final List<ChartPoint> upperBound =
-        moistureData.map((d) => ChartPoint(d.x, 60.0)).toList();
-    final List<ChartPoint> lowerBound =
-        moistureData.map((d) => ChartPoint(d.x, 40.0)).toList();
+    for (int i = 0; i < dataLength; i++) {
+      // Use the actual date labels passed from the view
+      final label = (labels != null && i < labels!.length) 
+          ? _formatLabel(labels![i]) 
+          : 'Day ${i + 1}';
+      
+      moistureData.add(ChartPoint(label, dailyReadings[i]));
+      upperBound.add(ChartPoint(label, 60.0));
+      lowerBound.add(ChartPoint(label, 40.0));
+    }
 
     return Container(
       width: double.infinity,
@@ -91,9 +93,9 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Trend (Last 8 Days)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          Text(
+            'Trend (${dataLength} Days)',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -250,5 +252,15 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return DateFormat('MMM d, yyyy – HH:mm').format(date);
+  }
+
+  // ✅ Format the date label from string (e.g., "2024-11-01" -> "Nov 1")
+  String _formatLabel(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM d').format(date);
+    } catch (e) {
+      return dateStr; // Return as-is if parsing fails
+    }
   }
 }

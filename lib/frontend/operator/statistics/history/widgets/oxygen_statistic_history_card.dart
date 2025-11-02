@@ -33,23 +33,22 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
 
     final quality = _getQuality(currentOxygen);
     final color = _getColorForQuality(quality);
-    final now = DateTime.now();
     final dataLength = dailyReadings.length;
 
-    // Generate chart data per day (e.g., Oct 18, Oct 19, etc.)
-    final List<ChartPoint> oxygenData = List.generate(dataLength, (i) {
-      final day = now.subtract(Duration(days: dataLength - 1 - i));
-      final label = DateFormat('MMM d').format(day);
-      return ChartPoint(label, dailyReadings[i]);
-    });
+    // ✅ Use actual labels from data instead of generating from now()
+    final List<ChartPoint> oxygenData = [];
+    final List<ChartPoint> upperBound = [];
+    final List<ChartPoint> lowerBound = [];
 
-    // Ideal oxygen (or air quality proxy) range: 0–1500 ppm
-    final List<ChartPoint> upperBound = oxygenData
-        .map((d) => ChartPoint(d.x, 1500.0))
-        .toList();
-    final List<ChartPoint> lowerBound = oxygenData
-        .map((d) => ChartPoint(d.x, 0.0))
-        .toList();
+    for (int i = 0; i < dataLength; i++) {
+      final label = (labels != null && i < labels!.length) 
+          ? _formatLabel(labels![i]) 
+          : 'Day ${i + 1}';
+      
+      oxygenData.add(ChartPoint(label, dailyReadings[i]));
+      upperBound.add(ChartPoint(label, 1500.0));
+      lowerBound.add(ChartPoint(label, 0.0));
+    }
 
     return Container(
       width: double.infinity,
@@ -93,9 +92,9 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Trend (Last 7 Days)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          Text(
+            'Trend (${dataLength} Days)',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
           SizedBox(
@@ -242,5 +241,15 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return DateFormat('MMM d, yyyy – HH:mm').format(date);
+  }
+
+  // ✅ Format the date label from string (e.g., "2024-11-01" -> "Nov 1")
+  String _formatLabel(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM d').format(date);
+    } catch (e) {
+      return dateStr;
+    }
   }
 }
