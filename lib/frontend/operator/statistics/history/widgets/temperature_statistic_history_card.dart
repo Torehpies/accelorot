@@ -26,7 +26,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     final color = _getColorForQuality(quality);
     final dataLength = dailyReadings.length;
 
-    // ✅ Use actual labels from data instead of generating from now()
     final List<_ChartPoint> temperatureData = [];
     final List<_ChartPoint> upperBound = [];
     final List<_ChartPoint> lowerBound = [];
@@ -59,7 +58,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -79,7 +77,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               ),
             ],
           ),
-
           if (lastUpdated != null) ...[
             const SizedBox(height: 4),
             Text(
@@ -87,10 +84,7 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
-
           const SizedBox(height: 12),
-
-          // Quality indicator
           Row(
             children: [
               Container(
@@ -109,10 +103,7 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Ideal range and progress
           const Text(
             'Ideal Range: 55–65°C',
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
@@ -124,65 +115,72 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
-
           const SizedBox(height: 16),
-
           Text(
             'Trend (${dataLength} Days)',
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
-
           SizedBox(
             height: 120,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                interval: 1,
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 80,
-                interval: 10,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                labelStyle: const TextStyle(fontSize: 9),
-              ),
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              series: [
-                // Temperature line
-                LineSeries<_ChartPoint, String>(
-                  dataSource: temperatureData,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.orange,
-                  width: 2,
-                  markerSettings: const MarkerSettings(isVisible: true),
-                ),
-
-                // Upper bound
-                LineSeries<_ChartPoint, String>(
-                  dataSource: upperBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-
-                // Lower bound
-                LineSeries<_ChartPoint, String>(
-                  dataSource: lowerBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final calculatedWidth = dataLength * 50.0;
+                final chartWidth = calculatedWidth > constraints.maxWidth 
+                    ? calculatedWidth 
+                    : constraints.maxWidth;
+                
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        labelStyle: const TextStyle(fontSize: 9),
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        interval: 1,
+                      ),
+                      primaryYAxis: NumericAxis(
+                        minimum: 0,
+                        maximum: 80,
+                        interval: 10,
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        labelStyle: const TextStyle(fontSize: 9),
+                      ),
+                      plotAreaBorderWidth: 0,
+                      margin: EdgeInsets.zero,
+                      series: [
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: temperatureData,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.orange,
+                          width: 2,
+                          markerSettings: const MarkerSettings(isVisible: true),
+                        ),
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: upperBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: lowerBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -244,7 +242,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
         '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  // ✅ Format the date label from string (e.g., "2024-11-01" -> "Nov 1")
   String _formatLabel(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
@@ -255,9 +252,9 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
   }
 }
 
-// ✅ Data model for chart points
 class _ChartPoint {
   final String x;
   final double y;
   _ChartPoint(this.x, this.y);
 }
+

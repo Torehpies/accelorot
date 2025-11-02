@@ -35,13 +35,11 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
     final color = _getColorForQuality(quality);
     final dataLength = dailyReadings.length;
 
-    // ✅ Use actual labels from data instead of generating from now()
     final List<ChartPoint> moistureData = [];
     final List<ChartPoint> upperBound = [];
     final List<ChartPoint> lowerBound = [];
 
     for (int i = 0; i < dataLength; i++) {
-      // Use the actual date labels passed from the view
       final label = (labels != null && i < labels!.length) 
           ? _formatLabel(labels![i]) 
           : 'Day ${i + 1}';
@@ -100,61 +98,71 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: 120,
-            width: double.infinity,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                interval: 1,
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 100,
-                interval: 20,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                labelStyle: const TextStyle(fontSize: 9),
-              ),
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              series: <CartesianSeries>[
-                // Main moisture trend
-                LineSeries<ChartPoint, String>(
-                  dataSource: moistureData,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.blue,
-                  width: 2,
-                  markerSettings: const MarkerSettings(isVisible: true),
-                ),
-                // Ideal upper bound (60%)
-                LineSeries<ChartPoint, String>(
-                  dataSource: upperBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-                // Ideal lower bound (40%)
-                LineSeries<ChartPoint, String>(
-                  dataSource: lowerBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Use the larger of: calculated width or available width
+                final calculatedWidth = dataLength * 50.0;
+                final chartWidth = calculatedWidth > constraints.maxWidth 
+                    ? calculatedWidth 
+                    : constraints.maxWidth;
+                
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        labelStyle: const TextStyle(fontSize: 9),
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        interval: 1,
+                      ),
+                      primaryYAxis: NumericAxis(
+                        minimum: 0,
+                        maximum: 100,
+                        interval: 20,
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        labelStyle: const TextStyle(fontSize: 9),
+                      ),
+                      plotAreaBorderWidth: 0,
+                      margin: EdgeInsets.zero,
+                      series: <CartesianSeries>[
+                        LineSeries<ChartPoint, String>(
+                          dataSource: moistureData,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.blue,
+                          width: 2,
+                          markerSettings: const MarkerSettings(isVisible: true),
+                        ),
+                        LineSeries<ChartPoint, String>(
+                          dataSource: upperBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                        LineSeries<ChartPoint, String>(
+                          dataSource: lowerBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
-
-  // ===================== Helper Widgets =====================
 
   Widget _buildHeader(BuildContext context, Color color) {
     return Row(
@@ -222,8 +230,6 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
     );
   }
 
-  // ===================== Utility Methods =====================
-
   String _getQuality(double moisture) {
     if (moisture >= 40 && moisture <= 60) {
       return 'Excellent';
@@ -254,13 +260,12 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
     return DateFormat('MMM d, yyyy – HH:mm').format(date);
   }
 
-  // ✅ Format the date label from string (e.g., "2024-11-01" -> "Nov 1")
   String _formatLabel(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
       return DateFormat('MMM d').format(date);
     } catch (e) {
-      return dateStr; // Return as-is if parsing fails
+      return dateStr;
     }
   }
 }

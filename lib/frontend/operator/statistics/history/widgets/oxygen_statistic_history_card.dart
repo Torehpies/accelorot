@@ -35,7 +35,6 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
     final color = _getColorForQuality(quality);
     final dataLength = dailyReadings.length;
 
-    // ✅ Use actual labels from data instead of generating from now()
     final List<ChartPoint> oxygenData = [];
     final List<ChartPoint> upperBound = [];
     final List<ChartPoint> lowerBound = [];
@@ -99,50 +98,64 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: 120,
-            width: double.infinity,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                interval: 1,
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 5000,
-                interval: 1000,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                labelStyle: const TextStyle(fontSize: 9),
-              ),
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              series: <CartesianSeries>[
-                LineSeries<ChartPoint, String>(
-                  dataSource: oxygenData,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.blue,
-                  width: 2,
-                  markerSettings: const MarkerSettings(isVisible: true),
-                ),
-                LineSeries<ChartPoint, String>(
-                  dataSource: upperBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-                LineSeries<ChartPoint, String>(
-                  dataSource: lowerBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.green,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final calculatedWidth = dataLength * 50.0;
+                final chartWidth = calculatedWidth > constraints.maxWidth 
+                    ? calculatedWidth 
+                    : constraints.maxWidth;
+                
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        labelStyle: const TextStyle(fontSize: 9),
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        interval: 1,
+                      ),
+                      primaryYAxis: NumericAxis(
+                        minimum: 0,
+                        maximum: 5000,
+                        interval: 1000,
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        labelStyle: const TextStyle(fontSize: 9),
+                      ),
+                      plotAreaBorderWidth: 0,
+                      margin: EdgeInsets.zero,
+                      series: <CartesianSeries>[
+                        LineSeries<ChartPoint, String>(
+                          dataSource: oxygenData,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.blue,
+                          width: 2,
+                          markerSettings: const MarkerSettings(isVisible: true),
+                        ),
+                        LineSeries<ChartPoint, String>(
+                          dataSource: upperBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                        LineSeries<ChartPoint, String>(
+                          dataSource: lowerBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.green,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -243,7 +256,6 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
     return DateFormat('MMM d, yyyy – HH:mm').format(date);
   }
 
-  // ✅ Format the date label from string (e.g., "2024-11-01" -> "Nov 1")
   String _formatLabel(String dateStr) {
     try {
       final date = DateTime.parse(dateStr);
