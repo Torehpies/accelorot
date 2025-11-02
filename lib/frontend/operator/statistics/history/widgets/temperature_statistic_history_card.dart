@@ -117,7 +117,7 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Trend (${dataLength} Days)',
+            'Trend ($dataLength Days)',
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
