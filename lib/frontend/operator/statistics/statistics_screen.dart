@@ -10,9 +10,12 @@ import '../machine_management/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
+  final String? focusedMachineId; // ⭐ NEW: Machine filter
 
-  
-  const StatisticsScreen({super.key});
+  const StatisticsScreen({
+    super.key,
+    this.focusedMachineId,
+  });
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -38,15 +41,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-
-
-
       final currentUserId = FirestoreMachineService.getCurrentUserId();
-      // always load machines for current user (or all if null)
-      if (currentUserId != null) {
-        _machines = await FirestoreMachineService.getMachinesByOperatorId(currentUserId);
+      
+      // ⭐ If focused on a specific machine, only load that machine
+      if (widget.focusedMachineId != null) {
+        final allMachines = currentUserId != null
+            ? await FirestoreMachineService.getMachinesByOperatorId(currentUserId)
+            : await FirestoreMachineService.getAllMachines();
+        
+        _machines = allMachines
+            .where((m) => m.machineId == widget.focusedMachineId)
+            .toList();
       } else {
-        _machines = await FirestoreMachineService.getAllMachines();
+        // Load all machines for current user
+        if (currentUserId != null) {
+          _machines = await FirestoreMachineService.getMachinesByOperatorId(currentUserId);
+        } else {
+          _machines = await FirestoreMachineService.getAllMachines();
+        }
       }
 
       setState(() {
@@ -91,6 +103,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ⭐ Hide AppBar when in machine view (shown by parent HomeScreen)
+    if (widget.focusedMachineId != null) {
+      return _buildBody();
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -117,45 +134,53 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 56, color: Colors.red.shade300),
-                        const SizedBox(height: 12),
-                        Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade700, fontSize: 13),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _loadMachines,
-                          icon: const Icon(Icons.refresh, size: 18),
-                          label: const Text('Retry'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: _selectedRange == null
-                      ? _buildAllMachinesLayout()
-                      : HistoryPage(
-                          filter: _selectedFilterLabel,
-                          range: _selectedRange!,
-                        ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 56, color: Colors.red.shade300),
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _loadMachines,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Retry'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
                 ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: _selectedRange == null
+          ? _buildAllMachinesLayout()
+          : HistoryPage(
+              filter: _selectedFilterLabel,
+              range: _selectedRange!,
+            ),
     );
   }
 
@@ -174,7 +199,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No Machines Found',
+                widget.focusedMachineId != null
+                    ? 'Machine Not Found'
+                    : 'No Machines Found',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -183,7 +210,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                'You don\'t have any machines assigned yet.',
+                widget.focusedMachineId != null
+                    ? 'The selected machine is not available.'
+                    : 'You don\'t have any machines assigned yet.',
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey[600],
@@ -199,46 +228,47 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
-        // Compact Summary Header
-        Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade50, Colors.teal.shade100],
-            ),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.teal.shade200, width: 1),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.analytics_outlined, color: Colors.teal.shade700, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Monitoring ${_machines.length} machine(s)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.teal.shade900,
-                      ),
-                    ),
-                    Text(
-                      'Active: ${_machines.where((m) => !m.isArchived).length} • Disabled: ${_machines.where((m) => m.isArchived).length}',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.teal.shade700,
-                      ),
-                    ),
-                  ],
-                ),
+        // ⭐ Only show summary header when NOT in machine view
+        if (widget.focusedMachineId == null)
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.teal.shade50, Colors.teal.shade100],
               ),
-            ],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.teal.shade200, width: 1),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.analytics_outlined, color: Colors.teal.shade700, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Monitoring ${_machines.length} machine(s)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal.shade900,
+                        ),
+                      ),
+                      Text(
+                        'Active: ${_machines.where((m) => !m.isArchived).length} • Disabled: ${_machines.where((m) => m.isArchived).length}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.teal.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
 
         // Machine Statistics Cards
         ..._machines.map((machine) => _buildMachineSection(machine)),
@@ -247,6 +277,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildMachineSection(MachineModel machine) {
+    // ⭐ Simplified card for machine view (no header needed)
+    if (widget.focusedMachineId != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          children: [
+            OxygenStatsView(machineId: machine.machineId),
+            const SizedBox(height: 12),
+            TemperatureStatsView(machineId: machine.machineId),
+            const SizedBox(height: 12),
+            MoistureStatsView(machineId: machine.machineId),
+          ],
+        ),
+      );
+    }
+
+    // ⭐ Full card with header for multi-machine view
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(

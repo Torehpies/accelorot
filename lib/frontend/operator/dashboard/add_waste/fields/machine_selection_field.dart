@@ -4,12 +4,14 @@ import '../../../../../services/machine_services/firestore_machine_service.dart'
 
 class MachineSelectionField extends StatelessWidget {
   final String? selectedMachineId;
-  final Function(String?) onChanged;
+  final Function(String?)? onChanged;
+  final bool isLocked;
 
   const MachineSelectionField({
     super.key,
     required this.selectedMachineId,
-    required this.onChanged,
+    this.onChanged,
+    this.isLocked = false, 
   });
 
   @override
@@ -46,14 +48,19 @@ class MachineSelectionField extends StatelessWidget {
               horizontal: 12,
               vertical: 8,
             ),
+         
+            suffixIcon: isLocked
+                ? const Icon(Icons.lock, size: 18, color: Colors.grey)
+                : null,
           ),
           items: machines.map((machine) {
             return DropdownMenuItem<String>(
               value: machine.machineId,
+              enabled: !isLocked, 
               child: Text(machine.machineName),
             );
           }).toList(),
-          onChanged: onChanged,
+          onChanged: isLocked ? null : onChanged, // 
         );
       },
     );

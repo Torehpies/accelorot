@@ -11,12 +11,13 @@ import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
+  final String? preSelectedMachineId; 
 
-  
   const AddWasteProduct({
     super.key,
-
+    this.preSelectedMachineId,
   });
+
 
   // Builds and displays the Add Waste Product dialog.
   @override
@@ -40,6 +41,12 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     _quantityController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+    @override
+  void initState() {
+    super.initState();
+
+    _selectedMachineId = widget.preSelectedMachineId;
   }
 
   // Capitalizes the first letter of a given category name.
@@ -205,7 +212,10 @@ void _handleSubmit() async {
               const SizedBox(height: 16),
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
-                onChanged: (value) => setState(() => _selectedMachineId = value),
+                onChanged: widget.preSelectedMachineId == null
+                    ? (value) => setState(() => _selectedMachineId = value)
+                    : null, // ⭐ Disable if pre-selected
+                isLocked: widget.preSelectedMachineId != null,
               ),
               const SizedBox(height: 16),
               QuantityField(
