@@ -84,10 +84,10 @@ class AlertsSection extends StatelessWidget {
                   children: [
                     FilterBox(
                       icon: Icons.thermostat,
-                      label: 'Temp',
-                      filterValue: 'Temp',
+                      label: 'Temperature',
+                      filterValue: 'Temperature',
                       destination: AlertsScreen(
-                        initialFilter: 'Temp',
+                        initialFilter: 'Temperature',
                         
                         focusedMachineId: focusedMachineId, 
                       ),
