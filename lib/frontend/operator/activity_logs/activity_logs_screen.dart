@@ -15,7 +15,7 @@ class ActivityLogsScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text(
           "Activity Logs",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
       ),
