@@ -88,12 +88,12 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
 
             debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
           } else {
-            readings.add(lastKnownValue ?? 0.0);
-            debugPrint('⚠️ $dateKey – no readings, using fallback: ${lastKnownValue ?? 0.0}');
+            readings.add(0.0);
+            debugPrint('⚠️ $dateKey – no readings, using 0.0');
           }
         } else {
-          readings.add(lastKnownValue ?? 0.0);
-          debugPrint('⚠️ $dateKey – not in data, using fallback: ${lastKnownValue ?? 0.0}');
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – no readings, using 0.0');
         }
       }
 

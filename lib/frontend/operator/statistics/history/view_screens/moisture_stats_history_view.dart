@@ -82,7 +82,6 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
             readings.add(dailyAvg);
             lastKnownValue = dailyAvg;
 
-            // Track last update timestamp
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;
               if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
@@ -92,12 +91,12 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
 
             debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
           } else {
-            readings.add(lastKnownValue ?? 0.0);
-            debugPrint('⚠️ $dateKey – no readings, using fallback: ${lastKnownValue ?? 0.0}');
+            readings.add(0.0);
+            debugPrint('⚠️ $dateKey – no readings, using 0.0');
           }
         } else {
-          readings.add(lastKnownValue ?? 0.0);
-          debugPrint('⚠️ $dateKey – not in data, using fallback: ${lastKnownValue ?? 0.0}');
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – not in data, using 0.0');
         }
       }
 
