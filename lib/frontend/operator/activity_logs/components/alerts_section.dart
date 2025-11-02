@@ -4,11 +4,13 @@ import '../view_screens/alerts_screen.dart';
 import '../widgets/filter_box.dart';
 
 class AlertsSection extends StatelessWidget {
-  final String? viewingOperatorId; // ⭐ NEW
+
+  final String? focusedMachineId;
 
   const AlertsSection({
     super.key,
-    this.viewingOperatorId, // ⭐ NEW
+
+    this.focusedMachineId, 
   });
 
   @override
@@ -47,7 +49,8 @@ class AlertsSection extends StatelessWidget {
                       Navigator.of(context).push(
                         SlidePageRoute(
                           page: AlertsScreen(
-                            viewingOperatorId: viewingOperatorId, 
+
+                            focusedMachineId: focusedMachineId, 
                           ),
                         ),
                       );
@@ -75,7 +78,8 @@ class AlertsSection extends StatelessWidget {
                       filterValue: 'Temp',
                       destination: AlertsScreen(
                         initialFilter: 'Temp',
-                        viewingOperatorId: viewingOperatorId,
+                        
+                        focusedMachineId: focusedMachineId, 
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -85,7 +89,8 @@ class AlertsSection extends StatelessWidget {
                       filterValue: 'Moisture',
                       destination: AlertsScreen(
                         initialFilter: 'Moisture',
-                        viewingOperatorId: viewingOperatorId, 
+                       
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -95,7 +100,8 @@ class AlertsSection extends StatelessWidget {
                       filterValue: 'Oxygen',
                       destination: AlertsScreen(
                         initialFilter: 'Oxygen',
-                        viewingOperatorId: viewingOperatorId, 
+                        
+                        focusedMachineId: focusedMachineId,
                       ),
                     ),
                   ],

@@ -214,7 +214,7 @@ void _handleSubmit() async {
                 selectedMachineId: _selectedMachineId,
                 onChanged: widget.preSelectedMachineId == null
                     ? (value) => setState(() => _selectedMachineId = value)
-                    : null, // ⭐ Disable if pre-selected
+                    : null, 
                 isLocked: widget.preSelectedMachineId != null,
               ),
               const SizedBox(height: 16),

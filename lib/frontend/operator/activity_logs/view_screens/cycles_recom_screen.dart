@@ -7,7 +7,7 @@ class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
     super.key, 
     super.initialFilter,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   });
 
   @override
@@ -16,7 +16,9 @@ class CyclesRecomScreen extends BaseActivityScreen {
 
 class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
-  String get screenTitle => 'Cycles & Recommendations';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Cycles & Recommendations'
+      : 'Cycles & Recommendations'; // ⭐ Dynamic title
 
   @override
   List<String> get filters => const ['All', 'Recoms', 'Cycles'];

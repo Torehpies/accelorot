@@ -3,11 +3,13 @@ import '../view_screens/cycles_recom_screen.dart';
 import '../widgets/slide_page_route.dart';
 
 class CyclesRecomSection extends StatelessWidget {
-  final String? viewingOperatorId; 
+
+  final String? focusedMachineId; 
 
   const CyclesRecomSection({
     super.key,
-    this.viewingOperatorId,
+
+    this.focusedMachineId,
   });
 
   @override
@@ -15,7 +17,11 @@ class CyclesRecomSection extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          SlidePageRoute(page: CyclesRecomScreen(viewingOperatorId: viewingOperatorId,)),
+          SlidePageRoute(
+            page: CyclesRecomScreen(
+              focusedMachineId: focusedMachineId,
+            ),
+          ),
         );
       },
       child: SizedBox(

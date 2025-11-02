@@ -63,7 +63,10 @@ class _MainNavigationState extends State<MainNavigation> {
     // ⭐ Initialize screens with focused machine if provided
     _screens = [
       HomeScreen(focusedMachine: widget.focusedMachine),
-      ActivityLogsNavigator(key: _activityNavigatorKey),
+      ActivityLogsNavigator(
+        key: _activityNavigatorKey,
+        focusedMachineId: widget.focusedMachine?.machineId, // ⭐ Pass machine filter
+      ),
       StatisticsScreen(focusedMachineId: widget.focusedMachine?.machineId),
       const OperatorMachineScreen(),
       const ProfileScreen(),     

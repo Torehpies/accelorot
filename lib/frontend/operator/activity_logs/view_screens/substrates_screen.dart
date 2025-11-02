@@ -7,7 +7,9 @@ class SubstratesScreen extends BaseActivityScreen {
   const SubstratesScreen({
     super.key, 
     super.initialFilter,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId
+    
+
   });
 
   @override
@@ -16,7 +18,9 @@ class SubstratesScreen extends BaseActivityScreen {
 
 class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
-  String get screenTitle => 'Substrate Logs';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Substrate Logs'
+      : 'Substrate Logs'; 
 
   @override
   List<String> get filters => const ['All', 'Greens', 'Browns', 'Compost'];
