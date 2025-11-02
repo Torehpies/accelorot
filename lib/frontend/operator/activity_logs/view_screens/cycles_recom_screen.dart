@@ -1,3 +1,4 @@
+//lib/frontend/operator/activity_logs/view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -7,7 +8,7 @@ class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
     super.key, 
     super.initialFilter,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   });
 
   @override
@@ -16,7 +17,9 @@ class CyclesRecomScreen extends BaseActivityScreen {
 
 class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
-  String get screenTitle => 'Cycles & Recommendations';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Cycles & Recommendations'
+      : 'Cycles & Recommendations'; // ⭐ Dynamic title
 
   @override
   List<String> get filters => const ['All', 'Recoms', 'Cycles'];

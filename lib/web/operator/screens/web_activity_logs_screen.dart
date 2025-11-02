@@ -7,6 +7,7 @@ import '../../../frontend/operator/activity_logs/web/web_cycles_recom_section.da
 
 // ===== Web Detail Panel Component (Embedded) =====
 class WebDetailPanel extends StatelessWidget {
+  
   final Widget child;
   final String title;
   final VoidCallback onClose;
@@ -75,9 +76,10 @@ class WebDetailPanel extends StatelessWidget {
 
 // ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
-  final String? viewingOperatorId;
+  final bool shouldRefresh;
 
-  const WebActivityLogsScreen({super.key, this.viewingOperatorId});
+  
+  const WebActivityLogsScreen({super.key, this.shouldRefresh = false});
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
@@ -265,18 +267,18 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(child: WebSubstrateSection()),
             const SizedBox(width: 24),
-            Expanded(child: WebAlertsSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(child: WebAlertsSection()),
           ],
         ),
         const SizedBox(height: 24),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(),
       ],
     );
   }
@@ -285,18 +287,18 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(child: WebSubstrateSection()),
             const SizedBox(width: 20),
-            Expanded(child: WebAlertsSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(child: WebAlertsSection()),
           ],
         ),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(),
       ],
     );
   }
@@ -305,13 +307,13 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(),
         const SizedBox(height: 20),
-        WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId),
+        WebSubstrateSection(),
         const SizedBox(height: 20),
-        WebAlertsSection(viewingOperatorId: widget.viewingOperatorId),
+        WebAlertsSection(),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(),
       ],
     );
   }
@@ -321,7 +323,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
         const SizedBox(height: 16),
-        WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId),
+        WebSubstrateSection(),
       ],
     );
   }
@@ -331,7 +333,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
         const SizedBox(height: 16),
-        WebAlertsSection(viewingOperatorId: widget.viewingOperatorId),
+        WebAlertsSection(),
       ],
     );
   }
@@ -341,7 +343,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
         const SizedBox(height: 16),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(),
       ],
     );
   }

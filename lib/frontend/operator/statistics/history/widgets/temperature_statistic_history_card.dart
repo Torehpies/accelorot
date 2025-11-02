@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 class TemperatureStatisticHistoryCard extends StatelessWidget {
   final double currentTemperature;
-  final List<double> dailyReadings; // ✅ Changed from hourlyReadings
+  final List<double> dailyReadings;
   final DateTime? lastUpdated;
   final List<String>? labels; 
 
@@ -14,7 +14,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     required this.dailyReadings,
     this.lastUpdated,
     this.labels,
-    
   });
 
   @override
@@ -25,21 +24,20 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
 
     final quality = _getQuality(currentTemperature);
     final color = _getColorForQuality(quality);
-    final now = DateTime.now();
     final dataLength = dailyReadings.length;
 
-    // ✅ Use strongly typed data class
     final List<_ChartPoint> temperatureData = [];
     final List<_ChartPoint> upperBound = [];
     final List<_ChartPoint> lowerBound = [];
 
-    // ✅ Generate past N days as labels (e.g., Mon, Tue, ...)
     for (int i = 0; i < dataLength; i++) {
-      final day = now.subtract(Duration(days: dataLength - 1 - i));
-      final dayLabel = DateFormat('MMM d').format(day); // 👉 e.g., "Oct 23"
-      temperatureData.add(_ChartPoint(dayLabel, dailyReadings[i]));
-      upperBound.add(_ChartPoint(dayLabel, 65.0));
-      lowerBound.add(_ChartPoint(dayLabel, 55.0));
+      final label = (labels != null && i < labels!.length) 
+          ? _formatLabel(labels![i]) 
+          : 'Day ${i + 1}';
+      
+      temperatureData.add(_ChartPoint(label, dailyReadings[i]));
+      upperBound.add(_ChartPoint(label, 65.0));
+      lowerBound.add(_ChartPoint(label, 55.0));
     }
 
     return Container(
@@ -60,12 +58,11 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Temperature (Daily)',
+                'Temperature',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium
@@ -80,7 +77,6 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               ),
             ],
           ),
-
           if (lastUpdated != null) ...[
             const SizedBox(height: 4),
             Text(
@@ -88,10 +84,7 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
-
           const SizedBox(height: 12),
-
-          // Quality indicator
           Row(
             children: [
               Container(
@@ -110,10 +103,7 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Ideal range and progress
           const Text(
             'Ideal Range: 55–65°C',
             style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
@@ -125,65 +115,72 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
           ),
-
           const SizedBox(height: 16),
-
-          const Text(
-            'Trend (Last 7 Days)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+          Text(
+            'Trend ($dataLength Days)',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           ),
           const SizedBox(height: 8),
-
           SizedBox(
             height: 120,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                interval: 1,
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 80,
-                interval: 10,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
-                labelStyle: const TextStyle(fontSize: 9),
-              ),
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              series: [
-                // Temperature line
-                LineSeries<_ChartPoint, String>(
-                  dataSource: temperatureData,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.orange,
-                  width: 2,
-                  markerSettings: const MarkerSettings(isVisible: true),
-                ),
-
-                // Upper bound
-                LineSeries<_ChartPoint, String>(
-                  dataSource: upperBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-
-                // Lower bound
-                LineSeries<_ChartPoint, String>(
-                  dataSource: lowerBound,
-                  xValueMapper: (data, _) => data.x,
-                  yValueMapper: (data, _) => data.y,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final calculatedWidth = dataLength * 50.0;
+                final chartWidth = calculatedWidth > constraints.maxWidth 
+                    ? calculatedWidth 
+                    : constraints.maxWidth;
+                
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: chartWidth,
+                    child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        labelStyle: const TextStyle(fontSize: 9),
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        interval: 1,
+                      ),
+                      primaryYAxis: NumericAxis(
+                        minimum: 0,
+                        maximum: 80,
+                        interval: 10,
+                        majorGridLines:
+                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        labelStyle: const TextStyle(fontSize: 9),
+                      ),
+                      plotAreaBorderWidth: 0,
+                      margin: EdgeInsets.zero,
+                      series: [
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: temperatureData,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.orange,
+                          width: 2,
+                          markerSettings: const MarkerSettings(isVisible: true),
+                        ),
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: upperBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                        LineSeries<_ChartPoint, String>(
+                          dataSource: lowerBound,
+                          xValueMapper: (data, _) => data.x,
+                          yValueMapper: (data, _) => data.y,
+                          color: Colors.red,
+                          dashArray: const [5, 5],
+                          width: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -244,11 +241,20 @@ class TemperatureStatisticHistoryCard extends StatelessWidget {
     return '${date.month}/${date.day}/${date.year} '
         '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
+
+  String _formatLabel(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM d').format(date);
+    } catch (e) {
+      return dateStr;
+    }
+  }
 }
 
-// ✅ Data model for chart points
 class _ChartPoint {
   final String x;
   final double y;
   _ChartPoint(this.x, this.y);
 }
+

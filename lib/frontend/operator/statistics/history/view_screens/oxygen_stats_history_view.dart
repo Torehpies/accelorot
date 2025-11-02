@@ -32,6 +32,14 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
     _fetchOxygenHistory();
   }
 
+  @override
+  void didUpdateWidget(OxygenStatsHistoryView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.range != widget.range) {
+      _fetchOxygenHistory();
+    }
+  }
+
   Future<void> _fetchOxygenHistory() async {
     try {
       setState(() {
@@ -53,25 +61,39 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
+      double? lastKnownValue;
 
-      for (var entry in dataByDay.entries) {
-        final dayValues = entry.value.map((d) => d['value'] as double).toList();
+      final daysDiff = end.difference(start).inDays + 1;
 
-        if (dayValues.isNotEmpty) {
-          final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
-          readings.add(dailyAvg);
-          labels.add(entry.key); // store only days with data
+      for (int i = 0; i < daysDiff; i++) {
+        final currentDay = start.add(Duration(days: i));
+        final dateKey = '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
+        
+        labels.add(dateKey);
 
-          for (var d in entry.value) {
-            final ts = d['timestamp'] as DateTime?;
-            if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
-              lastUpdate = ts;
+        if (dataByDay.containsKey(dateKey)) {
+          final dayValues = dataByDay[dateKey]!.map((d) => d['value'] as double).toList();
+
+          if (dayValues.isNotEmpty) {
+            final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
+            readings.add(dailyAvg);
+            lastKnownValue = dailyAvg;
+
+            for (var d in dataByDay[dateKey]!) {
+              final ts = d['timestamp'] as DateTime?;
+              if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
+                lastUpdate = ts;
+              }
             }
-          }
 
-          debugPrint('📊 ${entry.key} – dailyAvg: $dailyAvg, readings: $dayValues');
+            debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
+          } else {
+            readings.add(0.0);
+            debugPrint('⚠️ $dateKey – no readings, using 0.0');
+          }
         } else {
-          debugPrint('⚠️ ${entry.key} – no readings, skipping');
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – no readings, using 0.0');
         }
       }
 
@@ -103,11 +125,11 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
           currentOxygen: _currentOxygen,
           dailyReadings: _dailyReadings,
           lastUpdated: _lastUpdated,
-          labels: _labels, // only show days with readings
+          labels: _labels,
         ),
         const SizedBox(height: 8),
         Text(
-          'Showing ${_labels.length} days with data',
+          'Showing ${_labels.length} days',
           style: const TextStyle(fontSize: 12, color: Colors.grey),
           textAlign: TextAlign.center,
         ),

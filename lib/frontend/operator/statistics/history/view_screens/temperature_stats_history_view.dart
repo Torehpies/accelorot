@@ -34,6 +34,14 @@ class _TemperatureStatsHistoryViewState
     _fetchTemperatureHistory();
   }
 
+  @override
+  void didUpdateWidget(TemperatureStatsHistoryView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.range != widget.range) {
+      _fetchTemperatureHistory();
+    }
+  }
+
   Future<void> _fetchTemperatureHistory() async {
     try {
       setState(() {
@@ -55,25 +63,39 @@ class _TemperatureStatsHistoryViewState
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
+      double? lastKnownValue;
 
-      for (var entry in dataByDay.entries) {
-        final dayValues = entry.value.map((d) => d['value'] as double).toList();
+      final daysDiff = end.difference(start).inDays + 1;
 
-        if (dayValues.isNotEmpty) {
-          final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
-          readings.add(dailyAvg);
-          labels.add(entry.key);
+      for (int i = 0; i < daysDiff; i++) {
+        final currentDay = start.add(Duration(days: i));
+        final dateKey = '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
+        
+        labels.add(dateKey);
 
-          for (var d in entry.value) {
-            final ts = d['timestamp'] as DateTime?;
-            if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
-              lastUpdate = ts;
+        if (dataByDay.containsKey(dateKey)) {
+          final dayValues = dataByDay[dateKey]!.map((d) => d['value'] as double).toList();
+
+          if (dayValues.isNotEmpty) {
+            final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
+            readings.add(dailyAvg);
+            lastKnownValue = dailyAvg;
+
+            for (var d in dataByDay[dateKey]!) {
+              final ts = d['timestamp'] as DateTime?;
+              if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
+                lastUpdate = ts;
+              }
             }
-          }
 
-          debugPrint('📊 ${entry.key} – dailyAvg: $dailyAvg, readings: $dayValues');
+            debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
+          } else {
+            readings.add(0.0);
+            debugPrint('⚠️ $dateKey – no readings, using 0.0');
+          }
         } else {
-          debugPrint('⚠️ ${entry.key} – no readings, skipping');
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – no readings, using 0.0');
         }
       }
 
@@ -109,7 +131,7 @@ class _TemperatureStatsHistoryViewState
         ),
         const SizedBox(height: 8),
         Text(
-          'Showing ${_labels.length} days with data',
+          'Showing ${_labels.length} days',
           style: const TextStyle(fontSize: 12, color: Colors.grey),
           textAlign: TextAlign.center,
         ),

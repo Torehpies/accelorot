@@ -33,6 +33,14 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
     _fetchMoistureHistory();
   }
 
+  @override
+  void didUpdateWidget(MoistureStatsHistoryView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.range != widget.range) {
+      _fetchMoistureHistory();
+    }
+  }
+
   Future<void> _fetchMoistureHistory() async {
     try {
       setState(() {
@@ -51,30 +59,44 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
         end: end,
       );
 
+      // ✅ Generate ALL days in the range, not just days with data
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
+      double? lastKnownValue;
 
-      // Only include days that have readings
-      for (var entry in dataByDay.entries) {
-        final dayValues = entry.value.map((d) => d['value'] as double).toList();
+      // Calculate number of days in range
+      final daysDiff = end.difference(start).inDays + 1;
 
-        if (dayValues.isNotEmpty) {
-          final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
-          readings.add(dailyAvg);
-          labels.add(entry.key); // store date label
+      for (int i = 0; i < daysDiff; i++) {
+        final currentDay = start.add(Duration(days: i));
+        final dateKey = '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
+        
+        labels.add(dateKey);
 
-          // track last update timestamp
-          for (var d in entry.value) {
-            final ts = d['timestamp'] as DateTime?;
-            if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
-              lastUpdate = ts;
+        if (dataByDay.containsKey(dateKey)) {
+          final dayValues = dataByDay[dateKey]!.map((d) => d['value'] as double).toList();
+          
+          if (dayValues.isNotEmpty) {
+            final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
+            readings.add(dailyAvg);
+            lastKnownValue = dailyAvg;
+
+            for (var d in dataByDay[dateKey]!) {
+              final ts = d['timestamp'] as DateTime?;
+              if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
+                lastUpdate = ts;
+              }
             }
-          }
 
-          debugPrint('📊 ${entry.key} – dailyAvg: $dailyAvg, readings: $dayValues');
+            debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
+          } else {
+            readings.add(0.0);
+            debugPrint('⚠️ $dateKey – no readings, using 0.0');
+          }
         } else {
-          debugPrint('⚠️ ${entry.key} – no readings, skipping');
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – not in data, using 0.0');
         }
       }
 
@@ -106,11 +128,11 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
           currentMoisture: _currentMoisture,
           dailyReadings: _dailyReadings,
           lastUpdated: _lastUpdated,
-          labels: _labels, // pass only dates with data
+          labels: _labels,
         ),
         const SizedBox(height: 8),
         Text(
-          'Showing ${_labels.length} days with data',
+          'Showing ${_labels.length} days',
           style: const TextStyle(fontSize: 12, color: Colors.grey),
           textAlign: TextAlign.center,
         ),
