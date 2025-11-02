@@ -1,27 +1,26 @@
 // lib/frontend/operator/activity_logs/components/substrate_section.dart
 import 'package:flutter/material.dart';
-import '../widgets/slide_page_route.dart';
-import '../view_screens/substrates_screen.dart';
 import '../widgets/filter_box.dart';
 
+// Section card for substrate activity logs with filter boxes
 class SubstrateSection extends StatelessWidget {
-  final String? viewingOperatorId;
+  final String? focusedMachineId; 
 
   const SubstrateSection({
     super.key,
-    this.viewingOperatorId,
+    this.focusedMachineId, 
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
-      child: Container( // Replaced Card with Container for shadow styling
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade300, width: 1.0),
-          boxShadow: [ // ⭐ ADDED: Shadow styling
+          boxShadow: [
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
@@ -34,7 +33,7 @@ class SubstrateSection extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Header
+              // Header with title and view all button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -54,13 +53,7 @@ class SubstrateSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).push(
-                        SlidePageRoute(
-                          page: SubstratesScreen(
-                            viewingOperatorId: viewingOperatorId,
-                          ),
-                        ),
-                      );
+                      Navigator.of(context).pushNamed('/substrates');
                     },
                     child: Text(
                       'View All >',
@@ -75,7 +68,7 @@ class SubstrateSection extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Boxes using unified FilterBox
+              // Filter boxes for substrate types
               Expanded(
                 child: Row(
                   children: [
@@ -83,30 +76,36 @@ class SubstrateSection extends StatelessWidget {
                       icon: Icons.eco,
                       label: 'Green',
                       filterValue: 'Greens',
-                      destination: SubstratesScreen(
-                        initialFilter: 'Greens',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/substrates',
+                          arguments: {'initialFilter': 'Greens'},
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.energy_savings_leaf,
                       label: 'Brown',
                       filterValue: 'Browns',
-                      destination: SubstratesScreen(
-                        initialFilter: 'Browns',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/substrates',
+                          arguments: {'initialFilter': 'Browns'},
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.recycling,
                       label: 'Compost',
                       filterValue: 'Compost',
-                      destination: SubstratesScreen(
-                        initialFilter: 'Compost',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/substrates',
+                          arguments: {'initialFilter': 'Compost'},
+                        );
+                      },
                     ),
                   ],
                 ),

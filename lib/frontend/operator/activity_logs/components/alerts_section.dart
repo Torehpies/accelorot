@@ -1,27 +1,26 @@
 // lib/frontend/operator/activity_logs/components/alerts_section.dart
 import 'package:flutter/material.dart';
-import '../widgets/slide_page_route.dart';
-import '../view_screens/alerts_screen.dart';
 import '../widgets/filter_box.dart';
 
+// Section card for alert logs with filter boxes
 class AlertsSection extends StatelessWidget {
-  final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const AlertsSection({
     super.key,
-    this.viewingOperatorId,
+    this.focusedMachineId, 
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 200,
-      child: Container( // Replaced Card with Container to use BoxDecoration for shadow
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade300, width: 1.0),
-          boxShadow: [ // ⭐ ADDED: Shadow styling from FilterBox
+          boxShadow: [
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
@@ -34,7 +33,7 @@ class AlertsSection extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Header
+              // Header with title and view all button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -55,13 +54,7 @@ class AlertsSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).push(
-                        SlidePageRoute(
-                          page: AlertsScreen(
-                            viewingOperatorId: viewingOperatorId,
-                          ),
-                        ),
-                      );
+                      Navigator.of(context).pushNamed('/alerts');
                     },
                     child: Text(
                       'View All >',
@@ -76,7 +69,7 @@ class AlertsSection extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Boxes using unified FilterBox
+              // Filter boxes for alert types
               Expanded(
                 child: Row(
                   children: [
@@ -84,30 +77,36 @@ class AlertsSection extends StatelessWidget {
                       icon: Icons.thermostat,
                       label: 'Temp',
                       filterValue: 'Temp',
-                      destination: AlertsScreen(
-                        initialFilter: 'Temp',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/alerts',
+                          arguments: {'initialFilter': 'Temp'},
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.water_drop,
                       label: 'Moisture',
                       filterValue: 'Moisture',
-                      destination: AlertsScreen(
-                        initialFilter: 'Moisture',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/alerts',
+                          arguments: {'initialFilter': 'Moisture'},
+                        );
+                      },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.bubble_chart,
                       label: 'Oxygen',
                       filterValue: 'Oxygen',
-                      destination: AlertsScreen(
-                        initialFilter: 'Oxygen',
-                        viewingOperatorId: viewingOperatorId,
-                      ),
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
+                          '/alerts',
+                          arguments: {'initialFilter': 'Oxygen'},
+                        );
+                      },
                     ),
                   ],
                 ),
