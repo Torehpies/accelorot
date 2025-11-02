@@ -38,7 +38,7 @@ class MachineSelectionField extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          value: selectedMachineId,
+          initialValue: selectedMachineId,
           decoration: InputDecoration(
             labelText: 'Select Machine',
             border: OutlineInputBorder(

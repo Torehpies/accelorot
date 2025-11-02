@@ -79,6 +79,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
   }
 
   // Builds the Activity Logs card layout including header and log list.
+  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 3,

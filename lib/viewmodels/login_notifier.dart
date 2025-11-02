@@ -39,7 +39,6 @@ class LoginNotifier extends _$LoginNotifier {
   }
 
   void handleForgotPassword() {
-    // TODO
   }
 
   Future<LoginFlowResult> loginUser({

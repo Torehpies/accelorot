@@ -1,10 +1,12 @@
 import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
 import 'firestore_collections.dart';
 import 'package:flutter/material.dart';
+//ignore: unused_import
 import 'firestore_helpers.dart';
 
 class FirestoreFetch {
   /// Validate that userId is provided (should never be null from service layer)
+  // ignore: unused_element
   static String _validateUserId(String? userId) {
     if (userId == null || userId.isEmpty) {
       throw Exception('User ID must be provided. This is a programming error - FirestoreActivityService should always resolve the user ID before calling fetch methods.');
