@@ -1,4 +1,4 @@
-//search_bar_widget.dart
+// lib/frontend/operator/machine_management/widgets/search_bar_widget.dart
 import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatefulWidget {

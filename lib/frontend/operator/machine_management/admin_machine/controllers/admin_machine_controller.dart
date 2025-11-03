@@ -9,7 +9,6 @@ class AdminMachineController extends ChangeNotifier {
   
   List<MachineModel> _allMachines = [];
   List<Map<String, dynamic>> _teamMembers = [];
-  final Map<String, bool> _expandedStates = {};
   bool _showArchived = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -59,9 +58,6 @@ class AdminMachineController extends ChangeNotifier {
   int get remainingCount {
     return filteredMachines.length - displayedMachines.length;
   }
-
-  // Check if machine is expanded
-  bool isExpanded(String machineId) => _expandedStates[machineId] ?? false;
 
   // ==================== INITIALIZATION ====================
   
@@ -167,17 +163,6 @@ class AdminMachineController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleExpanded(String machineId) {
-    _expandedStates[machineId] = !(_expandedStates[machineId] ?? false);
-    notifyListeners();
-  }
-
-  /// Collapse a specific card (used after archive/restore)
-  void _collapseCard(String machineId) {
-    _expandedStates[machineId] = false;
-    notifyListeners();
-  }
-
   void setSearchQuery(String query) {
     _searchQuery = query;
     resetPagination(); // Reset pagination when searching
@@ -231,6 +216,9 @@ class AdminMachineController extends ChangeNotifier {
       );
 
       await FirestoreMachineService.addMachine(machine);
+      
+      // Delay before refresh
+      await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
     } catch (e) {
       _errorMessage = 'Failed to add machine: $e';
@@ -263,6 +251,9 @@ class AdminMachineController extends ChangeNotifier {
       );
 
       await FirestoreMachineService.updateMachine(updatedMachine);
+      
+      // Delay before refresh
+      await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
     } catch (e) {
       _errorMessage = 'Failed to update machine: $e';
@@ -278,11 +269,10 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('You must be logged in to archive machines');
       }
 
-      // Collapse the card before archiving
-      _collapseCard(machineId);
+      // Delay before executing archive
+      await Future.delayed(const Duration(milliseconds: 300));
       
       await FirestoreMachineService.deleteMachine(machineId);
-      await refresh();
     } catch (e) {
       _errorMessage = 'Failed to archive machine: $e';
       notifyListeners();
@@ -297,11 +287,10 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('You must be logged in to restore machines');
       }
 
-      // Collapse the card before restoring
-      _collapseCard(machineId);
+      // Delay before executing restore
+      await Future.delayed(const Duration(milliseconds: 300));
       
       await FirestoreMachineService.restoreMachine(machineId);
-      await refresh();
     } catch (e) {
       _errorMessage = 'Failed to restore machine: $e';
       notifyListeners();
@@ -325,7 +314,7 @@ class AdminMachineController extends ChangeNotifier {
     notifyListeners();
   }
 
-    /// Check if a machine ID already exists (used by AddMachineModal)
+  /// Check if a machine ID already exists (used by AddMachineModal)
   Future<bool> machineExists(String machineId) async {
     try {
       return await FirestoreMachineService.machineExists(machineId);
@@ -334,5 +323,4 @@ class AdminMachineController extends ChangeNotifier {
       return false;
     }
   }
-
 }

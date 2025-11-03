@@ -1,3 +1,4 @@
+// lib/frontend/operator/machine_management/machine_view/view_confirmation.dart
 import 'package:flutter/material.dart';
 import '../../machine_management/models/machine_model.dart';
 import '../../main_navigation.dart';
