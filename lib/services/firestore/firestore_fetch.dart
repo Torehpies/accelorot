@@ -211,7 +211,7 @@ class FirestoreFetch {
         getSubstrates(userId),
         getAlerts(userId),
         getCyclesRecom(userId),
-        getReports(userId), // ⭐ Now includes reports
+        getReports(userId), // Now includes reports
       ]);
 
       // Combine all lists

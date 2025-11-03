@@ -26,7 +26,7 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey _filterKey = GlobalKey();
-  
+
   // Track which view to show
   bool _showReportsView = false;
 
@@ -66,10 +66,8 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => EditReportModal(
-        controller: _reportsController,
-        report: report,
-      ),
+      builder: (context) =>
+          EditReportModal(controller: _reportsController, report: report),
     );
   }
 
@@ -105,9 +103,15 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                   : null,
               automaticallyImplyLeading: false,
               title: Text(
-                _showReportsView ? 'Reports' : 'Machine Management',
+                _showReportsView
+                    ? 'Reports'
+                    : _machineController.showArchived
+                    ? 'Archived Machines'
+                    : 'Machine Management',
                 style: const TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold),
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               backgroundColor: Colors.teal,
               elevation: 0,
@@ -321,9 +325,7 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
 
   Widget _buildReportsContent() {
     if (_reportsController.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.teal),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.teal));
     }
 
     if (_reportsController.errorMessage != null) {
@@ -370,8 +372,11 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.report_outlined,
-                  size: 64, color: Colors.grey.shade300),
+              Icon(
+                Icons.report_outlined,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
               const SizedBox(height: 16),
               Text(
                 _reportsController.searchQuery.isNotEmpty
@@ -408,7 +413,8 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
               onPressed: _reportsController.loadMore,
               icon: const Icon(Icons.expand_more),
               label: Text(
-                  'Load More (${_reportsController.remainingCount} remaining)'),
+                'Load More (${_reportsController.remainingCount} remaining)',
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,

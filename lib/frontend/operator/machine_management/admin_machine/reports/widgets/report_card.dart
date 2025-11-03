@@ -69,7 +69,7 @@ class ReportCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      report.title,
+                      report.reportTypeLabel,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class ReportCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       // Status chip text
                       Text(
-                        '[${report.statusLabel}]',
+                        report.statusLabel,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -137,20 +137,10 @@ class ReportCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const SizedBox(width: 52), 
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          report.reportTypeLabel,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black54,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
                         // Machine info
                         Text(
                           'Machine: ${report.machineName ?? report.machineId}',
