@@ -1,4 +1,4 @@
-// widgets/activity_logs_helpers.dart
+// lib/frontend/operator/dashboard/add_waste/widgets/activity_logs_helpers.dart
 String formatTimestamp(DateTime date) {
   final month = monthString(date.month);
   final ampm = date.hour >= 12 ? 'PM' : 'AM';

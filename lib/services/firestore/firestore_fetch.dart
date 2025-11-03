@@ -1,4 +1,6 @@
+// lib/services/firestore/firestore_fetch.dart
 import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firestore_collections.dart';
 import 'package:flutter/material.dart';
 //ignore: unused_import
@@ -13,7 +15,8 @@ class FirestoreFetch {
     }
     return userId;
   }
-    static String _resolveUserId(String? userId) {
+  
+  static String _resolveUserId(String? userId) {
     if (userId == null || userId.isEmpty) {
       throw Exception('User ID must be provided');
     }
@@ -96,7 +99,53 @@ class FirestoreFetch {
     }
   }
 
-  // Fetch All Activities Combined
+  /// Fetch all reports from all machines the user can access
+  static Future<List<ActivityItem>> getReports([String? targetUserId]) async {
+    try {
+      final userId = _resolveUserId(targetUserId);
+      
+      // Fetch all machines (reports are stored per machine)
+      final machinesSnapshot = await FirebaseFirestore.instance
+          .collection('machines')
+          .get();
+
+      List<ActivityItem> allReports = [];
+
+      // Fetch reports from each machine
+      for (var machineDoc in machinesSnapshot.docs) {
+        try {
+          final reportsSnapshot = await FirebaseFirestore.instance
+              .collection('machines')
+              .doc(machineDoc.id)
+              .collection('reports')
+              .orderBy('createdAt', descending: true)
+              .get();
+
+          final reports = reportsSnapshot.docs.map((doc) {
+            final data = doc.data();
+            return ActivityItem.fromMap(data);
+          }).toList();
+
+          allReports.addAll(reports);
+        } catch (e) {
+          debugPrint('Error fetching reports for machine ${machineDoc.id}: $e');
+          // Continue to next machine even if one fails
+        }
+      }
+
+      // Sort all reports by timestamp
+      allReports.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      debugPrint('✅ Fetched ${allReports.length} reports across all machines');
+
+      return allReports;
+    } catch (e) {
+      debugPrint('❌ Error fetching reports: $e');
+      rethrow;
+    }
+  }
+
+  // Fetch All Activities Combined (substrates + alerts + cycles + reports)
   static Future<List<ActivityItem>> getAllActivities([String? targetUserId]) async {
     try {
       final userId = _resolveUserId(targetUserId);
@@ -106,23 +155,29 @@ class FirestoreFetch {
         getSubstrates(userId),
         getAlerts(userId),
         getCyclesRecom(userId),
+        getReports(userId), // ⭐ Now includes reports
       ]);
 
       // Combine all lists
       final allActivities = <ActivityItem>[
-        ...results[0],
-        ...results[1],
-        ...results[2],
+        ...results[0], // substrates
+        ...results[1], // alerts
+        ...results[2], // cycles
+        ...results[3], // reports
       ];
 
       // Sort by timestamp descending
       allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       debugPrint('✅ Fetched ${allActivities.length} total activities for user: $userId');
+      debugPrint('   - ${results[0].length} substrates');
+      debugPrint('   - ${results[1].length} alerts');
+      debugPrint('   - ${results[2].length} cycles');
+      debugPrint('   - ${results[3].length} reports');
       
       if (allActivities.isNotEmpty) {
         final first = allActivities.first;
-        debugPrint('   First activity: machineId=${first.machineId}, machineName=${first.machineName}, operator=${first.operatorName}');
+        debugPrint('   First activity: ${first.isReport ? "REPORT" : "WASTE"} - ${first.title}');
       }
 
       return allActivities;

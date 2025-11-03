@@ -294,4 +294,110 @@ class FirestoreUpload {
       rethrow;
     }
   }
+
+  /// Submit a machine report (maintenance, observation, safety)
+/// Stores in machines/{machineId}/reports/{reportId}
+static Future<void> submitReport(Map<String, dynamic> reportEntry, [String? targetUserId]) async {
+  try {
+    final userId = _resolveUserId(targetUserId);
+    final machineId = reportEntry['machineId'];
+    
+    if (machineId == null || machineId.toString().isEmpty) {
+      throw Exception('Machine ID is required');
+    }
+
+    final reportType = reportEntry['reportType'];
+    final priority = reportEntry['priority'];
+    final timestamp = reportEntry['timestamp'] as DateTime;
+    
+    // Fetch machine name
+    String? machineName;
+    try {
+      final machineDoc = await _firestore
+          .collection('machines')
+          .doc(machineId)
+          .get();
+      
+      if (machineDoc.exists) {
+        machineName = machineDoc.data()?['machineName'];
+      }
+    } catch (e) {
+      debugPrint('Error fetching machine name: $e');
+    }
+    
+    // Fetch user name and role
+    String userName = 'Unknown';
+    String userRole = 'Unknown';
+    try {
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        final firstName = userData?['firstname'] ?? '';
+        final lastName = userData?['lastname'] ?? '';
+        userName = '$firstName $lastName'.trim();
+        
+        if (userName.isEmpty) {
+          userName = userData?['email'] ?? 'Unknown';
+        }
+        
+        userRole = userData?['role'] ?? 'Unknown';
+      }
+    } catch (e) {
+      debugPrint('Error fetching user info: $e');
+    }
+
+    // Get icon and color based on report type and priority
+    final iconAndColor = FirestoreHelpers.getReportIconAndColor(reportType);
+    final priorityColor = FirestoreHelpers.getPriorityColor(priority);
+
+    // Create document ID: {reportType}_{timestamp}
+    final docId = '${reportType}_${timestamp.millisecondsSinceEpoch}';
+    
+    // Reference to machines/{machineId}/reports/{docId}
+    final docRef = _firestore
+        .collection('machines')
+        .doc(machineId)
+        .collection('reports')
+        .doc(docId);
+
+    final data = {
+      'reportType': reportType,
+      'title': reportEntry['title'],
+      'machineId': machineId,
+      'machineName': machineName ?? 'Unknown Machine',
+      'userId': userId,
+      'userName': userName,
+      'userRole': userRole,
+      'description': reportEntry['description'] ?? '',
+      'priority': priority,
+      'status': 'open', // Default status
+      'statusColor': priorityColor,
+      'icon': iconAndColor['iconCodePoint'],
+      'createdAt': Timestamp.fromDate(timestamp),
+      'resolvedAt': null,
+      'resolvedBy': null,
+    };
+
+    await docRef.set(data);
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final verify = await docRef.get();
+    if (!verify.exists) throw Exception('Report not saved');
+    
+    debugPrint('✅ Report submitted successfully');
+    debugPrint('   ReportId: $docId');
+    debugPrint('   Machine: ${machineName ?? 'Unknown'} ($machineId)');
+    debugPrint('   Submitted by: $userName ($userRole)');
+    debugPrint('   Priority: $priority');
+  } catch (e) {
+    debugPrint('❌ Error submitting report: $e');
+    rethrow;
+  }
+}
+
 }
