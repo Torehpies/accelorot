@@ -9,12 +9,9 @@ import 'add_waste/activity_logs_card.dart';
 import '../machine_management/models/machine_model.dart';
 
 class HomeScreen extends StatefulWidget {
-  final MachineModel? focusedMachine; 
+  final MachineModel? focusedMachine;
 
-  const HomeScreen({
-    super.key,
-    this.focusedMachine,
-  });
+  const HomeScreen({super.key, this.focusedMachine});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
-  
+
   // State lifted from CompostingProgressCard - shared between cards
   CompostBatch? _currentBatch;
 
@@ -40,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentBatch = null;
     });
   }
-      
+
   @override
   Widget build(BuildContext context) {
     final bool isMachineView = widget.focusedMachine != null;
@@ -48,11 +45,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       // ⭐ ALWAYS show AppBar (let MainNavigation handle hiding it if needed)
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        automaticallyImplyLeading: isMachineView, // Show back button in machine view
+        automaticallyImplyLeading:
+            isMachineView, // Show back button in machine view
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -74,7 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.filter_alt,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -93,30 +98,28 @@ class _HomeScreenState extends State<HomeScreen> {
               // ⭐ Show these cards regardless of machine view
               const EnvironmentalSensorsView(),
               const SizedBox(height: 16),
-              
+
               // Composting Progress Card - now receives batch and callbacks
               CompostingProgressCard(
                 currentBatch: _currentBatch,
                 onBatchStarted: _handleBatchStarted,
                 onBatchCompleted: _handleBatchCompleted,
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // System Card - Drum rotation controls (receives current batch)
-              SystemCard(
-                currentBatch: _currentBatch,
-              ),
-              
+              SystemCard(currentBatch: _currentBatch),
+
               const SizedBox(height: 16),
-              
+
               // Activity Logs Card - Recent waste activities
               ActivityLogsCard(
                 key: _activityLogsKey,
                 focusedMachineId: widget.focusedMachine?.machineId,
               ),
               const SizedBox(height: 16),
-              
+
               // It should only be shown in its own tab in MainNavigation
             ],
           ),
