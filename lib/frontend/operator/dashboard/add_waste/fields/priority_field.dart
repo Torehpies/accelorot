@@ -2,24 +2,30 @@
 
 import 'package:flutter/material.dart';
 
+
 class PriorityField extends StatelessWidget {
   final String? selectedPriority;
   final Function(String?) onChanged;
+  final String? errorText;  // ADDED
+
 
   const PriorityField({
     super.key,
     required this.selectedPriority,
     required this.onChanged,
+    this.errorText,  // ADDED
   });
+
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       initialValue: selectedPriority,
       isExpanded: true,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(  // CHANGED: const to non-const
         labelText: 'Select priority',
-        prefixIcon: Icon(Icons.priority_high, size: 18),
+        prefixIcon: const Icon(Icons.priority_high, size: 18),
+        errorText: errorText,  // ADDED
       ),
       items: const [
         DropdownMenuItem(
@@ -49,16 +55,6 @@ class PriorityField extends StatelessWidget {
               Icon(Icons.circle, size: 10, color: Color(0xFFFF9800)),
               SizedBox(width: 8),
               Text('High', style: TextStyle(fontSize: 14)),
-            ],
-          ),
-        ),
-        DropdownMenuItem(
-          value: 'critical',
-          child: Row(
-            children: [
-              Icon(Icons.circle, size: 10, color: Color(0xFFF44336)),
-              SizedBox(width: 8),
-              Text('Critical', style: TextStyle(fontSize: 14)),
             ],
           ),
         ),

@@ -10,8 +10,10 @@ import 'fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class AddWasteProduct extends StatefulWidget {
   final String? preSelectedMachineId; 
+
 
   const AddWasteProduct({
     super.key,
@@ -19,21 +21,30 @@ class AddWasteProduct extends StatefulWidget {
   });
 
 
+
   // Builds and displays the Add Waste Product dialog.
   @override
   State<AddWasteProduct> createState() => _AddWasteProductState();
 }
 
+
 class _AddWasteProductState extends State<AddWasteProduct> {
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
+
 
   String? _selectedWasteCategory;
   String? _selectedPlantType;
   String? _selectedMachineId;
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
+  
+  // Error state variables
   String? _quantityError;
+  String? _wasteCategoryError;
+  String? _plantTypeError;
+  String? _machineError;
+
 
   // Disposes controllers to free memory when widget is removed.
   @override
@@ -46,14 +57,17 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   void initState() {
     super.initState();
 
+
     _selectedMachineId = widget.preSelectedMachineId;
   }
+
 
   // Capitalizes the first letter of a given category name.
   String _capitalizeCategory(String category) {
     if (category.isEmpty) return category;
     return category[0].toUpperCase() + category.substring(1);
   }
+
 
   // Validates the entered quantity and ensures it's within defined limits.
   String? _validateQuantity(String? value) {
@@ -65,34 +79,36 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return null;
   }
 
+
   // Ensures required fields are selected and valid before submission.
   bool _validateForm() {
-    if (_selectedWasteCategory == null) {
-      _showError('Please select waste category');
-      return false;
-    }
-    if (_selectedPlantType == null) {
-      _showError('Please select target plant type');
-      return false;
-    }
-    if (_selectedMachineId == null) {
-      _showError('Please select a machine');
-      return false;
-    }
-    final qtyError = _validateQuantity(_quantityController.text);
-    if (qtyError != null) {
-      _showError(qtyError);
-      return false;
-    }
-    return true;
+    setState(() {
+      // Clear all errors first
+      _wasteCategoryError = null;
+      _plantTypeError = null;
+      _machineError = null;
+      _quantityError = null;
+
+      // Validate each field and set error messages
+      if (_selectedWasteCategory == null) {
+        _wasteCategoryError = 'Please select waste category';
+      }
+      if (_selectedPlantType == null) {
+        _plantTypeError = 'Please select target plant type';
+      }
+      if (_selectedMachineId == null) {
+        _machineError = 'Please select a machine';
+      }
+      _quantityError = _validateQuantity(_quantityController.text);
+    });
+
+    // Return true only if all errors are null
+    return _wasteCategoryError == null &&
+           _plantTypeError == null &&
+           _machineError == null &&
+           _quantityError == null;
   }
 
-  // Displays a brief error message using SnackBar.
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    );
-  }
 
   // Retrieves the display label for a given plant type value.
   String getPlantLabel(String? value) {
@@ -105,9 +121,11 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return '';
   }
 
+
   // Handles form submission, validates input, and saves data to Firestore.
 void _handleSubmit() async {
   if (!_validateForm()) return;
+
 
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) {
@@ -120,6 +138,7 @@ void _handleSubmit() async {
     );
     return;
   }
+
 
     final wasteEntry = {
       'category': _capitalizeCategory(_selectedWasteCategory!),
@@ -136,6 +155,7 @@ void _handleSubmit() async {
       // 'machineName': _selectedMachineName,
     };
 
+
     try {
       await FirestoreActivityService.addWasteProduct(wasteEntry);
       await Future.delayed(const Duration(milliseconds: 1000));
@@ -148,6 +168,7 @@ void _handleSubmit() async {
       );
     }
   }
+
 
   // Builds the Add Waste Product dialog layout and structure.
   @override
@@ -200,22 +221,31 @@ void _handleSubmit() async {
                 onCategoryChanged: (value) => setState(() {
                   _selectedWasteCategory = value;
                   _selectedPlantType = null;
+                  _wasteCategoryError = null; // Clear error on change
                 }),
+                errorText: _wasteCategoryError,
               ),
               const SizedBox(height: 16),
               PlantTypeSection(
                 selectedWasteCategory: _selectedWasteCategory,
                 selectedPlantType: _selectedPlantType,
-                onPlantTypeChanged: (value) =>
-                    setState(() => _selectedPlantType = value),
+                onPlantTypeChanged: (value) => setState(() {
+                  _selectedPlantType = value;
+                  _plantTypeError = null; // Clear error on change
+                }),
+                errorText: _plantTypeError,
               ),
               const SizedBox(height: 16),
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
                 onChanged: widget.preSelectedMachineId == null
-                    ? (value) => setState(() => _selectedMachineId = value)
+                    ? (value) => setState(() {
+                        _selectedMachineId = value;
+                        _machineError = null; // Clear error on change
+                      })
                     : null, 
                 isLocked: widget.preSelectedMachineId != null,
+                errorText: _machineError,
               ),
               const SizedBox(height: 16),
               QuantityField(
@@ -231,7 +261,7 @@ void _handleSubmit() async {
               const SizedBox(height: 24),
               SubmitButton(
                 onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(), // Provide your desired ButtonStyle here
+                style: ElevatedButton.styleFrom(),
               ),
             ],
           ),

@@ -124,8 +124,6 @@ class FirestoreHelpers {
         return 'Medium';
       case 'high':
         return 'High';
-      case 'critical':
-        return 'Critical';
       default:
         return 'Unknown';
     }

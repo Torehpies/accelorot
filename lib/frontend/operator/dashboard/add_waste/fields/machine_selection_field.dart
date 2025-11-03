@@ -1,18 +1,25 @@
+// lib/frontend/operator/dashboard/add_waste/fields/machine_selection_field.dart
+
 import 'package:flutter/material.dart';
 import '../../../../operator/machine_management/models/machine_model.dart';
 import '../../../../../services/machine_services/firestore_machine_service.dart';
+
 
 class MachineSelectionField extends StatelessWidget {
   final String? selectedMachineId;
   final Function(String?)? onChanged;
   final bool isLocked;
+  final String? errorText;  // ADDED
+
 
   const MachineSelectionField({
     super.key,
     required this.selectedMachineId,
     this.onChanged,
-    this.isLocked = false, 
+    this.isLocked = false,
+    this.errorText,  // ADDED
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +32,11 @@ class MachineSelectionField extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
+
         if (snapshot.hasError) {
           return const Text('Error loading machines');
         }
+
 
         final machines = snapshot.data ?? [];
         if (machines.isEmpty) {
@@ -36,6 +45,7 @@ class MachineSelectionField extends StatelessWidget {
             style: TextStyle(color: Colors.red),
           );
         }
+
 
         return DropdownButtonFormField<String>(
           initialValue: selectedMachineId,
@@ -48,19 +58,19 @@ class MachineSelectionField extends StatelessWidget {
               horizontal: 12,
               vertical: 8,
             ),
-         
             suffixIcon: isLocked
                 ? const Icon(Icons.lock, size: 18, color: Colors.grey)
                 : null,
+            errorText: errorText,  // ADDED
           ),
           items: machines.map((machine) {
             return DropdownMenuItem<String>(
               value: machine.machineId,
-              enabled: !isLocked, 
+              enabled: !isLocked,
               child: Text(machine.machineName),
             );
           }).toList(),
-          onChanged: isLocked ? null : onChanged, // 
+          onChanged: isLocked ? null : onChanged,
         );
       },
     );

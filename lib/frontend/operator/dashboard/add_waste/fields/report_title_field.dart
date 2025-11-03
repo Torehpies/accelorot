@@ -2,28 +2,35 @@
 
 import 'package:flutter/material.dart';
 
+
 class ReportTitleField extends StatelessWidget {
   final TextEditingController controller;
   final String? errorText;
+  final ValueChanged<String>? onChanged;
+
 
   const ReportTitleField({
     super.key,
     required this.controller,
     this.errorText,
+    this.onChanged,
   });
+
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      maxLength: 100,
       decoration: InputDecoration(
-        labelText: 'Brief title for the report',
+        labelText: 'Report Title',
+        hintText: 'Enter a descriptive title',
         prefixIcon: const Icon(Icons.title, size: 18),
         errorText: errorText,
-        counterText: '',
-        hintText: 'e.g., Motor making unusual noise',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
       ),
+      onChanged: onChanged,
     );
   }
 }

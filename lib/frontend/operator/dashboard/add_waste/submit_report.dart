@@ -10,17 +10,21 @@ import 'fields/description_field.dart';
 import 'fields/submit_button.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
+
 class SubmitReport extends StatefulWidget {
   final String? preSelectedMachineId;
+
 
   const SubmitReport({
     super.key,
     this.preSelectedMachineId,
   });
 
+
   @override
   State<SubmitReport> createState() => _SubmitReportState();
 }
+
 
 class _SubmitReportState extends State<SubmitReport> {
   String? _selectedReportType;
@@ -28,7 +32,13 @@ class _SubmitReportState extends State<SubmitReport> {
   String? _selectedPriority;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  
+  // Error state variables for each field
   String? _titleError;
+  String? _reportTypeError;
+  String? _machineError;
+  String? _priorityError;
+
 
   @override
   void initState() {
@@ -36,12 +46,14 @@ class _SubmitReportState extends State<SubmitReport> {
     _selectedMachineId = widget.preSelectedMachineId;
   }
 
+
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
+
 
   String? _validateTitle(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -53,38 +65,39 @@ class _SubmitReportState extends State<SubmitReport> {
     return null;
   }
 
+
   bool _validateForm() {
-    if (_selectedReportType == null) {
-      _showError('Please select a report type');
-      return false;
-    }
-    if (_selectedMachineId == null) {
-      _showError('Please select a machine');
-      return false;
-    }
-    if (_selectedPriority == null) {
-      _showError('Please select a priority level');
-      return false;
-    }
-    final titleError = _validateTitle(_titleController.text);
-    if (titleError != null) {
-      _showError(titleError);
-      return false;
-    }
-    return true;
+    setState(() {
+      // Clear all errors first
+      _reportTypeError = null;
+      _machineError = null;
+      _priorityError = null;
+      _titleError = null;
+
+      // Validate each field and set error messages
+      if (_selectedReportType == null) {
+        _reportTypeError = 'Please select a report type';
+      }
+      if (_selectedMachineId == null) {
+        _machineError = 'Please select a machine';
+      }
+      if (_selectedPriority == null) {
+        _priorityError = 'Please select a priority level';
+      }
+      _titleError = _validateTitle(_titleController.text);
+    });
+
+    // Return true only if all errors are null
+    return _reportTypeError == null &&
+           _machineError == null &&
+           _priorityError == null &&
+           _titleError == null;
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   void _handleSubmit() async {
     if (!_validateForm()) return;
+
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -98,6 +111,7 @@ class _SubmitReportState extends State<SubmitReport> {
       return;
     }
 
+
     final report = {
       'reportType': _selectedReportType!,
       'title': _titleController.text.trim(),
@@ -107,6 +121,7 @@ class _SubmitReportState extends State<SubmitReport> {
       'timestamp': DateTime.now(),
       'userId': user.uid,
     };
+
 
     try {
       await FirestoreActivityService.submitReport(report);
@@ -120,6 +135,7 @@ class _SubmitReportState extends State<SubmitReport> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,40 +184,63 @@ class _SubmitReportState extends State<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
+
               // Report Type
               ReportTypeField(
                 selectedReportType: _selectedReportType,
-                onChanged: (value) => setState(() => _selectedReportType = value),
+                onChanged: (value) => setState(() {
+                  _selectedReportType = value;
+                  _reportTypeError = null; // Clear error on change
+                }),
+                errorText: _reportTypeError,
               ),
               const SizedBox(height: 16),
+
 
               // Title
               ReportTitleField(
                 controller: _titleController,
                 errorText: _titleError,
+                onChanged: (value) {
+                  setState(() {
+                    _titleError = null; // Clear error on change
+                  });
+                },
               ),
               const SizedBox(height: 16),
+
 
               // Machine Selection
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
                 onChanged: widget.preSelectedMachineId == null
-                    ? (value) => setState(() => _selectedMachineId = value)
+                    ? (value) => setState(() {
+                        _selectedMachineId = value;
+                        _machineError = null; // Clear error on change
+                      })
                     : null,
                 isLocked: widget.preSelectedMachineId != null,
+                errorText: _machineError,
               ),
               const SizedBox(height: 16),
+
 
               // Priority
               PriorityField(
                 selectedPriority: _selectedPriority,
-                onChanged: (value) => setState(() => _selectedPriority = value),
+                onChanged: (value) => setState(() {
+                  _selectedPriority = value;
+                  _priorityError = null; // Clear error on change
+                }),
+                errorText: _priorityError,
               ),
               const SizedBox(height: 16),
+
 
               // Description
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
+
 
               // Submit Button
               SubmitButton(
