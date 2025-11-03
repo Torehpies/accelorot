@@ -38,7 +38,7 @@ class DesktopLoginView extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Where rot meets acceleration eme.',
+                      'Where rot meets acceleration.',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 18,

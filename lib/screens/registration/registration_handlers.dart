@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
@@ -124,11 +125,11 @@ class RegistrationFormContent extends ConsumerWidget {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2B7326)),
+    //    borderSide: const BorderSide(color: Color(0xFF2B7326)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+        borderSide: const BorderSide(color: Colors.teal, width: 2),
       ),
     );
 
@@ -136,7 +137,7 @@ class RegistrationFormContent extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Center(child: _buildLogo()),
+        if (!isDesktop) Center(child: _buildLogo()),
         const SizedBox(height: 10),
         Center(child: _buildTitle(theme)),
         SizedBox(height: isDesktop ? 10 : 32),
@@ -228,7 +229,7 @@ class RegistrationFormContent extends ConsumerWidget {
                 validator: handlers.confirmPasswordValidator,
               ),
               const SizedBox(height: 16),
-							buildTeamDropdown(context, isDesktop),
+              buildTeamDropdown(context, isDesktop),
               const SizedBox(height: 16),
 
               SizedBox(
@@ -242,7 +243,7 @@ class RegistrationFormContent extends ConsumerWidget {
               const SizedBox(height: 24),
 
               const OrDivider(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Google Sign-In Button
               GoogleSignInButton(
@@ -251,7 +252,7 @@ class RegistrationFormContent extends ConsumerWidget {
               ),
 
               // Sign In Link
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -293,9 +294,16 @@ class RegistrationFormContent extends ConsumerWidget {
         return DropdownButtonFormField<String>(
           key: const ValueKey('team-dropdown'),
           initialValue: handlers.selectedTeamId,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Select Team',
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.teal, width: 2),
+            ),
           ),
           hint: const Text('Choose your team'),
           items: teams.map((team) {
