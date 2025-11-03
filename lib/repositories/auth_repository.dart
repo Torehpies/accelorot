@@ -69,11 +69,28 @@ class AuthRepository {
     } on FirebaseAuthException {
       rethrow;
     } on FirebaseException {
-			rethrow;
+      rethrow;
     } catch (e) {
-			log(e.toString());
-			throw UserRegistrationException(e.toString());
-		}
+      log(e.toString());
+      throw UserRegistrationException(e.toString());
+    }
+  }
+
+  Future<void> sendVerificationEmail() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  // Reload the user data from Firebase and return the verification status
+  Future<bool> checkAndReloadEmailVerified() async {
+    final user = currentUser;
+    if (user != null) {
+      await user.reload();
+      return user.emailVerified;
+    }
+    return false;
   }
 
   Future<User?> registerUser({

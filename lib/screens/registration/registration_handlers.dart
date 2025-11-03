@@ -137,9 +137,9 @@ class RegistrationFormContent extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Center(child: _buildLogo()),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         Center(child: _buildTitle(theme)),
-        SizedBox(height: isDesktop ? 40 : 32),
+        SizedBox(height: isDesktop ? 10 : 32),
 
         Form(
           key: handlers.formKey,

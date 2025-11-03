@@ -34,9 +34,21 @@ class TeamRepository {
         'pendingTeamSelection': teamId,
       });
     } catch (e) {
-			log(e.toString());
+      log(e.toString());
       throw UpdatePendingTeamException(e.toString());
     }
+  }
+
+  Future<String?> getPendingTeam(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final pendingTeamSelection =
+          userDoc.data()?['pendingTeamSelection'] as String?;
+      return pendingTeamSelection;
+    } catch (e) {
+			log(e.toString());
+			throw GetPendingTeamException(e.toString());
+		}
   }
 }
 
@@ -47,6 +59,6 @@ TeamRepository teamRepository(Ref ref) {
 
 @riverpod
 Future<List<Team>> teamList(Ref ref) {
-	final teamRepo = ref.watch(teamRepositoryProvider);
-	return teamRepo.fetchAllTeams();
+  final teamRepo = ref.watch(teamRepositoryProvider);
+  return teamRepo.fetchAllTeams();
 }

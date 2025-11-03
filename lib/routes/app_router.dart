@@ -1,10 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/email_verify.dart';
+import 'package:flutter_application_1/screens/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
@@ -23,7 +24,6 @@ import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -47,7 +47,7 @@ enum RoutePath {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-	final authListenable = ref.watch(authListenableProvider);
+  final authListenable = ref.watch(authListenableProvider);
 
   return GoRouter(
     refreshListenable: authListenable,
@@ -69,7 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.signup.path,
         name: RoutePath.signup.name,
         builder: (context, state) => const RegistrationScreen(),
-			),
+      ),
       GoRoute(
         path: RoutePath.forgotPassword.path,
         name: RoutePath.forgotPassword.name,

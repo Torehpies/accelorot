@@ -46,32 +46,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         }
       }
     });
-
-    firstNameController.addListener(() {
-      ref
-          .read(registrationProvider.notifier)
-          .updateFirstName(firstNameController.text.trim());
-    });
-    lastNameController.addListener(() {
-      ref
-          .read(registrationProvider.notifier)
-          .updateLastName(lastNameController.text.trim());
-    });
-    emailController.addListener(() {
-      ref
-          .read(registrationProvider.notifier)
-          .updateEmail(emailController.text.trim());
-    });
-    passwordController.addListener(() {
-      ref
-          .read(registrationProvider.notifier)
-          .updatePassword(passwordController.text);
-    });
-    confirmPasswordController.addListener(() {
-      ref
-          .read(registrationProvider.notifier)
-          .updateConfirmPassword(confirmPasswordController.text);
-    });
   }
 
   // --- Handler Methods ---
@@ -86,12 +60,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         return;
       }
 
-			notifier.registerUser(
-				firstName: firstNameController.text.trim(),
-				lastName: lastNameController.text.trim(),
-				email: emailController.text.trim(),
-				password: passwordController.text,
-			);
+      notifier.registerUser(
+        firstName: firstNameController.text.trim(),
+        lastName: lastNameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
     }
   }
 
@@ -117,11 +91,24 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(registrationProvider);
+    final isLoading = ref.watch(
+      registrationProvider.select((state) => state.isRegistrationLoading),
+    );
+    final isGoogleLoading = ref.watch(
+      registrationProvider.select((state) => state.isGoogleLoading),
+    );
+    final obscurePassword = ref.watch(
+      registrationProvider.select((state) => state.obscurePassword),
+    );
+    final obscureConfirmPassword = ref.watch(
+      registrationProvider.select((state) => state.obscureConfirmPassword),
+    );
+    final selectedTeamId = ref.watch(
+      registrationProvider.select((state) => state.selectedTeamId),
+    );
     final notifier = ref.read(registrationProvider.notifier);
     final asyncTeamList = ref.watch(teamListProvider);
 
-    // 3. Create the Handlers object
     final RegistrationHandlers handlers = RegistrationHandlers(
       formKey: _formKey,
       firstNameController: firstNameController,
@@ -131,14 +118,14 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       confirmPasswordController: confirmPasswordController,
 
       asyncTeamList: asyncTeamList,
-      selectedTeamId: state.selectedTeamId,
+      selectedTeamId: selectedTeamId,
       onTeamSelected: _onTeamSelected,
 
       // State from Notifier
-      isLoading: state.isRegistrationLoading,
-      isGoogleLoading: state.isGoogleLoading,
-      obscurePassword: state.obscurePassword,
-      obscureConfirmPassword: state.obscureConfirmPassword,
+      isLoading: isLoading,
+      isGoogleLoading: isGoogleLoading,
+      obscurePassword: obscurePassword,
+      obscureConfirmPassword: obscureConfirmPassword,
 
       // Methods from Notifier
       togglePasswordVisibility: notifier.togglePasswordVisibility,
@@ -152,7 +139,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       onNavigateToLogin: () => context.go('/signin'),
     );
 
-    // 4. Delegate to the ResponsiveLayout
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(

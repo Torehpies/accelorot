@@ -26,3 +26,11 @@ class UpdatePendingTeamException implements Exception {
 	@override
 	String toString() => 'UpdatePendingTeamException: $message';
 }
+
+class GetPendingTeamException implements Exception {
+	final String message;
+	GetPendingTeamException(this.message);
+
+	@override
+	String toString() => 'GetPendingTeamException: $message';
+}

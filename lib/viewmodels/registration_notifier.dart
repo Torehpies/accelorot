@@ -24,13 +24,13 @@ class RegistrationNotifier extends _$RegistrationNotifier {
   }
 
   // Update field states (used by controllers in the main screen)
-  void updateFirstName(String value) =>
-      state = state.copyWith(firstName: value);
-  void updateLastName(String value) => state = state.copyWith(lastName: value);
-  void updateEmail(String value) => state = state.copyWith(email: value);
-  void updatePassword(String value) => state = state.copyWith(password: value);
-  void updateConfirmPassword(String value) =>
-      state = state.copyWith(confirmPassword: value);
+//  void updateFirstName(String value) =>
+//      state = state.copyWith(firstName: value);
+//  void updateLastName(String value) => state = state.copyWith(lastName: value);
+//  void updateEmail(String value) => state = state.copyWith(email: value);
+//  void updatePassword(String value) => state = state.copyWith(password: value);
+//  void updateConfirmPassword(String value) =>
+//      state = state.copyWith(confirmPassword: value);
   void updateSelectedTeamId(String? teamId) {
     state = state.copyWith(selectedTeamId: () => teamId);
   }
@@ -66,10 +66,10 @@ class RegistrationNotifier extends _$RegistrationNotifier {
 
     try {
       await routerNotifier.registerAndSetState(
-        email: state.email,
-        password: state.password,
-        firstName: state.firstName,
-        lastName: state.lastName,
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
         role: 'Operator',
 				teamId: state.selectedTeamId!,
       );
