@@ -86,4 +86,9 @@ class FirestoreActivityService {
     final effectiveUserId = getEffectiveUserId(viewingOperatorId);
     return FirestoreUpload.submitReport(report, effectiveUserId);
   }
+
+  static Future<List<ActivityItem>> getReports({String? viewingOperatorId}) {
+    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
+    return FirestoreFetch.getReports(effectiveUserId);
+  }
 }

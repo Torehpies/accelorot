@@ -4,11 +4,13 @@ import '../components/all_activity_section.dart';
 import '../components/substrate_section.dart';
 import '../components/alerts_section.dart';
 import '../components/cycles_recom_section.dart';
+import '../components/reports_section.dart';
 import '../components/batch_filter_section.dart';
 import '../view_screens/all_activity_screen.dart';
 import '../view_screens/substrates_screen.dart';
 import '../view_screens/alerts_screen.dart';
 import '../view_screens/cycles_recom_screen.dart';
+import '../view_screens/reports_screen.dart';
 
 // Main navigator for Activity Logs tab with nested routing
 class ActivityLogsNavigator extends StatelessWidget {
@@ -51,6 +53,14 @@ class ActivityLogsNavigator extends StatelessWidget {
           case '/cycles-recom':
             final args = settings.arguments as Map<String, dynamic>?;
             page = CyclesRecomScreen(
+              focusedMachineId: focusedMachineId,
+              initialFilter: args?['initialFilter'],
+            );
+            break;
+          // ⭐ NEW ROUTE
+          case '/reports':
+            final args = settings.arguments as Map<String, dynamic>?;
+            page = ReportsScreen(
               focusedMachineId: focusedMachineId,
               initialFilter: args?['initialFilter'],
             );
@@ -161,15 +171,13 @@ class _ActivityLogsOverview extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Column(
+                  child: Stack( // ⭐ CHANGED: From Column to Stack
                     children: [
-                      // Batch filter header - casts shadow over scrolling content
-                      const BatchFilterSection(),
-                      
-                      // Scrollable section cards area
-                      Expanded(
+                      // Scrollable section cards area (behind)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 70),
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0), 
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -187,10 +195,21 @@ class _ActivityLogsOverview extends StatelessWidget {
                               const SizedBox(height: 16),
                               CyclesRecomSection(
                                 focusedMachineId: focusedMachineId,
+                              ),const SizedBox(height: 16),
+                              ReportsSection(
+                                focusedMachineId: focusedMachineId,
                               ),
                             ],
                           ),
                         ),
+                      ),
+                      
+                      // Batch filter header - positioned on top
+                      const Positioned( // ⭐ NEW: Fixed position on top
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: BatchFilterSection(),
                       ),
                     ],
                   ),
