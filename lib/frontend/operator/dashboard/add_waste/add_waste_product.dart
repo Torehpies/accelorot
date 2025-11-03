@@ -148,10 +148,8 @@ void _handleSubmit() async {
       'description': _descriptionController.text.trim(),
       'timestamp': DateTime.now(),
       'machineId': _selectedMachineId!,
-      // add operator info so the activity doc contains the operator name and userId
       'operatorName': user.displayName ?? user.email ?? 'Operator',
       'userId': user.uid,
-      // If you also have a selected machine name, add it here:
       // 'machineName': _selectedMachineName,
     };
 
@@ -221,7 +219,7 @@ void _handleSubmit() async {
                 onCategoryChanged: (value) => setState(() {
                   _selectedWasteCategory = value;
                   _selectedPlantType = null;
-                  _wasteCategoryError = null; // Clear error on change
+                  _wasteCategoryError = null;
                 }),
                 errorText: _wasteCategoryError,
               ),
@@ -231,7 +229,7 @@ void _handleSubmit() async {
                 selectedPlantType: _selectedPlantType,
                 onPlantTypeChanged: (value) => setState(() {
                   _selectedPlantType = value;
-                  _plantTypeError = null; // Clear error on change
+                  _plantTypeError = null;
                 }),
                 errorText: _plantTypeError,
               ),
@@ -241,7 +239,7 @@ void _handleSubmit() async {
                 onChanged: widget.preSelectedMachineId == null
                     ? (value) => setState(() {
                         _selectedMachineId = value;
-                        _machineError = null; // Clear error on change
+                        _machineError = null;
                       })
                     : null, 
                 isLocked: widget.preSelectedMachineId != null,

@@ -190,7 +190,7 @@ class _SubmitReportState extends State<SubmitReport> {
                 selectedReportType: _selectedReportType,
                 onChanged: (value) => setState(() {
                   _selectedReportType = value;
-                  _reportTypeError = null; // Clear error on change
+                  _reportTypeError = null;
                 }),
                 errorText: _reportTypeError,
               ),
@@ -203,7 +203,7 @@ class _SubmitReportState extends State<SubmitReport> {
                 errorText: _titleError,
                 onChanged: (value) {
                   setState(() {
-                    _titleError = null; // Clear error on change
+                    _titleError = null;
                   });
                 },
               ),
@@ -216,7 +216,7 @@ class _SubmitReportState extends State<SubmitReport> {
                 onChanged: widget.preSelectedMachineId == null
                     ? (value) => setState(() {
                         _selectedMachineId = value;
-                        _machineError = null; // Clear error on change
+                        _machineError = null;
                       })
                     : null,
                 isLocked: widget.preSelectedMachineId != null,
@@ -230,7 +230,7 @@ class _SubmitReportState extends State<SubmitReport> {
                 selectedPriority: _selectedPriority,
                 onChanged: (value) => setState(() {
                   _selectedPriority = value;
-                  _priorityError = null; // Clear error on change
+                  _priorityError = null;
                 }),
                 errorText: _priorityError,
               ),
