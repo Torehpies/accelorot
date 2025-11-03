@@ -116,7 +116,7 @@ class ActivityCard extends StatelessWidget {
                           color: Colors.black45,
                         ),
                       ),
-                      // ⭐ Show batch info
+                      // Show batch info
                       if (item.batchId != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),

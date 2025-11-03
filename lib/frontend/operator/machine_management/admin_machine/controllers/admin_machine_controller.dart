@@ -13,10 +13,9 @@ class AdminMachineController extends ChangeNotifier {
   String? _errorMessage;
   String _searchQuery = '';
   bool _isAuthenticated = false;
-  int _displayLimit = 10;
-  static const int _pageSize = 10;
+  int _displayLimit = 5;
+  static const int _pageSize = 5;
 
-  // ⭐ Search controller for external control
   final TextEditingController searchController = TextEditingController();
 
   // ==================== GETTERS ====================
@@ -129,7 +128,7 @@ class AdminMachineController extends ChangeNotifier {
   void setShowArchived(bool value) {
     _showArchived = value;
     _searchQuery = '';
-    searchController.clear(); // ⭐ Clear external controller
+    searchController.clear();
     resetPagination();
     notifyListeners();
   }
@@ -142,7 +141,7 @@ class AdminMachineController extends ChangeNotifier {
 
   void clearSearch() {
     _searchQuery = '';
-    searchController.clear(); // ⭐ Clear external controller
+    searchController.clear();
     resetPagination();
     notifyListeners();
   }
@@ -286,7 +285,7 @@ class AdminMachineController extends ChangeNotifier {
 
   @override
   void dispose() {
-    searchController.dispose(); // ⭐ Dispose controller
+    searchController.dispose();
     super.dispose();
   }
 }

@@ -23,7 +23,6 @@ class ReportsController extends ChangeNotifier {
   int _displayLimit = 10;
   static const int _pageSize = 10;
 
-  // ⭐ Search controller for external control
   final TextEditingController searchController = TextEditingController();
 
   // ==================== GETTERS ====================
@@ -251,4 +250,7 @@ class ReportsController extends ChangeNotifier {
     searchController.dispose();
     super.dispose();
   }
+
+
+  
 }

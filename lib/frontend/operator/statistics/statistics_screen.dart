@@ -10,7 +10,7 @@ import '../machine_management/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  final String? focusedMachineId; // ⭐ NEW: Machine filter
+  final String? focusedMachineId;
 
   const StatisticsScreen({
     super.key,
@@ -43,7 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     try {
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       
-      // ⭐ If focused on a specific machine, only load that machine
+      // If focused on a specific machine, only load that machine
       if (widget.focusedMachineId != null) {
         final allMachines = currentUserId != null
             ? await FirestoreMachineService.getMachinesByOperatorId(currentUserId)
@@ -103,7 +103,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ⭐ Hide AppBar when in machine view (shown by parent HomeScreen)
+    // Hide AppBar when in machine view (shown by parent HomeScreen)
     if (widget.focusedMachineId != null) {
       return _buildBody();
     }
@@ -228,7 +228,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
-        // ⭐ Only show summary header when NOT in machine view
+        // Only show summary header when NOT in machine view
         if (widget.focusedMachineId == null)
           Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -277,7 +277,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildMachineSection(MachineModel machine) {
-    // ⭐ Simplified card for machine view (no header needed)
+    // Simplified card for machine view (no header needed)
     if (widget.focusedMachineId != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -293,7 +293,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    // ⭐ Full card with header for multi-machine view
+    // Full card with header for multi-machine view
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(

@@ -136,7 +136,7 @@ class ViewConfirmationDialog extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => MainNavigation(
-                            focusedMachine: machine, // ⭐ Pass machine to navigation
+                            focusedMachine: machine,
                           ),
                         ),
                       );
