@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/auth_wrapper.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
+import 'change_password_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -393,6 +394,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: Text(
                           'Edit Profile',
+                          style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: verticalSpacing * 0.75),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () => ChangePasswordDialog.show(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.orange,
+                          side: const BorderSide(color: Colors.orange),
+                          backgroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isSmallScreen ? 16 : 20,
+                            vertical: isSmallScreen ? 12 : 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Change Password',
                           style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                         ),
                       ),
