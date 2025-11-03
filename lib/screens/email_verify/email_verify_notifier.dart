@@ -18,12 +18,12 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
   @override
   EmailVerifyState build() {
     final initialState = const EmailVerifyState(
-      resendCooldown: _cooldownDuration,
+      resendCooldown: 0, // Start button clickable immediately
     );
 
     Future.microtask(() {
       _startVerificationCheck();
-      _startCooldown();
+      // No initial cooldown timer start here
     });
 
     ref.onDispose(() {
@@ -35,36 +35,54 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     return initialState;
   }
 
-  // --- Core Verification Logic (from _startVerificationCheck) ---
+  // --- Core Verification Logic FIX ---
 
   void _startVerificationCheck() {
+    // Cancel any previous timer before starting a new one
+    _verificationTimer?.cancel();
+    
     _verificationTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
       final authRepo = ref.read(authRepositoryProvider);
 
-      // Check if user exists (handles user logging out)
+      // CRITICAL CHECK: If the user logs out, stop the polling
       if (authRepo.currentUser == null) {
         _verificationTimer?.cancel();
-        // The View needs to handle navigation if state becomes null/invalid
         return;
       }
 
       final isVerified = await authRepo.checkAndReloadEmailVerified();
 
       if (isVerified) {
-        // Verification success!
         _onVerificationSuccess();
-        // Optional: Update Firestore field here if needed
-        // await authRepo.updateEmailVerificationStatus(authRepo.currentUser!.uid, true);
+      }
+    });
+  }
+  
+  void _onVerificationSuccess() {
+    _verificationTimer?.cancel();
+    state = state.copyWith(isVerified: true);
+
+    _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (state.dashboardCountdown > 0) {
+        state = state.copyWith(
+          dashboardCountdown: state.dashboardCountdown - 1,
+        );
+      } else {
+        timer.cancel();
+        final authListenable = ref.read(authListenableProvider.notifier);
+        await authListenable.refreshUser();
       }
     });
   }
 
-  void _startCooldownTimer() {
+  // --- Cooldown Logic (Starts only on successful send) ---
+
+  void _startCooldown() {
     _cooldownTimer?.cancel();
+    state = state.copyWith(resendCooldown: _cooldownDuration); 
 
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (state.resendCooldown > 0) {
-        // This is safe because state is initialized
         state = state.copyWith(resendCooldown: state.resendCooldown - 1);
       } else {
         timer.cancel();
@@ -73,75 +91,35 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     });
   }
 
-  void _onVerificationSuccess() {
-    // Stop the verification polling
-    _verificationTimer?.cancel();
+  // --- Public Method ---
 
-    // Set the state to verified
-    state = state.copyWith(isVerified: true);
-
-    // Start the dashboard redirect countdown timer
-    _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (state.dashboardCountdown > 0) {
-        state = state.copyWith(
-          dashboardCountdown: state.dashboardCountdown - 1,
-        );
-      } else {
-        // Redirect logic here
-        timer.cancel();
-
-        // Notify the AuthListenable to refresh its state (GoRouter logic)
-        final authListenable = ref.read(authListenableProvider.notifier);
-        await authListenable.refreshUser();
-      }
-    });
-  }
-
-  // --- Cooldown Logic (from _startCooldown) ---
-
-  void _startCooldown() {
-    // Cancel existing timer just in case
-    _cooldownTimer?.cancel();
-
-    // Set initial cooldown state
-    state = state.copyWith(resendCooldown: _cooldownDuration);
-
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.resendCooldown > 0) {
-        state = state.copyWith(resendCooldown: state.resendCooldown - 1);
-      } else {
-        timer.cancel();
-        state = state.copyWith(resendCooldown: 0); // Cooldown finished
-      }
-    });
-  }
-
-  // --- Public Methods (for the View to call) ---
-
-  // Public method to resend the email
   Future<void> resendVerificationEmail() async {
     if (state.resendCooldown > 0 || state.isResending) return;
 
     state = state.copyWith(isResending: true);
+    
     try {
       await ref.read(authRepositoryProvider).sendVerificationEmail();
-      // Only start cooldown and show snackbar upon successful send
-      _startCooldownTimer();
-      // The View will handle the snackbar based on success
+      _startCooldown(); // Success: Start cooldown
+
+    } on FirebaseAuthException catch (e) {
+      // Error: If it's a rate limit error, we don't start cooldown.
+      // Cooldown stays at 0, allowing immediate retry.
+      rethrow;
+      
     } catch (e) {
-      // The View will handle the snackbar based on error
+      // Handle generic errors
       rethrow;
     } finally {
       state = state.copyWith(isResending: false);
     }
   }
 
-  // Public method for the "Back to Login" button
   Future<void> signOutAndNavigate() async {
     try {
       await ref.read(authRepositoryProvider).signOut();
     } catch (_) {
-			await FirebaseAuth.instance.signOut();
-		}
+      await FirebaseAuth.instance.signOut();
+    }
   }
 }

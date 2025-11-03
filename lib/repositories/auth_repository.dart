@@ -87,8 +87,15 @@ class AuthRepository {
   Future<bool> checkAndReloadEmailVerified() async {
     final user = currentUser;
     if (user != null) {
-      await user.reload();
-      return user.emailVerified;
+      try {
+        await user.reload();
+
+        // We must get the updated user object, which is usually the current user after reload
+        final reloadedUser = _auth.currentUser;
+        return reloadedUser?.emailVerified ?? false;
+      } catch (e) {
+        return user.emailVerified;
+      }
     }
     return false;
   }
