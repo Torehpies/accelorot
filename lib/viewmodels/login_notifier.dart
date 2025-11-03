@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
+import 'package:flutter_application_1/utils/firebase_error.dart';
 
 import '../utils/google_auth_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -78,7 +79,7 @@ class LoginNotifier extends _$LoginNotifier {
       /// stop loading on auth error
       state = state.copyWith(
         isLoading: false,
-        errorMessage: _mapAuthErrorCodeToMessage(e.code),
+        errorMessage: mapAuthErrorCodeToMessage(e.code),
       );
     } catch (e) {
       /// stop loading on error
@@ -112,15 +113,4 @@ class LoginNotifier extends _$LoginNotifier {
     }
   }
 
-  String _mapAuthErrorCodeToMessage(String code) {
-    return switch (code) {
-      'user-not-found' => 'No user found with that email.',
-      'wrong-password' => 'Wrong password provided.',
-      'invalid-email' => 'The email address is not valid.',
-      'user-disabled' => 'This account has been disabled.',
-      'operation-not-allowed' => 'Email/Password sign-in is not enabled.',
-      'network-request-failed' => 'Network error. Check your connection.',
-      _ => 'Login failed. Please try again.',
-    };
-  }
 }

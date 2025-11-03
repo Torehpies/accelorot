@@ -51,28 +51,32 @@ class RouterNotifier extends ChangeNotifier {
     _userRole = await authRepo.getUserRole(uid);
   }
 
-  Future<Map<String, dynamic>> registerAndSetState({
+  Future<void> registerAndSetState({
     required String email,
     required String password,
     required String firstName,
     required String lastName,
     required String role,
+    required String teamId,
   }) async {
     final authRepo = _ref.read(authRepositoryProvider);
 
-    final result = await authRepo.registerUser(
-      email: email,
-      password: password,
-      firstName: firstName,
-      lastName: lastName,
-      role: role,
-    );
-
-    if (result['success'] == true) {
+    try {
+       await authRepo.registerUserWithTeam(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        role: role,
+				teamId: teamId,
+      );
       _currentUser = _firebaseAuth.currentUser;
       notifyListeners();
-    }
-    return result;
+    } on FirebaseAuthException{
+			rethrow;
+		} catch (e) {
+			rethrow;
+		}
   }
 
   Future<void> refreshUser() async {
@@ -89,10 +93,6 @@ class RouterNotifier extends ChangeNotifier {
 }
 
 /// PROVIDERS
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
-  return FirebaseAuth.instance;
-});
-
 final authListenableProvider = ChangeNotifierProvider<RouterNotifier>((ref) {
   final auth = ref.watch(firebaseAuthProvider);
   final notifier = RouterNotifier(auth, ref);

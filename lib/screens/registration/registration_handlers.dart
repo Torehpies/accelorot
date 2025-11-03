@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
+import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_application_1/widgets/common/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,10 +15,16 @@ class RegistrationHandlers {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
+
+  final AsyncValue<List<Team>> asyncTeamList;
+
+  final String? selectedTeamId;
   final bool isLoading;
   final bool isGoogleLoading;
   final bool obscurePassword;
   final bool obscureConfirmPassword;
+
+  final void Function(String?) onTeamSelected;
   final VoidCallback togglePasswordVisibility;
   final VoidCallback toggleConfirmPasswordVisibility;
   final VoidCallback onSubmitRegistration;
@@ -31,6 +38,11 @@ class RegistrationHandlers {
     required this.emailController,
     required this.passwordController,
     required this.confirmPasswordController,
+
+    required this.asyncTeamList,
+    required this.selectedTeamId,
+    required this.onTeamSelected,
+
     required this.isLoading,
     required this.isGoogleLoading,
     required this.obscurePassword,
@@ -41,7 +53,7 @@ class RegistrationHandlers {
     required this.onGoogleSignIn,
     required this.onNavigateToLogin,
   });
-  
+
   // --- Validators ---
   String? nameValidator(String? value) {
     if (value == null || value.isEmpty) {
@@ -101,21 +113,24 @@ class RegistrationFormContent extends ConsumerWidget {
     final theme = Theme.of(context);
 
     // Common Text Field Decoration style (based on your original screen)
-    InputDecoration inputDecoration(String labelText, {Widget? suffixIcon, Icon? prefixIcon}) => InputDecoration(
-          labelText: labelText,
-          prefixIcon: prefixIcon,
-          suffixIcon: suffixIcon,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2B7326)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
-          ),
-        );
-
+    InputDecoration inputDecoration(
+      String labelText, {
+      Widget? suffixIcon,
+      Icon? prefixIcon,
+    }) => InputDecoration(
+      labelText: labelText,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF2B7326)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF2B7326), width: 2),
+      ),
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -163,7 +178,7 @@ class RegistrationFormContent extends ConsumerWidget {
                 textInputAction: TextInputAction.next,
                 decoration: inputDecoration(
                   'Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined)
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
                 validator: handlers.emailValidator,
               ),
@@ -212,9 +227,10 @@ class RegistrationFormContent extends ConsumerWidget {
                 ),
                 validator: handlers.confirmPasswordValidator,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+							buildTeamDropdown(context, isDesktop),
+              const SizedBox(height: 16),
 
-              // Register Button
               SizedBox(
                 width: double.infinity,
                 child: PrimaryButton(
@@ -259,7 +275,41 @@ class RegistrationFormContent extends ConsumerWidget {
     );
   }
 
-  // --- Helper Widgets (Copied from your original login file) ---
+  Widget buildTeamDropdown(BuildContext context, bool isDesktop) {
+    return handlers.asyncTeamList.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Text(
+        'Error loading teams: $err',
+        style: TextStyle(color: Colors.red),
+      ),
+      data: (teams) {
+        if (teams.isEmpty) {
+          return const Text(
+            'No teams available.',
+            style: TextStyle(color: Colors.orange),
+          );
+        }
+
+        return DropdownButtonFormField<String>(
+          key: const ValueKey('team-dropdown'),
+          initialValue: handlers.selectedTeamId,
+          decoration: const InputDecoration(
+            labelText: 'Select Team',
+            border: OutlineInputBorder(),
+          ),
+          hint: const Text('Choose your team'),
+          items: teams.map((team) {
+            return DropdownMenuItem<String>(
+              value: team.id,
+              child: Text(team.name),
+            );
+          }).toList(),
+          onChanged: handlers.onTeamSelected,
+        );
+      },
+    );
+  }
+
   Widget _buildLogo() {
     return Container(
       width: 80,

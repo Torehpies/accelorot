@@ -60,7 +60,7 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
         final user = _authService.getCurrentUser();
         if (user != null) {
           await _authService.updateEmailVerificationStatus(user.uid, true);
-          await _handlePostVerification(user.uid);
+          //await _handlePostVerification(user.uid);
         }
       }
     });

@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/repositories/team_repository.dart';
+import 'package:flutter_application_1/utils/app_exceptions.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,6 +23,7 @@ AuthRepository authRepository(Ref ref) {
     ref.watch(firebaseAuthProvider),
     ref.watch(firebaseFirestoreProvider),
     GoogleSignIn.instance,
+    ref.watch(teamRepositoryProvider),
   );
 }
 
@@ -28,14 +31,52 @@ class AuthRepository {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
   final FirebaseFirestore _firestore;
+  final TeamRepository _teamRepository;
   bool _isGoogleSignInInitialized = false;
 
-  AuthRepository(this._auth, this._firestore, this._googleSignIn);
+  AuthRepository(
+    this._auth,
+    this._firestore,
+    this._googleSignIn,
+    this._teamRepository,
+  );
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
-  Future<Map<String, dynamic>> registerUser({
+  Future<User?> registerUserWithTeam({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String role,
+    required String teamId,
+  }) async {
+    try {
+      final user = await registerUser(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        role: role,
+      );
+
+      if (user != null) {
+        await _teamRepository.updatePendingTeam(user.uid, teamId);
+      }
+
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
+    } on FirebaseException {
+			rethrow;
+    } catch (e) {
+			log(e.toString());
+			throw UserRegistrationException(e.toString());
+		}
+  }
+
+  Future<User?> registerUser({
     required String email,
     required String password,
     required String firstName,
@@ -49,53 +90,32 @@ class AuthRepository {
         password: password,
       );
 
-      User? user = result.user;
-      if (user != null) {
-        await user.sendEmailVerification();
-        // Save additional user data to Firestore
-        await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'email': email,
-          // Store names separately (no concatenation)
-          // Note: keys are intentionally cased to match requested schema
-          'firstname': firstName,
-          'lastname': lastName,
-          'role': role,
-          'createdAt': FieldValue.serverTimestamp(),
-          'isActive': true,
-          'emailVerified': false,
-        });
+      final user = result.user;
+      if (user == null) {
+        throw UserRegistrationException('Failed to create user account.');
+      }
 
-        return {
-          'success': true,
-          'message': 'User registered successfully',
-          'uid': user.uid,
-          'needsVerification': true,
-        };
-      } else {
-        return {'success': false, 'message': 'Failed to create user account'};
-      }
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'weak-password':
-          message = 'The password provided is too weak.';
-          break;
-        case 'email-already-in-use':
-          message = 'The account already exists for that email.';
-          break;
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        default:
-          message = e.message ?? 'An error occurred during registration.';
-      }
-      return {'success': false, 'message': message};
+      await user.sendEmailVerification();
+
+      await _firestore.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'email': email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isActive': true,
+        'emailVerified': false,
+      });
+
+      return user;
+    } on FirebaseAuthException {
+      rethrow;
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred: ${e.toString()}',
-      };
+      log('Unexpected registration error: $e');
+      throw UserRegistrationException(
+        'An unexpected error occurred during registration.',
+      );
     }
   }
 
@@ -103,19 +123,19 @@ class AuthRepository {
     return await _firestore.collection('users').doc(uid).get();
   }
 
-	Future<String?> getUserRole(String uid) async {
-		try {
-			final doc = await _firestore.collection('users').doc(uid).get();
-			final data = doc.data();
-			if (doc.exists && data != null) {
-			return data['role'] as String?;
-			}
-			return null;
-		} catch (e) {
-			log('Error fetching user role for $uid: $e');
-			return null;
-		}
-	}
+  Future<String?> getUserRole(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      final data = doc.data();
+      if (doc.exists && data != null) {
+        return data['role'] as String?;
+      }
+      return null;
+    } catch (e) {
+      log('Error fetching user role for $uid: $e');
+      return null;
+    }
+  }
 
   Future<User?> signInWithEmail(String email, String password) async {
     try {

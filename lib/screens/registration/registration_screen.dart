@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_application_1/viewmodels/registration_notifier.dart';
 import 'package:flutter_application_1/widgets/common/responsive_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,47 +30,77 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // 1. Listen for errors from the notifier
     ref.listenManual(registrationProvider, (previous, next) {
       if (next.errorMessage != null &&
           previous?.errorMessage != next.errorMessage) {
         if (mounted) {
           showSnackbar(context, next.errorMessage!, isError: true);
-          // Clear the error message after showing it
-          ref.read(registrationProvider.notifier).clearError();
+        }
+      }
+      if (next.successMessage != null &&
+          previous?.successMessage != next.successMessage) {
+        if (mounted) {
+          showSnackbar(context, next.successMessage!);
         }
       }
     });
 
-    // 2. Link TextControllers to Notifier state updates
     firstNameController.addListener(() {
-      ref.read(registrationProvider.notifier).updateFirstName(firstNameController.text.trim());
+      ref
+          .read(registrationProvider.notifier)
+          .updateFirstName(firstNameController.text.trim());
     });
     lastNameController.addListener(() {
-      ref.read(registrationProvider.notifier).updateLastName(lastNameController.text.trim());
+      ref
+          .read(registrationProvider.notifier)
+          .updateLastName(lastNameController.text.trim());
     });
     emailController.addListener(() {
-      ref.read(registrationProvider.notifier).updateEmail(emailController.text.trim());
+      ref
+          .read(registrationProvider.notifier)
+          .updateEmail(emailController.text.trim());
     });
     passwordController.addListener(() {
-      ref.read(registrationProvider.notifier).updatePassword(passwordController.text);
+      ref
+          .read(registrationProvider.notifier)
+          .updatePassword(passwordController.text);
     });
     confirmPasswordController.addListener(() {
-      ref.read(registrationProvider.notifier).updateConfirmPassword(confirmPasswordController.text);
+      ref
+          .read(registrationProvider.notifier)
+          .updateConfirmPassword(confirmPasswordController.text);
     });
   }
 
   // --- Handler Methods ---
 
-  Future<void> _submitRegistration() async {
+  void _submitRegistration() {
     if (_formKey.currentState?.validate() ?? false) {
-			await ref.read(registrationProvider.notifier).registerUser();
+      final notifier = ref.read(registrationProvider.notifier);
+      final state = ref.read(registrationProvider);
+
+      if (state.selectedTeamId == null) {
+        showSnackbar(context, 'Please select a team.');
+        return;
+      }
+
+			notifier.registerUser(
+				firstName: firstNameController.text.trim(),
+				lastName: lastNameController.text.trim(),
+				email: emailController.text.trim(),
+				password: passwordController.text,
+			);
     }
   }
 
   Future<void> _handleGoogleSignIn() async {
-		await ref.read(registrationProvider.notifier).signInWithGoogle();
+    await ref.read(registrationProvider.notifier).signInWithGoogle();
+  }
+
+  void _onTeamSelected(String? teamId) {
+    ref.read(registrationProvider.notifier).updateSelectedTeamId(teamId);
   }
 
   // --- Dispose Controllers ---
@@ -86,9 +117,9 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the state to trigger UI rebuilds
     final state = ref.watch(registrationProvider);
     final notifier = ref.read(registrationProvider.notifier);
+    final asyncTeamList = ref.watch(teamListProvider);
 
     // 3. Create the Handlers object
     final RegistrationHandlers handlers = RegistrationHandlers(
@@ -98,9 +129,13 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       emailController: emailController,
       passwordController: passwordController,
       confirmPasswordController: confirmPasswordController,
-      
+
+      asyncTeamList: asyncTeamList,
+      selectedTeamId: state.selectedTeamId,
+      onTeamSelected: _onTeamSelected,
+
       // State from Notifier
-      isLoading: state.isLoading,
+      isLoading: state.isRegistrationLoading,
       isGoogleLoading: state.isGoogleLoading,
       obscurePassword: state.obscurePassword,
       obscureConfirmPassword: state.obscureConfirmPassword,
@@ -108,11 +143,11 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       // Methods from Notifier
       togglePasswordVisibility: notifier.togglePasswordVisibility,
       toggleConfirmPasswordVisibility: notifier.toggleConfirmPasswordVisibility,
-      
+
       // Local Handler Methods
       onSubmitRegistration: _submitRegistration,
       onGoogleSignIn: _handleGoogleSignIn,
-      
+
       // Navigation
       onNavigateToLogin: () => context.go('/signin'),
     );
