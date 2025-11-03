@@ -1,4 +1,4 @@
-// widgets/shared/base_activity_screen.dart
+// lib/frontend/operator/activity_logs/widgets/shared/base_activity_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/activity_item.dart';
 import '../filter_section.dart';

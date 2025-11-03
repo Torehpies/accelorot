@@ -1,3 +1,4 @@
+// lib/frontend/operator/activity_logs/view_screens/alerts_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -80,7 +81,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
         category: category,
         timestamp:
             DateTime.tryParse(alert['timestamp'] ?? '') ?? DateTime.now(),
-        userId: alert['machine_id'],
+        machineId: alert['machine_id'], // ⭐ Changed from userId to machineId
       );
     }).toList();
 

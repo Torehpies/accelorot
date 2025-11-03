@@ -1,20 +1,19 @@
-// lib/frontend/operator/screens/home_screen.dart
+// lib/frontend/operator/dashboard/home_screen.dart
 import 'package:flutter/material.dart';
 import 'cycles/system_card.dart';
 import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
 import 'compost_progress/composting_progress_card.dart';
 import 'compost_progress/models/compost_batch_model.dart';
 import 'add_waste/add_waste_product.dart';
+import 'add_waste/submit_report.dart';
+import 'add_waste/quick_actions_sheet.dart';
 import 'add_waste/activity_logs_card.dart';
 import '../machine_management/models/machine_model.dart';
 
 class HomeScreen extends StatefulWidget {
-  final MachineModel? focusedMachine; 
+  final MachineModel? focusedMachine;
 
-  const HomeScreen({
-    super.key,
-    this.focusedMachine,
-  });
+  const HomeScreen({super.key, this.focusedMachine});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -23,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
-  
+
   // State lifted from CompostingProgressCard - shared between cards
   CompostBatch? _currentBatch;
 
@@ -40,19 +39,69 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentBatch = null;
     });
   }
+
+  // Handle FAB press - show action sheet
+  void _handleFABPress() async {
+  final action = await showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (context) => const QuickActionsSheet(),
+  );
+
+  if (action == null || !mounted) return;
+
+  // Handle selected action
+  if (action == 'add_waste') {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => AddWasteProduct(
+        preSelectedMachineId: widget.focusedMachine?.machineId,
+      ),
+    );
+
+    // Refresh activity logs if waste was added
+    if (result != null && mounted) {
+      await _activityLogsKey.currentState?.refresh();
+    }
+  } else if (action == 'submit_report') {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => SubmitReport(
+        preSelectedMachineId: widget.focusedMachine?.machineId,
+      ),
+    );
+
+    // ⭐ Show confirmation AND refresh activity logs if report was submitted
+    if (result != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Report submitted successfully'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
       
+      // Refresh the activity logs to show the new report
+      await _activityLogsKey.currentState?.refresh();
+    }
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final bool isMachineView = widget.focusedMachine != null;
 
     return Scaffold(
-      // ⭐ ALWAYS show AppBar (let MainNavigation handle hiding it if needed)
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        automaticallyImplyLeading: isMachineView, // Show back button in machine view
+        automaticallyImplyLeading: isMachineView,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -74,7 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.filter_alt,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -90,34 +143,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-              // ⭐ Show these cards regardless of machine view
               const EnvironmentalSensorsView(),
               const SizedBox(height: 16),
-              
-              // Composting Progress Card - now receives batch and callbacks
+
               CompostingProgressCard(
                 currentBatch: _currentBatch,
                 onBatchStarted: _handleBatchStarted,
                 onBatchCompleted: _handleBatchCompleted,
               ),
-              
+
               const SizedBox(height: 16),
-              
-              // System Card - Drum rotation controls (receives current batch)
-              SystemCard(
-                currentBatch: _currentBatch,
-              ),
-              
+
+              SystemCard(currentBatch: _currentBatch),
+
               const SizedBox(height: 16),
-              
-              // Activity Logs Card - Recent waste activities
+
               ActivityLogsCard(
                 key: _activityLogsKey,
                 focusedMachineId: widget.focusedMachine?.machineId,
               ),
               const SizedBox(height: 16),
-              
-              // It should only be shown in its own tab in MainNavigation
             ],
           ),
         ),
@@ -128,20 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 58,
           height: 58,
           child: FloatingActionButton(
-            onPressed: () async {
-              // Open Add Waste Product dialog
-              final result = await showDialog<Map<String, dynamic>>(
-                context: context,
-                builder: (context) => AddWasteProduct(
-                  preSelectedMachineId: widget.focusedMachine?.machineId,
-                ),
-              );
-
-              // Refresh activity logs if waste was added
-              if (result != null && mounted) {
-                await _activityLogsKey.currentState?.refresh();
-              }
-            },
+            onPressed: _handleFABPress,
             backgroundColor: Colors.teal,
             elevation: 5,
             shape: RoundedRectangleBorder(

@@ -1,5 +1,7 @@
+// lib/frontend/operator/dashboard/add_waste/widgets/activity_log_item.dart
 import 'package:flutter/material.dart';
 import '../../../activity_logs/models/activity_item.dart';
+import '../../../../../services/firestore/firestore_helpers.dart';
 
 class ActivityLogItem extends StatelessWidget {
   final ActivityItem log;
@@ -86,8 +88,33 @@ class ActivityLogItem extends StatelessWidget {
                     ],
                   ),
                 
-                // Batch Info
-                if (log.batchId != null)
+                // ⭐ Report Type OR Batch Info (Option A: replace batch with report type)
+                if (log.isReport && log.reportType != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getReportTypeIcon(log.reportType),
+                          size: 12, 
+                          color: Colors.grey[600]
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            FirestoreHelpers.getReportTypeLabel(log.reportType),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (!log.isReport && log.batchId != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Row(
@@ -153,5 +180,19 @@ class ActivityLogItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Helper to get icon for report type
+  IconData _getReportTypeIcon(String? reportType) {
+    switch (reportType?.toLowerCase()) {
+      case 'maintenance_issue':
+        return Icons.build;
+      case 'observation':
+        return Icons.visibility;
+      case 'safety_concern':
+        return Icons.warning;
+      default:
+        return Icons.report;
+    }
   }
 }

@@ -1,8 +1,7 @@
 // lib/frontend/operator/activity_logs/components/all_activity_section.dart
 import 'package:flutter/material.dart';
-import '../view_screens/all_activity_screen.dart';
-import '../widgets/slide_page_route.dart';
 
+// Section card for viewing all activity logs
 class AllActivitySection extends StatelessWidget {
   final String? focusedMachineId;
 
@@ -15,13 +14,7 @@ class AllActivitySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          SlidePageRoute(
-            page: AllActivityScreen(
-              focusedMachineId: focusedMachineId,
-            ),
-          ),
-        );
+        Navigator.of(context).pushNamed('/all-activity');
       },
       child: SizedBox(
         width: 390,

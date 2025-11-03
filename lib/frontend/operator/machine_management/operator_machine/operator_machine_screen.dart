@@ -43,7 +43,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
       appBar: AppBar(
         title: const Text(
           'My Machines',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
         elevation: 0,

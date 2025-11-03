@@ -1,14 +1,14 @@
-// lib/frontend/operator/activity_logs/components/alerts_section.dart
+// lib/frontend/operator/activity_logs/components/reports_section.dart
 import 'package:flutter/material.dart';
 import '../widgets/filter_box.dart';
 
-// Section card for alert logs with filter boxes
-class AlertsSection extends StatelessWidget {
+// Section card for report logs with filter boxes
+class ReportsSection extends StatelessWidget {
   final String? focusedMachineId;
 
-  const AlertsSection({
+  const ReportsSection({
     super.key,
-    this.focusedMachineId, 
+    this.focusedMachineId,
   });
 
   @override
@@ -39,11 +39,11 @@ class AlertsSection extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.warning_amber_outlined,
+                      Icon(Icons.report_outlined,
                           color: Colors.teal.shade700, size: 20),
                       const SizedBox(width: 8),
                       const Text(
-                        'Alerts',
+                        'Reports',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -54,7 +54,7 @@ class AlertsSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.of(context).pushNamed('/alerts');
+                      Navigator.of(context).pushNamed('/reports');
                     },
                     child: Text(
                       'View All >',
@@ -68,43 +68,42 @@ class AlertsSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Filter boxes for alert types
+              // Filter boxes for report types
               Expanded(
                 child: Row(
                   children: [
                     FilterBox(
-                      icon: Icons.thermostat,
-                      label: 'Temp',
-                      filterValue: 'Temp',
+                      icon: Icons.build,
+                      label: 'Maintenance',
+                      filterValue: 'Maintenance',
                       onTap: () {
                         Navigator.of(context).pushNamed(
-                          '/alerts',
-                          arguments: {'initialFilter': 'Temp'},
+                          '/reports',
+                          arguments: {'initialFilter': 'Maintenance'},
                         );
                       },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
-                      icon: Icons.water_drop,
-                      label: 'Moisture',
-                      filterValue: 'Moisture',
+                      icon: Icons.visibility,
+                      label: 'Observation',
+                      filterValue: 'Observation',
                       onTap: () {
                         Navigator.of(context).pushNamed(
-                          '/alerts',
-                          arguments: {'initialFilter': 'Moisture'},
+                          '/reports',
+                          arguments: {'initialFilter': 'Observation'},
                         );
                       },
                     ),
                     const SizedBox(width: 8),
                     FilterBox(
-                      icon: Icons.bubble_chart,
-                      label: 'Oxygen',
-                      filterValue: 'Oxygen',
+                      icon: Icons.warning,
+                      label: 'Safety',
+                      filterValue: 'Safety',
                       onTap: () {
                         Navigator.of(context).pushNamed(
-                          '/alerts',
-                          arguments: {'initialFilter': 'Oxygen'},
+                          '/reports',
+                          arguments: {'initialFilter': 'Safety'},
                         );
                       },
                     ),

@@ -1,3 +1,4 @@
+// lib/frontend/operator/activity_logs/activity_logs_screen.dart
 import 'package:flutter/material.dart';
 import 'components/all_activity_section.dart';
 import 'components/substrate_section.dart';
@@ -15,7 +16,7 @@ class ActivityLogsScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text(
           "Activity Logs",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
       ),
