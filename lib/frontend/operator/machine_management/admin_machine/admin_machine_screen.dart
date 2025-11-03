@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'controllers/admin_machine_controller.dart';
 import '../components/machine_action_card.dart';
 import 'widgets/add_machine_modal.dart';
-import '../widgets/search_bar_widget.dart';
+import '../widgets/report_search.dart';
 import 'widgets/admin_machine_list.dart';
+import '../admin_machine/reports/reports_screen.dart';
 
 class AdminMachineScreen extends StatefulWidget {
   final String? viewingOperatorId;
-  
-  const AdminMachineScreen ({super.key, this.viewingOperatorId});
+
+  const AdminMachineScreen({super.key, this.viewingOperatorId});
 
   @override
   State<AdminMachineScreen> createState() => _AdminMachineScreenState();
@@ -19,6 +20,7 @@ class AdminMachineScreen extends StatefulWidget {
 class _AdminMachineScreenState extends State<AdminMachineScreen> {
   late final AdminMachineController _controller;
   final FocusNode _searchFocusNode = FocusNode();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _searchFocusNode.dispose();
     _controller.dispose();
     super.dispose();
@@ -45,28 +48,42 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
     );
   }
 
+  void _navigateToReports() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ReportsScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Machine Management',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.teal,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          return Padding(
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: AppBar(
+            leading: _controller.showArchived
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => _controller.setShowArchived(false),
+                  )
+                : null,
+            automaticallyImplyLeading: false,
+            title: const Text(
+              'Machine Management',
+              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.teal,
+            elevation: 0,
+            centerTitle: false,
+          ),
+          body: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Action Cards Row - Always Visible
+                // Action Cards Row
                 Row(
                   children: [
                     Expanded(
@@ -76,7 +93,15 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                         onPressed: () => _controller.setShowArchived(true),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: MachineActionCard(
+                        icon: Icons.report,
+                        label: 'Reports',
+                        onPressed: _navigateToReports,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: MachineActionCard(
                         icon: Icons.add_circle_outline,
@@ -88,17 +113,7 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Toggle between archived and active
-                if (_controller.showArchived)
-                  TextButton.icon(
-                    onPressed: () => _controller.setShowArchived(false),
-                    icon: const Icon(Icons.arrow_back, size: 16),
-                    label: const Text('Back to Active Machines'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.teal),
-                  ),
-                const SizedBox(height: 8),
-
-                // Main Container - Always Visible
+                // Main Container
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -118,14 +133,14 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: SearchBarWidget(
+                            controller: _searchController,
                             onSearchChanged: _controller.setSearchQuery,
                             onClear: _controller.clearSearch,
                             focusNode: _searchFocusNode,
                           ),
                         ),
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Row(
                             children: [
                               Text(
@@ -142,30 +157,25 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        
-                        // Content with Error/Loading States Inside
-                        Expanded(
-                          child: _buildContent(),
-                        ),
+
+                        Expanded(child: _buildContent()),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildContent() {
-    // Loading State - inside container
     if (_controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error State - inside container
     if (_controller.errorMessage != null) {
       return Center(
         child: Padding(
@@ -203,7 +213,6 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
       );
     }
 
-    // Content - Machine List
     return AdminMachineList(controller: _controller);
   }
 }

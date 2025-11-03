@@ -8,7 +8,6 @@ class AdminMachineController extends ChangeNotifier {
   // ==================== STATE ====================
   
   List<MachineModel> _allMachines = [];
-  List<Map<String, dynamic>> _teamMembers = [];
   bool _showArchived = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -17,10 +16,12 @@ class AdminMachineController extends ChangeNotifier {
   int _displayLimit = 10;
   static const int _pageSize = 10;
 
+  // ⭐ Search controller for external control
+  final TextEditingController searchController = TextEditingController();
+
   // ==================== GETTERS ====================
   
   List<MachineModel> get machines => _allMachines;
-  List<Map<String, dynamic>> get users => _teamMembers;
   bool get showArchived => _showArchived;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -73,17 +74,11 @@ class AdminMachineController extends ChangeNotifier {
       await FirestoreMachineService.uploadAllMockMachines();
 
       if (_isAuthenticated) {
-        // Admin is logged in - fetch their team's machines and team members
-        await Future.wait([
-          _fetchMachinesByTeamId(currentUserId!),
-          _fetchTeamMembers(currentUserId),
-        ]);
+        // Admin is logged in - fetch their team's machines
+        await _fetchMachinesByTeamId(currentUserId!);
       } else {
         // Not logged in - show all machines for preview
-        await Future.wait([
-          _fetchAllMachines(),
-          _fetchTeamMembers(''),
-        ]);
+        await _fetchAllMachines();
       }
 
       _isLoading = false;
@@ -118,39 +113,14 @@ class AdminMachineController extends ChangeNotifier {
     }
   }
 
-  /// Fetch team members from teams/{teamId}/members subcollection
-  /// Only fetches active (non-archived) members
-  Future<void> _fetchTeamMembers(String teamId) async {
-    try {
-      if (teamId.isEmpty) {
-        _teamMembers = [];
-        notifyListeners();
-        return;
-      }
-
-      _teamMembers = await FirestoreMachineService.getTeamMembers(teamId);
-      notifyListeners();
-    } catch (e) {
-      // Don't set error for team members fetch, it's not critical
-      _teamMembers = [];
-      notifyListeners();
-    }
-  }
-
   Future<void> refresh() async {
     final currentUserId = FirestoreMachineService.getCurrentUserId();
     _isAuthenticated = currentUserId != null;
     
     if (_isAuthenticated) {
-      await Future.wait([
-        _fetchMachinesByTeamId(currentUserId!),
-        _fetchTeamMembers(currentUserId),
-      ]);
+      await _fetchMachinesByTeamId(currentUserId!);
     } else {
-      await Future.wait([
-        _fetchAllMachines(),
-        _fetchTeamMembers(''),
-      ]);
+      await _fetchAllMachines();
     }
   }
 
@@ -158,20 +128,22 @@ class AdminMachineController extends ChangeNotifier {
   
   void setShowArchived(bool value) {
     _showArchived = value;
-    _searchQuery = ''; // Clear search when switching views
-    resetPagination(); // Reset pagination when switching views
+    _searchQuery = '';
+    searchController.clear(); // ⭐ Clear external controller
+    resetPagination();
     notifyListeners();
   }
 
   void setSearchQuery(String query) {
     _searchQuery = query;
-    resetPagination(); // Reset pagination when searching
+    resetPagination();
     notifyListeners();
   }
 
   void clearSearch() {
     _searchQuery = '';
-    resetPagination(); // Reset pagination when clearing search
+    searchController.clear(); // ⭐ Clear external controller
+    resetPagination();
     notifyListeners();
   }
 
@@ -189,7 +161,6 @@ class AdminMachineController extends ChangeNotifier {
   // ==================== CRUD OPERATIONS ====================
   
   /// Add new machine (auto-sets teamId to admin's UID)
-  /// userId is no longer used - set to empty string
   Future<void> addMachine({
     required String machineName,
     required String machineId,
@@ -228,7 +199,6 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   /// Update existing machine (can change name only)
-  /// userId is ignored since machines are now team-wide
   Future<void> updateMachine({
     required String machineId,
     required String machineName,
@@ -247,7 +217,6 @@ class AdminMachineController extends ChangeNotifier {
       final updatedMachine = existingMachine.copyWith(
         machineName: machineName,
         userId: '', // Keep empty - not used anymore
-        // teamId and machineId remain unchanged
       );
 
       await FirestoreMachineService.updateMachine(updatedMachine);
@@ -300,15 +269,6 @@ class AdminMachineController extends ChangeNotifier {
 
   // ==================== HELPER METHODS ====================
   
-  /// Get member name by userId (not used anymore but kept for compatibility)
-  String? getUserName(String userId) {
-    final member = _teamMembers.firstWhere(
-      (m) => m['uid'] == userId,
-      orElse: () => {},
-    );
-    return member.isNotEmpty ? member['name'] : null;
-  }
-
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -322,5 +282,11 @@ class AdminMachineController extends ChangeNotifier {
       debugPrint('Error checking machine existence: $e');
       return false;
     }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose(); // ⭐ Dispose controller
+    super.dispose();
   }
 }
