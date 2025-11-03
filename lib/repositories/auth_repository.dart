@@ -62,7 +62,8 @@ class AuthRepository {
       );
 
       if (user != null) {
-        await _teamRepository.updatePendingTeam(user.uid, teamId);
+        //await _teamRepository.updatePendingTeam(user.uid, teamId);
+        await _teamRepository.sendTeamJoinRequest(user.uid, teamId);
       }
 
       return user;
@@ -73,6 +74,22 @@ class AuthRepository {
     } catch (e) {
       log(e.toString());
       throw UserRegistrationException(e.toString());
+    }
+  }
+
+  Future<void> updateIsEmailVerified(
+    String userId,
+    bool isEmailVerified,
+  ) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'emailVerified': isEmailVerified,
+      });
+    } on FirebaseException {
+      rethrow;
+    } catch (e) {
+      debugPrint(e.toString());
+      throw UpdateIsEmailVerifiedException(e.toString());
     }
   }
 

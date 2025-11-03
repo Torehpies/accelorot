@@ -58,9 +58,11 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     });
   }
   
-  void _onVerificationSuccess() {
+  Future<void> _onVerificationSuccess() async {
     _verificationTimer?.cancel();
     state = state.copyWith(isVerified: true);
+		final authRepo = ref.read(authRepositoryProvider);
+		await authRepo.updateIsEmailVerified(authRepo.currentUser!.uid, true);
 
     _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.dashboardCountdown > 0) {
