@@ -133,7 +133,7 @@ class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
 			final userRef = _firestore.collection('users').doc(requestorId);
 			batch.update(userRef, {
 				'teamId': teamId,
-				'pendingTeamId': FieldValue.delete(),
+				'pendingTeamSelection': FieldValue.delete(),
 			});
 
 			// 3. Delete from pending_members

@@ -29,8 +29,8 @@ class RouterNotifier extends ChangeNotifier {
 
   final Ref _ref;
 
-	final Completer<void> _initializationCompleter = Completer<void>();
-	Future<void> get isInitialized => _initializationCompleter.future;
+  final Completer<void> _initializationCompleter = Completer<void>();
+  Future<void> get isInitialized => _initializationCompleter.future;
 
   RouterNotifier(this._firebaseAuth, this._ref) {
     _authStateSubscription = _firebaseAuth.authStateChanges().listen((
@@ -40,16 +40,17 @@ class RouterNotifier extends ChangeNotifier {
 
       if (_currentUser != null) {
         await _fetchAndSetRole(_currentUser!.uid);
-				await _fetchAndSetIsInTeam(_currentUser!.uid);
-				await _fetchAndSetIsPending(_currentUser!.uid);
+        //await _fetchAndSetIsPending(_currentUser!.uid);
+        //await _fetchAndSetIsInTeam(_currentUser!.uid);
+        await _fetchAndSetIsPendingAndIsInTeam(_currentUser!.uid);
       } else {
         _userRole = null;
       }
       notifyListeners();
 
-			if (!_initializationCompleter.isCompleted) {
-				_initializationCompleter.complete();
-			}
+      if (!_initializationCompleter.isCompleted) {
+        _initializationCompleter.complete();
+      }
     });
 
     _currentUser = _firebaseAuth.currentUser;
@@ -57,20 +58,17 @@ class RouterNotifier extends ChangeNotifier {
     if (_currentUser != null) {
       _fetchAndSetRole(_currentUser!.uid).then((_) async {
         if (_currentUser?.uid == _firebaseAuth.currentUser?.uid) {
-					await _fetchAndSetIsInTeam(_currentUser!.uid);
-					await _fetchAndSetIsPending(_currentUser!.uid);
+          //await _fetchAndSetIsInTeam(_currentUser!.uid);
+          //await _fetchAndSetIsPending(_currentUser!.uid);
+          await _fetchAndSetIsPendingAndIsInTeam(_currentUser!.uid);
           notifyListeners();
         }
 
-				if (!_initializationCompleter.isCompleted) {
-					_initializationCompleter.complete();
-				}
+        if (!_initializationCompleter.isCompleted) {
+          _initializationCompleter.complete();
+        }
       });
-    } else {
-			if (!_initializationCompleter.isCompleted) {
-				_initializationCompleter.complete();
-			}
-		}
+    }
   }
 
   Future<void> _fetchAndSetRole(String uid) async {
@@ -81,13 +79,21 @@ class RouterNotifier extends ChangeNotifier {
   Future<void> _fetchAndSetIsPending(String uid) async {
     final teamRepo = _ref.read(teamRepositoryProvider);
     final result = await teamRepo.getPendingTeam(uid);
-		_isPending = result != null ? true : false;
+    _isPending = result != null ? true : false;
   }
-	
+
   Future<void> _fetchAndSetIsInTeam(String uid) async {
     final teamRepo = _ref.read(teamRepositoryProvider);
     final result = await teamRepo.getTeamId(uid);
-		_isInTeam = result != null ? true : false;
+    _isInTeam = result != null ? true : false;
+  }
+
+  Future<void> _fetchAndSetIsPendingAndIsInTeam(String uid) async {
+    final teamRepo = _ref.read(teamRepositoryProvider);
+    final isPendingResult = await teamRepo.getPendingTeam(uid);
+    final isInTeamResult = await teamRepo.getTeamId(uid);
+    _isPending = isPendingResult != null ? true : false;
+    _isInTeam = isInTeamResult != null ? true : false;
   }
 
   Future<void> registerAndSetState({
@@ -124,15 +130,15 @@ class RouterNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-	Future<void> refreshIsInTeam() async {
-		await _fetchAndSetIsInTeam(_currentUser!.uid);
-		notifyListeners();
-	}
+  Future<void> refreshIsInTeam() async {
+    await _fetchAndSetIsInTeam(_currentUser!.uid);
+    notifyListeners();
+  }
 
-	Future<void> refreshIsPending() async {
-		await _fetchAndSetIsPending(_currentUser!.uid);
-		notifyListeners();
-	}
+  Future<void> refreshIsPending() async {
+    await _fetchAndSetIsPending(_currentUser!.uid);
+    notifyListeners();
+  }
 
   @override
   void dispose() {

@@ -27,10 +27,9 @@ class EmailVerifyScreen extends ConsumerWidget {
 
     ref.listen<EmailVerifyState>(emailVerifyProvider, (previous, current) {
       if (!previous!.isVerified && current.isVerified) {
-        showSnackbar(
-          context,
-          '🎉 Email successfully verified! Redirecting to Dashboard.',
-        );
+        Future.microtask(() {
+          showSnackbar(context, 'Email successfully verified!');
+        });
       }
     });
 

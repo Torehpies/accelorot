@@ -8,7 +8,7 @@ FutureOr<String?> appRouteRedirect(
   BuildContext context,
   Ref ref,
   GoRouterState state,
-) async {
+) {
   final authListenable = ref.watch(authListenableProvider);
 
   final isLoggedIn = authListenable.isLoggedIn;
