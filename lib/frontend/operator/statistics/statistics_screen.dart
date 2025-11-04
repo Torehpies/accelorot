@@ -57,16 +57,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       
       // ⭐ If focused on a specific machine ID, load from ALL machines
       if (widget.focusedMachineId != null) {
-        // Fetch all machines to support admin viewing any machine
         final allMachines = await FirestoreMachineService.getAllMachines();
-        
         _machines = allMachines
             .where((m) => m.machineId == widget.focusedMachineId)
             .toList();
       } else {
         // ⭐ Load machines by user's teamId (operator view)
         if (currentUserId != null) {
-          // Get user's teamId and fetch team machines
           final sessionService = SessionService();
           final userData = await sessionService.getCurrentUserData();
           final teamId = userData?['teamId'] as String?;
@@ -137,21 +134,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ),
         backgroundColor: Colors.teal,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: DateFilter(onChanged: _onDateChanged),
-          ),
           if (_selectedRange != null)
             IconButton(
               tooltip: "Reset to Default View",
               icon: const Icon(Icons.refresh),
               onPressed: _resetFilter,
             ),
-          IconButton(
-            tooltip: "Refresh Data",
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadMachines,
-          ),
         ],
       ),
       body: _buildBody(),
@@ -390,6 +378,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                // 🔹 DATE FILTER BUTTON INSIDE MACHINE CARD
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade200, // background color
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    child: DateFilter(onChanged: _onDateChanged),
                   ),
                 ),
               ],

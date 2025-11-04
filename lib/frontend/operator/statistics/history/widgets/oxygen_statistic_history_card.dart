@@ -168,7 +168,7 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Oxygen Level',
+          'Air Quality',
           style: Theme.of(context)
               .textTheme
               .titleMedium
@@ -223,7 +223,7 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(18),
       child: Center(
-        child: Text('No oxygen data', style: TextStyle(color: Colors.grey[600])),
+        child: Text('No air quality data', style: TextStyle(color: Colors.grey[600])),
       ),
     );
   }

@@ -23,7 +23,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
       : 'Alerts Logs';
 
   @override
-  List<String> get filters => const ['All', 'Temperature', 'Moisture', 'Oxygen'];
+  List<String> get filters => const ['All', 'Temperature', 'Moisture', 'Air Quality'];
 
   /// Helper function to capitalize first letter properly
   String toProperCase(String input) {
@@ -33,7 +33,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    final batchId = widget.viewingOperatorId ?? '123456_03';
+    final batchId = widget.viewingOperatorId ?? '01_01';
     final alerts = await FirestoreAlertService.fetchAlertsForBatch(batchId);
 
     final List<ActivityItem> activityList = alerts.map<ActivityItem>((alert) {
