@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/controllers/admin_machine_controller.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/add_machine_modal.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/admin_machine_list.dart';
+import '../widgets/operator_search_bar.dart';
 
 class ThemeConstants {
   static const double spacing12 = 12.0;
+  static const double spacing8 = 8.0;
   static const double borderRadius20 = 20.0;
+  static const double borderRadius12 = 12.0;
   static final Color greyShade300 = Colors.grey[300]!;
   static final Color tealShade700 = Colors.teal.shade700;
 }
@@ -71,113 +74,127 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
         ),
         backgroundColor: ThemeConstants.tealShade700,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              _controller.initialize();
-            },
-          ),
-        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(ThemeConstants.spacing12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🟩 ACTION CARDS ROW (Archive, Add Machine, Total Machines)
-            SizedBox(
-              height: 100,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildActionCard(
-                      icon: Icons.archive,
-                      label: 'Archive',
-                      count: null,
-                      onPressed: () => _controller.setShowArchived(true),
-                      iconBackgroundColor: Colors.orange[50]!,
-                      iconColor: Colors.orange.shade700,
-                    ),
-                  ),
-                  const SizedBox(width: ThemeConstants.spacing12),
-                  Expanded(
-                    child: _buildActionCard(
-                      icon: Icons.add_circle_outline,
-                      label: 'Add Machine',
-                      count: null,
-                      onPressed: _showAddMachineModal,
-                      iconBackgroundColor: Colors.blue[50]!,
-                      iconColor: Colors.blue.shade700,
-                    ),
-                  ),
-                  const SizedBox(width: ThemeConstants.spacing12),
-                  Expanded(
-                    child: _buildInfoCard(
-                      icon: Icons.devices,
-                      label: 'Total Machines',
-                      count: _controller.filteredMachines.length,
-                      iconBackgroundColor: Colors.teal[50]!,
-                      iconColor: Colors.teal.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: ThemeConstants.spacing12),
-
-            // 🟦 MAIN CONTENT CONTAINER
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                      BorderRadius.circular(ThemeConstants.borderRadius20),
-                  border: Border.all(
-                    color: ThemeConstants.greyShade300,
-                    width: 1.0,
-                  ),
-                ),
-                child: Column(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(ThemeConstants.spacing12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 🟩 ACTION CARDS ROW
+              SizedBox(
+                height: 100,
+                child: Row(
                   children: [
-                    // 🟨 HEADER LABEL ONLY (No Search Bar)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: ThemeConstants.spacing12,
-                        vertical: 20, // 🟢 Added padding for the header label
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _controller.showArchived
-                              ? 'Archived Machines'
-                              : 'Active Machines',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal,
-                          ),
-                        ),
+                    Expanded(
+                      child: _buildActionCard(
+                        icon: Icons.archive,
+                        label: 'Archive',
+                        count: null,
+                        onPressed: () => _controller.setShowArchived(true),
+                        iconBackgroundColor: Colors.orange[50]!,
+                        iconColor: Colors.orange.shade700,
                       ),
                     ),
-
-                    const Divider(height: 1),
-
-                    // 🟪 MACHINE LIST (Displays active or archived machines)
+                    const SizedBox(width: ThemeConstants.spacing12),
                     Expanded(
-                      child: _buildContent(),
+                      child: _buildActionCard(
+                        icon: Icons.add_circle_outline,
+                        label: 'Add Machine',
+                        count: null,
+                        onPressed: _showAddMachineModal,
+                        iconBackgroundColor: Colors.blue[50]!,
+                        iconColor: Colors.blue.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: ThemeConstants.spacing12),
+                    Expanded(
+                      child: _buildInfoCard(
+                        icon: Icons.devices,
+                        label: 'Total Machines',
+                        count: _controller.filteredMachines.length,
+                        iconBackgroundColor: Colors.teal[50]!,
+                        iconColor: Colors.teal.shade700,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: ThemeConstants.spacing12),
+
+              // 🟦 MAIN CONTENT CONTAINER — SEARCH BAR INSIDE
+              Expanded(
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(ThemeConstants.borderRadius20),
+                    border: Border.all(
+                      color: ThemeConstants.greyShade300,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // 🔹 HEADER + SEARCH BAR IN SAME ROW
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: ThemeConstants.spacing12,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          children: [
+                            // LEFT: Section Title
+                            Text(
+                              _controller.showArchived
+                                  ? 'Archived Machines'
+                                  : 'Active Machines',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal,
+                              ),
+                            ),
+
+                            const Spacer(),
+
+                            // RIGHT: Search Bar + Refresh Button
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 500),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: OperatorSearchBar(
+                                      searchQuery: _controller.searchQuery,
+                                      onSearchChanged: _controller.setSearchQuery,
+                                       onRefresh: _controller.initialize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const Divider(height: 1),
+
+                      // MACHINE LIST
+                      Expanded(
+                        child: _buildContent(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // 🟫 MACHINE LIST CONTENT HANDLER
   Widget _buildContent() {
     if (_controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -226,7 +243,6 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     return AdminMachineList(controller: _controller);
   }
 
-  // 🟩 ACTION CARD TEMPLATE
   Widget _buildActionCard({
     required IconData icon,
     required String label,
@@ -262,6 +278,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       label,
@@ -292,7 +309,6 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     );
   }
 
-  // 🟦 INFO CARD TEMPLATE (Total Machines)
   Widget _buildInfoCard({
     required IconData icon,
     required String label,
@@ -327,6 +343,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     label,
