@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../models/machine_model.dart';
-import '../../machine_view/machine_view_screen.dart';
+import '../../../main_navigation.dart';
 import '../controllers/admin_machine_controller.dart';
 import '../../widgets/confirmation_dialog.dart';
 import 'edit_machine_modal.dart';
@@ -120,7 +120,9 @@ class AdminMachineViewDialog extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MachineViewScreen(machine: machine),
+        builder: (context) => MainNavigation(
+          focusedMachine: machine, // ⭐ Switch to operator navigation with focused machine
+        ),
       ),
     );
   }
