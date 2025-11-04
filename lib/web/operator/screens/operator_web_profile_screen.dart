@@ -6,9 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
-import '../../operator/widgets/profile_header_widget.dart';
-import '../../operator/widgets/profile_edit_form_widget.dart';
-import '../../operator/widgets/profile_info_view_widget.dart';
+import '../../../frontend/operator/profile/change_password_dialog.dart';
 
 class WebProfileScreen extends StatefulWidget {
   const WebProfileScreen({super.key});
@@ -24,8 +22,8 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   bool _isEditing = false;
 
   // Controllers for form fields
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
 
   // ignore: unused_element
   Future<void> _signOut() async {
@@ -51,8 +49,8 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       setState(() {
         _userData = data;
         _loading = false;
-        _usernameController.text = displayName;
-        _fullNameController.text = fullName;
+        _firstNameController.text = firstName;
+        _lastNameController.text = lastName;
       });
     }
   }
@@ -74,8 +72,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
 
   String get displayName => [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim();
 
-  String get fullName => '$firstName $lastName'.trim();
-
   String get initials => ((firstName.isNotEmpty ? firstName[0] : '') + (lastName.isNotEmpty ? lastName[0] : '')).toUpperCase();
 
   Future<void> _saveProfile() async {
@@ -83,9 +79,8 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      final nameParts = _fullNameController.text.trim().split(' ');
-      final newFirstName = nameParts.isNotEmpty ? nameParts.first : '';
-      final newLastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+      final newFirstName = _firstNameController.text.trim();
+      final newLastName = _lastNameController.text.trim();
 
       await FirebaseFirestore.instance
           .collection('users')
@@ -120,26 +115,10 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     }
   }
 
-  void _handleDiscard() {
-    setState(() {
-      _isEditing = false;
-      _usernameController.text = displayName;
-      _fullNameController.text = fullName;
-    });
-  }
-
-  void _handleEdit() {
-    setState(() {
-      _isEditing = true;
-      _usernameController.text = displayName;
-      _fullNameController.text = fullName;
-    });
-  }
-
   @override
   void dispose() {
-    _usernameController.dispose();
-    _fullNameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -148,23 +127,28 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-  title: const Text(
-    'Profile',
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  ),
-  automaticallyImplyLeading: false,
-  centerTitle: false,
-  flexibleSpace: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.teal.shade700, Colors.teal.shade900],
+        title: const Text(
+          'Profile',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
       ),
-    ),
-  ),
-  foregroundColor: Colors.white,
-  elevation: 0,
-  actions: [], // <-- Now empty; notification icon removed
-),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -180,56 +164,240 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ProfileHeaderWidget(
-                          initials: initials,
-                          displayName: displayName,
-                          email: email,
-                          role: role,
+                        // Header Row with Avatar, Info, and Edit Button
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: NetworkImage(
+                                'https://via.placeholder.com/150/2E7D32/FFFFFF?text=$initials',
+                              ),
+                            ),
+                            const SizedBox(width: 32),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    email,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.teal[50],
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      role,
+                                      style: TextStyle(
+                                        color: Colors.teal[800],
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Buttons in top row
+                            if (!_isEditing)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: () => ChangePasswordDialog.show(context),
+                                    icon: const Icon(Icons.lock_reset, size: 18),
+                                    label: const Text('Change Password'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.orange,
+                                      side: const BorderSide(color: Colors.orange),
+                                      backgroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: 180,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          _isEditing = true;
+                                          _firstNameController.text = firstName;
+                                          _lastNameController.text = lastName;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.edit, size: 18),
+                                      label: const Text('Edit Profile'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.teal,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 32),
                         Divider(color: Colors.grey[300]),
                         const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Personal Information',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800],
-                                  ),
-                            ),
-                            if (!_isEditing)
-                              ElevatedButton(
-                                onPressed: _handleEdit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: const Text('Edit Profile'),
+                        // Personal Info Header (no button here anymore)
+                        Text(
+                          'Personal Information',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
                               ),
-                          ],
                         ),
                         const SizedBox(height: 24),
                         if (_isEditing)
-                          ProfileEditFormWidget(
-                            usernameController: _usernameController,
-                            fullNameController: _fullNameController,
-                            email: email,
-                            role: role,
-                            onSave: _saveProfile,
-                            onDiscard: _handleDiscard,
+                          Form(
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _firstNameController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'First Name',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _lastNameController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Last Name',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        initialValue: email,
+                                        decoration: InputDecoration(
+                                          labelText: 'Email Address',
+                                          border: const OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.grey[200],
+                                        ),
+                                        enabled: false,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    Expanded(
+                                      child: TextFormField(
+                                        initialValue: role,
+                                        decoration: InputDecoration(
+                                          labelText: 'Role',
+                                          border: const OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.grey[200],
+                                        ),
+                                        enabled: false,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 32),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    // Discard Button
+                                    OutlinedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _isEditing = false;
+                                          _firstNameController.text = firstName;
+                                          _lastNameController.text = lastName;
+                                        });
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: Colors.teal,
+                                        side: const BorderSide(color: Colors.teal),
+                                        backgroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: const Text('Discard'),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    // Save Button
+                                    ElevatedButton(
+                                      onPressed: _saveProfile,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.teal,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: const Text('Save'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           )
                         else
-                          ProfileInfoViewWidget(
-                            displayName: displayName,
-                            fullName: fullName,
-                            email: email,
-                            role: role,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoField('First Name', firstName),
+                                  ),
+                                  const SizedBox(width: 24),
+                                  Expanded(
+                                    child: _buildInfoField('Last Name', lastName),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoField('Email Address', email),
+                                  ),
+                                  const SizedBox(width: 24),
+                                  Expanded(
+                                    child: _buildInfoField('Role', role),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                       ],
                     ),
@@ -237,6 +405,36 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildInfoField(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

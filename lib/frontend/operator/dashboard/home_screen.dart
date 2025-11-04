@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // ⭐ Show confirmation AND refresh activity logs if report was submitted
+    // Show confirmation AND refresh activity logs if report was submitted
     if (result != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

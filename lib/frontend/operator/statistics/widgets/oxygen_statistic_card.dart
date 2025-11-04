@@ -60,7 +60,7 @@ class OxygenStatisticCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Oxygen Level',
+                'Air Quality',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium
@@ -126,7 +126,7 @@ class OxygenStatisticCard extends StatelessWidget {
           if (hourlyReadings.isEmpty) ...[
             Center(
               child: Text(
-                '⚠️ No oxygen data available',
+                '⚠️ No air quality data available',
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,

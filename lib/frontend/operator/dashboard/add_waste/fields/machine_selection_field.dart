@@ -7,12 +7,14 @@ class MachineSelectionField extends StatelessWidget {
   final String? selectedMachineId;
   final Function(String?)? onChanged;
   final bool isLocked;
+  final String? errorText;
 
   const MachineSelectionField({
     super.key,
     required this.selectedMachineId,
     this.onChanged,
     this.isLocked = false, 
+    this.errorText,
   });
 
   /// Fetch machines based on user's teamId
@@ -97,7 +99,7 @@ class MachineSelectionField extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          value: selectedMachineId,
+          initialValue: selectedMachineId,
           decoration: InputDecoration(
             labelText: 'Select Machine',
             prefixIcon: const Icon(Icons.precision_manufacturing, size: 18),
@@ -111,6 +113,7 @@ class MachineSelectionField extends StatelessWidget {
             suffixIcon: isLocked
                 ? const Icon(Icons.lock, size: 18, color: Colors.grey)
                 : null,
+            errorText: errorText,
           ),
           items: machines.map((machine) {
             return DropdownMenuItem<String>(

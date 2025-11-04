@@ -58,12 +58,11 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // ⭐ Initialize screens with focused machine if provided
     _screens = [
       HomeScreen(focusedMachine: widget.focusedMachine),
       ActivityLogsNavigator(
         key: _activityNavigatorKey,
-        focusedMachineId: widget.focusedMachine?.machineId, // ⭐ Pass machine filter
+        focusedMachineId: widget.focusedMachine?.machineId,
       ),
       StatisticsScreen(
         focusedMachineId: widget.focusedMachine?.machineId,

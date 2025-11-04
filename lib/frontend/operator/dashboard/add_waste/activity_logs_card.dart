@@ -89,7 +89,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                 Text(
                   widget.focusedMachineId != null
                       ? 'Machine Activity Logs'
-                      : 'Recent Activity', // ⭐ Changed from 'Activity Logs'
+                      : 'Recent Activity',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

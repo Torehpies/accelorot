@@ -88,7 +88,7 @@ class ActivityLogItem extends StatelessWidget {
                     ],
                   ),
                 
-                // ⭐ Report Type OR Batch Info (Option A: replace batch with report type)
+                // Report Type OR Batch Info
                 if (log.isReport && log.reportType != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),

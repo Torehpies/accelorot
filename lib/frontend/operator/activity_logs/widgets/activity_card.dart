@@ -94,20 +94,10 @@ class ActivityCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const SizedBox(width: 52), 
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        item.category,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
                       // Show machine info
                       Text(
                        'Machine: ${item.machineName ?? item.machineId ?? '-'}',
@@ -116,7 +106,7 @@ class ActivityCard extends StatelessWidget {
                           color: Colors.black45,
                         ),
                       ),
-                      // ⭐ Show batch info
+                      // Show batch info
                       if (item.batchId != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),

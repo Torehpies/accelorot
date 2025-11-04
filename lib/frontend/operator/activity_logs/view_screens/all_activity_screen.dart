@@ -70,11 +70,9 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
     bool hasAlerts = categories.any(
       (cat) => ['Temp', 'Moisture', 'Oxygen'].contains(cat)
     );
-    // ⭐ NEW: Check for Cycles
     bool hasCycles = categories.any(
       (cat) => ['Recoms', 'Cycles'].contains(cat)
     );
-    // ⭐ NEW: Check for Reports
     bool hasReports = categories.any(
       (cat) => ['Maintenance', 'Observation', 'Safety'].contains(cat)
     );
@@ -85,7 +83,7 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
     if (hasCycles) result.add('Cycles');
     if (hasReports) result.add('Reports'); 
     
-    // ⭐ UPDATED: All requires all 4 categories
+    // UPDATED: All requires all 4 categories
     if (hasSubstrate && hasAlerts && hasCycles && hasReports) {
       result.add('All');
     }

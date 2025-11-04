@@ -1,4 +1,4 @@
-//firestore_machine_service.dart
+// lib/services/machine_services/firestore_machine_service.dart
 
 import '../../frontend/operator/machine_management/models/machine_model.dart';
 import 'firestore_collection.dart';
