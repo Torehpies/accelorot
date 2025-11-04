@@ -419,19 +419,18 @@ class FirestoreFetch {
     return parts.join('\n');
   }
 
-  // Fetch All Activities Combined (substrates + alerts + cycles + reports)
+  // Fetch All Activities Combined (substrates + alerts + cycles only, excluding reports)
   static Future<List<ActivityItem>> getAllActivities([
     String? targetUserId,
   ]) async {
     try {
       final userId = _resolveUserId(targetUserId);
 
-      // Fetch all collections in parallel
+      // Fetch all collections in parallel (excluding reports)
       final results = await Future.wait([
         getSubstrates(userId),
         getAlerts(userId),
         getCyclesRecom(userId),
-        getReports(userId), // ⭐ Now includes reports
       ]);
 
       // Combine all lists
@@ -439,7 +438,6 @@ class FirestoreFetch {
         ...results[0], // substrates
         ...results[1], // alerts
         ...results[2], // cycles
-        ...results[3], // reports
       ];
 
       // Sort by timestamp descending
@@ -451,7 +449,6 @@ class FirestoreFetch {
       debugPrint('   - ${results[0].length} substrates');
       debugPrint('   - ${results[1].length} alerts');
       debugPrint('   - ${results[2].length} cycles');
-      debugPrint('   - ${results[3].length} reports');
 
       if (allActivities.isNotEmpty) {
         final first = allActivities.first;
