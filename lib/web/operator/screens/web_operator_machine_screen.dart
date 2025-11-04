@@ -41,7 +41,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     await controller.refresh();
   }
 
-  void handleMachineTap(machine) {
+  void handleMachineTap(dynamic machine) {
     showDialog(
       context: context,
       builder: (context) => WebViewConfirmationDialog(machine: machine),
