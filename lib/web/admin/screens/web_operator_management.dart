@@ -256,6 +256,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             searchQuery: _controller.searchQuery,
             onSearchChanged: (value) => _controller.setSearchQuery(value),
             onRefresh: () => _controller.loadOperators(),
+            onBack: _controller.showArchived 
+                ? () => _controller.setShowArchived(false) 
+                : null,
           ),
           const Divider(height: 1),
           // Content
