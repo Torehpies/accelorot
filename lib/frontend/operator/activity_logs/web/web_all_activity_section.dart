@@ -1,5 +1,7 @@
 // lib/frontend/operator/activity_logs/web/web_all_activity_section.dart
 import 'package:flutter/material.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../../activity_logs/models/activity_item.dart';
 
 class WebAllActivitySection extends StatelessWidget {
   final String? viewingOperatorId;
@@ -8,12 +10,6 @@ class WebAllActivitySection extends StatelessWidget {
     super.key,
     this.viewingOperatorId,
   });
-
-  static List<Map<String, dynamic>> get _mockLogs => [
-    {'time': '10:30 AM', 'user': 'Miguel', 'action': 'Added greens', 'details': '5kg kitchen waste'},
-    {'time': '09:15 AM', 'user': 'System', 'action': 'Temp alert', 'details': '62°C in Bin A'},
-    {'time': 'Yesterday', 'user': 'Admin', 'action': 'Cycle started', 'details': 'Cycle #42'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -32,42 +28,101 @@ class WebAllActivitySection extends StatelessWidget {
               children: [
                 const Icon(Icons.history, color: Colors.teal, size: 20),
                 const SizedBox(width: 12),
-                // ✅ Title text: explicitly black
                 const Text(
                   'Recent Activity',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black
+                    color: Colors.black,
                   ),
                 ),
               ],
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _mockLogs.length,
-            itemBuilder: (context, index) {
-              final log = _mockLogs[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                // ✅ Action: black (bold)
-                title: Text(
-                  log['action'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color:Color.fromARGB(255, 48, 47, 47)),
-                ),
-                // ✅ Details: grey
-                subtitle: Text(
-                  '${log['time']} • ${log['details']}',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                // ✅ User: grey
-                trailing: Text(
-                  log['user'] as String,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                ),
+          
+          // Fetch real data from Firestore - all activities combined
+          FutureBuilder<List<ActivityItem>>(
+            future: FirestoreActivityService.getAllActivities(
+              viewingOperatorId: viewingOperatorId,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Error loading activities',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
+                );
+              }
+
+              final activities = snapshot.data ?? [];
+              
+              if (activities.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(
+                      'No activities yet',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ),
+                );
+              }
+
+              // Show only first 5 most recent activities
+              final recentActivities = activities.take(5).toList();
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: recentActivities.length,
+                itemBuilder: (context, index) {
+                  final activity = recentActivities[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    leading: Icon(
+                      activity.icon,
+                      color: Colors.teal,
+                      size: 20,
+                    ),
+                    title: Text(
+                      activity.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Color.fromARGB(255, 48, 47, 47),
+                      ),
+                    ),
+                    subtitle: Text(
+                      '${activity.formattedTimestamp} • ${activity.value}',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: activity.statusColorValue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        activity.category,
+                        style: TextStyle(
+                          color: activity.statusColorValue,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),

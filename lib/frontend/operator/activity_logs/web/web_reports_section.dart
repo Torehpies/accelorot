@@ -1,13 +1,13 @@
-// lib/frontend/operator/activity_logs/web/web_cycles_recom_section.dart
+// lib/frontend/operator/activity_logs/web/web_reports_section.dart
 import 'package:flutter/material.dart';
 import '../../../../services/firestore_activity_service.dart';
 import '../../activity_logs/models/activity_item.dart';
 
-class WebCyclesRecomSection extends StatelessWidget {
+class WebReportsSection extends StatelessWidget {
   final String? viewingOperatorId;
   final VoidCallback? onViewAll;
 
-  const WebCyclesRecomSection({
+  const WebReportsSection({
     super.key,
     this.viewingOperatorId,
     this.onViewAll,
@@ -28,10 +28,10 @@ class WebCyclesRecomSection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Colors.blue, size: 20),
+                const Icon(Icons.report_outlined, color: Colors.deepPurple, size: 20),
                 const SizedBox(width: 12),
                 const Text(
-                  'Composting Cycles',
+                  'Reports',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -53,9 +53,9 @@ class WebCyclesRecomSection extends StatelessWidget {
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
           
-          // Fetch real data from Firestore
+          // Fetch real data
           FutureBuilder<List<ActivityItem>>(
-            future: FirestoreActivityService.getCyclesRecom(
+            future: FirestoreActivityService.getReports(
               viewingOperatorId: viewingOperatorId,
             ),
             builder: (context, snapshot) {
@@ -70,57 +70,64 @@ class WebCyclesRecomSection extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Error loading cycles',
+                    'Error loading reports',
                     style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
                 );
               }
 
-              final cycles = snapshot.data ?? [];
+              final reports = snapshot.data ?? [];
               
-              if (cycles.isEmpty) {
+              if (reports.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(32),
                   child: Center(
                     child: Text(
-                      'No cycles yet',
+                      'No reports yet',
                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
                     ),
                   ),
                 );
               }
 
-              // Show only first 3 cycles
-              final previewCycles = cycles.take(3).toList();
+              // Show only first 3 reports
+              final previewReports = reports.take(3).toList();
 
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: previewCycles.length,
+                itemCount: previewReports.length,
                 itemBuilder: (context, index) {
-                  final cycle = previewCycles[index];
+                  final report = previewReports[index];
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    leading: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: _getReportColor(report.reportType),
+                      child: Icon(
+                        report.icon,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
                     title: Text(
-                      cycle.title,
+                      report.title,
                       style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
                     ),
                     subtitle: Text(
-                      cycle.description,
+                      report.formattedTimestamp,
                       style: const TextStyle(fontSize: 13, color: Colors.grey),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: cycle.statusColorValue.withValues(alpha: 0.1),
+                        color: report.statusColorValue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        cycle.value,
+                        report.value,
                         style: TextStyle(
-                          color: cycle.statusColorValue,
+                          color: report.statusColorValue,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -134,5 +141,18 @@ class WebCyclesRecomSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getReportColor(String? reportType) {
+    switch (reportType?.toLowerCase()) {
+      case 'maintenance issue':
+        return Colors.blue;
+      case 'observation':
+        return Colors.green;
+      case 'safety concern':
+        return Colors.red;
+      default:
+        return Colors.deepPurple;
+    }
   }
 }

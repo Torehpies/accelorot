@@ -1,5 +1,7 @@
 // lib/frontend/operator/activity_logs/web/web_alerts_section.dart
 import 'package:flutter/material.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../../activity_logs/models/activity_item.dart';
 
 class WebAlertsSection extends StatelessWidget {
   final String? viewingOperatorId;
@@ -10,12 +12,6 @@ class WebAlertsSection extends StatelessWidget {
     this.viewingOperatorId,
     this.onViewAll,
   });
-
-  static List<Map<String, dynamic>> get _mockAlerts => [
-    {'time': '10:30 AM', 'type': 'High Temp', 'value': '62°C', 'status': 'Unresolved'},
-    {'time': '09:15 AM', 'type': 'Low O2', 'value': '8%', 'status': 'Resolved'},
-    {'time': 'Yesterday', 'type': 'Moisture', 'value': 'Too dry', 'status': 'Pending'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +30,12 @@ class WebAlertsSection extends StatelessWidget {
               children: [
                 const Icon(Icons.warning, color: Colors.orange, size: 20),
                 const SizedBox(width: 12),
-                // ✅ Title text: explicitly black
                 const Text(
                   'Recent Alerts',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black text
+                    color: Colors.black,
                   ),
                 ),
                 if (onViewAll != null) ...[
@@ -57,34 +52,80 @@ class WebAlertsSection extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _mockAlerts.length,
-            itemBuilder: (context, index) {
-              final alert = _mockAlerts[index];
-              final color = alert['status'] == 'Unresolved' ? Colors.red : Colors.green;
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                // ✅ Alert type: black
-                title: Text(
-                  alert['type'] as String,
-                  style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
-                ),
-                // ✅ Time & value: grey (as intended)
-                subtitle: Text(
-                  '${alert['time']} • ${alert['value']}',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                trailing: Chip(
-                  label: Text(alert['status'] as String),
-                  backgroundColor: color,
-                  labelStyle: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+          
+          // Fetch real data from Firestore
+          FutureBuilder<List<ActivityItem>>(
+            future: FirestoreActivityService.getAlerts(
+              viewingOperatorId: viewingOperatorId,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Error loading alerts',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
-                ),
+                );
+              }
+
+              final alerts = snapshot.data ?? [];
+              
+              if (alerts.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(
+                      'No alerts yet',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ),
+                );
+              }
+
+              // Show only first 3 alerts
+              final previewAlerts = alerts.take(3).toList();
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: previewAlerts.length,
+                itemBuilder: (context, index) {
+                  final alert = previewAlerts[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    title: Text(
+                      alert.title,
+                      style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                    ),
+                    subtitle: Text(
+                      '${alert.formattedTimestamp} • ${alert.value}',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: alert.statusColorValue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        alert.category,
+                        style: TextStyle(
+                          color: alert.statusColorValue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
           ),

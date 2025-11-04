@@ -1,5 +1,7 @@
 // lib/frontend/operator/activity_logs/web/web_substrate_section.dart
 import 'package:flutter/material.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../../activity_logs/models/activity_item.dart';
 
 class WebSubstrateSection extends StatelessWidget {
   final String? viewingOperatorId;
@@ -10,12 +12,6 @@ class WebSubstrateSection extends StatelessWidget {
     this.viewingOperatorId,
     this.onViewAll,
   });
-
-  static List<Map<String, dynamic>> get _mockSubstrates => [
-    {'type': 'Greens', 'amount': '5 kg', 'time': 'Today, 10:30 AM', 'source': 'Kitchen'},
-    {'type': 'Browns', 'amount': '3 kg', 'time': 'Today, 09:00 AM', 'source': 'Yard'},
-    {'type': 'Compost', 'amount': '10 kg', 'time': 'Yesterday', 'source': 'Harvest'},
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,13 +30,12 @@ class WebSubstrateSection extends StatelessWidget {
               children: [
                 const Icon(Icons.eco, color: Colors.green, size: 20),
                 const SizedBox(width: 12),
-                // ✅ Title: explicitly black
                 const Text(
                   'Substrate Log',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black
+                    color: Colors.black,
                   ),
                 ),
                 if (onViewAll != null) ...[
@@ -57,38 +52,78 @@ class WebSubstrateSection extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _mockSubstrates.length,
-            itemBuilder: (context, index) {
-              final item = _mockSubstrates[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                leading: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: _getTypeColor(item['type'] as String),
-                  child: Icon(
-                    _getTypeIcon(item['type'] as String),
-                    color: Colors.white,
-                    size: 16,
+          
+          // Fetch real data from Firestore
+          FutureBuilder<List<ActivityItem>>(
+            future: FirestoreActivityService.getSubstrates(
+              viewingOperatorId: viewingOperatorId,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Error loading substrates',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
                   ),
-                ),
-                // ✅ Type: black
-                title: Text(
-                  item['type'] as String,
-                  style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
-                ),
-                // ✅ Amount & source: grey
-                subtitle: Text(
-                  '${item['amount']} • ${item['source']}',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                // ✅ Time: grey
-                trailing: Text(
-                  item['time'] as String,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                ),
+                );
+              }
+
+              final substrates = snapshot.data ?? [];
+              
+              if (substrates.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: Text(
+                      'No substrates yet',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ),
+                );
+              }
+
+              // Show only first 3 substrates
+              final previewSubstrates = substrates.take(3).toList();
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: previewSubstrates.length,
+                itemBuilder: (context, index) {
+                  final item = previewSubstrates[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    leading: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: _getTypeColor(item.category),
+                      child: Icon(
+                        item.icon,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                    title: Text(
+                      item.title,
+                      style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                    ),
+                    subtitle: Text(
+                      '${item.value} • ${item.category}',
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    trailing: Text(
+                      item.formattedTimestamp,
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -97,21 +132,16 @@ class WebSubstrateSection extends StatelessWidget {
     );
   }
 
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'Greens': return Colors.green;
-      case 'Browns': return Colors.brown;
-      case 'Compost': return Colors.teal;
-      default: return Colors.grey;
-    }
-  }
-
-  IconData _getTypeIcon(String type) {
-    switch (type) {
-      case 'Greens': return Icons.local_dining;
-      case 'Browns': return Icons.park;
-      case 'Compost': return Icons.recycling;
-      default: return Icons.eco;
+  Color _getTypeColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'greens':
+        return Colors.green;
+      case 'browns':
+        return Colors.brown;
+      case 'compost':
+        return Colors.teal;
+      default:
+        return Colors.grey;
     }
   }
 }

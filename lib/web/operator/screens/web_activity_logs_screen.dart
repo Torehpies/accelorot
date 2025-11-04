@@ -1,23 +1,22 @@
-// lib/frontend/operator/web/web_activity_logs_screen.dart
+// lib/frontend/operator/screens/web_activity_logs_screen.dart
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/activity_logs/web/web_all_activity_section.dart';
-import '../../../frontend/operator/activity_logs/web/web_substrate_section.dart';
-import '../../../frontend/operator/activity_logs/web/web_alerts_section.dart';
-import '../../../frontend/operator/activity_logs/web/web_cycles_recom_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_batch_selector.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_all_activity_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_substrate_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_alerts_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_cycles_recom_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_reports_section.dart';
+import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_focused_view.dart';
+import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
-// ===== Web Detail Panel Component (Embedded) =====
+// ===== Web Detail Panel Component =====
 class WebDetailPanel extends StatelessWidget {
-  
   final Widget child;
-  final String title;
-  final VoidCallback onClose;
   final bool isVisible;
 
   const WebDetailPanel({
     super.key,
     required this.child,
-    required this.title,
-    required this.onClose,
     required this.isVisible,
   });
 
@@ -26,49 +25,18 @@ class WebDetailPanel extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       width: isVisible ? 500 : 0,
-      decoration: BoxDecoration(
+      decoration: BoxDecoration(  // ✅ Use BoxDecoration
         color: Colors.white,
-        boxShadow: [
+        boxShadow: [  // ✅ boxShadow takes a List<BoxShadow>
           BoxShadow(
-            color: Colors.black,
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(-4, 0),
           ),
         ],
       ),
       child: isVisible
-          ? Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey)),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: onClose,
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: child,
-                  ),
-                ),
-              ],
-            )
+          ? child  // ✅ Simplified - no need for extra Container
           : const SizedBox(),
     );
   }
@@ -78,7 +46,6 @@ class WebDetailPanel extends StatelessWidget {
 class WebActivityLogsScreen extends StatefulWidget {
   final bool shouldRefresh;
 
-  
   const WebActivityLogsScreen({super.key, this.shouldRefresh = false});
 
   @override
@@ -86,24 +53,75 @@ class WebActivityLogsScreen extends StatefulWidget {
 }
 
 class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
-  String selectedTab = 'all'; // ✅ No leading underscore
+  String selectedTab = 'all';
   bool isDetailPanelOpen = false;
   Widget? detailContent;
-  String detailTitle = '';
 
-  void openDetailPanel(String title, Widget content) { // ✅ No leading underscore
+  void openDetailPanel(Widget content) {
     setState(() {
-      detailTitle = title;
       detailContent = content;
       isDetailPanelOpen = true;
     });
   }
 
-  void closeDetailPanel() { // ✅ No leading underscore
+  void closeDetailPanel() {
     setState(() {
       isDetailPanelOpen = false;
       detailContent = null;
     });
+  }
+
+  // Fetch data methods
+  Future<void> _openSubstratesFocusedView() async {
+    final items = await FirestoreActivityService.getSubstrates();
+    openDetailPanel(
+      WebFocusedView(
+        title: 'Substrate Logs',
+        icon: Icons.eco,
+        items: items,
+        filterOptions: const ['All', 'Greens', 'Browns', 'Compost'],
+        onClose: closeDetailPanel,
+      ),
+    );
+  }
+
+  Future<void> _openAlertsFocusedView() async {
+    final items = await FirestoreActivityService.getAlerts();
+    openDetailPanel(
+      WebFocusedView(
+        title: 'System Alerts',
+        icon: Icons.warning,
+        items: items,
+        filterOptions: const ['All', 'Temp', 'Moisture', 'Air Quality'],
+        onClose: closeDetailPanel,
+      ),
+    );
+  }
+
+  Future<void> _openReportsFocusedView() async {
+    final items = await FirestoreActivityService.getReports();
+    openDetailPanel(
+      WebFocusedView(
+        title: 'Reports',
+        icon: Icons.report_outlined,
+        items: items,
+        filterOptions: const ['All', 'Maintenance Issue', 'Observation', 'Safety Concern'],
+        onClose: closeDetailPanel,
+      ),
+    );
+  }
+
+  Future<void> _openCyclesFocusedView() async {
+    final items = await FirestoreActivityService.getCyclesRecom();
+    openDetailPanel(
+      WebFocusedView(
+        title: 'Composting Cycles',
+        icon: Icons.auto_awesome,
+        items: items,
+        filterOptions: const ['All', 'Active', 'Completed', 'Paused'],
+        onClose: closeDetailPanel,
+      ),
+    );
   }
 
   @override
@@ -114,24 +132,24 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-   appBar: AppBar(
-  title: const Text(
-    'Activity Logs',
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  ),
-  automaticallyImplyLeading: false,
-  centerTitle: false,
-  flexibleSpace: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.teal.shade700, Colors.teal.shade900],
+      appBar: AppBar(
+        title: const Text(
+          'Activity Logs',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: const [],
       ),
-    ),
-  ),
-  foregroundColor: Colors.white,
-  elevation: 0,
-  actions: [], // <-- Now empty; notification icon removed
-),
       body: SafeArea(
         child: Row(
           children: [
@@ -139,6 +157,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
             Expanded(
               child: Column(
                 children: [
+                  // Batch Selector (Fixed at top)
+                  const WebBatchSelector(),
+
                   // Tab Navigation Bar
                   Container(
                     margin: EdgeInsets.fromLTRB(
@@ -164,6 +185,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                         buildTabButton('all', 'All Activity', Icons.list),
                         buildTabButton('substrate', 'Substrate', Icons.eco),
                         buildTabButton('alerts', 'Alerts', Icons.warning),
+                        buildTabButton('reports', 'Reports', Icons.report_outlined),
                         buildTabButton('cycles', 'Cycles', Icons.refresh),
                       ],
                     ),
@@ -185,12 +207,10 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               ),
             ),
 
-            // Detail Panel (Web/Desktop Only)
+            // Detail Panel (Side Panel)
             if (isWideScreen)
               WebDetailPanel(
                 isVisible: isDetailPanelOpen,
-                title: detailTitle,
-                onClose: closeDetailPanel,
                 child: detailContent ?? const SizedBox(),
               ),
           ],
@@ -251,6 +271,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         return buildSubstrateView();
       case 'alerts':
         return buildAlertsView();
+      case 'reports':
+        return buildReportsView();
       case 'cycles':
         return buildCyclesView();
       case 'all':
@@ -267,18 +289,20 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        const WebAllActivitySection(),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection()),
+            Expanded(child: WebSubstrateSection(onViewAll: _openSubstratesFocusedView)),
             const SizedBox(width: 24),
-            Expanded(child: WebAlertsSection()),
+            Expanded(child: WebAlertsSection(onViewAll: _openAlertsFocusedView)),
+            const SizedBox(width: 24),
+            Expanded(child: WebReportsSection(onViewAll: _openReportsFocusedView)),
           ],
         ),
         const SizedBox(height: 24),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(onViewAll: _openCyclesFocusedView),
       ],
     );
   }
@@ -287,18 +311,25 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        const WebAllActivitySection(),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection()),
+            Expanded(child: WebSubstrateSection(onViewAll: _openSubstratesFocusedView)),
             const SizedBox(width: 20),
-            Expanded(child: WebAlertsSection()),
+            Expanded(child: WebAlertsSection(onViewAll: _openAlertsFocusedView)),
           ],
         ),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: WebReportsSection(onViewAll: _openReportsFocusedView)),
+            const SizedBox(width: 20),
+            Expanded(child: WebCyclesRecomSection(onViewAll: _openCyclesFocusedView)),
+          ],
+        ),
       ],
     );
   }
@@ -307,13 +338,15 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        const WebAllActivitySection(),
         const SizedBox(height: 20),
-        WebSubstrateSection(),
+        WebSubstrateSection(onViewAll: _openSubstratesFocusedView),
         const SizedBox(height: 20),
-        WebAlertsSection(),
+        WebAlertsSection(onViewAll: _openAlertsFocusedView),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(),
+        WebReportsSection(onViewAll: _openReportsFocusedView),
+        const SizedBox(height: 20),
+        WebCyclesRecomSection(onViewAll: _openCyclesFocusedView),
       ],
     );
   }
@@ -323,7 +356,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
         const SizedBox(height: 16),
-        WebSubstrateSection(),
+        WebSubstrateSection(onViewAll: _openSubstratesFocusedView),
       ],
     );
   }
@@ -333,7 +366,17 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
         const SizedBox(height: 16),
-        WebAlertsSection(),
+        WebAlertsSection(onViewAll: _openAlertsFocusedView),
+      ],
+    );
+  }
+
+  Widget buildReportsView() {
+    return Column(
+      children: [
+        buildSectionHeader('Reports', Icons.report_outlined, Colors.deepPurple),
+        const SizedBox(height: 16),
+        WebReportsSection(onViewAll: _openReportsFocusedView),
       ],
     );
   }
@@ -343,7 +386,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
         const SizedBox(height: 16),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(onViewAll: _openCyclesFocusedView),
       ],
     );
   }
@@ -379,7 +422,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
             child: Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,  
+                fontWeight: FontWeight.bold,
                 fontSize: 13,
                 color: color.shade900,
               ),
