@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/controllers/admin_machine_controller.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/add_machine_modal.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/admin_machine_list.dart';
+import '../controllers/admin_machine_controller.dart';
+import '../widgets/add_machine_modal.dart';
+import '../widgets/admin_machine_list.dart';
 import '../widgets/operator_search_bar.dart';
 
 class ThemeConstants {
@@ -16,7 +16,8 @@ class ThemeConstants {
 class WebMachineManagement extends StatefulWidget {
 
   
-  const WebMachineManagement({super.key});
+  const WebMachineManagement({super.key, this.viewingOperatorId});
+  final String? viewingOperatorId;
 
   @override
   State<WebMachineManagement> createState() => _WebMachineManagementState();
@@ -109,10 +110,11 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                     ),
                     const SizedBox(width: ThemeConstants.spacing12),
                     Expanded(
-                      child: _buildInfoCard(
+                      child: _buildActionCard(
                         icon: Icons.devices,
                         label: 'Total Machines',
                         count: _controller.filteredMachines.length,
+                        onPressed: () => _controller.setShowArchived(false),
                         iconBackgroundColor: Colors.teal[50]!,
                         iconColor: Colors.teal.shade700,
                       ),
@@ -262,19 +264,19 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: iconBackgroundColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, size: 24, color: iconColor),
+                child: Icon(icon, size: 22, color: iconColor),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,17 +285,17 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                     Text(
                       label,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
                     if (count != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         count.toString(),
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: iconColor,
                         ),
@@ -304,68 +306,6 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String label,
-    required int count,
-    Color? iconBackgroundColor,
-    Color? iconColor,
-  }) {
-    iconBackgroundColor ??= Colors.teal[50]!;
-    iconColor ??= Colors.teal.shade700;
-
-    return Card(
-      color: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: ThemeConstants.greyShade300, width: 1.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: iconBackgroundColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 24, color: iconColor),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    count.toString(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
