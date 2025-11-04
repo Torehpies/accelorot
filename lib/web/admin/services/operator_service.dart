@@ -77,6 +77,25 @@ class OperatorService {
     });
   }
 
+  // Remove operator permanently (mark as left)
+  Future<void> removeOperatorPermanently(String operatorUid) async {
+    if (currentUserId == null) {
+      throw Exception('No user logged in');
+    }
+
+    await _firestore
+        .collection('teams')
+        .doc(currentUserId)
+        .collection('members')
+        .doc(operatorUid)
+        .update({
+      'hasLeft': true,
+      'leftAt': FieldValue.serverTimestamp(),
+      'isArchived': true,
+      'archivedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   // Load pending members
   Future<List<PendingMemberModel>> loadPendingMembers() async {
     if (currentUserId == null) {

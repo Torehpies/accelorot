@@ -125,6 +125,34 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     }
   }
 
+  Future<void> _handleRemovePermanently() async {
+    final operator = _controller.selectedOperator;
+    if (operator == null) return;
+
+    final confirm = await OperatorDialogs.showRemovePermanentlyConfirmation(
+      context,
+      operator.name,
+    );
+
+    if (confirm != true || !mounted) return;
+
+    final success = await _controller.removeOperatorPermanently(operator);
+    if (!mounted) return;
+
+    if (success) {
+      _controller.clearSelectedOperator();
+      OperatorDialogs.showSuccessSnackbar(
+        context,
+        '${operator.name} has been removed permanently',
+      );
+    } else {
+      OperatorDialogs.showErrorSnackbar(
+        context,
+        'Failed to remove operator',
+      );
+    }
+  }
+
 
 
   @override
@@ -175,6 +203,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                         onClose: () => _controller.clearSelectedOperator(),
                         onArchive: _handleArchive,
                         onRestore: _handleRestore,
+                        onRemovePermanently: _handleRemovePermanently,
                         showArchived: _controller.showArchived,
                       ),
                     ),
