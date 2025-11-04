@@ -12,6 +12,7 @@ void main() async {
 
   // 🌐 Global error handler (safe for web)
   FlutterError.onError = (details) {
+		debugPrint(details.toString());
     // Consider using a logging service here in production
     // e.g., Sentry.captureException(details.exception, stackTrace: details.stack);
   };
@@ -19,6 +20,7 @@ void main() async {
   // 🧵 Async error handler
   PlatformDispatcher.instance.onError = (error, stack) {
     // Consider using a logging service here in production
+		debugPrint(error.toString());
     return true;
   };
 
@@ -30,6 +32,7 @@ void main() async {
   } on FirebaseException {
     // Handle or log Firebase initialization errors appropriately
   } catch (e) {
+		debugPrint(e.toString());
     // Handle or log general initialization errors appropriately
   }
 

@@ -1,22 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_application_1/routes/router_notifier.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../services/auth_service.dart';
-import 'waiting_approval_screen.dart';
-import 'login_screen.dart';
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
-class TeamSelectionScreen extends StatefulWidget {
+class TeamSelectionScreen extends ConsumerStatefulWidget {
   const TeamSelectionScreen({super.key});
 
   @override
-  State<TeamSelectionScreen> createState() => _TeamSelectionScreenState();
+  ConsumerState<TeamSelectionScreen> createState() => _TeamSelectionScreenState();
 }
 
-class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
+class _TeamSelectionScreenState extends ConsumerState<TeamSelectionScreen> {
   final AuthService _auth = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   bool _loading = true;
   bool _submitting = false;
   String? _selectedTeamId;
@@ -39,10 +39,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
       final teamsSnapshot = await _firestore.collection('teams').get();
       final teams = teamsSnapshot.docs.map((doc) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          'name': data['teamName'] ?? 'Unnamed Team',
-        };
+        return {'id': doc.id, 'name': data['teamName'] ?? 'Unnamed Team'};
       }).toList();
 
       if (mounted) {
@@ -63,9 +60,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
 
   Future<void> _submitTeamRequest() async {
     if (_selectedTeamId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a team first')),
-      );
+      showSnackbar(context, 'Please select a team first.');
       return;
     }
 
@@ -83,7 +78,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
           .doc(_selectedTeamId!)
           .collection('pending_members')
           .doc(user.uid);
-      
+
       batch.set(pendingRef, {
         'requestorId': user.uid,
         'requestorEmail': user.email ?? '',
@@ -92,48 +87,34 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
 
       // Set pendingTeamId in user document
       final userRef = _firestore.collection('users').doc(user.uid);
-      batch.update(userRef, {
-        'pendingTeamId': _selectedTeamId,
-      });
+      batch.update(userRef, {'pendingTeamSelection': _selectedTeamId});
 
       await batch.commit();
+      _onSuccessRequest();
 
       if (!mounted) return;
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Request submitted! Waiting for approval.'),
-          backgroundColor: Colors.green,
-        ),
-      );
+
+      showSnackbar(context, 'Request submitted! Waiting for approval.');
 
       // Navigate to waiting approval screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const WaitingApprovalScreen()),
-      );
+      //context.go('/pending');
     } catch (e) {
       if (mounted) {
-        setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to submit request: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showSnackbar(context, 'Failed to submit request: $e');
       }
+    } finally {
+      setState(() => _submitting = false);
     }
   }
 
+  Future<void> _onSuccessRequest() async {
+    final authListenable = ref.read(authListenableProvider.notifier);
+    await authListenable.refreshIsPending();
+  }
+
   Future<void> _handleBackToLogin() async {
-    await _auth.signOut();
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => kIsWeb
-            ? const WebLoginScreen()
-            : const LoginScreen(),
-      ),
-    );
+    await FirebaseAuth.instance.signOut();
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
+import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -20,7 +21,17 @@ class RouterNotifier extends ChangeNotifier {
 
   bool get isLoggedIn => currentUser != null;
 
+  bool? _isPending = false;
+  bool? get isPending => _isPending;
+
+  bool? _isInTeam = false;
+  bool? get isInTeam => _isInTeam;
+
   final Ref _ref;
+
+	final Completer<void> _initializationCompleter = Completer<void>();
+	Future<void> get isInitialized => _initializationCompleter.future;
+
   RouterNotifier(this._firebaseAuth, this._ref) {
     _authStateSubscription = _firebaseAuth.authStateChanges().listen((
       user,
@@ -29,26 +40,54 @@ class RouterNotifier extends ChangeNotifier {
 
       if (_currentUser != null) {
         await _fetchAndSetRole(_currentUser!.uid);
+				await _fetchAndSetIsInTeam(_currentUser!.uid);
+				await _fetchAndSetIsPending(_currentUser!.uid);
       } else {
         _userRole = null;
       }
       notifyListeners();
+
+			if (!_initializationCompleter.isCompleted) {
+				_initializationCompleter.complete();
+			}
     });
 
     _currentUser = _firebaseAuth.currentUser;
 
     if (_currentUser != null) {
-      _fetchAndSetRole(_currentUser!.uid).then((_) {
+      _fetchAndSetRole(_currentUser!.uid).then((_) async {
         if (_currentUser?.uid == _firebaseAuth.currentUser?.uid) {
+					await _fetchAndSetIsInTeam(_currentUser!.uid);
+					await _fetchAndSetIsPending(_currentUser!.uid);
           notifyListeners();
         }
+
+				if (!_initializationCompleter.isCompleted) {
+					_initializationCompleter.complete();
+				}
       });
-    }
+    } else {
+			if (!_initializationCompleter.isCompleted) {
+				_initializationCompleter.complete();
+			}
+		}
   }
 
   Future<void> _fetchAndSetRole(String uid) async {
     final authRepo = _ref.read(authRepositoryProvider);
     _userRole = await authRepo.getUserRole(uid);
+  }
+
+  Future<void> _fetchAndSetIsPending(String uid) async {
+    final teamRepo = _ref.read(teamRepositoryProvider);
+    final result = await teamRepo.getPendingTeam(uid);
+		_isPending = result != null ? true : false;
+  }
+	
+  Future<void> _fetchAndSetIsInTeam(String uid) async {
+    final teamRepo = _ref.read(teamRepositoryProvider);
+    final result = await teamRepo.getTeamId(uid);
+		_isInTeam = result != null ? true : false;
   }
 
   Future<void> registerAndSetState({
@@ -62,21 +101,21 @@ class RouterNotifier extends ChangeNotifier {
     final authRepo = _ref.read(authRepositoryProvider);
 
     try {
-       await authRepo.registerUserWithTeam(
+      await authRepo.registerUserWithTeam(
         email: email,
         password: password,
         firstName: firstName,
         lastName: lastName,
         role: role,
-				teamId: teamId,
+        teamId: teamId,
       );
       _currentUser = _firebaseAuth.currentUser;
       notifyListeners();
-    } on FirebaseAuthException{
-			rethrow;
-		} catch (e) {
-			rethrow;
-		}
+    } on FirebaseAuthException {
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> refreshUser() async {
@@ -84,6 +123,16 @@ class RouterNotifier extends ChangeNotifier {
     _currentUser = _firebaseAuth.currentUser;
     notifyListeners();
   }
+
+	Future<void> refreshIsInTeam() async {
+		await _fetchAndSetIsInTeam(_currentUser!.uid);
+		notifyListeners();
+	}
+
+	Future<void> refreshIsPending() async {
+		await _fetchAndSetIsPending(_currentUser!.uid);
+		notifyListeners();
+	}
 
   @override
   void dispose() {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
@@ -62,7 +63,9 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     _verificationTimer?.cancel();
     state = state.copyWith(isVerified: true);
 		final authRepo = ref.read(authRepositoryProvider);
+		final authListenable = ref.read(authListenableProvider.notifier);
 		await authRepo.updateIsEmailVerified(authRepo.currentUser!.uid, true);
+		await authListenable.refreshIsPending();
 
     _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.dashboardCountdown > 0) {
@@ -73,6 +76,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
         timer.cancel();
         final authListenable = ref.read(authListenableProvider.notifier);
         await authListenable.refreshUser();
+        await authListenable.refreshIsPending();
       }
     });
   }
@@ -105,12 +109,11 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
       _startCooldown(); // Success: Start cooldown
 
     } on FirebaseAuthException catch (e) {
-      // Error: If it's a rate limit error, we don't start cooldown.
-      // Cooldown stays at 0, allowing immediate retry.
+			debugPrint(e.toString());
       rethrow;
       
     } catch (e) {
-      // Handle generic errors
+			debugPrint(e.toString());
       rethrow;
     } finally {
       state = state.copyWith(isResending: false);

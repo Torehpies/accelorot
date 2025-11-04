@@ -1,19 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/utils/snackbar_utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-class WaitingApprovalScreen extends StatefulWidget {
+class WaitingApprovalScreen extends ConsumerStatefulWidget {
   const WaitingApprovalScreen({super.key});
 
   @override
-  State<WaitingApprovalScreen> createState() => _WaitingApprovalScreenState();
+  ConsumerState<WaitingApprovalScreen> createState() =>
+      _WaitingApprovalScreenState();
 }
 
-class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
+class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   final AuthService _auth = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _loading = false;
@@ -21,13 +22,13 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
   Future<void> _cancelRequest() async {
     final user = _auth.getCurrentUser();
     if (user == null) return;
-    
+
     setState(() => _loading = true);
 
     try {
       // Get the pendingTeamId before clearing it
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final pendingTeamId = userDoc.data()?['pendingTeamId'] as String?;
+      final pendingTeamId = userDoc.data()?['pendingTeamSelection'] as String?;
 
       if (pendingTeamId != null) {
         final batch = _firestore.batch();
@@ -42,31 +43,22 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
         // 2. Clear pendingTeamId from user document
         final userRef = _firestore.collection('users').doc(user.uid);
-        batch.update(userRef, {
-          'pendingTeamId': FieldValue.delete(),
-        });
+        batch.update(userRef, {'pendingTeamSelection': FieldValue.delete()});
 
         await batch.commit();
       }
-
-			// TODO Use context.go / Router Notifier
+      final authListenable = ref.read(authListenableProvider.notifier);
+      await authListenable.refreshIsPending();
       if (!mounted) return;
-      
-      // Navigate back to team selection screen on next frame to ensure context is valid
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const TeamSelectionScreen()),
-        );
-      });
+      showSnackbar(context, 'Request to join team has been cancelled!');
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error canceling request: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error canceling request: $e')));
       });
     }
   }
@@ -179,7 +171,9 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(
@@ -198,8 +192,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                       width: double.infinity,
                       child: OutlinedButton(
                         onPressed: () async {
-                          await _auth.signOut();
-													context.go('/login');
+                          await FirebaseAuth.instance.signOut();
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.teal,

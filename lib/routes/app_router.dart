@@ -5,6 +5,7 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
@@ -34,6 +35,7 @@ enum RoutePath {
   qrRefer(path: '/qr-refer'),
   pending(path: '/pending'),
   verifyEmail(path: '/verify-email'),
+	teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
   dashboard(path: '/dashboard'),
@@ -88,6 +90,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return EmailVerifyScreen(email: email);
         },
+      ),
+      GoRoute(
+        path: RoutePath.teamSelect.path,
+        name: RoutePath.teamSelect.name,
+        builder: (context, state) => const TeamSelectionScreen(),
       ),
       GoRoute(
         path: RoutePath.pending.path,
