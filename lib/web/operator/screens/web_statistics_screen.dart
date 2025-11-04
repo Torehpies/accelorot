@@ -7,6 +7,7 @@ import '../../../frontend/operator/statistics/widgets/date_filter.dart';
 import '../../../frontend/operator/statistics/history/history.dart';
 import '../../../frontend/operator/machine_management/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
+import '../../../services/sess_service.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
 
@@ -40,9 +41,18 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
 
 
       final currentUserId = FirestoreMachineService.getCurrentUserId();
-      // always load machines for current user (or all if null)
+      // ⭐ Load machines by user's teamId
       if (currentUserId != null) {
-        _machines = await FirestoreMachineService.getMachinesByOperatorId(currentUserId);
+        // Get user's teamId and fetch team machines
+        final sessionService = SessionService();
+        final userData = await sessionService.getCurrentUserData();
+        final teamId = userData?['teamId'] as String?;
+        
+        if (teamId != null && teamId.isNotEmpty) {
+          _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+        } else {
+          _machines = await FirestoreMachineService.getAllMachines();
+        }
       } else {
         _machines = await FirestoreMachineService.getAllMachines();
       }

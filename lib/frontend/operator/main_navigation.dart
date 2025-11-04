@@ -64,7 +64,10 @@ class _MainNavigationState extends State<MainNavigation> {
         key: _activityNavigatorKey,
         focusedMachineId: widget.focusedMachine?.machineId,
       ),
-      StatisticsScreen(focusedMachineId: widget.focusedMachine?.machineId),
+      StatisticsScreen(
+        focusedMachineId: widget.focusedMachine?.machineId,
+        focusedMachine: widget.focusedMachine, // ⭐ Pass the full machine object
+      ),
       const OperatorMachineScreen(),
       const ProfileScreen(),     
     ];

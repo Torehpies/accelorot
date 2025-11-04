@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../models/machine_model.dart';
 import '../../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../../services/sess_service.dart';
 
 class OperatorMachineController extends ChangeNotifier {
   // ==================== STATE ====================
@@ -105,10 +106,19 @@ class OperatorMachineController extends ChangeNotifier {
 
   // ==================== FETCH OPERATIONS ====================
   
-  /// Fetch all team machines for this operator
+  /// Fetch all team machines by user's teamId
   Future<void> _fetchMachinesByOperatorId(String operatorId) async {
     try {
-      _allMachines = await FirestoreMachineService.getMachinesByOperatorId(operatorId);
+      // ⭐ Get user's teamId and fetch team machines
+      final sessionService = SessionService();
+      final userData = await sessionService.getCurrentUserData();
+      final teamId = userData?['teamId'] as String?;
+      
+      if (teamId != null && teamId.isNotEmpty) {
+        _allMachines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+      } else {
+        _allMachines = await FirestoreMachineService.getAllMachines();
+      }
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to fetch machines: $e';
