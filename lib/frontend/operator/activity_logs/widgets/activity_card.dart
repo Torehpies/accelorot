@@ -90,19 +90,48 @@ class ActivityCard extends StatelessWidget {
             
             const SizedBox(height: 12),
             
-            // Category and Timestamp
+            // Category, Machine, Batch, Operator and Timestamp
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const SizedBox(width: 52), // Icon width (40) + spacing (12)
                 Expanded(
-                  child: Text(
-                    item.category,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Show machine info
+                      Text(
+                       'Machine: ${item.machineName ?? item.machineId ?? '-'}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black45,
+                        ),
+                      ),
+                      // Show batch info
+                      if (item.batchId != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            'Batch: ${item.batchId}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black45,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      // Show operator info
+                      if (item.operatorName != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            'By: ${item.operatorName}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black45,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Text(

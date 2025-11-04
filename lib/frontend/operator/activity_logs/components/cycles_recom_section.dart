@@ -1,32 +1,38 @@
+// lib/frontend/operator/activity_logs/components/cycles_recom_section.dart
 import 'package:flutter/material.dart';
-import '../view_screens/cycles_recom_screen.dart';
-import '../widgets/slide_page_route.dart';
 
+// Section card for cycles and recommendations
 class CyclesRecomSection extends StatelessWidget {
-  final String? viewingOperatorId; 
+  final String? focusedMachineId; 
 
   const CyclesRecomSection({
     super.key,
-    this.viewingOperatorId,
+    this.focusedMachineId,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          SlidePageRoute(page: CyclesRecomScreen(viewingOperatorId: viewingOperatorId,)),
-        );
+        Navigator.of(context).pushNamed('/cycles-recom');
       },
       child: SizedBox(
         width: 400,
-        height: 80,
-        child: Card(
-          shape: RoundedRectangleBorder(
+        height: 70,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300, width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-          elevation: 4,
-          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(

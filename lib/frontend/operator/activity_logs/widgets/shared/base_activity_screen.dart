@@ -1,4 +1,4 @@
-// widgets/shared/base_activity_screen.dart
+// lib/frontend/operator/activity_logs/widgets/shared/base_activity_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/activity_item.dart';
 import '../filter_section.dart';
@@ -11,12 +11,14 @@ import '../../../../../services/firestore_activity_service.dart';
 /// Provides common functionality: search, filters, date filtering, data loading, and UI
 abstract class BaseActivityScreen extends StatefulWidget {
   final String? initialFilter;
-  final String? viewingOperatorId; // ⭐ NEW: Support for admin viewing operator
+  final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const BaseActivityScreen({
     super.key, 
     this.initialFilter,
-    this.viewingOperatorId, // ⭐ NEW
+    this.viewingOperatorId,
+    this.focusedMachineId,
   });
 
   @override
@@ -95,15 +97,12 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     });
 
     try {
-      // ⭐ UPDATED: Get effective user ID (operator being viewed or current user)
-      final effectiveUserId = FirestoreActivityService.getEffectiveUserId(widget.viewingOperatorId);
+      final effectiveUserId = widget.viewingOperatorId ?? 
+                             FirestoreActivityService.getEffectiveUserId();
       _isLoggedIn = effectiveUserId.isNotEmpty;
         
       if (_isLoggedIn) {
-        // ⭐ UPDATED: Upload mock data for the correct user
-        await FirestoreActivityService.uploadAllMockData(
-          viewingOperatorId: widget.viewingOperatorId,
-        );
+        await FirestoreActivityService.uploadAllMockData();
         await _loadActivities();
       }
     } catch (e) {
@@ -120,7 +119,15 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   /// Load activities using child's fetchData implementation
   Future<void> _loadActivities() async {
     try {
-      final activities = await fetchData(); // Calls child's implementation
+      List<ActivityItem> activities = await fetchData(); // Calls child's implementation
+      
+      // Filter by machine if focusedMachineId is provided
+      if (widget.focusedMachineId != null) {
+        activities = activities
+            .where((item) => item.machineId == widget.focusedMachineId)
+            .toList();
+      }
+      
       if (mounted) {
         setState(() {
           _allActivities = activities;
@@ -219,9 +226,26 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: Text(
-            screenTitle, // Uses child's implementation
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                screenTitle, // Uses child's implementation
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              // Show subtitle when in machine view
+              if (widget.focusedMachineId != null)
+                Text(
+                  'Machine ID: ${widget.focusedMachineId}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                ),
+            ],
           ),
           backgroundColor: Colors.teal,
           actions: [
@@ -233,6 +257,36 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
+              // Show machine filter banner
+              if (widget.focusedMachineId != null)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.teal.shade50, Colors.teal.shade100],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.teal.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Showing activities for this machine only',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.teal.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               SearchBarWidget(
                 onSearchChanged: _onSearchChanged,
                 onClear: _onSearchCleared,
@@ -247,6 +301,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
+                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
@@ -355,15 +410,43 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     // Show empty state
     if (_filteredActivities.isEmpty) {
       return Center(
-        child: Text(
-          searchQuery.isNotEmpty
-              ? 'No results found for "$searchQuery"'
-              : 'No ${selectedFilter.toLowerCase()} activities found',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.inbox_outlined,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                widget.focusedMachineId != null
+                    ? 'No activities found for this machine'
+                    : searchQuery.isNotEmpty
+                        ? 'No results found for "$searchQuery"'
+                        : 'No ${selectedFilter.toLowerCase()} activities found',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (widget.focusedMachineId != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Activities will appear here once waste is added to this machine',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
           ),
-          textAlign: TextAlign.center,
         ),
       );
     }

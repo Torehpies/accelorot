@@ -14,9 +14,9 @@ class ThemeConstants {
 }
 
 class WebMachineManagement extends StatefulWidget {
-  final String? viewingOperatorId;
 
-  const WebMachineManagement({super.key, this.viewingOperatorId});
+  
+  const WebMachineManagement({super.key});
 
   @override
   State<WebMachineManagement> createState() => _WebMachineManagementState();

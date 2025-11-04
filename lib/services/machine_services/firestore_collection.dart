@@ -1,4 +1,4 @@
-//firestore_collection.dart
+// lib/services/machine_services/firestore_collection.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_mock_data.dart';

@@ -1,3 +1,4 @@
+// lib/frontend/operator/activity_logs/view_screens/all_activity_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -6,7 +7,7 @@ import '../../../../services/firestore_activity_service.dart';
 class AllActivityScreen extends BaseActivityScreen {
   const AllActivityScreen({
     super.key,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   }) : super(initialFilter: 'All');
 
   @override
@@ -15,17 +16,17 @@ class AllActivityScreen extends BaseActivityScreen {
 
 class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen> {
   @override
-  String get screenTitle => 'All Activity Logs';
+  String get screenTitle => widget.focusedMachineId != null 
+      ? 'Machine Activity Logs' 
+      : 'All Activity Logs';
 
   @override
-  List<String> get filters => const ['All', 'Substrate', 'Alerts'];
+  // UPDATED: Added 'Cycles' and 'Reports'
+  List<String> get filters => const ['All', 'Substrate', 'Alerts', 'Cycles', 'Reports'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    // ⭐ UPDATED: Pass viewingOperatorId to service
-    return await FirestoreActivityService.getAllActivities(
-      viewingOperatorId: widget.viewingOperatorId,
-    );
+    return await FirestoreActivityService.getAllActivities();
   }
 
   @override
@@ -44,6 +45,18 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
       ).toList();
     }
     
+    if (filter == 'Cycles') {
+      return items.where((item) => 
+        ['Recoms', 'Cycles'].contains(item.category)
+      ).toList();
+    }
+    
+    if (filter == 'Reports') {
+      return items.where((item) => 
+        ['Maintenance', 'Observation', 'Safety'].contains(item.category)
+      ).toList();
+    }
+    
     return items;
   }
 
@@ -57,11 +70,23 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
     bool hasAlerts = categories.any(
       (cat) => ['Temp', 'Moisture', 'Oxygen'].contains(cat)
     );
-
+    bool hasCycles = categories.any(
+      (cat) => ['Recoms', 'Cycles'].contains(cat)
+    );
+    bool hasReports = categories.any(
+      (cat) => ['Maintenance', 'Observation', 'Safety'].contains(cat)
+    );
+    
     Set<String> result = {};
     if (hasSubstrate) result.add('Substrate');
     if (hasAlerts) result.add('Alerts');
-    if (hasSubstrate && hasAlerts) result.add('All');
+    if (hasCycles) result.add('Cycles');
+    if (hasReports) result.add('Reports'); 
+    
+    // UPDATED: All requires all 4 categories
+    if (hasSubstrate && hasAlerts && hasCycles && hasReports) {
+      result.add('All');
+    }
     
     return result;
   }

@@ -3,7 +3,9 @@ import '../../../../services/firestore_statistics_service.dart';
 import '../widgets/moisture_statistic_card.dart';
 
 class MoistureStatsView extends StatefulWidget {
-  const MoistureStatsView({super.key});
+  final String? machineId;
+  
+  const MoistureStatsView({super.key, this.machineId});
 
   @override
   State<MoistureStatsView> createState() => _MoistureStatsViewState();
@@ -16,12 +18,22 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  static const String _machineId = "01";
+  static const String _defaultMachineId = "01";
+
+  String get _machineId => widget.machineId ?? _defaultMachineId;
 
   @override
   void initState() {
     super.initState();
     _loadMoistureData();
+  }
+
+  @override
+  void didUpdateWidget(MoistureStatsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.machineId != widget.machineId) {
+      _loadMoistureData();
+    }
   }
 
   Future<void> _loadMoistureData() async {
@@ -38,7 +50,9 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
         _currentMoisture = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        _errorMessage = 'No moisture data found for machine $_machineId';
+        _hourlyReadings = [];
+        _currentMoisture = 0;
+        _lastUpdated = null;
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -51,30 +65,35 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const SizedBox(
-        height: 200,
-        child: Center(child: CircularProgressIndicator()),
+        height: 120,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
 
     if (_errorMessage != null) {
       return SizedBox(
-        height: 200,
+        height: 120,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
-              const SizedBox(height: 8),
+              Icon(Icons.error_outline, size: 24, color: Colors.grey[400]),
+              const SizedBox(height: 4),
               Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.grey[600]),
+                'Error loading data',
+                style: TextStyle(color: Colors.grey[600], fontSize: 11),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
+              const SizedBox(height: 6),
+              TextButton.icon(
                 onPressed: _loadMoistureData,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                icon: const Icon(Icons.refresh, size: 14),
+                label: const Text('Retry', style: TextStyle(fontSize: 11)),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
             ],
           ),
@@ -82,13 +101,10 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
       );
     }
 
-    return SizedBox(
-      height: 300, // minimum height ensures card is visible
-      child: MoistureStatisticCard(
-        currentMoisture: _currentMoisture,
-        hourlyReadings: _hourlyReadings,
-        lastUpdated: _lastUpdated,
-      ),
+    return MoistureStatisticCard(
+      currentMoisture: _currentMoisture,
+      hourlyReadings: _hourlyReadings,
+      lastUpdated: _lastUpdated,
     );
   }
 }

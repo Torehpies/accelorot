@@ -7,9 +7,9 @@ import '../components/system_card.dart';
 import '../components/composting_progress_card.dart';
 
 class WebHomeScreen extends StatelessWidget {
-  final String? viewingOperatorId;
 
-  const WebHomeScreen({super.key, this.viewingOperatorId});
+
+  const WebHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

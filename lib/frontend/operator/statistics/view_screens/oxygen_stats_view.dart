@@ -3,7 +3,9 @@ import '../../../../services/firestore_statistics_service.dart';
 import '../widgets/oxygen_statistic_card.dart';
 
 class OxygenStatsView extends StatefulWidget {
-  const OxygenStatsView({super.key});
+  final String? machineId;
+  
+  const OxygenStatsView({super.key, this.machineId});
 
   @override
   State<OxygenStatsView> createState() => _OxygenStatsViewState();
@@ -16,15 +18,25 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  static const String _machineId = "01";
+  static const String _defaultMachineId = "01";
+
+  String get _machineId => widget.machineId ?? _defaultMachineId;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadOxygenData();
   }
 
-  Future<void> _loadData() async {
+  @override
+  void didUpdateWidget(OxygenStatsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.machineId != widget.machineId) {
+      _loadOxygenData();
+    }
+  }
+
+  Future<void> _loadOxygenData() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -38,7 +50,9 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
         _currentOxygen = _hourlyReadings.last;
         _lastUpdated = data.last['timestamp'];
       } else {
-        _errorMessage = 'No oxygen data found for machine $_machineId';
+        _hourlyReadings = [];
+        _currentOxygen = 0;
+        _lastUpdated = null;
       }
     } catch (e) {
       _errorMessage = 'Error loading data: $e';
@@ -51,30 +65,35 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const SizedBox(
-        height: 200,
-        child: Center(child: CircularProgressIndicator()),
+        height: 120,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
 
     if (_errorMessage != null) {
       return SizedBox(
-        height: 200,
+        height: 120,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
-              const SizedBox(height: 8),
+              Icon(Icons.error_outline, size: 24, color: Colors.grey[400]),
+              const SizedBox(height: 4),
               Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.grey[600]),
+                'Error loading data',
+                style: TextStyle(color: Colors.grey[600], fontSize: 11),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _loadData,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+              const SizedBox(height: 6),
+              TextButton.icon(
+                onPressed: _loadOxygenData,
+                icon: const Icon(Icons.refresh, size: 14),
+                label: const Text('Retry', style: TextStyle(fontSize: 11)),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
             ],
           ),
@@ -82,13 +101,10 @@ class _OxygenStatsViewState extends State<OxygenStatsView> {
       );
     }
 
-    return SizedBox(
-      height: 300,
-      child: OxygenStatisticCard(
-        currentOxygen: _currentOxygen,
-        hourlyReadings: _hourlyReadings,
-        lastUpdated: _lastUpdated,
-      ),
+    return OxygenStatisticCard(
+      currentOxygen: _currentOxygen,
+      hourlyReadings: _hourlyReadings,
+      lastUpdated: _lastUpdated,
     );
   }
 }

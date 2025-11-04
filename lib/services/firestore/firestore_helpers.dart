@@ -1,3 +1,4 @@
+// lib/services/firestore/firestore_helpers.dart
 import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
@@ -75,9 +76,91 @@ class FirestoreHelpers {
       statusColor = 'yellow';
     }
 
-    return {
-      'iconCodePoint': iconCodePoint,
-      'statusColor': statusColor,
-    };
+    return {'iconCodePoint': iconCodePoint, 'statusColor': statusColor};
+  }
+
+  /// Returns icon and color for report types
+  static Map<String, dynamic> getReportIconAndColor(String? reportType) {
+    switch (reportType?.toLowerCase()) {
+      case 'maintenance_issue':
+        return {'iconCodePoint': Icons.build.codePoint, 'icon': Icons.build};
+      case 'observation':
+        return {
+          'iconCodePoint': Icons.visibility.codePoint,
+          'icon': Icons.visibility,
+        };
+      case 'safety_concern':
+        return {
+          'iconCodePoint': Icons.warning.codePoint,
+          'icon': Icons.warning,
+        };
+      default:
+        return {'iconCodePoint': Icons.report.codePoint, 'icon': Icons.report};
+    }
+  }
+
+  /// Returns color based on priority level
+  static int getPriorityColor(String? priority) {
+    switch (priority?.toLowerCase()) {
+      case 'low':
+        return 0xFF4CAF50; // Green
+      case 'medium':
+        return 0xFFFFC107; // Amber/Yellow
+      case 'high':
+        return 0xFFFF9800; // Orange
+      case 'critical':
+        return 0xFFF44336; // Red
+      default:
+        return 0xFF9E9E9E; // Gray
+    }
+  }
+
+  /// Returns display label for priority
+  static String getPriorityLabel(String? priority) {
+    switch (priority?.toLowerCase()) {
+      case 'low':
+        return 'Low';
+      case 'medium':
+        return 'Medium';
+      case 'high':
+        return 'High';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  /// Returns display label for report type
+  static String getReportTypeLabel(String? reportType) {
+    switch (reportType?.toLowerCase()) {
+      case 'maintenance_issue':
+        return 'Maintenance Issue';
+      case 'observation':
+        return 'Observation';
+      case 'safety_concern':
+        return 'Safety Concern';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  /// Converts int color to string color name for ActivityItem compatibility
+  static String colorIntToString(int colorInt) {
+    switch (colorInt) {
+      case 0xFF4CAF50: // Green
+        return 'green';
+      case 0xFFFFC107: // Amber/Yellow
+        return 'yellow';
+      case 0xFFFF9800: // Orange
+        return 'orange';
+      case 0xFFF44336: // Red
+        return 'red';
+      case 0xFF2196F3: // Blue
+        return 'blue';
+      case 0xFF8D6E63: // Brown
+        return 'brown';
+      case 0xFF9E9E9E: // Gray
+      default:
+        return 'grey';
+    }
   }
 }

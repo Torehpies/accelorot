@@ -12,7 +12,7 @@ import '../../utils/operator_dialogs.dart';
 import '../../utils/theme_constants.dart';
 import '../widgets/accept_operators_card.dart';
 import '../../../web/admin/widgets/add_operator_screen.dart';
-import '../../admin/screens/web_operator_view_navigation.dart';
+
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -125,20 +125,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     }
   }
 
-  void _handleViewDashboard() {
-    final operator = _controller.selectedOperator;
-    if (operator == null) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WebOperatorViewNavigation(
-          operatorId: operator.uid,
-          operatorName: operator.name,
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +177,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                         onClose: () => _controller.clearSelectedOperator(),
                         onArchive: _handleArchive,
                         onRestore: _handleRestore,
-                        onViewDashboard: _handleViewDashboard,
                         showArchived: _controller.showArchived,
                       ),
                     ),
