@@ -164,7 +164,7 @@ class _WebCyclesRecomSectionState extends State<WebCyclesRecomSection> {
                       ),
                       trailing: Chip(
                         label: Text(cycle.category),
-                        backgroundColor: cycle.statusColorValue.withOpacity(0.1),
+                        backgroundColor: cycle.statusColorValue.withValues(alpha: 0.1),
                         labelStyle: TextStyle(
                           color: cycle.statusColorValue,
                           fontWeight: FontWeight.bold,
