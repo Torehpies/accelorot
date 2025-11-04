@@ -28,8 +28,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
   List<MachineModel> _machines = [];
+  List<MachineModel> _filteredMachines = []; // 🔹 For search filtering
   bool _isLoading = true;
   String? _errorMessage;
+  String _searchQuery = ""; // 🔹 Current search query
 
   @override
   void initState() {
@@ -44,9 +46,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
-      // ⭐ If we have the full machine object (admin access), use it directly
       if (widget.focusedMachine != null) {
         _machines = [widget.focusedMachine!];
+        _filteredMachines = _machines;
         setState(() {
           _isLoading = false;
         });
@@ -54,20 +56,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       }
 
       final currentUserId = FirestoreMachineService.getCurrentUserId();
-      
-      // ⭐ If focused on a specific machine ID, load from ALL machines
+
       if (widget.focusedMachineId != null) {
         final allMachines = await FirestoreMachineService.getAllMachines();
         _machines = allMachines
             .where((m) => m.machineId == widget.focusedMachineId)
             .toList();
       } else {
-        // ⭐ Load machines by user's teamId (operator view)
         if (currentUserId != null) {
           final sessionService = SessionService();
           final userData = await sessionService.getCurrentUserData();
           final teamId = userData?['teamId'] as String?;
-          
           if (teamId != null && teamId.isNotEmpty) {
             _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
           } else {
@@ -77,6 +76,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           _machines = await FirestoreMachineService.getAllMachines();
         }
       }
+
+      _filteredMachines = _machines; // 🔹 Initialize filtered list
 
       setState(() {
         _isLoading = false;
@@ -92,7 +93,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   void _onDateChanged(DateTimeRange? range) {
     setState(() {
       _selectedRange = range;
-
       if (range == null) {
         _selectedFilterLabel = "Date Filter";
       } else {
@@ -115,12 +115,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     setState(() {
       _selectedRange = null;
       _selectedFilterLabel = "Date Filter";
+      _searchQuery = "";
+      _filteredMachines = _machines; // 🔹 Reset search filter
+    });
+  }
+
+  // 🔹 Handle search input changes
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      _filteredMachines = _machines
+          .where((m) => m.machineName.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // ⭐ Hide AppBar when in machine view (shown by parent HomeScreen)
     if (widget.focusedMachineId != null) {
       return _buildBody();
     }
@@ -193,7 +204,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildAllMachinesLayout() {
-    if (_machines.isEmpty) {
+    if (_filteredMachines.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -209,7 +220,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Text(
                 widget.focusedMachineId != null
                     ? 'Machine Not Found'
-                    : 'No Machines Found',
+                    : (_searchQuery.isEmpty
+                        ? 'No Machines Found'
+                        : 'No Machines match "$_searchQuery"'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -220,7 +233,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Text(
                 widget.focusedMachineId != null
                     ? 'The selected machine is not available.'
-                    : 'You don\'t have any machines assigned yet.',
+                    : (_searchQuery.isEmpty
+                        ? 'You don\'t have any machines assigned yet.'
+                        : 'Try adjusting your search.'),
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey[600],
@@ -250,7 +265,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.analytics_outlined, color: Colors.teal.shade700, size: 18),
+                Icon(Icons.analytics_outlined,
+                    color: Colors.teal.shade700, size: 18),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -278,8 +294,28 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
+        // 🔹 SEARCH BAR
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          child: TextField(
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: 'Search Machine',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.teal.shade200),
+              ),
+              filled: true,
+              fillColor: Colors.teal.shade50,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            ),
+            onChanged: _onSearchChanged,
+          ),
+        ),
+
         // Machine Statistics Cards
-        ..._machines.map((machine) => _buildMachineSection(machine)),
+        ..._filteredMachines.map((machine) => _buildMachineSection(machine)),
       ],
     );
   }
