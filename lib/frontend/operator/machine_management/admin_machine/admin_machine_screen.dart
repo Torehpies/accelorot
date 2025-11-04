@@ -75,6 +75,12 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
 
   void _toggleReportsView() {
     setState(() {
+      _searchController.clear();
+      _searchFocusNode.unfocus();
+
+      _machineController.clearSearch();
+      _reportsController.clearSearch();
+
       _showReportsView = !_showReportsView;
     });
   }
@@ -103,9 +109,15 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                   ? IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.black),
                       onPressed: () {
+                        // Clear search and unfocus
+                        _searchController.clear();
+                        _searchFocusNode.unfocus();
+
                         if (_showReportsView) {
+                          _reportsController.clearSearch();
                           _toggleReportsView();
                         } else {
+                          _machineController.clearSearch();
                           _machineController.setShowArchived(false);
                         }
                       },
@@ -149,8 +161,12 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                               child: MachineActionCard(
                                 icon: Icons.archive,
                                 label: 'Archive',
-                                onPressed: () =>
-                                    _machineController.setShowArchived(true),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _searchFocusNode.unfocus();
+                                  _machineController.clearSearch();
+                                  _machineController.setShowArchived(true);
+                                },
                               ),
                             ),
                             const SizedBox(width: 12),
