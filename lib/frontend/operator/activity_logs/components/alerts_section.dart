@@ -99,12 +99,12 @@ class AlertsSection extends StatelessWidget {
                     const SizedBox(width: 8),
                     FilterBox(
                       icon: Icons.bubble_chart,
-                      label: 'Oxygen',
+                      label: 'Air Quality',
                       filterValue: 'Oxygen',
                       onTap: () {
                         Navigator.of(context).pushNamed(
                           '/alerts',
-                          arguments: {'initialFilter': 'Oxygen'},
+                          arguments: {'initialFilter': 'Air Quality'},
                         );
                       },
                     ),

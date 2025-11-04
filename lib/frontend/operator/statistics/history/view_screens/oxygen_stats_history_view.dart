@@ -109,7 +109,7 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
         _error = e.toString();
         _isLoading = false;
       });
-      debugPrint('❌ Error loading oxygen history: $e\n$stack');
+      debugPrint('❌ Error loading air quality history: $e\n$stack');
     }
   }
 
@@ -117,7 +117,7 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
     if (_error.isNotEmpty) return Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red)));
-    if (_dailyReadings.isEmpty) return const Center(child: Text('No oxygen data available'));
+    if (_dailyReadings.isEmpty) return const Center(child: Text('No air quality data available'));
 
     return Column(
       children: [
