@@ -63,6 +63,7 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
+          // ignore: unused_local_variable
       double? lastKnownValue;
 
       // Calculate number of days in range
