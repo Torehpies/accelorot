@@ -63,6 +63,7 @@ class _TemperatureStatsHistoryViewState
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
+      // ignore: unused_local_variable
       double? lastKnownValue;
 
       final daysDiff = end.difference(start).inDays + 1;
