@@ -16,7 +16,7 @@ class WebAllActivitySection extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -39,7 +39,7 @@ class WebAllActivitySection extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
+          Divider(height: 1, color: Colors.grey.shade300),
           
           // Fetch real data from Firestore - all activities combined
           FutureBuilder<List<ActivityItem>>(
@@ -79,7 +79,7 @@ class WebAllActivitySection extends StatelessWidget {
               }
 
               // Show only first 5 most recent activities
-              final recentActivities = activities.take(5).toList();
+              final recentActivities = activities.take(3).toList();
 
               return ListView.builder(
                 shrinkWrap: true,
