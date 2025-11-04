@@ -142,12 +142,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
         ),
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
