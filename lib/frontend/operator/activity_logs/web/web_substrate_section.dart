@@ -171,7 +171,7 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
                     style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
                   ),
                   subtitle: Text(
-                    '${item.value} • ${item.machineName ?? 'Unknown'}',
+                    '${item.value} • ${item.machineName ?? 'Unknown'} • ${item.operatorName ?? 'Unknown Operator'}',
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   trailing: Text(
