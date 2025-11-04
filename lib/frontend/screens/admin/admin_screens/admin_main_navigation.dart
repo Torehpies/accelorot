@@ -18,13 +18,6 @@ class AdminMainNavigation extends StatefulWidget {
 class _AdminMainNavigationState extends State<AdminMainNavigation> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    AdminHomeScreen(),
-    OperatorManagementScreen(), 
-    const AdminMachineScreen(),
-    ProfileScreen(),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -33,6 +26,25 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
         logCurrentUser(context);
       }
     });
+  }
+
+  /// Navigate to a specific tab programmatically
+  void _navigateToTab(int index) {
+    if (index == _selectedIndex) return;
+    
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  /// Build the list of screens with navigation callback
+  List<Widget> _buildScreens() {
+    return [
+      AdminHomeScreen(onNavigateToTab: _navigateToTab),
+      const OperatorManagementScreen(), 
+      const AdminMachineScreen(),
+      const ProfileScreen(),
+    ];
   }
 
   void _onItemTapped(int index) {
@@ -68,8 +80,10 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final screens = _buildScreens();
+    
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
