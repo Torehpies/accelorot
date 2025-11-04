@@ -19,14 +19,13 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   @override
   String get screenTitle => widget.focusedMachineId != null
       ? 'Machine Cycles & Recommendations'
-      : 'Cycles & Recommendations'; // ⭐ Dynamic title
+      : 'Cycles & Recommendations';
 
   @override
   List<String> get filters => const ['All', 'Recoms', 'Cycles'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    // ⭐ UPDATED: Pass viewingOperatorId to service
     return await FirestoreActivityService.getCyclesRecom(
       viewingOperatorId: widget.viewingOperatorId,
     );

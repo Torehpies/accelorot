@@ -100,13 +100,16 @@ class _EditMachineModalState extends State<EditMachineModal> {
       );
 
       if (!mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(); // Close modal
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✅ Machine "$name" updated successfully'),
           backgroundColor: Colors.green,
         ),
       );
+      
+      // Delay handled in controller's updateMachine method
     } catch (e) {
       if (!mounted) return;
       
@@ -122,10 +125,9 @@ class _EditMachineModalState extends State<EditMachineModal> {
           duration: const Duration(seconds: 4),
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      
+      // Stay in modal on error
+      setState(() => _isSubmitting = false);
     }
   }
 

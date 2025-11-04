@@ -11,14 +11,14 @@ import '../../../../../services/firestore_activity_service.dart';
 /// Provides common functionality: search, filters, date filtering, data loading, and UI
 abstract class BaseActivityScreen extends StatefulWidget {
   final String? initialFilter;
-  final String? viewingOperatorId; // ⭐ Keep for operator-specific filtering
-  final String? focusedMachineId; // ⭐ NEW: Machine-specific filtering
+  final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const BaseActivityScreen({
     super.key, 
     this.initialFilter,
     this.viewingOperatorId,
-    this.focusedMachineId, // ⭐ NEW
+    this.focusedMachineId,
   });
 
   @override
@@ -121,7 +121,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     try {
       List<ActivityItem> activities = await fetchData(); // Calls child's implementation
       
-      // ⭐ Filter by machine if focusedMachineId is provided
+      // Filter by machine if focusedMachineId is provided
       if (widget.focusedMachineId != null) {
         activities = activities
             .where((item) => item.machineId == widget.focusedMachineId)
@@ -236,7 +236,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                   fontSize: 18,
                 ),
               ),
-              // ⭐ Show subtitle when in machine view
+              // Show subtitle when in machine view
               if (widget.focusedMachineId != null)
                 Text(
                   'Machine ID: ${widget.focusedMachineId}',
@@ -257,7 +257,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           child: Column(
             children: [
-              // ⭐ Show machine filter banner
+              // Show machine filter banner
               if (widget.focusedMachineId != null)
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -301,6 +301,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
+                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),

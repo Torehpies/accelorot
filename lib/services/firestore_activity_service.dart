@@ -6,7 +6,7 @@ import 'firestore/firestore_upload.dart';
 import 'firestore/firestore_fetch.dart';
 
 class FirestoreActivityService {
-  // ⭐ CRITICAL: Get the current logged-in user ID (for authentication checks only)
+  // CRITICAL: Get the current logged-in user ID (for authentication checks only)
   static String? getCurrentUserId() {
     return FirestoreCollections.getCurrentUserId();
   }

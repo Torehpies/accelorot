@@ -28,7 +28,6 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    // ⭐ UPDATED: Pass viewingOperatorId to service
     return await FirestoreActivityService.getSubstrates(
       viewingOperatorId: widget.viewingOperatorId,
     );

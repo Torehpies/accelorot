@@ -81,7 +81,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
         category: category,
         timestamp:
             DateTime.tryParse(alert['timestamp'] ?? '') ?? DateTime.now(),
-        machineId: alert['machine_id'], // ⭐ Changed from userId to machineId
+        machineId: alert['machine_id'],
       );
     }).toList();
 

@@ -5,7 +5,7 @@ class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
 
   @override
-/*************  ✨ Windsurf Command ⭐  *************/
+/*************  ✨ Windsurf Command  *************/
 /// Builds a personal info screen with an avatar, name, email, username, full name, role, and an edit button.
 /// The screen is scrollable and has a white background.
 /// The avatar is a circle with a radius of 50.

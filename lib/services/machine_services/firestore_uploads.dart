@@ -1,4 +1,4 @@
-//firestore_uploads.dart
+// lib/services/machine_services/firestore_uploads.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../frontend/operator/machine_management/models/machine_model.dart';

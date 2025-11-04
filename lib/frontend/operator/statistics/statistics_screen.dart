@@ -8,13 +8,16 @@ import 'widgets/date_filter.dart';
 import 'history/history.dart';
 import '../machine_management/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
+import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  final String? focusedMachineId; // ⭐ NEW: Machine filter
+  final String? focusedMachineId; 
+  final MachineModel? focusedMachine; 
 
   const StatisticsScreen({
     super.key,
     this.focusedMachineId,
+    this.focusedMachine,
   });
 
   @override
@@ -41,21 +44,38 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     });
 
     try {
+      // ⭐ If we have the full machine object (admin access), use it directly
+      if (widget.focusedMachine != null) {
+        _machines = [widget.focusedMachine!];
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       
-      // ⭐ If focused on a specific machine, only load that machine
+      // ⭐ If focused on a specific machine ID, load from ALL machines
       if (widget.focusedMachineId != null) {
-        final allMachines = currentUserId != null
-            ? await FirestoreMachineService.getMachinesByOperatorId(currentUserId)
-            : await FirestoreMachineService.getAllMachines();
+        // Fetch all machines to support admin viewing any machine
+        final allMachines = await FirestoreMachineService.getAllMachines();
         
         _machines = allMachines
             .where((m) => m.machineId == widget.focusedMachineId)
             .toList();
       } else {
-        // Load all machines for current user
+        // ⭐ Load machines by user's teamId (operator view)
         if (currentUserId != null) {
-          _machines = await FirestoreMachineService.getMachinesByOperatorId(currentUserId);
+          // Get user's teamId and fetch team machines
+          final sessionService = SessionService();
+          final userData = await sessionService.getCurrentUserData();
+          final teamId = userData?['teamId'] as String?;
+          
+          if (teamId != null && teamId.isNotEmpty) {
+            _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+          } else {
+            _machines = await FirestoreMachineService.getAllMachines();
+          }
         } else {
           _machines = await FirestoreMachineService.getAllMachines();
         }

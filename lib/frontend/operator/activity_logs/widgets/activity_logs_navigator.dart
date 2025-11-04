@@ -57,7 +57,6 @@ class ActivityLogsNavigator extends StatelessWidget {
               initialFilter: args?['initialFilter'],
             );
             break;
-          // ⭐ NEW ROUTE
           case '/reports':
             final args = settings.arguments as Map<String, dynamic>?;
             page = ReportsScreen(
@@ -171,7 +170,7 @@ class _ActivityLogsOverview extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Stack( // ⭐ CHANGED: From Column to Stack
+                  child: Stack(
                     children: [
                       // Scrollable section cards area (behind)
                       Padding(
@@ -205,7 +204,7 @@ class _ActivityLogsOverview extends StatelessWidget {
                       ),
                       
                       // Batch filter header - positioned on top
-                      const Positioned( // ⭐ NEW: Fixed position on top
+                      const Positioned(
                         top: 0,
                         left: 0,
                         right: 0,

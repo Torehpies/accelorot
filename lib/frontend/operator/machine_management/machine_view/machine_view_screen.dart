@@ -1,3 +1,4 @@
+// lib/frontend/operator/machine_management/machine_view/machine_view_screen.dart
 import 'package:flutter/material.dart';
 import '../../machine_management/models/machine_model.dart';
 import '../../../operator/dashboard/home_screen.dart';

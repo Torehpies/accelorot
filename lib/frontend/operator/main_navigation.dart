@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'dashboard/home_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
-// ignore: unused_import
-import '../screens/statistics_screen.dart';
 import 'profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_management/operator_machine/operator_machine_screen.dart';
@@ -60,14 +58,16 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // ⭐ Initialize screens with focused machine if provided
     _screens = [
       HomeScreen(focusedMachine: widget.focusedMachine),
       ActivityLogsNavigator(
         key: _activityNavigatorKey,
-        focusedMachineId: widget.focusedMachine?.machineId, // ⭐ Pass machine filter
+        focusedMachineId: widget.focusedMachine?.machineId,
       ),
-      StatisticsScreen(focusedMachineId: widget.focusedMachine?.machineId),
+      StatisticsScreen(
+        focusedMachineId: widget.focusedMachine?.machineId,
+        focusedMachine: widget.focusedMachine, // ⭐ Pass the full machine object
+      ),
       const OperatorMachineScreen(),
       const ProfileScreen(),     
     ];

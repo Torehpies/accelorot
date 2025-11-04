@@ -1,30 +1,31 @@
 // lib/frontend/operator/dashboard/compost_progress/components/batch_start_dialog.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/compost_batch_model.dart';
+
 
 class BatchStartDialog extends StatefulWidget {
   const BatchStartDialog({super.key});
+
 
   @override
   State<BatchStartDialog> createState() => _BatchStartDialogState();
 }
 
+
 class _BatchStartDialogState extends State<BatchStartDialog> {
   final _batchNameController = TextEditingController();
-  final _batchNumberController = TextEditingController();
   final _startNotesController = TextEditingController();
   
   String? _nameError;
-  String? _numberError;
+
 
   @override
   void dispose() {
     _batchNameController.dispose();
-    _batchNumberController.dispose();
     _startNotesController.dispose();
     super.dispose();
   }
+
 
   String? _validateBatchName(String? value) {
     if (value == null || value.isEmpty) {
@@ -36,43 +37,32 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
     return null;
   }
 
-  String? _validateBatchNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Batch number is required';
-    }
-    if (value.length > 6) {
-      return 'Maximum 6 digits';
-    }
-    if (!RegExp(r'^\d+$').hasMatch(value)) {
-      return 'Only numbers allowed';
-    }
-    return null;
-  }
 
   void _handleConfirm() {
     final nameError = _validateBatchName(_batchNameController.text);
-    final numberError = _validateBatchNumber(_batchNumberController.text);
     
-    if (nameError != null || numberError != null) {
+    if (nameError != null) {
       setState(() {
         _nameError = nameError;
-        _numberError = numberError;
       });
       return;
     }
 
-    // Create batch object
+
+    // Create batch object with hardcoded batch number
     final batch = CompostBatch(
       batchName: _batchNameController.text.trim(),
-      batchNumber: 'Batch-${_batchNumberController.text.trim()}',
+      batchNumber: 'Batch-1', // Hardcoded for now
       batchStart: DateTime.now(),
       startNotes: _startNotesController.text.trim().isEmpty 
           ? null 
           : _startNotesController.text.trim(),
     );
 
+
     Navigator.of(context).pop(batch);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +111,7 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 16),
 
+
               // Batch Name Field
               Text(
                 'Batch Name',
@@ -153,7 +144,8 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Batch Number Field
+
+              // Batch Number Field (Read-only)
               Text(
                 'Batch Number',
                 style: TextStyle(
@@ -164,41 +156,27 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: _batchNumberController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(6),
-                ],
+                readOnly: true,
+                controller: TextEditingController(text: 'Batch-1'),
                 decoration: InputDecoration(
-                  hintText: 'Up to 6 digits',
-                  prefixIcon: Icon(Icons.tag, color: Colors.teal[600]),
-                  prefix: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: Text(
-                      'Batch-',
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+                  prefixIcon: Icon(Icons.tag, color: Colors.grey[400]),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  errorText: _numberError,
-                  focusedBorder: OutlineInputBorder(
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
                   ),
                 ),
-                onChanged: (value) {
-                  if (_numberError != null) {
-                    setState(() => _numberError = null);
-                  }
-                },
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 16),
+
 
               // Start Notes Field
               Text(
@@ -225,6 +203,7 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                 ),
               ),
               const SizedBox(height: 24),
+
 
               // Action buttons
               Row(
