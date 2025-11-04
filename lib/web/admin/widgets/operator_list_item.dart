@@ -117,7 +117,7 @@ class OperatorListItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: ThemeConstants.orangeShade50,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: ThemeConstants.orangeShade600.withOpacity(0.3)),
+                  border: Border.all(color: ThemeConstants.orangeShade600.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
