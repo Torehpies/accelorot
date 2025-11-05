@@ -82,10 +82,6 @@ class MoistureStatisticCard extends StatelessWidget {
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-          Text(
-            'Trend (Last 8 Hours)',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          ),
           const SizedBox(height: 8),
 
           // ✅ Message when no data (like Temperature)

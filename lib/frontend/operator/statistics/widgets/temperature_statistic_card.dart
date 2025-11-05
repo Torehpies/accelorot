@@ -123,10 +123,6 @@ class TemperatureStatisticCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Trend label
-          const Text(
-            'Trend (Last 8 Hours)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          ),
           const SizedBox(height: 8),
 
           // Display "No data" text if readings are empty

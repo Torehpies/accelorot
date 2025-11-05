@@ -70,7 +70,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
         (route) => false,
       );
     }
