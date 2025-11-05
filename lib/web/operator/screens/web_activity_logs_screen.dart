@@ -77,9 +77,14 @@ class WebDetailPanel extends StatelessWidget {
 // ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
   final bool shouldRefresh;
+  final String? focusedMachineId;
 
   
-  const WebActivityLogsScreen({super.key, this.shouldRefresh = false});
+  const WebActivityLogsScreen({
+    super.key, 
+    this.shouldRefresh = false,
+    this.focusedMachineId,
+  });
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
@@ -267,18 +272,18 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection()),
+            Expanded(child: WebSubstrateSection(focusedMachineId: widget.focusedMachineId)),
             const SizedBox(width: 24),
-            Expanded(child: WebAlertsSection()),
+            Expanded(child: WebAlertsSection(focusedMachineId: widget.focusedMachineId)),
           ],
         ),
         const SizedBox(height: 24),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -287,18 +292,18 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection()),
+            Expanded(child: WebSubstrateSection(focusedMachineId: widget.focusedMachineId)),
             const SizedBox(width: 20),
-            Expanded(child: WebAlertsSection()),
+            Expanded(child: WebAlertsSection(focusedMachineId: widget.focusedMachineId)),
           ],
         ),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -307,13 +312,13 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebSubstrateSection(),
+        WebSubstrateSection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebAlertsSection(),
+        WebAlertsSection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -323,7 +328,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
         const SizedBox(height: 16),
-        WebSubstrateSection(),
+        WebSubstrateSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -333,7 +338,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
         const SizedBox(height: 16),
-        WebAlertsSection(),
+        WebAlertsSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -343,7 +348,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
         const SizedBox(height: 16),
-        WebCyclesRecomSection(),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }

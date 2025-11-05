@@ -113,13 +113,21 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    final currentUserId = FirestoreMachineService.getCurrentUserId();
-    _isAuthenticated = currentUserId != null;
-    
-    if (_isAuthenticated) {
-      await _fetchMachinesByTeamId(currentUserId!);
-    } else {
-      await _fetchAllMachines();
+    try {
+      final currentUserId = FirestoreMachineService.getCurrentUserId();
+      _isAuthenticated = currentUserId != null;
+      
+      if (_isAuthenticated) {
+        await _fetchMachinesByTeamId(currentUserId!);
+      } else {
+        await _fetchAllMachines();
+      }
+      
+      // ✅ Force UI update after refresh
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to refresh: $e';
+      notifyListeners();
     }
   }
 
@@ -237,10 +245,11 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('You must be logged in to archive machines');
       }
 
-      // Delay before executing archive
+      await FirestoreMachineService.deleteMachine(machineId);
+      
       await Future.delayed(const Duration(milliseconds: 300));
       
-      await FirestoreMachineService.deleteMachine(machineId);
+      await refresh();
     } catch (e) {
       _errorMessage = 'Failed to archive machine: $e';
       notifyListeners();
@@ -255,10 +264,11 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('You must be logged in to restore machines');
       }
 
-      // Delay before executing restore
+      await FirestoreMachineService.restoreMachine(machineId);
+      
       await Future.delayed(const Duration(milliseconds: 300));
       
-      await FirestoreMachineService.restoreMachine(machineId);
+      await refresh();
     } catch (e) {
       _errorMessage = 'Failed to restore machine: $e';
       notifyListeners();
