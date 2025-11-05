@@ -63,7 +63,7 @@ class _TemperatureStatsHistoryViewState
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
-      double? lastKnownValue;
+     
 
       final daysDiff = end.difference(start).inDays + 1;
 
@@ -79,7 +79,7 @@ class _TemperatureStatsHistoryViewState
           if (dayValues.isNotEmpty) {
             final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
-            lastKnownValue = dailyAvg;
+            _currentTemperature = readings.isNotEmpty ? readings.last : 0.0;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;

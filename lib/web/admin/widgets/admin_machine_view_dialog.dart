@@ -1,5 +1,7 @@
 // lib/frontend/operator/machine_management/admin_machine/widgets/admin_machine_view_dialog.dart
 
+// ignore_for_file: library_prefixes
+
 import 'package:flutter/material.dart';
 import '../models/admin_machine_model.dart' as AdminModel;
 import '../controllers/admin_machine_controller.dart';
@@ -585,7 +587,6 @@ class AdminMachineViewDialog extends StatelessWidget {
 }
 
 extension on BuildContext {
-  bool? get matched => null;
 }
 
 // Helper widget for detail rows
