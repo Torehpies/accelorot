@@ -67,7 +67,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
       Navigator.pushAndRemoveUntil(
         context,
         //MaterialPageRoute(builder: (_) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
         (route) => false,
       );
     }
