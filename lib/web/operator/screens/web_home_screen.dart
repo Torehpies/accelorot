@@ -1,35 +1,108 @@
 // lib/web/operator/screens/web_home_screen.dart
 
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
-import '../components/environmental_sensors_card.dart';
-import '../components/system_card.dart';
-import '../components/composting_progress_card.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/submit_report.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/cycles/system_card.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
 
-class WebHomeScreen extends StatelessWidget {
-  final MachineModel? focusedMachine;
+class WebHomeScreen extends StatefulWidget {
+  const WebHomeScreen({super.key, required MachineModel? focusedMachine});
 
-  const WebHomeScreen({super.key, this.focusedMachine});
+  @override
+  State<WebHomeScreen> createState() => _WebHomeScreenState();
+}
+
+class _WebHomeScreenState extends State<WebHomeScreen> {
+  final GlobalKey<ActivityLogsCardState> _activityLogsKey = GlobalKey<ActivityLogsCardState>();
+  CompostBatch? _currentBatch;
+
+  void _handleBatchStarted(CompostBatch batch) {
+    setState(() => _currentBatch = batch);
+  }
+
+  void _handleBatchCompleted() {
+    setState(() => _currentBatch = null);
+  }
+
+  void _handleFABPress() async {
+    final action = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 12),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Quick Actions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+          content: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.add_circle_outline, color: Colors.teal.shade700, size: 24),
+                  title: const Text('Add Waste', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  onTap: () => Navigator.of(context).pop('add_waste'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.note_add_outlined, color: Colors.teal.shade700, size: 24),
+                  title: const Text('Submit Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  onTap: () => Navigator.of(context).pop('submit_report'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (action == null || !mounted) return;
+
+    if (action == 'add_waste') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => const AddWasteProduct(),
+      );
+
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Waste entry added successfully!'), backgroundColor: Colors.teal),
+        );
+        await _activityLogsKey.currentState?.refresh();
+      }
+    } else if (action == 'submit_report') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => const SubmitReport(),
+      );
+
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Report submitted successfully!'), backgroundColor: Colors.green),
+        );
+        await _activityLogsKey.currentState?.refresh();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth > 1024;
+    final isDesktop = MediaQuery.of(context).size.width > 1024;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade700, Colors.teal.shade900],
-            ),
+            gradient: LinearGradient(colors: [Colors.teal.shade700, Colors.teal.shade900]),
           ),
         ),
         foregroundColor: Colors.white,
@@ -39,10 +112,7 @@ class WebHomeScreen extends StatelessWidget {
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No new notifications'),
-                  duration: Duration(seconds: 2),
-                ),
+                const SnackBar(content: Text('No new notifications'), duration: Duration(seconds: 2)),
               );
             },
           ),
@@ -59,75 +129,108 @@ class WebHomeScreen extends StatelessWidget {
                   horizontal: isDesktop ? 32 : 24,
                   vertical: 24,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ROW 1: Environmental Sensors + System Card (side by side)
-                      if (isDesktop)
-                        SizedBox(
-                          height: 280,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: const [
-                              Expanded(
-                                flex: 3,
-                                child: EnvironmentalSensorsCard(),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                flex: 2,
-                                child: SystemCard(),
-                              ),
-                            ],
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: 250,
+                            child: CompostingProgressCard(
+                              currentBatch: _currentBatch,
+                              onBatchStarted: _handleBatchStarted,
+                              onBatchCompleted: _handleBatchCompleted,
+                            ),
                           ),
-                        )
-                      else
-                        Column(
-                          children: const [
-                            EnvironmentalSensorsCard(),
-                            SizedBox(height: 16),
-                            SystemCard(),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 250,
+                            child: SystemCard(currentBatch: _currentBatch),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
                         ),
-                      
-                      const SizedBox(height: 16),
-
-                      // ROW 2: Composting Progress
-                      const CompostingProgressCard(),
-                    ],
-                  ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Recent Activity',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal[700]),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.refresh, color: Colors.grey),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    onPressed: () async {
+                                      await _activityLogsKey.currentState?.refresh();
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Activity logs refreshed'), duration: Duration(seconds: 2)),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Divider(height: 1, thickness: 1, color: Colors.grey),
+                            Expanded(
+                              child: Stack(
+                                children: [
+                                  ActivityLogsCard(
+                                    key: _activityLogsKey,
+                                    focusedMachineId: null,
+                                  ),
+                                  Positioned(
+                                    bottom: 16,
+                                    right: 16,
+                                    child: FloatingActionButton(
+                                      onPressed: _handleFABPress,
+                                      backgroundColor: Colors.teal[800],
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      child: const Icon(Icons.add, size: 32, color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await showDialog<Map<String, dynamic>>(
-            context: context,
-            builder: (context) => const AddWasteProduct(),
-          );
-
-          if (result != null) {
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Waste entry added successfully!'),
-                backgroundColor: Colors.teal,
-              ),
-            );
-          }
-        },
-        backgroundColor: Colors.teal,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Waste',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

@@ -161,12 +161,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
