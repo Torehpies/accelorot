@@ -1,3 +1,5 @@
+// lib/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart
+
 import 'package:flutter/material.dart';
 import 'controllers/admin_machine_controller.dart';
 import '../components/machine_action_card.dart';
@@ -73,8 +75,22 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
 
   void _toggleReportsView() {
     setState(() {
+      _searchController.clear();
+      _searchFocusNode.unfocus();
+
+      _machineController.clearSearch();
+      _reportsController.clearSearch();
+
       _showReportsView = !_showReportsView;
     });
+  }
+
+  Future<void> _handleRefresh() async {
+    if (_showReportsView) {
+      await _reportsController.refresh();
+    } else {
+      await _machineController.refresh();
+    }
   }
 
   @override
@@ -93,9 +109,15 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                   ? IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.black),
                       onPressed: () {
+                        // Clear search and unfocus
+                        _searchController.clear();
+                        _searchFocusNode.unfocus();
+
                         if (_showReportsView) {
+                          _reportsController.clearSearch();
                           _toggleReportsView();
                         } else {
+                          _machineController.clearSearch();
                           _machineController.setShowArchived(false);
                         }
                       },
@@ -116,6 +138,13 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
               backgroundColor: Colors.teal,
               elevation: 0,
               centerTitle: false,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  onPressed: _handleRefresh,
+                  tooltip: 'Refresh',
+                ),
+              ],
             ),
             body: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -132,8 +161,12 @@ class _AdminMachineScreenState extends State<AdminMachineScreen> {
                               child: MachineActionCard(
                                 icon: Icons.archive,
                                 label: 'Archive',
-                                onPressed: () =>
-                                    _machineController.setShowArchived(true),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _searchFocusNode.unfocus();
+                                  _machineController.clearSearch();
+                                  _machineController.setShowArchived(true);
+                                },
                               ),
                             ),
                             const SizedBox(width: 12),

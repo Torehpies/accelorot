@@ -1,22 +1,102 @@
 // lib/frontend/operator/activity_logs/web/web_all_activity_section.dart
 import 'package:flutter/material.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../models/activity_item.dart';
+import 'package:intl/intl.dart';
 
-class WebAllActivitySection extends StatelessWidget {
+class WebAllActivitySection extends StatefulWidget {
   final String? viewingOperatorId;
+  final String? focusedMachineId;
 
   const WebAllActivitySection({
     super.key,
     this.viewingOperatorId,
+    this.focusedMachineId,
   });
 
-  static List<Map<String, dynamic>> get _mockLogs => [
-    {'time': '10:30 AM', 'user': 'Miguel', 'action': 'Added greens', 'details': '5kg kitchen waste'},
-    {'time': '09:15 AM', 'user': 'System', 'action': 'Temp alert', 'details': '62°C in Bin A'},
-    {'time': 'Yesterday', 'user': 'Admin', 'action': 'Cycle started', 'details': 'Cycle #42'},
-  ];
+  @override
+  State<WebAllActivitySection> createState() => _WebAllActivitySectionState();
+}
+
+class _WebAllActivitySectionState extends State<WebAllActivitySection> {
+  bool _isLoading = true;
+  List<ActivityItem> _activities = [];
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadActivities();
+  }
+
+  Future<void> _loadActivities() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final activities = await FirestoreActivityService.getAllActivities(
+        viewingOperatorId: widget.viewingOperatorId,
+      );
+
+      // Filter by machine if focusedMachineId is provided
+      final filteredActivities = widget.focusedMachineId != null
+          ? activities.where((a) => a.machineId == widget.focusedMachineId).toList()
+          : activities;
+
+      setState(() {
+        _activities = filteredActivities.take(5).toList(); // Show only recent 5
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final diff = now.difference(timestamp);
+
+    if (diff.inDays == 0) {
+      return DateFormat('h:mm a').format(timestamp);
+    } else if (diff.inDays == 1) {
+      return 'Yesterday';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays} days ago';
+    } else {
+      return DateFormat('MMM d').format(timestamp);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(32),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -45,32 +125,43 @@ class WebAllActivitySection extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _mockLogs.length,
-            itemBuilder: (context, index) {
-              final log = _mockLogs[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                // ✅ Action: black (bold)
-                title: Text(
-                  log['action'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color:Color.fromARGB(255, 48, 47, 47)),
+          
+          if (_activities.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(
+                child: Text(
+                  'No recent activity',
+                  style: TextStyle(color: Colors.grey),
                 ),
-                // ✅ Details: grey
-                subtitle: Text(
-                  '${log['time']} • ${log['details']}',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-                // ✅ User: grey
-                trailing: Text(
-                  log['user'] as String,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-              );
-            },
-          ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _activities.length,
+              itemBuilder: (context, index) {
+                final activity = _activities[index];
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(
+                    activity.title,
+                    style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color:Color.fromARGB(255, 48, 47, 47)),
+                  ),
+                  subtitle: Text(
+                    '${_formatTime(activity.timestamp)} • ${activity.description.split('\n').first}',
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: Text(
+                    activity.category,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

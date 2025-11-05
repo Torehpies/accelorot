@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
+
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/submit_report.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
@@ -116,6 +117,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       }
     }
   }
+
+import '../components/environmental_sensors_card.dart';
+import '../components/system_card.dart';
+import '../components/composting_progress_card.dart';
+import '../../../frontend/operator/machine_management/models/machine_model.dart';
+
+class WebHomeScreen extends StatelessWidget {
+  final MachineModel? focusedMachine;
+
+  const WebHomeScreen({super.key, this.focusedMachine});
+
 
   @override
   Widget build(BuildContext context) {
