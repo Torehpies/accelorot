@@ -61,7 +61,6 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
       final List<double> readings = [];
       final List<String> labels = [];
       DateTime? lastUpdate;
-      double? lastKnownValue;
 
       final daysDiff = end.difference(start).inDays + 1;
 
@@ -77,7 +76,6 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
           if (dayValues.isNotEmpty) {
             final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
-            lastKnownValue = dailyAvg;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;
