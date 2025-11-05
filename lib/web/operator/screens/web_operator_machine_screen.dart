@@ -5,6 +5,7 @@ import '../../../frontend/operator/machine_management/widgets/search_bar_widget.
 import '../../operator/widgets/summary_card_widget.dart';
 import '../../operator/widgets/machine_card_widget.dart';
 import '../../operator/widgets/machine_list_tile_widget.dart';
+import '../widgets/web_view_confirmation_dialog.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
 
@@ -40,9 +41,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     await controller.refresh();
   }
 
-  void handleMachineTap(String machineName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening $machineName details')),
+  void handleMachineTap(dynamic machine) {
+    showDialog(
+      context: context,
+      builder: (context) => WebViewConfirmationDialog(machine: machine),
     );
   }
 
@@ -369,7 +371,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         final machine = controller.filteredMachines[index];
         return MachineCardWidget(
           machine: machine,
-          onTap: () => handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine),
         );
       },
     );
@@ -384,7 +386,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         final machine = controller.filteredMachines[index];
         return MachineListTileWidget(
           machine: machine,
-          onTap: () => handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine),
         );
       },
     );
