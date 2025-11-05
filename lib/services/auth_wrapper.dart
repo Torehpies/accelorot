@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
+//import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
 import '../frontend/operator/main_navigation.dart';
 import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import '../web/admin/admin_navigation/web_admin_navigation.dart';
