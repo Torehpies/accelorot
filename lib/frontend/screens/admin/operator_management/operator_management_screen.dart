@@ -1,5 +1,6 @@
-// ignore_for_file: deprecated_member_use
+// lib/frontend/screens/admin/operator_management/operator_management_screen.dart
 
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'operator_detail_screen.dart';
 import 'add_operator_screen.dart';
