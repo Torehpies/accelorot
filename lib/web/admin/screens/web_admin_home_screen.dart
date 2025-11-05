@@ -125,8 +125,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           _archivedOperators = archivedOperators;
           _activeMachines = activeMachines;
           _archivedMachines = archivedMachines;
-          _operators = operators.take(8).toList();
-          _machines = machines.take(8).toList();
+          _operators = operators.take(7).toList();
+          _machines = machines.take(7).toList();
           _loading = false;
         });
       }
@@ -140,12 +140,13 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.teal.shade700,
         title: const Text(
           'Dashboard',
           style: TextStyle(
-            color: Colors.teal,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -548,16 +549,11 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   }) {
     return Container(
       decoration: BoxDecoration(
+
         color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 1) ,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+       
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
