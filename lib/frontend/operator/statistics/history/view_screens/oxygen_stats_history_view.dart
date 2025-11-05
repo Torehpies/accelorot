@@ -66,6 +66,7 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
 
           // ignore: unused_local_variable
 
+      // ignore: unused_local_variable
       double? lastKnownValue;
 
       final daysDiff = end.difference(start).inDays + 1;

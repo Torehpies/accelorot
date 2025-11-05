@@ -68,6 +68,7 @@ class _TemperatureStatsHistoryViewState
 
           // ignore: unused_local_variable
 
+      // ignore: unused_local_variable
       double? lastKnownValue;
 
       final daysDiff = end.difference(start).inDays + 1;

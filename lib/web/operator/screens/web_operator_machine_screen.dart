@@ -10,7 +10,7 @@ import '../widgets/web_view_confirmation_dialog.dart';
 class WebOperatorMachineScreen extends StatefulWidget {
 
 
-  const WebOperatorMachineScreen({super.key});
+  const WebOperatorMachineScreen({super.key, required focusedMachine});
 
   @override
   State<WebOperatorMachineScreen> createState() =>
