@@ -103,4 +103,15 @@ class OperatorManagementController extends ChangeNotifier {
       return false;
     }
   }
+
+  // Remove operator permanently
+  Future<bool> removeOperatorPermanently(OperatorModel operator) async {
+    try {
+      await _operatorService.removeOperatorPermanently(operator.uid);
+      await loadOperators();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

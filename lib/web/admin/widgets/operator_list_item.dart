@@ -76,6 +76,69 @@ class OperatorListItem extends StatelessWidget {
                 ],
               ),
             ),
+            // Status Badge
+            if (operator.hasLeft)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.red.shade300),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person_off,
+                      size: 12,
+                      color: Colors.red.shade600,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Left',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (operator.isArchived)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: ThemeConstants.orangeShade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: ThemeConstants.orangeShade600.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.archive,
+                      size: 12,
+                      color: ThemeConstants.orangeShade600,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Archived',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: ThemeConstants.orangeShade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

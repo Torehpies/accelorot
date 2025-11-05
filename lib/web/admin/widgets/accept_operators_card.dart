@@ -1,11 +1,9 @@
-// lib/screens/accept_operators_screen.dart
+﻿// lib/screens/accept_operators_screen.dart
 
 import 'package:flutter/material.dart';
 import '../controllers/pending_members_controller.dart';
-import '../controllers/invitation_controller.dart';
 import '../../utils/theme_constants.dart';
 import '../../utils/operator_dialogs.dart';
-import 'invitation_code_screen.dart';
 import '../models/pending_member_model.dart';
 
 class AcceptOperatorsScreen extends StatefulWidget {
@@ -17,13 +15,11 @@ class AcceptOperatorsScreen extends StatefulWidget {
 
 class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
   late PendingMembersController _controller;
-  late InvitationController _invitationController;
 
   @override
   void initState() {
     super.initState();
     _controller = PendingMembersController();
-    _invitationController = InvitationController();
     _controller.addListener(_onControllerUpdate);
     _controller.loadPendingMembers();
   }
@@ -32,32 +28,12 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
   void dispose() {
     _controller.removeListener(_onControllerUpdate);
     _controller.dispose();
-    _invitationController.dispose();
     super.dispose();
   }
 
   void _onControllerUpdate() {
     if (mounted) {
       setState(() {});
-    }
-  }
-
-  Future<void> _onGenerateCode() async {
-    final success = await _invitationController.getOrCreateCode();
-    
-    if (!mounted) return;
-
-    if (success) {
-      showInvitationOverlay(
-        context,
-        _invitationController.currentCode!,
-        _invitationController.expiryDate!,
-      );
-    } else {
-      OperatorDialogs.showErrorSnackbar(
-        context,
-        'Error generating invitation code',
-      );
     }
   }
 
@@ -151,24 +127,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: ThemeConstants.spacing16),
-                  // Generate Code Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _onGenerateCode,
-                      icon: const Icon(Icons.qr_code, size: ThemeConstants.iconSize18),
-                      label: const Text('Generate Invitation Code'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ThemeConstants.tealShade600,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: ThemeConstants.spacing12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius12),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -324,7 +282,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
                   ),
                   const SizedBox(height: ThemeConstants.spacing4),
                   Text(
-                    'Requested: ${member.formatDate()}',
+                    'Requested: ',
                     style: TextStyle(
                       fontSize: ThemeConstants.fontSize11,
                       color: ThemeConstants.greyShade500,
