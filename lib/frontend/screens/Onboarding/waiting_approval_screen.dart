@@ -3,9 +3,6 @@ import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
-
 
 class WaitingApprovalScreen extends StatefulWidget {
   const WaitingApprovalScreen({super.key});
@@ -204,9 +201,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                             if (!mounted) return;
                             Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => kIsWeb
-                                  ? const WebLoginScreen()
-                                  : const LoginScreen(),
+															builder: (context) => const LoginScreen(),
                             ),
                      
                           );

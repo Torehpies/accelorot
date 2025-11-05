@@ -398,7 +398,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       width: double.infinity,
       child: PrimaryButton(
         text: 'Login',
-        onPressed: isLoading ? null : () => _submitLogin,
+        onPressed: isLoading ? null : () => _submitLogin(),
         isLoading: isLoading,
       ),
     );

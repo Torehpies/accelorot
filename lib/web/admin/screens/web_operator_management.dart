@@ -158,7 +158,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeConstants.greyShade50,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: ThemeConstants.tealShade700,
         elevation: 0,
@@ -169,6 +169,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        // 🖌️ APP BAR ICONS (e.g., back button) inherit from AppBar brightness or iconTheme
+        // To customize: use `iconTheme: IconThemeData(color: Colors.white)`
       ),
       body: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacing12),
@@ -194,7 +196,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                   // Spacing
                   if (_controller.selectedOperator != null)
                     const SizedBox(width: ThemeConstants.spacing12),
-                  // Right Side - Detail Panel (full height)
+                  // Right Side - Detail Panel
                   if (_controller.selectedOperator != null)
                     SizedBox(
                       width: 320,
@@ -226,8 +228,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.archivedCount,
             onPressed: () => _controller.setShowArchived(true),
             showCountBelow: true,
+            // 🖌️ ICON COLOR: orange (from theme)
             iconBackgroundColor: ThemeConstants.orangeShade50,
-            iconColor: ThemeConstants.orangeShade600,
+            iconColor: ThemeConstants.orangeShade600, // ← Icon tint color
             isActive: _controller.showArchived,
           ),
         ),
@@ -239,8 +242,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAddOperatorDialog,
             showCountBelow: false,
+            // 🖌️ ICON COLOR: blue (from theme)
             iconBackgroundColor: ThemeConstants.blueShade50,
-            iconColor: ThemeConstants.blueShade600,
+            iconColor: ThemeConstants.blueShade600, // ← Icon tint color
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -251,8 +255,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAcceptOperatorDialog,
             showCountBelow: false,
+            // 🖌️ ICON COLOR: green (from theme)
             iconBackgroundColor: ThemeConstants.greenShade50,
-            iconColor: ThemeConstants.greenShade600,
+            iconColor: ThemeConstants.greenShade600, // ← Icon tint color
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -263,6 +268,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.activeCount,
             onPressed: () => _controller.setShowArchived(false),
             showCountBelow: true,
+            // 🖌️ ICON COLOR: default (likely teal or primary) — check OperatorActionCard implementation
+            // If no iconColor is passed, it may use a default (e.g., ThemeConstants.tealShade700)
             isActive: !_controller.showArchived,
           ),
         ),
@@ -279,7 +286,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
       ),
       child: Column(
         children: [
-          // Header
+          // Header (may contain search icon, refresh icon, etc.)
           OperatorListHeader(
             showArchived: _controller.showArchived,
             searchQuery: _controller.searchQuery,
@@ -336,6 +343,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           operator: operator,
           isSelected: isSelected,
           onTap: () => _controller.setSelectedOperator(operator),
+          // 🖌️ ICON COLOR inside OperatorListItem: likely defined in that widget
+          // (e.g., status icon, avatar fallback icon)
         );
       },
     );

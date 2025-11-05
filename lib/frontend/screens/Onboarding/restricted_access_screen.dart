@@ -1,11 +1,8 @@
-// lib/frontend/screens/restricted_access_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'team_selection_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
 class RestrictedAccessScreen extends StatefulWidget {
   final String reason;
@@ -287,9 +284,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                                 if (!context.mounted) return;
                                 Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(
-                                  builder: (context) => kIsWeb
-                                      ? const WebLoginScreen()
-                                      : const LoginScreen(),
+                                  builder: (context) => const LoginScreen(),
                                 ),
                                 (route) => false,
                               );

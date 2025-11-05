@@ -6,7 +6,9 @@ class AppColors {
   static const Color primaryLight = Color(0xFF4DB6AC); // Teal 400
   static const Color background = Colors.white;
   static const Color textPrimary = Color(0xFF333333);
-  static const Color textSecondary = Color(0xFF757575); // Hint/Placeholder Color
+  static const Color textSecondary = Color(
+    0xFF757575,
+  ); // Hint/Placeholder Color
   static const Color error = Color(0xFFD32F2F);
 }
 
@@ -14,7 +16,7 @@ class AppColors {
 final ThemeData appTheme = ThemeData(
   // Global Scaffold Background
   scaffoldBackgroundColor: AppColors.background,
-  
+
   // Defines the default color palette using the modern ColorScheme
   colorScheme: const ColorScheme.light(
     primary: AppColors.primary,
@@ -33,10 +35,7 @@ final ThemeData appTheme = ThemeData(
       color: AppColors.textPrimary,
     ),
     // Used for secondary text (e.g., "Sign in to continue")
-    bodyLarge: TextStyle(
-      fontSize: 16,
-      color: AppColors.textSecondary,
-    ),
+    bodyLarge: TextStyle(fontSize: 16, color: AppColors.textSecondary),
   ),
 
   // --- Input Field Styling (Applies to all TextFormFields) ---
@@ -64,12 +63,28 @@ final ThemeData appTheme = ThemeData(
   // --- Button Styling ---
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
-      foregroundColor: AppColors.primary,
+      foregroundColor: AppColors.textPrimary,
       textStyle: const TextStyle(fontWeight: FontWeight.bold),
-      padding: EdgeInsets.zero, // Often used for small links like "Forgot Password?"
+      padding:
+          EdgeInsets.zero, // Often used for small links like "Forgot Password?"
     ),
   ),
-  
+
   // Custom button styling for PrimaryButton component (if needed)
   // elevatedButtonTheme: ElevatedButtonThemeData(...)
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      // The background color of the button (the filled part)
+      backgroundColor: AppColors.primary, // This is Teal
+      // The foreground color (the text color)
+      foregroundColor: AppColors.background, // Set this to white for contrast
+      // Optional: Increase minimum size
+      //minimumSize: const Size(
+      //  double.infinity,
+      //  48,
+      //), // Full width, standard height
+      // Optional: Customize shape
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  ),
 );

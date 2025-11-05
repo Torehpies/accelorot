@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../operator/screens/web_home_screen.dart';
 import 'screens/web_activity_logs_screen.dart';
@@ -33,10 +31,10 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
   void initState() {
     super.initState();
     _screens = [
-      const WebHomeScreen(),
+      WebHomeScreen(focusedMachine: null),
       const WebActivityLogsScreen(),
       const WebStatisticsScreen(),
-      const WebOperatorMachineScreen(),
+      WebOperatorMachineScreen(focusedMachine: null),
       const WebProfileScreen(),
     ];
   }
@@ -66,7 +64,8 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        //MaterialPageRoute(builder: (_) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
         (route) => false,
       );
     }
