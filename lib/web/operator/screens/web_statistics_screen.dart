@@ -10,9 +10,12 @@ import '../../../services/machine_services/firestore_machine_service.dart';
 import '../../../services/sess_service.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
+  final String? focusedMachineId;
 
-
-  const WebStatisticsScreen({super.key});
+  const WebStatisticsScreen({
+    super.key,
+    this.focusedMachineId,
+  });
 
   @override
   State<WebStatisticsScreen> createState() => _WebStatisticsScreenState();

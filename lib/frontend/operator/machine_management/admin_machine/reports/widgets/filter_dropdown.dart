@@ -1,5 +1,4 @@
-// lib/frontend/operator/machine_management/reports/widgets/reports_search_bar.dart
-
+// lib/frontend/operator/machine_management/reports/widgets/reports_dropdown.dart
 import 'package:flutter/material.dart';
 import '../controllers/reports_controller.dart';
 
@@ -78,6 +77,50 @@ class ReportsSearchBar extends StatelessWidget {
                     ),
                   ),
                 );
+              },
+            ),
+          ),
+        ),
+        
+        const SizedBox(width: 12),
+        
+        // Sort Dropdown
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<SortOption>(
+              value: reportsController.sortOption,
+              icon: Icon(Icons.sort, color: Colors.grey.shade600),
+              items: const [
+                DropdownMenuItem(
+                  value: SortOption.newest,
+                  child: Text('Newest'),
+                ),
+                DropdownMenuItem(
+                  value: SortOption.oldest,
+                  child: Text('Oldest'),
+                ),
+                DropdownMenuItem(
+                  value: SortOption.priorityHighToLow,
+                  child: Text('Priority ↓'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  reportsController.setSortOption(value);
+                }
               },
             ),
           ),
