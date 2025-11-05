@@ -83,7 +83,7 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
           if (dayValues.isNotEmpty) {
             final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
-            lastKnownValue = dailyAvg;
+            _currentOxygen = readings.isNotEmpty ? readings.last : 0.0;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;
