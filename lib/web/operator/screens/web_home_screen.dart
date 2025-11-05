@@ -247,23 +247,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             ),
                             const Divider(height: 1, thickness: 1, color: Colors.grey),
 
-                            // ✅ FULL-HEIGHT ACTIVITY LOGS (NO WRAPPING SCROLL VIEW)
+                            // ✅ FULL-HEIGHT ACTIVITY LOGS WITH PROPER SCROLLING
                             Expanded(
                               child: Stack(
-                                fit: StackFit.passthrough,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 16,
-                                      right: 16,
-                                      top: 12,
-                                      bottom: 80, // Space for FAB
-                                    ),
-                                    child: ActivityLogsCard(
-                                      key: _activityLogsKey,
-                                      focusedMachineId: null,
-                                      // maxHeight: null → web mode (full stretch)
-                                    ),
+                                  ActivityLogsCard(
+                                    key: _activityLogsKey,
+                                    focusedMachineId: null,
                                   ),
                                   Positioned(
                                     bottom: 16,
