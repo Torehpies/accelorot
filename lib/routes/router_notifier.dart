@@ -27,6 +27,9 @@ class RouterNotifier extends ChangeNotifier {
   bool? _isInTeam = false;
   bool? get isInTeam => _isInTeam;
 
+	bool? _isLoading = false;
+	bool? get isLoading => _isLoading;
+
   final Ref _ref;
 
   final Completer<void> _initializationCompleter = Completer<void>();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/repositories/team_repository.dart';
 
 class RegistrationState {
   final String? selectedTeamId;

@@ -1,36 +1,26 @@
-import 'dart:developer';
-
 import 'package:flutter_application_1/repositories/auth_repository.dart';
-import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
-import 'package:flutter_application_1/viewmodels/registration_state.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:flutter_application_1/viewmodels/registration/registration_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'registration_notifier.g.dart';
 
 @riverpod
 class RegistrationNotifier extends _$RegistrationNotifier {
-  late final AuthRepository _authRepo;
-  late final TeamRepository _teamRepo;
-
   @override
   RegistrationState build() {
-    _authRepo = ref.read(authRepositoryProvider);
-    _teamRepo = ref.read(teamRepositoryProvider);
-
     return RegistrationState();
   }
 
   // Update field states (used by controllers in the main screen)
-//  void updateFirstName(String value) =>
-//      state = state.copyWith(firstName: value);
-//  void updateLastName(String value) => state = state.copyWith(lastName: value);
-//  void updateEmail(String value) => state = state.copyWith(email: value);
-//  void updatePassword(String value) => state = state.copyWith(password: value);
-//  void updateConfirmPassword(String value) =>
-//      state = state.copyWith(confirmPassword: value);
+  //  void updateFirstName(String value) =>
+  //      state = state.copyWith(firstName: value);
+  //  void updateLastName(String value) => state = state.copyWith(lastName: value);
+  //  void updateEmail(String value) => state = state.copyWith(email: value);
+  //  void updatePassword(String value) => state = state.copyWith(password: value);
+  //  void updateConfirmPassword(String value) =>
+  //      state = state.copyWith(confirmPassword: value);
   void updateSelectedTeamId(String? teamId) {
     state = state.copyWith(selectedTeamId: () => teamId);
   }
@@ -71,7 +61,7 @@ class RegistrationNotifier extends _$RegistrationNotifier {
         firstName: firstName,
         lastName: lastName,
         role: 'Operator',
-				teamId: state.selectedTeamId!,
+        teamId: state.selectedTeamId!,
       );
 
       state = state.copyWith(isRegistrationLoading: false);

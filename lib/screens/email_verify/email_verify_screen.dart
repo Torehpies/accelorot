@@ -152,7 +152,7 @@ class EmailVerifyScreen extends ConsumerWidget {
                                       if (e.code == 'too-many-requests') {
                                         showSnackbar(
                                           context,
-                                          '🚫 Max send limit reached. Please wait a bit before sending another message.',
+                                          'Max send limit reached. Please wait a bit before sending another message.',
                                           isError: true,
                                         );
                                       } else {

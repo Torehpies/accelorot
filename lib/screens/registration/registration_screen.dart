@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/repositories/team_repository.dart';
-import 'package:flutter_application_1/viewmodels/registration_notifier.dart';
+import 'package:flutter_application_1/viewmodels/registration/registration_notifier.dart';
 import 'package:flutter_application_1/widgets/common/responsive_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

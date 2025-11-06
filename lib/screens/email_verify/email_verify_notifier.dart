@@ -45,7 +45,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     _verificationTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
       final authRepo = ref.read(authRepositoryProvider);
 
-      // CRITICAL CHECK: If the user logs out, stop the polling
+      // If the user logs out, stop the polling
       if (authRepo.currentUser == null) {
         _verificationTimer?.cancel();
         return;

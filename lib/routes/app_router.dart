@@ -21,6 +21,7 @@ import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/mobile_shell.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/routes/web_shell.dart';
+import 'package:flutter_application_1/screens/loading_screen.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,6 +31,7 @@ const int kDesktopBreakpoint = 1024;
 
 enum RoutePath {
   initial(path: '/'),
+  loading(path: '/loading'),
   signin(path: '/signin'),
   signup(path: '/signup'),
   qrRefer(path: '/qr-refer'),
@@ -61,6 +63,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePath.loading.path,
+        name: RoutePath.loading.name,
+        builder: (context, state) => const LoadingScreen(),
       ),
       GoRoute(
         path: RoutePath.signin.path,
