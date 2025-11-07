@@ -6,6 +6,7 @@ import 'package:flutter_application_1/frontend/operator/machine_management/admin
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
+import 'package:flutter_application_1/routes/go_router_refresh_stream.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
@@ -24,6 +25,7 @@ import 'package:flutter_application_1/routes/web_shell.dart';
 import 'package:flutter_application_1/screens/loading_screen.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
+import 'package:flutter_application_1/viewmodels/auth_state_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,10 +53,10 @@ enum RoutePath {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authListenable = ref.watch(authListenableProvider);
+	final goRouterRefreshStream = GoRouterRefreshStream(ref);
 
   return GoRouter(
-    refreshListenable: authListenable,
+    refreshListenable: goRouterRefreshStream,
     initialLocation: RoutePath.signin.path, // Start at the splash screen
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
