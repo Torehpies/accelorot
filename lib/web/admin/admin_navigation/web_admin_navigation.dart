@@ -1,15 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
 import '../screens/web_admin_machine.dart';
 import '../screens/web_profile_screen.dart';
 import '../../../web/admin/screens/web_operator_management.dart';
-
-
-
 
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
@@ -22,7 +17,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
   int _selectedIndex = 0;
 
   late final List<Widget> _screens;
-  
+
   final List<_NavItem> _navItems = const [
     _NavItem(Icons.dashboard, 'Dashboard'),
     _NavItem(Icons.history, 'Operators'),
@@ -102,11 +97,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                       color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.eco,
-                      size: 40,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.eco, size: 40, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -160,7 +151,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                     ),
                   ),
                   const Divider(color: Colors.white30, height: 32),
-                  
+
                   // Navigation Items
                   Expanded(
                     child: ListView.builder(
@@ -176,47 +167,59 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                             child: ListTile(
                               leading: Icon(
                                 item.icon,
-                                color: isSelected ? Colors.white : Colors.white70,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white70,
                                 size: 22,
                               ),
                               title: Text(
                                 item.label,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.white70,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.white70,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                   fontSize: 14,
                                 ),
                               ),
                               selected: isSelected,
-                              selectedTileColor: Colors.white.withValues(alpha: 0.15),
+                              selectedTileColor: Colors.white.withValues(
+                                alpha: 0.15,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              onTap: () => setState(() => _selectedIndex = index),
+                              onTap: () =>
+                                  setState(() => _selectedIndex = index),
                             ),
                           ),
                         );
                       },
                     ),
                   ),
-                  
+
                   // Logout Button
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: Material(
                       color: Colors.transparent,
                       child: ListTile(
-                        leading: const Icon(Icons.logout, color: Colors.white70, size: 22),
+                        leading: const Icon(
+                          Icons.logout,
+                          color: Colors.white70,
+                          size: 22,
+                        ),
                         title: const Text(
                           'Logout',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
                         ),
                         onTap: _handleLogout,
                       ),
@@ -226,7 +229,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
               ),
             ),
           ),
-          
+
           // Main Content Area
           Expanded(
             child: Container(
