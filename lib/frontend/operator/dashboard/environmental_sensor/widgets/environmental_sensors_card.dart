@@ -194,8 +194,9 @@ class EnvironmentalSensorsCard extends StatelessWidget {
   (String, Color) _getOxygenStatus(double? val) {
     if (val == null) return ('No Data', Colors.grey);
     if (val <= 1500) return ('Good (Well-Aerated)', Colors.green);
-    if (val > 1500 && val <= 3000)
+    if (val > 1500 && val <= 3000) {
       return ('Moderate Gas Buildup', Colors.orange);
+    }
     if (val > 3000) return ('Poor (Low O₂)', Colors.red);
     return ('Unknown', Colors.grey);
   }

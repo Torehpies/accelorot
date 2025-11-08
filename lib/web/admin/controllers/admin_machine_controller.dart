@@ -6,6 +6,7 @@ import '../models/admin_machine_model.dart' as AdminModel;
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 // ignore: library_prefixes
 import '../../../frontend/operator/machine_management/models/machine_model.dart'
+    // ignore: library_prefixes
     as OperatorModel;
 
 class AdminMachineController extends ChangeNotifier {

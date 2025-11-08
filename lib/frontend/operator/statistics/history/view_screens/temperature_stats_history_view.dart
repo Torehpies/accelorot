@@ -132,15 +132,17 @@ class _TemperatureStatsHistoryViewState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_error.isNotEmpty)
+    if (_error.isNotEmpty) {
       return Center(
         child: Text(
           'Error: $_error',
           style: const TextStyle(color: Colors.red),
         ),
       );
-    if (_dailyReadings.isEmpty)
+    }
+    if (_dailyReadings.isEmpty) {
       return const Center(child: Text('No temperature data available'));
+    }
 
     return Column(
       children: [
