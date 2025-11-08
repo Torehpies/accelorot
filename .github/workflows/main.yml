@@ -1,0 +1,124 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ] # runs on all PRs
+
+jobs:
+  # -------------------------
+  # 1. Pull Request Checks
+  # -------------------------
+  pr-checks:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.35.5"
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Inject Firebase Options (Dart)
+        env:
+          FIREBASE_OPTIONS_DART: ${{ secrets.FIREBASE_OPTIONS_CONTENT }}
+        run: |
+          mkdir -p lib
+          echo "$FIREBASE_OPTIONS_DART" > lib/firebase_options.dart
+        shell: bash
+
+      - name: Create google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          mkdir -p android/app
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo '{"project_info": {"project_id": "dummy-pr"}}' > android/app/google-services.json
+          else
+            echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          fi        
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate riverpod/build runner files
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Analyze project
+        run: flutter analyze --no-fatal-warnings
+
+      - name: Check formatting
+        run: dart format . 
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+  # -------------------------
+  # 2. Main Branch Build & Deploy
+  # -------------------------
+  main-build:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.35.5"
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate riverpod/build runner files
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Create google-services.json
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "Error: GOOGLE_SERVICES_JSON environment variable is not set or is empty."
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+        shell: bash
+
+      - name: Analyze project
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+    #App distribution
+      # - name: Upload to Firebase App Distribution
+      #   uses: wzieba/Firebase-Distribution-Github-Action@v1
+      #   with:
+      #     appId: ${{ secrets.FIREBASE_APP_ID }}
+      #     token: ${{ secrets.FIREBASE_AUTH_TOKEN }}
+      #     groups: testers
+      #     file: build/app/outputs/flutter-apk/app-release.apk
