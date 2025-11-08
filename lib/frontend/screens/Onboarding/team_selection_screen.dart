@@ -14,7 +14,7 @@ class TeamSelectionScreen extends StatefulWidget {
 class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
   final AuthService _auth = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   bool _loading = true;
   bool _submitting = false;
   String? _selectedTeamId;
@@ -37,10 +37,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
       final teamsSnapshot = await _firestore.collection('teams').get();
       final teams = teamsSnapshot.docs.map((doc) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          'name': data['teamName'] ?? 'Unnamed Team',
-        };
+        return {'id': doc.id, 'name': data['teamName'] ?? 'Unnamed Team'};
       }).toList();
 
       if (mounted) {
@@ -81,7 +78,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
           .doc(_selectedTeamId!)
           .collection('pending_members')
           .doc(user.uid);
-      
+
       batch.set(pendingRef, {
         'requestorId': user.uid,
         'requestorEmail': user.email ?? '',
@@ -90,14 +87,12 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
 
       // Set pendingTeamId in user document
       final userRef = _firestore.collection('users').doc(user.uid);
-      batch.update(userRef, {
-        'pendingTeamId': _selectedTeamId,
-      });
+      batch.update(userRef, {'pendingTeamId': _selectedTeamId});
 
       await batch.commit();
 
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Request submitted! Waiting for approval.'),
@@ -126,9 +121,7 @@ class _TeamSelectionScreenState extends State<TeamSelectionScreen> {
     await _auth.signOut();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 

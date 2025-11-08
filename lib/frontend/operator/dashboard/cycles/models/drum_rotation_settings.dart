@@ -3,7 +3,7 @@
 class DrumRotationSettings {
   int cycles;
   String period;
-  
+
   // For future Firestore integration
   DateTime? lastCycleCompleted;
   Duration totalRuntime;

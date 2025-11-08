@@ -5,7 +5,12 @@ class InfoBox extends StatelessWidget {
   final MaterialColor color;
   final String emoji;
 
-  const InfoBox({super.key, required this.text, required this.color, required this.emoji});
+  const InfoBox({
+    super.key,
+    required this.text,
+    required this.color,
+    required this.emoji,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,11 @@ class InfoBox extends StatelessWidget {
       ),
       child: Text(
         '$emoji $text',
-        style: TextStyle(fontSize: 12, color: color[800], fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 12,
+          color: color[800],
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

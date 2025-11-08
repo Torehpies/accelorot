@@ -10,9 +10,11 @@ class ChangePasswordModal extends StatefulWidget {
 }
 
 class _ChangePasswordModalState extends State<ChangePasswordModal> {
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _obscureCurrent = true;
   bool _obscureNew = true;
@@ -22,9 +24,7 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
@@ -68,7 +68,8 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
               "Current Password",
               controller: _currentPasswordController,
               obscureText: _obscureCurrent,
-              onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
+              onToggle: () =>
+                  setState(() => _obscureCurrent = !_obscureCurrent),
             ),
             const SizedBox(height: 16),
 
@@ -86,7 +87,8 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
               "Confirm New Password",
               controller: _confirmPasswordController,
               obscureText: _obscureConfirm,
-              onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+              onToggle: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
               errorText: _confirmError,
             ),
             const SizedBox(height: 24),
@@ -149,8 +151,10 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
             labelStyle: const TextStyle(fontWeight: FontWeight.w500),
             filled: true,
             fillColor: Colors.white,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 16,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -188,9 +192,7 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
           backgroundColor: Colors.red.shade700,
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
       return;
@@ -214,15 +216,16 @@ class _ChangePasswordModalState extends State<ChangePasswordModal> {
           children: [
             Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 8),
-            const Text("Password changed successfully!", style: TextStyle(color: Colors.white)),
+            const Text(
+              "Password changed successfully!",
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         backgroundColor: Colors.green.shade700,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

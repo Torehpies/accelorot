@@ -6,7 +6,7 @@ import '../../../../services/firestore_activity_service.dart';
 
 class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
-    super.key, 
+    super.key,
     super.initialFilter,
     super.focusedMachineId,
   });
@@ -15,7 +15,8 @@ class CyclesRecomScreen extends BaseActivityScreen {
   State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
+class _CyclesRecomScreenState
+    extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
   String get screenTitle => widget.focusedMachineId != null
       ? 'Machine Cycles & Recommendations'
@@ -41,18 +42,18 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Recoms', 'Cycles'};
-    
+
     Set<String> result = {};
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-    
+
     if (specificCategories.every((cat) => categories.contains(cat))) {
       result.add('All');
     }
-    
+
     return result;
   }
 }

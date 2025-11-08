@@ -58,16 +58,17 @@ class _MainLayoutState extends State<MainLayout> {
     } else {
       // Web/Desktop: Permanent Sidebar
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('My App'),
-        ),
+        appBar: AppBar(title: const Text('My App')),
         drawer: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
               const DrawerHeader(
                 decoration: BoxDecoration(color: Colors.blue),
-                child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
               ),
               ...List.generate(
                 navItems.length,
@@ -77,7 +78,9 @@ class _MainLayoutState extends State<MainLayout> {
                   selected: _currentIndex == index,
                   onTap: () {
                     _onItemTapped(index);
-                    Navigator.of(context).pop(); // Close drawer on web (optional)
+                    Navigator.of(
+                      context,
+                    ).pop(); // Close drawer on web (optional)
                   },
                 ),
               ),

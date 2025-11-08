@@ -6,7 +6,7 @@ class CompostBatch {
   final String? startedBy; // Operator name (null for now)
   final DateTime batchStart;
   final String? startNotes; // Notes when starting batch
-  
+
   // Completion fields
   String status; // 'active' or 'completed'
   String? completionNotes; // Notes when completing batch
@@ -50,8 +50,8 @@ class CompostBatch {
       startNotes: map['startNotes'],
       status: map['status'] ?? 'active',
       completionNotes: map['completionNotes'],
-      completedAt: map['completedAt'] != null 
-          ? DateTime.parse(map['completedAt']) 
+      completedAt: map['completedAt'] != null
+          ? DateTime.parse(map['completedAt'])
           : null,
       finalWeight: map['finalWeight']?.toDouble(),
     );

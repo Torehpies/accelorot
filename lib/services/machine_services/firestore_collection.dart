@@ -35,7 +35,9 @@ class MachineFirestoreCollections {
   static Future<bool> allMockMachinesExist() async {
     try {
       final mockData = MachineMockData.getMockMachines();
-      final mockIds = mockData.map((data) => data['machineId'] as String).toList();
+      final mockIds = mockData
+          .map((data) => data['machineId'] as String)
+          .toList();
 
       for (final id in mockIds) {
         final doc = await getMachinesCollection().doc(id).get();

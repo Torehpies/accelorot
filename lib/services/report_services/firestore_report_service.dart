@@ -76,7 +76,7 @@ class FirestoreReportService {
       }
 
       await reportRef.update(updates);
-      
+
       // Delay for consistency (like machine updates)
       await Future.delayed(const Duration(milliseconds: 1000));
     } catch (e) {

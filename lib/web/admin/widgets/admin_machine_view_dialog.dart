@@ -27,15 +27,10 @@ class AdminMachineViewDialog extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: 380,
-          constraints: const BoxConstraints(
-            maxHeight: 280,
-            minHeight: 220,
-          ),
+          constraints: const BoxConstraints(maxHeight: 280, minHeight: 220),
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -115,7 +110,7 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   Future<void> _handleArchive(BuildContext context) async {
     Navigator.pop(context); // Close view dialog first
-    
+
     final confirmed = await _showCompactConfirmationDialog(
       context,
       'Archive Machine',
@@ -128,14 +123,14 @@ class AdminMachineViewDialog extends StatelessWidget {
       try {
         await controller.archiveMachine(machine.machineId);
         if (!context.mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${machine.machineName} moved to archive'),
             backgroundColor: Colors.orange,
           ),
         );
-        
+
         // Delay before refresh
         await Future.delayed(const Duration(milliseconds: 1000));
         if (!context.mounted) return;
@@ -158,7 +153,7 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   Future<void> _handleRestore(BuildContext context) async {
     Navigator.pop(context); // Close view dialog first
-    
+
     final confirmed = await _showCompactConfirmationDialog(
       context,
       'Restore Machine',
@@ -171,14 +166,14 @@ class AdminMachineViewDialog extends StatelessWidget {
       try {
         await controller.restoreMachine(machine.machineId);
         if (!context.mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${machine.machineName} restored successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Delay before refresh
         await Future.delayed(const Duration(milliseconds: 1000));
         if (!context.mounted) return;
@@ -201,30 +196,26 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   void _handleEdit(BuildContext context) {
     Navigator.pop(context); // Close view dialog first
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => EditMachineModal(
-        controller: controller,
-        machine: machine,
-      ),
+      builder: (context) =>
+          EditMachineModal(controller: controller, machine: machine),
     );
   }
 
   void _handleViewDetails(BuildContext context) {
     Navigator.pop(context); // Close dialog first
-    
+
     // Show detailed information about the machine in a new dialog
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           width: 500,
           constraints: const BoxConstraints(maxHeight: 600),
@@ -277,7 +268,7 @@ class AdminMachineViewDialog extends StatelessWidget {
                 ],
               ),
               const Divider(height: 32),
-              
+
               // Machine Details
               _DetailRow(
                 icon: Icons.tag,
@@ -309,9 +300,9 @@ class AdminMachineViewDialog extends StatelessWidget {
                 value: machine.isArchived ? 'Archived' : 'Active',
                 valueColor: machine.isArchived ? Colors.orange : Colors.green,
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -351,15 +342,10 @@ class AdminMachineViewDialog extends StatelessWidget {
     final isArchived = machine.isArchived;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: 420,
-        constraints: const BoxConstraints(
-          maxHeight: 500,
-          minHeight: 380,
-        ),
+        constraints: const BoxConstraints(maxHeight: 500, minHeight: 380),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -370,12 +356,16 @@ class AdminMachineViewDialog extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: isArchived ? Colors.grey.shade200 : Colors.teal.shade50,
+                  color: isArchived
+                      ? Colors.grey.shade200
+                      : Colors.teal.shade50,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.precision_manufacturing,
-                  color: isArchived ? Colors.grey.shade500 : Colors.teal.shade700,
+                  color: isArchived
+                      ? Colors.grey.shade500
+                      : Colors.teal.shade700,
                   size: 32,
                 ),
               ),
@@ -586,8 +576,7 @@ class AdminMachineViewDialog extends StatelessWidget {
   }
 }
 
-extension on BuildContext {
-}
+extension on BuildContext {}
 
 // Helper widget for detail rows
 class _DetailRow extends StatelessWidget {

@@ -9,7 +9,7 @@ import 'firestore_fetchs.dart';
 /// Provides a unified API for all machine operations.
 class FirestoreMachineService {
   // ==================== AUTH & COLLECTIONS ====================
-  
+
   static String? getCurrentUserId() =>
       MachineFirestoreCollections.getCurrentUserId();
 
@@ -20,7 +20,7 @@ class FirestoreMachineService {
       MachineFirestoreCollections.machineExists(machineId);
 
   // ==================== UPLOAD METHODS ====================
-  
+
   static Future<void> uploadAllMockMachines() =>
       MachineFirestoreUpload.uploadAllMockMachines();
 
@@ -38,9 +38,7 @@ class FirestoreMachineService {
   static Future<void> updateMachineArchiveStatus(
     String machineId,
     bool isArchived,
-  ) =>
-      MachineFirestoreUpload.updateMachineArchiveStatus(
-          machineId, isArchived);
+  ) => MachineFirestoreUpload.updateMachineArchiveStatus(machineId, isArchived);
 
   // Archive instead of deleting permanently
   static Future<void> deleteMachine(String machineId) =>
@@ -51,18 +49,19 @@ class FirestoreMachineService {
       MachineFirestoreUpload.restoreMachine(machineId);
 
   // ==================== FETCH METHODS - ROLE-SPECIFIC ====================
-  
+
   /// Fetch machines for Operators (by operatorId)
   /// Looks up operator's teamId and returns all team machines
-  static Future<List<MachineModel>> getMachinesByOperatorId(String operatorId) =>
-      MachineFirestoreFetch.getMachinesByOperatorId(operatorId);
+  static Future<List<MachineModel>> getMachinesByOperatorId(
+    String operatorId,
+  ) => MachineFirestoreFetch.getMachinesByOperatorId(operatorId);
 
   /// Fetch machines for Admins and Operators (by teamId + mock data)
   static Future<List<MachineModel>> getMachinesByTeamId(String teamId) =>
       MachineFirestoreFetch.getMachinesByTeamId(teamId);
 
   // ==================== FETCH METHODS - GENERAL ====================
-  
+
   static Future<List<MachineModel>> getActiveMachines() =>
       MachineFirestoreFetch.getActiveMachines();
 
@@ -82,7 +81,7 @@ class FirestoreMachineService {
       MachineFirestoreFetch.getOperators();
 
   // ==================== TEAM MEMBER METHODS ====================
-  
+
   /// Fetch all active members from a specific team
   /// Used by admins to populate the user dropdown when adding/editing machines
   static Future<List<Map<String, dynamic>>> getTeamMembers(String teamId) =>

@@ -35,10 +35,7 @@ class StatusIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: _statusColor,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white,
-          width: 2,
-        ),
+        border: Border.all(color: Colors.white, width: 2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),

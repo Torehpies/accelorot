@@ -2,12 +2,10 @@
 
 import 'package:flutter/material.dart';
 
-
 class ReportTitleField extends StatelessWidget {
   final TextEditingController controller;
   final String? errorText;
   final ValueChanged<String>? onChanged;
-
 
   const ReportTitleField({
     super.key,
@@ -15,7 +13,6 @@ class ReportTitleField extends StatelessWidget {
     this.errorText,
     this.onChanged,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +23,7 @@ class ReportTitleField extends StatelessWidget {
         hintText: 'Enter a descriptive title',
         prefixIcon: const Icon(Icons.title, size: 18),
         errorText: errorText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
       onChanged: onChanged,
     );

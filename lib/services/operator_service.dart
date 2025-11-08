@@ -11,7 +11,10 @@ class OperatorService {
   /// Any other fields from the document are preserved.
   static Future<List<Map<String, dynamic>>> fetchOperators() async {
     // Query users where role == 'Operator'
-    final snapshot = await _firestore.collection('users').where('role', isEqualTo: 'Operator').get();
+    final snapshot = await _firestore
+        .collection('users')
+        .where('role', isEqualTo: 'Operator')
+        .get();
 
     return snapshot.docs.map((d) {
       final data = d.data();
@@ -20,7 +23,9 @@ class OperatorService {
         'id': d.id,
         'uid': d.id,
         // Compose a display name if explicit 'name' not present
-        'name': data['name'] ?? '${(data['firstname'] ?? '')} ${(data['lastname'] ?? '')}'.trim(),
+        'name':
+            data['name'] ??
+            '${(data['firstname'] ?? '')} ${(data['lastname'] ?? '')}'.trim(),
         'email': data['email'] ?? '',
         'role': data['role'] ?? '',
         'isArchived': data['isArchived'] ?? false,

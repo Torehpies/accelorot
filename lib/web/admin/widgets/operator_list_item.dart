@@ -25,7 +25,9 @@ class OperatorListItem extends StatelessWidget {
           color: isSelected ? ThemeConstants.tealShade50 : Colors.transparent,
           borderRadius: BorderRadius.circular(ThemeConstants.borderRadius12),
           border: Border.all(
-            color: isSelected ? ThemeConstants.tealShade300 : Colors.transparent,
+            color: isSelected
+                ? ThemeConstants.tealShade300
+                : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -41,7 +43,9 @@ class OperatorListItem extends StatelessWidget {
               height: ThemeConstants.avatarSize44,
               decoration: BoxDecoration(
                 color: ThemeConstants.greyShade300,
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius8,
+                ),
               ),
               child: Center(
                 child: Icon(
@@ -79,10 +83,7 @@ class OperatorListItem extends StatelessWidget {
             // Status Badge
             if (operator.hasLeft)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(6),
@@ -110,14 +111,13 @@ class OperatorListItem extends StatelessWidget {
               )
             else if (operator.isArchived)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: ThemeConstants.orangeShade50,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: ThemeConstants.orangeShade600.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: ThemeConstants.orangeShade600.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

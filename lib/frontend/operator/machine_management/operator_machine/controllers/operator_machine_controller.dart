@@ -7,7 +7,7 @@ import '../../../../../services/sess_service.dart';
 
 class OperatorMachineController extends ChangeNotifier {
   // ==================== STATE ====================
-  
+
   List<MachineModel> _allMachines = [];
   List<Map<String, dynamic>> _users = [];
   bool _isLoading = false;
@@ -21,7 +21,7 @@ class OperatorMachineController extends ChangeNotifier {
   OperatorMachineController({this.viewingOperatorId});
 
   // ==================== GETTERS ====================
-  
+
   List<MachineModel> get machines => _allMachines;
   List<Map<String, dynamic>> get users => _users;
   bool get isLoading => _isLoading;
@@ -66,7 +66,7 @@ class OperatorMachineController extends ChangeNotifier {
       _allMachines.where((m) => m.isArchived).length;
 
   // ==================== INITIALIZATION ====================
-  
+
   Future<void> initialize() async {
     _isLoading = true;
     _errorMessage = null;
@@ -89,10 +89,7 @@ class OperatorMachineController extends ChangeNotifier {
         ]);
       } else {
         // Not logged in - show mock/all machines for preview
-        await Future.wait([
-          _fetchAllMachines(),
-          _fetchUsers(),
-        ]);
+        await Future.wait([_fetchAllMachines(), _fetchUsers()]);
       }
 
       _isLoading = false;
@@ -105,7 +102,7 @@ class OperatorMachineController extends ChangeNotifier {
   }
 
   // ==================== FETCH OPERATIONS ====================
-  
+
   /// Fetch all team machines by user's teamId
   Future<void> _fetchMachinesByOperatorId(String operatorId) async {
     try {
@@ -113,9 +110,11 @@ class OperatorMachineController extends ChangeNotifier {
       final sessionService = SessionService();
       final userData = await sessionService.getCurrentUserData();
       final teamId = userData?['teamId'] as String?;
-      
+
       if (teamId != null && teamId.isNotEmpty) {
-        _allMachines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+        _allMachines = await FirestoreMachineService.getMachinesByTeamId(
+          teamId,
+        );
       } else {
         _allMachines = await FirestoreMachineService.getAllMachines();
       }
@@ -152,9 +151,9 @@ class OperatorMachineController extends ChangeNotifier {
   Future<void> refresh() async {
     final currentUserId = FirestoreMachineService.getCurrentUserId();
     _isAuthenticated = currentUserId != null;
-    
+
     final targetUserId = viewingOperatorId ?? currentUserId;
-    
+
     if (targetUserId != null) {
       await _fetchMachinesByOperatorId(targetUserId);
     } else {
@@ -163,7 +162,7 @@ class OperatorMachineController extends ChangeNotifier {
   }
 
   // ==================== PAGINATION ====================
-  
+
   void loadMore() {
     _displayLimit += _pageSize;
     notifyListeners();
@@ -175,7 +174,7 @@ class OperatorMachineController extends ChangeNotifier {
   }
 
   // ==================== SEARCH ====================
-  
+
   void setSearchQuery(String query) {
     _searchQuery = query;
     resetPagination(); // Reset pagination when searching
@@ -189,12 +188,9 @@ class OperatorMachineController extends ChangeNotifier {
   }
 
   // ==================== HELPER METHODS ====================
-  
+
   String? getUserName(String userId) {
-    final user = _users.firstWhere(
-      (u) => u['uid'] == userId,
-      orElse: () => {},
-    );
+    final user = _users.firstWhere((u) => u['uid'] == userId, orElse: () => {});
     return user.isNotEmpty ? user['fullName'] : null;
   }
 

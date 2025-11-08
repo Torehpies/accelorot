@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 class AllActivitySection extends StatelessWidget {
   final String? focusedMachineId;
 
-  const AllActivitySection({
-    super.key,
-    this.focusedMachineId,
-  });
+  const AllActivitySection({super.key, this.focusedMachineId});
 
   @override
   Widget build(BuildContext context) {

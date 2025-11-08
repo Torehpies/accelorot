@@ -8,13 +8,10 @@ import 'widgets/activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
   final String? focusedMachineId;
-  final double? maxHeight; // 👈 Optional: constrain height (mobile), or leave infinite (web)
+  final double?
+  maxHeight; // 👈 Optional: constrain height (mobile), or leave infinite (web)
 
-  const ActivityLogsCard({
-    super.key,
-    this.focusedMachineId,
-    this.maxHeight,
-  });
+  const ActivityLogsCard({super.key, this.focusedMachineId, this.maxHeight});
 
   @override
   State<ActivityLogsCard> createState() => ActivityLogsCardState();
@@ -147,7 +144,9 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       }
     } else {
       final filteredLogs = widget.focusedMachineId != null
-          ? _allLogs.where((log) => log.machineId == widget.focusedMachineId).toList()
+          ? _allLogs
+                .where((log) => log.machineId == widget.focusedMachineId)
+                .toList()
           : _allLogs;
 
       if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
@@ -174,10 +173,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       );
 
       if (widget.maxHeight != null) {
-        return SizedBox(
-          height: widget.maxHeight,
-          child: listView,
-        );
+        return SizedBox(height: widget.maxHeight, child: listView);
       } else {
         // Web: let it expand naturally inside a scrollable parent
         return listView;

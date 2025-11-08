@@ -147,8 +147,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         '$status • $change',
-                        style: const TextStyle(
-                            fontSize: 8, color: Colors.grey),
+                        style: const TextStyle(fontSize: 8, color: Colors.grey),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -158,7 +157,7 @@ class EnvironmentalSensorsCard extends StatelessWidget {
               ],
             )
           : // 🟡 Centered No Data Message
-          Center(
+            Center(
               child: Text(
                 '⚠️ No $title data available',
                 style: TextStyle(
@@ -195,7 +194,8 @@ class EnvironmentalSensorsCard extends StatelessWidget {
   (String, Color) _getOxygenStatus(double? val) {
     if (val == null) return ('No Data', Colors.grey);
     if (val <= 1500) return ('Good (Well-Aerated)', Colors.green);
-    if (val > 1500 && val <= 3000) return ('Moderate Gas Buildup', Colors.orange);
+    if (val > 1500 && val <= 3000)
+      return ('Moderate Gas Buildup', Colors.orange);
     if (val > 3000) return ('Poor (Low O₂)', Colors.red);
     return ('Unknown', Colors.grey);
   }

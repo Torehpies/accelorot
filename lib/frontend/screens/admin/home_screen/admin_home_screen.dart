@@ -10,23 +10,19 @@ import '../../../../services/admin_dashboard/mock_admin_data.dart';
 import '../../../../services/admin_dashboard/admin_firestore_service.dart';
 import '../../../../services/sess_service.dart';
 
-
 /// Admin home screen with teal theme and auth-based data loading
 class AdminHomeScreen extends StatefulWidget {
   final void Function(int index)? onNavigateToTab;
-  
-  const AdminHomeScreen({super.key, this.onNavigateToTab});
 
+  const AdminHomeScreen({super.key, this.onNavigateToTab});
 
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
 }
 
-
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final AdminFirestoreService _firestoreService = AdminFirestoreService();
   final SessionService _sessionService = SessionService();
-
 
   late AdminStats _stats;
   late List<OperatorModel> _operators;
@@ -34,13 +30,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   bool _isLoading = true;
   bool _isLoggedIn = false;
 
-
   @override
   void initState() {
     super.initState();
     _loadData();
   }
-
 
   /// Load data based on authentication status (mock vs Firestore)
   Future<void> _loadData() async {
@@ -48,15 +42,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _isLoading = true;
     });
 
-
     // Simulate network delay for smooth UX
     await Future.delayed(const Duration(milliseconds: 500));
-
 
     try {
       // Check if user is logged in
       final user = _sessionService.currentUser;
-      
+
       if (user != null) {
         // User is logged in - fetch real data from Firestore
         _isLoggedIn = true;
@@ -72,7 +64,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       _loadMockData();
     }
 
-
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -80,13 +71,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-
   /// Load data from Firestore for authenticated admin
   Future<void> _loadFirestoreData(String adminUid) async {
     try {
       // Admin's UID is their teamId
       final teamId = _firestoreService.getTeamId(adminUid);
-
 
       // Fetch stats, operators, and machines in parallel
       final results = await Future.wait([
@@ -94,7 +83,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         _firestoreService.fetchOperatorsPreview(teamId),
         _firestoreService.fetchMachinesPreview(teamId),
       ]);
-
 
       _stats = results[0] as AdminStats;
       _operators = results[1] as List<OperatorModel>;
@@ -106,14 +94,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-
   /// Load mock data for non-authenticated users
   void _loadMockData() {
     _stats = MockAdminData.getStats();
     _operators = MockAdminData.getOperatorsPreview();
     _machines = MockAdminData.getMachinesPreview();
   }
-
 
   /// Handle notification icon tap
   void _onNotificationTap() {
@@ -124,7 +110,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       ),
     );
   }
-
 
   /// Handle "Manage >" tap for operators - Navigate to Operator tab
   void _onOperatorManageTap() {
@@ -141,7 +126,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-
   /// Handle "Manage >" tap for machines - Navigate to Machine tab
   void _onMachineManageTap() {
     if (widget.onNavigateToTab != null) {
@@ -157,7 +141,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,7 +149,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       body: _isLoading ? _buildLoadingState() : _buildContent(),
     );
   }
-
 
   /// Build teal app bar with bold black text
   PreferredSizeWidget _buildAppBar() {
@@ -190,16 +172,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-
   /// Build loading indicator
   Widget _buildLoadingState() {
     return const Center(
-      child: CircularProgressIndicator(
-        color: Color(0xFF4CAF50),
-      ),
+      child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
     );
   }
-
 
   /// Build main scrollable content with pull-to-refresh
   Widget _buildContent() {
@@ -232,23 +210,16 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-
   /// Build stats row with operator and machine counts (no icons)
   Widget _buildStatsRow() {
     return Row(
       children: [
         Expanded(
-          child: StatCard(
-            count: _stats.userCount,
-            label: 'Operators',
-          ),
+          child: StatCard(count: _stats.userCount, label: 'Operators'),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: StatCard(
-            count: _stats.machineCount,
-            label: 'Machines',
-          ),
+          child: StatCard(count: _stats.machineCount, label: 'Machines'),
         ),
       ],
     );

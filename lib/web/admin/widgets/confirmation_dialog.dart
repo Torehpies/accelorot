@@ -34,9 +34,7 @@ Future<bool?> showConfirmationDialog(
     context: context,
     builder: (context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -50,11 +48,7 @@ Future<bool?> showConfirmationDialog(
                   color: iconColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  dialogIcon,
-                  color: iconColor,
-                  size: 32,
-                ),
+                child: Icon(dialogIcon, color: iconColor, size: 32),
               ),
               const SizedBox(height: 16),
 

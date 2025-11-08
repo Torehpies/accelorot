@@ -11,8 +11,8 @@ import '../../../services/machine_services/firestore_machine_service.dart';
 import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  final String? focusedMachineId; 
-  final MachineModel? focusedMachine; 
+  final String? focusedMachineId;
+  final MachineModel? focusedMachine;
 
   const StatisticsScreen({
     super.key,
@@ -68,7 +68,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           final userData = await sessionService.getCurrentUserData();
           final teamId = userData?['teamId'] as String?;
           if (teamId != null && teamId.isNotEmpty) {
-            _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+            _machines = await FirestoreMachineService.getMachinesByTeamId(
+              teamId,
+            );
           } else {
             _machines = await FirestoreMachineService.getAllMachines();
           }
@@ -125,7 +127,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     setState(() {
       _searchQuery = query;
       _filteredMachines = _machines
-          .where((m) => m.machineName.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (m) => m.machineName.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     });
   }
@@ -196,10 +200,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: _selectedRange == null
           ? _buildAllMachinesLayout()
-          : HistoryPage(
-              filter: _selectedFilterLabel,
-              range: _selectedRange!,
-            ),
+          : HistoryPage(filter: _selectedFilterLabel, range: _selectedRange!),
     );
   }
 
@@ -221,8 +222,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 widget.focusedMachineId != null
                     ? 'Machine Not Found'
                     : (_searchQuery.isEmpty
-                        ? 'No Machines Found'
-                        : 'No Machines match "$_searchQuery"'),
+                          ? 'No Machines Found'
+                          : 'No Machines match "$_searchQuery"'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -234,12 +235,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 widget.focusedMachineId != null
                     ? 'The selected machine is not available.'
                     : (_searchQuery.isEmpty
-                        ? 'You don\'t have any machines assigned yet.'
-                        : 'Try adjusting your search.'),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                ),
+                          ? 'You don\'t have any machines assigned yet.'
+                          : 'Try adjusting your search.'),
+                style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -265,8 +263,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.analytics_outlined,
-                    color: Colors.teal.shade700, size: 18),
+                Icon(
+                  Icons.analytics_outlined,
+                  color: Colors.teal.shade700,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -307,8 +308,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               filled: true,
               fillColor: Colors.teal.shade50,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 0,
+              ),
             ),
             onChanged: _onSearchChanged,
           ),
@@ -344,7 +347,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         color: machine.isArchived ? Colors.grey.shade50 : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: machine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
+          color: machine.isArchived
+              ? Colors.grey.shade300
+              : Colors.teal.shade200,
           width: 1.5,
         ),
       ),
@@ -355,7 +360,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: machine.isArchived ? Colors.grey.shade100 : Colors.teal.shade50,
+              color: machine.isArchived
+                  ? Colors.grey.shade100
+                  : Colors.teal.shade50,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 topRight: Radius.circular(8),
@@ -365,7 +372,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               children: [
                 Icon(
                   Icons.precision_manufacturing,
-                  color: machine.isArchived ? Colors.grey.shade600 : Colors.teal.shade700,
+                  color: machine.isArchived
+                      ? Colors.grey.shade600
+                      : Colors.teal.shade700,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
@@ -381,7 +390,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: machine.isArchived ? Colors.grey.shade700 : Colors.teal.shade900,
+                                color: machine.isArchived
+                                    ? Colors.grey.shade700
+                                    : Colors.teal.shade900,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -389,11 +400,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           const SizedBox(width: 6),
                           if (machine.isArchived)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.orange.shade100,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.orange.shade300, width: 0.5),
+                                border: Border.all(
+                                  color: Colors.orange.shade300,
+                                  width: 0.5,
+                                ),
                               ),
                               child: Text(
                                 'DISABLED',
@@ -410,7 +427,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         'ID: ${machine.machineId}',
                         style: TextStyle(
                           fontSize: 10,
-                          color: machine.isArchived ? Colors.grey.shade600 : Colors.teal.shade600,
+                          color: machine.isArchived
+                              ? Colors.grey.shade600
+                              : Colors.teal.shade600,
                         ),
                       ),
                     ],
@@ -425,7 +444,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       color: Colors.teal.shade200, // background color
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     child: DateFilter(onChanged: _onDateChanged),
                   ),
                 ),

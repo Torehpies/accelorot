@@ -44,7 +44,9 @@ class OperatorListHeader extends StatelessWidget {
                     backgroundColor: ThemeConstants.tealShade50,
                     minimumSize: const Size(36, 36),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius8,
+                      ),
                     ),
                   ),
                 ),
@@ -80,16 +82,29 @@ class OperatorListHeader extends StatelessWidget {
                       size: ThemeConstants.iconSize18,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
-                      borderSide: BorderSide(color: ThemeConstants.greyShade300),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius10,
+                      ),
+                      borderSide: BorderSide(
+                        color: ThemeConstants.greyShade300,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
-                      borderSide: BorderSide(color: ThemeConstants.greyShade300),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius10,
+                      ),
+                      borderSide: BorderSide(
+                        color: ThemeConstants.greyShade300,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
-                      borderSide: BorderSide(color: ThemeConstants.tealShade600, width: 2),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius10,
+                      ),
+                      borderSide: BorderSide(
+                        color: ThemeConstants.tealShade600,
+                        width: 2,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: ThemeConstants.spacing12,
@@ -116,7 +131,9 @@ class OperatorListHeader extends StatelessWidget {
                   style: IconButton.styleFrom(
                     backgroundColor: ThemeConstants.greyShade100,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius8,
+                      ),
                     ),
                   ),
                 ),

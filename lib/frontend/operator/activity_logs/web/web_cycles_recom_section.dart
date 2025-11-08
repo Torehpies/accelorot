@@ -80,7 +80,10 @@ class _WebCyclesRecomSectionState extends State<WebCyclesRecomSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(32),
@@ -92,17 +95,26 @@ class _WebCyclesRecomSectionState extends State<WebCyclesRecomSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+        child: Text(
+          'Error: $_errorMessage',
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+        border: Border.all(
+          color: const Color.fromARGB(255, 243, 243, 243),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -153,18 +165,28 @@ class _WebCyclesRecomSectionState extends State<WebCyclesRecomSection> {
                   itemBuilder: (context, index) {
                     final cycle = _cycles[index];
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
                       title: Text(
                         cycle.title,
-                        style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color.fromARGB(255, 48, 47, 47),
+                        ),
                       ),
                       subtitle: Text(
                         '${_formatTime(cycle.timestamp)} • ${cycle.value}',
-                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
                       ),
                       trailing: Chip(
                         label: Text(cycle.category),
-                        backgroundColor: cycle.statusColorValue.withValues(alpha: 0.1),
+                        backgroundColor: cycle.statusColorValue.withValues(
+                          alpha: 0.1,
+                        ),
                         labelStyle: TextStyle(
                           color: cycle.statusColorValue,
                           fontWeight: FontWeight.bold,

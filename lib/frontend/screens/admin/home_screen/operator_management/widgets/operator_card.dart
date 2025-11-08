@@ -8,11 +8,7 @@ class OperatorCard extends StatelessWidget {
   final OperatorModel operator;
   final VoidCallback? onTap;
 
-  const OperatorCard({
-    super.key,
-    required this.operator,
-    this.onTap,
-  });
+  const OperatorCard({super.key, required this.operator, this.onTap});
 
   /// Build the card widget with grey border
   @override
@@ -26,10 +22,7 @@ class OperatorCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade400,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.shade400, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -74,11 +67,7 @@ class OperatorCard extends StatelessWidget {
         color: Colors.teal.shade50,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.person,
-        size: 40,
-        color: Colors.teal.shade600,
-      ),
+      child: Icon(Icons.person, size: 40, color: Colors.teal.shade600),
     );
   }
 

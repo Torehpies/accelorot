@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../operator/profile/profile_screen.dart'; 
+import '../../../operator/profile/profile_screen.dart';
 import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart';
 import '../operator_management/operator_management_screen.dart';
 import '../home_screen/admin_home_screen.dart';
@@ -31,7 +31,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   /// Navigate to a specific tab programmatically
   void _navigateToTab(int index) {
     if (index == _selectedIndex) return;
-    
+
     setState(() {
       _selectedIndex = index;
     });
@@ -41,7 +41,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   List<Widget> _buildScreens() {
     return [
       AdminHomeScreen(onNavigateToTab: _navigateToTab),
-      const OperatorManagementScreen(), 
+      const OperatorManagementScreen(),
       const AdminMachineScreen(),
       const ProfileScreen(),
     ];
@@ -81,7 +81,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   @override
   Widget build(BuildContext context) {
     final screens = _buildScreens();
-    
+
     return Scaffold(
       body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -92,7 +92,10 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: "Operator"), 
+          BottomNavigationBarItem(
+            icon: Icon(Icons.supervisor_account),
+            label: "Operator",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machine"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
