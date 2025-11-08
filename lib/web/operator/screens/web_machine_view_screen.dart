@@ -8,10 +8,7 @@ import 'web_statistics_screen.dart';
 class WebMachineViewScreen extends StatefulWidget {
   final MachineModel machine;
 
-  const WebMachineViewScreen({
-    super.key,
-    required this.machine,
-  });
+  const WebMachineViewScreen({super.key, required this.machine});
 
   @override
   State<WebMachineViewScreen> createState() => _WebMachineViewScreenState();
@@ -65,10 +62,7 @@ class _WebMachineViewScreenState extends State<WebMachineViewScreen> {
                         ),
                         title: const Text(
                           'Back to Machines',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -135,23 +129,32 @@ class _WebMachineViewScreenState extends State<WebMachineViewScreen> {
                             child: ListTile(
                               leading: Icon(
                                 item.icon,
-                                color: isSelected ? Colors.white : Colors.white70,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white70,
                                 size: 22,
                               ),
                               title: Text(
                                 item.label,
                                 style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.white70,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.white70,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                                   fontSize: 14,
                                 ),
                               ),
                               selected: isSelected,
-                              selectedTileColor: Colors.white.withValues(alpha: 0.15),
+                              selectedTileColor: Colors.white.withValues(
+                                alpha: 0.15,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              onTap: () => setState(() => _selectedIndex = index),
+                              onTap: () =>
+                                  setState(() => _selectedIndex = index),
                             ),
                           ),
                         );

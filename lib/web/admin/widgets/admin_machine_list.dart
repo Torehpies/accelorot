@@ -7,10 +7,7 @@ import '../widgets/admin_machine_card.dart';
 class AdminMachineList extends StatelessWidget {
   final AdminMachineController controller;
 
-  const AdminMachineList({
-    super.key,
-    required this.controller,
-  });
+  const AdminMachineList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +29,8 @@ class AdminMachineList extends StatelessWidget {
               controller.searchQuery.isNotEmpty
                   ? 'No machines found'
                   : controller.showArchived
-                      ? 'No archived machines'
-                      : 'No machines available. Add one to get started!',
+                  ? 'No archived machines'
+                  : 'No machines available. Add one to get started!',
               style: TextStyle(color: Colors.grey[600], fontSize: 16),
               textAlign: TextAlign.center,
             ),
@@ -75,10 +72,7 @@ class AdminMachineList extends StatelessWidget {
         }
 
         final machine = displayedMachines[index];
-        return AdminMachineCard(
-          machine: machine,
-          controller: controller,
-        );
+        return AdminMachineCard(machine: machine, controller: controller);
       },
     );
   }

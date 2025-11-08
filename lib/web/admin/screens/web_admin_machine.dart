@@ -14,8 +14,6 @@ class ThemeConstants {
 }
 
 class WebMachineManagement extends StatefulWidget {
-
-  
   const WebMachineManagement({super.key, this.viewingOperatorId});
   final String? viewingOperatorId;
 
@@ -53,9 +51,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
           child: AddMachineModal(controller: _controller),
@@ -130,7 +126,9 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(ThemeConstants.borderRadius20),
+                    borderRadius: BorderRadius.circular(
+                      ThemeConstants.borderRadius20,
+                    ),
                     border: Border.all(
                       color: ThemeConstants.greyShade300,
                       width: 1.0,
@@ -169,8 +167,9 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                                   Flexible(
                                     child: OperatorSearchBar(
                                       searchQuery: _controller.searchQuery,
-                                      onSearchChanged: _controller.setSearchQuery,
-                                       onRefresh: _controller.initialize,
+                                      onSearchChanged:
+                                          _controller.setSearchQuery,
+                                      onRefresh: _controller.initialize,
                                     ),
                                   ),
                                 ],
@@ -183,9 +182,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                       const Divider(height: 1),
 
                       // MACHINE LIST
-                      Expanded(
-                        child: _buildContent(),
-                      ),
+                      Expanded(child: _buildContent()),
                     ],
                   ),
                 ),
@@ -213,10 +210,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               const SizedBox(height: 16),
               Text(
                 _controller.errorMessage!,
-                style: TextStyle(
-                  color: Colors.red.shade700,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.red.shade700, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),

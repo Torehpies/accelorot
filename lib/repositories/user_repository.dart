@@ -38,6 +38,6 @@ class UserRepository {
       }
     }
 
-		return user;
+    return user;
   }
 }

@@ -42,7 +42,9 @@ class _EditReportModalState extends State<EditReportModal> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.report.title);
-    _descriptionController = TextEditingController(text: widget.report.description);
+    _descriptionController = TextEditingController(
+      text: widget.report.description,
+    );
     _selectedStatus = widget.report.status;
     _selectedPriority = widget.report.priority;
   }
@@ -54,11 +56,16 @@ class _EditReportModalState extends State<EditReportModal> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText, {bool readOnly = false}) {
+  InputDecoration _buildInputDecoration(
+    String labelText, {
+    bool readOnly = false,
+  }) {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.grey),
-      floatingLabelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.teal),
+      floatingLabelStyle: TextStyle(
+        color: readOnly ? Colors.grey[400] : Colors.teal,
+      ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
           color: readOnly ? Colors.grey[300]! : Colors.teal,
@@ -95,16 +102,16 @@ class _EditReportModalState extends State<EditReportModal> {
     final description = _descriptionController.text.trim();
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Title is required')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Title is required')));
       return;
     }
 
     if (description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Description is required')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Description is required')));
       return;
     }
 
@@ -113,9 +120,9 @@ class _EditReportModalState extends State<EditReportModal> {
         description == widget.report.description &&
         _selectedStatus == widget.report.status &&
         _selectedPriority == widget.report.priority) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No changes detected')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No changes detected')));
       return;
     }
 
@@ -133,7 +140,7 @@ class _EditReportModalState extends State<EditReportModal> {
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Close modal
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✅ Report "$title" updated successfully'),
@@ -142,11 +149,11 @@ class _EditReportModalState extends State<EditReportModal> {
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       final errorMessage = e.toString().contains('logged in')
           ? 'You must be logged in to edit reports'
           : 'Failed to update report: $e';
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -154,7 +161,7 @@ class _EditReportModalState extends State<EditReportModal> {
           duration: const Duration(seconds: 4),
         ),
       );
-      
+
       setState(() => _isSubmitting = false);
     }
   }
@@ -194,11 +201,13 @@ class _EditReportModalState extends State<EditReportModal> {
                   : 'You can preview the form, but must be logged in to save changes',
               style: TextStyle(
                 color: isAuthenticated ? Colors.grey : Colors.orange.shade700,
-                fontWeight: isAuthenticated ? FontWeight.normal : FontWeight.w500,
+                fontWeight: isAuthenticated
+                    ? FontWeight.normal
+                    : FontWeight.w500,
               ),
             ),
             const SizedBox(height: 20),
-            
+
             // Title (Editable)
             TextField(
               controller: _titleController,
@@ -208,7 +217,7 @@ class _EditReportModalState extends State<EditReportModal> {
               enabled: !_isSubmitting,
             ),
             const SizedBox(height: 16),
-            
+
             // Description (Editable)
             TextField(
               controller: _descriptionController,
@@ -219,7 +228,7 @@ class _EditReportModalState extends State<EditReportModal> {
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            
+
             // Status Dropdown (Editable)
             DropdownButtonFormField<String>(
               initialValue: _selectedStatus,
@@ -230,12 +239,14 @@ class _EditReportModalState extends State<EditReportModal> {
                   child: Text(option['label']!),
                 );
               }).toList(),
-              onChanged: _isSubmitting ? null : (value) {
-                setState(() => _selectedStatus = value!);
-              },
+              onChanged: _isSubmitting
+                  ? null
+                  : (value) {
+                      setState(() => _selectedStatus = value!);
+                    },
             ),
             const SizedBox(height: 16),
-            
+
             // Priority Dropdown (Editable)
             DropdownButtonFormField<String>(
               initialValue: _selectedPriority,
@@ -246,12 +257,14 @@ class _EditReportModalState extends State<EditReportModal> {
                   child: Text(option['label']!),
                 );
               }).toList(),
-              onChanged: _isSubmitting ? null : (value) {
-                setState(() => _selectedPriority = value!);
-              },
+              onChanged: _isSubmitting
+                  ? null
+                  : (value) {
+                      setState(() => _selectedPriority = value!);
+                    },
             ),
             const SizedBox(height: 16),
-            
+
             // Machine ID (Read-only)
             TextField(
               controller: TextEditingController(
@@ -263,7 +276,7 @@ class _EditReportModalState extends State<EditReportModal> {
               readOnly: true,
             ),
             const SizedBox(height: 16),
-            
+
             // User Name (Read-only)
             TextField(
               controller: TextEditingController(text: widget.report.userName),
@@ -273,11 +286,13 @@ class _EditReportModalState extends State<EditReportModal> {
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
-            
+
             // Created At (Read-only)
             TextField(
               controller: TextEditingController(
-                text: DateFormat('MM/dd/yyyy, hh:mm a').format(widget.report.createdAt),
+                text: DateFormat(
+                  'MM/dd/yyyy, hh:mm a',
+                ).format(widget.report.createdAt),
               ),
               decoration: _buildInputDecoration('Created At', readOnly: true),
               enabled: false,
@@ -285,7 +300,7 @@ class _EditReportModalState extends State<EditReportModal> {
               style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 24),
-            
+
             // Buttons
             Row(
               children: [
@@ -310,7 +325,9 @@ class _EditReportModalState extends State<EditReportModal> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _handleSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isAuthenticated ? Colors.teal : Colors.orange,
+                      backgroundColor: isAuthenticated
+                          ? Colors.teal
+                          : Colors.orange,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -323,8 +340,9 @@ class _EditReportModalState extends State<EditReportModal> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : Row(
@@ -335,7 +353,11 @@ class _EditReportModalState extends State<EditReportModal> {
                                   padding: EdgeInsets.only(right: 6),
                                   child: Icon(Icons.lock_outline, size: 16),
                                 ),
-                              Text(isAuthenticated ? 'Update Report' : 'Login Required'),
+                              Text(
+                                isAuthenticated
+                                    ? 'Update Report'
+                                    : 'Login Required',
+                              ),
                             ],
                           ),
                   ),

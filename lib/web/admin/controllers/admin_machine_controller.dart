@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import '../models/admin_machine_model.dart' as AdminModel;
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 // ignore: library_prefixes
-import '../../../frontend/operator/machine_management/models/machine_model.dart' as OperatorModel;
+import '../../../frontend/operator/machine_management/models/machine_model.dart'
+    // ignore: library_prefixes
+    as OperatorModel;
 
 class AdminMachineController extends ChangeNotifier {
   // ==================== STATE ====================
-  
+
   List<AdminModel.MachineModel> _allMachines = [];
   bool _showArchived = false;
   bool _isLoading = false;
@@ -22,9 +24,11 @@ class AdminMachineController extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
 
   // ==================== CONVERTERS ====================
-  
+
   /// Convert Operator MachineModel to Admin MachineModel
-  AdminModel.MachineModel _convertToAdminModel(OperatorModel.MachineModel operatorModel) {
+  AdminModel.MachineModel _convertToAdminModel(
+    OperatorModel.MachineModel operatorModel,
+  ) {
     return AdminModel.MachineModel(
       machineName: operatorModel.machineName,
       machineId: operatorModel.machineId,
@@ -36,12 +40,16 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   /// Convert list of Operator MachineModels to Admin MachineModels
-  List<AdminModel.MachineModel> _convertList(List<OperatorModel.MachineModel> operatorList) {
+  List<AdminModel.MachineModel> _convertList(
+    List<OperatorModel.MachineModel> operatorList,
+  ) {
     return operatorList.map(_convertToAdminModel).toList();
   }
 
   /// Convert Admin MachineModel to Operator MachineModel
-  OperatorModel.MachineModel _convertToOperatorModel(AdminModel.MachineModel adminModel) {
+  OperatorModel.MachineModel _convertToOperatorModel(
+    AdminModel.MachineModel adminModel,
+  ) {
     return OperatorModel.MachineModel(
       machineName: adminModel.machineName,
       machineId: adminModel.machineId,
@@ -53,7 +61,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== GETTERS ====================
-  
+
   List<AdminModel.MachineModel> get machines => _allMachines;
   bool get showArchived => _showArchived;
   bool get isLoading => _isLoading;
@@ -94,7 +102,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== INITIALIZATION ====================
-  
+
   Future<void> initialize() async {
     _isLoading = true;
     _errorMessage = null;
@@ -124,10 +132,11 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== FETCH OPERATIONS ====================
-  
+
   Future<void> _fetchMachinesByTeamId(String teamId) async {
     try {
-      final operatorMachines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+      final operatorMachines =
+          await FirestoreMachineService.getMachinesByTeamId(teamId);
       _allMachines = _convertList(operatorMachines);
       notifyListeners();
     } catch (e) {
@@ -151,7 +160,7 @@ class AdminMachineController extends ChangeNotifier {
   Future<void> refresh() async {
     final currentUserId = FirestoreMachineService.getCurrentUserId();
     _isAuthenticated = currentUserId != null;
-    
+
     if (_isAuthenticated) {
       await _fetchMachinesByTeamId(currentUserId!);
     } else {
@@ -160,7 +169,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== UI STATE MANAGEMENT ====================
-  
+
   void setShowArchived(bool value) {
     _showArchived = value;
     _searchQuery = '';
@@ -183,7 +192,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== PAGINATION ====================
-  
+
   void loadMore() {
     _displayLimit += _pageSize;
     notifyListeners();
@@ -194,7 +203,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== CRUD OPERATIONS ====================
-  
+
   /// Add new machine (auto-sets teamId to admin's UID)
   Future<void> addMachine({
     required String machineName,
@@ -225,7 +234,7 @@ class AdminMachineController extends ChangeNotifier {
       // Convert to operator model for service
       final operatorMachine = _convertToOperatorModel(adminMachine);
       await FirestoreMachineService.addMachine(operatorMachine);
-      
+
       // Delay before refresh
       await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
@@ -260,7 +269,7 @@ class AdminMachineController extends ChangeNotifier {
       // Convert to operator model for service
       final operatorMachine = _convertToOperatorModel(updatedAdminMachine);
       await FirestoreMachineService.updateMachine(operatorMachine);
-      
+
       // Delay before refresh
       await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
@@ -280,7 +289,7 @@ class AdminMachineController extends ChangeNotifier {
 
       // Delay before executing archive
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       await FirestoreMachineService.deleteMachine(machineId);
     } catch (e) {
       _errorMessage = 'Failed to archive machine: $e';
@@ -298,7 +307,7 @@ class AdminMachineController extends ChangeNotifier {
 
       // Delay before executing restore
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       await FirestoreMachineService.restoreMachine(machineId);
     } catch (e) {
       _errorMessage = 'Failed to restore machine: $e';
@@ -308,7 +317,7 @@ class AdminMachineController extends ChangeNotifier {
   }
 
   // ==================== HELPER METHODS ====================
-  
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();

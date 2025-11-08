@@ -36,10 +36,7 @@ class SearchBarWidget extends StatelessWidget {
           onPressed: onClear,
         ),
         hintText: 'Search here...',
-        hintStyle: const TextStyle(
-          fontSize: 13,
-          color: Colors.grey,
-        ),
+        hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
         isDense: true, // 🟢 compact height
         contentPadding: const EdgeInsets.symmetric(
           vertical: 10,

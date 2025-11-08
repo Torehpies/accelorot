@@ -37,8 +37,10 @@ class OperatorManagementController extends ChangeNotifier {
     }).toList();
   }
 
-  int get archivedCount => _operators.where((o) => o.isArchived || o.hasLeft).length;
-  int get activeCount => _operators.where((o) => !o.isArchived && !o.hasLeft).length;
+  int get archivedCount =>
+      _operators.where((o) => o.isArchived || o.hasLeft).length;
+  int get activeCount =>
+      _operators.where((o) => !o.isArchived && !o.hasLeft).length;
 
   // Setters
   void setShowArchived(bool value) {

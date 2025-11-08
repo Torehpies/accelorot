@@ -147,10 +147,7 @@ class MockAdminData {
 
   // Get operators for display (first 4 active ones for preview)
   static List<OperatorModel> getOperatorsPreview() {
-    return getMockOperators()
-        .where((op) => !op.isArchived)
-        .take(4)
-        .toList();
+    return getMockOperators().where((op) => !op.isArchived).take(4).toList();
   }
 
   // Get machines for display (first 4 active ones for preview)

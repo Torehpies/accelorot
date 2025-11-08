@@ -38,8 +38,7 @@ class LoginNotifier extends _$LoginNotifier {
     return const LoginState();
   }
 
-  void handleForgotPassword() {
-  }
+  void handleForgotPassword() {}
 
   Future<LoginFlowResult> loginUser({
     required String email,
@@ -86,10 +85,10 @@ class LoginNotifier extends _$LoginNotifier {
   }
 
   Future<LoginFlowResult> signInWithGoogleAndCheckStatus() async {
-		state = state.copyWith(isLoading: true, errorMessage: null);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
-		final authService = ref.read(authServiceProvider);
-		final userRepository = ref.read(userRepositoryProvider);
+    final authService = ref.read(authServiceProvider);
+    final userRepository = ref.read(userRepositoryProvider);
 
     try {
       final googleResult = await authService.signInWithGoogle();
@@ -106,15 +105,15 @@ class LoginNotifier extends _$LoginNotifier {
           return LoginFlowError(message);
       }
     } catch (e) {
-			state = state.copyWith(errorMessage: 'Unexpected Google sign-in');
+      state = state.copyWith(errorMessage: 'Unexpected Google sign-in');
       return LoginFlowError('Unexpected Google sign-in');
     } finally {
-			state = state.copyWith(isLoading: false);
-		}
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   void togglePasswordVisibility() {
-		state = state.copyWith(obscurePassword: !state.obscurePassword);
+    state = state.copyWith(obscurePassword: !state.obscurePassword);
   }
 
   String? validateEmail(String? value) {
@@ -147,6 +146,8 @@ class LoginNotifier extends _$LoginNotifier {
       return LoginFlowPendingApproval();
     }
 
-    return LoginFlowError('Unable to determine user status. Please contact support.');
+    return LoginFlowError(
+      'Unable to determine user status. Please contact support.',
+    );
   }
 }

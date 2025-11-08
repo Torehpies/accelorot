@@ -19,9 +19,7 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -49,11 +47,7 @@ class StatCard extends StatelessWidget {
                   if (icon != null)
                     Padding(
                       padding: const EdgeInsets.only(left: 4, top: 4),
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: Colors.black87,
-                      ),
+                      child: Icon(icon, size: 20, color: Colors.black87),
                     ),
                 ],
               ),

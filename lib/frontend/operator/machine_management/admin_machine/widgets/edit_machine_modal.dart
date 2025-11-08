@@ -37,11 +37,16 @@ class _EditMachineModalState extends State<EditMachineModal> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText, {bool readOnly = false}) {
+  InputDecoration _buildInputDecoration(
+    String labelText, {
+    bool readOnly = false,
+  }) {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.grey),
-      floatingLabelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.teal),
+      floatingLabelStyle: TextStyle(
+        color: readOnly ? Colors.grey[400] : Colors.teal,
+      ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
           color: readOnly ? Colors.grey[300]! : Colors.teal,
@@ -77,17 +82,17 @@ class _EditMachineModalState extends State<EditMachineModal> {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Machine Name is required')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Machine Name is required')));
       return;
     }
 
     // Check if anything changed
     if (name == widget.machine.machineName) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No changes detected')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No changes detected')));
       return;
     }
 
@@ -101,23 +106,23 @@ class _EditMachineModalState extends State<EditMachineModal> {
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Close modal
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('✅ Machine "$name" updated successfully'),
           backgroundColor: Colors.green,
         ),
       );
-      
+
       // Delay handled in controller's updateMachine method
     } catch (e) {
       if (!mounted) return;
-      
+
       // Show user-friendly error message
       final errorMessage = e.toString().contains('logged in')
           ? 'You must be logged in to edit machines'
           : 'Failed to update machine: $e';
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -125,7 +130,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
           duration: const Duration(seconds: 4),
         ),
       );
-      
+
       // Stay in modal on error
       setState(() => _isSubmitting = false);
     }
@@ -169,7 +174,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
             ),
           ),
           const SizedBox(height: 20),
-          
+
           // Machine Name (Editable)
           TextField(
             controller: _nameController,
@@ -179,17 +184,20 @@ class _EditMachineModalState extends State<EditMachineModal> {
             enabled: !_isSubmitting,
           ),
           const SizedBox(height: 16),
-          
+
           // Machine ID (Read-only, grayed out)
           TextField(
             controller: _idController,
             style: TextStyle(color: Colors.grey[600]),
-            decoration: _buildInputDecoration('Machine ID (Cannot be changed)', readOnly: true),
+            decoration: _buildInputDecoration(
+              'Machine ID (Cannot be changed)',
+              readOnly: true,
+            ),
             enabled: false,
             readOnly: true,
           ),
           const SizedBox(height: 16),
-          
+
           // Assigned Users - Read-only field showing "All Team Members"
           TextField(
             controller: TextEditingController(text: 'All Team Members'),
@@ -199,7 +207,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
             style: TextStyle(color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-          
+
           // Buttons
           Row(
             children: [
@@ -224,7 +232,9 @@ class _EditMachineModalState extends State<EditMachineModal> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isAuthenticated ? Colors.teal : Colors.orange,
+                    backgroundColor: isAuthenticated
+                        ? Colors.teal
+                        : Colors.orange,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -237,8 +247,9 @@ class _EditMachineModalState extends State<EditMachineModal> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Row(
@@ -249,7 +260,11 @@ class _EditMachineModalState extends State<EditMachineModal> {
                                 padding: EdgeInsets.only(right: 6),
                                 child: Icon(Icons.lock_outline, size: 16),
                               ),
-                            Text(isAuthenticated ? 'Update Machine' : 'Login Required'),
+                            Text(
+                              isAuthenticated
+                                  ? 'Update Machine'
+                                  : 'Login Required',
+                            ),
                           ],
                         ),
                 ),

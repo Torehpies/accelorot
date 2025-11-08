@@ -44,7 +44,9 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
 
       // Filter by machine if focusedMachineId is provided
       final filteredSubstrates = widget.focusedMachineId != null
-          ? substrates.where((s) => s.machineId == widget.focusedMachineId).toList()
+          ? substrates
+                .where((s) => s.machineId == widget.focusedMachineId)
+                .toList()
           : substrates;
 
       setState(() {
@@ -80,7 +82,10 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(32),
@@ -92,17 +97,26 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+        child: Text(
+          'Error: $_errorMessage',
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+        border: Border.all(
+          color: const Color.fromARGB(255, 243, 243, 243),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -137,7 +151,7 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          
+
           if (_substrates.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
@@ -168,7 +182,10 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
                   ),
                   title: Text(
                     item.title,
-                    style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromARGB(255, 48, 47, 47),
+                    ),
                   ),
                   subtitle: Text(
                     '${item.value} • ${item.machineName ?? 'Unknown'} • ${item.operatorName ?? 'Unknown Operator'}',
@@ -188,19 +205,27 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
 
   Color _getTypeColor(String type) {
     switch (type) {
-      case 'Greens': return Colors.green;
-      case 'Browns': return Colors.brown;
-      case 'Compost': return Colors.teal;
-      default: return Colors.grey;
+      case 'Greens':
+        return Colors.green;
+      case 'Browns':
+        return Colors.brown;
+      case 'Compost':
+        return Colors.teal;
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getTypeIcon(String type) {
     switch (type) {
-      case 'Greens': return Icons.local_dining;
-      case 'Browns': return Icons.park;
-      case 'Compost': return Icons.recycling;
-      default: return Icons.eco;
+      case 'Greens':
+        return Icons.local_dining;
+      case 'Browns':
+        return Icons.park;
+      case 'Compost':
+        return Icons.recycling;
+      default:
+        return Icons.eco;
     }
   }
 }

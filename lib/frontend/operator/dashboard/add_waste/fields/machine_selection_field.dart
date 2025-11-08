@@ -13,7 +13,7 @@ class MachineSelectionField extends StatelessWidget {
     super.key,
     required this.selectedMachineId,
     this.onChanged,
-    this.isLocked = false, 
+    this.isLocked = false,
     this.errorText,
   });
 
@@ -21,7 +21,7 @@ class MachineSelectionField extends StatelessWidget {
   Future<List<MachineModel>> _fetchTeamMachines() async {
     final sessionService = SessionService();
     final userData = await sessionService.getCurrentUserData();
-    
+
     if (userData == null) {
       throw Exception('User not authenticated');
     }
@@ -59,10 +59,7 @@ class MachineSelectionField extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Error: ${snapshot.error}',
-                    style: TextStyle(
-                      color: Colors.red.shade700,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.red.shade700, fontSize: 12),
                   ),
                 ),
               ],
@@ -81,7 +78,11 @@ class MachineSelectionField extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.orange.shade700, size: 20),
+                Icon(
+                  Icons.info_outline,
+                  color: Colors.orange.shade700,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
@@ -103,9 +104,7 @@ class MachineSelectionField extends StatelessWidget {
           decoration: InputDecoration(
             labelText: 'Select Machine',
             prefixIcon: const Icon(Icons.precision_manufacturing, size: 18),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 8,
@@ -118,7 +117,7 @@ class MachineSelectionField extends StatelessWidget {
           items: machines.map((machine) {
             return DropdownMenuItem<String>(
               value: machine.machineId,
-              enabled: !isLocked, 
+              enabled: !isLocked,
               child: Text(
                 machine.machineName,
                 style: TextStyle(

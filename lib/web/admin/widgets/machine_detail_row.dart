@@ -5,11 +5,7 @@ class MachineDetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const MachineDetailRow({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const MachineDetailRow({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

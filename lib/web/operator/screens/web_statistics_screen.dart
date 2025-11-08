@@ -12,10 +12,7 @@ import '../../../services/sess_service.dart';
 class WebStatisticsScreen extends StatefulWidget {
   final String? focusedMachineId;
 
-  const WebStatisticsScreen({
-    super.key,
-    this.focusedMachineId,
-  });
+  const WebStatisticsScreen({super.key, this.focusedMachineId});
 
   @override
   State<WebStatisticsScreen> createState() => _WebStatisticsScreenState();
@@ -41,8 +38,6 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
     });
 
     try {
-
-
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       // ⭐ Load machines by user's teamId
       if (currentUserId != null) {
@@ -50,7 +45,7 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
         final sessionService = SessionService();
         final userData = await sessionService.getCurrentUserData();
         final teamId = userData?['teamId'] as String?;
-        
+
         if (teamId != null && teamId.isNotEmpty) {
           _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
         } else {
@@ -146,44 +141,51 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _loadMachines,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade300,
                     ),
-                  )
-                : SingleChildScrollView(
-                    padding: EdgeInsets.all(isWideScreen ? 24 : 12),
-                    child: Center(
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 1400),
-                        child: _selectedRange == null
-                            ? _buildAllMachinesLayout()
-                            : HistoryPage(
-                                filter: _selectedFilterLabel,
-                                range: _selectedRange!,
-                              ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: _loadMachines,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
                       ),
                     ),
+                  ],
+                ),
+              )
+            : SingleChildScrollView(
+                padding: EdgeInsets.all(isWideScreen ? 24 : 12),
+                child: Center(
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: _selectedRange == null
+                        ? _buildAllMachinesLayout()
+                        : HistoryPage(
+                            filter: _selectedFilterLabel,
+                            range: _selectedRange!,
+                          ),
                   ),
+                ),
+              ),
       ),
     );
   }
@@ -213,10 +215,7 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
               const SizedBox(height: 8),
               Text(
                 'You don\'t have any machines assigned yet.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -240,7 +239,11 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
           ),
           child: Row(
             children: [
-              Icon(Icons.analytics_outlined, color: Colors.teal.shade700, size: 28),
+              Icon(
+                Icons.analytics_outlined,
+                color: Colors.teal.shade700,
+                size: 28,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -290,7 +293,9 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
               topRight: Radius.circular(12),
             ),
             border: Border.all(
-              color: machine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
+              color: machine.isArchived
+                  ? Colors.grey.shade300
+                  : Colors.teal.shade200,
               width: 2,
             ),
           ),
@@ -313,13 +318,18 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: machine.isArchived ? Colors.grey.shade700 : Colors.teal.shade900,
+                            color: machine.isArchived
+                                ? Colors.grey.shade700
+                                : Colors.teal.shade900,
                           ),
                         ),
                         const SizedBox(width: 8),
                         if (machine.isArchived)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(10),
@@ -328,7 +338,11 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.cancel, size: 12, color: Colors.orange.shade700),
+                                Icon(
+                                  Icons.cancel,
+                                  size: 12,
+                                  color: Colors.orange.shade700,
+                                ),
                                 const SizedBox(width: 3),
                                 Text(
                                   'DISABLED',
@@ -347,7 +361,9 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
                       'Machine ID: ${machine.machineId}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: machine.isArchived ? Colors.grey.shade600 : Colors.teal.shade600,
+                        color: machine.isArchived
+                            ? Colors.grey.shade600
+                            : Colors.teal.shade600,
                       ),
                     ),
                   ],
@@ -368,15 +384,21 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
             ),
             border: Border(
               left: BorderSide(
-                color: machine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
+                color: machine.isArchived
+                    ? Colors.grey.shade300
+                    : Colors.teal.shade200,
                 width: 2,
               ),
               right: BorderSide(
-                color: machine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
+                color: machine.isArchived
+                    ? Colors.grey.shade300
+                    : Colors.teal.shade200,
                 width: 2,
               ),
               bottom: BorderSide(
-                color: machine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
+                color: machine.isArchived
+                    ? Colors.grey.shade300
+                    : Colors.teal.shade200,
                 width: 2,
               ),
             ),
@@ -384,7 +406,7 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth > 900;
-              
+
               if (isWide) {
                 // Horizontal layout for wide screens
                 return Row(

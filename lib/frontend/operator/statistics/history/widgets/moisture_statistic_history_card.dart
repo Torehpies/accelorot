@@ -40,10 +40,10 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
     final List<ChartPoint> lowerBound = [];
 
     for (int i = 0; i < dataLength; i++) {
-      final label = (labels != null && i < labels!.length) 
-          ? _formatLabel(labels![i]) 
+      final label = (labels != null && i < labels!.length)
+          ? _formatLabel(labels![i])
           : 'Day ${i + 1}';
-      
+
       moistureData.add(ChartPoint(label, dailyReadings[i]));
       upperBound.add(ChartPoint(label, 60.0));
       lowerBound.add(ChartPoint(label, 40.0));
@@ -102,10 +102,10 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
               builder: (context, constraints) {
                 // Use the larger of: calculated width or available width
                 final calculatedWidth = dataLength * 50.0;
-                final chartWidth = calculatedWidth > constraints.maxWidth 
-                    ? calculatedWidth 
+                final chartWidth = calculatedWidth > constraints.maxWidth
+                    ? calculatedWidth
                     : constraints.maxWidth;
-                
+
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: SizedBox(
@@ -113,16 +113,20 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
                     child: SfCartesianChart(
                       primaryXAxis: CategoryAxis(
                         labelStyle: const TextStyle(fontSize: 9),
-                        majorGridLines:
-                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        majorGridLines: const MajorGridLines(
+                          width: 0.5,
+                          color: Colors.grey,
+                        ),
                         interval: 1,
                       ),
                       primaryYAxis: NumericAxis(
                         minimum: 0,
                         maximum: 100,
                         interval: 20,
-                        majorGridLines:
-                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        majorGridLines: const MajorGridLines(
+                          width: 0.5,
+                          color: Colors.grey,
+                        ),
                         labelStyle: const TextStyle(fontSize: 9),
                       ),
                       plotAreaBorderWidth: 0,
@@ -170,17 +174,16 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
       children: [
         Text(
           'Moisture',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           '${currentMoisture.toStringAsFixed(0)}%',
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold, color: color),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ],
     );
@@ -224,8 +227,10 @@ class MoistureStatisticHistoryCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(18),
       child: Center(
-        child:
-            Text('No moisture data', style: TextStyle(color: Colors.grey[600])),
+        child: Text(
+          'No moisture data',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
       ),
     );
   }

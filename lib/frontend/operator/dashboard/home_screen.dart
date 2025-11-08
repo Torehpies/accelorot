@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Refresh the activity logs to show the new report
         await _activityLogsKey.currentState?.refresh();
       }
@@ -144,7 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
               // ✅ Environmental Sensors section is PERMANENTLY REMOVED
-
               CompostingProgressCard(
                 currentBatch: _currentBatch,
                 onBatchStarted: _handleBatchStarted,

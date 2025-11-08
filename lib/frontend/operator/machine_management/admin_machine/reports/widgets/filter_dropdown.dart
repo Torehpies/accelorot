@@ -81,9 +81,9 @@ class ReportsSearchBar extends StatelessWidget {
             ),
           ),
         ),
-        
+
         const SizedBox(width: 12),
-        
+
         // Sort Dropdown
         Container(
           decoration: BoxDecoration(

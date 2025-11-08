@@ -8,8 +8,6 @@ import '../../operator/widgets/machine_list_tile_widget.dart';
 import '../widgets/web_view_confirmation_dialog.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
-
-
   const WebOperatorMachineScreen({super.key, required focusedMachine});
 
   @override
@@ -25,8 +23,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   @override
   void initState() {
     super.initState();
-    controller =
-        OperatorMachineController();
+    controller = OperatorMachineController();
     controller.initialize();
   }
 
@@ -144,8 +141,9 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.teal.shade50,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
                                             border: Border.all(
                                               color: Colors.teal.shade200,
                                             ),
@@ -163,16 +161,15 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     SearchBarWidget(
-                                      onSearchChanged: controller.setSearchQuery,
+                                      onSearchChanged:
+                                          controller.setSearchQuery,
                                       onClear: controller.clearSearch,
                                       focusNode: searchFocusNode,
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                child: _buildContent(),
-                              ),
+                              Expanded(child: _buildContent()),
                             ],
                           ),
                         ),
@@ -213,9 +210,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               Expanded(
                 child: SummaryCardWidget(
                   title: 'Total Machines',
-                  value: (controller.activeMachinesCount +
-                          controller.archivedMachinesCount)
-                      .toString(),
+                  value:
+                      (controller.activeMachinesCount +
+                              controller.archivedMachinesCount)
+                          .toString(),
                   icon: Icons.devices,
                   color: Colors.blue,
                 ),
@@ -245,9 +243,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   Expanded(
                     child: SummaryCardWidget(
                       title: 'Total',
-                      value: (controller.activeMachinesCount +
-                              controller.archivedMachinesCount)
-                          .toString(),
+                      value:
+                          (controller.activeMachinesCount +
+                                  controller.archivedMachinesCount)
+                              .toString(),
                       icon: Icons.devices,
                       color: Colors.blue,
                     ),
@@ -335,10 +334,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                 controller.searchQuery.isEmpty
                     ? 'You don\'t have any machines yet.'
                     : 'No machines match your search.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -355,8 +351,8 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     final crossAxisCount = screenWidth > 1200
         ? 3
         : screenWidth > 800
-            ? 2
-            : 1;
+        ? 2
+        : 1;
 
     return GridView.builder(
       padding: const EdgeInsets.all(24),

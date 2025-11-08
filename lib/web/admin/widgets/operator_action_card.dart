@@ -33,7 +33,9 @@ class OperatorActionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius16),
         side: BorderSide(
-          color: isActive ? ThemeConstants.tealShade600 : ThemeConstants.greyShade200,
+          color: isActive
+              ? ThemeConstants.tealShade600
+              : ThemeConstants.greyShade200,
           width: isActive ? 2 : 1,
         ),
       ),
@@ -52,7 +54,9 @@ class OperatorActionCard extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: iconBackgroundColor ?? ThemeConstants.tealShade50,
-                  borderRadius: BorderRadius.circular(ThemeConstants.borderRadius12),
+                  borderRadius: BorderRadius.circular(
+                    ThemeConstants.borderRadius12,
+                  ),
                 ),
                 child: Icon(
                   icon,

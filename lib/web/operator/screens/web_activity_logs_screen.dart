@@ -7,7 +7,6 @@ import '../../../frontend/operator/activity_logs/web/web_cycles_recom_section.da
 
 // ===== Web Detail Panel Component (Embedded) =====
 class WebDetailPanel extends StatelessWidget {
-  
   final Widget child;
   final String title;
   final VoidCallback onClose;
@@ -40,7 +39,10 @@ class WebDetailPanel extends StatelessWidget {
           ? Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   decoration: const BoxDecoration(
                     border: Border(bottom: BorderSide(color: Colors.grey)),
                   ),
@@ -79,9 +81,8 @@ class WebActivityLogsScreen extends StatefulWidget {
   final bool shouldRefresh;
   final String? focusedMachineId;
 
-  
   const WebActivityLogsScreen({
-    super.key, 
+    super.key,
     this.shouldRefresh = false,
     this.focusedMachineId,
   });
@@ -96,7 +97,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   Widget? detailContent;
   String detailTitle = '';
 
-  void openDetailPanel(String title, Widget content) { // ✅ No leading underscore
+  void openDetailPanel(String title, Widget content) {
+    // ✅ No leading underscore
     setState(() {
       detailTitle = title;
       detailContent = content;
@@ -104,7 +106,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     });
   }
 
-  void closeDetailPanel() { // ✅ No leading underscore
+  void closeDetailPanel() {
+    // ✅ No leading underscore
     setState(() {
       isDetailPanelOpen = false;
       detailContent = null;
@@ -119,24 +122,24 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-   appBar: AppBar(
-  title: const Text(
-    'Activity Logs',
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  ),
-  automaticallyImplyLeading: false,
-  centerTitle: false,
-  flexibleSpace: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.teal.shade700, Colors.teal.shade900],
+      appBar: AppBar(
+        title: const Text(
+          'Activity Logs',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [], // <-- Now empty; notification icon removed
       ),
-    ),
-  ),
-  foregroundColor: Colors.white,
-  elevation: 0,
-  actions: [], // <-- Now empty; notification icon removed
-),
       body: SafeArea(
         child: Row(
           children: [
@@ -236,7 +239,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                     label,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey[700],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -263,8 +268,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         return isWideScreen
             ? buildWideLayout()
             : isMediumScreen
-                ? buildMediumLayout()
-                : buildNarrowLayout();
+            ? buildMediumLayout()
+            : buildNarrowLayout();
     }
   }
 
@@ -277,9 +282,17 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(focusedMachineId: widget.focusedMachineId)),
+            Expanded(
+              child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
             const SizedBox(width: 24),
-            Expanded(child: WebAlertsSection(focusedMachineId: widget.focusedMachineId)),
+            Expanded(
+              child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -297,9 +310,17 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(focusedMachineId: widget.focusedMachineId)),
+            Expanded(
+              child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
             const SizedBox(width: 20),
-            Expanded(child: WebAlertsSection(focusedMachineId: widget.focusedMachineId)),
+            Expanded(
+              child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -346,7 +367,11 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   Widget buildCyclesView() {
     return Column(
       children: [
-        buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
+        buildSectionHeader(
+          'Composting Cycles & Recommendations',
+          Icons.refresh,
+          Colors.blue,
+        ),
         const SizedBox(height: 16),
         WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
@@ -373,18 +398,14 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               color: color.shade700,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,  
+                fontWeight: FontWeight.bold,
                 fontSize: 13,
                 color: color.shade900,
               ),

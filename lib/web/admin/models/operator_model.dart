@@ -27,7 +27,11 @@ class OperatorModel {
     this.addedAt,
   });
 
-  factory OperatorModel.fromFirestore(String userId, Map<String, dynamic> memberData, Map<String, dynamic>? userData) {
+  factory OperatorModel.fromFirestore(
+    String userId,
+    Map<String, dynamic> memberData,
+    Map<String, dynamic>? userData,
+  ) {
     final firstName = userData?['firstname'] ?? '';
     final lastName = userData?['lastname'] ?? '';
     final name = '$firstName $lastName'.trim();

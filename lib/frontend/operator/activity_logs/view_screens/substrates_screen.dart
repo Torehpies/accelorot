@@ -6,11 +6,9 @@ import '../../../../services/firestore_activity_service.dart';
 
 class SubstratesScreen extends BaseActivityScreen {
   const SubstratesScreen({
-    super.key, 
+    super.key,
     super.initialFilter,
-    super.focusedMachineId
-    
-
+    super.focusedMachineId,
   });
 
   @override
@@ -21,7 +19,7 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
   String get screenTitle => widget.focusedMachineId != null
       ? 'Machine Substrate Logs'
-      : 'Substrate Logs'; 
+      : 'Substrate Logs';
 
   @override
   List<String> get filters => const ['All', 'Greens', 'Browns', 'Compost'];
@@ -43,18 +41,18 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Greens', 'Browns', 'Compost'};
-    
+
     Set<String> result = {};
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-    
+
     if (specificCategories.every((cat) => categories.contains(cat))) {
       result.add('All');
     }
-    
+
     return result;
   }
 }

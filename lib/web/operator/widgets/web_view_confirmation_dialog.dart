@@ -6,17 +6,12 @@ import '../screens/web_machine_view_screen.dart';
 class WebViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
 
-  const WebViewConfirmationDialog({
-    super.key,
-    required this.machine,
-  });
+  const WebViewConfirmationDialog({super.key, required this.machine});
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         padding: const EdgeInsets.all(32),
@@ -82,10 +77,7 @@ class WebViewConfirmationDialog extends StatelessWidget {
                       const SizedBox(width: 12),
                       Text(
                         'ID: ${machine.machineId}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                       ),
                     ],
                   ),
@@ -137,9 +129,8 @@ class WebViewConfirmationDialog extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => WebMachineViewScreen(
-                            machine: machine,
-                          ),
+                          builder: (context) =>
+                              WebMachineViewScreen(machine: machine),
                         ),
                       );
                     },

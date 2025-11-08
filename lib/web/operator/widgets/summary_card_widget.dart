@@ -18,7 +18,7 @@ class SummaryCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-        color: Colors.white,
+      color: Colors.white,
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
@@ -32,7 +32,7 @@ class SummaryCardWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 // ignore: deprecated_member_use
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),  
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 22),
             ),
@@ -46,7 +46,10 @@ class SummaryCardWidget extends StatelessWidget {
                 ),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),

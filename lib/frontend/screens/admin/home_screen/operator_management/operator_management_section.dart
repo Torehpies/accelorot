@@ -29,9 +29,7 @@ class OperatorManagementSection extends StatelessWidget {
     return Card(
       color: Colors.white,
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -51,11 +49,7 @@ class OperatorManagementSection extends StatelessWidget {
     return Row(
       children: [
         // Small teal person icon (same size as text)
-        Icon(
-          Icons.person,
-          color: Colors.teal.shade600,
-          size: 20,
-        ),
+        Icon(Icons.person, color: Colors.teal.shade600, size: 20),
         const SizedBox(width: 8),
         // Section title
         const Text(
@@ -95,10 +89,7 @@ class OperatorManagementSection extends StatelessWidget {
         child: const Center(
           child: Text(
             'No operators available',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
       );

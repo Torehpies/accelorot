@@ -16,9 +16,7 @@ class ArchiveConfirmationDialog extends StatelessWidget {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text('Archive Operator'),
-      content: Text(
-        'Are you sure you want to archive $operatorName?',
-      ),
+      content: Text('Are you sure you want to archive $operatorName?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),

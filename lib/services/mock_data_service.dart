@@ -15,7 +15,7 @@ class MockDataService {
   static List<ActivityItem> getSubstrates() => List.from(substrates);
   static List<ActivityItem> getAlerts() => List.from(alerts);
   static List<ActivityItem> getCyclesRecom() => List.from(cyclesRecom);
-  
+
   // Get all activities combined and sorted by timestamp
   static List<ActivityItem> getAllActivities() {
     final combined = [...substrates, ...alerts, ...cyclesRecom];

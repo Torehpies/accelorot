@@ -45,10 +45,7 @@ class SearchBarWidget extends StatelessWidget {
             onChanged: onSearchChanged,
             decoration: InputDecoration(
               hintText: 'Search....',
-              hintStyle: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 16,
-              ),
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
               prefixIcon: Icon(
                 Icons.search,
                 color: Colors.grey.shade600,
@@ -56,10 +53,7 @@ class SearchBarWidget extends StatelessWidget {
               ),
               suffixIcon: controller.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(
-                        Icons.clear,
-                        color: Colors.grey.shade600,
-                      ),
+                      icon: Icon(Icons.clear, color: Colors.grey.shade600),
                       onPressed: _clearSearch,
                     )
                   : null,

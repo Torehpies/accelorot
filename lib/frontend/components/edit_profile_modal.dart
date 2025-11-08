@@ -24,12 +24,9 @@ class EditProfileModal extends StatelessWidget {
     final firstNameController = TextEditingController(text: firstName);
     final lastNameController = TextEditingController(text: lastName);
     final usernameController = TextEditingController(text: username);
- 
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(20),
@@ -76,7 +73,6 @@ class EditProfileModal extends StatelessWidget {
             _buildTextField("Username", usernameController),
             const SizedBox(height: 16),
 
-
             // Role (Read-only)
             TextField(
               decoration: InputDecoration(
@@ -90,7 +86,10 @@ class EditProfileModal extends StatelessWidget {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.green.shade400, width: 2),
+                  borderSide: BorderSide(
+                    color: Colors.green.shade400,
+                    width: 2,
+                  ),
                 ),
               ),
               readOnly: true,
@@ -123,13 +122,11 @@ class EditProfileModal extends StatelessWidget {
                       final currentFirstName = firstNameController.text.trim();
                       final currentLastName = lastNameController.text.trim();
                       final currentUsername = usernameController.text.trim();
- 
 
                       // Check if any field changed
                       if (currentFirstName == firstName &&
                           currentLastName == lastName &&
-                          currentUsername == username ) 
-                         {
+                          currentUsername == username) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Row(
@@ -203,7 +200,10 @@ class EditProfileModal extends StatelessWidget {
         labelStyle: const TextStyle(fontWeight: FontWeight.w500),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),

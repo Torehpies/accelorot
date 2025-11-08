@@ -40,7 +40,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
   }
 
   void _startVerificationCheck() {
-    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
+      timer,
+    ) async {
       bool isVerified = await _authService.isEmailVerified();
       if (isVerified && mounted) {
         timer.cancel();
@@ -59,12 +61,13 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
     // Check if user selected a team during registration
     final userDoc = await _firestore.collection('users').doc(userId).get();
-    final pendingTeamSelection = userDoc.data()?['pendingTeamSelection'] as String?;
+    final pendingTeamSelection =
+        userDoc.data()?['pendingTeamSelection'] as String?;
 
     if (pendingTeamSelection != null) {
       // Send team join request
       await _sendTeamJoinRequest(userId, pendingTeamSelection);
-      
+
       // Clear the pending team selection
       await _firestore.collection('users').doc(userId).update({
         'pendingTeamSelection': FieldValue.delete(),
@@ -89,7 +92,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         );
       } else if (pendingTeamId != null) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const WaitingApprovalScreen()),
+          MaterialPageRoute(
+            builder: (context) => const WaitingApprovalScreen(),
+          ),
         );
       } else {
         Navigator.of(context).pushReplacement(
@@ -109,10 +114,10 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
           .doc(teamId)
           .collection('pending_members')
           .doc(userId);
-      
+
       final userDoc = await _firestore.collection('users').doc(userId).get();
       final email = userDoc.data()?['email'] as String? ?? '';
-      
+
       batch.set(pendingRef, {
         'requestorId': userId,
         'requestorEmail': email,
@@ -121,9 +126,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
       // Set pendingTeamId in user document
       final userRef = _firestore.collection('users').doc(userId);
-      batch.update(userRef, {
-        'pendingTeamId': teamId,
-      });
+      batch.update(userRef, {'pendingTeamId': teamId});
 
       await batch.commit();
     } catch (e) {
@@ -145,11 +148,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
     if (!mounted) return;
     setState(() => _isResendingEmail = false);
-    showSnackbar(
-      context,
-      result['message'],
-      isError: !result['success'],
-    );
+    showSnackbar(context, result['message'], isError: !result['success']);
     if (result['success']) {
       _startResendCooldown();
     } else {
@@ -194,7 +193,11 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
         await _handlePostVerification(user.uid);
       }
     } else {
-      showSnackbar(context, 'Email not yet verified. Please check your inbox.', isError: true);
+      showSnackbar(
+        context,
+        'Email not yet verified. Please check your inbox.',
+        isError: true,
+      );
     }
   }
 
@@ -264,10 +267,7 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
 
                       const Text(
                         'We\'ve sent a verification email to:',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
@@ -293,7 +293,10 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, color: Colors.blue.shade700),
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.blue.shade700,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -318,7 +321,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: isWideScreen ? 18 : 16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isWideScreen ? 18 : 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -345,7 +350,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: isWideScreen ? 18 : 16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: isWideScreen ? 18 : 16,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -357,7 +364,9 @@ class _EmailVerifyScreenState extends State<EmailVerifyScreen> {
                                   height: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : Text(

@@ -28,7 +28,9 @@ class OperatorDialogs {
               backgroundColor: ThemeConstants.orangeShade600,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius8,
+                ),
               ),
             ),
             child: const Text('Archive'),
@@ -77,7 +79,9 @@ class OperatorDialogs {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius8,
+                ),
               ),
             ),
             child: const Text('Remove Permanently'),
@@ -90,7 +94,7 @@ class OperatorDialogs {
   // Show success snackbar
   static void showSuccessSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -103,7 +107,7 @@ class OperatorDialogs {
   // Show error snackbar
   static void showErrorSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -116,7 +120,7 @@ class OperatorDialogs {
   // Show warning snackbar
   static void showWarningSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -129,7 +133,7 @@ class OperatorDialogs {
   // Show info snackbar
   static void showInfoSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

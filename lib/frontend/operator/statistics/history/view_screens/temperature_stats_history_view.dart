@@ -5,7 +5,7 @@ import '../widgets/temperature_statistic_history_card.dart';
 class TemperatureStatsHistoryView extends StatefulWidget {
   final String machineId;
   final DateTimeRange? range;
-  final List<String>? labels; 
+  final List<String>? labels;
 
   const TemperatureStatsHistoryView({
     super.key,
@@ -50,7 +50,8 @@ class _TemperatureStatsHistoryViewState
       });
 
       final now = DateTime.now();
-      final start = widget.range?.start ?? now.subtract(const Duration(days: 7));
+      final start =
+          widget.range?.start ?? now.subtract(const Duration(days: 7));
       final end = widget.range?.end ?? now;
 
       final dataByDay = await FirestoreStatisticHistoryService.getDataForRange(
@@ -66,7 +67,7 @@ class _TemperatureStatsHistoryViewState
 
       // ignore: unused_local_variable
 
-          // ignore: unused_local_variable
+      // ignore: unused_local_variable
 
       // ignore: unused_local_variable
       double? lastKnownValue;
@@ -75,26 +76,33 @@ class _TemperatureStatsHistoryViewState
 
       for (int i = 0; i < daysDiff; i++) {
         final currentDay = start.add(Duration(days: i));
-        final dateKey = '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
-        
+        final dateKey =
+            '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
+
         labels.add(dateKey);
 
         if (dataByDay.containsKey(dateKey)) {
-          final dayValues = dataByDay[dateKey]!.map((d) => d['value'] as double).toList();
+          final dayValues = dataByDay[dateKey]!
+              .map((d) => d['value'] as double)
+              .toList();
 
           if (dayValues.isNotEmpty) {
-            final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
+            final dailyAvg =
+                dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
             _currentTemperature = readings.isNotEmpty ? readings.last : 0.0;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;
-              if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
+              if (ts != null &&
+                  (lastUpdate == null || ts.isAfter(lastUpdate))) {
                 lastUpdate = ts;
               }
             }
 
-            debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
+            debugPrint(
+              '📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues',
+            );
           } else {
             readings.add(0.0);
             debugPrint('⚠️ $dateKey – no readings, using 0.0');
@@ -124,8 +132,17 @@ class _TemperatureStatsHistoryViewState
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_error.isNotEmpty) return Center(child: Text('Error: $_error', style: const TextStyle(color: Colors.red)));
-    if (_dailyReadings.isEmpty) return const Center(child: Text('No temperature data available'));
+    if (_error.isNotEmpty) {
+      return Center(
+        child: Text(
+          'Error: $_error',
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+    if (_dailyReadings.isEmpty) {
+      return const Center(child: Text('No temperature data available'));
+    }
 
     return Column(
       children: [

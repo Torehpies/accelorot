@@ -31,8 +31,8 @@ class OperatorEmptyState extends StatelessWidget {
             isSearching
                 ? 'No operators found matching "$searchQuery"'
                 : isArchived
-                    ? 'No archived operators'
-                    : 'No operators available',
+                ? 'No archived operators'
+                : 'No operators available',
             style: TextStyle(
               color: ThemeConstants.greyShade600,
               fontSize: ThemeConstants.fontSize16,

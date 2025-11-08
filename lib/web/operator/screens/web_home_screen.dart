@@ -19,7 +19,8 @@ class WebHomeScreen extends StatefulWidget {
 }
 
 class _WebHomeScreenState extends State<WebHomeScreen> {
-  final GlobalKey<ActivityLogsCardState> _activityLogsKey = GlobalKey<ActivityLogsCardState>();
+  final GlobalKey<ActivityLogsCardState> _activityLogsKey =
+      GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
 
   void _handleBatchStarted(CompostBatch batch) {
@@ -36,23 +37,51 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          titlePadding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          titlePadding: const EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: 12,
+          ),
           contentPadding: EdgeInsets.zero,
-          title: const Text('Quick Actions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+          title: const Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
           content: SizedBox(
             width: 320,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: Icon(Icons.add_circle_outline, color: Colors.teal.shade700, size: 24),
-                  title: const Text('Add Waste', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  leading: Icon(
+                    Icons.add_circle_outline,
+                    color: Colors.teal.shade700,
+                    size: 24,
+                  ),
+                  title: const Text(
+                    'Add Waste',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
                   onTap: () => Navigator.of(context).pop('add_waste'),
                 ),
                 ListTile(
-                  leading: Icon(Icons.note_add_outlined, color: Colors.teal.shade700, size: 24),
-                  title: const Text('Submit Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  leading: Icon(
+                    Icons.note_add_outlined,
+                    color: Colors.teal.shade700,
+                    size: 24,
+                  ),
+                  title: const Text(
+                    'Submit Report',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
                   onTap: () => Navigator.of(context).pop('submit_report'),
                 ),
               ],
@@ -72,7 +101,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
       if (result != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Waste entry added successfully!'), backgroundColor: Colors.teal),
+          const SnackBar(
+            content: Text('Waste entry added successfully!'),
+            backgroundColor: Colors.teal,
+          ),
         );
         await _activityLogsKey.currentState?.refresh();
       }
@@ -84,7 +116,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
       if (result != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report submitted successfully!'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Report submitted successfully!'),
+            backgroundColor: Colors.green,
+          ),
         );
         await _activityLogsKey.currentState?.refresh();
       }
@@ -98,11 +133,16 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.teal.shade700, Colors.teal.shade900]),
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
           ),
         ),
         foregroundColor: Colors.white,
@@ -112,7 +152,10 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('No new notifications'), duration: Duration(seconds: 2)),
+                const SnackBar(
+                  content: Text('No new notifications'),
+                  duration: Duration(seconds: 2),
+                ),
               );
             },
           ),
@@ -176,21 +219,37 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             Padding(
                               padding: const EdgeInsets.all(16),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Recent Activity',
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal[700]),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.teal[700],
+                                    ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.refresh, color: Colors.grey),
+                                    icon: const Icon(
+                                      Icons.refresh,
+                                      color: Colors.grey,
+                                    ),
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),
                                     onPressed: () async {
-                                      await _activityLogsKey.currentState?.refresh();
+                                      await _activityLogsKey.currentState
+                                          ?.refresh();
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Activity logs refreshed'), duration: Duration(seconds: 2)),
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Activity logs refreshed',
+                                            ),
+                                            duration: Duration(seconds: 2),
+                                          ),
                                         );
                                       }
                                     },
@@ -198,7 +257,11 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 ],
                               ),
                             ),
-                            const Divider(height: 1, thickness: 1, color: Colors.grey),
+                            const Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: Colors.grey,
+                            ),
                             Expanded(
                               child: Stack(
                                 children: [
@@ -213,8 +276,14 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                       onPressed: _handleFABPress,
                                       backgroundColor: Colors.teal[800],
                                       elevation: 5,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      child: const Icon(Icons.add, size: 32, color: Colors.white),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.add,
+                                        size: 32,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ],

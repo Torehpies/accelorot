@@ -67,7 +67,8 @@ final List<ActivityItem> cyclesRecom = [
     value: '45min',
     statusColor: 'yellow',
     icon: Icons.pause_circle,
-    description: 'Cycle paused due to high temperature reading. Cooling down in progress.',
+    description:
+        'Cycle paused due to high temperature reading. Cooling down in progress.',
     category: 'Cycles',
     timestamp: MockDataService.daysAgo(5, hour: 13, minute: 15),
   ),
@@ -78,7 +79,8 @@ final List<ActivityItem> cyclesRecom = [
     value: '0.5kg',
     statusColor: 'grey',
     icon: Icons.air,
-    description: 'Turn the compost pile to improve oxygen flow and speed up decomposition.',
+    description:
+        'Turn the compost pile to improve oxygen flow and speed up decomposition.',
     category: 'Recoms',
     timestamp: MockDataService.daysAgo(6, hour: 8, minute: 30),
   ),

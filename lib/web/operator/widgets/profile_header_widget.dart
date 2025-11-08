@@ -40,14 +40,14 @@ class ProfileHeaderWidget extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 email,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.teal[50],
                   borderRadius: BorderRadius.circular(20),

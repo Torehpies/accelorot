@@ -134,30 +134,27 @@ class _ActiveStateState extends State<ActiveState> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Batch info
-      Padding(
-        padding: const EdgeInsets.only(right: 40.0, left: 5.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            InfoItem(label: 'Uptime', value: _formatUptime()),
-            InfoItem(label: 'Last Cycle', value: _getLastCycleText()),
-          ],
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Batch info
+        Padding(
+          padding: const EdgeInsets.only(right: 40.0, left: 5.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InfoItem(label: 'Uptime', value: _formatUptime()),
+              InfoItem(label: 'Last Cycle', value: _getLastCycleText()),
+            ],
+          ),
         ),
-      ),
-      const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         // Drum Rotation Settings Header
         const Text(
           'Drum Rotation Settings',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
         const SizedBox(height: 12),
 
@@ -168,8 +165,9 @@ Widget build(BuildContext context) {
           isLocked: _isSettingsLocked,
           onCycleChanged: (value) {
             if (value != null) {
-              final updated =
-                  widget.settings.copyWith(cycles: int.parse(value));
+              final updated = widget.settings.copyWith(
+                cycles: int.parse(value),
+              );
               widget.onSettingsChanged(updated);
             }
           },

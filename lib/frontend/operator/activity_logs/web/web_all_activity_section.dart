@@ -42,7 +42,9 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
 
       // Filter by machine if focusedMachineId is provided
       final filteredActivities = widget.focusedMachineId != null
-          ? activities.where((a) => a.machineId == widget.focusedMachineId).toList()
+          ? activities
+                .where((a) => a.machineId == widget.focusedMachineId)
+                .toList()
           : activities;
 
       setState(() {
@@ -78,7 +80,10 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(32),
@@ -90,17 +95,26 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+        child: Text(
+          'Error: $_errorMessage',
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+        border: Border.all(
+          color: const Color.fromARGB(255, 243, 243, 243),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -125,7 +139,7 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          
+
           if (_activities.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
@@ -147,7 +161,11 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   title: Text(
                     activity.title,
-                    style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color:Color.fromARGB(255, 48, 47, 47)),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                      color: Color.fromARGB(255, 48, 47, 47),
+                    ),
                   ),
                   subtitle: Text(
                     '${_formatTime(activity.timestamp)} • ${activity.description.split('\n').first}',
