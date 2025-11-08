@@ -63,9 +63,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     _verificationTimer?.cancel();
     state = state.copyWith(isVerified: true);
 		final authRepo = ref.read(authRepositoryProvider);
-		final authListenable = ref.read(authListenableProvider.notifier);
 		await authRepo.updateIsEmailVerified(authRepo.currentUser!.uid, true);
-		await authListenable.refreshIsPending();
 
     _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.dashboardCountdown > 0) {
@@ -74,9 +72,6 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
         );
       } else {
         timer.cancel();
-        final authListenable = ref.read(authListenableProvider.notifier);
-        await authListenable.refreshUser();
-        await authListenable.refreshIsPending();
       }
     });
   }

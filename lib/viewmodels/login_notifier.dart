@@ -72,7 +72,6 @@ class LoginNotifier extends _$LoginNotifier {
 
     try {
       await authRepo.signInWithEmail(state.email, state.password);
-			ref.read(authListenableProvider).refreshUser();
       // stop loading on success
       state = state.copyWith(isLoading: false, errorMessage: null);
     } on FirebaseAuthException catch (e) {
