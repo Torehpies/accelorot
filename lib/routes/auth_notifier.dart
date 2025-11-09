@@ -100,28 +100,13 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
     }
   }
 
-  UserRole _parseRole(String? roleString) {
-    final normalizedRole = roleString?.toLowerCase();
-    if (normalizedRole == 'admin') return UserRole.Admin;
-    if (normalizedRole == 'superadmin') return UserRole.SuperAdmin;
-    return UserRole.Operator;
-  }
-
-  Future<void> sendVerificationEmail() async {
-    await _auth.currentUser?.sendEmailVerification();
-  }
-
-  Future<void> checkEmailVerification() async {
-    await _auth.currentUser?.reload();
-    await _handleAuthChange(_auth.currentUser);
+  Future<void> logout() async {
+    await _auth.signOut();
   }
 }
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AuthStatus>((
+final authStateProvider = StateNotifierProvider<AuthNotifier, AuthStatusState>((
   ref,
 ) {
-  final auth = ref.watch(firebaseAuthProvider);
-  final firestore = ref.watch(firebaseFirestoreProvider);
-
-  return AuthNotifier(auth, firestore);
+  return AuthNotifier(ref);
 });

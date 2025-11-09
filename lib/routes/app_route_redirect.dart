@@ -10,32 +10,49 @@ FutureOr<String?> appRouteRedirect(
   Ref ref,
   GoRouterState state,
 ) {
-  final authStatus = ref.watch(authStateProvider);
-  final path = state.uri.toString();
-  bool isFlowGate =
-      path == '/signin' ||
-      path == '/signup' ||
-      path == '/verify-email' ||
-      path == '/team-select' ||
-      path == '/pending';
+  final authStatusState = ref.read(authStateProvider);
+  final isLoggedIn = authStatusState.status != AuthStatus.unauthenticated;
+  final isLoggingIn =
+      state.uri.path == '/signin' || state.uri.path == '/signup';
 
-  return switch (authStatus) {
-    Unauthenticated() =>
-      path == '/signin' || path == '/signup' ? null : '/signin',
-    Unverified() => path == '/verify-email' ? null : '/verify-email',
-    TeamSelection() => path == '/team-select' ? null : '/team-select',
-    PendingAdminApproval() => path == '/pending' ? null : '/pending',
-    Authenticated(role: final role) => () {
-      if (isFlowGate || path == '/') {
-        return '/${role.name}';
+  final String signinPath = '/signin';
+  final String signupPath = '/signup';
+  final String verifyPath = '/verify-email';
+  final String selectTeamPath = '/select-team';
+  final String waitingPath = '/waiting-approval';
+  final String dashboardPath =
+      authStatusState.status == AuthStatus.authenticated
+      ? _getDashboardPath(authStatusState.role)
+      : '/';
+
+  switch (authStatusState.status) {
+    case AuthStatus.loading:
+      return null;
+    case AuthStatus.unauthenticated:
+      return isLoggingIn ? null : signinPath;
+    case AuthStatus.unverified:
+      return state.uri.path == verifyPath ? null : verifyPath;
+    case AuthStatus.teamSelection:
+      return state.uri.path == selectTeamPath ? null : selectTeamPath;
+    case AuthStatus.pendingAdminApproval:
+      return state.uri.path == waitingPath ? null : waitingPath;
+    case AuthStatus.authenticated:
+      if (isLoggingIn ||
+          state.uri.path == verifyPath ||
+          state.uri.path == selectTeamPath ||
+          state.uri.path == waitingPath) {
+        return dashboardPath;
       }
-      final correctedDashboardPath = '/${role.name}';
-      if (path.startsWith(correctedDashboardPath)) {
-        return null;
-      }
-      return correctedDashboardPath;
-    }(),
-  };
+      // Otherwise, allow navigation to the intended path (or stay put).
+      return null;
+  }
+}
+
+String _getDashboardPath(String? role) {
+  if (role == 'SuperAdmin') return '/superadmin';
+  if (role == 'Admin') return '/admin';
+  if (role == 'Operator') return '/operator';
+  return '/signin';
 }
 
 //FutureOr<String?> appRouteRedirect(
