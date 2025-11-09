@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
-import 'package:flutter_application_1/routes/responsive_mobile_shell.dart';
+import 'package:flutter_application_1/routes/navigations/responsive_mobile_shell.dart';
 
 class AdminMobileShell extends StatelessWidget {
   final Widget child;

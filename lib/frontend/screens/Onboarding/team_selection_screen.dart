@@ -108,8 +108,8 @@ class _TeamSelectionScreenState extends ConsumerState<TeamSelectionScreen> {
   }
 
   Future<void> _onSuccessRequest() async {
-    final authListenable = ref.read(authListenableProvider.notifier);
-    await authListenable.refreshIsPending();
+//    final authListenable = ref.read(authListenableProvider.notifier);
+//    await authListenable.refreshIsPending();
   }
 
   Future<void> _handleBackToLogin() async {

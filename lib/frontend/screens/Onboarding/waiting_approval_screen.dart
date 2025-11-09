@@ -47,8 +47,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
 
         await batch.commit();
       }
-      final authListenable = ref.read(authListenableProvider.notifier);
-      await authListenable.refreshIsPending();
+//      final authListenable = ref.read(authListenableProvider.notifier);
+//      await authListenable.refreshIsPending();
       if (!mounted) return;
       showSnackbar(context, 'Request to join team has been cancelled!');
     } catch (e) {

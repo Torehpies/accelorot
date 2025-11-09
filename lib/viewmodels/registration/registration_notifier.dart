@@ -43,7 +43,8 @@ class RegistrationNotifier extends _$RegistrationNotifier {
     required String email,
     required String password,
   }) async {
-    final routerNotifier = ref.read(authListenableProvider.notifier);
+//    final routerNotifier = ref.read(authListenableProvider.notifier);
+		final authRepo = ref.read(authRepositoryProvider);	
     state = state.copyWith(isRegistrationLoading: true, errorMessage: null);
 
     if (state.selectedTeamId == null) {
@@ -55,7 +56,7 @@ class RegistrationNotifier extends _$RegistrationNotifier {
     }
 
     try {
-      await routerNotifier.registerAndSetState(
+      await authRepo.registerUserWithTeam(
         email: email,
         password: password,
         firstName: firstName,

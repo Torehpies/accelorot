@@ -75,8 +75,8 @@ class WaitingApproval extends _$WaitingApproval {
         state = state.copyWith(redirectCountdown: state.redirectCountdown - 1);
       } else {
         timer.cancel();
-        final authListenable = ref.read(authListenableProvider.notifier);
-        await authListenable.refreshIsInTeam();
+        //final authListenable = ref.read(authListenableProvider.notifier);
+        //await authListenable.refreshIsInTeam();
       }
     });
   }

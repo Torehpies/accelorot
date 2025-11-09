@@ -176,8 +176,8 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
       } else {
         timer.cancel();
 
-        final authListenable = ref.read(authListenableProvider.notifier);
-        await authListenable.refreshUser();
+        //final authListenable = ref.read(authListenableProvider.notifier);
+        //await authListenable.refreshUser();
       }
     });
   }

@@ -16,16 +16,14 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart'; // Corrected import reference
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_management_screen.dart';
-import 'package:flutter_application_1/routes/admin_mobile_shell.dart';
-import 'package:flutter_application_1/routes/admin_web_shell.dart';
+import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
+import 'package:flutter_application_1/routes/navigations/admin_web_shell.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
-import 'package:flutter_application_1/routes/mobile_shell.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
-import 'package:flutter_application_1/routes/web_shell.dart';
+import 'package:flutter_application_1/routes/navigations/mobile_shell.dart';
+import 'package:flutter_application_1/routes/navigations/web_shell.dart';
 import 'package:flutter_application_1/screens/loading_screen.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
-import 'package:flutter_application_1/viewmodels/auth_state_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

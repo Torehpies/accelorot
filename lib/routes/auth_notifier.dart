@@ -5,17 +5,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/routes/auth_status.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-class AuthNotifier extends StateNotifier<AuthStatus> {
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
+class AuthNotifier extends StateNotifier<AuthStatusState> {
+  final Ref ref;
+  StreamSubscription<User?>? _authStateSubscription;
+  StreamSubscription<DocumentSnapshot>? _firestoreSubscription;
 
-  late final StreamSubscription<User?> _authStateSubscription;
-  StreamSubscription<DocumentSnapshot>? _userDocSubscription;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  AuthNotifier(this._auth, this._firestore) : super(Unauthenticated()) {
+  AuthNotifier(this.ref) : super(AuthStatusState.loading()) {
     _authStateSubscription = _auth.authStateChanges().listen(_handleAuthChange);
+  }
+
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel();
+    _firestoreSubscription?.cancel();
+    super.dispose();
   }
 
   DocumentReference _getUserDocRef(String userId) {
@@ -23,46 +32,71 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   }
 
   Future<void> _handleAuthChange(User? user) async {
-    await _userDocSubscription?.cancel();
-    _userDocSubscription = null;
-
     if (user == null) {
-      state = Unauthenticated();
+      _firestoreSubscription?.cancel();
+      state = AuthStatusState.unauthenticated();
       return;
     }
 
     if (!user.emailVerified) {
-      state = Unverified();
+      _firestoreSubscription?.cancel();
+      state = AuthStatusState.unverified();
       return;
     }
 
-    _userDocSubscription = _getUserDocRef(user.uid).snapshots().listen(
+    _firestoreSubscription ??= _getUserDocRef(user.uid).snapshots().listen(
       _handleFirestoreChange,
-      onError: (e) {
-        if (kDebugMode) print('Firestore status stream error: $e');
-        state = TeamSelection();
-      },
+      onError: (e) => debugPrint('Firestore Listener Error: $e'),
     );
   }
 
   void _handleFirestoreChange(DocumentSnapshot doc) {
     if (!doc.exists || doc.data() == null) {
-      state = TeamSelection();
+      state = AuthStatusState.teamSelection();
       return;
     }
 
-    final data = doc.data() as Map<String, dynamic>;
-    final String? pendingTeamId = data['pendingTeamSelection'];
-    final String? teamId = data['teamId'];
-    final String? roleString = data['role'];
+    final data = doc.data()! as Map<String, dynamic>;
+    final userRole = data['role'] as String?;
 
-    if (pendingTeamId != null && pendingTeamId.isNotEmpty) {
-      state = PendingAdminApproval(pendingTeamId);
-    } else if (teamId != null && teamId.isNotEmpty) {
-      final role = _parseRole(roleString);
-      state = Authenticated(role);
+    if (userRole == null) {
+      state = AuthStatusState.teamSelection();
+      return;
+    }
+
+    if (data.containsKey('pendingTeamSelection')) {
+      state = AuthStatusState.pendingAdminApproval();
+    } else if (data.containsKey('teamId')) {
+      state = AuthStatusState.authenticated(role: userRole);
     } else {
-      state = TeamSelection();
+      state = AuthStatusState.teamSelection();
+    }
+  }
+
+  Future<void> requestTeam(String teamId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _getUserDocRef(
+        user.uid,
+      ).set({'pendingTeamSelection': teamId}, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error requesting team: $e');
+    }
+  }
+
+  Future<void> cancelTeam() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _getUserDocRef(user.uid).update({
+        'pendingTeamSelection': FieldValue.delete(),
+        'teamId': FieldValue.delete(),
+      });
+    } catch (e) {
+      debugPrint('Error cancelling request: $e');
     }
   }
 
@@ -80,13 +114,6 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   Future<void> checkEmailVerification() async {
     await _auth.currentUser?.reload();
     await _handleAuthChange(_auth.currentUser);
-  }
-
-  @override
-  void dispose() {
-    _authStateSubscription.cancel();
-    _userDocSubscription?.cancel();
-    super.dispose();
   }
 }
 

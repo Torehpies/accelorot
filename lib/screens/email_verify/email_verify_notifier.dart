@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_state.dart';

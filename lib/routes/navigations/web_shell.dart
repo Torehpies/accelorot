@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
-import 'package:flutter_application_1/routes/responsive_web_shell.dart';
+import 'package:flutter_application_1/routes/navigations/responsive_web_shell.dart';
 
 class WebShell extends StatelessWidget {
   final Widget child;
