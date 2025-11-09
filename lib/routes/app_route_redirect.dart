@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routes/app_router.dart';
 import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/routes/auth_status.dart';
 import 'package:go_router/go_router.dart';
@@ -11,48 +12,84 @@ FutureOr<String?> appRouteRedirect(
   GoRouterState state,
 ) {
   final authStatusState = ref.read(authStateProvider);
-  final isLoggedIn = authStatusState.status != AuthStatus.unauthenticated;
-  final isLoggingIn =
-      state.uri.path == '/signin' || state.uri.path == '/signup';
+  final currentPath = state.uri.path;
 
-  final String signinPath = '/signin';
-  final String signupPath = '/signup';
-  final String verifyPath = '/verify-email';
-  final String selectTeamPath = '/select-team';
-  final String waitingPath = '/waiting-approval';
-  final String dashboardPath =
-      authStatusState.status == AuthStatus.authenticated
-      ? _getDashboardPath(authStatusState.role)
-      : '/';
+  // Paths that are part of the initial authentication/onboarding flow
+  const flowGatePaths = [
+    '/signin',
+    '/signup',
+    '/verify-email',
+    '/team-select',
+    '/pending',
+    '/loading',
+    '/',
+  ];
+
+  final isFlowGate = flowGatePaths.contains(currentPath);
+  final targetDashboardPath = _getDashboardPath(authStatusState.role);
 
   switch (authStatusState.status) {
     case AuthStatus.loading:
-      return null;
+      // Stay on the loading screen or allow initial path access.
+      return currentPath == RoutePath.loading.path ||
+              currentPath == RoutePath.initial.path
+          ? null
+          : RoutePath.loading.path;
+
     case AuthStatus.unauthenticated:
-      return isLoggingIn ? null : signinPath;
+      return currentPath.startsWith('/sign') ||
+              currentPath == RoutePath.forgotPassword.path
+          ? null
+          : RoutePath.signin.path;
+
     case AuthStatus.unverified:
-      return state.uri.path == verifyPath ? null : verifyPath;
+      // Must go to Email Verification
+      return currentPath == RoutePath.verifyEmail.path
+          ? null
+          : RoutePath.verifyEmail.path;
+
     case AuthStatus.teamSelection:
-      return state.uri.path == selectTeamPath ? null : selectTeamPath;
+      // Must go to Team Selection
+      return currentPath == RoutePath.teamSelect.path
+          ? null
+          : RoutePath.teamSelect.path;
+
     case AuthStatus.pendingAdminApproval:
-      return state.uri.path == waitingPath ? null : waitingPath;
+      // Must go to Waiting Approval screen
+      return currentPath == RoutePath.pending.path
+          ? null
+          : RoutePath.pending.path;
+
     case AuthStatus.authenticated:
-      if (isLoggingIn ||
-          state.uri.path == verifyPath ||
-          state.uri.path == selectTeamPath ||
-          state.uri.path == waitingPath) {
-        return dashboardPath;
+      // User is fully authenticated.
+      if (isFlowGate) {
+        return targetDashboardPath;
       }
-      // Otherwise, allow navigation to the intended path (or stay put).
+      final userShellPrefix = targetDashboardPath.substring(
+        0,
+        targetDashboardPath.indexOf('/', 1),
+      );
+      if (!currentPath.startsWith(userShellPrefix)) {
+        return targetDashboardPath;
+      }
+
       return null;
   }
 }
 
 String _getDashboardPath(String? role) {
-  if (role == 'SuperAdmin') return '/superadmin';
-  if (role == 'Admin') return '/admin';
-  if (role == 'Operator') return '/operator';
-  return '/signin';
+  if (role == null) return RoutePath.signin.path;
+  final lowerRole = role.toLowerCase();
+
+  switch (lowerRole) {
+    case 'superadmin':
+    case 'admin':
+      return RoutePath.adminDashboard.path;
+    case 'operator':
+      return RoutePath.dashboard.path;
+    default:
+      return RoutePath.restricted.path;
+  }
 }
 
 //FutureOr<String?> appRouteRedirect(

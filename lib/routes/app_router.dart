@@ -10,7 +10,6 @@ import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/routes/go_router_refresh_stream.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/qr_refer.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
@@ -35,28 +34,38 @@ enum RoutePath {
   loading(path: '/loading'),
   signin(path: '/signin'),
   signup(path: '/signup'),
-  qrRefer(path: '/qr-refer'),
+  //qrRefer(path: '/qr-refer'),
   pending(path: '/pending'),
   verifyEmail(path: '/verify-email'),
-	teamSelect(path: '/team-select'),
+  teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
-  dashboard(path: '/dashboard'),
-  activity(path: '/activity'),
-  machines(path: '/machines'),
-  statistics(path: '/statistics'),
-  profile(path: '/profile');
+
+  // operator paths
+  dashboard(path: '/operator/dashboard'),
+  activity(path: '/operator/activity'),
+  statistics(path: '/operator/statistics'),
+  operatorMachines(path: '/operator/machines'),
+  profile(path: '/operator/profile'),
+
+  //admin paths
+  adminDashboard(path: '/admin/dashboard'),
+  adminActivity(path: '/admin/activity'),
+  adminStatistics(path: '/admin/statistics'),
+  adminMachines(path: '/admin/machines'),
+  adminOperators(path: '/admin/operators'),
+  adminProfile(path: '/admin/profile');
 
   const RoutePath({required this.path});
   final String path;
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-	final authStateStream = ref.watch(authStateProvider.notifier).stream;
+  final authStateStream = ref.watch(authStateProvider.notifier).stream;
 
   return GoRouter(
     refreshListenable: GoRouterRefreshStream(authStateStream),
-    initialLocation: RoutePath.signin.path, // Start at the splash screen
+    initialLocation: RoutePath.signin.path,
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
     routes: [
@@ -93,7 +102,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               (state.extra as String?) ??
               FirebaseAuth.instance.currentUser?.email;
           if (email == null) {
-            // This case should be handled by redirect, but as a fallback:
             return const LoginScreen();
           }
           return EmailVerifyScreen(email: email);
@@ -108,10 +116,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.pending.path,
         name: RoutePath.pending.name,
         builder: (context, state) => const WaitingApprovalScreen(),
-      ),
-      GoRoute(
-        path: RoutePath.qrRefer.path,
-        builder: (context, state) => const QRReferScreen(),
       ),
       GoRoute(
         path: RoutePath.restricted.path,
@@ -148,21 +152,24 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/stats',
+            path: RoutePath.statistics.path,
+            name: RoutePath.statistics.name,
             pageBuilder: (context, state) => NoTransitionPage(
               child: const StatisticsScreen(),
               key: state.pageKey,
             ),
           ),
           GoRoute(
-            path: '/machines',
+            path: RoutePath.operatorMachines.path,
+            name: RoutePath.operatorMachines.name,
             pageBuilder: (context, state) => NoTransitionPage(
               child: const OperatorMachineScreen(),
               key: state.pageKey,
             ),
           ),
           GoRoute(
-            path: '/profile',
+            path: RoutePath.profile.path,
+            name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               child: const ProfileScreen(),
               key: state.pageKey,
@@ -182,28 +189,32 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
         routes: [
           GoRoute(
-            path: '/admin/dashboard',
+            path: RoutePath.adminDashboard.path,
+            name: RoutePath.adminDashboard.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const AdminHomeScreen(),
             ),
           ),
           GoRoute(
-            path: '/admin/operators',
+            path: RoutePath.adminOperators.path,
+            name: RoutePath.adminOperators.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const OperatorManagementScreen(),
             ),
           ),
           GoRoute(
-            path: '/admin/machines',
+            path: RoutePath.adminMachines.path,
+            name: RoutePath.adminMachines.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const AdminMachineScreen(),
             ),
           ),
           GoRoute(
-            path: '/admin/profile',
+            path: RoutePath.adminProfile.path,
+            name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const ProfileScreen(),
