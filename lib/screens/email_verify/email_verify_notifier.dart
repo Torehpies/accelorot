@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_state.dart';
 
 part 'email_verify_notifier.g.dart';

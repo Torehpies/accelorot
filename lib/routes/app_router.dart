@@ -54,7 +54,15 @@ enum RoutePath {
   adminStatistics(path: '/admin/statistics'),
   adminMachines(path: '/admin/machines'),
   adminOperators(path: '/admin/operators'),
-  adminProfile(path: '/admin/profile');
+  adminProfile(path: '/admin/profile'),
+
+	//TODO placeholder super admin paths
+  superAdminDashboard(path: '/superadmin/dashboard'),
+  superAdminActivity(path: '/superadmin/activity'),
+  superAdminStatistics(path: '/superadmin/statistics'),
+  superAdminMachines(path: '/superadmin/machines'),
+  superAdminOperators(path: '/superadmin/operators'),
+  superAdminProfile(path: '/superadmin/profile');
 
   const RoutePath({required this.path});
   final String path;

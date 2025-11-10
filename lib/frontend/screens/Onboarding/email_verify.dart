@@ -1,18 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
-// TODO
-//import 'package:go_router/go_router.dart';
-import 'login_screen.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
 
 class EmailVerifyScreen extends ConsumerStatefulWidget {
   final String email;
@@ -47,9 +43,6 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
     super.dispose();
   }
 
-  //TODO refactor email_verify
-  //  void _onVerificationSuccess() {
-  //    _verificationTimer?.cancel();
   void _startVerificationCheck() {
     _verificationTimer = Timer.periodic(const Duration(seconds: 5), (
       timer,

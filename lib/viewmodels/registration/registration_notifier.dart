@@ -1,7 +1,6 @@
-import 'package:flutter_application_1/repositories/auth_repository.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
 import 'package:flutter_application_1/viewmodels/registration/registration_state.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'registration_notifier.g.dart';

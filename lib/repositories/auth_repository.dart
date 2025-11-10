@@ -7,25 +7,6 @@ import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_application_1/utils/app_exceptions.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'auth_repository.g.dart';
-
-@Riverpod(keepAlive: true)
-FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
-
-@Riverpod(keepAlive: true)
-FirebaseFirestore firebaseFirestore(Ref ref) => FirebaseFirestore.instance;
-
-@Riverpod(keepAlive: true)
-AuthRepository authRepository(Ref ref) {
-  return AuthRepository(
-    ref.watch(firebaseAuthProvider),
-    ref.watch(firebaseFirestoreProvider),
-    GoogleSignIn.instance,
-    ref.watch(teamRepositoryProvider),
-  );
-}
 
 class AuthRepository {
   final FirebaseAuth _auth;

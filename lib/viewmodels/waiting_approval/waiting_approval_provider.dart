@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_application_1/repositories/auth_repository.dart';
-import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
 
 part 'waiting_approval_provider.g.dart';
 

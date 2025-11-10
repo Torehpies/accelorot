@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/utils/firebase_error.dart';
+import 'package:flutter_application_1/providers/auth_providers.dart';
 
 import '../utils/google_auth_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
