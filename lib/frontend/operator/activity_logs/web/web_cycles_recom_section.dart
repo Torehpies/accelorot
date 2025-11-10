@@ -1,20 +1,104 @@
 // lib/frontend/operator/activity_logs/web/web_cycles_recom_section.dart
 import 'package:flutter/material.dart';
 import '../../../../services/firestore_activity_service.dart';
-import '../../activity_logs/models/activity_item.dart';
+import '../models/activity_item.dart';
+import 'package:intl/intl.dart';
 
-class WebCyclesRecomSection extends StatelessWidget {
+class WebCyclesRecomSection extends StatefulWidget {
   final String? viewingOperatorId;
   final VoidCallback? onViewAll;
+  final String? focusedMachineId;
 
   const WebCyclesRecomSection({
     super.key,
     this.viewingOperatorId,
     this.onViewAll,
+    this.focusedMachineId,
   });
 
   @override
+  State<WebCyclesRecomSection> createState() => _WebCyclesRecomSectionState();
+}
+
+class _WebCyclesRecomSectionState extends State<WebCyclesRecomSection> {
+  bool _isLoading = true;
+  List<ActivityItem> _cycles = [];
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCycles();
+  }
+
+  Future<void> _loadCycles() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final cycles = await FirestoreActivityService.getCyclesRecom(
+        viewingOperatorId: widget.viewingOperatorId,
+      );
+
+      // Filter by machine if focusedMachineId is provided
+      final filteredCycles = widget.focusedMachineId != null
+          ? cycles.where((c) => c.machineId == widget.focusedMachineId).toList()
+          : cycles;
+
+      setState(() {
+        _cycles = filteredCycles.take(5).toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatTime(DateTime timestamp) {
+    final now = DateTime.now();
+    final diff = now.difference(timestamp);
+
+    if (diff.inDays == 0) {
+      return 'Today';
+    } else if (diff.inDays == 1) {
+      return 'Yesterday';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays} days ago';
+    } else {
+      return DateFormat('MMM d').format(timestamp);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(32),
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -38,10 +122,10 @@ class WebCyclesRecomSection extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
-                if (onViewAll != null) ...[
+                if (widget.onViewAll != null) ...[
                   const Spacer(),
                   TextButton(
-                    onPressed: onViewAll,
+                    onPressed: widget.onViewAll,
                     child: const Text(
                       'View All',
                       style: TextStyle(color: Colors.teal, fontSize: 13),
@@ -52,85 +136,44 @@ class WebCyclesRecomSection extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          
-          // Fetch real data from Firestore
-          FutureBuilder<List<ActivityItem>>(
-            future: FirestoreActivityService.getCyclesRecom(
-              viewingOperatorId: viewingOperatorId,
-            ),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              if (snapshot.hasError) {
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Error loading cycles',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  ),
-                );
-              }
-
-              final cycles = snapshot.data ?? [];
-              
-              if (cycles.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(32),
+          _cycles.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(32.0),
                   child: Center(
                     child: Text(
-                      'No cycles yet',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      'No recent cycles',
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
-                );
-              }
-
-              // Show only first 3 cycles
-              final previewCycles = cycles.take(3).toList();
-
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: previewCycles.length,
-                itemBuilder: (context, index) {
-                  final cycle = previewCycles[index];
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    title: Text(
-                      cycle.title,
-                      style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
-                    ),
-                    subtitle: Text(
-                      cycle.description,
-                      style: const TextStyle(fontSize: 13, color: Colors.grey),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cycle.statusColorValue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _cycles.length,
+                  itemBuilder: (context, index) {
+                    final cycle = _cycles[index];
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(
+                        cycle.title,
+                        style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
                       ),
-                      child: Text(
-                        cycle.value,
-                        style: TextStyle(
+                      subtitle: Text(
+                        '${_formatTime(cycle.timestamp)} • ${cycle.value}',
+                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                      trailing: Chip(
+                        label: Text(cycle.category),
+                        backgroundColor: cycle.statusColorValue.withValues(alpha: 0.1),
+                        labelStyle: TextStyle(
                           color: cycle.statusColorValue,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+                    );
+                  },
+                ),
         ],
       ),
     );

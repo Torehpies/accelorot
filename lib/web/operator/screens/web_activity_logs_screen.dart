@@ -13,8 +13,13 @@ import 'package:flutter_application_1/services/firestore_activity_service.dart';
 // ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
   final bool shouldRefresh;
+  final String? focusedMachineId;
 
-  const WebActivityLogsScreen({super.key, this.shouldRefresh = false});
+  const WebActivityLogsScreen({
+    super.key, 
+    this.shouldRefresh = false,
+    this.focusedMachineId,
+  });
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
@@ -294,25 +299,28 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'substrate'),
               ),
             ),
             const SizedBox(width: 24),
             Expanded(
               child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'alerts'),
               ),
             ),
             const SizedBox(width: 24),
             Expanded(
               child: WebReportsSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'reports'),
               ),
             ),
@@ -320,6 +328,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         ),
         const SizedBox(height: 24),
         WebCyclesRecomSection(
+          focusedMachineId: widget.focusedMachineId,
           onViewAll: () => setState(() => selectedTab = 'cycles'),
         ),
       ],
@@ -330,19 +339,21 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'substrate'),
               ),
             ),
             const SizedBox(width: 20),
             Expanded(
               child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'alerts'),
               ),
             ),
@@ -354,12 +365,14 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
           children: [
             Expanded(
               child: WebReportsSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'reports'),
               ),
             ),
             const SizedBox(width: 20),
             Expanded(
               child: WebCyclesRecomSection(
+                focusedMachineId: widget.focusedMachineId,
                 onViewAll: () => setState(() => selectedTab = 'cycles'),
               ),
             ),
@@ -373,21 +386,25 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const WebAllActivitySection(),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
         WebSubstrateSection(
+          focusedMachineId: widget.focusedMachineId,
           onViewAll: () => setState(() => selectedTab = 'substrate'),
         ),
         const SizedBox(height: 20),
         WebAlertsSection(
+          focusedMachineId: widget.focusedMachineId,
           onViewAll: () => setState(() => selectedTab = 'alerts'),
         ),
         const SizedBox(height: 20),
         WebReportsSection(
+          focusedMachineId: widget.focusedMachineId,
           onViewAll: () => setState(() => selectedTab = 'reports'),
         ),
         const SizedBox(height: 20),
         WebCyclesRecomSection(
+          focusedMachineId: widget.focusedMachineId,
           onViewAll: () => setState(() => selectedTab = 'cycles'),
         ),
       ],

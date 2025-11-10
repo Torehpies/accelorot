@@ -5,11 +5,12 @@ import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_
 import '../components/environmental_sensors_card.dart';
 import '../components/system_card.dart';
 import '../components/composting_progress_card.dart';
+import '../../../frontend/operator/machine_management/models/machine_model.dart';
 
 class WebHomeScreen extends StatelessWidget {
+  final MachineModel? focusedMachine;
 
-
-  const WebHomeScreen({super.key});
+  const WebHomeScreen({super.key, this.focusedMachine});
 
   @override
   Widget build(BuildContext context) {
