@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
 
 class NavItem {
   final IconData icon;
@@ -11,19 +10,19 @@ class NavItem {
   const NavItem(this.icon, this.label, this.path);
 }
 
-const List<NavItem> operatorNavItems = [
-  NavItem(Icons.home, "Dashboard", "/dashboard"),
-  NavItem(Icons.history, "Activity", "/activity"),
-  NavItem(Icons.bar_chart, "Stats", "/stats"),
-  NavItem(Icons.settings, "Machines", "/machines"),
-  NavItem(Icons.person, "Profile", "/profile"),
+List<NavItem> operatorNavItems = [
+  NavItem(Icons.home, "Dashboard", RoutePath.dashboard.path),
+  NavItem(Icons.history, "Activity", RoutePath.activity.path),
+  NavItem(Icons.bar_chart, "Stats", RoutePath.statistics.path),
+  NavItem(Icons.settings, "Machines", RoutePath.operatorMachines.path),
+  NavItem(Icons.person, "Profile", RoutePath.profile.path),
 ];
 
-const List<NavItem> adminNavItems = [
-  NavItem(Icons.home, "Dashboard", "/admin/dashboard"),
-  NavItem(Icons.history, "Operators", "/admin/operators"),
-  NavItem(Icons.bar_chart, "Machines", "/admin/machines"),
-  NavItem(Icons.person, "Profile", "/admin/profile"),
+List<NavItem> adminNavItems = [
+  NavItem(Icons.home, "Dashboard", RoutePath.adminDashboard.path),
+  NavItem(Icons.history, "Operators", RoutePath.adminOperators.path),
+  NavItem(Icons.bar_chart, "Machines", RoutePath.adminMachines.path),
+  NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
 ];
 
 int getSelectedIndex(BuildContext context, List<NavItem> navItems) {

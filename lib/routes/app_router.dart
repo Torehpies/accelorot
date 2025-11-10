@@ -19,8 +19,8 @@ import 'package:flutter_application_1/frontend/screens/admin/operator_management
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/admin_web_shell.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
-import 'package:flutter_application_1/routes/navigations/mobile_shell.dart';
-import 'package:flutter_application_1/routes/navigations/web_shell.dart';
+import 'package:flutter_application_1/routes/navigations/operator_mobile_shell.dart';
+import 'package:flutter_application_1/routes/navigations/operator_web_shell.dart';
 import 'package:flutter_application_1/screens/loading_screen.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
