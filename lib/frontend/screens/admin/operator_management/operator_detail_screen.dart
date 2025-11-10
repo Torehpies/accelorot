@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class OperatorDetailScreen extends StatefulWidget {
   final String operatorId;
   final String operatorName;
@@ -197,9 +196,7 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
 
       // Clear teamId from user document
       final userRef = _firestore.collection('users').doc(widget.operatorId);
-      batch.update(userRef, {
-        'teamId': FieldValue.delete(),
-      });
+      batch.update(userRef, {'teamId': FieldValue.delete()});
 
       await batch.commit();
 
@@ -207,7 +204,9 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.operatorName} has been removed from the team'),
+          content: Text(
+            '${widget.operatorName} has been removed from the team',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -298,10 +297,9 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            
 
             const SizedBox(height: 12),
-            
+
             // Archive button (temporary restriction)
             SizedBox(
               width: double.infinity,
@@ -314,7 +312,9 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.archive),
-                label: Text(_isProcessing ? 'Processing...' : 'Archive (Temporary)'),
+                label: Text(
+                  _isProcessing ? 'Processing...' : 'Archive (Temporary)',
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.orange,
                   side: const BorderSide(color: Colors.orange),
@@ -326,7 +326,7 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             // Remove button (permanent)
             SizedBox(
               width: double.infinity,
@@ -339,7 +339,11 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.exit_to_app),
-                label: Text(_isProcessing ? 'Processing...' : 'Remove from Team (Permanent)'),
+                label: Text(
+                  _isProcessing
+                      ? 'Processing...'
+                      : 'Remove from Team (Permanent)',
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),
@@ -350,9 +354,9 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Info text
             Container(
               padding: const EdgeInsets.all(12),
@@ -363,12 +367,19 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.blue.shade700,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Archive: Temporary restriction, can be restored.\nRemove: Permanent, operator must rejoin via invite.',
-                      style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade900,
+                      ),
                     ),
                   ),
                 ],

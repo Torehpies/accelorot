@@ -62,11 +62,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Compute display values with safe fallbacks
   String get firstName => _userData != null && _userData!['firstname'] is String
       ? _userData!['firstname'] as String
-      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? 'Miguel';
+      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ??
+            'Miguel';
 
   String get lastName => _userData != null && _userData!['lastname'] is String
       ? _userData!['lastname'] as String
-      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? 'Reyes';
+      : FirebaseAuth.instance.currentUser?.displayName
+                ?.split(' ')
+                .skip(1)
+                .join(' ') ??
+            'Reyes';
 
   String get email => _userData != null && _userData!['email'] is String
       ? _userData!['email'] as String
@@ -74,11 +79,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String get role => _userData?['role'] ?? 'User';
 
-  String get displayName => [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim();
+  String get displayName =>
+      [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim();
 
   String get fullName => '$firstName $lastName'.trim();
 
-  String get initials => ((firstName.isNotEmpty ? firstName[0] : '') + (lastName.isNotEmpty ? lastName[0] : '')).toUpperCase();
+  String get initials =>
+      ((firstName.isNotEmpty ? firstName[0] : '') +
+              (lastName.isNotEmpty ? lastName[0] : ''))
+          .toUpperCase();
 
   Future<void> _saveProfile() async {
     try {
@@ -88,13 +97,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final newFirstName = _firstNameController.text.trim();
       final newLastName = _lastNameController.text.trim();
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
-        'firstname': newFirstName,
-        'lastname': newLastName,
-      });
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {'firstname': newFirstName, 'lastname': newLastName},
+      );
 
       await _loadUser();
 
@@ -135,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
-    
+
     // Responsive spacing values
     final cardPadding = isSmallScreen ? 16.0 : 24.0;
     final outerPadding = isSmallScreen ? 12.0 : 16.0;
@@ -161,12 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -177,7 +176,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Card(
                     elevation: 4,
                     color: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: Padding(
                       padding: EdgeInsets.all(cardPadding),
                       child: Column(
@@ -234,18 +235,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(height: sectionSpacing),
                           Divider(color: Colors.grey[300]),
                           SizedBox(height: sectionSpacing),
-                          
+
                           // Personal Information Header
                           Text(
                             'Personal Information',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   fontSize: isSmallScreen ? 18 : 22,
                                   color: Colors.grey[800],
                                 ),
                           ),
                           SizedBox(height: sectionSpacing),
-                          
+
                           // Form Fields (Vertical Stack)
                           if (_isEditing)
                             Form(
@@ -256,7 +258,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     decoration: const InputDecoration(
                                       labelText: 'Username',
                                       border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 12,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: verticalSpacing),
@@ -265,7 +270,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     decoration: const InputDecoration(
                                       labelText: 'First Name',
                                       border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 12,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: verticalSpacing),
@@ -274,7 +282,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     decoration: const InputDecoration(
                                       labelText: 'Last Name',
                                       border: OutlineInputBorder(),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 12,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: verticalSpacing),
@@ -285,7 +296,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       border: const OutlineInputBorder(),
                                       filled: true,
                                       fillColor: Colors.grey[200],
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 12,
+                                          ),
                                     ),
                                     enabled: false,
                                   ),
@@ -297,7 +312,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       border: const OutlineInputBorder(),
                                       filled: true,
                                       fillColor: Colors.grey[200],
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 12,
+                                          ),
                                     ),
                                     enabled: false,
                                   ),
@@ -309,8 +328,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         onPressed: () {
                                           setState(() {
                                             _isEditing = false;
-                                            _usernameController.text = displayName;
-                                            _firstNameController.text = firstName;
+                                            _usernameController.text =
+                                                displayName;
+                                            _firstNameController.text =
+                                                firstName;
                                             _lastNameController.text = lastName;
                                           });
                                         },
@@ -323,7 +344,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             vertical: isSmallScreen ? 10 : 12,
                                           ),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                         ),
                                         child: const Text('Discard'),
@@ -339,7 +362,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             vertical: isSmallScreen ? 10 : 12,
                                           ),
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                         ),
                                         child: const Text('Save'),
@@ -353,11 +378,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildInfoField('Username', displayName, isSmallScreen),
+                                _buildInfoField(
+                                  'Username',
+                                  displayName,
+                                  isSmallScreen,
+                                ),
                                 SizedBox(height: verticalSpacing),
-                                _buildInfoField('Full Name', fullName, isSmallScreen),
+                                _buildInfoField(
+                                  'Full Name',
+                                  fullName,
+                                  isSmallScreen,
+                                ),
                                 SizedBox(height: verticalSpacing),
-                                _buildInfoField('Email Address', email, isSmallScreen),
+                                _buildInfoField(
+                                  'Email Address',
+                                  email,
+                                  isSmallScreen,
+                                ),
                                 SizedBox(height: verticalSpacing),
                                 _buildInfoField('Role', role, isSmallScreen),
                               ],
@@ -366,7 +403,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  
+
                   // Bottom Buttons (Outside Card)
                   if (!_isEditing) ...[
                     SizedBox(height: verticalSpacing),

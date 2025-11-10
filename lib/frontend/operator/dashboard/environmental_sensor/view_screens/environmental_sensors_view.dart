@@ -38,23 +38,27 @@ class _EnvironmentalSensorsViewState extends State<EnvironmentalSensorsView> {
     });
 
     try {
-      final tempData =
-          await FirestoreStatisticsService.getTemperatureData(_machineId);
-      final moistureData =
-          await FirestoreStatisticsService.getMoistureData(_machineId);
-      final oxygenData =
-          await FirestoreStatisticsService.getOxygenData(_machineId);
+      final tempData = await FirestoreStatisticsService.getTemperatureData(
+        _machineId,
+      );
+      final moistureData = await FirestoreStatisticsService.getMoistureData(
+        _machineId,
+      );
+      final oxygenData = await FirestoreStatisticsService.getOxygenData(
+        _machineId,
+      );
 
       // Convert readings (even if empty)
-      _temperatureReadings =
-          tempData.map((e) => e['value'] as double).toList();
-      _moistureReadings = moistureData.map((e) => e['value'] as double).toList();
+      _temperatureReadings = tempData.map((e) => e['value'] as double).toList();
+      _moistureReadings = moistureData
+          .map((e) => e['value'] as double)
+          .toList();
       _oxygenReadings = oxygenData.map((e) => e['value'] as double).toList();
 
-      _temperature =
-          _temperatureReadings.isNotEmpty ? _temperatureReadings.last : null;
-      _moisture =
-          _moistureReadings.isNotEmpty ? _moistureReadings.last : null;
+      _temperature = _temperatureReadings.isNotEmpty
+          ? _temperatureReadings.last
+          : null;
+      _moisture = _moistureReadings.isNotEmpty ? _moistureReadings.last : null;
       _oxygen = _oxygenReadings.isNotEmpty ? _oxygenReadings.last : null;
     } catch (e) {
       _errorMessage = 'Error loading data: $e';

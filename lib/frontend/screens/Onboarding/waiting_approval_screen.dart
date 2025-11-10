@@ -3,9 +3,6 @@ import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
-
 
 class WaitingApprovalScreen extends StatefulWidget {
   const WaitingApprovalScreen({super.key});
@@ -22,7 +19,7 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
   Future<void> _cancelRequest() async {
     final user = _auth.getCurrentUser();
     if (user == null) return;
-    
+
     setState(() => _loading = true);
 
     try {
@@ -43,15 +40,13 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
 
         // 2. Clear pendingTeamId from user document
         final userRef = _firestore.collection('users').doc(user.uid);
-        batch.update(userRef, {
-          'pendingTeamId': FieldValue.delete(),
-        });
+        batch.update(userRef, {'pendingTeamId': FieldValue.delete()});
 
         await batch.commit();
       }
 
       if (!mounted) return;
-      
+
       // Navigate back to team selection screen on next frame to ensure context is valid
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -64,9 +59,9 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
       setState(() => _loading = false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error canceling request: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error canceling request: $e')));
       });
     }
   }
@@ -179,7 +174,9 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(
@@ -203,14 +200,10 @@ class _WaitingApprovalScreenState extends State<WaitingApprovalScreen> {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (!mounted) return;
                             Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => kIsWeb
-                                  ? const WebLoginScreen()
-                                  : const LoginScreen(),
-                            ),
-                     
-                          );
-                          
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
                           });
                         },
                         style: OutlinedButton.styleFrom(

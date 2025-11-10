@@ -60,17 +60,16 @@ class TemperatureStatisticCard extends StatelessWidget {
             children: [
               Text(
                 'Temperature',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '${currentTemperature.toStringAsFixed(1)}°C',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -123,10 +122,6 @@ class TemperatureStatisticCard extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Trend label
-          const Text(
-            'Trend (Last 8 Hours)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          ),
           const SizedBox(height: 8),
 
           // Display "No data" text if readings are empty
@@ -150,16 +145,20 @@ class TemperatureStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
                 maximum: 80,
                 interval: 10,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,

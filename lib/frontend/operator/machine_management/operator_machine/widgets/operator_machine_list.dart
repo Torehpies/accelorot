@@ -7,10 +7,7 @@ import 'operator_machine_card.dart';
 class OperatorMachineList extends StatelessWidget {
   final OperatorMachineController controller;
 
-  const OperatorMachineList({
-    super.key,
-    required this.controller,
-  });
+  const OperatorMachineList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +31,7 @@ class OperatorMachineList extends StatelessWidget {
               controller.searchQuery.isNotEmpty
                   ? 'No machines found matching "${controller.searchQuery}"'
                   : 'No machines available in your team.\nContact your admin for machine assignment.',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
               textAlign: TextAlign.center,
             ),
           ],
@@ -78,10 +72,7 @@ class OperatorMachineList extends StatelessWidget {
         }
 
         final machine = displayedMachines[index];
-        return OperatorMachineCard(
-          machine: machine,
-          controller: controller,
-        );
+        return OperatorMachineCard(machine: machine, controller: controller);
       },
     );
   }

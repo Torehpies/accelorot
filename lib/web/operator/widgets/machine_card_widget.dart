@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/widgets/machine_card_widget.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart' show MachineModel;
-
+import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart'
+    show MachineModel;
 
 class MachineCardWidget extends StatelessWidget {
   final MachineModel machine;
@@ -100,10 +100,7 @@ class MachineCardWidget extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'ID: $machineId',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const Spacer(),
               Row(

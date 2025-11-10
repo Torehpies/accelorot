@@ -50,7 +50,7 @@ class QuickActionsSheet extends StatelessWidget {
             subtitle: 'Log waste material for composting',
             onTap: () => Navigator.pop(context, 'add_waste'),
           ),
-          
+
           const SizedBox(height: 12),
 
           // Submit Report Option
@@ -106,11 +106,7 @@ class _ActionTile extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 24,
-              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
             // Text Content
@@ -129,20 +125,13 @@ class _ActionTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
             // Arrow Icon
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
           ],
         ),
       ),

@@ -53,21 +53,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         onChanged: widget.onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Search....',
-          hintStyle: TextStyle(
-            color: Colors.grey.shade400,
-            fontSize: 16,
-          ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: Colors.grey.shade600,
-            size: 28,
-          ),
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
+          prefixIcon: Icon(Icons.search, color: Colors.grey.shade600, size: 28),
           suffixIcon: _controller.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: Colors.grey.shade600,
-                  ),
+                  icon: Icon(Icons.clear, color: Colors.grey.shade600),
                   onPressed: _clearSearch,
                 )
               : null,

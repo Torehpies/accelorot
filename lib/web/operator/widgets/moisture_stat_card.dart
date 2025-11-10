@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/view_screens/moisture_stats_view.dart';
 
-
 class MoistureStatCard extends StatelessWidget {
   final VoidCallback? onTap;
 

@@ -16,15 +16,15 @@ class _BatchFilterSectionState extends State<BatchFilterSection> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, 
+        color: Colors.white,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2), 
-            offset: const Offset(0, 4), 
+            color: Colors.black.withValues(alpha: 0.2),
+            offset: const Offset(0, 4),
             blurRadius: 4,
             spreadRadius: 0,
           ),
@@ -47,7 +47,7 @@ class _BatchFilterSectionState extends State<BatchFilterSection> {
           // 2. Dropdown Filter
           DropdownButton<String>(
             value: _selectedBatch,
-            
+
             // --- Style for the button itself (The part that shows the value) ---
             hint: const Text(
               'All Batches',
@@ -60,11 +60,11 @@ class _BatchFilterSectionState extends State<BatchFilterSection> {
             // Style for the selected value
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.teal, 
+              color: Colors.teal,
               fontSize: 16,
             ),
-            
-            underline: const SizedBox(), 
+
+            underline: const SizedBox(),
             icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
 
             // --- Style for the dropdown menu ---
@@ -85,7 +85,7 @@ class _BatchFilterSectionState extends State<BatchFilterSection> {
                 ),
               );
             }).toList(),
-            
+
             // --- Logic ---
             onChanged: (String? newValue) {
               setState(() {

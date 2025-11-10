@@ -4,15 +4,11 @@ import 'package:flutter/material.dart';
 import '../models/report_model.dart';
 import '../../../../../../services/report_services/firestore_report_service.dart';
 
-enum SortOption {
-  newest,
-  oldest,
-  priorityHighToLow,
-}
+enum SortOption { newest, oldest, priorityHighToLow }
 
 class ReportsController extends ChangeNotifier {
   // ==================== STATE ====================
-  
+
   List<ReportModel> _allReports = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -26,7 +22,7 @@ class ReportsController extends ChangeNotifier {
   final TextEditingController searchController = TextEditingController();
 
   // ==================== GETTERS ====================
-  
+
   List<ReportModel> get allReports => _allReports;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -44,12 +40,12 @@ class ReportsController extends ChangeNotifier {
       final filterLower = _selectedFilter.toLowerCase();
       filtered = filtered.where((report) {
         final statusLower = report.status.toLowerCase();
-        
+
         // Map filter to status
         if (filterLower == 'open') return statusLower == 'open';
         if (filterLower == 'in progress') return statusLower == 'in_progress';
         if (filterLower == 'closed') return statusLower == 'closed';
-        
+
         return true;
       }).toList();
     }
@@ -100,22 +96,22 @@ class ReportsController extends ChangeNotifier {
   /// Get auto-highlighted filters based on search results
   Set<String> get autoHighlightedFilters {
     if (_searchQuery.isEmpty) return {};
-    
+
     final Set<String> highlights = {};
     final results = filteredReports;
-    
+
     for (var report in results) {
       final statusLower = report.status.toLowerCase();
       if (statusLower == 'open') highlights.add('Open');
       if (statusLower == 'in_progress') highlights.add('In Progress');
       if (statusLower == 'closed') highlights.add('Closed');
     }
-    
+
     return highlights;
   }
 
   // ==================== INITIALIZATION ====================
-  
+
   Future<void> initialize() async {
     _isLoading = true;
     _errorMessage = null;
@@ -143,7 +139,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   // ==================== FETCH OPERATIONS ====================
-  
+
   Future<void> _fetchTeamReports(String teamId) async {
     try {
       _allReports = await FirestoreReportService.getTeamReports(teamId);
@@ -157,7 +153,7 @@ class ReportsController extends ChangeNotifier {
   Future<void> refresh() async {
     final currentUserId = FirestoreReportService.getCurrentUserId();
     _isAuthenticated = currentUserId != null;
-    
+
     if (_isAuthenticated) {
       await _fetchTeamReports(currentUserId!);
     } else {
@@ -167,7 +163,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   // ==================== UI STATE MANAGEMENT ====================
-  
+
   void setSearchQuery(String query) {
     _searchQuery = query;
     resetPagination();
@@ -193,7 +189,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   // ==================== PAGINATION ====================
-  
+
   void loadMore() {
     _displayLimit += _pageSize;
     notifyListeners();
@@ -204,7 +200,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   // ==================== UPDATE OPERATIONS ====================
-  
+
   /// Update an existing report
   Future<void> updateReport({
     required String machineId,
@@ -239,7 +235,7 @@ class ReportsController extends ChangeNotifier {
   }
 
   // ==================== HELPER METHODS ====================
-  
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -250,7 +246,4 @@ class ReportsController extends ChangeNotifier {
     searchController.dispose();
     super.dispose();
   }
-
-
-  
 }

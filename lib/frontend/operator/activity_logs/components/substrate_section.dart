@@ -4,12 +4,9 @@ import '../widgets/filter_box.dart';
 
 // Section card for substrate activity logs with filter boxes
 class SubstrateSection extends StatelessWidget {
-  final String? focusedMachineId; 
+  final String? focusedMachineId;
 
-  const SubstrateSection({
-    super.key,
-    this.focusedMachineId, 
-  });
+  const SubstrateSection({super.key, this.focusedMachineId});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +36,11 @@ class SubstrateSection extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.eco_outlined, color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.eco_outlined,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Substrate',

@@ -3,12 +3,9 @@ import 'package:flutter/material.dart';
 
 // Section card for cycles and recommendations
 class CyclesRecomSection extends StatelessWidget {
-  final String? focusedMachineId; 
+  final String? focusedMachineId;
 
-  const CyclesRecomSection({
-    super.key,
-    this.focusedMachineId,
-  });
+  const CyclesRecomSection({super.key, this.focusedMachineId});
 
   @override
   Widget build(BuildContext context) {

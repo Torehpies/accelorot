@@ -12,7 +12,10 @@ class FirestoreCollections {
   }
 
   // Collection References - accepts optional userId for admin viewing operators
-  static CollectionReference getSubstratesCollection(String batchId, [String? userId]) {
+  static CollectionReference getSubstratesCollection(
+    String batchId, [
+    String? userId,
+  ]) {
     return _firestore
         .collection('batches')
         .doc(batchId)
@@ -42,7 +45,7 @@ class FirestoreCollections {
           .where('userId', isEqualTo: targetUserId)
           .limit(1)
           .get();
-      
+
       return batches.docs.isNotEmpty;
     } catch (e) {
       return false;
@@ -59,7 +62,7 @@ class FirestoreCollections {
       final batchDocs = await getBatchesCollection()
           .where('userId', isEqualTo: targetUserId)
           .get();
-      
+
       for (var batchDoc in batchDocs.docs) {
         // Delete substrates subcollection
         final substrateDocs = await batchDoc.reference
@@ -68,23 +71,23 @@ class FirestoreCollections {
         for (var substrateDoc in substrateDocs.docs) {
           await substrateDoc.reference.delete();
         }
-        
+
         // Delete batch document
         await batchDoc.reference.delete();
       }
 
       // Delete alerts
-      final alertDocs = await getAlertsCollection(targetUserId)
-          .where('userId', isEqualTo: targetUserId)
-          .get();
+      final alertDocs = await getAlertsCollection(
+        targetUserId,
+      ).where('userId', isEqualTo: targetUserId).get();
       for (var doc in alertDocs.docs) {
         await doc.reference.delete();
       }
 
       // Delete cyclesRecom
-      final cyclesRecomDocs = await getCyclesRecomCollection(targetUserId)
-          .where('userId', isEqualTo: targetUserId)
-          .get();
+      final cyclesRecomDocs = await getCyclesRecomCollection(
+        targetUserId,
+      ).where('userId', isEqualTo: targetUserId).get();
       for (var doc in cyclesRecomDocs.docs) {
         await doc.reference.delete();
       }

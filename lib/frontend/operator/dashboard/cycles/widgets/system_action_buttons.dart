@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/system_status.dart';
-import 'stop_confirmation_dialog.dart'; 
+import 'stop_confirmation_dialog.dart';
 
 class SystemActionButtons extends StatelessWidget {
   final SystemStatus status;
@@ -18,9 +18,7 @@ class SystemActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: _buildButtons(context),
-    );
+    return Center(child: _buildButtons(context));
   }
 
   Widget _buildButtons(BuildContext context) {
@@ -41,17 +39,12 @@ class SystemActionButtons extends StatelessWidget {
       icon: const Icon(Icons.play_arrow, size: 18),
       label: Text(
         status == SystemStatus.stopped ? 'Start New Cycle' : 'Start',
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
       ),
     );

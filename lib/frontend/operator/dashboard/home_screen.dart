@@ -1,7 +1,7 @@
 // lib/frontend/operator/dashboard/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'cycles/system_card.dart';
-import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
 import 'compost_progress/composting_progress_card.dart';
 import 'compost_progress/models/compost_batch_model.dart';
 import 'add_waste/add_waste_product.dart';
@@ -42,51 +42,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Handle FAB press - show action sheet
   void _handleFABPress() async {
-  final action = await showModalBottomSheet<String>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    isScrollControlled: true,
-    builder: (context) => const QuickActionsSheet(),
-  );
-
-  if (action == null || !mounted) return;
-
-  // Handle selected action
-  if (action == 'add_waste') {
-    final result = await showDialog<Map<String, dynamic>>(
+    final action = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) => AddWasteProduct(
-        preSelectedMachineId: widget.focusedMachine?.machineId,
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const QuickActionsSheet(),
     );
 
-    // Refresh activity logs if waste was added
-    if (result != null && mounted) {
-      await _activityLogsKey.currentState?.refresh();
-    }
-  } else if (action == 'submit_report') {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => SubmitReport(
-        preSelectedMachineId: widget.focusedMachine?.machineId,
-      ),
-    );
+    if (action == null || !mounted) return;
 
-    // Show confirmation AND refresh activity logs if report was submitted
-    if (result != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Report submitted successfully'),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.green,
+    // Handle selected action
+    if (action == 'add_waste') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => AddWasteProduct(
+          preSelectedMachineId: widget.focusedMachine?.machineId,
         ),
       );
-      
-      // Refresh the activity logs to show the new report
-      await _activityLogsKey.currentState?.refresh();
+
+      // Refresh activity logs if waste was added
+      if (result != null && mounted) {
+        await _activityLogsKey.currentState?.refresh();
+      }
+    } else if (action == 'submit_report') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SubmitReport(
+          preSelectedMachineId: widget.focusedMachine?.machineId,
+        ),
+      );
+
+      // Show confirmation AND refresh activity logs if report was submitted
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Report submitted successfully'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Refresh the activity logs to show the new report
+        await _activityLogsKey.currentState?.refresh();
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -143,9 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-              const EnvironmentalSensorsView(),
-              const SizedBox(height: 16),
-
+              // ✅ Environmental Sensors section is PERMANENTLY REMOVED
               CompostingProgressCard(
                 currentBatch: _currentBatch,
                 onBatchStarted: _handleBatchStarted,

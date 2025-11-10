@@ -39,7 +39,7 @@ class FirestoreFetch {
             .collection('users')
             .doc(userId)
             .get();
-        
+
         if (userDoc.exists) {
           teamId = userDoc.data()?['teamId'] as String?;
         }
@@ -52,26 +52,29 @@ class FirestoreFetch {
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
         debugPrint('🔍 Fetching team-wide substrates for teamId: $teamId');
-        
+
         // Get all machines belonging to this team
         final machinesSnapshot = await FirebaseFirestore.instance
             .collection('machines')
             .where('teamId', isEqualTo: teamId)
             .get();
-        
-        final teamMachineIds = machinesSnapshot.docs.map((doc) => doc.id).toList();
-        
+
+        final teamMachineIds = machinesSnapshot.docs
+            .map((doc) => doc.id)
+            .toList();
+
         if (teamMachineIds.isNotEmpty) {
           // Get all batches for these machines
-          final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-              .where('machineId', whereIn: teamMachineIds)
-              .get();
-          
+          final batchesSnapshot =
+              await FirestoreCollections.getBatchesCollection()
+                  .where('machineId', whereIn: teamMachineIds)
+                  .get();
+
           // Fetch substrates from each batch
           for (var batchDoc in batchesSnapshot.docs) {
             final batchData = batchDoc.data() as Map<String, dynamic>?;
             final batchUserId = batchData?['userId'] as String?;
-            
+
             if (batchUserId != null) {
               try {
                 final substratesSnapshot =
@@ -87,16 +90,19 @@ class FirestoreFetch {
 
                 allSubstrates.addAll(substrates);
               } catch (e) {
-                debugPrint('Error fetching substrates from batch ${batchDoc.id}: $e');
+                debugPrint(
+                  'Error fetching substrates from batch ${batchDoc.id}: $e',
+                );
               }
             }
           }
         }
       } else {
         // Fallback: Get only current user's batches
-        final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-            .where('userId', isEqualTo: userId)
-            .get();
+        final batchesSnapshot =
+            await FirestoreCollections.getBatchesCollection()
+                .where('userId', isEqualTo: userId)
+                .get();
 
         for (var batchDoc in batchesSnapshot.docs) {
           final substratesSnapshot =
@@ -140,7 +146,7 @@ class FirestoreFetch {
             .collection('users')
             .doc(userId)
             .get();
-        
+
         if (userDoc.exists) {
           teamId = userDoc.data()?['teamId'] as String?;
         }
@@ -153,21 +159,24 @@ class FirestoreFetch {
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
         debugPrint('🔍 Fetching team-wide alerts for teamId: $teamId');
-        
+
         // Get all machines belonging to this team
         final machinesSnapshot = await FirebaseFirestore.instance
             .collection('machines')
             .where('teamId', isEqualTo: teamId)
             .get();
-        
-        final teamMachineIds = machinesSnapshot.docs.map((doc) => doc.id).toList();
-        
+
+        final teamMachineIds = machinesSnapshot.docs
+            .map((doc) => doc.id)
+            .toList();
+
         if (teamMachineIds.isNotEmpty) {
           // Get all batches for these machines
-          final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-              .where('machineId', whereIn: teamMachineIds)
-              .get();
-          
+          final batchesSnapshot =
+              await FirestoreCollections.getBatchesCollection()
+                  .where('machineId', whereIn: teamMachineIds)
+                  .get();
+
           // ⭐ Fetch alerts from each batch's alerts subcollection
           for (var batchDoc in batchesSnapshot.docs) {
             try {
@@ -190,9 +199,10 @@ class FirestoreFetch {
         }
       } else {
         // Fallback: Get only current user's batches
-        final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-            .where('userId', isEqualTo: userId)
-            .get();
+        final batchesSnapshot =
+            await FirestoreCollections.getBatchesCollection()
+                .where('userId', isEqualTo: userId)
+                .get();
 
         for (var batchDoc in batchesSnapshot.docs) {
           try {
@@ -242,7 +252,7 @@ class FirestoreFetch {
             .collection('users')
             .doc(userId)
             .get();
-        
+
         if (userDoc.exists) {
           teamId = userDoc.data()?['teamId'] as String?;
         }
@@ -255,21 +265,24 @@ class FirestoreFetch {
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
         debugPrint('🔍 Fetching team-wide cycles for teamId: $teamId');
-        
+
         // Get all machines belonging to this team
         final machinesSnapshot = await FirebaseFirestore.instance
             .collection('machines')
             .where('teamId', isEqualTo: teamId)
             .get();
-        
-        final teamMachineIds = machinesSnapshot.docs.map((doc) => doc.id).toList();
-        
+
+        final teamMachineIds = machinesSnapshot.docs
+            .map((doc) => doc.id)
+            .toList();
+
         if (teamMachineIds.isNotEmpty) {
           // Get all batches for these machines
-          final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-              .where('machineId', whereIn: teamMachineIds)
-              .get();
-          
+          final batchesSnapshot =
+              await FirestoreCollections.getBatchesCollection()
+                  .where('machineId', whereIn: teamMachineIds)
+                  .get();
+
           // ⭐ Fetch cycles from each batch's cyclesRecom subcollection
           for (var batchDoc in batchesSnapshot.docs) {
             try {
@@ -292,9 +305,10 @@ class FirestoreFetch {
         }
       } else {
         // Fallback: Get only current user's batches
-        final batchesSnapshot = await FirestoreCollections.getBatchesCollection()
-            .where('userId', isEqualTo: userId)
-            .get();
+        final batchesSnapshot =
+            await FirestoreCollections.getBatchesCollection()
+                .where('userId', isEqualTo: userId)
+                .get();
 
         for (var batchDoc in batchesSnapshot.docs) {
           try {

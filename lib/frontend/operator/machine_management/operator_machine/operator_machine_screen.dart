@@ -6,8 +6,6 @@ import 'widgets/operator_machine_list.dart';
 import '../widgets/search_bar_widget.dart';
 
 class OperatorMachineScreen extends StatefulWidget {
-
-
   const OperatorMachineScreen({super.key});
 
   @override
@@ -157,9 +155,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
                         const SizedBox(height: 12),
 
                         // Machine List with Error/Loading States Inside
-                        Expanded(
-                          child: _buildContent(),
-                        ),
+                        Expanded(child: _buildContent()),
                       ],
                     ),
                   ),

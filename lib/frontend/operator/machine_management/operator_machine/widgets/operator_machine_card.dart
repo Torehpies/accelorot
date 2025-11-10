@@ -17,12 +17,10 @@ class OperatorMachineCard extends StatelessWidget {
     required this.controller,
   });
 
-    void _showMachineViewDialog(BuildContext context) {
+  void _showMachineViewDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => ViewConfirmationDialog(
-        machine: machine,
-      ),
+      builder: (context) => ViewConfirmationDialog(machine: machine),
     );
   }
 
@@ -84,7 +82,9 @@ class OperatorMachineCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
-                              color: isArchived ? Colors.grey[700] : Colors.black,
+                              color: isArchived
+                                  ? Colors.grey[700]
+                                  : Colors.black,
                             ),
                           ),
                         ],
@@ -173,15 +173,9 @@ class OperatorMachineCard extends StatelessWidget {
                   value: machine.machineId,
                 ),
                 const SizedBox(height: 8),
-                MachineDetailRow(
-                  label: 'Assigned User:',
-                  value: userName,
-                ),
+                MachineDetailRow(label: 'Assigned User:', value: userName),
                 const SizedBox(height: 8),
-                MachineDetailRow(
-                  label: 'Date Created:',
-                  value: dateStr,
-                ),
+                MachineDetailRow(label: 'Date Created:', value: dateStr),
               ],
             ),
           ),

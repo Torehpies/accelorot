@@ -15,7 +15,7 @@ abstract class BaseActivityScreen extends StatefulWidget {
   final String? focusedMachineId;
 
   const BaseActivityScreen({
-    super.key, 
+    super.key,
     this.initialFilter,
     this.viewingOperatorId,
     this.focusedMachineId,
@@ -29,40 +29,39 @@ abstract class BaseActivityScreen extends StatefulWidget {
 /// Child classes must implement abstract methods for screen-specific behavior
 abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     extends State<T> {
-  
   // ===== ABSTRACT METHODS - Must be implemented by child classes =====
-  
+
   /// AppBar title text
   String get screenTitle;
-  
+
   /// List of filter chip labels (e.g., ['All', 'Temp', 'Moisture', 'Oxygen'])
   List<String> get filters;
-  
+
   /// Fetch data from Firestore
   Future<List<ActivityItem>> fetchData();
-  
+
   /// Filter items by selected category
   /// @param items - List of all items
   /// @param filter - Selected filter string
   /// @return Filtered list of items
   List<ActivityItem> filterByCategory(List<ActivityItem> items, String filter);
-  
+
   /// Determine which filters to auto-highlight during search
   /// @param searchResults - Filtered list from search
   /// @return Set of filter labels to highlight
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults);
 
   // ===== SHARED STATE VARIABLES =====
-  
+
   // Filter state
   late String selectedFilter;
   String searchQuery = '';
   bool isManualFilter = false;
   DateFilterRange _dateFilter = DateFilterRange(type: DateFilterType.none);
-  
+
   // UI state
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   // Data state
   List<ActivityItem> _allActivities = [];
   bool _isLoggedIn = false;
@@ -97,10 +96,11 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
     });
 
     try {
-      final effectiveUserId = widget.viewingOperatorId ?? 
-                             FirestoreActivityService.getEffectiveUserId();
+      final effectiveUserId =
+          widget.viewingOperatorId ??
+          FirestoreActivityService.getEffectiveUserId();
       _isLoggedIn = effectiveUserId.isNotEmpty;
-        
+
       if (_isLoggedIn) {
         await FirestoreActivityService.uploadAllMockData();
         await _loadActivities();
@@ -119,15 +119,16 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   /// Load activities using child's fetchData implementation
   Future<void> _loadActivities() async {
     try {
-      List<ActivityItem> activities = await fetchData(); // Calls child's implementation
-      
+      List<ActivityItem> activities =
+          await fetchData(); // Calls child's implementation
+
       // Filter by machine if focusedMachineId is provided
       if (widget.focusedMachineId != null) {
         activities = activities
             .where((item) => item.machineId == widget.focusedMachineId)
             .toList();
       }
-      
+
       if (mounted) {
         setState(() {
           _allActivities = activities;
@@ -179,7 +180,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
     return _allActivities.where((item) {
       return item.timestamp.isAfter(_dateFilter.startDate!) &&
-             item.timestamp.isBefore(_dateFilter.endDate!);
+          item.timestamp.isBefore(_dateFilter.endDate!);
     }).toList();
   }
 
@@ -196,20 +197,28 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   /// Get filters to auto-highlight based on search results
   Set<String> get _categoriesInSearchResults {
     if (searchQuery.isEmpty) return {};
-    return getCategoriesInSearchResults(_searchResults); // Calls child's implementation
+    return getCategoriesInSearchResults(
+      _searchResults,
+    ); // Calls child's implementation
   }
 
   /// Apply category filter to search results
   List<ActivityItem> get _filteredActivities {
     if (isManualFilter && selectedFilter != 'All') {
-      return filterByCategory(_searchResults, selectedFilter); // Calls child's implementation
+      return filterByCategory(
+        _searchResults,
+        selectedFilter,
+      ); // Calls child's implementation
     }
 
     if (selectedFilter == 'All' || !isManualFilter) {
       return _searchResults;
     }
 
-    return filterByCategory(_searchResults, selectedFilter); // Calls child's implementation
+    return filterByCategory(
+      _searchResults,
+      selectedFilter,
+    ); // Calls child's implementation
   }
 
   // ===== UI BUILD METHODS =====
@@ -240,10 +249,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
               if (widget.focusedMachineId != null)
                 Text(
                   'Machine ID: ${widget.focusedMachineId}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
                 ),
             ],
           ),
@@ -271,7 +277,11 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 18),
+                      Icon(
+                        Icons.filter_alt,
+                        color: Colors.teal.shade700,
+                        size: 18,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -321,9 +331,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                           autoHighlightedFilters: _categoriesInSearchResults,
                         ),
                       ),
-                      Expanded(
-                        child: _buildContent(),
-                      ),
+                      Expanded(child: _buildContent()),
                     ],
                   ),
                 ),
@@ -339,9 +347,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   Widget _buildContent() {
     // Show loading indicator
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.teal),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.teal));
     }
 
     // Show login prompt
@@ -351,10 +357,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           padding: EdgeInsets.all(24.0),
           child: Text(
             'Please log in to view activity logs',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey),
             textAlign: TextAlign.center,
           ),
         ),
@@ -369,11 +372,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.error_outline, size: 48, color: Colors.grey),
               const SizedBox(height: 16),
               const Text(
                 'Error loading data',
@@ -386,10 +385,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
               const SizedBox(height: 8),
               Text(
                 _errorMessage!,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -415,18 +411,14 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 64,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
                 widget.focusedMachineId != null
                     ? 'No activities found for this machine'
                     : searchQuery.isNotEmpty
-                        ? 'No results found for "$searchQuery"'
-                        : 'No ${selectedFilter.toLowerCase()} activities found',
+                    ? 'No results found for "$searchQuery"'
+                    : 'No ${selectedFilter.toLowerCase()} activities found',
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -438,10 +430,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                 const SizedBox(height: 8),
                 Text(
                   'Activities will appear here once waste is added to this machine',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                   textAlign: TextAlign.center,
                 ),
               ],

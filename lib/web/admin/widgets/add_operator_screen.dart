@@ -112,9 +112,9 @@ class _AddOperatorScreenState extends State<AddOperatorScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -223,9 +223,13 @@ class _AddOperatorScreenState extends State<AddOperatorScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ThemeConstants.greyShade300,
                       foregroundColor: ThemeConstants.tealShade600,
-                      padding: const EdgeInsets.symmetric(vertical: ThemeConstants.spacing16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: ThemeConstants.spacing16,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius8,
+                        ),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -238,9 +242,13 @@ class _AddOperatorScreenState extends State<AddOperatorScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: ThemeConstants.tealShade600,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: ThemeConstants.spacing16),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: ThemeConstants.spacing16,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius8,
+                        ),
                       ),
                     ),
                     child: _isSubmitting
@@ -249,8 +257,9 @@ class _AddOperatorScreenState extends State<AddOperatorScreen> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text('Add Operator'),

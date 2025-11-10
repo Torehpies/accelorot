@@ -31,7 +31,10 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => kIsWeb ? const LoginScreen() : const AuthWrapper()),
+        MaterialPageRoute(
+          builder: (context) =>
+              kIsWeb ? const LoginScreen() : const AuthWrapper(),
+        ),
         (route) => false,
       );
     }
@@ -58,11 +61,16 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   // Compute display values with safe fallbacks
   String get firstName => _userData != null && _userData!['firstname'] is String
       ? _userData!['firstname'] as String
-      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? 'Miguel';
+      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ??
+            'Miguel';
 
   String get lastName => _userData != null && _userData!['lastname'] is String
       ? _userData!['lastname'] as String
-      : FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? 'Reyes';
+      : FirebaseAuth.instance.currentUser?.displayName
+                ?.split(' ')
+                .skip(1)
+                .join(' ') ??
+            'Reyes';
 
   String get email => _userData != null && _userData!['email'] is String
       ? _userData!['email'] as String
@@ -70,9 +78,13 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
 
   String get role => _userData?['role'] ?? 'User';
 
-  String get displayName => [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim();
+  String get displayName =>
+      [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim();
 
-  String get initials => ((firstName.isNotEmpty ? firstName[0] : '') + (lastName.isNotEmpty ? lastName[0] : '')).toUpperCase();
+  String get initials =>
+      ((firstName.isNotEmpty ? firstName[0] : '') +
+              (lastName.isNotEmpty ? lastName[0] : ''))
+          .toUpperCase();
 
   Future<void> _saveProfile() async {
     try {
@@ -82,13 +94,9 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       final newFirstName = _firstNameController.text.trim();
       final newLastName = _lastNameController.text.trim();
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
-        'firstname': newFirstName,
-        'lastname': newLastName,
-      });
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {'firstname': newFirstName, 'lastname': newLastName},
+      );
 
       await _loadUser();
 
@@ -142,12 +150,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
         ),
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -158,7 +160,9 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                 child: Card(
                   elevation: 4,
                   color: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Column(
@@ -195,7 +199,10 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.teal[50],
                                       borderRadius: BorderRadius.circular(20),
@@ -218,14 +225,23 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   OutlinedButton.icon(
-                                    onPressed: () => ChangePasswordDialog.show(context),
-                                    icon: const Icon(Icons.lock_reset, size: 18),
+                                    onPressed: () =>
+                                        ChangePasswordDialog.show(context),
+                                    icon: const Icon(
+                                      Icons.lock_reset,
+                                      size: 18,
+                                    ),
                                     label: const Text('Change Password'),
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: Colors.orange,
-                                      side: const BorderSide(color: Colors.orange),
+                                      side: const BorderSide(
+                                        color: Colors.orange,
+                                      ),
                                       backgroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 12,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -247,9 +263,14 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -264,7 +285,8 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                         // Personal Info Header (no button here anymore)
                         Text(
                           'Personal Information',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey[800],
                               ),
@@ -342,11 +364,18 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                                       },
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.teal,
-                                        side: const BorderSide(color: Colors.teal),
+                                        side: const BorderSide(
+                                          color: Colors.teal,
+                                        ),
                                         backgroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                       ),
                                       child: const Text('Discard'),
@@ -358,9 +387,14 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 12,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                       ),
                                       child: const Text('Save'),
@@ -377,11 +411,17 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: _buildInfoField('First Name', firstName),
+                                    child: _buildInfoField(
+                                      'First Name',
+                                      firstName,
+                                    ),
                                   ),
                                   const SizedBox(width: 24),
                                   Expanded(
-                                    child: _buildInfoField('Last Name', lastName),
+                                    child: _buildInfoField(
+                                      'Last Name',
+                                      lastName,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -389,7 +429,10 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: _buildInfoField('Email Address', email),
+                                    child: _buildInfoField(
+                                      'Email Address',
+                                      email,
+                                    ),
                                   ),
                                   const SizedBox(width: 24),
                                   Expanded(
@@ -418,20 +461,11 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],
       ),

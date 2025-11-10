@@ -39,10 +39,7 @@ class AddOperatorScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Fill in the details to register a new operator',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -77,10 +74,7 @@ class AddOperatorScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 14),
-                  _buildTextField(
-                    hint: "Enter Username",
-                    label: "Username *",
-                  ),
+                  _buildTextField(hint: "Enter Username", label: "Username *"),
 
                   const SizedBox(height: 14),
                   _buildTextField(
@@ -150,7 +144,10 @@ class AddOperatorScreen extends StatelessWidget {
                                 height: 50,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
-                                    colors: [Colors.teal.shade400, Colors.teal.shade700],
+                                    colors: [
+                                      Colors.teal.shade400,
+                                      Colors.teal.shade700,
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
@@ -246,7 +243,10 @@ class AddOperatorScreen extends StatelessWidget {
                       child: Ink(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.teal.shade400, Colors.teal.shade700],
+                            colors: [
+                              Colors.teal.shade400,
+                              Colors.teal.shade700,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),

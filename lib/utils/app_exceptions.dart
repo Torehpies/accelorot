@@ -1,12 +1,10 @@
-class UserCancelledSignInException implements Exception {
-
-} 
+class UserCancelledSignInException implements Exception {}
 
 class AuthFailureException implements Exception {
-	final String message;
+  final String message;
 
-	AuthFailureException(this.message);
+  AuthFailureException(this.message);
 
-	@override
-	String toString() => 'AuthFailureException: $message';
+  @override
+  String toString() => 'AuthFailureException: $message';
 }

@@ -123,7 +123,8 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   @override
   Widget build(BuildContext context) {
-    final isWeb = Theme.of(context).platform == TargetPlatform.macOS ||
+    final isWeb =
+        Theme.of(context).platform == TargetPlatform.macOS ||
         Theme.of(context).platform == TargetPlatform.windows ||
         Theme.of(context).platform == TargetPlatform.linux;
 
@@ -211,31 +212,32 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ).copyWith(
-                    overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                      (Set<MaterialState> states) {
-                        if (states.contains(MaterialState.hovered)) {
-                          return Colors.teal.withAlpha(25);
-                        }
-                        if (states.contains(MaterialState.pressed)) {
-                          return Colors.teal.withAlpha(50);
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
+                  style:
+                      ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ).copyWith(
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                          (Set<MaterialState> states) {
+                            if (states.contains(MaterialState.hovered)) {
+                              return Colors.teal.withAlpha(25);
+                            }
+                            if (states.contains(MaterialState.pressed)) {
+                              return Colors.teal.withAlpha(50);
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
                   child: const Text('Add Waste'),
                 ),
               ),

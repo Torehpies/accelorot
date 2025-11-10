@@ -35,11 +35,7 @@ class WebFilterBox extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  icon,
-                  size: 24,
-                  color: Colors.teal,
-                ),
+                Icon(icon, size: 24, color: Colors.teal),
                 const SizedBox(height: 6),
                 Text(
                   label,

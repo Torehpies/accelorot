@@ -55,9 +55,9 @@ class OperatorService {
         .collection('members')
         .doc(operatorUid)
         .update({
-      'isArchived': true,
-      'archivedAt': FieldValue.serverTimestamp(),
-    });
+          'isArchived': true,
+          'archivedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   // Restore operator
@@ -71,10 +71,26 @@ class OperatorService {
         .doc(currentUserId)
         .collection('members')
         .doc(operatorUid)
+        .update({'isArchived': false, 'archivedAt': FieldValue.delete()});
+  }
+
+  // Remove operator permanently (mark as left)
+  Future<void> removeOperatorPermanently(String operatorUid) async {
+    if (currentUserId == null) {
+      throw Exception('No user logged in');
+    }
+
+    await _firestore
+        .collection('teams')
+        .doc(currentUserId)
+        .collection('members')
+        .doc(operatorUid)
         .update({
-      'isArchived': false,
-      'archivedAt': FieldValue.delete(),
-    });
+          'hasLeft': true,
+          'leftAt': FieldValue.serverTimestamp(),
+          'isArchived': true,
+          'archivedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   // Load pending members
@@ -97,7 +113,10 @@ class OperatorService {
       final requestorId = data['requestorId'] as String?;
 
       if (requestorId != null) {
-        final userDoc = await _firestore.collection('users').doc(requestorId).get();
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(requestorId)
+            .get();
 
         if (userDoc.exists) {
           final userData = userDoc.data();
@@ -162,9 +181,7 @@ class OperatorService {
 
     // Update user
     final userRef = _firestore.collection('users').doc(member.requestorId);
-    batch.update(userRef, {
-      'pendingTeamId': FieldValue.delete(),
-    });
+    batch.update(userRef, {'pendingTeamId': FieldValue.delete()});
 
     // Delete pending member
     final pendingRef = _firestore

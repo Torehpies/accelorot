@@ -1,4 +1,5 @@
 // lib/frontend/operator/dashboard/add_waste/activity_logs_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/firestore_activity_service.dart';
@@ -7,11 +8,10 @@ import 'widgets/activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
   final String? focusedMachineId;
+  final double?
+  maxHeight; // 👈 Optional: constrain height (mobile), or leave infinite (web)
 
-  const ActivityLogsCard({
-    super.key,
-    this.focusedMachineId,
-  });
+  const ActivityLogsCard({super.key, this.focusedMachineId, this.maxHeight});
 
   @override
   State<ActivityLogsCard> createState() => ActivityLogsCardState();
@@ -73,38 +73,48 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white,
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.focusedMachineId != null
-                      ? 'Machine Activity Logs'
-                      : 'Recent Activity',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.teal,
+    // On web, we don't want the outer Card — it's already inside a white container
+    // But we keep it for mobile compatibility
+    final isWeb = widget.maxHeight == null;
+
+    if (isWeb) {
+      // Web: just return the body directly (no Card, no padding)
+      return _buildCardBody();
+    } else {
+      // Mobile: original styled card
+      return Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: Colors.white,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.focusedMachineId != null
+                        ? 'Machine Activity Logs'
+                        : 'Recent Activity',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.teal,
+                    ),
                   ),
-                ),
-                const Icon(Icons.history, size: 20, color: Colors.teal),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildCardBody(),
-          ],
+                  const Icon(Icons.history, size: 20, color: Colors.teal),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildCardBody(),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Widget _buildCardBody() {
@@ -133,9 +143,10 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
         );
       }
     } else {
-      // Filter logs by machine if focusedMachineId is provided
       final filteredLogs = widget.focusedMachineId != null
-          ? _allLogs.where((log) => log.machineId == widget.focusedMachineId).toList()
+          ? _allLogs
+                .where((log) => log.machineId == widget.focusedMachineId)
+                .toList()
           : _allLogs;
 
       if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
@@ -148,19 +159,25 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
         );
       }
 
-      return SizedBox(
-        height: 140,
-        child: ListView.builder(
-          itemCount: filteredLogs.length,
-          physics: const BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ActivityLogItem(log: filteredLogs[index]),
-            );
-          },
-        ),
+      // ✅ Web: no height constraint → fills available space
+      // ✅ Mobile: constrained by maxHeight (e.g., 140)
+      Widget listView = ListView.builder(
+        itemCount: filteredLogs.length,
+        physics: const ClampingScrollPhysics(), // Better for web
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: ActivityLogItem(log: filteredLogs[index]),
+          );
+        },
       );
+
+      if (widget.maxHeight != null) {
+        return SizedBox(height: widget.maxHeight, child: listView);
+      } else {
+        // Web: let it expand naturally inside a scrollable parent
+        return listView;
+      }
     }
   }
 }

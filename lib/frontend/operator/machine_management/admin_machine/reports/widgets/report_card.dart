@@ -8,11 +8,7 @@ class ReportCard extends StatelessWidget {
   final ReportModel report;
   final VoidCallback onTap;
 
-  const ReportCard({
-    super.key,
-    required this.report,
-    required this.onTap,
-  });
+  const ReportCard({super.key, required this.report, required this.onTap});
 
   /// Get priority color circle
   Color get priorityColor {
@@ -51,9 +47,7 @@ class ReportCard extends StatelessWidget {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
@@ -103,18 +97,14 @@ class ReportCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Icon and Description
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    reportIcon,
-                    size: 40,
-                    color: Colors.teal,
-                  ),
+                  Icon(reportIcon, size: 40, color: Colors.teal),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -130,9 +120,9 @@ class ReportCard extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Report Type, Machine, User, and Timestamp
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -165,10 +155,7 @@ class ReportCard extends StatelessWidget {
                   ),
                   Text(
                     formattedTimestamp,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black45,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.black45),
                   ),
                 ],
               ),

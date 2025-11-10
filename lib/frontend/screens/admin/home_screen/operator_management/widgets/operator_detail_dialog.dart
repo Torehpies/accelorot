@@ -8,10 +8,7 @@ import '../../widgets/status_indicator.dart';
 class OperatorDetailDialog extends StatelessWidget {
   final OperatorModel operator;
 
-  const OperatorDetailDialog({
-    super.key,
-    required this.operator,
-  });
+  const OperatorDetailDialog({super.key, required this.operator});
 
   /// Format date to readable string (e.g., "October 24, 2025")
   String _formatDate(DateTime date) {
@@ -23,9 +20,7 @@ class OperatorDetailDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: const EdgeInsets.all(24),
         constraints: const BoxConstraints(maxWidth: 400),
@@ -109,9 +104,7 @@ class OperatorDetailDialog extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal.shade600,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
         child: const Text('Close'),

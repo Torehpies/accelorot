@@ -10,21 +10,14 @@ import 'fields/description_field.dart';
 import 'fields/submit_button.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
-
 class SubmitReport extends StatefulWidget {
   final String? preSelectedMachineId;
 
-
-  const SubmitReport({
-    super.key,
-    this.preSelectedMachineId,
-  });
-
+  const SubmitReport({super.key, this.preSelectedMachineId});
 
   @override
   State<SubmitReport> createState() => _SubmitReportState();
 }
-
 
 class _SubmitReportState extends State<SubmitReport> {
   String? _selectedReportType;
@@ -32,13 +25,12 @@ class _SubmitReportState extends State<SubmitReport> {
   String? _selectedPriority;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   // Error state variables for each field
   String? _titleError;
   String? _reportTypeError;
   String? _machineError;
   String? _priorityError;
-
 
   @override
   void initState() {
@@ -46,14 +38,12 @@ class _SubmitReportState extends State<SubmitReport> {
     _selectedMachineId = widget.preSelectedMachineId;
   }
 
-
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
-
 
   String? _validateTitle(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -64,7 +54,6 @@ class _SubmitReportState extends State<SubmitReport> {
     }
     return null;
   }
-
 
   bool _validateForm() {
     setState(() {
@@ -89,15 +78,13 @@ class _SubmitReportState extends State<SubmitReport> {
 
     // Return true only if all errors are null
     return _reportTypeError == null &&
-           _machineError == null &&
-           _priorityError == null &&
-           _titleError == null;
+        _machineError == null &&
+        _priorityError == null &&
+        _titleError == null;
   }
-
 
   void _handleSubmit() async {
     if (!_validateForm()) return;
-
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -111,7 +98,6 @@ class _SubmitReportState extends State<SubmitReport> {
       return;
     }
 
-
     final report = {
       'reportType': _selectedReportType!,
       'title': _titleController.text.trim(),
@@ -121,7 +107,6 @@ class _SubmitReportState extends State<SubmitReport> {
       'timestamp': DateTime.now(),
       'userId': user.uid,
     };
-
 
     try {
       await FirestoreActivityService.submitReport(report);
@@ -135,7 +120,6 @@ class _SubmitReportState extends State<SubmitReport> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +168,6 @@ class _SubmitReportState extends State<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
-
               // Report Type
               ReportTypeField(
                 selectedReportType: _selectedReportType,
@@ -195,7 +178,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 errorText: _reportTypeError,
               ),
               const SizedBox(height: 16),
-
 
               // Title
               ReportTitleField(
@@ -208,7 +190,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 },
               ),
               const SizedBox(height: 16),
-
 
               // Machine Selection
               MachineSelectionField(
@@ -224,7 +205,6 @@ class _SubmitReportState extends State<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
-
               // Priority
               PriorityField(
                 selectedPriority: _selectedPriority,
@@ -236,11 +216,9 @@ class _SubmitReportState extends State<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
-
               // Description
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
-
 
               // Submit Button
               SubmitButton(

@@ -33,7 +33,11 @@ class _SystemCardState extends State<SystemCard> {
             // Header with Status
             Row(
               children: [
-                Icon(Icons.desktop_windows_outlined, color: Colors.grey[700], size: 18),
+                Icon(
+                  Icons.desktop_windows_outlined,
+                  color: Colors.grey[700],
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'System',
@@ -45,7 +49,10 @@ class _SystemCardState extends State<SystemCard> {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -62,14 +69,17 @@ class _SystemCardState extends State<SystemCard> {
                         ),
                       ),
                       SizedBox(width: 4),
-                      Icon(Icons.check_circle, color: Colors.green, size: 12), // Reduced from 14
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                        size: 12,
+                      ), // Reduced from 14
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16), // Reduced from 20
-
             // Uptime and Last Update
             Row(
               children: [
@@ -123,7 +133,6 @@ class _SystemCardState extends State<SystemCard> {
             ),
 
             const SizedBox(height: 16), // Reduced from 24
-
             // Drum Rotation Section
             Text(
               'Drum Rotation',
@@ -134,7 +143,6 @@ class _SystemCardState extends State<SystemCard> {
               ),
             ),
             const SizedBox(height: 8), // Reduced from 12
-
             // Dropdown Row with Labels
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +162,10 @@ class _SystemCardState extends State<SystemCard> {
                       ),
                       const SizedBox(height: 4), // Reduced from 6
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey[300]!),
                           borderRadius: BorderRadius.circular(6),
@@ -165,16 +176,24 @@ class _SystemCardState extends State<SystemCard> {
                             value: cyclesValue,
                             hint: Text(
                               'Select',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[500],
+                              ),
                             ),
                             isDense: true,
                             isExpanded: true,
-                            items: ['50', '100', '150', '200'].map((String value) {
+                            items: ['50', '100', '150', '200'].map((
+                              String value,
+                            ) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(
                                   '$value Cycles',
-                                  style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey[700],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -205,7 +224,10 @@ class _SystemCardState extends State<SystemCard> {
                       ),
                       const SizedBox(height: 4), // Reduced from 6
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey[300]!),
                           borderRadius: BorderRadius.circular(6),
@@ -216,16 +238,24 @@ class _SystemCardState extends State<SystemCard> {
                             value: periodValue,
                             hint: Text(
                               'Select',
-                              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey[500],
+                              ),
                             ),
                             isDense: true,
                             isExpanded: true,
-                            items: ['15 minutes', '30 minutes', '1 hour'].map((String value) {
+                            items: ['15 minutes', '30 minutes', '1 hour'].map((
+                              String value,
+                            ) {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(
                                   value,
-                                  style: TextStyle(fontSize: 10, color: Colors.grey[700]),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey[700],
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               );
@@ -245,7 +275,6 @@ class _SystemCardState extends State<SystemCard> {
             ),
 
             const SizedBox(height: 16), // Reduced from 18
-
             // Start Button
             SizedBox(
               width: double.infinity,
@@ -254,7 +283,9 @@ class _SystemCardState extends State<SystemCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8), // Reduced from 12
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                  ), // Reduced from 12
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),

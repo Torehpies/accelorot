@@ -4,7 +4,7 @@ import '../widgets/temperature_statistic_card.dart';
 
 class TemperatureStatsView extends StatefulWidget {
   final String? machineId;
-  
+
   const TemperatureStatsView({super.key, this.machineId});
 
   @override
@@ -43,7 +43,9 @@ class _TemperatureStatsViewState extends State<TemperatureStatsView> {
     });
 
     try {
-      final data = await FirestoreStatisticsService.getTemperatureData(_machineId);
+      final data = await FirestoreStatisticsService.getTemperatureData(
+        _machineId,
+      );
 
       if (data.isNotEmpty) {
         _hourlyReadings = data.map((e) => e['value'] as double).toList();

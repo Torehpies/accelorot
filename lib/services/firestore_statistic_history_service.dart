@@ -19,7 +19,9 @@ class FirestoreStatisticHistoryService {
     required DateTime date,
   }) async {
     final collectionName = _getCollectionForDate(date);
-    debugPrint('📅 Fetching $fieldName readings from $collectionName for machine $machineId');
+    debugPrint(
+      '📅 Fetching $fieldName readings from $collectionName for machine $machineId',
+    );
 
     try {
       final snapshot = await _db.collection(collectionName).get();
@@ -45,12 +47,16 @@ class FirestoreStatisticHistoryService {
         final data = doc.data();
         return {
           'id': doc.id,
-          'value': (data[fieldName] is num ? (data[fieldName] as num).toDouble() : 0.0),
+          'value': (data[fieldName] is num
+              ? (data[fieldName] as num).toDouble()
+              : 0.0),
           'timestamp': _parseTimestamp(data['timestamp']),
         };
       }).toList();
     } catch (e, stack) {
-      debugPrint('❌ Error fetching $fieldName from $collectionName: $e\n$stack');
+      debugPrint(
+        '❌ Error fetching $fieldName from $collectionName: $e\n$stack',
+      );
       return [];
     }
   }

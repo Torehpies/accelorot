@@ -10,41 +10,31 @@ import 'fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class AddWasteProduct extends StatefulWidget {
-  final String? preSelectedMachineId; 
+  final String? preSelectedMachineId;
 
-
-  const AddWasteProduct({
-    super.key,
-    this.preSelectedMachineId,
-  });
-
-
+  const AddWasteProduct({super.key, this.preSelectedMachineId});
 
   // Builds and displays the Add Waste Product dialog.
   @override
   State<AddWasteProduct> createState() => _AddWasteProductState();
 }
 
-
 class _AddWasteProductState extends State<AddWasteProduct> {
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
-
 
   String? _selectedWasteCategory;
   String? _selectedPlantType;
   String? _selectedMachineId;
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   // Error state variables
   String? _quantityError;
   String? _wasteCategoryError;
   String? _plantTypeError;
   String? _machineError;
-
 
   // Disposes controllers to free memory when widget is removed.
   @override
@@ -53,21 +43,19 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     _descriptionController.dispose();
     super.dispose();
   }
-    @override
+
+  @override
   void initState() {
     super.initState();
 
-
     _selectedMachineId = widget.preSelectedMachineId;
   }
-
 
   // Capitalizes the first letter of a given category name.
   String _capitalizeCategory(String category) {
     if (category.isEmpty) return category;
     return category[0].toUpperCase() + category.substring(1);
   }
-
 
   // Validates the entered quantity and ensures it's within defined limits.
   String? _validateQuantity(String? value) {
@@ -78,7 +66,6 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     if (num > _maxQuantity) return 'Max: ${_maxQuantity}kg';
     return null;
   }
-
 
   // Ensures required fields are selected and valid before submission.
   bool _validateForm() {
@@ -104,11 +91,10 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
     // Return true only if all errors are null
     return _wasteCategoryError == null &&
-           _plantTypeError == null &&
-           _machineError == null &&
-           _quantityError == null;
+        _plantTypeError == null &&
+        _machineError == null &&
+        _quantityError == null;
   }
-
 
   // Retrieves the display label for a given plant type value.
   String getPlantLabel(String? value) {
@@ -121,24 +107,21 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return '';
   }
 
-
   // Handles form submission, validates input, and saves data to Firestore.
-void _handleSubmit() async {
-  if (!_validateForm()) return;
+  void _handleSubmit() async {
+    if (!_validateForm()) return;
 
-
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please log in to add waste log.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    return;
-  }
-
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to add waste log.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
 
     final wasteEntry = {
       'category': _capitalizeCategory(_selectedWasteCategory!),
@@ -153,7 +136,6 @@ void _handleSubmit() async {
       // 'machineName': _selectedMachineName,
     };
 
-
     try {
       await FirestoreActivityService.addWasteProduct(wasteEntry);
       await Future.delayed(const Duration(milliseconds: 1000));
@@ -166,7 +148,6 @@ void _handleSubmit() async {
       );
     }
   }
-
 
   // Builds the Add Waste Product dialog layout and structure.
   @override
@@ -241,7 +222,7 @@ void _handleSubmit() async {
                         _selectedMachineId = value;
                         _machineError = null;
                       })
-                    : null, 
+                    : null,
                 isLocked: widget.preSelectedMachineId != null,
                 errorText: _machineError,
               ),

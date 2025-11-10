@@ -37,8 +37,10 @@ class OperatorManagementController extends ChangeNotifier {
     }).toList();
   }
 
-  int get archivedCount => _operators.where((o) => o.isArchived || o.hasLeft).length;
-  int get activeCount => _operators.where((o) => !o.isArchived && !o.hasLeft).length;
+  int get archivedCount =>
+      _operators.where((o) => o.isArchived || o.hasLeft).length;
+  int get activeCount =>
+      _operators.where((o) => !o.isArchived && !o.hasLeft).length;
 
   // Setters
   void setShowArchived(bool value) {
@@ -97,6 +99,17 @@ class OperatorManagementController extends ChangeNotifier {
 
     try {
       await _operatorService.restoreOperator(operator.uid);
+      await loadOperators();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Remove operator permanently
+  Future<bool> removeOperatorPermanently(OperatorModel operator) async {
+    try {
+      await _operatorService.removeOperatorPermanently(operator.uid);
       await loadOperators();
       return true;
     } catch (e) {

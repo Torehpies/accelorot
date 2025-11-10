@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart' show HomeScreen;
+import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart'
+    show HomeScreen;
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
@@ -31,7 +32,9 @@ class _MobileNavigationState extends State<MobileNavigation> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        backgroundColor: const Color(0xFF1ABC9C), // 🟢 Teal green (matches your screenshot)
+        backgroundColor: const Color(
+          0xFF1ABC9C,
+        ), // 🟢 Teal green (matches your screenshot)
         elevation: 0,
         actions: [
           IconButton(
@@ -59,14 +62,19 @@ class _MobileNavigationState extends State<MobileNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Machines",
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add your FAB action here (e.g., add new machine, start batch)
         },
-        backgroundColor: const Color(0xFF4CAF50), // 🟢 Green (matches your screenshot)
+        backgroundColor: const Color(
+          0xFF4CAF50,
+        ), // 🟢 Green (matches your screenshot)
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

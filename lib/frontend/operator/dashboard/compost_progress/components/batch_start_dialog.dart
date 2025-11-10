@@ -2,22 +2,18 @@
 import 'package:flutter/material.dart';
 import '../models/compost_batch_model.dart';
 
-
 class BatchStartDialog extends StatefulWidget {
   const BatchStartDialog({super.key});
-
 
   @override
   State<BatchStartDialog> createState() => _BatchStartDialogState();
 }
 
-
 class _BatchStartDialogState extends State<BatchStartDialog> {
   final _batchNameController = TextEditingController();
   final _startNotesController = TextEditingController();
-  
-  String? _nameError;
 
+  String? _nameError;
 
   @override
   void dispose() {
@@ -25,7 +21,6 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
     _startNotesController.dispose();
     super.dispose();
   }
-
 
   String? _validateBatchName(String? value) {
     if (value == null || value.isEmpty) {
@@ -37,10 +32,9 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
     return null;
   }
 
-
   void _handleConfirm() {
     final nameError = _validateBatchName(_batchNameController.text);
-    
+
     if (nameError != null) {
       setState(() {
         _nameError = nameError;
@@ -48,21 +42,18 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
       return;
     }
 
-
     // Create batch object with hardcoded batch number
     final batch = CompostBatch(
       batchName: _batchNameController.text.trim(),
       batchNumber: 'Batch-1', // Hardcoded for now
       batchStart: DateTime.now(),
-      startNotes: _startNotesController.text.trim().isEmpty 
-          ? null 
+      startNotes: _startNotesController.text.trim().isEmpty
+          ? null
           : _startNotesController.text.trim(),
     );
 
-
     Navigator.of(context).pop(batch);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +102,6 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 16),
 
-
               // Batch Name Field
               Text(
                 'Batch Name',
@@ -126,14 +116,20 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                 controller: _batchNameController,
                 decoration: InputDecoration(
                   hintText: 'e.g., October Vegetable Waste',
-                  prefixIcon: Icon(Icons.label_outline, color: Colors.teal[600]),
+                  prefixIcon: Icon(
+                    Icons.label_outline,
+                    color: Colors.teal[600],
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   errorText: _nameError,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
                 onChanged: (value) {
@@ -143,7 +139,6 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                 },
               ),
               const SizedBox(height: 16),
-
 
               // Batch Number Field (Read-only)
               Text(
@@ -177,7 +172,6 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 16),
 
-
               // Start Notes Field
               Text(
                 'Start Notes (Optional)',
@@ -198,12 +192,14 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-
 
               // Action buttons
               Row(

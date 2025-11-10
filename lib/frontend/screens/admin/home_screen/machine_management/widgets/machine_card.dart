@@ -8,11 +8,7 @@ class MachineCard extends StatelessWidget {
   final MachineModel machine;
   final VoidCallback? onTap;
 
-  const MachineCard({
-    super.key,
-    required this.machine,
-    this.onTap,
-  });
+  const MachineCard({super.key, required this.machine, this.onTap});
 
   /// Build the card widget with grey border
   @override
@@ -26,10 +22,7 @@ class MachineCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey.shade400,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.shade400, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),

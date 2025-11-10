@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/statistics/view_screens/temperature_stats_view.dart' show TemperatureStatsView;
-
+import 'package:flutter_application_1/frontend/operator/statistics/view_screens/temperature_stats_view.dart'
+    show TemperatureStatsView;
 
 class TemperatureStatCard extends StatelessWidget {
   final VoidCallback? onTap;

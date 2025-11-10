@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/widgets/machine_list_tile_widget.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart' show MachineModel;
-
+import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart'
+    show MachineModel;
 
 class MachineListTileWidget extends StatelessWidget {
   final MachineModel machine;
@@ -46,29 +46,20 @@ class MachineListTileWidget extends StatelessWidget {
         ),
         title: Text(
           machineName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             'ID: $machineId',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey[600]),
           ),
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isActive ? Colors.green : Colors.orange,
                 borderRadius: BorderRadius.circular(20),

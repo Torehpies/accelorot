@@ -76,3 +76,5 @@ notes.md
 # Freezed
 *.g.dart
 *.freezed.dart
+
+.env

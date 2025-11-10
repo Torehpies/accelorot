@@ -9,7 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_management/operator_machine/operator_machine_screen.dart';
 import 'machine_management/models/machine_model.dart';
 
-
 void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
 
@@ -41,7 +40,7 @@ class MainNavigation extends StatefulWidget {
     super.key,
     this.showReferralOverlay = false,
     this.referralCode,
-    this.focusedMachine, 
+    this.focusedMachine,
   });
 
   @override
@@ -51,7 +50,8 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
 
-  final GlobalKey<NavigatorState> _activityNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _activityNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   late final List<Widget> _screens;
 
@@ -69,7 +69,7 @@ class _MainNavigationState extends State<MainNavigation> {
         focusedMachine: widget.focusedMachine, // ⭐ Pass the full machine object
       ),
       const OperatorMachineScreen(),
-      const ProfileScreen(),     
+      const ProfileScreen(),
     ];
   }
 
@@ -109,10 +109,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   ),
                   Text(
                     'Machine View • ID: ${widget.focusedMachine!.machineId}',
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 11, color: Colors.white70),
                   ),
                 ],
               ),
@@ -125,14 +122,19 @@ class _MainNavigationState extends State<MainNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: widget.focusedMachine != null ? Colors.teal : Colors.blue,
+        selectedItemColor: widget.focusedMachine != null
+            ? Colors.teal
+            : Colors.blue,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machines"), 
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Machines",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),

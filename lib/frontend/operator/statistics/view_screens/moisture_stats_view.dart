@@ -4,7 +4,7 @@ import '../widgets/moisture_statistic_card.dart';
 
 class MoistureStatsView extends StatefulWidget {
   final String? machineId;
-  
+
   const MoistureStatsView({super.key, this.machineId});
 
   @override
@@ -90,7 +90,10 @@ class _MoistureStatsViewState extends State<MoistureStatsView> {
                 icon: const Icon(Icons.refresh, size: 14),
                 label: const Text('Retry', style: TextStyle(fontSize: 11)),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   minimumSize: const Size(0, 0),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),

@@ -19,7 +19,7 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   Future<void> _handleArchive(BuildContext context) async {
     Navigator.pop(context); // Close view dialog first
-    
+
     final confirmed = await showConfirmationDialog(
       context,
       'Archive Machine',
@@ -30,14 +30,14 @@ class AdminMachineViewDialog extends StatelessWidget {
       try {
         await controller.archiveMachine(machine.machineId);
         if (!context.mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${machine.machineName} moved to archive'),
             backgroundColor: Colors.orange,
           ),
         );
-        
+
         // Delay before refresh
         await Future.delayed(const Duration(milliseconds: 1000));
         if (!context.mounted) return;
@@ -60,7 +60,7 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   Future<void> _handleRestore(BuildContext context) async {
     Navigator.pop(context); // Close view dialog first
-    
+
     final confirmed = await showConfirmationDialog(
       context,
       'Restore Machine',
@@ -71,14 +71,14 @@ class AdminMachineViewDialog extends StatelessWidget {
       try {
         await controller.restoreMachine(machine.machineId);
         if (!context.mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${machine.machineName} restored successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Delay before refresh
         await Future.delayed(const Duration(milliseconds: 1000));
         if (!context.mounted) return;
@@ -101,17 +101,15 @@ class AdminMachineViewDialog extends StatelessWidget {
 
   void _handleEdit(BuildContext context) {
     Navigator.pop(context); // Close view dialog first
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => EditMachineModal(
-        controller: controller,
-        machine: machine,
-      ),
+      builder: (context) =>
+          EditMachineModal(controller: controller, machine: machine),
     );
   }
 
@@ -121,7 +119,8 @@ class AdminMachineViewDialog extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => MainNavigation(
-          focusedMachine: machine, // ⭐ Switch to operator navigation with focused machine
+          focusedMachine:
+              machine, // ⭐ Switch to operator navigation with focused machine
         ),
       ),
     );
@@ -132,9 +131,7 @@ class AdminMachineViewDialog extends StatelessWidget {
     final isArchived = machine.isArchived;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -199,10 +196,7 @@ class AdminMachineViewDialog extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'ID: ${machine.machineId}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                       ),
                     ],
                   ),

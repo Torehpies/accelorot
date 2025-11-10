@@ -1,11 +1,8 @@
-// lib/frontend/screens/restricted_access_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'team_selection_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
 class RestrictedAccessScreen extends StatefulWidget {
   final String reason;
@@ -46,10 +43,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
           content: Text(
             'This will remove you from the team completely. You can request to join another team or rejoin this one later.\n\n'
             'Are you sure you want to continue?',
-            style: TextStyle(
-              fontSize: isDesktop ? 16 : 14,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: isDesktop ? 16 : 14, height: 1.5),
           ),
           actions: [
             TextButton(
@@ -111,9 +105,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
 
           // 2. Remove teamId from user document
           final userRef = firestore.collection('users').doc(user.uid);
-          batch.update(userRef, {
-            'teamId': FieldValue.delete(),
-          });
+          batch.update(userRef, {'teamId': FieldValue.delete()});
 
           await batch.commit();
 
@@ -286,13 +278,11 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                                 await FirebaseAuth.instance.signOut();
                                 if (!context.mounted) return;
                                 Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) => kIsWeb
-                                      ? const WebLoginScreen()
-                                      : const LoginScreen(),
-                                ),
-                                (route) => false,
-                              );
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                  (route) => false,
+                                );
                               },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.teal,
