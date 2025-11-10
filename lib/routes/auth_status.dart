@@ -6,14 +6,20 @@ enum AuthStatus {
   unverified,
   teamSelection,
   pendingAdminApproval,
+  archived,
   authenticated,
 }
 
 class AuthStatusState {
   final AuthStatus status;
   final String? role;
+  final String? restrictedReason;
 
-  const AuthStatusState({required this.status, this.role});
+  const AuthStatusState({
+    required this.status,
+    this.role,
+    this.restrictedReason,
+  });
 
   factory AuthStatusState.loading() =>
       const AuthStatusState(status: AuthStatus.loading);
@@ -25,6 +31,10 @@ class AuthStatusState {
       const AuthStatusState(status: AuthStatus.teamSelection);
   factory AuthStatusState.pendingAdminApproval() =>
       const AuthStatusState(status: AuthStatus.pendingAdminApproval);
+  factory AuthStatusState.archived() => const AuthStatusState(
+    status: AuthStatus.archived,
+    restrictedReason: 'archived',
+  );
   factory AuthStatusState.authenticated({required String role}) =>
       AuthStatusState(status: AuthStatus.authenticated, role: role);
 }

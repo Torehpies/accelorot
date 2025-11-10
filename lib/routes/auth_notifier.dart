@@ -69,6 +69,12 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
 
     final data = doc.data()! as Map<String, dynamic>;
     final userRole = data['role'] as String?;
+		final isArchived = data['isArchived'] as bool? ?? false;
+
+		if (isArchived) {
+			state = AuthStatusState.archived();
+			return;
+		}
 
     if (userRole == null) {
       state = AuthStatusState.teamSelection();

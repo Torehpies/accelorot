@@ -45,18 +45,15 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
           content: Text(
             'This will remove you from the team completely. You can request to join another team or rejoin this one later.\n\n'
             'Are you sure you want to continue?',
-            style: TextStyle(
-              fontSize: isDesktop ? 16 : 14,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: isDesktop ? 16 : 14, height: 1.5),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () => FirebaseAuth.instance.signOut(),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () => FirebaseAuth.instance.signOut(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -110,9 +107,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
 
           // 2. Remove teamId from user document
           final userRef = firestore.collection('users').doc(user.uid);
-          batch.update(userRef, {
-            'teamId': FieldValue.delete(),
-          });
+          batch.update(userRef, {'teamId': FieldValue.delete()});
 
           await batch.commit();
 
@@ -169,150 +164,148 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: isDesktop ? 600 : double.infinity,
-            ),
-            padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
-            child: Card(
-              elevation: isDesktop ? 10 : 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: isDesktop ? 600 : double.infinity,
               ),
-              child: Padding(
-                padding: EdgeInsets.all(isDesktop ? 48.0 : 32.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Icon
-                    Container(
-                      width: isDesktop ? 100 : 80,
-                      height: isDesktop ? 100 : 80,
-                      decoration: BoxDecoration(
-                        color: widget.reason == 'archived'
-                            ? Colors.orange.shade100
-                            : Colors.red.shade100,
-                        shape: BoxShape.circle,
+              padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
+              child: Card(
+                elevation: isDesktop ? 10 : 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(isDesktop ? 48.0 : 32.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon
+                      Container(
+                        width: isDesktop ? 100 : 80,
+                        height: isDesktop ? 100 : 80,
+                        decoration: BoxDecoration(
+                          color: widget.reason == 'archived'
+                              ? Colors.orange.shade100
+                              : Colors.red.shade100,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.reason == 'archived'
+                              ? Icons.lock
+                              : Icons.exit_to_app,
+                          size: isDesktop ? 50 : 40,
+                          color: widget.reason == 'archived'
+                              ? Colors.orange.shade700
+                              : Colors.red.shade700,
+                        ),
                       ),
-                      child: Icon(
+                      SizedBox(height: isDesktop ? 32 : 24),
+
+                      // Title
+                      Text(
                         widget.reason == 'archived'
-                            ? Icons.lock
-                            : Icons.exit_to_app,
-                        size: isDesktop ? 50 : 40,
-                        color: widget.reason == 'archived'
-                            ? Colors.orange.shade700
-                            : Colors.red.shade700,
+                            ? 'Account Archived'
+                            : 'Team Access Removed',
+                        style: TextStyle(
+                          fontSize: isDesktop ? 28 : 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    SizedBox(height: isDesktop ? 32 : 24),
+                      SizedBox(height: isDesktop ? 20 : 16),
 
-                    // Title
-                    Text(
-                      widget.reason == 'archived'
-                          ? 'Account Archived'
-                          : 'Team Access Removed',
-                      style: TextStyle(
-                        fontSize: isDesktop ? 28 : 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      // Message
+                      Text(
+                        _getMessage(),
+                        style: TextStyle(
+                          fontSize: isDesktop ? 16 : 14,
+                          color: Colors.grey[700],
+                          height: 1.6,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isDesktop ? 20 : 16),
+                      SizedBox(height: isDesktop ? 16 : 32),
 
-                    // Message
-                    Text(
-                      _getMessage(),
-                      style: TextStyle(
-                        fontSize: isDesktop ? 16 : 14,
-                        color: Colors.grey[700],
-                        height: 1.6,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isDesktop ? 48 : 32),
-
-                    // Leave Team Button (only for archived users)
-                    if (widget.reason == 'archived') ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _isLeaving ? null : _leaveTeamPermanently,
-                          icon: _isLeaving
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation(
-                                      Colors.white,
+                      // Leave Team Button (only for archived users)
+                      if (widget.reason == 'archived') ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: _isLeaving
+                                ? null
+                                : _leaveTeamPermanently,
+                            icon: _isLeaving
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation(
+                                        Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : const Icon(Icons.exit_to_app),
-                          label: Text(
-                            _isLeaving
-                                ? 'Leaving...'
-                                : 'Leave Team Permanently',
-                            style: TextStyle(
-                              fontSize: isDesktop ? 16 : 14,
-                              fontWeight: FontWeight.bold,
+                                  )
+                                : const Icon(Icons.exit_to_app),
+                            label: Text(
+                              _isLeaving
+                                  ? 'Leaving...'
+                                  : 'Leave Team Permanently',
+                              style: TextStyle(
+                                fontSize: isDesktop ? 16 : 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isDesktop ? 18 : 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
+                        ),
+                        SizedBox(height: isDesktop ? 16 : 12),
+                      ],
+
+                      // Back to Login Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: _isLeaving
+                              ? null
+                              : () async {
+                                  await FirebaseAuth.instance.signOut();
+                                },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.teal,
+                            side: const BorderSide(
+                              color: Colors.teal,
+                              width: 2,
+                            ),
                             padding: EdgeInsets.symmetric(
                               vertical: isDesktop ? 18 : 16,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            elevation: 4,
+                          ),
+                          child: Text(
+                            'Back to Login',
+                            style: TextStyle(
+                              fontSize: isDesktop ? 16 : 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(height: isDesktop ? 16 : 12),
                     ],
-
-                    // Back to Login Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: _isLeaving
-                            ? null
-                            : () async {
-                                await FirebaseAuth.instance.signOut();
-                                if (!context.mounted) return;
-                                Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) => kIsWeb
-                                      ? const WebLoginScreen()
-                                      : const LoginScreen(),
-                                ),
-                                (route) => false,
-                              );
-                              },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.teal,
-                          side: const BorderSide(color: Colors.teal, width: 2),
-                          padding: EdgeInsets.symmetric(
-                            vertical: isDesktop ? 18 : 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Back to Login',
-                          style: TextStyle(
-                            fontSize: isDesktop ? 16 : 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

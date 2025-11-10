@@ -23,6 +23,8 @@ FutureOr<String?> appRouteRedirect(
     '/pending',
     '/loading',
     '/',
+    '/restricted',
+    '/forgot-password',
   ];
 
   final isFlowGate = flowGatePaths.contains(currentPath);
@@ -59,6 +61,11 @@ FutureOr<String?> appRouteRedirect(
       return currentPath == RoutePath.pending.path
           ? null
           : RoutePath.pending.path;
+
+    case AuthStatus.archived:
+      return currentPath == RoutePath.restricted.path
+          ? null
+          : RoutePath.restricted.path;
 
     case AuthStatus.authenticated:
       // User is fully authenticated.

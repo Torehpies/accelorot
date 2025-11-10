@@ -129,7 +129,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.restricted.path,
         name: RoutePath.restricted.name,
         builder: (context, state) {
-          final reason = state.extra as String?;
+          final extraReason = state.extra as String?;
+
+					final authStatusState = ref.read(authStateProvider);
+					final fallbackReason = authStatusState.restrictedReason;
+
+					final reason = extraReason ?? fallbackReason;
           return RestrictedAccessScreen(reason: reason ?? 'Unknown reason');
         },
       ),
