@@ -16,7 +16,7 @@ class WebActivityLogsScreen extends StatefulWidget {
   final String? focusedMachineId;
 
   const WebActivityLogsScreen({
-    super.key, 
+    super.key,
     this.shouldRefresh = false,
     this.focusedMachineId,
   });
@@ -27,33 +27,43 @@ class WebActivityLogsScreen extends StatefulWidget {
 
 class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   String selectedTab = 'all';
-  
+
   // Substrate state
   String _substrateFilter = 'All';
   String _substrateSearch = '';
   int _substratePage = 1;
-  DateFilterRange _substrateDateFilter = DateFilterRange(type: DateFilterType.none);
-  final TextEditingController _substrateSearchController = TextEditingController();
-  
+  DateFilterRange _substrateDateFilter = DateFilterRange(
+    type: DateFilterType.none,
+  );
+  final TextEditingController _substrateSearchController =
+      TextEditingController();
+
   // Alerts state
   String _alertsFilter = 'All';
   String _alertsSearch = '';
   int _alertsPage = 1;
-  DateFilterRange _alertsDateFilter = DateFilterRange(type: DateFilterType.none);
+  DateFilterRange _alertsDateFilter = DateFilterRange(
+    type: DateFilterType.none,
+  );
   final TextEditingController _alertsSearchController = TextEditingController();
-  
+
   // Reports state
   String _reportsFilter = 'All';
   String _reportsSearch = '';
   int _reportsPage = 1;
-  DateFilterRange _reportsDateFilter = DateFilterRange(type: DateFilterType.none);
-  final TextEditingController _reportsSearchController = TextEditingController();
-  
+  DateFilterRange _reportsDateFilter = DateFilterRange(
+    type: DateFilterType.none,
+  );
+  final TextEditingController _reportsSearchController =
+      TextEditingController();
+
   // Cycles state
   String _cyclesFilter = 'All';
   String _cyclesSearch = '';
   int _cyclesPage = 1;
-  DateFilterRange _cyclesDateFilter = DateFilterRange(type: DateFilterType.none);
+  DateFilterRange _cyclesDateFilter = DateFilterRange(
+    type: DateFilterType.none,
+  );
   final TextEditingController _cyclesSearchController = TextEditingController();
 
   final int _itemsPerPage = 10;
@@ -74,19 +84,19 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       _substratePage = 1;
       _substrateDateFilter = DateFilterRange(type: DateFilterType.none);
       _substrateSearchController.clear();
-      
+
       _alertsFilter = 'All';
       _alertsSearch = '';
       _alertsPage = 1;
       _alertsDateFilter = DateFilterRange(type: DateFilterType.none);
       _alertsSearchController.clear();
-      
+
       _reportsFilter = 'All';
       _reportsSearch = '';
       _reportsPage = 1;
       _reportsDateFilter = DateFilterRange(type: DateFilterType.none);
       _reportsSearchController.clear();
-      
+
       _cyclesFilter = 'All';
       _cyclesSearch = '';
       _cyclesPage = 1;
@@ -185,33 +195,28 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   }
 
   Widget _buildDateFilter() {
-    DateFilterRange currentFilter;
     ValueChanged<DateFilterRange> onChanged;
 
     switch (selectedTab) {
       case 'substrate':
-        currentFilter = _substrateDateFilter;
         onChanged = (filter) => setState(() {
           _substrateDateFilter = filter;
           _substratePage = 1;
         });
         break;
       case 'alerts':
-        currentFilter = _alertsDateFilter;
         onChanged = (filter) => setState(() {
           _alertsDateFilter = filter;
           _alertsPage = 1;
         });
         break;
       case 'reports':
-        currentFilter = _reportsDateFilter;
         onChanged = (filter) => setState(() {
           _reportsDateFilter = filter;
           _reportsPage = 1;
         });
         break;
       case 'cycles':
-        currentFilter = _cyclesDateFilter;
         onChanged = (filter) => setState(() {
           _cyclesDateFilter = filter;
           _cyclesPage = 1;
@@ -260,7 +265,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                     label,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey[700],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -289,8 +296,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         return isWideScreen
             ? buildWideLayout()
             : isMediumScreen
-                ? buildMediumLayout()
-                : buildNarrowLayout();
+            ? buildMediumLayout()
+            : buildNarrowLayout();
     }
   }
 
@@ -531,7 +538,12 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
         return buildFullViewContent(
           items: filteredItems,
-          filterOptions: const ['All', 'Maintenance Issue', 'Observation', 'Safety Concern'],
+          filterOptions: const [
+            'All',
+            'Maintenance Issue',
+            'Observation',
+            'Safety Concern',
+          ],
           currentFilter: _reportsFilter,
           currentSearch: _reportsSearch,
           currentPage: _reportsPage,
@@ -609,8 +621,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     if (filter != 'All') {
       filtered = filtered.where((item) {
         if (item.isReport) {
-          return item.reportType?.toLowerCase() == filter.toLowerCase().replaceAll(' ', '_') ||
-                 item.category.toLowerCase() == filter.toLowerCase();
+          return item.reportType?.toLowerCase() ==
+                  filter.toLowerCase().replaceAll(' ', '_') ||
+              item.category.toLowerCase() == filter.toLowerCase();
         }
         return item.category.toLowerCase() == filter.toLowerCase();
       }).toList();
@@ -618,14 +631,18 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     // Apply search filter
     if (search.isNotEmpty) {
-      filtered = filtered.where((item) => item.matchesSearchQuery(search)).toList();
+      filtered = filtered
+          .where((item) => item.matchesSearchQuery(search))
+          .toList();
     }
 
     // Apply date filter
-    if (dateFilter.isActive && dateFilter.startDate != null && dateFilter.endDate != null) {
+    if (dateFilter.isActive &&
+        dateFilter.startDate != null &&
+        dateFilter.endDate != null) {
       filtered = filtered.where((item) {
         return item.timestamp.isAfter(dateFilter.startDate!) &&
-               item.timestamp.isBefore(dateFilter.endDate!);
+            item.timestamp.isBefore(dateFilter.endDate!);
       }).toList();
     }
 
@@ -644,7 +661,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     required ValueChanged<String> onSearchChanged,
     required ValueChanged<int> onPageChanged,
   }) {
-    final totalPages = items.isEmpty ? 1 : (items.length / _itemsPerPage).ceil();
+    final totalPages = items.isEmpty
+        ? 1
+        : (items.length / _itemsPerPage).ceil();
     final startIndex = (currentPage - 1) * _itemsPerPage;
     final endIndex = startIndex + _itemsPerPage;
     final paginatedItems = items.sublist(
@@ -688,17 +707,26 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                         onTap: () => onFilterChanged(filter),
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.teal : Colors.transparent,
+                            color: isSelected
+                                ? Colors.teal
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             filter,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.grey[700],
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey[700],
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               fontSize: 14,
                             ),
                           ),
@@ -710,9 +738,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               }).toList(),
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Search Bar (40% width)
           Row(
             children: [
@@ -730,10 +758,16 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search activities...',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.grey.shade600,
+                      ),
                       suffixIcon: currentSearch.isNotEmpty
                           ? IconButton(
-                              icon: Icon(Icons.clear, color: Colors.grey.shade600),
+                              icon: Icon(
+                                Icons.clear,
+                                color: Colors.grey.shade600,
+                              ),
                               onPressed: () {
                                 searchController.clear();
                                 onSearchChanged('');
@@ -741,7 +775,10 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -749,23 +786,27 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               const Spacer(flex: 6),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Results Count
           Text(
-            items.isEmpty 
-              ? 'No results found'
-              : 'Showing ${items.isEmpty ? 0 : startIndex + 1}-${startIndex + paginatedItems.length} of ${items.length}',
-            style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            items.isEmpty
+                ? 'No results found'
+                : 'Showing ${items.isEmpty ? 0 : startIndex + 1}-${startIndex + paginatedItems.length} of ${items.length}',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           const Divider(height: 1),
-          
+
           const SizedBox(height: 8),
-          
+
           // Activity Cards
           if (items.isEmpty)
             Center(
@@ -782,11 +823,15 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: paginatedItems.length,
-              separatorBuilder: (context, index) => const Divider(height: 1, color: Colors.grey),
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 1, color: Colors.grey),
               itemBuilder: (context, index) {
                 final item = paginatedItems[index];
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   leading: CircleAvatar(
                     radius: 16,
                     backgroundColor: item.statusColorValue,
@@ -837,7 +882,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                 );
               },
             ),
-          
+
           // Pagination
           if (totalPages > 1) ...[
             const SizedBox(height: 16),
@@ -853,42 +898,41 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                       : null,
                 ),
                 const SizedBox(width: 8),
-                ...List.generate(
-                  totalPages > 5 ? 5 : totalPages,
-                  (index) {
-                    int pageNumber;
-                    if (totalPages <= 5) {
-                      pageNumber = index + 1;
-                    } else if (currentPage <= 3) {
-                      pageNumber = index + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNumber = totalPages - 4 + index;
-                    } else {
-                      pageNumber = currentPage - 2 + index;
-                    }
+                ...List.generate(totalPages > 5 ? 5 : totalPages, (index) {
+                  int pageNumber;
+                  if (totalPages <= 5) {
+                    pageNumber = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + index;
+                  } else {
+                    pageNumber = currentPage - 2 + index;
+                  }
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: TextButton(
-                        onPressed: () => onPageChanged(pageNumber),
-                        style: TextButton.styleFrom(
-                          backgroundColor: currentPage == pageNumber
-                              ? Colors.teal
-                              : Colors.grey[200],
-                          minimumSize: const Size(40, 40),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Text(
-                          '$pageNumber',
-                          style: TextStyle(
-                            color: currentPage == pageNumber ? Colors.white : Colors.black87,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: TextButton(
+                      onPressed: () => onPageChanged(pageNumber),
+                      style: TextButton.styleFrom(
+                        backgroundColor: currentPage == pageNumber
+                            ? Colors.teal
+                            : Colors.grey[200],
+                        minimumSize: const Size(40, 40),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text(
+                        '$pageNumber',
+                        style: TextStyle(
+                          color: currentPage == pageNumber
+                              ? Colors.white
+                              : Colors.black87,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }),
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
