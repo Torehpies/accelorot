@@ -66,13 +66,7 @@ Future<void> handleLogout(
 
   if (shouldLogout == true && context.mounted) {
     // Read providers from the nearest ProviderScope without requiring a WidgetRef.
-    final container = ProviderScope.containerOf(context, listen: false);
-    try {
-      await container.read(authRepositoryProvider).signOut();
-    } catch (_) {
-      // Fallback to direct Firebase sign out (e.g., if GoogleSignIn signOut throws on web)
-      await FirebaseAuth.instance.signOut();
-    }
+    await FirebaseAuth.instance.signOut();
   }
 }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_state.dart';
@@ -23,7 +24,6 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
 
     Future.microtask(() {
       _startVerificationCheck();
-      // No initial cooldown timer start here
     });
 
     ref.onDispose(() {
@@ -38,31 +38,38 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
   // --- Core Verification Logic FIX ---
 
   void _startVerificationCheck() {
-    // Cancel any previous timer before starting a new one
     _verificationTimer?.cancel();
-    
-    _verificationTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-      final authRepo = ref.read(authRepositoryProvider);
 
-      // If the user logs out, stop the polling
-      if (authRepo.currentUser == null) {
-        _verificationTimer?.cancel();
-        return;
+    _verificationTimer = Timer.periodic(const Duration(seconds: 3), (
+      timer,
+    ) async {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        await user.reload();
+
+        final updatedUser = FirebaseAuth.instance.currentUser;
+
+        if (updatedUser != null && updatedUser.emailVerified) {
+          timer.cancel();
+          state = state.copyWith(isVerified: true);
+
+          ref.read(authStateProvider.notifier).handleAuthChange(updatedUser);
+
+          _startRedirectCountdown();
+          return;
+        }
       }
 
-      final isVerified = await authRepo.checkAndReloadEmailVerified();
-
-      if (isVerified) {
-        _onVerificationSuccess();
+      if (user == null) {
+        timer.cancel();
       }
     });
   }
-  
-  Future<void> _onVerificationSuccess() async {
-    _verificationTimer?.cancel();
-    state = state.copyWith(isVerified: true);
-		final authRepo = ref.read(authRepositoryProvider);
-		await authRepo.updateIsEmailVerified(authRepo.currentUser!.uid, true);
+
+  void _startRedirectCountdown() {
+    _redirectTimer?.cancel();
+    state = state.copyWith(dashboardCountdown: 3);
 
     _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (state.dashboardCountdown > 0) {
@@ -75,11 +82,28 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     });
   }
 
+  //Future<void> _onVerificationSuccess() async {
+  //  _verificationTimer?.cancel();
+  //  state = state.copyWith(isVerified: true);
+  //  final authRepo = ref.read(authRepositoryProvider);
+  //  await authRepo.updateIsEmailVerified(authRepo.currentUser!.uid, true);
+
+  //  _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+  //    if (state.dashboardCountdown > 0) {
+  //      state = state.copyWith(
+  //        dashboardCountdown: state.dashboardCountdown - 1,
+  //      );
+  //    } else {
+  //      timer.cancel();
+  //    }
+  //  });
+  //}
+
   // --- Cooldown Logic (Starts only on successful send) ---
 
   void _startCooldown() {
     _cooldownTimer?.cancel();
-    state = state.copyWith(resendCooldown: _cooldownDuration); 
+    state = state.copyWith(resendCooldown: _cooldownDuration);
 
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (state.resendCooldown > 0) {
@@ -97,17 +121,15 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
     if (state.resendCooldown > 0 || state.isResending) return;
 
     state = state.copyWith(isResending: true);
-    
+
     try {
       await ref.read(authRepositoryProvider).sendVerificationEmail();
       _startCooldown(); // Success: Start cooldown
-
     } on FirebaseAuthException catch (e) {
-			debugPrint(e.toString());
+      debugPrint(e.toString());
       rethrow;
-      
     } catch (e) {
-			debugPrint(e.toString());
+      debugPrint(e.toString());
       rethrow;
     } finally {
       state = state.copyWith(isResending: false);
@@ -115,10 +137,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
   }
 
   Future<void> signOutAndNavigate() async {
-    try {
-      await ref.read(authRepositoryProvider).signOut();
-    } catch (_) {
-      await FirebaseAuth.instance.signOut();
-    }
+    await ref.read(authRepositoryProvider).signOut();
+    await FirebaseAuth.instance.signOut();
   }
 }

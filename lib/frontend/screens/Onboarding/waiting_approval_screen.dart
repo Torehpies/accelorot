@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
-import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,51 +13,31 @@ class WaitingApprovalScreen extends ConsumerStatefulWidget {
 }
 
 class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
-  final AuthService _auth = AuthService();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _loading = false;
 
-  Future<void> _cancelRequest() async {
-    final user = _auth.getCurrentUser();
-    if (user == null) return;
-
-    setState(() => _loading = true);
-
+  Future<void> _cancelRequest(BuildContext context, WidgetRef ref) async {
+		setState(() => _loading = true);
+    final authNotifier = ref.read(authStateProvider.notifier);
     try {
-      // Get the pendingTeamId before clearing it
-      final userDoc = await _firestore.collection('users').doc(user.uid).get();
-      final pendingTeamId = userDoc.data()?['pendingTeamSelection'] as String?;
-
-      if (pendingTeamId != null) {
-        final batch = _firestore.batch();
-
-        // 1. Remove from pending_members subcollection
-        final pendingRef = _firestore
-            .collection('teams')
-            .doc(pendingTeamId)
-            .collection('pending_members')
-            .doc(user.uid);
-        batch.delete(pendingRef);
-
-        // 2. Clear pendingTeamId from user document
-        final userRef = _firestore.collection('users').doc(user.uid);
-        batch.update(userRef, {'pendingTeamSelection': FieldValue.delete()});
-
-        await batch.commit();
-      }
-//      final authListenable = ref.read(authListenableProvider.notifier);
-//      await authListenable.refreshIsPending();
-      if (!mounted) return;
-      showSnackbar(context, 'Request to join team has been cancelled!');
+      await authNotifier.cancelTeam();
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error canceling request: $e')));
-      });
+      showSnackbar(
+        context,
+        'Failed to cancel request. Please try again.',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      showSnackbar(
+        context,
+        'Failed to log out. Please try again.',
+        isError: true,
+      );
     }
   }
 
@@ -153,7 +131,8 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _loading ? null : _cancelRequest,
+                        //onPressed: _loading ? null : _cancelRequest,
+												onPressed: () => _cancelRequest(context, ref),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
                           foregroundColor: Colors.white,
@@ -191,9 +170,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
-                        onPressed: () async {
-                          await FirebaseAuth.instance.signOut();
-                        },
+                        onPressed: () => _signOut(context),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.teal,
                           side: const BorderSide(color: Colors.teal),

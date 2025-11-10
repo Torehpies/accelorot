@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/routes/auth_status.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -17,7 +16,7 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   AuthNotifier(this.ref) : super(AuthStatusState.loading()) {
-    _authStateSubscription = _auth.authStateChanges().listen(_handleAuthChange);
+    _authStateSubscription = _auth.authStateChanges().listen(handleAuthChange);
   }
 
   @override
@@ -31,17 +30,29 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
     return _firestore.collection('users').doc(userId);
   }
 
-  Future<void> _handleAuthChange(User? user) async {
+  // public checker for auth changes
+  Future<void> handleAuthChange(User? user) async {
+    final bool wasUnverified = state.status == AuthStatus.unverified;
+
     if (user == null) {
       _firestoreSubscription?.cancel();
+			_firestoreSubscription = null;
       state = AuthStatusState.unauthenticated();
       return;
     }
 
     if (!user.emailVerified) {
       _firestoreSubscription?.cancel();
+			_firestoreSubscription = null;
       state = AuthStatusState.unverified();
       return;
+    }
+
+    if (wasUnverified) {
+      debugPrint(
+        'User verified. Forcing state to teamSelection for immediate redirect',
+      );
+			state = AuthStatusState.teamSelection();
     }
 
     _firestoreSubscription ??= _getUserDocRef(user.uid).snapshots().listen(
