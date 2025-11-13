@@ -10,6 +10,7 @@ class OperatorDetailPanel extends StatelessWidget {
   final VoidCallback? onArchive;
   final VoidCallback? onRestore;
   final VoidCallback? onViewDashboard;
+  final VoidCallback? onRemovePermanently;
   final bool showArchived;
 
   const OperatorDetailPanel({
@@ -19,6 +20,7 @@ class OperatorDetailPanel extends StatelessWidget {
     this.onArchive,
     this.onRestore,
     this.onViewDashboard,
+    this.onRemovePermanently,
     required this.showArchived,
   });
 
@@ -60,7 +62,7 @@ class OperatorDetailPanel extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          
+
           // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
@@ -77,7 +79,9 @@ class OperatorDetailPanel extends StatelessWidget {
                           height: 80,
                           decoration: BoxDecoration(
                             color: ThemeConstants.tealShade100,
-                            borderRadius: BorderRadius.circular(ThemeConstants.borderRadius16),
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.borderRadius16,
+                            ),
                           ),
                           child: Icon(
                             Icons.person,
@@ -103,8 +107,12 @@ class OperatorDetailPanel extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: ThemeConstants.tealShade50,
-                            borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
-                            border: Border.all(color: ThemeConstants.tealShade200),
+                            borderRadius: BorderRadius.circular(
+                              ThemeConstants.borderRadius8,
+                            ),
+                            border: Border.all(
+                              color: ThemeConstants.tealShade200,
+                            ),
                           ),
                           child: Text(
                             operator.role,
@@ -119,7 +127,7 @@ class OperatorDetailPanel extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: ThemeConstants.spacing24),
-                  
+
                   // Information Section
                   Text(
                     'Contact Information',
@@ -130,20 +138,20 @@ class OperatorDetailPanel extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: ThemeConstants.spacing12),
-                  
+
                   _buildDetailRow(
                     Icons.email_outlined,
                     'Email Address',
                     operator.email,
                   ),
                   const SizedBox(height: ThemeConstants.spacing16),
-                  
+
                   _buildDetailRow(
                     Icons.calendar_today_outlined,
                     'Date Added',
                     operator.formatDate(operator.addedAt),
                   ),
-                  
+
                   if (operator.isArchived) ...[
                     const SizedBox(height: ThemeConstants.spacing16),
                     _buildDetailRow(
@@ -152,9 +160,9 @@ class OperatorDetailPanel extends StatelessWidget {
                       operator.formatDate(operator.archivedAt),
                     ),
                   ],
-                  
+
                   const SizedBox(height: ThemeConstants.spacing24),
-                  
+
                   // Status Section
                   Text(
                     'Status',
@@ -165,48 +173,102 @@ class OperatorDetailPanel extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: ThemeConstants.spacing12),
-                  
+
                   Container(
                     padding: const EdgeInsets.all(ThemeConstants.spacing12),
                     decoration: BoxDecoration(
-                      color: operator.isArchived 
-                          ? ThemeConstants.orangeShade50 
+                      color: hasLeft
+                          ? Colors.red.shade50
+                          : operator.isArchived
+                          ? ThemeConstants.orangeShade50
                           : ThemeConstants.greenShade50,
-                      borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                      borderRadius: BorderRadius.circular(
+                        ThemeConstants.borderRadius8,
+                      ),
                       border: Border.all(
-                        color: operator.isArchived 
-                            ? ThemeConstants.orangeShade600 
+                        color: hasLeft
+                            ? Colors.red.shade600
+                            : operator.isArchived
+                            ? ThemeConstants.orangeShade600
                             : ThemeConstants.greenShade600,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          operator.isArchived ? Icons.archive : Icons.check_circle,
-                          color: operator.isArchived 
-                              ? ThemeConstants.orangeShade600 
+                          hasLeft
+                              ? Icons.person_off
+                              : operator.isArchived
+                              ? Icons.archive
+                              : Icons.check_circle,
+                          color: hasLeft
+                              ? Colors.red.shade600
+                              : operator.isArchived
+                              ? ThemeConstants.orangeShade600
                               : ThemeConstants.greenShade600,
                           size: ThemeConstants.iconSize18,
                         ),
                         const SizedBox(width: ThemeConstants.spacing8),
-                        Text(
-                          operator.isArchived ? 'Archived' : 'Active',
-                          style: TextStyle(
-                            color: operator.isArchived 
-                                ? ThemeConstants.orangeShade600 
-                                : ThemeConstants.greenShade600,
-                            fontWeight: FontWeight.w600,
-                            fontSize: ThemeConstants.fontSize13,
+                        Expanded(
+                          child: Text(
+                            hasLeft
+                                ? 'Permanently Removed'
+                                : operator.isArchived
+                                ? 'Archived'
+                                : 'Active',
+                            style: TextStyle(
+                              color: hasLeft
+                                  ? Colors.red.shade600
+                                  : operator.isArchived
+                                  ? ThemeConstants.orangeShade600
+                                  : ThemeConstants.greenShade600,
+                              fontWeight: FontWeight.w600,
+                              fontSize: ThemeConstants.fontSize13,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+
+                  // Additional info for permanently removed operators
+                  if (hasLeft && operator.leftAt != null) ...[
+                    const SizedBox(height: ThemeConstants.spacing12),
+                    Container(
+                      padding: const EdgeInsets.all(ThemeConstants.spacing12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius8,
+                        ),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.red.shade600,
+                            size: ThemeConstants.iconSize18,
+                          ),
+                          const SizedBox(width: ThemeConstants.spacing8),
+                          Expanded(
+                            child: Text(
+                              'This operator was permanently removed on ${operator.formatDate(operator.leftAt)} and cannot be restored.',
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: ThemeConstants.fontSize12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
-          
+
           // Action Buttons at Bottom
           const Divider(height: 1),
           Padding(
@@ -218,7 +280,10 @@ class OperatorDetailPanel extends StatelessWidget {
                 if (onViewDashboard != null) ...[
                   ElevatedButton.icon(
                     onPressed: onViewDashboard,
-                    icon: const Icon(Icons.dashboard, size: ThemeConstants.iconSize18),
+                    icon: const Icon(
+                      Icons.dashboard,
+                      size: ThemeConstants.iconSize18,
+                    ),
                     label: const Text(
                       'View Dashboard',
                       style: TextStyle(fontSize: ThemeConstants.fontSize14),
@@ -228,18 +293,23 @@ class OperatorDetailPanel extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius10,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: ThemeConstants.spacing12),
                 ],
-                
+
                 // Archive Button (only for active operators)
                 if (!showArchived && !hasLeft && onArchive != null) ...[
                   ElevatedButton.icon(
                     onPressed: onArchive,
-                    icon: const Icon(Icons.archive, size: ThemeConstants.iconSize18),
+                    icon: const Icon(
+                      Icons.archive,
+                      size: ThemeConstants.iconSize18,
+                    ),
                     label: const Text(
                       'Archive',
                       style: TextStyle(fontSize: ThemeConstants.fontSize14),
@@ -249,17 +319,50 @@ class OperatorDetailPanel extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius10,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: ThemeConstants.spacing12),
+                ],
+
+                // Remove Permanently Button (only for active operators)
+                if (!showArchived &&
+                    !hasLeft &&
+                    onRemovePermanently != null) ...[
+                  OutlinedButton.icon(
+                    onPressed: onRemovePermanently,
+                    icon: const Icon(
+                      Icons.delete_forever,
+                      size: ThemeConstants.iconSize18,
+                    ),
+                    label: const Text(
+                      'Remove Permanently',
+                      style: TextStyle(fontSize: ThemeConstants.fontSize14),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red, width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius10,
+                        ),
                       ),
                     ),
                   ),
                 ],
-                
+
                 // Restore Button (only for archived operators who haven't left)
                 if (showArchived && !hasLeft && onRestore != null) ...[
                   ElevatedButton.icon(
                     onPressed: onRestore,
-                    icon: const Icon(Icons.restore, size: ThemeConstants.iconSize18),
+                    icon: const Icon(
+                      Icons.restore,
+                      size: ThemeConstants.iconSize18,
+                    ),
                     label: const Text(
                       'Restore',
                       style: TextStyle(fontSize: ThemeConstants.fontSize14),
@@ -269,7 +372,9 @@ class OperatorDetailPanel extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
+                        borderRadius: BorderRadius.circular(
+                          ThemeConstants.borderRadius10,
+                        ),
                       ),
                     ),
                   ),
@@ -293,7 +398,11 @@ class OperatorDetailPanel extends StatelessWidget {
             color: ThemeConstants.greyShade100,
             borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
           ),
-          child: Icon(icon, color: ThemeConstants.greyShade700, size: ThemeConstants.iconSize18),
+          child: Icon(
+            icon,
+            color: ThemeConstants.greyShade700,
+            size: ThemeConstants.iconSize18,
+          ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
         Expanded(

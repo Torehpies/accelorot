@@ -25,7 +25,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   Future<void> _loadUserData() async {
     if (widget.viewingOperatorId != null) {
-      final data = await OperatorViewService.getOperatorDetails(widget.viewingOperatorId!);
+      final data = await OperatorViewService.getOperatorDetails(
+        widget.viewingOperatorId!,
+      );
       if (mounted) {
         setState(() {
           _userData = data;
@@ -120,16 +122,16 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     const SizedBox(height: 8),
                     Text(
                       email,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     // Show viewing badge if admin is viewing
                     if (_isViewingAsAdmin)
                       Container(
                         margin: const EdgeInsets.only(top: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,
                           border: Border.all(color: Colors.blue.shade200),
@@ -179,10 +181,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         const SizedBox(height: 4),
         Text(
           value.isNotEmpty ? value : 'N/A',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-          ),
+          style: const TextStyle(fontSize: 16, color: Colors.black),
         ),
         const Divider(height: 24),
       ],

@@ -30,7 +30,7 @@ class ReportModel {
   /// Create ReportModel from Firestore DocumentSnapshot
   factory ReportModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return ReportModel(
       reportId: doc.id,
       machineId: data['machineId'] ?? '',
@@ -133,12 +133,12 @@ class ReportModel {
   bool matchesSearchQuery(String query) {
     final lowerQuery = query.toLowerCase();
     return title.toLowerCase().contains(lowerQuery) ||
-           description.toLowerCase().contains(lowerQuery) ||
-           (machineName?.toLowerCase().contains(lowerQuery) ?? false) ||
-           machineId.toLowerCase().contains(lowerQuery) ||
-           userName.toLowerCase().contains(lowerQuery) ||
-           reportTypeLabel.toLowerCase().contains(lowerQuery) ||
-           statusLabel.toLowerCase().contains(lowerQuery) ||
-           priorityLabel.toLowerCase().contains(lowerQuery);
+        description.toLowerCase().contains(lowerQuery) ||
+        (machineName?.toLowerCase().contains(lowerQuery) ?? false) ||
+        machineId.toLowerCase().contains(lowerQuery) ||
+        userName.toLowerCase().contains(lowerQuery) ||
+        reportTypeLabel.toLowerCase().contains(lowerQuery) ||
+        statusLabel.toLowerCase().contains(lowerQuery) ||
+        priorityLabel.toLowerCase().contains(lowerQuery);
   }
 }

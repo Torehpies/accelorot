@@ -27,14 +27,10 @@ class ActivityLogItem extends StatelessWidget {
               color: log.statusColorValue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              log.icon,
-              color: log.statusColorValue,
-              size: 20,
-            ),
+            child: Icon(log.icon, color: log.statusColorValue, size: 20),
           ),
           const SizedBox(width: 12),
-          
+
           // Content
           Expanded(
             child: Column(
@@ -65,14 +61,15 @@ class ActivityLogItem extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                
+
                 // Machine Info
                 if (log.machineName != null || log.machineId != null)
                   Row(
                     children: [
-                      Icon(Icons.precision_manufacturing, 
-                        size: 12, 
-                        color: Colors.grey[600]
+                      Icon(
+                        Icons.precision_manufacturing,
+                        size: 12,
+                        color: Colors.grey[600],
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -87,7 +84,7 @@ class ActivityLogItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                
+
                 // Report Type OR Batch Info
                 if (log.isReport && log.reportType != null)
                   Padding(
@@ -96,8 +93,8 @@ class ActivityLogItem extends StatelessWidget {
                       children: [
                         Icon(
                           _getReportTypeIcon(log.reportType),
-                          size: 12, 
-                          color: Colors.grey[600]
+                          size: 12,
+                          color: Colors.grey[600],
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -119,9 +116,10 @@ class ActivityLogItem extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2),
                     child: Row(
                       children: [
-                        Icon(Icons.inventory_2, 
-                          size: 12, 
-                          color: Colors.grey[600]
+                        Icon(
+                          Icons.inventory_2,
+                          size: 12,
+                          color: Colors.grey[600],
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -138,17 +136,14 @@ class ActivityLogItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                
+
                 // Operator Info
                 if (log.operatorName != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Row(
                       children: [
-                        Icon(Icons.person, 
-                          size: 12, 
-                          color: Colors.grey[600]
-                        ),
+                        Icon(Icons.person, size: 12, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -163,16 +158,13 @@ class ActivityLogItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                
+
                 const SizedBox(height: 2),
-                
+
                 // Timestamp
                 Text(
                   log.formattedTimestamp,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                 ),
               ],
             ),

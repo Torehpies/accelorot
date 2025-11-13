@@ -38,10 +38,7 @@ class InvitationService {
       if (existingCode != null && expiresAt != null) {
         final expiryDate = expiresAt.toDate();
         if (expiryDate.isAfter(DateTime.now())) {
-          return {
-            'code': existingCode,
-            'expiry': _formatDate(expiryDate),
-          };
+          return {'code': existingCode, 'expiry': _formatDate(expiryDate)};
         }
       }
 
@@ -70,10 +67,7 @@ class InvitationService {
       });
     }
 
-    return {
-      'code': code,
-      'expiry': _formatDate(expiry),
-    };
+    return {'code': code, 'expiry': _formatDate(expiry)};
   }
 
   // Generate new invitation code (force new)
@@ -91,10 +85,7 @@ class InvitationService {
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
-    return {
-      'code': code,
-      'expiry': _formatDate(expiry),
-    };
+    return {'code': code, 'expiry': _formatDate(expiry)};
   }
 
   String _formatDate(DateTime date) {

@@ -29,9 +29,7 @@ class MachineManagementSection extends StatelessWidget {
     return Card(
       color: Colors.white,
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -95,10 +93,7 @@ class MachineManagementSection extends StatelessWidget {
         child: const Center(
           child: Text(
             'No machines available',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
       );

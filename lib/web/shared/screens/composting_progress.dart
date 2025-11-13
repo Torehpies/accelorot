@@ -22,10 +22,7 @@ Widget _buildCompostingProgressCard() {
               SizedBox(width: 8),
               Text(
                 'Composting Progress',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -36,7 +33,10 @@ Widget _buildCompostingProgressCard() {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Decomposition', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    const Text(
+                      'Decomposition',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       value: progress / 100,
@@ -45,7 +45,10 @@ Widget _buildCompostingProgressCard() {
                       minHeight: 12,
                     ),
                     const SizedBox(height: 8),
-                    Text('$progress% Complete', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      '$progress% Complete',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
               ),

@@ -22,25 +22,17 @@ class ProfileInfoViewWidget extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: _buildInfoField('Username', displayName),
-            ),
+            Expanded(child: _buildInfoField('Username', displayName)),
             const SizedBox(width: 24),
-            Expanded(
-              child: _buildInfoField('Full Name', fullName),
-            ),
+            Expanded(child: _buildInfoField('Full Name', fullName)),
           ],
         ),
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(
-              child: _buildInfoField('Email Address', email),
-            ),
+            Expanded(child: _buildInfoField('Email Address', email)),
             const SizedBox(width: 24),
-            Expanded(
-              child: _buildInfoField('Role', role),
-            ),
+            Expanded(child: _buildInfoField('Role', role)),
           ],
         ),
       ],
@@ -57,20 +49,11 @@ class ProfileInfoViewWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],
       ),

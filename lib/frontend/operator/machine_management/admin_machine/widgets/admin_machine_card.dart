@@ -19,10 +19,8 @@ class AdminMachineCard extends StatelessWidget {
   void _showMachineViewDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AdminMachineViewDialog(
-        machine: machine,
-        controller: controller,
-      ),
+      builder: (context) =>
+          AdminMachineViewDialog(machine: machine, controller: controller),
     );
   }
 
@@ -83,7 +81,9 @@ class AdminMachineCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
-                              color: isArchived ? Colors.grey[700] : Colors.black,
+                              color: isArchived
+                                  ? Colors.grey[700]
+                                  : Colors.black,
                             ),
                           ),
                         ],
@@ -177,10 +177,7 @@ class AdminMachineCard extends StatelessWidget {
                   value: 'All Team Members',
                 ),
                 const SizedBox(height: 8),
-                MachineDetailRow(
-                  label: 'Date Created:',
-                  value: dateStr,
-                ),
+                MachineDetailRow(label: 'Date Created:', value: dateStr),
               ],
             ),
           ),

@@ -6,10 +6,7 @@ import '../widgets/filter_box.dart';
 class ReportsSection extends StatelessWidget {
   final String? focusedMachineId;
 
-  const ReportsSection({
-    super.key,
-    this.focusedMachineId,
-  });
+  const ReportsSection({super.key, this.focusedMachineId});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +36,11 @@ class ReportsSection extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.report_outlined,
-                          color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.report_outlined,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Reports',

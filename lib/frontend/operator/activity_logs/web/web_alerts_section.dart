@@ -80,7 +80,10 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(32),
@@ -92,17 +95,26 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+          border: Border.all(
+            color: const Color.fromARGB(255, 243, 243, 243),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
+        child: Text(
+          'Error: $_errorMessage',
+          style: const TextStyle(color: Colors.red),
+        ),
       );
     }
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
+        border: Border.all(
+          color: const Color.fromARGB(255, 243, 243, 243),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -137,7 +149,7 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          
+
           if (_alerts.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
@@ -160,14 +172,20 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   title: Text(
                     alert.title,
-                    style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromARGB(255, 48, 47, 47),
+                    ),
                   ),
                   subtitle: Text(
                     '${_formatTime(alert.timestamp)} • ${alert.value}',
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),

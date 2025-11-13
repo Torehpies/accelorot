@@ -28,7 +28,7 @@ class MachineMockData {
         'dateCreated': DateTime(2025, 9, 1),
         'isArchived': false,
       },
-      
+
       // Archived Machines (3)
       {
         'machineName': 'Old Composter 1',

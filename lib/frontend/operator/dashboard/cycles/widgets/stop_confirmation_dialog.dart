@@ -97,10 +97,7 @@ Future<bool> showStopConfirmationDialog(BuildContext context) async {
                   icon: const Icon(Icons.stop_rounded, size: 18),
                   label: const Text(
                     'Stop Cycle',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEF4444), // Red

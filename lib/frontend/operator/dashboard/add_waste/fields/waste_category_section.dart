@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'waste_config.dart';
 import 'info_box.dart';
 
-
 class WasteCategorySection extends StatelessWidget {
   final String? selectedWasteCategory;
   final Function(String?) onCategoryChanged;
   final String? errorText;
-
 
   const WasteCategorySection({
     super.key,
@@ -17,20 +15,18 @@ class WasteCategorySection extends StatelessWidget {
     this.errorText,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (selectedWasteCategory != null)
-          ...[
-            InfoBox(
-              text: wasteCategoryInfo[selectedWasteCategory]!,
-              color: Colors.green,
-              emoji: '',
-            ),
-            const SizedBox(height: 12),
-          ],
+        if (selectedWasteCategory != null) ...[
+          InfoBox(
+            text: wasteCategoryInfo[selectedWasteCategory]!,
+            color: Colors.green,
+            emoji: '',
+          ),
+          const SizedBox(height: 12),
+        ],
         DropdownButtonFormField<String>(
           initialValue: selectedWasteCategory,
           isExpanded: true,

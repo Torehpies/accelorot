@@ -1,23 +1,18 @@
-//activity_card.dart
+// lib/frontend/operator/activity_logs/widgets/activity_card.dart
 import 'package:flutter/material.dart';
 import '../models/activity_item.dart';
 
 class ActivityCard extends StatelessWidget {
   final ActivityItem item;
 
-  const ActivityCard({
-    super.key,
-    required this.item,
-  });
+  const ActivityCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -62,18 +57,14 @@ class ActivityCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Icon and Description
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  item.icon,
-                  size: 40,
-                  color: Colors.teal,
-                ),
+                Icon(item.icon, size: 40, color: Colors.teal),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -87,9 +78,9 @@ class ActivityCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Category, Machine, Batch, Operator and Timestamp
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -100,7 +91,7 @@ class ActivityCard extends StatelessWidget {
                     children: [
                       // Show machine info
                       Text(
-                       'Machine: ${item.machineName ?? item.machineId ?? '-'}',
+                        'Machine: ${item.machineName ?? item.machineId ?? '-'}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black45,
@@ -136,10 +127,7 @@ class ActivityCard extends StatelessWidget {
                 ),
                 Text(
                   item.formattedTimestamp,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black45,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.black45),
                 ),
               ],
             ),

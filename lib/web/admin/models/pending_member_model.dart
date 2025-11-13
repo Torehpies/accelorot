@@ -17,7 +17,11 @@ class PendingMemberModel {
     this.requestedAt,
   });
 
-  factory PendingMemberModel.fromFirestore(String docId, Map<String, dynamic> data, Map<String, dynamic>? userData) {
+  factory PendingMemberModel.fromFirestore(
+    String docId,
+    Map<String, dynamic> data,
+    Map<String, dynamic>? userData,
+  ) {
     final firstName = userData?['firstname'] ?? '';
     final lastName = userData?['lastname'] ?? '';
     final name = '$firstName $lastName'.trim();

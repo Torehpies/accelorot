@@ -6,10 +6,7 @@ import '../../../operator/dashboard/home_screen.dart';
 class MachineViewScreen extends StatelessWidget {
   final MachineModel machine;
 
-  const MachineViewScreen({
-    super.key,
-    required this.machine,
-  });
+  const MachineViewScreen({super.key, required this.machine});
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +26,14 @@ class MachineViewScreen extends StatelessWidget {
             ),
             Text(
               'ID: ${machine.machineId}',
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
         ),
         backgroundColor: Colors.teal,
         elevation: 0,
       ),
-      body: HomeScreen(
-        focusedMachine: machine,
-      ),
+      body: HomeScreen(focusedMachine: machine),
     );
   }
 }

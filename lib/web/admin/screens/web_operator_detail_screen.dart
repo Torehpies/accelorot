@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class WebOperatorDetailScreen extends StatefulWidget {
   final String operatorId;
   final String operatorName;
@@ -18,11 +17,13 @@ class WebOperatorDetailScreen extends StatefulWidget {
     required this.operatorName,
     required this.role,
     required this.email,
-    required this.dateAdded, required Null Function() onBack,
+    required this.dateAdded,
+    required Null Function() onBack,
   });
 
   @override
-  State<WebOperatorDetailScreen> createState() => _WebOperatorDetailScreenState();
+  State<WebOperatorDetailScreen> createState() =>
+      _WebOperatorDetailScreenState();
 }
 
 class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
@@ -35,7 +36,9 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Archive Operator'),
-        content: Text('Are you sure you want to archive ${widget.operatorName}?'),
+        content: Text(
+          'Are you sure you want to archive ${widget.operatorName}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -45,7 +48,9 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: const Text('Archive'),
           ),
@@ -67,9 +72,9 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
           .collection('members')
           .doc(widget.operatorId)
           .update({
-        'isArchived': true,
-        'archivedAt': FieldValue.serverTimestamp(),
-      });
+            'isArchived': true,
+            'archivedAt': FieldValue.serverTimestamp(),
+          });
 
       if (!mounted) return;
 
@@ -80,14 +85,12 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error archiving operator: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error archiving operator: $e')));
       setState(() => _isArchiving = false);
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +104,7 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
         ),
         title: const Text(
           'Operator Details',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -185,21 +185,26 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                       // Actions
                       Column(
                         children: [
-                          
                           const SizedBox(height: 12),
                           SizedBox(
                             width: 180,
                             child: OutlinedButton.icon(
                               onPressed: _isArchiving ? null : _archiveOperator,
                               icon: Icon(
-                                _isArchiving ? Icons.hourglass_empty : Icons.archive,
+                                _isArchiving
+                                    ? Icons.hourglass_empty
+                                    : Icons.archive,
                                 size: 18,
                               ),
-                              label: Text(_isArchiving ? 'Archiving...' : 'Archive'),
+                              label: Text(
+                                _isArchiving ? 'Archiving...' : 'Archive',
+                              ),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.orange.shade700,
                                 side: BorderSide(color: Colors.orange.shade300),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -223,7 +228,10 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey[300]!, width: 1),
+                          border: Border.all(
+                            color: Colors.grey[300]!,
+                            width: 1,
+                          ),
                         ),
                         padding: const EdgeInsets.all(24.0),
                         child: Column(
@@ -255,9 +263,17 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 24),
-                            _buildInfoRow(Icons.email_outlined, 'Email Address', widget.email),
+                            _buildInfoRow(
+                              Icons.email_outlined,
+                              'Email Address',
+                              widget.email,
+                            ),
                             const SizedBox(height: 20),
-                            _buildInfoRow(Icons.calendar_today_outlined, 'Date Added', widget.dateAdded),
+                            _buildInfoRow(
+                              Icons.calendar_today_outlined,
+                              'Date Added',
+                              widget.dateAdded,
+                            ),
                           ],
                         ),
                       ),
@@ -270,7 +286,10 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey[300]!, width: 1),
+                          border: Border.all(
+                            color: Colors.grey[300]!,
+                            width: 1,
+                          ),
                         ),
                         padding: const EdgeInsets.all(24.0),
                         child: Column(
@@ -304,7 +323,11 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
                             const SizedBox(height: 24),
                             _buildStatRow('Status', 'Active', Colors.green),
                             const SizedBox(height: 20),
-                            _buildStatRow('Account Type', widget.role, Colors.teal),
+                            _buildStatRow(
+                              'Account Type',
+                              widget.role,
+                              Colors.teal,
+                            ),
                           ],
                         ),
                       ),

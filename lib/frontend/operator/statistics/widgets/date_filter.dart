@@ -20,28 +20,28 @@ class DateFilterState extends State<DateFilter> {
   DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   void _setPresetRange(int days) {
-  final now = _normalize(DateTime.now());
-  final start = now.subtract(Duration(days: days - 1));
-  // Make end represent end of the current day (23:59:59)
-  final end = now.add(const Duration(hours: 23, minutes: 59, seconds: 59));
+    final now = _normalize(DateTime.now());
+    final start = now.subtract(Duration(days: days - 1));
+    // Make end represent end of the current day (23:59:59)
+    final end = now.add(const Duration(hours: 23, minutes: 59, seconds: 59));
 
-  final range = DateTimeRange(start: start, end: end);
+    final range = DateTimeRange(start: start, end: end);
 
-  setState(() {
-    _selectedRange = range;
-    _label = "Last $days Days";
-  });
+    setState(() {
+      _selectedRange = range;
+      _label = "Last $days Days";
+    });
 
-  widget.onChanged(range);
-}
-
+    widget.onChanged(range);
+  }
 
   Future<void> _pickCustomRange() async {
     DateTime now = _normalize(DateTime.now());
     DateTime firstDate = DateTime(2020);
     DateTime lastDate = DateTime(2100);
 
-    DateTime start = _selectedRange?.start ?? now.subtract(const Duration(days: 7));
+    DateTime start =
+        _selectedRange?.start ?? now.subtract(const Duration(days: 7));
     DateTime end = _selectedRange?.end ?? now;
     DateTimeRange tempRange = DateTimeRange(start: start, end: end);
 
@@ -123,11 +123,15 @@ class DateFilterState extends State<DateFilter> {
 
   void _showDropdownMenu() {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -181,7 +185,9 @@ class DateFilterState extends State<DateFilter> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: _selectedRange != null ? Colors.teal.shade100 : Colors.transparent,
+              color: _selectedRange != null
+                  ? Colors.teal.shade100
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -190,13 +196,17 @@ class DateFilterState extends State<DateFilter> {
                 Icon(
                   Icons.calendar_today,
                   size: 20,
-                  color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                  color: _selectedRange != null
+                      ? Colors.teal.shade700
+                      : Colors.white,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   _label,
                   style: TextStyle(
-                    color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                    color: _selectedRange != null
+                        ? Colors.teal.shade700
+                        : Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -205,7 +215,9 @@ class DateFilterState extends State<DateFilter> {
                 Icon(
                   Icons.arrow_drop_down,
                   size: 20,
-                  color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+                  color: _selectedRange != null
+                      ? Colors.teal.shade700
+                      : Colors.white,
                 ),
               ],
             ),

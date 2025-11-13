@@ -31,7 +31,8 @@ class MachineModel {
       userId: data['userId'] ?? '',
       teamId: data['teamId'] ?? '',
       isArchived: data['isArchived'] ?? false,
-      dateCreated: (data['dateCreated'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      dateCreated:
+          (data['dateCreated'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 

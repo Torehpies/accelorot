@@ -7,11 +7,7 @@ class BatchCompleteDialog extends StatefulWidget {
   final CompostBatch batch;
   final VoidCallback? onComplete;
 
-  const BatchCompleteDialog({
-    required this.batch,
-    this.onComplete,
-    super.key,
-  });
+  const BatchCompleteDialog({required this.batch, this.onComplete, super.key});
 
   @override
   State<BatchCompleteDialog> createState() => _BatchCompleteDialogState();
@@ -20,7 +16,7 @@ class BatchCompleteDialog extends StatefulWidget {
 class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
   final _finalWeightController = TextEditingController();
   final _completionNotesController = TextEditingController();
-  
+
   String? _weightError;
 
   @override
@@ -46,7 +42,7 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
 
   void _handleComplete() {
     final weightError = _validateWeight(_finalWeightController.text);
-    
+
     if (weightError != null) {
       setState(() => _weightError = weightError);
       return;
@@ -69,8 +65,18 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
   String _formatDate(DateTime? date) {
     if (date == null) return '-';
     final monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -173,7 +179,9 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
                       child: LinearProgressIndicator(
                         value: progress,
                         backgroundColor: Colors.white,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.teal.shade600),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.teal.shade600,
+                        ),
                         minHeight: 10,
                       ),
                     ),
@@ -213,8 +221,14 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
                     const SizedBox(height: 12),
                     _buildDetailRow('Batch Name', widget.batch.batchName),
                     _buildDetailRow('Batch Number', widget.batch.batchNumber),
-                    _buildDetailRow('Started By', widget.batch.startedBy ?? 'null'),
-                    _buildDetailRow('Start Date', _formatDate(widget.batch.batchStart)),
+                    _buildDetailRow(
+                      'Started By',
+                      widget.batch.startedBy ?? 'null',
+                    ),
+                    _buildDetailRow(
+                      'Start Date',
+                      _formatDate(widget.batch.batchStart),
+                    ),
                     if (widget.batch.startNotes != null)
                       _buildDetailRow('Start Notes', widget.batch.startNotes!),
                   ],
@@ -248,7 +262,10 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
                   errorText: _weightError,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
                 onChanged: (value) {
@@ -279,7 +296,10 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),

@@ -61,17 +61,16 @@ class OxygenStatisticCard extends StatelessWidget {
             children: [
               Text(
                 'Air Quality',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               Text(
                 '${currentOxygen.toStringAsFixed(0)} ppm',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -137,10 +136,6 @@ class OxygenStatisticCard extends StatelessWidget {
             const SizedBox(height: 8),
           ],
 
-          const Text(
-            'Trend (Last 8 Hours)',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          ),
           const SizedBox(height: 8),
 
           SizedBox(
@@ -149,16 +144,20 @@ class OxygenStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
                 maximum: 5000,
                 interval: 1000,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,

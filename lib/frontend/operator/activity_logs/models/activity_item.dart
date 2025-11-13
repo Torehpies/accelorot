@@ -15,7 +15,7 @@ class ActivityItem {
   final String? machineName;
   final String? batchId;
   final String? operatorName;
-  
+
   // Report-specific fields
   final bool isReport;
   final String? reportType;
@@ -67,19 +67,20 @@ class ActivityItem {
 
   /// Factory constructor to create ActivityItem from Firestore document
   factory ActivityItem.fromMap(Map<String, dynamic> data) {
-    final timestamp = (data['timestamp'] as Timestamp?)?.toDate() ?? 
-                      (data['createdAt'] as Timestamp?)?.toDate() ?? 
-                      DateTime.now();
-    
+    final timestamp =
+        (data['timestamp'] as Timestamp?)?.toDate() ??
+        (data['createdAt'] as Timestamp?)?.toDate() ??
+        DateTime.now();
+
     // Check if this is a report or waste product
     final bool isReport = data['reportType'] != null;
-    
+
     if (isReport) {
       // This is a report
       return ActivityItem(
         title: data['title'] ?? '',
         value: _capitalizeFirst(data['status'] ?? 'open'),
-        statusColor: data['statusColor'] is int 
+        statusColor: data['statusColor'] is int
             ? _colorIntToString(data['statusColor'] as int)
             : data['statusColor'] ?? 'grey',
         icon: _getIconFromCodePoint(data['icon'] ?? 0),
@@ -185,15 +186,18 @@ class ActivityItem {
   bool matchesSearchQuery(String query) {
     final lowerQuery = query.toLowerCase();
     return title.toLowerCase().contains(lowerQuery) ||
-           value.toLowerCase().contains(lowerQuery) ||
-           description.toLowerCase().contains(lowerQuery) ||
-           category.toLowerCase().contains(lowerQuery) ||
-           (machineName?.toLowerCase().contains(lowerQuery) ?? false) ||
-           (machineId?.toLowerCase().contains(lowerQuery) ?? false) ||
-           (operatorName?.toLowerCase().contains(lowerQuery) ?? false) ||
-           (batchId?.toLowerCase().contains(lowerQuery) ?? false) ||
-           (reportType != null && _getReportTypeLabel(reportType!).toLowerCase().contains(lowerQuery)) ||
-           (status?.toLowerCase().contains(lowerQuery) ?? false);
+        value.toLowerCase().contains(lowerQuery) ||
+        description.toLowerCase().contains(lowerQuery) ||
+        category.toLowerCase().contains(lowerQuery) ||
+        (machineName?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (machineId?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (operatorName?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (batchId?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (reportType != null &&
+            _getReportTypeLabel(
+              reportType!,
+            ).toLowerCase().contains(lowerQuery)) ||
+        (status?.toLowerCase().contains(lowerQuery) ?? false);
   }
 
   /// Helper to get report type label for search

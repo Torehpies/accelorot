@@ -6,17 +6,12 @@ import '../../main_navigation.dart';
 class ViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
 
-  const ViewConfirmationDialog({
-    super.key,
-    required this.machine,
-  });
+  const ViewConfirmationDialog({super.key, required this.machine});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -81,10 +76,7 @@ class ViewConfirmationDialog extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'ID: ${machine.machineId}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[700],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                       ),
                     ],
                   ),
@@ -135,9 +127,8 @@ class ViewConfirmationDialog extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => MainNavigation(
-                            focusedMachine: machine,
-                          ),
+                          builder: (context) =>
+                              MainNavigation(focusedMachine: machine),
                         ),
                       );
                     },

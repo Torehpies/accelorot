@@ -98,7 +98,9 @@ class DateFilterState extends State<DateFilter> {
           Text(
             _label,
             style: TextStyle(
-              color: _selectedRange != null ? Colors.teal.shade700 : Colors.white,
+              color: _selectedRange != null
+                  ? Colors.teal.shade700
+                  : Colors.white,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),

@@ -5,9 +5,27 @@ import 'package:flutter/material.dart';
 // ignore: unused_element
 Widget _buildEnvironmentalSensorsCard() {
   final sensors = [
-    {'name': 'Temperature', 'value': '3°C', 'icon': Icons.thermostat, 'trend': '+0 this week', 'status': 'normal'},
-    {'name': 'Moisture', 'value': '3 g/m³', 'icon': Icons.water_drop, 'trend': '+0 this week', 'status': 'normal'},
-    {'name': 'Oxygen Level', 'value': '3 CO₂', 'icon': Icons.air, 'trend': '+0 this week', 'status': 'warning'},
+    {
+      'name': 'Temperature',
+      'value': '3°C',
+      'icon': Icons.thermostat,
+      'trend': '+0 this week',
+      'status': 'normal',
+    },
+    {
+      'name': 'Moisture',
+      'value': '3 g/m³',
+      'icon': Icons.water_drop,
+      'trend': '+0 this week',
+      'status': 'normal',
+    },
+    {
+      'name': 'Oxygen Level',
+      'value': '3 CO₂',
+      'icon': Icons.air,
+      'trend': '+0 this week',
+      'status': 'warning',
+    },
   ];
 
   return Card(
@@ -24,10 +42,7 @@ Widget _buildEnvironmentalSensorsCard() {
               SizedBox(width: 8),
               Text(
                 'Environmental Sensors',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -53,18 +68,28 @@ Widget _buildEnvironmentalSensorsCard() {
                   children: [
                     Row(
                       children: [
-                        Icon(sensor['icon'] as IconData, color: statusColor, size: 24),
+                        Icon(
+                          sensor['icon'] as IconData,
+                          color: statusColor,
+                          size: 24,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           sensor['name'] as String,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       sensor['value'] as String,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(

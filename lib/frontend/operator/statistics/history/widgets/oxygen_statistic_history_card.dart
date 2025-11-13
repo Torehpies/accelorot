@@ -40,10 +40,10 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
     final List<ChartPoint> lowerBound = [];
 
     for (int i = 0; i < dataLength; i++) {
-      final label = (labels != null && i < labels!.length) 
-          ? _formatLabel(labels![i]) 
+      final label = (labels != null && i < labels!.length)
+          ? _formatLabel(labels![i])
           : 'Day ${i + 1}';
-      
+
       oxygenData.add(ChartPoint(label, dailyReadings[i]));
       upperBound.add(ChartPoint(label, 1500.0));
       lowerBound.add(ChartPoint(label, 0.0));
@@ -101,10 +101,10 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final calculatedWidth = dataLength * 50.0;
-                final chartWidth = calculatedWidth > constraints.maxWidth 
-                    ? calculatedWidth 
+                final chartWidth = calculatedWidth > constraints.maxWidth
+                    ? calculatedWidth
                     : constraints.maxWidth;
-                
+
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: SizedBox(
@@ -112,16 +112,20 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
                     child: SfCartesianChart(
                       primaryXAxis: CategoryAxis(
                         labelStyle: const TextStyle(fontSize: 9),
-                        majorGridLines:
-                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        majorGridLines: const MajorGridLines(
+                          width: 0.5,
+                          color: Colors.grey,
+                        ),
                         interval: 1,
                       ),
                       primaryYAxis: NumericAxis(
                         minimum: 0,
                         maximum: 5000,
                         interval: 1000,
-                        majorGridLines:
-                            const MajorGridLines(width: 0.5, color: Colors.grey),
+                        majorGridLines: const MajorGridLines(
+                          width: 0.5,
+                          color: Colors.grey,
+                        ),
                         labelStyle: const TextStyle(fontSize: 9),
                       ),
                       plotAreaBorderWidth: 0,
@@ -169,17 +173,16 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
       children: [
         Text(
           'Air Quality',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           '${currentOxygen.toStringAsFixed(0)} ppm',
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold, color: color),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ],
     );
@@ -223,7 +226,10 @@ class OxygenStatisticHistoryCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(18),
       child: Center(
-        child: Text('No air quality data', style: TextStyle(color: Colors.grey[600])),
+        child: Text(
+          'No air quality data',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
       ),
     );
   }

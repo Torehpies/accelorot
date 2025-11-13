@@ -16,10 +16,7 @@ import '../view_screens/reports_screen.dart';
 class ActivityLogsNavigator extends StatelessWidget {
   final String? focusedMachineId;
 
-  const ActivityLogsNavigator({
-    super.key,
-    this.focusedMachineId,
-  });
+  const ActivityLogsNavigator({super.key, this.focusedMachineId});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +24,7 @@ class ActivityLogsNavigator extends StatelessWidget {
       onGenerateRoute: (settings) {
         // Route handler - passes focusedMachineId to all screens
         Widget page;
-        
+
         switch (settings.name) {
           case '/':
             // Overview page with section cards
@@ -72,7 +69,7 @@ class ActivityLogsNavigator extends StatelessWidget {
         if (settings.name == '/') {
           return MaterialPageRoute(builder: (context) => page);
         }
-        
+
         return _SlidePageRoute(builder: (context) => page);
       },
     );
@@ -84,18 +81,22 @@ class _SlidePageRoute extends PageRouteBuilder {
   final WidgetBuilder builder;
 
   _SlidePageRoute({required this.builder})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-            var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
-            return SlideTransition(position: offsetAnimation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 300),
-        );
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            builder(context),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      );
 }
 
 // Overview page displaying all activity section cards
@@ -136,7 +137,11 @@ class _ActivityLogsOverview extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
+                      Icon(
+                        Icons.filter_alt,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -151,7 +156,7 @@ class _ActivityLogsOverview extends StatelessWidget {
                     ],
                   ),
                 ),
-              
+
               // Main content container with white background
               Expanded(
                 child: Container(
@@ -188,13 +193,12 @@ class _ActivityLogsOverview extends StatelessWidget {
                                 focusedMachineId: focusedMachineId,
                               ),
                               const SizedBox(height: 16),
-                              AlertsSection(
-                                focusedMachineId: focusedMachineId,
-                              ),
+                              AlertsSection(focusedMachineId: focusedMachineId),
                               const SizedBox(height: 16),
                               CyclesRecomSection(
                                 focusedMachineId: focusedMachineId,
-                              ),const SizedBox(height: 16),
+                              ),
+                              const SizedBox(height: 16),
                               ReportsSection(
                                 focusedMachineId: focusedMachineId,
                               ),
@@ -202,7 +206,7 @@ class _ActivityLogsOverview extends StatelessWidget {
                           ),
                         ),
                       ),
-                      
+
                       // Batch filter header - positioned on top
                       const Positioned(
                         top: 0,

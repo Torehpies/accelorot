@@ -35,16 +35,25 @@ class OperatorSearchBar extends StatelessWidget {
                 size: ThemeConstants.iconSize20,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius10,
+                ),
                 borderSide: BorderSide(color: ThemeConstants.greyShade300),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius10,
+                ),
                 borderSide: BorderSide(color: ThemeConstants.greyShade300),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius10),
-                borderSide: BorderSide(color: ThemeConstants.tealShade600, width: 2),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius10,
+                ),
+                borderSide: BorderSide(
+                  color: ThemeConstants.tealShade600,
+                  width: 2,
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: ThemeConstants.spacing12,

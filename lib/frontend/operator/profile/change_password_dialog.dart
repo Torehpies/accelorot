@@ -6,7 +6,7 @@ class ChangePasswordDialog {
   static Future<void> show(BuildContext context) async {
     final authService = AuthService();
     final user = authService.getCurrentUser();
-    
+
     if (user == null || user.email == null) {
       showSnackbar(context, 'No email found for current user', isError: true);
       return;
@@ -15,7 +15,8 @@ class ChangePasswordDialog {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _ChangePasswordConfirmationDialog(email: user.email!),
+      builder: (context) =>
+          _ChangePasswordConfirmationDialog(email: user.email!),
     );
 
     if (confirmed == true && context.mounted) {
@@ -32,22 +33,20 @@ class ChangePasswordDialog {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
       final result = await authService.sendPasswordResetEmail(email);
-      
+
       if (!context.mounted) return;
-      
+
       // Close loading indicator
       Navigator.pop(context);
-      
+
       if (result['success']) {
         showSnackbar(context, result['message'], isError: false);
-        
+
         // Optional: Show success dialog
         await _showSuccessDialog(context, email);
       } else {
@@ -61,7 +60,10 @@ class ChangePasswordDialog {
     }
   }
 
-  static Future<void> _showSuccessDialog(BuildContext context, String email) async {
+  static Future<void> _showSuccessDialog(
+    BuildContext context,
+    String email,
+  ) async {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -206,19 +208,12 @@ class _ChangePasswordConfirmationDialog extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 20,
-                  color: Colors.blue.shade700,
-                ),
+                Icon(Icons.info_outline, size: 20, color: Colors.blue.shade700),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Click the link in the email to create a new password. The link will expire in 1 hour.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.blue.shade900,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.blue.shade900),
                   ),
                 ),
               ],
@@ -229,10 +224,7 @@ class _ChangePasswordConfirmationDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
+          child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
         ),
         ElevatedButton.icon(
           onPressed: () => Navigator.pop(context, true),

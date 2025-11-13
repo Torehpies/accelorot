@@ -30,10 +30,7 @@ class HistoryPage extends StatelessWidget {
           // 🔹 Directly show Oxygen History View (no extra box)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: OxygenStatsHistoryView(
-              machineId: "01",
-              range: range,
-            ),
+            child: OxygenStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),
@@ -41,10 +38,7 @@ class HistoryPage extends StatelessWidget {
           // 🔹 Directly show Temperature History View
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: TemperatureStatsHistoryView(
-              machineId: "01",
-              range: range,
-            ),
+            child: TemperatureStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),
@@ -52,10 +46,7 @@ class HistoryPage extends StatelessWidget {
           // 🔹 Directly show Moisture History View
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: MoistureStatsHistoryView(
-              machineId: "01",
-              range: range,
-            ),
+            child: MoistureStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),
