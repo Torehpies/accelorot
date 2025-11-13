@@ -118,6 +118,7 @@ class ResponsiveWebShell extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(child: child),
         ],
       ),
     );
