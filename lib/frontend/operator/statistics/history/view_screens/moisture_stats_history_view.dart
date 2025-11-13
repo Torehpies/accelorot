@@ -84,7 +84,6 @@ class _MoistureStatsHistoryViewState extends State<MoistureStatsHistoryView> {
             final dailyAvg =
                 dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
-            _currentMoisture = readings.isNotEmpty ? readings.last : 0.0;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;
