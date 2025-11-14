@@ -1,19 +1,19 @@
-//filter_box.dart
+// lib/frontend/operator/activity_logs/widgets/filter_box.dart
 import 'package:flutter/material.dart';
-import 'slide_page_route.dart';
 
+// Reusable filter box widget with tap callback for navigation
 class FilterBox extends StatelessWidget {
   final IconData icon;
   final String label;
   final String filterValue;
-  final Widget destination;
+  final VoidCallback? onTap;
 
   const FilterBox({
     super.key,
     required this.icon,
     required this.label,
     required this.filterValue,
-    required this.destination,
+    this.onTap,
   });
 
   @override
@@ -21,11 +21,7 @@ class FilterBox extends StatelessWidget {
     return Expanded(
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
-        onTap: () {
-          Navigator.of(context).push(
-            SlidePageRoute(page: destination),
-          );
-        },
+        onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey.shade300),

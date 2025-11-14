@@ -1,3 +1,4 @@
+//sess_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -10,9 +11,9 @@ class SessionService {
   User? get currentUser {
     return _auth.currentUser;
   }
-  
-  bool get isUserLoggedIn => currentUser != null && (currentUser?.emailVerified ?? false);
-  
+
+  bool get isUserLoggedIn =>
+      currentUser != null && (currentUser?.emailVerified ?? false);
 
   // Returns current user firestore document data or null
   Future<Map<String, dynamic>?> getCurrentUserData() async {
@@ -22,7 +23,7 @@ class SessionService {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();
       return doc.data();
-    }catch (e) {
+    } catch (e) {
       return null;
     }
   }
@@ -35,6 +36,7 @@ class SessionService {
     if (role is String) return role;
     return null;
   }
+
   Future<void> updateLastLogin() async {
     final user = currentUser;
     if (user != null) {

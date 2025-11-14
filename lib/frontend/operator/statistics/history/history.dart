@@ -11,9 +11,6 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final start = DateTime(range.start.year, range.start.month, range.start.day);
-    final end = DateTime(range.end.year, range.end.month, range.end.day);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -23,31 +20,17 @@ class HistoryPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "(${_formatDate(start)} - ${_formatDate(end)})",
+              "(${_formatDate(range.start)} - ${_formatDate(range.end)})",
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-
-          // 🔹 Keep summary card
-          //_buildCard(
-          //  title: "Time Period Summary",
-          //  child: Center(
-          //    child: Text(
-          //      "Showing $days days of data",
-          //      style: const TextStyle(fontSize: 14, color: Colors.grey),
-          //    ),
-          //  ),
-          //),
 
           const SizedBox(height: 16),
 
           // 🔹 Directly show Oxygen History View (no extra box)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: OxygenStatsHistoryView(
-              machineId: "01",
-              range: DateTimeRange(start: start, end: end),
-            ),
+            child: OxygenStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),
@@ -55,10 +38,7 @@ class HistoryPage extends StatelessWidget {
           // 🔹 Directly show Temperature History View
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: TemperatureStatsHistoryView(
-              machineId: "01",
-              range: DateTimeRange(start: start, end: end),
-            ),
+            child: TemperatureStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),
@@ -66,10 +46,7 @@ class HistoryPage extends StatelessWidget {
           // 🔹 Directly show Moisture History View
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: MoistureStatsHistoryView(
-              machineId: "01",
-              range: DateTimeRange(start: start, end: end),
-            ),
+            child: MoistureStatsHistoryView(machineId: "01", range: range),
           ),
 
           const SizedBox(height: 16),

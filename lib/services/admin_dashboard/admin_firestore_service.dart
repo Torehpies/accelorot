@@ -84,10 +84,7 @@ class AdminFirestoreService {
   Future<List<OperatorModel>> fetchOperatorsPreview(String teamId) async {
     try {
       final operators = await fetchOperators(teamId);
-      return operators
-          .where((op) => !op.isArchived)
-          .take(4)
-          .toList();
+      return operators.where((op) => !op.isArchived).take(4).toList();
     } catch (e) {
       throw Exception('Failed to fetch operators preview: $e');
     }
@@ -98,10 +95,7 @@ class AdminFirestoreService {
   Future<List<MachineModel>> fetchMachinesPreview(String teamId) async {
     try {
       final machines = await fetchMachines(teamId);
-      return machines
-          .where((machine) => !machine.isArchived)
-          .take(4)
-          .toList();
+      return machines.where((machine) => !machine.isArchived).take(4).toList();
     } catch (e) {
       throw Exception('Failed to fetch machines preview: $e');
     }
@@ -116,9 +110,11 @@ class AdminFirestoreService {
         .collection('members')
         .where('role', isEqualTo: 'Operator')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => OperatorModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => OperatorModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Stream machines in real-time
@@ -128,9 +124,11 @@ class AdminFirestoreService {
         .collection('machines')
         .where('teamId', isEqualTo: teamId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => MachineModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => MachineModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   /// Update operator archive status
@@ -157,10 +155,9 @@ class AdminFirestoreService {
     required bool isArchived,
   }) async {
     try {
-      await _firestore
-          .collection('machines')
-          .doc(machineId)
-          .update({'isArchived': isArchived});
+      await _firestore.collection('machines').doc(machineId).update({
+        'isArchived': isArchived,
+      });
     } catch (e) {
       throw Exception('Failed to update machine status: $e');
     }

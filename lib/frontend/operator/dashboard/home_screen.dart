@@ -1,52 +1,166 @@
-// lib/frontend/operator/screens/home_screen.dart
+// lib/frontend/operator/dashboard/home_screen.dart
+
 import 'package:flutter/material.dart';
-import '../../components/system_card.dart';
-import '../dashboard/environmental_sensor/view_screens/environmental_sensors_view.dart';
-import '../../components/composting_progress_card.dart';
+import 'cycles/system_card.dart';
+import 'compost_progress/composting_progress_card.dart';
+import 'compost_progress/models/compost_batch_model.dart';
 import 'add_waste/add_waste_product.dart';
+import 'add_waste/submit_report.dart';
+import 'add_waste/quick_actions_sheet.dart';
 import 'add_waste/activity_logs_card.dart';
+import '../machine_management/models/machine_model.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String? viewingOperatorId;
-  
-  const HomeScreen({super.key, this.viewingOperatorId});
+  final MachineModel? focusedMachine;
+
+  const HomeScreen({super.key, this.focusedMachine});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // GlobalKey to control and refresh the ActivityLogsCard widget
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
-      
+
+  // State lifted from CompostingProgressCard - shared between cards
+  CompostBatch? _currentBatch;
+
+  // Callback when batch is started from CompostingProgressCard
+  void _handleBatchStarted(CompostBatch batch) {
+    setState(() {
+      _currentBatch = batch;
+    });
+  }
+
+  // Callback when batch is completed from CompostingProgressCard
+  void _handleBatchCompleted() {
+    setState(() {
+      _currentBatch = null;
+    });
+  }
+
+  // Handle FAB press - show action sheet
+  void _handleFABPress() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const QuickActionsSheet(),
+    );
+
+    if (action == null || !mounted) return;
+
+    // Handle selected action
+    if (action == 'add_waste') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => AddWasteProduct(
+          preSelectedMachineId: widget.focusedMachine?.machineId,
+        ),
+      );
+
+      // Refresh activity logs if waste was added
+      if (result != null && mounted) {
+        await _activityLogsKey.currentState?.refresh();
+      }
+    } else if (action == 'submit_report') {
+      final result = await showDialog<Map<String, dynamic>>(
+        context: context,
+        builder: (context) => SubmitReport(
+          preSelectedMachineId: widget.focusedMachine?.machineId,
+        ),
+      );
+
+      // Show confirmation AND refresh activity logs if report was submitted
+      if (result != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Report submitted successfully'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Refresh the activity logs to show the new report
+        await _activityLogsKey.currentState?.refresh();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isMachineView = widget.focusedMachine != null;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text(
+          'Dashboard',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: isMachineView,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Live Environmental Sensors Card
-              const EnvironmentalSensorsView(),
+              // Machine Focus Banner
+              if (isMachineView)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.teal.shade50, Colors.teal.shade100],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.teal.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.filter_alt,
+                        color: Colors.teal.shade700,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Filtered view • All data shown for this machine only',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.teal.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // ✅ Environmental Sensors section is PERMANENTLY REMOVED
+              CompostingProgressCard(
+                currentBatch: _currentBatch,
+                onBatchStarted: _handleBatchStarted,
+                onBatchCompleted: _handleBatchCompleted,
+              ),
 
               const SizedBox(height: 16),
-              CompostingProgressCard(batchStart: DateTime(2025, 9, 15)),
+
+              SystemCard(currentBatch: _currentBatch),
+
               const SizedBox(height: 16),
-              const SystemCard(),
-              const SizedBox(height: 16),
+
               ActivityLogsCard(
                 key: _activityLogsKey,
-                viewingOperatorId: widget.viewingOperatorId, // ⭐ Pass it here too!
+                focusedMachineId: widget.focusedMachine?.machineId,
               ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -57,21 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 58,
           height: 58,
           child: FloatingActionButton(
-            // Handles the FAB press to open the Add Waste Product dialog and refresh activity logs
-            onPressed: () async {
-           
-              
-              final result = await showDialog<Map<String, dynamic>>(
-                context: context,
-                builder: (context) => AddWasteProduct(
-                  viewingOperatorId: widget.viewingOperatorId, // ⭐ CRITICAL: Pass it here!
-                ),
-              );
-
-              if (result != null && mounted) {
-                await _activityLogsKey.currentState?.refresh();
-              }
-            },
+            onPressed: _handleFABPress,
             backgroundColor: Colors.teal,
             elevation: 5,
             shape: RoundedRectangleBorder(

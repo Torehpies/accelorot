@@ -39,7 +39,10 @@ class WebDetailPanel extends StatelessWidget {
           ? Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   decoration: const BoxDecoration(
                     border: Border(bottom: BorderSide(color: Colors.grey)),
                   ),
@@ -75,9 +78,14 @@ class WebDetailPanel extends StatelessWidget {
 
 // ===== Main Screen =====
 class WebActivityLogsScreen extends StatefulWidget {
-  final String? viewingOperatorId;
+  final bool shouldRefresh;
+  final String? focusedMachineId;
 
-  const WebActivityLogsScreen({super.key, this.viewingOperatorId});
+  const WebActivityLogsScreen({
+    super.key,
+    this.shouldRefresh = false,
+    this.focusedMachineId,
+  });
 
   @override
   State<WebActivityLogsScreen> createState() => _WebActivityLogsScreenState();
@@ -89,7 +97,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   Widget? detailContent;
   String detailTitle = '';
 
-  void openDetailPanel(String title, Widget content) { // ✅ No leading underscore
+  void openDetailPanel(String title, Widget content) {
+    // ✅ No leading underscore
     setState(() {
       detailTitle = title;
       detailContent = content;
@@ -97,7 +106,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     });
   }
 
-  void closeDetailPanel() { // ✅ No leading underscore
+  void closeDetailPanel() {
+    // ✅ No leading underscore
     setState(() {
       isDetailPanelOpen = false;
       detailContent = null;
@@ -112,24 +122,24 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-   appBar: AppBar(
-  title: const Text(
-    'Activity Logs',
-    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  ),
-  automaticallyImplyLeading: false,
-  centerTitle: false,
-  flexibleSpace: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.teal.shade700, Colors.teal.shade900],
+      appBar: AppBar(
+        title: const Text(
+          'Activity Logs',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.teal.shade900],
+            ),
+          ),
+        ),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        actions: [], // <-- Now empty; notification icon removed
       ),
-    ),
-  ),
-  foregroundColor: Colors.white,
-  elevation: 0,
-  actions: [], // <-- Now empty; notification icon removed
-),
       body: SafeArea(
         child: Row(
           children: [
@@ -229,7 +239,9 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
                     label,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey[700],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -256,8 +268,8 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
         return isWideScreen
             ? buildWideLayout()
             : isMediumScreen
-                ? buildMediumLayout()
-                : buildNarrowLayout();
+            ? buildMediumLayout()
+            : buildNarrowLayout();
     }
   }
 
@@ -265,18 +277,26 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 24),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(
+              child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
             const SizedBox(width: 24),
-            Expanded(child: WebAlertsSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(
+              child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 24),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -285,18 +305,26 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(child: WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(
+              child: WebSubstrateSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
             const SizedBox(width: 20),
-            Expanded(child: WebAlertsSection(viewingOperatorId: widget.viewingOperatorId)),
+            Expanded(
+              child: WebAlertsSection(
+                focusedMachineId: widget.focusedMachineId,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -305,13 +333,13 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WebAllActivitySection(viewingOperatorId: widget.viewingOperatorId),
+        WebAllActivitySection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId),
+        WebSubstrateSection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebAlertsSection(viewingOperatorId: widget.viewingOperatorId),
+        WebAlertsSection(focusedMachineId: widget.focusedMachineId),
         const SizedBox(height: 20),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -321,7 +349,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('Substrate Entries', Icons.eco, Colors.green),
         const SizedBox(height: 16),
-        WebSubstrateSection(viewingOperatorId: widget.viewingOperatorId),
+        WebSubstrateSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -331,7 +359,7 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
       children: [
         buildSectionHeader('System Alerts', Icons.warning, Colors.orange),
         const SizedBox(height: 16),
-        WebAlertsSection(viewingOperatorId: widget.viewingOperatorId),
+        WebAlertsSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -339,9 +367,13 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
   Widget buildCyclesView() {
     return Column(
       children: [
-        buildSectionHeader('Composting Cycles & Recommendations', Icons.refresh, Colors.blue),
+        buildSectionHeader(
+          'Composting Cycles & Recommendations',
+          Icons.refresh,
+          Colors.blue,
+        ),
         const SizedBox(height: 16),
-        WebCyclesRecomSection(viewingOperatorId: widget.viewingOperatorId),
+        WebCyclesRecomSection(focusedMachineId: widget.focusedMachineId),
       ],
     );
   }
@@ -366,18 +398,14 @@ class _WebActivityLogsScreenState extends State<WebActivityLogsScreen> {
               color: color.shade700,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.bold,  
+                fontWeight: FontWeight.bold,
                 fontSize: 13,
                 color: color.shade900,
               ),

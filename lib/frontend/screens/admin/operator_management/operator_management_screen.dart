@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'operator_detail_screen.dart';
 import 'add_operator_screen.dart';
@@ -181,15 +179,11 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Operator Management',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.teal,
         elevation: 0,
         centerTitle: false,
         actions: [
@@ -576,4 +570,3 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     );
   }
 }
-

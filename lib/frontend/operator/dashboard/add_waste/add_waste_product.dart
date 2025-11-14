@@ -6,16 +6,14 @@ import 'fields/quantity_field.dart';
 import 'fields/description_field.dart';
 import 'fields/submit_button.dart';
 import 'fields/waste_config.dart';
+import 'fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AddWasteProduct extends StatefulWidget {
-  final String? viewingOperatorId; // ⭐ NEW: Add this parameter
-  
-  const AddWasteProduct({
-    super.key,
-    this.viewingOperatorId, // ⭐ NEW: Add this parameter
-  });
+  final String? preSelectedMachineId;
+
+  const AddWasteProduct({super.key, this.preSelectedMachineId});
 
   // Builds and displays the Add Waste Product dialog.
   @override
@@ -28,9 +26,15 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   String? _selectedWasteCategory;
   String? _selectedPlantType;
+  String? _selectedMachineId;
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
+
+  // Error state variables
   String? _quantityError;
+  String? _wasteCategoryError;
+  String? _plantTypeError;
+  String? _machineError;
 
   // Disposes controllers to free memory when widget is removed.
   @override
@@ -38,6 +42,13 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     _quantityController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _selectedMachineId = widget.preSelectedMachineId;
   }
 
   // Capitalizes the first letter of a given category name.
@@ -58,27 +69,31 @@ class _AddWasteProductState extends State<AddWasteProduct> {
 
   // Ensures required fields are selected and valid before submission.
   bool _validateForm() {
-    if (_selectedWasteCategory == null) {
-      _showError('Please select waste category');
-      return false;
-    }
-    if (_selectedPlantType == null) {
-      _showError('Please select target plant type');
-      return false;
-    }
-    final qtyError = _validateQuantity(_quantityController.text);
-    if (qtyError != null) {
-      _showError(qtyError);
-      return false;
-    }
-    return true;
-  }
+    setState(() {
+      // Clear all errors first
+      _wasteCategoryError = null;
+      _plantTypeError = null;
+      _machineError = null;
+      _quantityError = null;
 
-  // Displays a brief error message using SnackBar.
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    );
+      // Validate each field and set error messages
+      if (_selectedWasteCategory == null) {
+        _wasteCategoryError = 'Please select waste category';
+      }
+      if (_selectedPlantType == null) {
+        _plantTypeError = 'Please select target plant type';
+      }
+      if (_selectedMachineId == null) {
+        _machineError = 'Please select a machine';
+      }
+      _quantityError = _validateQuantity(_quantityController.text);
+    });
+
+    // Return true only if all errors are null
+    return _wasteCategoryError == null &&
+        _plantTypeError == null &&
+        _machineError == null &&
+        _quantityError == null;
   }
 
   // Retrieves the display label for a given plant type value.
@@ -115,25 +130,21 @@ class _AddWasteProductState extends State<AddWasteProduct> {
       'quantity': double.parse(_quantityController.text),
       'description': _descriptionController.text.trim(),
       'timestamp': DateTime.now(),
+      'machineId': _selectedMachineId!,
+      'operatorName': user.displayName ?? user.email ?? 'Operator',
+      'userId': user.uid,
+      // 'machineName': _selectedMachineName,
     };
 
     try {
-
-      await FirestoreActivityService.addWasteProduct(
-        wasteEntry,
-        viewingOperatorId: widget.viewingOperatorId,
-      );
+      await FirestoreActivityService.addWasteProduct(wasteEntry);
       await Future.delayed(const Duration(milliseconds: 1000));
-
       if (!mounted) return;
       Navigator.pop(context, wasteEntry);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error adding waste: $e'),
-          duration: const Duration(seconds: 2),
-        ),
+        SnackBar(content: Text('Failed to add waste: ${e.toString()}')),
       );
     }
   }
@@ -189,14 +200,31 @@ class _AddWasteProductState extends State<AddWasteProduct> {
                 onCategoryChanged: (value) => setState(() {
                   _selectedWasteCategory = value;
                   _selectedPlantType = null;
+                  _wasteCategoryError = null;
                 }),
+                errorText: _wasteCategoryError,
               ),
               const SizedBox(height: 16),
               PlantTypeSection(
                 selectedWasteCategory: _selectedWasteCategory,
                 selectedPlantType: _selectedPlantType,
-                onPlantTypeChanged: (value) =>
-                    setState(() => _selectedPlantType = value),
+                onPlantTypeChanged: (value) => setState(() {
+                  _selectedPlantType = value;
+                  _plantTypeError = null;
+                }),
+                errorText: _plantTypeError,
+              ),
+              const SizedBox(height: 16),
+              MachineSelectionField(
+                selectedMachineId: _selectedMachineId,
+                onChanged: widget.preSelectedMachineId == null
+                    ? (value) => setState(() {
+                        _selectedMachineId = value;
+                        _machineError = null;
+                      })
+                    : null,
+                isLocked: widget.preSelectedMachineId != null,
+                errorText: _machineError,
               ),
               const SizedBox(height: 16),
               QuantityField(
@@ -212,7 +240,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
               const SizedBox(height: 24),
               SubmitButton(
                 onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(), // Provide your desired ButtonStyle here
+                style: ElevatedButton.styleFrom(),
               ),
             ],
           ),

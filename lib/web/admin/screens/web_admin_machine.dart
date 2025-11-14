@@ -1,15 +1,21 @@
-// lib/web/admin/screens/web_admin_machine.dart
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/controllers/admin_machine_controller.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/add_machine_modal.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/widgets/search_bar_widget.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/widgets/admin_machine_list.dart';
+import '../controllers/admin_machine_controller.dart';
+import '../widgets/add_machine_modal.dart';
+import '../widgets/admin_machine_list.dart';
+import '../widgets/operator_search_bar.dart';
+
+class ThemeConstants {
+  static const double spacing12 = 12.0;
+  static const double spacing8 = 8.0;
+  static const double borderRadius20 = 20.0;
+  static const double borderRadius12 = 12.0;
+  static final Color greyShade300 = Colors.grey[300]!;
+  static final Color tealShade700 = Colors.teal.shade700;
+}
 
 class WebMachineManagement extends StatefulWidget {
-  final String? viewingOperatorId;
-  
   const WebMachineManagement({super.key, this.viewingOperatorId});
+  final String? viewingOperatorId;
 
   @override
   State<WebMachineManagement> createState() => _WebMachineManagementState();
@@ -23,23 +29,29 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
   void initState() {
     super.initState();
     _controller = AdminMachineController();
+    _controller.addListener(_onControllerUpdate);
     _controller.initialize();
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _controller.removeListener(_onControllerUpdate);
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onControllerUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _showAddMachineModal() {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
           child: AddMachineModal(controller: _controller),
@@ -51,33 +63,25 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
           'Machine Management',
-          style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: ThemeConstants.tealShade700,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.teal),
-            onPressed: () {
-              _controller.initialize();
-            },
-          ),
-        ],
       ),
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Action Cards Row
-                Row(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(ThemeConstants.spacing12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 🟩 ACTION CARDS ROW
+              SizedBox(
+                height: 100,
+                child: Row(
                   children: [
                     Expanded(
                       child: _buildActionCard(
@@ -85,60 +89,60 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                         label: 'Archive',
                         count: null,
                         onPressed: () => _controller.setShowArchived(true),
+                        iconBackgroundColor: Colors.orange[50]!,
+                        iconColor: Colors.orange.shade700,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: ThemeConstants.spacing12),
                     Expanded(
                       child: _buildActionCard(
                         icon: Icons.add_circle_outline,
                         label: 'Add Machine',
                         count: null,
                         onPressed: _showAddMachineModal,
+                        iconBackgroundColor: Colors.blue[50]!,
+                        iconColor: Colors.blue.shade700,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: ThemeConstants.spacing12),
                     Expanded(
-                      child: _buildInfoCard(
+                      child: _buildActionCard(
                         icon: Icons.devices,
                         label: 'Total Machines',
                         count: _controller.filteredMachines.length,
+                        onPressed: () => _controller.setShowArchived(false),
+                        iconBackgroundColor: Colors.teal[50]!,
+                        iconColor: Colors.teal.shade700,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+              ),
+              const SizedBox(height: ThemeConstants.spacing12),
 
-                // Main Container
-                Container(
-                  constraints: const BoxConstraints(minHeight: 500),
+              Expanded(
+                child: Container(
+                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    borderRadius: BorderRadius.circular(
+                      ThemeConstants.borderRadius20,
+                    ),
+                    border: Border.all(
+                      color: ThemeConstants.greyShade300,
+                      width: 1.0,
+                    ),
                   ),
                   child: Column(
                     children: [
-                      // Search Bar Header
                       Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: ThemeConstants.spacing12,
+                          vertical: 16,
+                        ),
                         child: Row(
                           children: [
-                            Expanded(
-                              flex: 2,
-                              child: SearchBarWidget(
-                                onSearchChanged: _controller.setSearchQuery,
-                                onClear: _controller.clearSearch,
-                                focusNode: _searchFocusNode,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
+                            // LEFT: Section Title
                             Text(
                               _controller.showArchived
                                   ? 'Archived Machines'
@@ -149,23 +153,41 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                                 color: Colors.teal,
                               ),
                             ),
+
+                            const Spacer(),
+
+                            // RIGHT: Search Bar + Refresh Button
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 500),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: OperatorSearchBar(
+                                      searchQuery: _controller.searchQuery,
+                                      onSearchChanged:
+                                          _controller.setSearchQuery,
+                                      onRefresh: _controller.initialize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
+
                       const Divider(height: 1),
-                      
-                      // Content
-                      SizedBox(
-                        height: 500,
-                        child: _buildContent(),
-                      ),
+
+                      // MACHINE LIST
+                      Expanded(child: _buildContent()),
                     ],
                   ),
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -220,53 +242,54 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     required String label,
     required int? count,
     required VoidCallback onPressed,
+    required Color iconBackgroundColor,
+    required Color iconColor,
   }) {
     return Card(
-      elevation: 2,
+      color: Colors.white,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: ThemeConstants.greyShade300, width: 1.0),
       ),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           child: Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.teal.shade400, Colors.teal.shade700],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  color: iconBackgroundColor,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, size: 24, color: Colors.white),
+                child: Icon(icon, size: 22, color: iconColor),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       label,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
                     if (count != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         count.toString(),
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal.shade700,
+                          color: iconColor,
                         ),
                       ),
                     ],
@@ -275,60 +298,6 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String label,
-    required int count,
-  }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 24, color: Colors.teal.shade700),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    count.toString(),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

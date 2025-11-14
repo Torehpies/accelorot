@@ -1,4 +1,4 @@
-//firestore_collection.dart
+// lib/services/machine_services/firestore_collection.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_mock_data.dart';
@@ -35,7 +35,9 @@ class MachineFirestoreCollections {
   static Future<bool> allMockMachinesExist() async {
     try {
       final mockData = MachineMockData.getMockMachines();
-      final mockIds = mockData.map((data) => data['machineId'] as String).toList();
+      final mockIds = mockData
+          .map((data) => data['machineId'] as String)
+          .toList();
 
       for (final id in mockIds) {
         final doc = await getMachinesCollection().doc(id).get();

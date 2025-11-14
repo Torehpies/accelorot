@@ -6,9 +6,7 @@ import 'widgets/operator_machine_list.dart';
 import '../widgets/search_bar_widget.dart';
 
 class OperatorMachineScreen extends StatefulWidget {
-  final String? viewingOperatorId;
-
-  const OperatorMachineScreen({super.key, this.viewingOperatorId});
+  const OperatorMachineScreen({super.key});
 
   @override
   State<OperatorMachineScreen> createState() => _OperatorMachineScreenState();
@@ -21,7 +19,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
+    _controller = OperatorMachineController();
     _controller.initialize();
   }
 
@@ -43,7 +41,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
       appBar: AppBar(
         title: const Text(
           'My Machines',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
         elevation: 0,
@@ -157,9 +155,7 @@ class _OperatorMachineScreenState extends State<OperatorMachineScreen> {
                         const SizedBox(height: 12),
 
                         // Machine List with Error/Loading States Inside
-                        Expanded(
-                          child: _buildContent(),
-                        ),
+                        Expanded(child: _buildContent()),
                       ],
                     ),
                   ),

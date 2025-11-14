@@ -32,7 +32,11 @@ class CompostingProgressCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.pie_chart_outline, color: Colors.grey[700], size: 18),
+                Icon(
+                  Icons.pie_chart_outline,
+                  color: Colors.grey[700],
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Composting Progress',
@@ -45,7 +49,7 @@ class CompostingProgressCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Decomposition label and percentage
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,22 +72,24 @@ class CompostingProgressCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Progress Bar
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: progress / 100,
                 backgroundColor: Colors.grey[200],
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFA726)),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color(0xFFFFA726),
+                ),
                 minHeight: 16,
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Dates Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,10 +100,7 @@ class CompostingProgressCard extends StatelessWidget {
                   children: [
                     Text(
                       'Batch Start',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -110,7 +113,7 @@ class CompostingProgressCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 // Est Completion with green indicator
                 Row(
                   children: [
@@ -140,7 +143,6 @@ class CompostingProgressCard extends StatelessWidget {
                       width: 24,
                       height: 48,
                       decoration: BoxDecoration(
-                        
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

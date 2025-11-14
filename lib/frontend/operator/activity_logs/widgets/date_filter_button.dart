@@ -50,10 +50,7 @@ class DateFilterRange {
 class DateFilterButton extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
 
-  const DateFilterButton({
-    super.key,
-    required this.onFilterChanged,
-  });
+  const DateFilterButton({super.key, required this.onFilterChanged});
 
   @override
   State<DateFilterButton> createState() => _DateFilterButtonState();
@@ -64,11 +61,15 @@ class _DateFilterButtonState extends State<DateFilterButton> {
 
   void _showFilterMenu() {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -77,10 +78,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
       context: context,
       position: position,
       items: [
-        const PopupMenuItem(
-          value: DateFilterType.today,
-          child: Text('Today'),
-        ),
+        const PopupMenuItem(value: DateFilterType.today, child: Text('Today')),
         const PopupMenuItem(
           value: DateFilterType.last3Days,
           child: Text('Last 3 Days'),
@@ -153,7 +151,11 @@ class _DateFilterButtonState extends State<DateFilterButton> {
         );
 
         if (pickedDate != null) {
-          final selectedDay = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+          final selectedDay = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+          );
           newFilter = DateFilterRange(
             type: DateFilterType.customDate,
             startDate: selectedDay,
@@ -193,8 +195,8 @@ class _DateFilterButtonState extends State<DateFilterButton> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: _currentFilter.isActive 
-                  ? Colors.teal.shade100 
+              color: _currentFilter.isActive
+                  ? Colors.teal.shade100
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -204,7 +206,9 @@ class _DateFilterButtonState extends State<DateFilterButton> {
                 Icon(
                   Icons.calendar_today,
                   size: 20,
-                  color: _currentFilter.isActive ? Colors.teal.shade700 : Colors.white,
+                  color: _currentFilter.isActive
+                      ? Colors.teal.shade700
+                      : Colors.white,
                 ),
                 if (_currentFilter.isActive) ...[
                   const SizedBox(width: 6),

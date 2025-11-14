@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/email_verify.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/web/admin/screens/web_login_screen.dart';
 
 class WebRegistrationScreen extends StatefulWidget {
   const WebRegistrationScreen({super.key});
@@ -56,9 +56,8 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => EmailVerifyScreen(
-                  email: emailController.text.trim(),
-                ),
+                builder: (context) =>
+                    EmailVerifyScreen(email: emailController.text.trim()),
               ),
             );
           } else {
@@ -84,7 +83,9 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
       backgroundColor: isDesktop ? Colors.grey[50] : Colors.white,
       body: Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: isDesktop ? 600 : double.infinity),
+          constraints: BoxConstraints(
+            maxWidth: isDesktop ? 600 : double.infinity,
+          ),
           padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
           child: Card(
             elevation: isDesktop ? 8 : 0,
@@ -163,8 +164,8 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
                               ),
                               validator: (value) =>
                                   value == null || value.isEmpty
-                                      ? 'First name is required'
-                                      : null,
+                                  ? 'First name is required'
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -181,8 +182,8 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
                               ),
                               validator: (value) =>
                                   value == null || value.isEmpty
-                                      ? 'Last name is required'
-                                      : null,
+                                  ? 'Last name is required'
+                                  : null,
                             ),
                           ),
                         ],
@@ -330,16 +331,14 @@ class _WebRegistrationScreenState extends State<WebRegistrationScreen> {
                         children: [
                           Text(
                             "Already have an account? ",
-                            style: TextStyle(
-                              fontSize: isDesktop ? 15 : 14,
-                            ),
+                            style: TextStyle(fontSize: isDesktop ? 15 : 14),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const WebLoginScreen(),
+                                  builder: (context) => const LoginScreen(),
                                 ),
                               );
                             },

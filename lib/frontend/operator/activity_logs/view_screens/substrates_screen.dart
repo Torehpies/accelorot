@@ -1,3 +1,4 @@
+// lib/frontend/operator/activity_logs/view_screens/substrates_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -5,9 +6,9 @@ import '../../../../services/firestore_activity_service.dart';
 
 class SubstratesScreen extends BaseActivityScreen {
   const SubstratesScreen({
-    super.key, 
+    super.key,
     super.initialFilter,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   });
 
   @override
@@ -16,14 +17,15 @@ class SubstratesScreen extends BaseActivityScreen {
 
 class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
-  String get screenTitle => 'Substrate Logs';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Substrate Logs'
+      : 'Substrate Logs';
 
   @override
   List<String> get filters => const ['All', 'Greens', 'Browns', 'Compost'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    // ⭐ UPDATED: Pass viewingOperatorId to service
     return await FirestoreActivityService.getSubstrates(
       viewingOperatorId: widget.viewingOperatorId,
     );
@@ -39,18 +41,18 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Greens', 'Browns', 'Compost'};
-    
+
     Set<String> result = {};
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-    
+
     if (specificCategories.every((cat) => categories.contains(cat))) {
       result.add('All');
     }
-    
+
     return result;
   }
 }

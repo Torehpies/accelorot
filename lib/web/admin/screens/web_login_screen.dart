@@ -50,7 +50,7 @@ class _WebLoginScreenState extends State<WebLoginScreen> {
       onLoginSuccess: (result) {
         // Don't manually navigate - let AuthWrapper handle routing
         if (!mounted) return;
-        
+
         // Replace the entire navigation stack with AuthWrapper
         // This will trigger the StreamBuilder and route correctly
         Navigator.pushAndRemoveUntil(

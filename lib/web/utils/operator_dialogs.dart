@@ -28,7 +28,9 @@ class OperatorDialogs {
               backgroundColor: ThemeConstants.orangeShade600,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ThemeConstants.borderRadius8),
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius8,
+                ),
               ),
             ),
             child: const Text('Archive'),
@@ -38,10 +40,61 @@ class OperatorDialogs {
     );
   }
 
+  // Show remove permanently confirmation dialog
+  static Future<bool?> showRemovePermanentlyConfirmation(
+    BuildContext context,
+    String operatorName,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ThemeConstants.borderRadius16),
+        ),
+        title: const Text('Remove Operator Permanently'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Are you sure you want to permanently remove $operatorName?'),
+            const SizedBox(height: 12),
+            const Text(
+              'This action cannot be undone. The operator will be marked as "Left" and cannot be restored.',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  ThemeConstants.borderRadius8,
+                ),
+              ),
+            ),
+            child: const Text('Remove Permanently'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Show success snackbar
   static void showSuccessSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -54,7 +107,7 @@ class OperatorDialogs {
   // Show error snackbar
   static void showErrorSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -67,7 +120,7 @@ class OperatorDialogs {
   // Show warning snackbar
   static void showWarningSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -80,7 +133,7 @@ class OperatorDialogs {
   // Show info snackbar
   static void showInfoSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),

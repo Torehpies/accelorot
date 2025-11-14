@@ -5,7 +5,8 @@ class FilterSection extends StatefulWidget {
   final List<String> filters;
   final ValueChanged<String> onSelected;
   final String initialFilter;
-  final Set<String> autoHighlightedFilters; // Filters to auto-highlight from search
+  final Set<String>
+  autoHighlightedFilters; // Filters to auto-highlight from search
 
   const FilterSection({
     super.key,
@@ -32,9 +33,9 @@ class _FilterSectionState extends State<FilterSection> {
   @override
   void didUpdateWidget(FilterSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // If auto-highlighted filters changed and no manual selection, update display
-    if (!isManualSelection && 
+    if (!isManualSelection &&
         widget.autoHighlightedFilters != oldWidget.autoHighlightedFilters) {
       // Don't change selectedFilter, just rebuild to show highlights
       setState(() {});
@@ -50,14 +51,15 @@ class _FilterSectionState extends State<FilterSection> {
         child: Row(
           children: widget.filters.map((filter) {
             final isSelected = selectedFilter == filter;
-            final isAutoHighlighted = widget.autoHighlightedFilters.contains(filter) && 
-                                     !isManualSelection;
+            final isAutoHighlighted =
+                widget.autoHighlightedFilters.contains(filter) &&
+                !isManualSelection;
             final isFirst = filter == widget.filters.first;
             final isLast = filter == widget.filters.last;
-            
+
             // Determine chip appearance
             final bool shouldHighlight = isSelected || isAutoHighlighted;
-            
+
             return Padding(
               padding: EdgeInsets.only(
                 left: isFirst ? 0 : 4,
@@ -68,7 +70,9 @@ class _FilterSectionState extends State<FilterSection> {
                   filter,
                   style: TextStyle(
                     color: shouldHighlight ? Colors.white : Colors.black87,
-                    fontWeight: shouldHighlight ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: shouldHighlight
+                        ? FontWeight.bold
+                        : FontWeight.normal,
                   ),
                 ),
                 selected: shouldHighlight,

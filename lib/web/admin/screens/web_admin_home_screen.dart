@@ -125,8 +125,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
           _archivedOperators = archivedOperators;
           _activeMachines = activeMachines;
           _archivedMachines = archivedMachines;
-          _operators = operators.take(8).toList();
-          _machines = machines.take(8).toList();
+          _operators = operators.take(7).toList();
+          _machines = machines.take(7).toList();
           _loading = false;
         });
       }
@@ -140,14 +140,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.teal.shade700,
         title: const Text(
           'Dashboard',
-          style: TextStyle(
-            color: Colors.teal,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -216,62 +214,86 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: borderColor, width: 1),
+                                border: Border.all(
+                                  color: borderColor,
+                                  width: 1,
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildSectionHeader(
                                     'Operator Management',
-                                 onTapManage: widget.onManageOperators,
+                                    onTapManage: widget.onManageOperators,
                                   ),
                                   const SizedBox(height: 4),
                                   // === TABLE HEADER ===
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[100],
                                       borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(8)),
+                                        top: Radius.circular(8),
+                                      ),
                                     ),
                                     child: Row(
                                       children: [
                                         Expanded(
-                                            flex: 1,
-                                            child: Text('ID',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 1,
+                                          child: Text(
+                                            'ID',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
-                                            flex: 3,
-                                            child: Text('Surname',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 3,
+                                          child: Text(
+                                            'Surname',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
-                                            flex: 4,
-                                            child: Text('Email',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 4,
+                                          child: Text(
+                                            'Email',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
                                           flex: 2,
                                           child: Align(
                                             alignment: Alignment.topCenter,
-                                            child: Text('Status',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12)),
+                                            child: Text(
+                                              'Status',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         Expanded(
                                           flex: 1,
-                                          child: Text('Action',
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12)),
+                                          child: Text(
+                                            'Action',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -279,8 +301,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                   // === TABLE BODY ===
                                   Expanded(
                                     child: ListView.separated(
-                                      separatorBuilder: (_, _) =>
-                                          const Divider(
+                                      separatorBuilder: (_, _) => const Divider(
                                         height: 1,
                                         color: Colors.grey,
                                       ),
@@ -289,31 +310,38 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                         final operator = _operators[index];
                                         return Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
                                           child: Row(
                                             children: [
                                               Expanded(
-                                                  flex: 1,
-                                                  child: Text(
-                                                    '${index + 1}',
-                                                    style: const TextStyle(
-                                                        fontSize: 13),
-                                                  )),
+                                                flex: 1,
+                                                child: Text(
+                                                  '${index + 1}',
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
-                                                  flex: 3,
-                                                  child: Text(
-                                                    _getSurname(
-                                                        operator['name']),
-                                                    style: const TextStyle(
-                                                        fontSize: 14),
-                                                  )),
+                                                flex: 3,
+                                                child: Text(
+                                                  _getSurname(operator['name']),
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
-                                                  flex: 4,
-                                                  child: Text(
-                                                    operator['email'],
-                                                    style: const TextStyle(
-                                                        fontSize: 12),
-                                                  )),
+                                                flex: 4,
+                                                child: Text(
+                                                  operator['email'],
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
                                                 flex: 2,
                                                 child: Align(
@@ -323,8 +351,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                     height: 6,
                                                     decoration: BoxDecoration(
                                                       shape: BoxShape.circle,
-                                                      color: operator[
-                                                              'isArchived']
+                                                      color:
+                                                          operator['isArchived']
                                                           ? Colors.red
                                                           : Colors.green,
                                                     ),
@@ -342,9 +370,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                         Icons.edit,
                                                         size: 12,
                                                       ),
-                                                      onPressed: () {
-                                                       
-                                                      },
+                                                      onPressed: () {},
                                                       color: Colors.blue,
                                                       padding: EdgeInsets.zero,
                                                       visualDensity:
@@ -357,9 +383,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                         Icons.delete,
                                                         size: 12,
                                                       ),
-                                                      onPressed: () {
-                                                        
-                                                      },
+                                                      onPressed: () {},
                                                       color: Colors.red,
                                                       padding: EdgeInsets.zero,
                                                       visualDensity:
@@ -390,7 +414,10 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: borderColor, width: 1),
+                                border: Border.all(
+                                  color: borderColor,
+                                  width: 1,
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,52 +430,66 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                   // === TABLE HEADER ===
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[100],
                                       borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(8)),
+                                        top: Radius.circular(8),
+                                      ),
                                     ),
                                     child: Row(
                                       children: [
                                         Expanded(
-                                            flex: 1,
-                                            child: Text('ID',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 1,
+                                          child: Text(
+                                            'ID',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
-                                            flex: 3,
-                                            child: Text('Machine',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 3,
+                                          child: Text(
+                                            'Machine',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
-                                            flex: 3,
-                                            child: Text('ID',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12))),
+                                          flex: 3,
+                                          child: Text(
+                                            'ID',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
                                         Expanded(
                                           flex: 1,
-                                          child: Text('Action',
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12)),
+                                          child: Text(
+                                            'Action',
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const Divider(
-                                    height: 1,
-                                    color: Colors.grey,
-                                  ),
+                                  const Divider(height: 1, color: Colors.grey),
                                   // === TABLE BODY ===
                                   Expanded(
                                     child: ListView.separated(
-                                      separatorBuilder: (_, _) =>
-                                          const Divider(
+                                      separatorBuilder: (_, _) => const Divider(
                                         height: 1,
                                         color: Colors.grey,
                                       ),
@@ -457,30 +498,38 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                         final machine = _machines[index];
                                         return Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
                                           child: Row(
                                             children: [
                                               Expanded(
-                                                  flex: 1,
-                                                  child: Text(
-                                                    '${index + 1}',
-                                                    style: const TextStyle(
-                                                        fontSize: 12),
-                                                  )),
+                                                flex: 1,
+                                                child: Text(
+                                                  '${index + 1}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
-                                                  flex: 3,
-                                                  child: Text(
-                                                    _getSurname(machine['name']),
-                                                    style: const TextStyle(
-                                                        fontSize: 12),
-                                                  )),
+                                                flex: 3,
+                                                child: Text(
+                                                  _getSurname(machine['name']),
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
-                                                  flex: 3,
-                                                  child: Text(
-                                                    machine['machineId'],
-                                                    style: const TextStyle(
-                                                        fontSize: 12),
-                                                  )),
+                                                flex: 3,
+                                                child: Text(
+                                                  machine['machineId'],
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
                                               Expanded(
                                                 flex: 1,
                                                 child: Row(
@@ -492,9 +541,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                         Icons.edit,
                                                         size: 12,
                                                       ),
-                                                      onPressed: () {
-                                                        
-                                                      },
+                                                      onPressed: () {},
                                                       color: Colors.blue,
                                                       padding: EdgeInsets.zero,
                                                       visualDensity:
@@ -507,9 +554,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                         Icons.delete,
                                                         size: 12,
                                                       ),
-                                                      onPressed: () {
-                                                      
-                                                      },
+                                                      onPressed: () {},
                                                       color: Colors.red,
                                                       padding: EdgeInsets.zero,
                                                       visualDensity:
@@ -549,15 +594,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 1),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -589,8 +627,10 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   }
 
   // Section header with "Manage" button
-  Widget _buildSectionHeader(String title,
-      {required VoidCallback onTapManage}) {
+  Widget _buildSectionHeader(
+    String title, {
+    required VoidCallback onTapManage,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -615,11 +655,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                   fontSize: 16,
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: Color(0xFF2E7D32),
-              ),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF2E7D32)),
             ],
           ),
         ),

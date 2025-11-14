@@ -1,4 +1,4 @@
-// admin_home_screen.dart
+// lib/frontend/screens/admin/home_screen/admin_home_screen.dart
 import 'package:flutter/material.dart';
 import 'widgets/stat_card.dart';
 import 'operator_management/operator_management_section.dart';
@@ -12,7 +12,9 @@ import '../../../../services/sess_service.dart';
 
 /// Admin home screen with teal theme and auth-based data loading
 class AdminHomeScreen extends StatefulWidget {
-  const AdminHomeScreen({super.key});
+  final void Function(int index)? onNavigateToTab;
+
+  const AdminHomeScreen({super.key, this.onNavigateToTab});
 
   @override
   State<AdminHomeScreen> createState() => _AdminHomeScreenState();
@@ -46,7 +48,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     try {
       // Check if user is logged in
       final user = _sessionService.currentUser;
-      
+
       if (user != null) {
         // User is logged in - fetch real data from Firestore
         _isLoggedIn = true;
@@ -109,24 +111,34 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  /// Handle "Manage >" tap for operators
+  /// Handle "Manage >" tap for operators - Navigate to Operator tab
   void _onOperatorManageTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Operator management coming soon'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(1); // Navigate to Operator tab (index 1)
+    } else {
+      // Fallback if callback not provided
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Navigation not available'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
-  /// Handle "Manage >" tap for machines
+  /// Handle "Manage >" tap for machines - Navigate to Machine tab
   void _onMachineManageTap() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Machine management coming soon'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(2); // Navigate to Machine tab (index 2)
+    } else {
+      // Fallback if callback not provided
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Navigation not available'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   @override
@@ -163,9 +175,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   /// Build loading indicator
   Widget _buildLoadingState() {
     return const Center(
-      child: CircularProgressIndicator(
-        color: Color(0xFF4CAF50),
-      ),
+      child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
     );
   }
 
@@ -205,17 +215,11 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     return Row(
       children: [
         Expanded(
-          child: StatCard(
-            count: _stats.userCount,
-            label: 'Operators',
-          ),
+          child: StatCard(count: _stats.userCount, label: 'Operators'),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: StatCard(
-            count: _stats.machineCount,
-            label: 'Machines',
-          ),
+          child: StatCard(count: _stats.machineCount, label: 'Machines'),
         ),
       ],
     );

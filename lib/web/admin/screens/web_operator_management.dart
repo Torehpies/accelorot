@@ -12,13 +12,13 @@ import '../../utils/operator_dialogs.dart';
 import '../../utils/theme_constants.dart';
 import '../widgets/accept_operators_card.dart';
 import '../../../web/admin/widgets/add_operator_screen.dart';
-import '../../admin/screens/web_operator_view_navigation.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
 
   @override
-  State<OperatorManagementScreen> createState() => _OperatorManagementScreenState();
+  State<OperatorManagementScreen> createState() =>
+      _OperatorManagementScreenState();
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
@@ -89,10 +89,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         '${operator.name} archived successfully',
       );
     } else {
-      OperatorDialogs.showErrorSnackbar(
-        context,
-        'Error archiving operator',
-      );
+      OperatorDialogs.showErrorSnackbar(context, 'Error archiving operator');
     }
   }
 
@@ -118,42 +115,48 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         '${operator.name} restored successfully',
       );
     } else {
-      OperatorDialogs.showErrorSnackbar(
-        context,
-        'Error restoring operator',
-      );
+      OperatorDialogs.showErrorSnackbar(context, 'Error restoring operator');
     }
   }
 
-  void _handleViewDashboard() {
+  Future<void> _handleRemovePermanently() async {
     final operator = _controller.selectedOperator;
     if (operator == null) return;
 
-    Navigator.push(
+    final confirm = await OperatorDialogs.showRemovePermanentlyConfirmation(
       context,
-      MaterialPageRoute(
-        builder: (context) => WebOperatorViewNavigation(
-          operatorId: operator.uid,
-          operatorName: operator.name,
-        ),
-      ),
+      operator.name,
     );
+
+    if (confirm != true || !mounted) return;
+
+    final success = await _controller.removeOperatorPermanently(operator);
+    if (!mounted) return;
+
+    if (success) {
+      _controller.clearSelectedOperator();
+      OperatorDialogs.showSuccessSnackbar(
+        context,
+        '${operator.name} has been removed permanently',
+      );
+    } else {
+      OperatorDialogs.showErrorSnackbar(context, 'Failed to remove operator');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeConstants.greyShade50,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: ThemeConstants.tealShade700,
         elevation: 0,
         title: const Text(
           'Operator Management',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        // 🖌️ APP BAR ICONS (e.g., back button) inherit from AppBar brightness or iconTheme
+        // To customize: use `iconTheme: IconThemeData(color: Colors.white)`
       ),
       body: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacing12),
@@ -161,10 +164,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Action Cards Row - Always visible
-            SizedBox(
-              height: 100,
-              child: _buildActionCards(),
-            ),
+            SizedBox(height: 100, child: _buildActionCards()),
             const SizedBox(height: ThemeConstants.spacing12),
 
             // Main Content Area
@@ -173,13 +173,11 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Left Side - Operator List
-                  Expanded(
-                    child: _buildOperatorList(),
-                  ),
+                  Expanded(child: _buildOperatorList()),
                   // Spacing
                   if (_controller.selectedOperator != null)
                     const SizedBox(width: ThemeConstants.spacing12),
-                  // Right Side - Detail Panel (full height)
+                  // Right Side - Detail Panel
                   if (_controller.selectedOperator != null)
                     SizedBox(
                       width: 320,
@@ -188,7 +186,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                         onClose: () => _controller.clearSelectedOperator(),
                         onArchive: _handleArchive,
                         onRestore: _handleRestore,
-                        onViewDashboard: _handleViewDashboard,
+                        onRemovePermanently: _handleRemovePermanently,
                         showArchived: _controller.showArchived,
                       ),
                     ),
@@ -211,8 +209,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.archivedCount,
             onPressed: () => _controller.setShowArchived(true),
             showCountBelow: true,
+            // 🖌️ ICON COLOR: orange (from theme)
             iconBackgroundColor: ThemeConstants.orangeShade50,
-            iconColor: ThemeConstants.orangeShade600,
+            iconColor: ThemeConstants.orangeShade600, // ← Icon tint color
             isActive: _controller.showArchived,
           ),
         ),
@@ -224,8 +223,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAddOperatorDialog,
             showCountBelow: false,
+            // 🖌️ ICON COLOR: blue (from theme)
             iconBackgroundColor: ThemeConstants.blueShade50,
-            iconColor: ThemeConstants.blueShade600,
+            iconColor: ThemeConstants.blueShade600, // ← Icon tint color
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -236,8 +236,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAcceptOperatorDialog,
             showCountBelow: false,
+            // 🖌️ ICON COLOR: green (from theme)
             iconBackgroundColor: ThemeConstants.greenShade50,
-            iconColor: ThemeConstants.greenShade600,
+            iconColor: ThemeConstants.greenShade600, // ← Icon tint color
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -248,6 +249,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.activeCount,
             onPressed: () => _controller.setShowArchived(false),
             showCountBelow: true,
+            // 🖌️ ICON COLOR: default (likely teal or primary) — check OperatorActionCard implementation
+            // If no iconColor is passed, it may use a default (e.g., ThemeConstants.tealShade700)
             isActive: !_controller.showArchived,
           ),
         ),
@@ -264,18 +267,19 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
       ),
       child: Column(
         children: [
-          // Header
+          // Header (may contain search icon, refresh icon, etc.)
           OperatorListHeader(
             showArchived: _controller.showArchived,
             searchQuery: _controller.searchQuery,
             onSearchChanged: (value) => _controller.setSearchQuery(value),
             onRefresh: () => _controller.loadOperators(),
+            onBack: _controller.showArchived
+                ? () => _controller.setShowArchived(false)
+                : null,
           ),
           const Divider(height: 1),
           // Content
-          Expanded(
-            child: _buildListContent(),
-          ),
+          Expanded(child: _buildListContent()),
         ],
       ),
     );
@@ -309,7 +313,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         vertical: ThemeConstants.spacing8,
       ),
       itemCount: displayList.length,
-      separatorBuilder: (context, index) => const SizedBox(height: ThemeConstants.spacing8),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: ThemeConstants.spacing8),
       itemBuilder: (context, index) {
         final operator = displayList[index];
         final isSelected = _controller.selectedOperator?.id == operator.id;
@@ -318,6 +323,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           operator: operator,
           isSelected: isSelected,
           onTap: () => _controller.setSelectedOperator(operator),
+          // 🖌️ ICON COLOR inside OperatorListItem: likely defined in that widget
+          // (e.g., status icon, avatar fallback icon)
         );
       },
     );

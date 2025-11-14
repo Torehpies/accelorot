@@ -1,3 +1,4 @@
+// lib/frontend/screens/admin/admin_screens/admin_profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/services/sess_service.dart';
@@ -43,12 +44,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final first = (_userData != null && _userData!['firstname'] is String)
         ? (_userData!['firstname'] as String)
-        : (FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? '');
+        : (FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ??
+              '');
     final last = (_userData != null && _userData!['lastname'] is String)
         ? (_userData!['lastname'] as String)
-        : (FirebaseAuth.instance.currentUser?.displayName?.split(' ').skip(1).join(' ') ?? '');
+        : (FirebaseAuth.instance.currentUser?.displayName
+                  ?.split(' ')
+                  .skip(1)
+                  .join(' ') ??
+              '');
 
-    final displayName = [first, last].where((s) => s.isNotEmpty).join(' ').trim();
+    final displayName = [
+      first,
+      last,
+    ].where((s) => s.isNotEmpty).join(' ').trim();
     final email = (_userData != null && _userData!['email'] is String)
         ? (_userData!['email'] as String)
         : (FirebaseAuth.instance.currentUser?.email ?? '');
@@ -63,10 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 180,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF2E7D32),
-                    Color(0xFF4CAF50),
-                  ],
+                  colors: [Color(0xFF2E7D32), Color(0xFF4CAF50)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -118,10 +124,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         showDialog(
                           context: context,
                           builder: (context) => EditProfileModal(
-                            firstName: first.isNotEmpty ? first : 'Miguel Andres',
+                            firstName: first.isNotEmpty
+                                ? first
+                                : 'Miguel Andres',
                             lastName: last.isNotEmpty ? last : 'Reyes',
-                            username: FirebaseAuth.instance.currentUser?.displayName ?? '',
- 
+                            username:
+                                FirebaseAuth
+                                    .instance
+                                    .currentUser
+                                    ?.displayName ??
+                                '',
+
                             role: _userData?['role'] ?? 'User',
                           ),
                         );
@@ -157,12 +170,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2E7D32),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 48,
+                          vertical: 16,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Log Out", style: TextStyle(fontSize: 16)),
+                      child: const Text(
+                        "Log Out",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
@@ -174,7 +193,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildButton(BuildContext context, {required String label, required VoidCallback onPressed}) {
+  Widget _buildButton(
+    BuildContext context, {
+    required String label,
+    required VoidCallback onPressed,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -182,7 +205,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         title: Text(
           label,
           style: const TextStyle(
@@ -200,5 +226,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
 }

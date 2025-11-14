@@ -169,8 +169,6 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
       } else {
         timer.cancel();
 
-        //final authListenable = ref.read(authListenableProvider.notifier);
-        //await authListenable.refreshUser();
       }
     });
   }
@@ -396,7 +394,6 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(
-                              vertical: isDesktop ? 18 : 16,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -491,7 +488,6 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
                             backgroundColor: Colors.teal,
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(
-                              vertical: isDesktop ? 18 : 16,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),

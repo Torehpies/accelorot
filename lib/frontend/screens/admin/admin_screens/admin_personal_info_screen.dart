@@ -5,19 +5,18 @@ class PersonalInfoScreen extends StatelessWidget {
   const PersonalInfoScreen({super.key});
 
   @override
-/*************  ✨ Windsurf Command ⭐  *************/
-/// Builds a personal info screen with an avatar, name, email, username, full name, role, and an edit button.
-/// The screen is scrollable and has a white background.
-/// The avatar is a circle with a radius of 50.
-/// The name and email are displayed in a column above the avatar.
-/// The username, full name, role, and edit button are displayed in a column below the avatar.
-/// The edit button is a green button with a white edit icon.
-/// When pressed, the button opens a dialog with a form to edit the user's personal info.
-/// The dialog has a green header with a white close icon.
-/// The form has fields for the username, full name, email, and role.
-/// The fields are read-only except for the role field, which is editable.
-/// The form has a green save button at the bottom.
-
+  /*************  ✨ Windsurf Command  *************/
+  /// Builds a personal info screen with an avatar, name, email, username, full name, role, and an edit button.
+  /// The screen is scrollable and has a white background.
+  /// The avatar is a circle with a radius of 50.
+  /// The name and email are displayed in a column above the avatar.
+  /// The username, full name, role, and edit button are displayed in a column below the avatar.
+  /// The edit button is a green button with a white edit icon.
+  /// When pressed, the button opens a dialog with a form to edit the user's personal info.
+  /// The dialog has a green header with a white close icon.
+  /// The form has fields for the username, full name, email, and role.
+  /// The fields are read-only except for the role field, which is editable.
+  /// The form has a green save button at the bottom.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -72,10 +71,7 @@ class PersonalInfoScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       "miguelreyes@email.com",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -111,13 +107,7 @@ class PersonalInfoScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
+        Text(value, style: const TextStyle(fontSize: 16, color: Colors.black)),
         const Divider(height: 24), // Optional: adds subtle line
       ],
     );

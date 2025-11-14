@@ -1,8 +1,10 @@
+//auth_wrapper.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
+//import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
 import '../frontend/operator/main_navigation.dart';
 import '../frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import '../web/admin/admin_navigation/web_admin_navigation.dart';
@@ -34,7 +36,7 @@ class AuthWrapper extends StatelessWidget {
 
         // User is not logged in
         if (snapshot.data == null) {
-          return const SplashScreen();
+          return const LoginScreen();
         }
 
         final user = snapshot.data!;
@@ -51,8 +53,12 @@ class AuthWrapper extends StatelessWidget {
 
             // Admins bypass all checks
             if (role.toLowerCase() == 'admin') {
-              debugPrint('AuthWrapper: User is admin, redirecting to AdminMainNavigation (web-aware)');
-              return kIsWeb ? const WebAdminNavigation() : const AdminMainNavigation();
+              debugPrint(
+                'AuthWrapper: User is admin, redirecting to AdminMainNavigation (web-aware)',
+              );
+              return kIsWeb
+                  ? const WebAdminNavigation()
+                  : const AdminMainNavigation();
             }
 
             // For non-admin users, check team status
@@ -61,7 +67,9 @@ class AuthWrapper extends StatelessWidget {
             final teamId = status['teamId'];
             final pendingTeamId = status['pendingTeamId'];
 
-            debugPrint('AuthWrapper: teamId=$teamId, pendingTeamId=$pendingTeamId');
+            debugPrint(
+              'AuthWrapper: teamId=$teamId, pendingTeamId=$pendingTeamId',
+            );
 
             // Check member status across all teams
             try {
@@ -69,7 +77,9 @@ class AuthWrapper extends StatelessWidget {
                   .collection('teams')
                   .get();
 
-              debugPrint('AuthWrapper: Checking ${teamsSnapshot.docs.length} teams');
+              debugPrint(
+                'AuthWrapper: Checking ${teamsSnapshot.docs.length} teams',
+              );
 
               for (var teamDoc in teamsSnapshot.docs) {
                 final memberDoc = await FirebaseFirestore.instance
@@ -84,23 +94,31 @@ class AuthWrapper extends StatelessWidget {
                   final isArchived = memberData['isArchived'] ?? false;
                   final hasLeft = memberData['hasLeft'] ?? false;
 
-                  debugPrint('AuthWrapper: Found member in team ${teamDoc.id}, isArchived=$isArchived, hasLeft=$hasLeft');
+                  debugPrint(
+                    'AuthWrapper: Found member in team ${teamDoc.id}, isArchived=$isArchived, hasLeft=$hasLeft',
+                  );
 
                   // Block archived users immediately
                   if (isArchived) {
-                    debugPrint('AuthWrapper: User is archived, showing RestrictedAccessScreen');
+                    debugPrint(
+                      'AuthWrapper: User is archived, showing RestrictedAccessScreen',
+                    );
                     return const RestrictedAccessScreen(reason: 'archived');
                   }
 
                   // If user has left, show team selection screen
                   if (hasLeft) {
-                    debugPrint('AuthWrapper: User has left, redirecting to TeamSelectionScreen');
+                    debugPrint(
+                      'AuthWrapper: User has left, redirecting to TeamSelectionScreen',
+                    );
                     return const TeamSelectionScreen();
                   }
 
                   // Found as active member with teamId
                   if (teamId != null && !isArchived && !hasLeft) {
-                    debugPrint('AuthWrapper: User is active member, allowing access');
+                    debugPrint(
+                      'AuthWrapper: User is active member, allowing access',
+                    );
                     return kIsWeb
                         ? const WebOperatorNavigation()
                         : const MainNavigation();
@@ -112,7 +130,9 @@ class AuthWrapper extends StatelessWidget {
               debugPrint('AuthWrapper: User not found in any team');
 
               if (pendingTeamId != null) {
-                debugPrint('AuthWrapper: Has pendingTeamId, showing WaitingApprovalScreen');
+                debugPrint(
+                  'AuthWrapper: Has pendingTeamId, showing WaitingApprovalScreen',
+                );
                 return const WaitingApprovalScreen();
               } else {
                 debugPrint('AuthWrapper: No team, showing TeamSelectionScreen');

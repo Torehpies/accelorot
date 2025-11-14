@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/view_screens/oxygen_stats_view.dart';
 
-
 class OxygenStatCard extends StatelessWidget {
   final VoidCallback? onTap; // optional for future use
 

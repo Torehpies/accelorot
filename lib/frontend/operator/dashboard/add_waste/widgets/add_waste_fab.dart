@@ -1,3 +1,4 @@
+// lib/frontend/operator/dashboard/add_waste/widgets/add_waste_fab.dart
 import 'package:flutter/material.dart';
 import '../add_waste_product.dart';
 
@@ -25,7 +26,9 @@ class AddWasteFAB extends StatelessWidget {
           },
           backgroundColor: Colors.teal,
           elevation: 5,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: const Icon(Icons.add, size: 28, color: Colors.white),
         ),
       ),

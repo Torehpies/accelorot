@@ -82,10 +82,6 @@ class MoistureStatisticCard extends StatelessWidget {
             minHeight: 8,
           ),
           const SizedBox(height: 16),
-          Text(
-            'Trend (Last 8 Hours)',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-          ),
           const SizedBox(height: 8),
 
           // ✅ Message when no data (like Temperature)
@@ -110,16 +106,20 @@ class MoistureStatisticCard extends StatelessWidget {
             child: SfCartesianChart(
               primaryXAxis: CategoryAxis(
                 labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 interval: 1,
               ),
               primaryYAxis: NumericAxis(
                 minimum: 0,
                 maximum: 100,
                 interval: 20,
-                majorGridLines:
-                    const MajorGridLines(width: 0.5, color: Colors.grey),
+                majorGridLines: const MajorGridLines(
+                  width: 0.5,
+                  color: Colors.grey,
+                ),
                 labelStyle: const TextStyle(fontSize: 9),
               ),
               plotAreaBorderWidth: 0,
@@ -163,17 +163,16 @@ class MoistureStatisticCard extends StatelessWidget {
       children: [
         Text(
           'Moisture',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
           '${currentMoisture.toStringAsFixed(0)}%',
-          style: Theme.of(context)
-              .textTheme
-              .headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold, color: color),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
       ],
     );
@@ -191,7 +190,10 @@ class MoistureStatisticCard extends StatelessWidget {
         Text(
           'Quality: $quality',
           style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w600, color: color),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
         ),
       ],
     );
@@ -199,7 +201,8 @@ class MoistureStatisticCard extends StatelessWidget {
 
   String _getQuality(double moisture) {
     if (moisture >= 40 && moisture <= 60) return 'Excellent';
-    if ((moisture >= 30 && moisture < 40) || (moisture > 60 && moisture <= 70)) {
+    if ((moisture >= 30 && moisture < 40) ||
+        (moisture > 60 && moisture <= 70)) {
       return 'Good';
     }
     return 'Critical';

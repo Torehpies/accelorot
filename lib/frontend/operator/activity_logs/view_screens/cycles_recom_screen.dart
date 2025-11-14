@@ -1,3 +1,4 @@
+//lib/frontend/operator/activity_logs/view_screens/cycles_recom_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -5,25 +6,27 @@ import '../../../../services/firestore_activity_service.dart';
 
 class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
-    super.key, 
+    super.key,
     super.initialFilter,
-    super.viewingOperatorId, // ⭐ NEW: Pass to parent
+    super.focusedMachineId,
   });
 
   @override
   State<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
+class _CyclesRecomScreenState
+    extends BaseActivityScreenState<CyclesRecomScreen> {
   @override
-  String get screenTitle => 'Cycles & Recommendations';
+  String get screenTitle => widget.focusedMachineId != null
+      ? 'Machine Cycles & Recommendations'
+      : 'Cycles & Recommendations';
 
   @override
   List<String> get filters => const ['All', 'Recoms', 'Cycles'];
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    // ⭐ UPDATED: Pass viewingOperatorId to service
     return await FirestoreActivityService.getCyclesRecom(
       viewingOperatorId: widget.viewingOperatorId,
     );
@@ -39,18 +42,18 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   Set<String> getCategoriesInSearchResults(List<ActivityItem> searchResults) {
     final categories = searchResults.map((item) => item.category).toSet();
     final specificCategories = {'Recoms', 'Cycles'};
-    
+
     Set<String> result = {};
     for (var cat in specificCategories) {
       if (categories.contains(cat)) {
         result.add(cat);
       }
     }
-    
+
     if (specificCategories.every((cat) => categories.contains(cat))) {
       result.add('All');
     }
-    
+
     return result;
   }
 }

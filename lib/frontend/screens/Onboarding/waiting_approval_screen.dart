@@ -16,7 +16,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
   bool _loading = false;
 
   Future<void> _cancelRequest(BuildContext context, WidgetRef ref) async {
-		setState(() => _loading = true);
+    setState(() => _loading = true);
     final authNotifier = ref.read(authStateProvider.notifier);
     try {
       await authNotifier.cancelTeam();
@@ -132,7 +132,7 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         //onPressed: _loading ? null : _cancelRequest,
-												onPressed: () => _cancelRequest(context, ref),
+                        onPressed: () => _cancelRequest(context, ref),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
                           foregroundColor: Colors.white,

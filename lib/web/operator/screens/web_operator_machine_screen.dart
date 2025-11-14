@@ -5,11 +5,10 @@ import '../../../frontend/operator/machine_management/widgets/search_bar_widget.
 import '../../operator/widgets/summary_card_widget.dart';
 import '../../operator/widgets/machine_card_widget.dart';
 import '../../operator/widgets/machine_list_tile_widget.dart';
+import '../widgets/web_view_confirmation_dialog.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
-  final String? viewingOperatorId;
-
-  const WebOperatorMachineScreen({super.key, this.viewingOperatorId});
+  const WebOperatorMachineScreen({super.key, required focusedMachine});
 
   @override
   State<WebOperatorMachineScreen> createState() =>
@@ -24,8 +23,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
   @override
   void initState() {
     super.initState();
-    controller =
-        OperatorMachineController(viewingOperatorId: widget.viewingOperatorId);
+    controller = OperatorMachineController();
     controller.initialize();
   }
 
@@ -40,9 +38,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     await controller.refresh();
   }
 
-  void handleMachineTap(String machineName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening $machineName details')),
+  void handleMachineTap(dynamic machine) {
+    showDialog(
+      context: context,
+      builder: (context) => WebViewConfirmationDialog(machine: machine),
     );
   }
 
@@ -142,8 +141,9 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.teal.shade50,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
                                             border: Border.all(
                                               color: Colors.teal.shade200,
                                             ),
@@ -161,16 +161,15 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                                     ),
                                     const SizedBox(height: 16),
                                     SearchBarWidget(
-                                      onSearchChanged: controller.setSearchQuery,
+                                      onSearchChanged:
+                                          controller.setSearchQuery,
                                       onClear: controller.clearSearch,
                                       focusNode: searchFocusNode,
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
-                                child: _buildContent(),
-                              ),
+                              Expanded(child: _buildContent()),
                             ],
                           ),
                         ),
@@ -211,9 +210,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
               Expanded(
                 child: SummaryCardWidget(
                   title: 'Total Machines',
-                  value: (controller.activeMachinesCount +
-                          controller.archivedMachinesCount)
-                      .toString(),
+                  value:
+                      (controller.activeMachinesCount +
+                              controller.archivedMachinesCount)
+                          .toString(),
                   icon: Icons.devices,
                   color: Colors.blue,
                 ),
@@ -243,9 +243,10 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                   Expanded(
                     child: SummaryCardWidget(
                       title: 'Total',
-                      value: (controller.activeMachinesCount +
-                              controller.archivedMachinesCount)
-                          .toString(),
+                      value:
+                          (controller.activeMachinesCount +
+                                  controller.archivedMachinesCount)
+                              .toString(),
                       icon: Icons.devices,
                       color: Colors.blue,
                     ),
@@ -333,10 +334,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
                 controller.searchQuery.isEmpty
                     ? 'You don\'t have any machines yet.'
                     : 'No machines match your search.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -353,8 +351,8 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
     final crossAxisCount = screenWidth > 1200
         ? 3
         : screenWidth > 800
-            ? 2
-            : 1;
+        ? 2
+        : 1;
 
     return GridView.builder(
       padding: const EdgeInsets.all(24),
@@ -369,7 +367,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         final machine = controller.filteredMachines[index];
         return MachineCardWidget(
           machine: machine,
-          onTap: () => handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine),
         );
       },
     );
@@ -384,7 +382,7 @@ class _WebOperatorMachineScreenState extends State<WebOperatorMachineScreen> {
         final machine = controller.filteredMachines[index];
         return MachineListTileWidget(
           machine: machine,
-          onTap: () => handleMachineTap(machine.machineName),
+          onTap: () => handleMachineTap(machine),
         );
       },
     );

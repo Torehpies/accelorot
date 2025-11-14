@@ -36,13 +36,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submitLogin() async {
-		if (!mounted) return;
+    if (!mounted) return;
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-		final email = emailController.text;
-		final password = passwordController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
 
     final notifier = ref.read(loginProvider.notifier);
 
@@ -52,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     //  password: password,
     //);
 
-		if (!mounted) return;
+    if (!mounted) return;
 
     _handleLoginFlow(result, emailController.text.trim());
 
@@ -139,8 +139,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
-		emailController.dispose();
-		passwordController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
@@ -401,7 +401,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       width: double.infinity,
       child: PrimaryButton(
         text: 'Login',
-        onPressed: isLoading ? null : () => _submitLogin,
+        onPressed: isLoading ? null : () => _submitLogin(),
         isLoading: isLoading,
       ),
     );

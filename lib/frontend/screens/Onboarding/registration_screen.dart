@@ -9,7 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'email_verify.dart';
 
-
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -26,7 +25,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   String? selectedRole = 'Operator';
   String? selectedTeamId;
   bool _obscurePassword = true;
@@ -47,10 +46,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final teamsSnapshot = await _firestore.collection('teams').get();
       final teams = teamsSnapshot.docs.map((doc) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          'name': data['teamName'] ?? 'Unnamed Team',
-        };
+        return {'id': doc.id, 'name': data['teamName'] ?? 'Unnamed Team'};
       }).toList();
 
       if (mounted) {
@@ -103,20 +99,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
           if (result['success']) {
             final user = _authService.getCurrentUser();
-            
+
             // If a team was selected, save it for later (after email verification)
             if (selectedTeamId != null && user != null) {
               // Store the selected team ID temporarily in user document
               await _firestore.collection('users').doc(user.uid).update({
                 'pendingTeamSelection': selectedTeamId,
               });
-              
+
               if (!mounted) return;
-              showSnackbar(context, 'Registration successful! Please verify your email first.');
+              showSnackbar(
+                context,
+                'Registration successful! Please verify your email first.',
+              );
             } else {
               showSnackbar(context, result['message']);
             }
-            
+
             // Always navigate to email verification screen first
             Navigator.pushReplacement(
               context,
@@ -341,7 +340,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 ),
                               ),
                             ),
-                            validator: (value) => value == null ? 'Please select a team' : null,
+                            validator: (value) =>
+                                value == null ? 'Please select a team' : null,
                             items: [
                               ..._teams.map((team) {
                                 return DropdownMenuItem<String>(
@@ -474,8 +474,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, 
-                              color: Colors.blue.shade700, 
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.blue.shade700,
                               size: 20,
                             ),
                             const SizedBox(width: 8),

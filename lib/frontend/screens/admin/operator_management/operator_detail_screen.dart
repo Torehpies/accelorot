@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'operator_view_navigation.dart';
 
 class OperatorDetailScreen extends StatefulWidget {
   final String operatorId;
@@ -303,35 +302,6 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // View as Operator button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _isProcessing
-                    ? null
-                    : () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OperatorViewNavigation(
-                              operatorId: widget.operatorId,
-                              operatorName: widget.operatorName,
-                            ),
-                          ),
-                        );
-                      },
-                icon: const Icon(Icons.visibility),
-                label: const Text('View as Operator'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
             const SizedBox(height: 12),
 
             // Archive button (temporary restriction)
@@ -449,4 +419,3 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
     );
   }
 }
-

@@ -1,3 +1,4 @@
+// lib/frontend/operator/activity_logs/view_screens/alerts_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
 import '../models/activity_item.dart';
@@ -8,6 +9,7 @@ class AlertsScreen extends BaseActivityScreen {
     super.key,
     super.initialFilter,
     super.viewingOperatorId,
+    super.focusedMachineId,
   });
 
   @override
@@ -16,10 +18,16 @@ class AlertsScreen extends BaseActivityScreen {
 
 class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   @override
-  String get screenTitle => 'Alerts Logs';
+  String get screenTitle =>
+      widget.focusedMachineId != null ? 'Machine Alerts' : 'Alerts Logs';
 
   @override
-  List<String> get filters => const ['All', 'Temperature', 'Moisture', 'Oxygen'];
+  List<String> get filters => const [
+    'All',
+    'Temperature',
+    'Moisture',
+    'Air Quality',
+  ];
 
   /// Helper function to capitalize first letter properly
   String toProperCase(String input) {
@@ -29,7 +37,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
 
   @override
   Future<List<ActivityItem>> fetchData() async {
-    final batchId = widget.viewingOperatorId ?? '123456_03';
+    final batchId = widget.viewingOperatorId ?? '01_01';
     final alerts = await FirestoreAlertService.fetchAlertsForBatch(batchId);
 
     final List<ActivityItem> activityList = alerts.map<ActivityItem>((alert) {
@@ -77,7 +85,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
         category: category,
         timestamp:
             DateTime.tryParse(alert['timestamp'] ?? '') ?? DateTime.now(),
-        userId: alert['machine_id'],
+        machineId: alert['machine_id'],
       );
     }).toList();
 

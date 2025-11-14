@@ -12,11 +12,13 @@ class OperatorViewService {
   }
 
   /// Fetch operator details by UID
-  static Future<Map<String, dynamic>?> getOperatorDetails(String operatorId) async {
+  static Future<Map<String, dynamic>?> getOperatorDetails(
+    String operatorId,
+  ) async {
     try {
       final doc = await _firestore.collection('users').doc(operatorId).get();
       if (!doc.exists) return null;
-      
+
       final data = doc.data()!;
       return {
         'uid': operatorId,

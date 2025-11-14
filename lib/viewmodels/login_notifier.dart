@@ -110,5 +110,4 @@ class LoginNotifier extends _$LoginNotifier {
       );
     }
   }
-
 }
