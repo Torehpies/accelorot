@@ -6,19 +6,19 @@ part 'user.g.dart';
 
 @freezed
 abstract class User with _$User {
-	const factory User({
-		required String email,
-		required String firstName,
-		required String lastName,
-		required String role,
-		@Default('') String teamId,
-		@Default(false) bool isArchived,
-		@Default('') String pendingTeamSelection,
-		@Default(true) bool isActive,
-		required bool emailVerified,
-		required String uid,
-		required Timestamp createdAt,
-	}) = _User;
+  const factory User({
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String role,
+    @Default('') String teamId,
+    @Default(false) bool isArchived,
+    @Default('') String pendingTeamSelection,
+    @Default(true) bool isActive,
+    required bool emailVerified,
+    required String uid,
+    required DateTime createdAt,
+  }) = _User;
 
-	factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
