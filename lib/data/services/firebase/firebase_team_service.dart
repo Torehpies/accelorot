@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/services/contracts/team_service.dart';
 
-class FirebaseTeamService {
+class FirebaseTeamService implements TeamService {
   final FirebaseFirestore firestore;
   FirebaseTeamService(this.firestore);
 
-  Future<Map<String, dynamic>?> fetchRawTeam(String teamId) async {
+  @override
+  Future<Map<String, dynamic>?> fetchRawTeamData(String teamId) async {
     final snapshot = await firestore.collection('teams').doc(teamId).get();
     return snapshot.data();
   }

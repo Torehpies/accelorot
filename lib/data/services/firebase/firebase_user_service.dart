@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/services/contracts/user_service.dart';
 
-class FirebaseUserService {
+class FirebaseUserService implements UserService{
 	final FirebaseFirestore firestore;
 	FirebaseUserService(this.firestore);
 
-	Future<Map<String, dynamic>?> fetchRawUserData(String id) async {
+	@override
+  Future<Map<String, dynamic>?> fetchRawUserData(String id) async {
 		final snapshot = await firestore.collection('users').doc(id).get();
 
 		return snapshot.data();
