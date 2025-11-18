@@ -7,7 +7,7 @@ import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart'; // Import AuthWrapper
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart';
-import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 
 class WebLoginScreen extends StatefulWidget {
   const WebLoginScreen({super.key});

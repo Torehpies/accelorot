@@ -4,7 +4,7 @@ import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_main_navigation.dart';
 import 'package:flutter_application_1/utils/login_flow_result.dart';
 import 'package:flutter_application_1/viewmodels/login_notifier.dart';
-import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
