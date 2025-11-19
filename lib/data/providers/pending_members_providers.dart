@@ -7,13 +7,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pending_members_providers.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 PendingMemberService pendingMemberService(Ref ref) {
 	final firestore = ref.watch(firebaseFirestoreProvider);
 	return FirebasePendingMemberService(firestore);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 PendingMemberRepository pendingMemberRepository(Ref ref) {
 	final pendingMemberService = ref.watch(pendingMemberServiceProvider);
 	final userRepository = ref.watch(userRepositoryProvider);

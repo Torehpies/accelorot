@@ -6,13 +6,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_providers.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 UserService userService(Ref ref) {
 	final firestore = ref.watch(firebaseFirestoreProvider);
 	return FirebaseUserService(firestore);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 UserRepository userRepository(Ref ref) {
 	final userService = ref.watch(userServiceProvider);
 	return UserRepositoryImpl(userService);

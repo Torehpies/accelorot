@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/models/pending_member_user.dart';
 import 'package:flutter_application_1/data/models/user.dart';
 import 'package:flutter_application_1/data/repositories/user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
@@ -48,17 +49,26 @@ class PendingMemberRepositoryImpl implements PendingMemberRepository {
           final requestedAtDate = requestedAtTimestamp.toDate();
 
           final existingUserId = rawMap['requestorId'] as String?;
-          User? existingUser;
+          PendingMemberUser? existingPendingMemberUser;
+
           if (existingUserId != null) {
             try {
-              existingUser = await _userRepository.getUser(existingUserId);
+              final existingUser = await _userRepository.getUser(
+                existingUserId,
+              );
+              existingPendingMemberUser = PendingMemberUser(
+                uid: existingUser.uid,
+                firstName: existingUser.firstName,
+                lastName: existingUser.lastName,
+                email: existingUser.email,
+              );
             } catch (_) {
-              existingUser = null;
+              existingPendingMemberUser = null;
             }
           }
 
           return PendingMember(
-            user: existingUser,
+            user: existingPendingMemberUser,
             requestedAt: requestedAtDate,
           );
         }),

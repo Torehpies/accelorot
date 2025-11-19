@@ -8,6 +8,7 @@ import 'package:flutter_application_1/data/services/contracts/pending_member_ser
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
 @GenerateMocks([PendingMemberService, UserRepository])
 import 'pending_member_repository_test.mocks.dart';
 
@@ -28,6 +29,8 @@ void main() {
     globalRole: 'User',
     emailVerified: true,
     createdAt: DateTime(2024, 1, 1),
+    teamRole: 'Operator',
+    teamId: 'example-team',
   );
 
   setUp(() {

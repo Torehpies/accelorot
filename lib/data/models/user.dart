@@ -6,14 +6,15 @@ part 'user.g.dart';
 @freezed
 abstract class User with _$User {
   const factory User({
+    required String uid,
     required String email,
     required String firstName,
     required String lastName,
     required String globalRole,
-    @Default(false) bool isArchived,
+		required String teamRole,
+		required String teamId,
     @Default(true) bool isActive,
     required bool emailVerified,
-    required String uid,
     required DateTime createdAt,
   }) = _User;
 
