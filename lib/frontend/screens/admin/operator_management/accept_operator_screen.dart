@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/models/pending_member.dart';
 
 class AcceptOperatorScreen extends StatefulWidget {
   const AcceptOperatorScreen({super.key});
@@ -12,7 +13,9 @@ class AcceptOperatorScreen extends StatefulWidget {
 class _AcceptOperatorScreenState extends State<AcceptOperatorScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  List<Map<String, dynamic>> _pendingMembers = [];
+	// TODO use PendingMemberRepositoryImpl for business logic
+  //List<Map<String, dynamic>> _pendingMembers = [];
+	List<PendingMember> _pendingMembers = [];
   bool _loading = true;
   String? _error;
 

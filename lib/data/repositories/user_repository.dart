@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/user.dart';
-import 'package:flutter_application_1/data/services/firebase/firebase_user_service.dart';
+import 'package:flutter_application_1/data/services/contracts/user_service.dart';
 
 abstract class UserRepository {
   Future<User> getUser(String id);
 }
 
 class UserRepositoryImpl implements UserRepository {
-  final FirebaseUserService userService;
+  final UserService userService;
 
   UserRepositoryImpl(this.userService);
 
