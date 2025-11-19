@@ -70,11 +70,9 @@ web/firebase-messaging-sw.js
 
 notes.md
 
-
-
-
-# Freezed
+# Generated files (freezed, riverpod, mocks)
 *.g.dart
 *.freezed.dart
+*.mocks.dart
 
 .env
