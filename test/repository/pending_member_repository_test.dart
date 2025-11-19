@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/user.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository.dart';
 import 'package:flutter_application_1/data/repositories/user_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -40,99 +41,121 @@ void main() {
   group('getPendingMembers', () {
     // ARRANGEMENT
 
-    // A. setup muna ng raw data for mock service
-    test('should fetch, compose User, and map Timestamp to DateTime', () async {
-      final rawPendingMemberData = {
-        'requestedAt': testTimestamp,
-        'requestorId': testRequestorId,
-      };
+    // test 1: success (composition and mapping check)
+    test(
+      'should return success, compose User, and map Timestamp to DateTime',
+      () async {
+        // arrange
+        final rawPendingMemberData = {
+          'requestedAt': testTimestamp,
+          'requestorId': testRequestorId,
+        };
 
-      final mockPaginationResult = PaginationResult<Map<String, dynamic>>(
-        items: [rawPendingMemberData],
-        nextCursor: 'next-page-token',
-      );
+        final mockPaginationResult = PaginationResult<Map<String, dynamic>>(
+          items: [rawPendingMemberData],
+          nextCursor: 'next-page-token',
+        );
 
-      // B. setup ng irereturn ng mock service
-      when(
-        mockService.fetchRawPendingMembers(
-          teamId: testTeamId,
-          limit: 20,
-          startCursor: anyNamed('startCursor'),
-        ),
-      ).thenAnswer((_) async => mockPaginationResult);
+        // stub 1: service returns raw data
+        when(
+          mockService.fetchRawPendingMembers(
+            teamId: testTeamId,
+            limit: 20,
+            startCursor: anyNamed('startCursor'),
+          ),
+        ).thenAnswer((_) async => mockPaginationResult);
 
-      // C. setup ng irereturn ng user repository
-      when(
-        mockUserRepository.getUser(testRequestorId),
-      ).thenAnswer((_) async => mockUser);
+        // stub 2: repository returns clean user model
+        when(
+          mockUserRepository.getUser(testRequestorId),
+        ).thenAnswer((_) async => mockUser);
 
-      // TEST ACTION
-      final result = await repository.getPendingMembers(
-        teamId: testTeamId,
-        limit: 20,
-        startCursor: null,
-      );
-
-      // ASSERTION
-      expect(result.items, isNotEmpty);
-      final member = result.items.first;
-
-      expect(member.user, isNotNull);
-      expect(member.user!.uid, testRequestorId);
-
-      expect(member.requestedAt, isA<DateTime>());
-      expect(member.requestedAt.year, 2025);
-      expect(member.requestedAt, testTimestamp.toDate());
-
-      expect(result.nextCursor, 'next-page-token');
-
-      // VERIFICATION
-      verify(mockUserRepository.getUser(testRequestorId)).called(1);
-      verify(
-        mockService.fetchRawPendingMembers(
+        // action
+        final result = await repository.getPendingMembers(
           teamId: testTeamId,
           limit: 20,
           startCursor: null,
-        ),
-      ).called(1);
-    });
+        );
 
-    test('should return null user if userRepository throws error', () async {
-      // ARRANGEMENT
-      final rawData = {
-        'requestedAt': testTimestamp,
-        'requestorId': testRequestorId,
-        'teamId': testTeamId,
-      };
+        // assertion
 
-      when(
-        mockService.fetchRawPendingMembers(
-          teamId: anyNamed('teamId'),
-          limit: anyNamed('limit'),
-          startCursor: anyNamed('startCursor'),
-        ),
-      ).thenAnswer(
-        (_) async => PaginationResult(items: [rawData], nextCursor: null),
-      );
+        // check success rate
+        expect(result.value, isNotNull);
+        expect(result.error, isNull);
 
-      // Tell user repository to throw an error
-      when(
-        mockUserRepository.getUser(testRequestorId),
-      ).thenThrow(Exception('User not found'));
+        // check actaul paginationresult
+        final paginationResult = result.value!;
 
-      // ACTION
-      final result = await repository.getPendingMembers(
-        teamId: testTeamId,
-        limit: 20,
-        startCursor: null,
-      );
+        // check composition and mapping
+        expect(paginationResult.items, hasLength(1));
+        final member = paginationResult.items.first;
 
-      // ASSERTION
-      final member = result.items.first;
+        expect(member.user, isNotNull);
+        expect(member.user!.uid, testRequestorId);
+        expect(member.requestedAt, testTimestamp.toDate());
+        expect(paginationResult.nextCursor, 'next-page-token');
 
-      expect(member.user, isNull);
+        // verification
+        verify(mockUserRepository.getUser(testRequestorId)).called(1);
+      },
+    );
 
-      verify(mockUserRepository.getUser(testRequestorId)).called(1);
-    });
+    // test 2: network/unknown error
+    test(
+      'should return networkerror if the service fails with a general exception',
+      () async {
+        // arrange
+        when(
+          mockService.fetchRawPendingMembers(
+            teamId: anyNamed('teamId'),
+            limit: anyNamed('limit'),
+            startCursor: anyNamed('startCursor'),
+          ),
+        ).thenThrow(Exception('Simulated network timeout'));
+
+        // action
+        final result = await repository.getPendingMembers(
+          teamId: testTeamId,
+          limit: 20,
+          startCursor: null,
+        );
+
+        // assertion
+        // 1. check for failure state
+        expect(result.value, isNull);
+
+        // 2. check for the specific datalayererror type (networkerror)
+        expect(result.error, isA<DataLayerError>());
+        expect(result.error, isA<NetworkError>());
+      },
+    );
+
+    // test 3: failure - permission denied
+    test(
+      'should return PermissionError if the service throws a permission-denied FirebaseException',
+      () async {
+        // arrange
+        when(
+          mockService.fetchRawPendingMembers(
+            teamId: anyNamed('teamId'),
+            limit: anyNamed('limit'),
+            startCursor: anyNamed('startCursor'),
+          ),
+        ).thenThrow(
+          FirebaseException(plugin: 'firestore', code: 'permission-denied'),
+        );
+
+        // action
+        final result = await repository.getPendingMembers(
+          teamId: testTeamId,
+          limit: 20,
+          startCursor: null,
+        );
+
+        // assertion
+        expect(result.error, isA<DataLayerError>());
+        expect(result.error, isA<PermissionError>());
+      },
+    );
   });
 }
