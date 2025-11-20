@@ -1,7 +1,9 @@
-class Result<T, E> {
-	final T? value;
-	final E? error;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-	const Result.success(T data) : value = data, error = null;
-	const Result.failure(E failure) : value = null, error = failure;
+part 'result.freezed.dart';
+
+@freezed
+abstract class Result<T, E> with _$Result<T, E>{
+	const factory Result.success(T data) = Success<T, E>;
+	const factory Result.failure(E failure) = Failure<T, E>;
 }
