@@ -16,4 +16,11 @@ abstract class PendingMemberService {
 		required String teamId,
 		required String memberId,
 	});
+	Future<void> processAcceptanceTransaction({
+		required String teamId,
+		required String memberId,
+		required String email,
+		required String firstName,
+		required String lastName,
+	});
 }

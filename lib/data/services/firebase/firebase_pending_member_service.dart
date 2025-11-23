@@ -52,4 +52,76 @@ class FirebasePendingMemberService implements PendingMemberService {
 
     return PaginationResult(items: rawItems, nextCursor: nextCursor);
   }
+
+  @override
+  Future<String> addPendingMember({
+    required String teamId,
+    required String memberId,
+    required String memberEmail,
+  }) async {
+    final docRef = _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('pending_members')
+        .doc(memberId);
+
+    final rawData = {
+      'requestedAt': FieldValue.serverTimestamp(),
+      'requestorId': memberId,
+      'requestorEmail': memberEmail,
+    };
+
+    await docRef.set(rawData);
+
+    return memberId;
+  }
+
+  @override
+  Future<void> deletePendingMember({
+    required String teamId,
+    required String memberId,
+  }) async {
+    final docRef = _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('pending_members')
+        .doc(memberId);
+
+    await docRef.delete();
+  }
+
+  @override
+  Future<void> processAcceptanceTransaction({
+    required String teamId,
+    required String memberId,
+		required String email,
+		required String firstName,
+		required String lastName,
+  }) async {
+    final batch = _firestore.batch();
+
+    final pendingRef = _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('pending_members')
+        .doc(memberId);
+
+    batch.delete(pendingRef);
+
+    final teamMemberRef = _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('members')
+        .doc(memberId);
+
+    batch.set(teamMemberRef, {
+      'role': 'Operator',
+      'addedAt': FieldValue.serverTimestamp(),
+			'email': email,
+			'firstName': firstName,
+			'lastName': lastName,
+    });
+
+		await batch.commit();
+  }
 }
