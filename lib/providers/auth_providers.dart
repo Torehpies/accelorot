@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/repositories/auth_repository.dart';
 import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -14,10 +15,6 @@ part 'auth_providers.g.dart';
 Stream<User?> authStateChanges(Ref ref) {
 	return ref.watch(authRepositoryProvider).authStateChanges;
 }
-
-/// Firebase auth provider
-@Riverpod(keepAlive: true)
-FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
 
 /// Firebase Firestore provider
 @Riverpod(keepAlive: true)

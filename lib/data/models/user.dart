@@ -12,7 +12,7 @@ abstract class User with _$User {
     required String lastName,
     required String globalRole,
 		required String teamRole,
-		required String teamId,
+		@Default('') String teamId,
     @Default(true) bool isActive,
     required bool emailVerified,
     required DateTime createdAt,
