@@ -21,11 +21,36 @@ class FirebaseAuthService implements AuthService {
       password: password,
     );
 
-		return userCredential.user!.uid;
+    return userCredential.user!.uid;
   }
 
   @override
   Future<void> signOut() async {
-		await _firebaseAuth.signOut();
+    await _firebaseAuth.signOut();
+  }
+
+  @override
+  Future<String> signUp(String email, String password) async {
+    try {
+      UserCredential result = await _firebaseAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
+      final user = result.user;
+
+      await user?.sendEmailVerification();
+
+      //    await _firebaseFirestore.collection('users').doc(user?.uid).set({
+      //      'uid': user?.uid,
+      //      'email': email,
+      //      'firstname': firstName,
+      //      'lastname': lastName,
+      //      'globalRole': globalRole,
+      //			'status': UserStatus.unverified,
+      //      'createdAt': FieldValue.serverTimestamp(),
+      //    });
+
+      return result.user!.uid;
+    } on FirebaseAuthException {
+      rethrow;
+    }
   }
 }
