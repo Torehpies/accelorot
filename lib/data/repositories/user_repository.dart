@@ -1,15 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/user.dart';
+import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/user_service.dart';
+import 'package:flutter_application_1/utils/user_status.dart';
 
 abstract class UserRepository {
   Future<User> getUser(String id);
+  Future<Result<void, DataLayerError>> createUserProfile({
+    required String uid,
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String globalRole,
+    required String status,
+  });
 }
 
 class UserRepositoryImpl implements UserRepository {
   final UserService userService;
+  final AuthService authService;
+	final FirebaseFirestore firestore;
 
-  UserRepositoryImpl(this.userService);
+  UserRepositoryImpl(this.userService, this.authService, this.firestore);
 
   User _mapRawDataToDomain(Map<String, dynamic> rawData) {
     final Timestamp timestamp = rawData['createdAt'] as Timestamp;
@@ -25,6 +41,37 @@ class UserRepositoryImpl implements UserRepository {
       throw Exception('User data not found.');
     }
 
-		return _mapRawDataToDomain(rawData);
+    return _mapRawDataToDomain(rawData);
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> createUserProfile({
+    required String uid,
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String globalRole,
+    required String status,
+  }) async {
+    try {
+			await firestore.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'globalRole': globalRole,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': UserStatus.unverified,
+			});
+			return Result.success(null);
+    } on FirebaseException catch (e) {
+			if (e.code == 'permission-denied') {
+				return const Result.failure(PermissionError());
+			}
+			return const Result.failure(NetworkError());
+    } catch (e) {
+			debugPrint(e.toString());
+      return const Result.failure(NetworkError());
+    }
   }
 }

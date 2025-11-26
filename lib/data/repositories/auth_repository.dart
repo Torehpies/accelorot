@@ -5,6 +5,7 @@ import 'package:flutter_application_1/data/repositories/user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/utils/user_status.dart';
 
 abstract class AuthRepository {
   Stream<User?> get authStateChanges;
@@ -12,6 +13,14 @@ abstract class AuthRepository {
   Future<Result<void, DataLayerError>> signIn({
     required String email,
     required String password,
+  });
+  Future<Result<void, DataLayerError>> signUp({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String globalRole,
+    // default status unverified
   });
   Future<Result<void, DataLayerError>> signOut();
 }
@@ -65,17 +74,47 @@ class AuthRepositoryImpl implements AuthRepository {
       }
       return const Result.failure(PermissionError());
     } catch (e) {
-			return const Result.failure(NetworkError());
-		}
+      return const Result.failure(NetworkError());
+    }
   }
 
   @override
   Future<Result<void, DataLayerError>> signOut() async {
-		try {
-			await _authService.signOut();
-			return const Result.success(null);
-		} catch (e) {
-			return const Result.failure(NetworkError());
-		}
+    try {
+      await _authService.signOut();
+      return const Result.success(null);
+    } catch (e) {
+      return const Result.failure(NetworkError());
+    }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> signUp({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String globalRole,
+  }) async {
+    try {
+      final uid = await _authService.signUp(email, password);
+      final profileResult = await _userRepository.createUserProfile(
+        uid: uid,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        globalRole: globalRole,
+        status: UserStatus.unverified.value,
+      );
+      debugPrint(profileResult.toString());
+      return const Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        return const Result.failure(UserExistsError());
+      }
+      return const Result.failure(NetworkError());
+    } catch (e) {
+      return const Result.failure(NetworkError());
+    }
   }
 }

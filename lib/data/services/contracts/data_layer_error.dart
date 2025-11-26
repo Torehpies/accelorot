@@ -14,3 +14,7 @@ class PermissionError extends DataLayerError {
 class MappingError extends DataLayerError {
   const MappingError() : super('Data recieved from the server was corrupt.');
 }
+
+class UserExistsError extends DataLayerError {
+  const UserExistsError() : super('User already exists in database.');
+}

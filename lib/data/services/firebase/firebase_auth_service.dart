@@ -38,16 +38,6 @@ class FirebaseAuthService implements AuthService {
 
       await user?.sendEmailVerification();
 
-      //    await _firebaseFirestore.collection('users').doc(user?.uid).set({
-      //      'uid': user?.uid,
-      //      'email': email,
-      //      'firstname': firstName,
-      //      'lastname': lastName,
-      //      'globalRole': globalRole,
-      //			'status': UserStatus.unverified,
-      //      'createdAt': FieldValue.serverTimestamp(),
-      //    });
-
       return result.user!.uid;
     } on FirebaseAuthException {
       rethrow;
