@@ -19,7 +19,15 @@ class AcceptOperatorViewModel extends ChangeNotifier {
     try {
       final tid = teamId;
       if (tid.isEmpty) throw Exception('No user logged in');
-      pendingMembers = await repository.getPendingMembers(tid);
+      final raw = await repository.getPendingMembers(tid);
+      
+      // Add formatted date
+      pendingMembers = raw.map((m) {
+        return {
+          ...m,
+          'requestedAt': m['requestedAt'] as DateTime?,
+        };
+      }).toList();
     } catch (e) {
       error = e.toString();
     } finally {

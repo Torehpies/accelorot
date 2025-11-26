@@ -31,7 +31,14 @@ class OperatorDetailView extends StatelessWidget {
           return Scaffold(
             backgroundColor: Colors.grey[50],
             appBar: AppBar(
-              title: const Text('Operator Details'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.teal),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text(
+                'Operator Details',
+                style: TextStyle(color: Colors.teal),
+              ),
               backgroundColor: Colors.white,
               foregroundColor: Colors.teal,
               elevation: 0,
@@ -40,6 +47,7 @@ class OperatorDetailView extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
+                  // Operator Info Card
                   Card(
                     elevation: 6,
                     shape: RoundedRectangleBorder(
@@ -53,8 +61,8 @@ class OperatorDetailView extends StatelessWidget {
                           Row(
                             children: [
                               Container(
-                                width: 50,
-                                height: 50,
+                                width: 48,
+                                height: 48,
                                 decoration: BoxDecoration(
                                   color: Colors.teal.shade100,
                                   shape: BoxShape.circle,
@@ -62,16 +70,17 @@ class OperatorDetailView extends StatelessWidget {
                                 child: Icon(
                                   Icons.person,
                                   color: Colors.teal.shade700,
-                                  size: 28,
+                                  size: 24,
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
                                   operatorName,
                                   style: const TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
+                                    color: Colors.teal,
                                   ),
                                 ),
                               ),
@@ -88,18 +97,66 @@ class OperatorDetailView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Archive button (temporary restriction)
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: vm.processing
                           ? null
                           : () async {
-                              await vm.archive(operatorUid);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Archived')),
-                                );
-                                Navigator.pop(context, true);
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Archive Operator'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Archive $operatorName?'),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        '• Operator will be temporarily restricted',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const Text(
+                                        '• Can be restored later',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const Text(
+                                        '• Operator cannot login while archived',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context, true),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: const Text('Archive'),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirmed == true && context.mounted) {
+                                await vm.archive(operatorUid);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('$operatorName has been archived'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                  Navigator.pop(context, true);
+                                }
                               }
                             },
                       icon: vm.processing
@@ -110,9 +167,7 @@ class OperatorDetailView extends StatelessWidget {
                             )
                           : const Icon(Icons.archive),
                       label: Text(
-                        vm.processing
-                            ? 'Processing...'
-                            : 'Archive (Temporary)',
+                        vm.processing ? 'Processing...' : 'Archive (Temporary)',
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.orange,
@@ -125,19 +180,80 @@ class OperatorDetailView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // Remove button (permanent)
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: vm.processing
                           ? null
                           : () async {
-                              await vm.remove(operatorUid);
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Removed from team')),
-                                );
-                                Navigator.pop(context, true);
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Remove from Team'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Remove $operatorName from this team?'),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        '⚠️ This action is permanent:',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        '• Operator will be marked as "Left Team"',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const Text(
+                                        '• Cannot be restored (must rejoin via invite)',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const Text(
+                                        '• Operator can join other teams',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                      const Text(
+                                        '• Data retained in archive for records',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context, true),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      child: const Text('Remove'),
+                                    ),
+                                  ],
+                                ),
+                              );
+
+                              if (confirmed == true && context.mounted) {
+                                await vm.remove(operatorUid);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '$operatorName has been removed from the team',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                  Navigator.pop(context, true);
+                                }
                               }
                             },
                       icon: vm.processing
@@ -160,6 +276,37 @@ class OperatorDetailView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Info text
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.blue.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Archive: Temporary restriction, can be restored.\nRemove: Permanent, operator must rejoin via invite.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue.shade900,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

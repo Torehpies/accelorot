@@ -31,6 +31,7 @@ class OperatorManagementView extends StatelessWidget {
               ),
               backgroundColor: Colors.teal,
               elevation: 0,
+              centerTitle: false,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.refresh, color: Colors.teal),
@@ -87,7 +88,7 @@ class OperatorManagementView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Section Title
+                  // Section Title or Back Button
                   Row(
                     children: [
                       if (vm.showArchived)
@@ -115,7 +116,32 @@ class OperatorManagementView extends StatelessWidget {
                     child: vm.loading
                         ? const Center(child: CircularProgressIndicator())
                         : vm.error != null
-                            ? Center(child: Text('Error: ${vm.error}'))
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Error loading operators:',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      vm.error ?? '',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: vm.loadOperators,
+                                      child: const Text('Retry'),
+                                    ),
+                                  ],
+                                ),
+                              )
                             : currentList.isEmpty
                                 ? Center(
                                     child: Text(
@@ -140,44 +166,167 @@ class OperatorManagementView extends StatelessWidget {
                                       child: ListView.separated(
                                         padding: const EdgeInsets.all(16),
                                         itemCount: currentList.length,
-                                        separatorBuilder: (context, _) =>
-                                            const Divider(height: 1),
-                                        itemBuilder: (context, i) {
-                                          final op = currentList[i];
-                                          return ListTile(
-                                            title: Text(op.name),
-                                            subtitle: Text(op.email),
-                                            trailing: vm.showArchived
-                                                ? Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      if (!op.hasLeft)
-                                                        TextButton(
-                                                          onPressed: () =>
-                                                              vm.restoreOperator(op.uid),
-                                                          child: const Text('Restore'),
-                                                        ),
-                                                    ],
-                                                  )
-                                                : TextButton(
-                                                    onPressed: () =>
-                                                        vm.archiveOperator(op.uid),
-                                                    child: const Text('Archive'),
-                                                  ),
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) => OperatorDetailView(
-                                                    operatorUid: op.uid,
-                                                    operatorName: op.name,
-                                                    role: op.role,
-                                                    email: op.email,
-                                                    dateAdded: op.addedAt?.toString() ?? '',
-                                                  ),
+                                        separatorBuilder: (context, index) =>
+                                            const SizedBox(height: 12),
+                                        itemBuilder: (context, index) {
+                                          final op = currentList[index];
+                                          final hasLeft = op.hasLeft;
+                                          final isArchived = op.isArchived;
+
+                                          return Card(
+                                            elevation: 0,
+                                            margin: EdgeInsets.zero,
+                                            color: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(14),
+                                              side: BorderSide(
+                                                color: Colors.grey[200]!,
+                                                width: 0.5,
+                                              ),
+                                            ),
+                                            child: ListTile(
+                                              contentPadding: const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 12,
+                                              ),
+                                              leading: Container(
+                                                width: 40,
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                  color: hasLeft
+                                                      ? Colors.red.shade100
+                                                      : isArchived
+                                                          ? Colors.orange.shade100
+                                                          : Colors.teal.shade100,
+                                                  shape: BoxShape.circle,
                                                 ),
-                                              ).then((_) => vm.loadOperators());
-                                            },
+                                                child: Icon(
+                                                  Icons.person,
+                                                  color: hasLeft
+                                                      ? Colors.red.shade700
+                                                      : isArchived
+                                                          ? Colors.orange.shade700
+                                                          : Colors.teal.shade700,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              title: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: Text(
+                                                      op.name,
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  if (hasLeft)
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red.shade50,
+                                                        borderRadius: BorderRadius.circular(12),
+                                                        border: Border.all(
+                                                          color: Colors.red.shade200,
+                                                        ),
+                                                      ),
+                                                      child: Text(
+                                                        'Left Team',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.red.shade700,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                              subtitle: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    op.email,
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                  if (vm.showArchived) ...[
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      hasLeft
+                                                          ? 'Left: ${_formatDateTime(op.leftAt)}'
+                                                          : 'Archived: ${_formatDateTime(op.archivedAt)}',
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        color: Colors.grey.shade600,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              trailing: vm.showArchived
+                                                  ? (hasLeft
+                                                      ? null
+                                                      : ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor: Colors.teal.shade100,
+                                                            foregroundColor: Colors.teal.shade800,
+                                                            padding: const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 4,
+                                                            ),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                            ),
+                                                          ),
+                                                          onPressed: () async {
+                                                            await vm.restoreOperator(op.uid);
+                                                            if (context.mounted) {
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                SnackBar(
+                                                                  content: Text(
+                                                                    '${op.name} restored successfully',
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }
+                                                          },
+                                                          child: const Text(
+                                                            'Restore',
+                                                            style: TextStyle(fontSize: 12),
+                                                          ),
+                                                        ))
+                                                  : const Icon(
+                                                      Icons.chevron_right,
+                                                      color: Colors.teal,
+                                                    ),
+                                              onTap: (vm.showArchived && hasLeft)
+                                                  ? null
+                                                  : vm.showArchived
+                                                      ? null
+                                                      : () async {
+                                                          final shouldRefresh = await Navigator.push<bool>(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (_) => OperatorDetailView(
+                                                                operatorUid: op.uid,
+                                                                operatorName: op.name,
+                                                                role: op.role,
+                                                                email: op.email,
+                                                                dateAdded: _formatDateTime(op.addedAt),
+                                                              ),
+                                                            ),
+                                                          );
+
+                                                          if (shouldRefresh == true) {
+                                                            vm.loadOperators();
+                                                          }
+                                                        },
+                                            ),
                                           );
                                         },
                                       ),
@@ -191,6 +340,11 @@ class OperatorManagementView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return 'Unknown';
+    return '${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}-${dateTime.year}';
   }
 
   Widget _buildActionCard({
@@ -222,7 +376,7 @@ class OperatorManagementView extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.teal.withValues(alpha: 0.3),
-                      blurRadius: 8,
+                      blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
                   ],
