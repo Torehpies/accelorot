@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../operator/profile/profile_screen.dart';
 import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart';
-import '../operator_management/operator_management_screen.dart';
+import '../../../../ui/core/operator_management/widgets/operator_management_view.dart';
 import '../home_screen/admin_home_screen.dart';
 
 class AdminMainNavigation extends StatefulWidget {
@@ -41,7 +41,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   List<Widget> _buildScreens() {
     return [
       AdminHomeScreen(onNavigateToTab: _navigateToTab),
-      const OperatorManagementScreen(),
+      const OperatorManagementView(),
       const AdminMachineScreen(),
       const ProfileScreen(),
     ];
