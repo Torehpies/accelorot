@@ -1,6 +1,6 @@
 // lib/frontend/operator/activity_logs/web/web_focused_view.dart
 import 'package:flutter/material.dart';
-import '../../activity_logs/models/activity_item.dart';
+import '../../../data/models/activity_item.dart';
 
 class WebFocusedView extends StatefulWidget {
   final String title;

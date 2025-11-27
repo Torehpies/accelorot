@@ -1,5 +1,5 @@
 //mock_data_service.dart
-import '../frontend/operator/activity_logs/models/activity_item.dart';
+import '../data/models/activity_item.dart';
 import 'act_logs_firestore/mock_data/substrates.dart';
 import 'act_logs_firestore/mock_data/alerts.dart';
 import 'act_logs_firestore/mock_data/recom_cycles.dart';

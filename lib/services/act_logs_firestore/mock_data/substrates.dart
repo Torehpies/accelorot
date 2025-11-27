@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/activity_logs/models/activity_item.dart';
+import '../../../data/models/activity_item.dart';
 import '../../mock_data_service.dart';
 
 final List<ActivityItem> substrates = [

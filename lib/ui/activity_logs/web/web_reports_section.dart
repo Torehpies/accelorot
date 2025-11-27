@@ -1,15 +1,14 @@
-// lib/frontend/operator/activity_logs/web/web_alerts_section.dart
+// lib/frontend/operator/activity_logs/web/web_reports_section.dart
 import 'package:flutter/material.dart';
-import '../../../../services/firestore_activity_service.dart';
-import '../models/activity_item.dart';
-import 'package:intl/intl.dart';
+import '../../../services/firestore_activity_service.dart';
+import '../../../data/models/activity_item.dart';
 
-class WebAlertsSection extends StatefulWidget {
+class WebReportsSection extends StatefulWidget {
   final String? viewingOperatorId;
   final VoidCallback? onViewAll;
   final String? focusedMachineId;
 
-  const WebAlertsSection({
+  const WebReportsSection({
     super.key,
     this.viewingOperatorId,
     this.onViewAll,
@@ -17,38 +16,38 @@ class WebAlertsSection extends StatefulWidget {
   });
 
   @override
-  State<WebAlertsSection> createState() => _WebAlertsSectionState();
+  State<WebReportsSection> createState() => _WebReportsSectionState();
 }
 
-class _WebAlertsSectionState extends State<WebAlertsSection> {
+class _WebReportsSectionState extends State<WebReportsSection> {
   bool _isLoading = true;
-  List<ActivityItem> _alerts = [];
+  List<ActivityItem> _reports = [];
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadAlerts();
+    _loadReports();
   }
 
-  Future<void> _loadAlerts() async {
+  Future<void> _loadReports() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final alerts = await FirestoreActivityService.getAlerts(
+      final reports = await FirestoreActivityService.getReports(
         viewingOperatorId: widget.viewingOperatorId,
       );
 
       // Filter by machine if focusedMachineId is provided
-      final filteredAlerts = widget.focusedMachineId != null
-          ? alerts.where((a) => a.machineId == widget.focusedMachineId).toList()
-          : alerts;
+      final filteredReports = widget.focusedMachineId != null
+          ? reports.where((r) => r.machineId == widget.focusedMachineId).toList()
+          : reports;
 
       setState(() {
-        _alerts = filteredAlerts.take(5).toList();
+        _reports = filteredReports.take(3).toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -59,31 +58,13 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
     }
   }
 
-  String _formatTime(DateTime timestamp) {
-    final now = DateTime.now();
-    final diff = now.difference(timestamp);
-
-    if (diff.inDays == 0) {
-      return DateFormat('h:mm a').format(timestamp);
-    } else if (diff.inDays == 1) {
-      return 'Yesterday';
-    } else if (diff.inDays < 7) {
-      return '${diff.inDays} days ago';
-    } else {
-      return DateFormat('MMM d').format(timestamp);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(
-            color: const Color.fromARGB(255, 243, 243, 243),
-            width: 1,
-          ),
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(32),
@@ -95,26 +76,18 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(
-            color: const Color.fromARGB(255, 243, 243, 243),
-            width: 1,
-          ),
+          border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(16),
-        child: Text(
-          'Error: $_errorMessage',
-          style: const TextStyle(color: Colors.red),
-        ),
+        child: Text('Error: $_errorMessage', style: const TextStyle(color: Colors.red)),
       );
     }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(
-          color: const Color.fromARGB(255, 243, 243, 243),
-          width: 1,
-        ),
+        border: Border.all(color: const Color.fromARGB(255, 243, 243, 243), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -124,15 +97,14 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.warning, color: Colors.orange, size: 20),
+                const Icon(Icons.report_outlined, color: Colors.deepPurple, size: 20),
                 const SizedBox(width: 12),
-                // ✅ Title text: explicitly black
                 const Text(
-                  'Recent Alerts',
+                  'Reports',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black text
+                    color: Colors.black,
                   ),
                 ),
                 if (widget.onViewAll != null) ...[
@@ -149,14 +121,14 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-
-          if (_alerts.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(32),
+          
+          if (_reports.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No recent alerts',
-                  style: TextStyle(color: Colors.grey),
+                  'No reports yet',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ),
             )
@@ -164,37 +136,38 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _alerts.length,
+              itemCount: _reports.length,
               itemBuilder: (context, index) {
-                final alert = _alerts[index];
-                final color = alert.statusColorValue;
+                final report = _reports[index];
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(
-                    alert.title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromARGB(255, 48, 47, 47),
+                  leading: CircleAvatar(
+                    radius: 16,
+                    backgroundColor: _getReportColor(report.reportType),
+                    child: Icon(
+                      report.icon,
+                      color: Colors.white,
+                      size: 16,
                     ),
                   ),
+                  title: Text(
+                    report.title,
+                    style: const TextStyle(fontSize: 14, color: Color.fromARGB(255, 48, 47, 47)),
+                  ),
                   subtitle: Text(
-                    '${_formatTime(alert.timestamp)} • ${alert.value}',
+                    report.formattedTimestamp,
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: color),
+                      color: report.statusColorValue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      alert.category,
+                      report.value,
                       style: TextStyle(
-                        color: color,
+                        color: report.statusColorValue,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -206,5 +179,18 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
         ],
       ),
     );
+  }
+
+  Color _getReportColor(String? reportType) {
+    switch (reportType?.toLowerCase()) {
+      case 'maintenance issue':
+        return Colors.blue;
+      case 'observation':
+        return Colors.green;
+      case 'safety concern':
+        return Colors.red;
+      default:
+        return Colors.deepPurple;
+    }
   }
 }

@@ -1,6 +1,6 @@
 // lib/services/firestore_activity_service.dart
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_view_service.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_application_1/data/models/activity_item.dart';
 import 'firestore/firestore_collections.dart';
 import 'firestore/firestore_upload.dart';
 import 'firestore/firestore_fetch.dart';

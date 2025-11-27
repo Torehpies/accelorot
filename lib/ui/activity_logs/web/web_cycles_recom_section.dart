@@ -1,7 +1,7 @@
 // lib/frontend/operator/activity_logs/web/web_cycles_recom_section.dart
 import 'package:flutter/material.dart';
-import '../../../../services/firestore_activity_service.dart';
-import '../models/activity_item.dart';
+import '../../../services/firestore_activity_service.dart';
+import '../../../data/models/activity_item.dart';
 import 'package:intl/intl.dart';
 
 class WebCyclesRecomSection extends StatefulWidget {

@@ -10,7 +10,7 @@ import '../admin_machine/reports/controllers/reports_controller.dart';
 import '../admin_machine/reports/widgets/report_card.dart';
 import '../admin_machine/reports/widgets/edit_report_modal.dart';
 import '../admin_machine/reports/widgets/reports_search_bar.dart';
-import '../../activity_logs/widgets/filter_section.dart';
+import '../../../../ui/activity_logs/widgets/filter_section.dart';
 import '../admin_machine/reports/models/report_model.dart';
 
 class AdminMachineScreen extends StatefulWidget {

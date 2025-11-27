@@ -1,13 +1,13 @@
 // lib/frontend/operator/screens/web_activity_logs_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_batch_selector.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_all_activity_section.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_substrate_section.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_alerts_section.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_cycles_recom_section.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/web/web_reports_section.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/date_filter_button.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_batch_selector.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_all_activity_section.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_substrate_section.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_alerts_section.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_cycles_recom_section.dart';
+import 'package:flutter_application_1/ui/activity_logs/web/web_reports_section.dart';
+import 'package:flutter_application_1/ui/activity_logs/widgets/date_filter_button.dart';
+import 'package:flutter_application_1/data/models/activity_item.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
 // ===== Main Screen =====

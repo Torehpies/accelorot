@@ -1,56 +1,54 @@
-// lib/frontend/operator/activity_logs/web/web_substrate_section.dart
+// lib/frontend/operator/activity_logs/web/web_all_activity_section.dart
 import 'package:flutter/material.dart';
-import '../../../../services/firestore_activity_service.dart';
-import '../models/activity_item.dart';
+import '../../../services/firestore_activity_service.dart';
+import '../../../data/models/activity_item.dart';
 import 'package:intl/intl.dart';
 
-class WebSubstrateSection extends StatefulWidget {
+class WebAllActivitySection extends StatefulWidget {
   final String? viewingOperatorId;
-  final VoidCallback? onViewAll;
   final String? focusedMachineId;
 
-  const WebSubstrateSection({
+  const WebAllActivitySection({
     super.key,
     this.viewingOperatorId,
-    this.onViewAll,
     this.focusedMachineId,
   });
 
   @override
-  State<WebSubstrateSection> createState() => _WebSubstrateSectionState();
+  State<WebAllActivitySection> createState() => _WebAllActivitySectionState();
 }
 
-class _WebSubstrateSectionState extends State<WebSubstrateSection> {
+class _WebAllActivitySectionState extends State<WebAllActivitySection> {
   bool _isLoading = true;
-  List<ActivityItem> _substrates = [];
+  List<ActivityItem> _activities = [];
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadSubstrates();
+    _loadActivities();
   }
 
-  Future<void> _loadSubstrates() async {
+  Future<void> _loadActivities() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final substrates = await FirestoreActivityService.getSubstrates(
+      final activities = await FirestoreActivityService.getAllActivities(
         viewingOperatorId: widget.viewingOperatorId,
       );
 
       // Filter by machine if focusedMachineId is provided
-      final filteredSubstrates = widget.focusedMachineId != null
-          ? substrates
-                .where((s) => s.machineId == widget.focusedMachineId)
+      final filteredActivities = widget.focusedMachineId != null
+          ? activities
+                .where((a) => a.machineId == widget.focusedMachineId)
                 .toList()
-          : substrates;
+          : activities;
 
       setState(() {
-        _substrates = filteredSubstrates.take(5).toList();
+        _activities = filteredActivities.take(5).toList(); // Show only recent 5
         _isLoading = false;
       });
     } catch (e) {
@@ -66,7 +64,7 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
     final diff = now.difference(timestamp);
 
     if (diff.inDays == 0) {
-      return 'Today, ${DateFormat('h:mm a').format(timestamp)}';
+      return DateFormat('h:mm a').format(timestamp);
     } else if (diff.inDays == 1) {
       return 'Yesterday';
     } else if (diff.inDays < 7) {
@@ -126,38 +124,28 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.eco, color: Colors.green, size: 20),
+                const Icon(Icons.history, color: Colors.teal, size: 20),
                 const SizedBox(width: 12),
-                // ✅ Title: explicitly black
+                // ✅ Title text: explicitly black
                 const Text(
-                  'Substrate Log',
+                  'Recent Activity',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.black, // 🔲 Explicit black
                   ),
                 ),
-                if (widget.onViewAll != null) ...[
-                  const Spacer(),
-                  TextButton(
-                    onPressed: widget.onViewAll,
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(color: Colors.teal, fontSize: 13),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
 
-          if (_substrates.isEmpty)
+          if (_activities.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No substrate entries',
+                  'No recent activity',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -166,33 +154,27 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _substrates.length,
+              itemCount: _activities.length,
               itemBuilder: (context, index) {
-                final item = _substrates[index];
+                final activity = _activities[index];
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  leading: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: _getTypeColor(item.category),
-                    child: Icon(
-                      _getTypeIcon(item.category),
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
                   title: Text(
-                    item.title,
+                    activity.title,
                     style: const TextStyle(
+                      fontWeight: FontWeight.w500,
                       fontSize: 14,
                       color: Color.fromARGB(255, 48, 47, 47),
                     ),
                   ),
                   subtitle: Text(
-                    '${item.value} • ${item.machineName ?? 'Unknown'} • ${item.operatorName ?? 'Unknown Operator'}',
+                    '${_formatTime(activity.timestamp)} • ${activity.description.split('\n').first}',
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Text(
-                    _formatTime(item.timestamp),
+                    activity.category,
                     style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 );
@@ -201,31 +183,5 @@ class _WebSubstrateSectionState extends State<WebSubstrateSection> {
         ],
       ),
     );
-  }
-
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'Greens':
-        return Colors.green;
-      case 'Browns':
-        return Colors.brown;
-      case 'Compost':
-        return Colors.teal;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getTypeIcon(String type) {
-    switch (type) {
-      case 'Greens':
-        return Icons.local_dining;
-      case 'Browns':
-        return Icons.park;
-      case 'Compost':
-        return Icons.recycling;
-      default:
-        return Icons.eco;
-    }
   }
 }

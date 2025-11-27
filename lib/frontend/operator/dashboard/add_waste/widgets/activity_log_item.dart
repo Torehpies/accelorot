@@ -1,6 +1,6 @@
 // lib/frontend/operator/dashboard/add_waste/widgets/activity_log_item.dart
 import 'package:flutter/material.dart';
-import '../../../activity_logs/models/activity_item.dart';
+import '../../../../../data/models/activity_item.dart';
 import '../../../../../services/firestore/firestore_helpers.dart';
 
 class ActivityLogItem extends StatelessWidget {

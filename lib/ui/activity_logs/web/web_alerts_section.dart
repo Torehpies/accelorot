@@ -1,54 +1,54 @@
-// lib/frontend/operator/activity_logs/web/web_all_activity_section.dart
+// lib/frontend/operator/activity_logs/web/web_alerts_section.dart
 import 'package:flutter/material.dart';
-import '../../../../services/firestore_activity_service.dart';
-import '../models/activity_item.dart';
+import '../../../services/firestore_activity_service.dart';
+import '../../../data/models/activity_item.dart';
 import 'package:intl/intl.dart';
 
-class WebAllActivitySection extends StatefulWidget {
+class WebAlertsSection extends StatefulWidget {
   final String? viewingOperatorId;
+  final VoidCallback? onViewAll;
   final String? focusedMachineId;
 
-  const WebAllActivitySection({
+  const WebAlertsSection({
     super.key,
     this.viewingOperatorId,
+    this.onViewAll,
     this.focusedMachineId,
   });
 
   @override
-  State<WebAllActivitySection> createState() => _WebAllActivitySectionState();
+  State<WebAlertsSection> createState() => _WebAlertsSectionState();
 }
 
-class _WebAllActivitySectionState extends State<WebAllActivitySection> {
+class _WebAlertsSectionState extends State<WebAlertsSection> {
   bool _isLoading = true;
-  List<ActivityItem> _activities = [];
+  List<ActivityItem> _alerts = [];
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadActivities();
+    _loadAlerts();
   }
 
-  Future<void> _loadActivities() async {
+  Future<void> _loadAlerts() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final activities = await FirestoreActivityService.getAllActivities(
+      final alerts = await FirestoreActivityService.getAlerts(
         viewingOperatorId: widget.viewingOperatorId,
       );
 
       // Filter by machine if focusedMachineId is provided
-      final filteredActivities = widget.focusedMachineId != null
-          ? activities
-                .where((a) => a.machineId == widget.focusedMachineId)
-                .toList()
-          : activities;
+      final filteredAlerts = widget.focusedMachineId != null
+          ? alerts.where((a) => a.machineId == widget.focusedMachineId).toList()
+          : alerts;
 
       setState(() {
-        _activities = filteredActivities.take(5).toList(); // Show only recent 5
+        _alerts = filteredAlerts.take(5).toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -124,28 +124,38 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.history, color: Colors.teal, size: 20),
+                const Icon(Icons.warning, color: Colors.orange, size: 20),
                 const SizedBox(width: 12),
                 // ✅ Title text: explicitly black
                 const Text(
-                  'Recent Activity',
+                  'Recent Alerts',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black
+                    color: Colors.black, // 🔲 Explicit black text
                   ),
                 ),
+                if (widget.onViewAll != null) ...[
+                  const Spacer(),
+                  TextButton(
+                    onPressed: widget.onViewAll,
+                    child: const Text(
+                      'View All',
+                      style: TextStyle(color: Colors.teal, fontSize: 13),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
 
-          if (_activities.isEmpty)
+          if (_alerts.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No recent activity',
+                  'No recent alerts',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -154,28 +164,41 @@ class _WebAllActivitySectionState extends State<WebAllActivitySection> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _activities.length,
+              itemCount: _alerts.length,
               itemBuilder: (context, index) {
-                final activity = _activities[index];
+                final alert = _alerts[index];
+                final color = alert.statusColorValue;
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   title: Text(
-                    activity.title,
+                    alert.title,
                     style: const TextStyle(
-                      fontWeight: FontWeight.w500,
                       fontSize: 14,
                       color: Color.fromARGB(255, 48, 47, 47),
                     ),
                   ),
                   subtitle: Text(
-                    '${_formatTime(activity.timestamp)} • ${activity.description.split('\n').first}',
+                    '${_formatTime(alert.timestamp)} • ${alert.value}',
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Text(
-                    activity.category,
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: color),
+                    ),
+                    child: Text(
+                      alert.category,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 );
               },

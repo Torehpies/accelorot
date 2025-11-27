@@ -1,8 +1,8 @@
 // lib/frontend/operator/activity_logs/view_screens/alerts_screen.dart
 import 'package:flutter/material.dart';
 import '../widgets/shared/base_activity_screen.dart';
-import '../models/activity_item.dart';
-import '../../../../services/firestore_alert_service.dart';
+import '../../../data/models/activity_item.dart';
+import '../../../services/firestore_alert_service.dart';
 
 class AlertsScreen extends BaseActivityScreen {
   const AlertsScreen({
