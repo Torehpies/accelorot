@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/user.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
@@ -61,17 +60,17 @@ class UserRepositoryImpl implements UserRepository {
         'lastname': lastName,
         'globalRole': globalRole,
         'createdAt': FieldValue.serverTimestamp(),
-        'status': UserStatus.unverified,
+        'status': status,
 			});
 			return Result.success(null);
     } on FirebaseException catch (e) {
 			if (e.code == 'permission-denied') {
-				return const Result.failure(PermissionError());
+				return const Result.failure(DataLayerError.permissionError());
 			}
-			return const Result.failure(NetworkError());
+			return const Result.failure(DataLayerError.networkError());
     } catch (e) {
-			debugPrint(e.toString());
-      return const Result.failure(NetworkError());
+			debugPrint('Unexpected error on creating user profile: $e');
+			return Result.failure(DataLayerError.unknownError(e));
     }
   }
 }

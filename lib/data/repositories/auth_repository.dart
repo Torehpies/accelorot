@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/models/user.dart';
 import 'package:flutter_application_1/data/repositories/user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
@@ -20,18 +21,26 @@ abstract class AuthRepository {
     required String firstName,
     required String lastName,
     required String globalRole,
-    // default status unverified
+    required String teamId,
   });
   Future<Result<void, DataLayerError>> signOut();
+  Future<Result<void, DataLayerError>> signInWithGoogle();
 }
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthService _authService;
   final UserRepository _userRepository;
+  final PendingMemberService _pendingMemberService;
+  final FirebaseAuth _firebaseAuth;
 
   User? _lastKnownUser;
 
-  AuthRepositoryImpl(this._authService, this._userRepository);
+  AuthRepositoryImpl(
+    this._authService,
+    this._userRepository,
+    this._pendingMemberService,
+    this._firebaseAuth,
+  );
 
   @override
   Stream<User?> get authStateChanges {
@@ -95,9 +104,13 @@ class AuthRepositoryImpl implements AuthRepository {
     required String firstName,
     required String lastName,
     required String globalRole,
+    required String teamId,
   }) async {
     try {
+      /// Signup through Firebase
       final uid = await _authService.signUp(email, password);
+
+      /// Add user profile in firestore
       final profileResult = await _userRepository.createUserProfile(
         uid: uid,
         email: email,
@@ -106,15 +119,51 @@ class AuthRepositoryImpl implements AuthRepository {
         globalRole: globalRole,
         status: UserStatus.unverified.value,
       );
-      debugPrint(profileResult.toString());
+
+      if (profileResult.isFailure) {
+        return profileResult;
+      }
+
+      /// Add request in pending members
+      await _pendingMemberService.addPendingMember(
+        teamId: teamId,
+        memberId: uid,
+        memberEmail: email,
+      );
+
       return const Result.success(null);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        return const Result.failure(UserExistsError());
+        return const Result.failure(DataLayerError.userExistsError());
       }
-      return const Result.failure(NetworkError());
+      if (e.code == 'weak-password' || e.code == 'invalid-email') {
+        return Result.failure(
+          DataLayerError.validationError(
+            message:
+                'Invalid input. Please check your email and password strength.',
+          ),
+        );
+      }
+      return const Result.failure(DataLayerError.networkError());
     } catch (e) {
-      return const Result.failure(NetworkError());
+      debugPrint('Unexpected error during signup: $e');
+      return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> signInWithGoogle() async {
+    try {
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+      await _firebaseAuth.signInWithPopup(googleProvider);
+
+      return Result.success(null);
+    } on FirebaseAuthException catch (e) {
+      //TODO proper code checking
+      debugPrint(e.toString());
+      return Result.failure(NetworkError());
+    } catch (e) {
+      return Result.failure(NetworkError());
     }
   }
 }
