@@ -9,14 +9,14 @@ part 'user_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 UserService userService(Ref ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
+  final firestore = ref.read(firebaseFirestoreProvider);
   return FirebaseUserService(firestore);
 }
 
 @Riverpod(keepAlive: true)
 UserRepository userRepository(Ref ref) {
-  final userService = ref.watch(userServiceProvider);
-  final authService = ref.watch(authServiceProvider);
-  final firebaseFirestore = ref.watch(firebaseFirestoreProvider);
+  final userService = ref.read(userServiceProvider);
+  final authService = ref.read(authServiceProvider);
+  final firebaseFirestore = ref.read(firebaseFirestoreProvider);
   return UserRepositoryImpl(userService, authService, firebaseFirestore);
 }
