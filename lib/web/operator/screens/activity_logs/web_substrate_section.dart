@@ -1,7 +1,7 @@
 // lib/frontend/operator/activity_logs/web/web_substrate_section.dart
 import 'package:flutter/material.dart';
-import '../../../services/firestore_activity_service.dart';
-import '../../../data/models/activity_item.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../../../../data/models/activity_item.dart';
 import 'package:intl/intl.dart';
 
 class WebSubstrateSection extends StatefulWidget {

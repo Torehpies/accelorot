@@ -1,54 +1,54 @@
-// lib/frontend/operator/activity_logs/web/web_alerts_section.dart
+// lib/frontend/operator/activity_logs/web/web_all_activity_section.dart
 import 'package:flutter/material.dart';
-import '../../../services/firestore_activity_service.dart';
-import '../../../data/models/activity_item.dart';
+import '../../../../services/firestore_activity_service.dart';
+import '../../../../data/models/activity_item.dart';
 import 'package:intl/intl.dart';
 
-class WebAlertsSection extends StatefulWidget {
+class WebAllActivitySection extends StatefulWidget {
   final String? viewingOperatorId;
-  final VoidCallback? onViewAll;
   final String? focusedMachineId;
 
-  const WebAlertsSection({
+  const WebAllActivitySection({
     super.key,
     this.viewingOperatorId,
-    this.onViewAll,
     this.focusedMachineId,
   });
 
   @override
-  State<WebAlertsSection> createState() => _WebAlertsSectionState();
+  State<WebAllActivitySection> createState() => _WebAllActivitySectionState();
 }
 
-class _WebAlertsSectionState extends State<WebAlertsSection> {
+class _WebAllActivitySectionState extends State<WebAllActivitySection> {
   bool _isLoading = true;
-  List<ActivityItem> _alerts = [];
+  List<ActivityItem> _activities = [];
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadAlerts();
+    _loadActivities();
   }
 
-  Future<void> _loadAlerts() async {
+  Future<void> _loadActivities() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final alerts = await FirestoreActivityService.getAlerts(
+      final activities = await FirestoreActivityService.getAllActivities(
         viewingOperatorId: widget.viewingOperatorId,
       );
 
       // Filter by machine if focusedMachineId is provided
-      final filteredAlerts = widget.focusedMachineId != null
-          ? alerts.where((a) => a.machineId == widget.focusedMachineId).toList()
-          : alerts;
+      final filteredActivities = widget.focusedMachineId != null
+          ? activities
+                .where((a) => a.machineId == widget.focusedMachineId)
+                .toList()
+          : activities;
 
       setState(() {
-        _alerts = filteredAlerts.take(5).toList();
+        _activities = filteredActivities.take(5).toList(); // Show only recent 5
         _isLoading = false;
       });
     } catch (e) {
@@ -124,38 +124,28 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                const Icon(Icons.warning, color: Colors.orange, size: 20),
+                const Icon(Icons.history, color: Colors.teal, size: 20),
                 const SizedBox(width: 12),
                 // ✅ Title text: explicitly black
                 const Text(
-                  'Recent Alerts',
+                  'Recent Activity',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // 🔲 Explicit black text
+                    color: Colors.black, // 🔲 Explicit black
                   ),
                 ),
-                if (widget.onViewAll != null) ...[
-                  const Spacer(),
-                  TextButton(
-                    onPressed: widget.onViewAll,
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(color: Colors.teal, fontSize: 13),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
 
-          if (_alerts.isEmpty)
+          if (_activities.isEmpty)
             const Padding(
               padding: EdgeInsets.all(32),
               child: Center(
                 child: Text(
-                  'No recent alerts',
+                  'No recent activity',
                   style: TextStyle(color: Colors.grey),
                 ),
               ),
@@ -164,41 +154,28 @@ class _WebAlertsSectionState extends State<WebAlertsSection> {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _alerts.length,
+              itemCount: _activities.length,
               itemBuilder: (context, index) {
-                final alert = _alerts[index];
-                final color = alert.statusColorValue;
+                final activity = _activities[index];
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   title: Text(
-                    alert.title,
+                    activity.title,
                     style: const TextStyle(
+                      fontWeight: FontWeight.w500,
                       fontSize: 14,
                       color: Color.fromARGB(255, 48, 47, 47),
                     ),
                   ),
                   subtitle: Text(
-                    '${_formatTime(alert.timestamp)} • ${alert.value}',
+                    '${_formatTime(activity.timestamp)} • ${activity.description.split('\n').first}',
                     style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: color),
-                    ),
-                    child: Text(
-                      alert.category,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
+                  trailing: Text(
+                    activity.category,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 );
               },
