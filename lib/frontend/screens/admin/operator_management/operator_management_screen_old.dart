@@ -2,7 +2,7 @@
 
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
-import 'operator_detail_screen.dart';
+import 'operator_detail_screen_old.dart';
 import 'add_operator_screen_old.dart';
 import 'accept_operator_screen_old.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
