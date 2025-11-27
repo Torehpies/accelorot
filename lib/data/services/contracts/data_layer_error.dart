@@ -1,20 +1,26 @@
-abstract class DataLayerError implements Exception {
-	final String message;
-	const DataLayerError(this.message);
-}
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class NetworkError extends DataLayerError {
-	const NetworkError() : super('Connection failed or server is unreachable.');
-}
+part 'data_layer_error.freezed.dart';
 
-class PermissionError extends DataLayerError {
-  const PermissionError() : super('Insufficient permissions or unauthenticated.');
-}
+@freezed
+abstract class DataLayerError with _$DataLayerError {
+  const DataLayerError._();
 
-class MappingError extends DataLayerError {
-  const MappingError() : super('Data recieved from the server was corrupt.');
-}
+  const factory DataLayerError.networkError() = NetworkError;
+  const factory DataLayerError.permissionError() = PermissionError;
+  const factory DataLayerError.mappingError() = MappingError;
+  const factory DataLayerError.userExistsError() = UserExistsError;
 
-class UserExistsError extends DataLayerError {
-  const UserExistsError() : super('User already exists in database.');
+  const factory DataLayerError.validationError({required String message}) =
+      ValidationError;
+  const factory DataLayerError.unknownError([Object? error]) = UnknownError;
+
+  String get userFriendlyMessage => when(
+    networkError: () => 'Connection failed or server is unreachable.',
+    permissionError: () => 'Insufficient permissions or unauthenticated.',
+    mappingError: () => 'Data recieved from the server was corrupt.',
+    userExistsError: () => 'User already exists in database.',
+    validationError: (message) => message,
+    unknownError: (_) => 'An unexpected error occurred. Please try again',
+  );
 }
