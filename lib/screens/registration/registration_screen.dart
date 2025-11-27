@@ -50,7 +50,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   // --- Handler Methods ---
 
-  void _submitRegistration() {
+  void _submitRegistration() async {
     if (_formKey.currentState?.validate() ?? false) {
       final notifier = ref.read(registrationProvider.notifier);
       final state = ref.read(registrationProvider);
@@ -60,7 +60,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         return;
       }
 
-      notifier.registerUser(
+      await notifier.registerUser(
         firstName: firstNameController.text.trim(),
         lastName: lastNameController.text.trim(),
         email: emailController.text.trim(),

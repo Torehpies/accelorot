@@ -1,6 +1,6 @@
-import 'package:flutter_application_1/utils/google_auth_result.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/viewmodels/registration/registration_state.dart';
-import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'registration_notifier.g.dart';
@@ -9,19 +9,11 @@ part 'registration_notifier.g.dart';
 class RegistrationNotifier extends _$RegistrationNotifier {
   @override
   RegistrationState build() {
-    return RegistrationState();
+    return const RegistrationState();
   }
 
-  // Update field states (used by controllers in the main screen)
-  //  void updateFirstName(String value) =>
-  //      state = state.copyWith(firstName: value);
-  //  void updateLastName(String value) => state = state.copyWith(lastName: value);
-  //  void updateEmail(String value) => state = state.copyWith(email: value);
-  //  void updatePassword(String value) => state = state.copyWith(password: value);
-  //  void updateConfirmPassword(String value) =>
-  //      state = state.copyWith(confirmPassword: value);
   void updateSelectedTeamId(String? teamId) {
-    state = state.copyWith(selectedTeamId: () => teamId);
+    state = state.copyWith(selectedTeamId: teamId);
   }
 
   void togglePasswordVisibility() {
@@ -42,9 +34,12 @@ class RegistrationNotifier extends _$RegistrationNotifier {
     required String email,
     required String password,
   }) async {
-//    final routerNotifier = ref.read(authListenableProvider.notifier);
-		final authRepo = ref.read(authRepositoryProvider);	
-    state = state.copyWith(isRegistrationLoading: true, errorMessage: null);
+    final authRepo = ref.read(authRepositoryProvider);
+    state = state.copyWith(
+      isRegistrationLoading: true,
+      errorMessage: null,
+      successMessage: null,
+    );
 
     if (state.selectedTeamId == null) {
       state = state.copyWith(
@@ -54,51 +49,70 @@ class RegistrationNotifier extends _$RegistrationNotifier {
       return;
     }
 
-    try {
-      await authRepo.registerUserWithTeam(
-        email: email,
-        password: password,
-        firstName: firstName,
-        lastName: lastName,
-        role: 'Operator',
-        teamId: state.selectedTeamId!,
-      );
+    final result = await authRepo.signUp(
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
+      globalRole: 'User',
+      teamId: state.selectedTeamId!,
+    );
 
-      state = state.copyWith(isRegistrationLoading: false);
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: e.toString(),
-        isRegistrationLoading: false,
-      );
+    if (!ref.mounted) {
+      return;
     }
+
+    result.when(
+      success: (_) {
+        state = state.copyWith(
+          isRegistrationLoading: false,
+          errorMessage: null,
+          successMessage: 'Registration successful. Please check your email.',
+        );
+      },
+      failure: (error) {
+        final userMessage = (error).userFriendlyMessage;
+
+        state = state.copyWith(
+          isRegistrationLoading: false,
+          errorMessage: userMessage,
+          successMessage: null,
+        );
+      },
+    );
   }
 
   Future<void> signInWithGoogle() async {
     final authRepo = ref.read(authRepositoryProvider);
-    state = state.copyWith(isRegistrationLoading: true, errorMessage: null);
+    state = state.copyWith(
+      isGoogleLoading: true,
+      errorMessage: null,
+      successMessage: null,
+    );
 
-    try {
-      final result = await authRepo.signInWithGoogle();
+    final result = await authRepo.signInWithGoogle();
 
-      if (result is GoogleLoginSuccess) {
-        /// stop loading on google sign-in success
-        state = state.copyWith(
-          isRegistrationLoading: false,
-          errorMessage: null,
-        );
-      } else if (result is GoogleLoginFailure) {
-        /// stop loading on google sign-in failure
-        state = state.copyWith(
-          isRegistrationLoading: false,
-          errorMessage: result.message,
-        );
-      }
-    } on Exception {
-      // Catch unexpected errors during the sign-in call itself
-      state = state.copyWith(
-        isRegistrationLoading: false,
-        errorMessage: 'An unexpected error occurred during Google sign-in.',
-      );
+    if (!ref.mounted) {
+      return;
     }
+
+    result.when(
+      success: (_) {
+        state = state.copyWith(
+          isGoogleLoading: false,
+          errorMessage: null,
+					successMessage: 'Google sign-in successful',
+        );
+      },
+      failure: (error) {
+        final userMessage = (error).userFriendlyMessage;
+
+        state = state.copyWith(
+          isGoogleLoading: false,
+          errorMessage: userMessage,
+          successMessage: null,
+        );
+      },
+    );
   }
 }
