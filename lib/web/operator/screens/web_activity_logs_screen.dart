@@ -6,7 +6,7 @@ import 'package:flutter_application_1/web/operator/screens/activity_logs/web_sub
 import 'package:flutter_application_1/web/operator/screens/activity_logs/web_alerts_section.dart';
 import 'package:flutter_application_1/web/operator/screens/activity_logs/web_cycles_recom_section.dart';
 import 'package:flutter_application_1/web/operator/screens/activity_logs/web_reports_section.dart';
-import 'package:flutter_application_1/ui/activity_logs/widgets/date_filter_button.dart';
+import 'package:flutter_application_1/ui/core/ui/date_filter_button.dart';
 import 'package:flutter_application_1/data/models/activity_item.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
