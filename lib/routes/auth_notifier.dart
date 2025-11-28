@@ -36,14 +36,14 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
 
     if (user == null) {
       _firestoreSubscription?.cancel();
-			_firestoreSubscription = null;
+      _firestoreSubscription = null;
       state = AuthStatusState.unauthenticated();
       return;
     }
 
     if (!user.emailVerified) {
       _firestoreSubscription?.cancel();
-			_firestoreSubscription = null;
+      _firestoreSubscription = null;
       state = AuthStatusState.unverified();
       return;
     }
@@ -52,7 +52,7 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
       debugPrint(
         'User verified. Forcing state to teamSelection for immediate redirect',
       );
-			state = AuthStatusState.teamSelection();
+      state = AuthStatusState.teamSelection();
     }
 
     _firestoreSubscription ??= _getUserDocRef(user.uid).snapshots().listen(
@@ -68,25 +68,30 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
     }
 
     final data = doc.data()! as Map<String, dynamic>;
-    final userRole = data['role'] as String?;
-		final isArchived = data['isArchived'] as bool? ?? false;
+    final globalRole = (data['globalRole'] as String?)?.toLowerCase();
+    final teamRole = (data['teamRole'] as String?)?.toLowerCase();
+    final status = data['status'];
 
-		if (isArchived) {
-			state = AuthStatusState.archived();
-			return;
-		}
-
-    if (userRole == null) {
-      state = AuthStatusState.teamSelection();
-      return;
-    }
-
-    if (data.containsKey('pendingTeamSelection')) {
-      state = AuthStatusState.pendingAdminApproval();
-    } else if (data.containsKey('teamId')) {
-      state = AuthStatusState.authenticated(role: userRole);
-    } else {
-      state = AuthStatusState.teamSelection();
+    switch (status) {
+      case 'archived':
+        state = AuthStatusState.archived();
+        break;
+      case 'pending':
+        state = AuthStatusState.pendingAdminApproval();
+        break;
+      case 'registered':
+        state = AuthStatusState.teamSelection();
+        break;
+      case 'active':
+				debugPrint('USER ROLE: $globalRole $teamRole');
+        if (globalRole == 'superadmin') {
+          state = AuthStatusState.authenticated(role: globalRole as String);
+        }
+        state = AuthStatusState.authenticated(role: teamRole as String);
+        break;
+      default:
+        state = AuthStatusState.unauthenticated();
+        break;
     }
   }
 

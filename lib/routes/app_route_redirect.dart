@@ -14,7 +14,6 @@ FutureOr<String?> appRouteRedirect(
   final authStatusState = ref.read(authStateProvider);
   final currentPath = state.uri.path;
 
-  // Paths that are part of the initial authentication/onboarding flow
   const flowGatePaths = [
     '/signin',
     '/signup',
@@ -90,6 +89,8 @@ String _getDashboardPath(String? role) {
 
   switch (lowerRole) {
     case 'superadmin':
+			//TODO make superadmin dashboard
+      return RoutePath.superAdminTeams.path;
     case 'admin':
       return RoutePath.adminDashboard.path;
     case 'operator':
@@ -98,67 +99,3 @@ String _getDashboardPath(String? role) {
       return RoutePath.restricted.path;
   }
 }
-
-//FutureOr<String?> appRouteRedirect(
-//  BuildContext context,
-//  Ref ref,
-//  GoRouterState state,
-//) {
-//
-//  final isLoggedIn = authListenable.isLoggedIn;
-//  final isVerified = authListenable.isEmailVerified;
-//  final userRole = authListenable.userRole;
-//	final isInTeam = authListenable.isInTeam;
-//	final isPending = authListenable.isPending;
-//
-//  final isGoingToLogin = state.matchedLocation == '/signin';
-//  final isGoingToSignup = state.matchedLocation == '/signup';
-//  final isGoingToPublicPath = isGoingToLogin || isGoingToSignup;
-//
-//  final isGoingToVerify = state.matchedLocation == '/verify-email';
-//  final isGoingToTeam = state.matchedLocation == '/team-select';
-//  final isGoingToPending = state.matchedLocation == '/pending';
-//
-//  if (!isLoggedIn) {
-//    return isGoingToPublicPath ? null : '/signin';
-//  }
-//
-//  if (isLoggedIn && !isVerified) {
-//    return isGoingToVerify ? null : '/verify-email';
-//  }
-//
-//  if (isLoggedIn && isPending!) {
-//    return isGoingToPending ? null : '/pending';
-//  }
-//
-//  if (isLoggedIn && !isInTeam!) {
-//    return isGoingToTeam ? null : '/team-select';
-//  }
-//
-//  if (isLoggedIn && isVerified && userRole != null) {
-//    final isAdmin = userRole == 'Admin';
-//    final adminDashboardPath = '/admin/dashboard';
-//    final operatorDashboardPath = '/dashboard';
-//    final correctHomePath = isAdmin
-//        ? adminDashboardPath
-//        : operatorDashboardPath;
-//
-//    if (isGoingToPublicPath || isGoingToVerify) {
-//      return correctHomePath;
-//    }
-//
-//    final isGoingToAdminPath = state.matchedLocation.startsWith('/admin');
-//    final isGoingToOperatorPath = state.matchedLocation.startsWith(
-//      '/dashboard',
-//    );
-//
-//    if (isAdmin && isGoingToOperatorPath) {
-//      return adminDashboardPath;
-//    }
-//
-//    if (!isAdmin && isGoingToAdminPath) {
-//      return operatorDashboardPath;
-//    }
-//  }
-//  return null;
-//}

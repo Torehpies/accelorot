@@ -8,6 +8,8 @@ import 'package:flutter_application_1/frontend/operator/statistics/statistics_sc
 import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/routes/go_router_refresh_stream.dart';
+import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shell.dart';
+import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
 import 'package:flutter_application_1/screens/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
@@ -24,6 +26,7 @@ import 'package:flutter_application_1/routes/navigations/operator_web_shell.dart
 import 'package:flutter_application_1/screens/loading_screen.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
+import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -56,12 +59,8 @@ enum RoutePath {
   adminOperators(path: '/admin/operators'),
   adminProfile(path: '/admin/profile'),
 
-	//TODO placeholder super admin paths
-  superAdminDashboard(path: '/superadmin/dashboard'),
-  superAdminActivity(path: '/superadmin/activity'),
-  superAdminStatistics(path: '/superadmin/statistics'),
-  superAdminMachines(path: '/superadmin/machines'),
-  superAdminOperators(path: '/superadmin/operators'),
+  //TODO placeholder super admin paths
+  superAdminTeams(path: '/superadmin/teams'),
   superAdminProfile(path: '/superadmin/profile');
 
   const RoutePath({required this.path});
@@ -131,10 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extraReason = state.extra as String?;
 
-					final authStatusState = ref.read(authStateProvider);
-					final fallbackReason = authStatusState.restrictedReason;
+          final authStatusState = ref.read(authStateProvider);
+          final fallbackReason = authStatusState.restrictedReason;
 
-					final reason = extraReason ?? fallbackReason;
+          final reason = extraReason ?? fallbackReason;
           return RestrictedAccessScreen(reason: reason ?? 'Unknown reason');
         },
       ),
@@ -234,6 +233,35 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
+      ),
+      ShellRoute(
+        builder: (context, state, child) {
+          final isDesktop =
+              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+          if (isDesktop) {
+            return SuperAdminWebShell(child: child);
+          } else {
+            return SuperAdminMobileShell(child: child);
+          }
+        },
+        routes: [
+          GoRoute(
+            path: RoutePath.superAdminTeams.path,
+            name: RoutePath.superAdminTeams.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const TeamManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.superAdminProfile.path,
+            name: RoutePath.superAdminProfile.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ProfileScreen(),
+            ),
+          ),
+				],
       ),
     ],
   );
