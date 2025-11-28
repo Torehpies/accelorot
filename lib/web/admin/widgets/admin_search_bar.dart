@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import '../../utils/theme_constants.dart';
 
-class OperatorSearchBar extends StatelessWidget {
+class AdminSearchBar extends StatelessWidget {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onRefresh;
 
-  const OperatorSearchBar({
+  const AdminSearchBar({
     super.key,
     required this.searchQuery,
     required this.onSearchChanged,

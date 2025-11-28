@@ -63,13 +63,6 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
       final List<String> labels = [];
       DateTime? lastUpdate;
 
-      // ignore: unused_local_variable
-
-      // ignore: unused_local_variable
-
-      // ignore: unused_local_variable
-      double? lastKnownValue;
-
       final daysDiff = end.difference(start).inDays + 1;
 
       for (int i = 0; i < daysDiff; i++) {
@@ -88,7 +81,6 @@ class _OxygenStatsHistoryViewState extends State<OxygenStatsHistoryView> {
             final dailyAvg =
                 dayValues.reduce((a, b) => a + b) / dayValues.length;
             readings.add(dailyAvg);
-            _currentOxygen = readings.isNotEmpty ? readings.last : 0.0;
 
             for (var d in dataByDay[dateKey]!) {
               final ts = d['timestamp'] as DateTime?;

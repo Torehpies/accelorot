@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class WebAdminHomeScreen extends StatelessWidget {
   final VoidCallback onManageOperators;
@@ -33,7 +34,8 @@ class _WebAdminHomeScreenContent extends StatefulWidget {
   });
 
   @override
-  State<_WebAdminHomeScreenContent> createState() => _WebAdminHomeScreenState();
+  State<_WebAdminHomeScreenContent> createState() =>
+      _WebAdminHomeScreenState();
 }
 
 class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
@@ -47,20 +49,13 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   List<Map<String, dynamic>> _operators = [];
   List<Map<String, dynamic>> _machines = [];
 
-  // Define border color used in tables
-  final Color borderColor = const Color.fromARGB(255, 170, 169, 169);
+  // 🎨 Border color for containers (stat cards, tables) – light grey (#E6E6E6)
+  final Color borderColor = const Color.fromARGB(255, 230, 229, 229); // #E6E6E6
 
   @override
   void initState() {
     super.initState();
     _loadStats();
-  }
-
-  // Helper: Extract surname (last word)
-  String _getSurname(String fullName) {
-    if (fullName == '—' || fullName.trim().isEmpty) return '—';
-    final parts = fullName.trim().split(RegExp(r'\s+'));
-    return parts.last;
   }
 
   Future<void> _loadStats() async {
@@ -137,16 +132,11 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade700,
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+      // ✅ UPDATED APPBAR
+      appBar: AdminAppBar(
+        title: 'Dashboard',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
@@ -157,435 +147,359 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                height: screenHeight,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // === STAT CARDS ===
-                    Row(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // === STAT CARDS ===
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildInfoCard(
+                          icon: Icons.people_outline,
+                          label: 'Active Operators',
+                          count: _activeOperators,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildInfoCard(
+                          icon: Icons.archive_outlined,
+                          label: 'Archived Operators',
+                          count: _archivedOperators,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildInfoCard(
+                          icon: Icons.devices_other_outlined,
+                          label: 'Active Machines',
+                          count: _activeMachines,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildInfoCard(
+                          icon: Icons.archive_rounded,
+                          label: 'Archived Machines',
+                          count: _archivedMachines,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // === EXPANDED TABLES: Fill remaining space ===
+                  Expanded(
+                    child: Row(
                       children: [
+                        // === OPERATOR MANAGEMENT ===
                         Expanded(
-                          child: _buildInfoCard(
-                            icon: Icons.people_outline,
-                            label: 'Active Operators',
-                            count: _activeOperators,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: borderColor, width: 1),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionHeader(
+                                  'Operator Management',
+                                  onTapManage: widget.onManageOperators,
+                                ),
+                                const SizedBox(height: 10),
+                                // === TABLE HEADER ===
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          'Name',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 4,
+                                        child: Text(
+                                          'Email',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          'Status',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: Text(
+                                          'Actions',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Divider(height: 16, color: Colors.grey),
+                                // === TABLE BODY ===
+                                Expanded(
+                                  child: ListView.separated(
+                                    separatorBuilder: (_, _) =>
+                                        const Divider(height: 16, color: Colors.grey),
+                                    itemCount: _operators.length,
+                                    itemBuilder: (context, index) {
+                                      final operator = _operators[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text(
+                                                operator['name'],
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 4,
+                                              child: Text(
+                                                operator['email'],
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color.fromARGB(255, 73, 73, 73),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: Center(
+                                                child: Container(
+                                                  width: 7,
+                                                  height: 7,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: operator['isArchived']
+                                                        ? Colors.red
+                                                        : Colors.green,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit, size: 14),
+                                                    onPressed: () {
+                                                      
+                                                    },
+                                                    color: Colors.blue,
+                                                    padding: EdgeInsets.zero,
+                                                    visualDensity: VisualDensity.compact,
+                                                    constraints: BoxConstraints(),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete, size: 14),
+                                                    onPressed: () {
+                                                      
+                                                    },
+                                                    color: Colors.red,
+                                                    padding: EdgeInsets.zero,
+                                                    visualDensity: VisualDensity.compact,
+                                                    constraints: BoxConstraints(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 14),
+
+                        const SizedBox(width: 12),
+
+                        // === MACHINE MANAGEMENT ===
                         Expanded(
-                          child: _buildInfoCard(
-                            icon: Icons.archive_outlined,
-                            label: 'Archived Operators',
-                            count: _archivedOperators,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildInfoCard(
-                            icon: Icons.devices_other_outlined,
-                            label: 'Active Machines',
-                            count: _activeMachines,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: _buildInfoCard(
-                            icon: Icons.archive_rounded,
-                            label: 'Archived Machines',
-                            count: _archivedMachines,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: borderColor, width: 1),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionHeader(
+                                  'Machine Management',
+                                  onTapManage: widget.onManageMachines,
+                                ),
+                                const SizedBox(height: 10),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 4,
+                                        child: Text(
+                                          'Machine',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          'ID',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: Text(
+                                          'Actions',
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(255, 73, 73, 73),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Divider(height: 16, color: Colors.grey),
+                                Expanded(
+                                  child: ListView.separated(
+                                    separatorBuilder: (_, _) =>
+                                        const Divider(height: 16, color: Colors.grey),
+                                    itemCount: _machines.length,
+                                    itemBuilder: (context, index) {
+                                      final machine = _machines[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              flex: 4,
+                                              child: Text(
+                                                machine['name'],
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Text(
+                                                machine['machineId'],
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color.fromARGB(255, 73, 73, 73),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(Icons.edit, size: 14),
+                                                    onPressed: () {
+                                                     
+                                                    },
+                                                    color: Colors.blue,
+                                                    padding: EdgeInsets.zero,
+                                                    visualDensity: VisualDensity.compact,
+                                                    constraints: BoxConstraints(),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(Icons.delete, size: 14),
+                                                    onPressed: () {
+                                                      
+                                                    },
+                                                    color: Colors.red,
+                                                    padding: EdgeInsets.zero,
+                                                    visualDensity: VisualDensity.compact,
+                                                    constraints: BoxConstraints(),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 60),
-
-                    // === OPERATOR & MACHINE MANAGEMENT SIDE BY SIDE ===
-                    SizedBox(
-                      height: screenHeight * 0.45,
-                      child: Row(
-                        children: [
-                          // === OPERATOR MANAGEMENT ===
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: borderColor,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildSectionHeader(
-                                    'Operator Management',
-                                    onTapManage: widget.onManageOperators,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  // === TABLE HEADER ===
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(8),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
-                                            'ID',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            'Surname',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 4,
-                                          child: Text(
-                                            'Email',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Align(
-                                            alignment: Alignment.topCenter,
-                                            child: Text(
-                                              'Status',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
-                                            'Action',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // === TABLE BODY ===
-                                  Expanded(
-                                    child: ListView.separated(
-                                      separatorBuilder: (_, _) => const Divider(
-                                        height: 1,
-                                        color: Colors.grey,
-                                      ),
-                                      itemCount: _operators.length,
-                                      itemBuilder: (context, index) {
-                                        final operator = _operators[index];
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  '${index + 1}',
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  _getSurname(operator['name']),
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 4,
-                                                child: Text(
-                                                  operator['email'],
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Align(
-                                                  alignment: Alignment.center,
-                                                  child: Container(
-                                                    width: 6,
-                                                    height: 6,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color:
-                                                          operator['isArchived']
-                                                          ? Colors.red
-                                                          : Colors.green,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 1,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.edit,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {},
-                                                      color: Colors.blue,
-                                                      padding: EdgeInsets.zero,
-                                                      visualDensity:
-                                                          VisualDensity.compact,
-                                                      constraints:
-                                                          BoxConstraints(),
-                                                    ),
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.delete,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {},
-                                                      color: Colors.red,
-                                                      padding: EdgeInsets.zero,
-                                                      visualDensity:
-                                                          VisualDensity.compact,
-                                                      constraints:
-                                                          BoxConstraints(),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          // === MACHINE MANAGEMENT ===
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: borderColor,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildSectionHeader(
-                                    'Machine Management',
-                                    onTapManage: widget.onManageMachines,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  // === TABLE HEADER ===
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(8),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
-                                            'ID',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            'Machine',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            'ID',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
-                                            'Action',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const Divider(height: 1, color: Colors.grey),
-                                  // === TABLE BODY ===
-                                  Expanded(
-                                    child: ListView.separated(
-                                      separatorBuilder: (_, _) => const Divider(
-                                        height: 1,
-                                        color: Colors.grey,
-                                      ),
-                                      itemCount: _machines.length,
-                                      itemBuilder: (context, index) {
-                                        final machine = _machines[index];
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 1,
-                                                child: Text(
-                                                  '${index + 1}',
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  _getSurname(machine['name']),
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 3,
-                                                child: Text(
-                                                  machine['machineId'],
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 1,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.edit,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {},
-                                                      color: Colors.blue,
-                                                      padding: EdgeInsets.zero,
-                                                      visualDensity:
-                                                          VisualDensity.compact,
-                                                      constraints:
-                                                          BoxConstraints(),
-                                                    ),
-                                                    IconButton(
-                                                      icon: const Icon(
-                                                        Icons.delete,
-                                                        size: 12,
-                                                      ),
-                                                      onPressed: () {},
-                                                      color: Colors.red,
-                                                      padding: EdgeInsets.zero,
-                                                      visualDensity:
-                                                          VisualDensity.compact,
-                                                      constraints:
-                                                          BoxConstraints(),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
     );
   }
 
-  // ✅ Modern info card for stats
+  // ✅ Stat card with BORDER (no shadow)
   Widget _buildInfoCard({
     required IconData icon,
     required String label,
@@ -594,29 +508,30 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
+        // 🔲 Border instead of shadow – uses labeled borderColor
+        border: Border.all(color: borderColor, width: 1),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 28, color: Colors.teal),
-          const SizedBox(height: 8),
+          Icon(icon, size: 24, color: Colors.teal),
+          const SizedBox(height: 6),
           Text(
             label,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.grey,
+              color: Color.fromARGB(255, 168, 168, 168),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             count?.toString() ?? '—',
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -626,20 +541,16 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     );
   }
 
-  // Section header with "Manage" button
-  Widget _buildSectionHeader(
-    String title, {
-    required VoidCallback onTapManage,
-  }) {
+  Widget _buildSectionHeader(String title, {required VoidCallback onTapManage}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2E7D32),
+            color: Colors.teal,
           ),
         ),
         TextButton(
@@ -650,12 +561,16 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
               Text(
                 'Manage',
                 style: TextStyle(
-                  color: Color(0xFF2E7D32),
+                  color: Colors.teal,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: 15,
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFF2E7D32)),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 13,
+                color: Colors.teal,
+              ),
             ],
           ),
         ),
