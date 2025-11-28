@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../controllers/admin_machine_controller.dart';
-import '../widgets/machine_detail_row.dart';
+import '../view_model/machine_management_view_model.dart';
+import 'machine_detail_row.dart';
 import 'admin_machine_view_dialog.dart';
 
 class AdminMachineCard extends StatelessWidget {

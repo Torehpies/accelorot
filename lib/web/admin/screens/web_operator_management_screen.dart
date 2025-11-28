@@ -7,12 +7,12 @@ import '../widgets/operator_list_item.dart';
 import '../widgets/operator_detail_panel.dart';
 import '../widgets/operator_empty_state.dart';
 import '../widgets/operator_error_state.dart';
-import '../widgets/admin_search_bar.dart';
+import '../../../ui/core/ui/admin_search_bar.dart';
 import '../../utils/operator_dialogs.dart';
 import '../../utils/theme_constants.dart';
 import '../widgets/accept_operators_card.dart';
 import '../../../web/admin/widgets/add_operator_screen.dart';
-import '../widgets/admin_app_bar.dart';
+import '../../../ui/core/ui/admin_app_bar.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});

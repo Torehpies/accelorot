@@ -1,8 +1,8 @@
 // lib/frontend/operator/machine_management/admin_machine/widgets/edit_machine_modal.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/admin_machine_controller.dart';
-import '../../admin/models/admin_machine_model.dart';
+import '../view_model/machine_management_view_model.dart';
+import '../../../web/admin/models/admin_machine_model.dart';
 
 class EditMachineModal extends StatefulWidget {
   final AdminMachineController controller;

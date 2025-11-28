@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
+import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class WebAdminHomeScreen extends StatelessWidget {
   final VoidCallback onManageOperators;

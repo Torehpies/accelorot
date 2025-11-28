@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
-import '../models/admin_machine_model.dart' as AdminModel;
+import '../../../web/admin/models/admin_machine_model.dart' as AdminModel;
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 // ignore: library_prefixes
 import '../../../frontend/operator/machine_management/models/machine_model.dart'

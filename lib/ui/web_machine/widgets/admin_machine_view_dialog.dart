@@ -3,8 +3,8 @@
 // ignore_for_file: library_prefixes
 
 import 'package:flutter/material.dart';
-import '../models/admin_machine_model.dart' as AdminModel;
-import '../controllers/admin_machine_controller.dart';
+import '../../../web/admin/models/admin_machine_model.dart' as AdminModel;
+import '../view_model/machine_management_view_model.dart';
 import 'edit_machine_modal.dart';
 
 class AdminMachineViewDialog extends StatelessWidget {

@@ -1,8 +1,8 @@
 // lib/frontend/operator/machine_management/admin_machine/widgets/admin_machine_list.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/admin_machine_controller.dart';
-import '../widgets/admin_machine_card.dart';
+import '../view_model/machine_management_view_model.dart';
+import 'admin_machine_card.dart';
 
 class AdminMachineList extends StatelessWidget {
   final AdminMachineController controller;
