@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
 import 'package:flutter_application_1/routes/navigations/responsive_web_shell.dart';
+import 'package:flutter_application_1/ui/core/ui/web_branding.dart';
 
 class SuperAdminWebShell extends StatelessWidget {
   final Widget child;
@@ -14,7 +15,7 @@ class SuperAdminWebShell extends StatelessWidget {
       primaryColor: Colors.yellow.shade700,
       secondaryColor: Colors.yellow.shade900,
       roleName: 'Super Admin',
-      brandingWidget: buildAdminWebBranding(context),
+      brandingWidget: WebBranding(),
       sidebarWidth: 250,
       child: child,
     );

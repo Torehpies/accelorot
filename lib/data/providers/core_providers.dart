@@ -10,3 +10,6 @@ FirebaseAuth firebaseAuth(Ref ref) => FirebaseAuth.instance;
 @Riverpod(keepAlive: true)
 FirebaseFirestore firebaseFirestore(Ref ref) => FirebaseFirestore.instance;
 
+@Riverpod(keepAlive: true)
+Stream<User?> authStateChanges(Ref ref) =>
+    ref.watch(firebaseAuthProvider).authStateChanges();

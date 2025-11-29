@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/user.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_members_providers.dart';
@@ -32,6 +33,26 @@ AuthRepository authRepository(Ref ref) {
 
 @Riverpod(keepAlive: true)
 Stream<User?> authState(Ref ref) {
-  final repository = ref.read(authRepositoryProvider);
+  final repository = ref.watch(authRepositoryProvider);
   return repository.authStateChanges;
+}
+
+@Riverpod(keepAlive: true)
+Stream<User?> userProfile(Ref ref) {
+  final userService = ref.watch(userServiceProvider);
+  final authUser = ref.watch(authStateChangesProvider).value;
+
+  if (authUser == null) return const Stream.empty();
+	debugPrint(authUser.uid.toString());
+
+  final rawData = userService.watchRawUserData(authUser.uid);
+  return rawData.map((doc) {
+    final data = doc.data();
+    if (data == null) return null;
+		debugPrint(data.toString());
+
+    final user = User.fromJson({...data});
+		debugPrint(user.toString());
+		return user;
+  });
 }

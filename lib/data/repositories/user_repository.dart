@@ -5,10 +5,9 @@ import 'package:flutter_application_1/data/services/contracts/auth_service.dart'
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/user_service.dart';
-import 'package:flutter_application_1/utils/user_status.dart';
 
 abstract class UserRepository {
-  Future<User> getUser(String id);
+  Future<Result<User, DataLayerError>> getUser(String id);
   Future<Result<void, DataLayerError>> createUserProfile({
     required String uid,
     required String email,
@@ -17,16 +16,18 @@ abstract class UserRepository {
     required String globalRole,
     required String status,
   });
+  User mapRawDataToDomain(Map<String, dynamic> rawData);
 }
 
 class UserRepositoryImpl implements UserRepository {
   final UserService userService;
   final AuthService authService;
-	final FirebaseFirestore firestore;
+  final FirebaseFirestore firestore;
 
   UserRepositoryImpl(this.userService, this.authService, this.firestore);
 
-  User _mapRawDataToDomain(Map<String, dynamic> rawData) {
+  @override
+  User mapRawDataToDomain(Map<String, dynamic> rawData) {
     final Timestamp timestamp = rawData['createdAt'] as Timestamp;
     final cleanMap = Map<String, dynamic>.from(rawData);
     cleanMap['createdAt'] = timestamp.toDate();
@@ -34,13 +35,30 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<User> getUser(String id) async {
-    final rawData = await userService.fetchRawUserData(id);
-    if (rawData == null) {
-      throw Exception('User data not found.');
-    }
+  Future<Result<User, DataLayerError>> getUser(String id) async {
+    try {
+      final rawData = await userService.fetchRawUserData(id);
+      if (rawData == null) {
+        return Result.failure(DataLayerError.userExistsError());
+      }
 
-    return _mapRawDataToDomain(rawData);
+      return Result.success(mapRawDataToDomain(rawData));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e.toString()));
+    }
+  }
+
+  Future<User?> getUserModel(String id) async {
+    try {
+      final rawData = await userService.fetchRawUserData(id);
+      if (rawData == null) {
+        return null;
+      }
+
+      return mapRawDataToDomain(rawData);
+    } catch (e) {
+			return null;
+    }
   }
 
   @override
@@ -53,7 +71,7 @@ class UserRepositoryImpl implements UserRepository {
     required String status,
   }) async {
     try {
-			await firestore.collection('users').doc(uid).set({
+      await firestore.collection('users').doc(uid).set({
         'uid': uid,
         'email': email,
         'firstname': firstName,
@@ -61,16 +79,16 @@ class UserRepositoryImpl implements UserRepository {
         'globalRole': globalRole,
         'createdAt': FieldValue.serverTimestamp(),
         'status': status,
-			});
-			return Result.success(null);
+      });
+      return Result.success(null);
     } on FirebaseException catch (e) {
-			if (e.code == 'permission-denied') {
-				return const Result.failure(DataLayerError.permissionError());
-			}
-			return const Result.failure(DataLayerError.networkError());
+      if (e.code == 'permission-denied') {
+        return const Result.failure(DataLayerError.permissionError());
+      }
+      return const Result.failure(DataLayerError.networkError());
     } catch (e) {
-			debugPrint('Unexpected error on creating user profile: $e');
-			return Result.failure(DataLayerError.unknownError(e));
+      debugPrint('Unexpected error on creating user profile: $e');
+      return Result.failure(DataLayerError.unknownError(e));
     }
   }
 }

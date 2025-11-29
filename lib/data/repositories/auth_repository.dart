@@ -50,10 +50,23 @@ class AuthRepositoryImpl implements AuthRepository {
         return null;
       }
 
+			User? fetchedUser;
+
       try {
-        final user = await _userRepository.getUser(uid);
-        _lastKnownUser = user;
-        return user;
+        final result = await _userRepository.getUser(uid);
+
+        result.when(
+          success: (user) {
+            _lastKnownUser = user;
+            fetchedUser = user;
+          },
+          failure: (failure) {
+            debugPrint(
+              'Auth Error: User authenticated but profile fetch failed: $failure',
+            );
+            _lastKnownUser = null;
+          },
+        );
       } catch (e) {
         debugPrint(
           'Auth Error: User authenticated but profile fetch failed: $e',
@@ -61,6 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
         _lastKnownUser = null;
         return null;
       }
+      return fetchedUser;
     });
   }
 
