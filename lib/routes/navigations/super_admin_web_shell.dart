@@ -11,8 +11,8 @@ class SuperAdminWebShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveWebShell(
-      navItems: adminNavItems,
-      primaryColor: Colors.yellow.shade700,
+      navItems: superAdminNavItems,
+      primaryColor: Colors.yellow.shade800,
       secondaryColor: Colors.yellow.shade900,
       roleName: 'Super Admin',
       brandingWidget: WebBranding(),

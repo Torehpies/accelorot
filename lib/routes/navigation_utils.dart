@@ -25,6 +25,11 @@ List<NavItem> adminNavItems = [
   NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
 ];
 
+List<NavItem> superAdminNavItems = [
+  NavItem(Icons.group, "Teams", RoutePath.superAdminTeams.path),
+  NavItem(Icons.person, "Profile", RoutePath.superAdminProfile.path),
+];
+
 int getSelectedIndex(BuildContext context, List<NavItem> navItems) {
   final location = GoRouterState.of(context).matchedLocation;
 

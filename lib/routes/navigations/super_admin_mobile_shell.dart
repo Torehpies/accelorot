@@ -8,14 +8,14 @@ class SuperAdminMobileShell extends StatelessWidget {
   const SuperAdminMobileShell({super.key, required this.child});
 
   void _onItemTapped(BuildContext context, int index) {
-    goToPathByIndex(context, index, adminNavItems);
+    goToPathByIndex(context, index, superAdminNavItems);
   }
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveMobileShell(
       navItems: adminNavItems,
-      primaryColor: Colors.yellow.shade700,
+      primaryColor: Colors.yellow.shade200,
       selectedItemColor: Colors.yellow.shade700,
       onTapped: _onItemTapped,
       child: child,
