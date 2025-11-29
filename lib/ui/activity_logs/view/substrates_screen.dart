@@ -10,7 +10,7 @@ class SubstratesScreen extends BaseActivityScreen {
     super.key,
     super.initialFilter,
     super.viewingOperatorId,
-    super.focusedMachineId,
+    super.focusedMachineId, 
   });
 
   @override
