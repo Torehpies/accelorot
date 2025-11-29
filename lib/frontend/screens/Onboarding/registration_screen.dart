@@ -4,7 +4,7 @@ import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/services/google_sign_in_handler.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
-import 'package:flutter_application_1/widgets/common/primary_button.dart';
+import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import 'email_verify.dart';
