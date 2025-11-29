@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/activity_logs_navigator.dart
 
 import 'package:flutter/material.dart';
-import 'activity_logs_screen.dart';
+import 'activity_logs_main_view.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/view_screens/all_activity_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/view_screens/substrates_screen.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/view_screens/alerts_screen.dart';
