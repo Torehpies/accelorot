@@ -16,7 +16,7 @@ class FirestoreActivityService {
     return OperatorViewService.getEffectiveUserId(viewingOperatorId);
   }
 
-  // Upload Methods - ALL pass the resolved effective user ID
+  // Upload Methods
   static Future<void> uploadSubstrates({String? viewingOperatorId}) {
     final effectiveUserId = getEffectiveUserId(viewingOperatorId);
     return FirestoreUpload.uploadSubstrates(effectiveUserId);
@@ -32,7 +32,7 @@ class FirestoreActivityService {
     return FirestoreUpload.uploadCyclesRecom(effectiveUserId);
   }
 
-  // Fetch Methods - ALL pass the resolved effective user ID
+  // Fetch Methods
   static Future<List<ActivityItem>> getSubstrates({String? viewingOperatorId}) {
     final effectiveUserId = getEffectiveUserId(viewingOperatorId);
     return FirestoreFetch.getSubstrates(effectiveUserId);
@@ -57,7 +57,7 @@ class FirestoreActivityService {
     return FirestoreFetch.getAllActivities(effectiveUserId);
   }
 
-  // CRITICAL: Add waste product with proper user context
+  //Add waste product
   static Future<void> addWasteProduct(
     Map<String, dynamic> waste, {
     String? viewingOperatorId,
@@ -66,19 +66,7 @@ class FirestoreActivityService {
     return FirestoreUpload.addWasteProduct(waste, effectiveUserId);
   }
 
-  // Upload all mock data with proper user context
-  static Future<void> uploadAllMockData({String? viewingOperatorId}) {
-    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
-    return FirestoreUpload.uploadAllMockData(effectiveUserId);
-  }
-
-  // Force upload with proper user context
-  static Future<void> forceUploadAllMockData({String? viewingOperatorId}) {
-    final effectiveUserId = getEffectiveUserId(viewingOperatorId);
-    return FirestoreUpload.forceUploadAllMockData(effectiveUserId);
-  }
-
-  // Submit report with proper user context
+  // Submit repor
   static Future<void> submitReport(
     Map<String, dynamic> report, {
     String? viewingOperatorId,
