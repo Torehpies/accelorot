@@ -1,7 +1,8 @@
+// lib/ui/activity_logs/view/reports_screen.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/activity_list_state.dart';
-import '../view_model/reports_viewmodel.dart';
+import '../view_model/activity_viewmodel.dart';
 import 'base_activity_screen.dart';
 
 class ReportsScreen extends BaseActivityScreen {
@@ -17,14 +18,16 @@ class ReportsScreen extends BaseActivityScreen {
 }
 
 class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
+  ActivityParams get _params => ActivityParams(
+        screenType: ActivityScreenType.reports,
+        initialFilter: widget.initialFilter,
+        viewingOperatorId: widget.viewingOperatorId,
+        focusedMachineId: widget.focusedMachineId,
+      );
+
   @override
   ActivityListState getState() {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    return ref.watch(reportsViewModelProvider(params));
+    return ref.watch(activityViewModelProvider(_params));
   }
 
   @override
@@ -40,51 +43,29 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
 
   @override
   void onFilterChanged(String filter) {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(reportsViewModelProvider(params).notifier).onFilterChanged(filter);
+    ref.read(activityViewModelProvider(_params).notifier).onFilterChanged(filter);
   }
 
   @override
   void onSearchChanged(String query) {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(reportsViewModelProvider(params).notifier).onSearchChanged(query);
+    ref.read(activityViewModelProvider(_params).notifier).onSearchChanged(query);
   }
 
   @override
   void onSearchCleared() {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(reportsViewModelProvider(params).notifier).onSearchCleared();
+    ref.read(activityViewModelProvider(_params).notifier).onSearchCleared();
   }
 
   @override
   void onDateFilterChanged(DateFilterRange filter) {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(reportsViewModelProvider(params).notifier).onDateFilterChanged(filter);
+    ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
 
   @override
   Future<void> onRefresh() async {
-    final params = ReportsParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    await ref.read(reportsViewModelProvider(params).notifier).refresh(widget.viewingOperatorId);
+    await ref.read(activityViewModelProvider(_params).notifier).refresh(
+          widget.viewingOperatorId,
+          widget.focusedMachineId,
+        );
   }
 }

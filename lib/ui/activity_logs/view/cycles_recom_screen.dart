@@ -1,7 +1,8 @@
+// lib/ui/activity_logs/view/cycles_recom_screen.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/activity_list_state.dart';
-import '../view_model/cycles_recom_viewmodel.dart';
+import '../view_model/activity_viewmodel.dart';
 import 'base_activity_screen.dart';
 
 class CyclesRecomScreen extends BaseActivityScreen {
@@ -17,14 +18,16 @@ class CyclesRecomScreen extends BaseActivityScreen {
 }
 
 class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
+  ActivityParams get _params => ActivityParams(
+        screenType: ActivityScreenType.cyclesRecom,
+        initialFilter: widget.initialFilter,
+        viewingOperatorId: widget.viewingOperatorId,
+        focusedMachineId: widget.focusedMachineId,
+      );
+
   @override
   ActivityListState getState() {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    return ref.watch(cyclesRecomViewModelProvider(params));
+    return ref.watch(activityViewModelProvider(_params));
   }
 
   @override
@@ -42,51 +45,29 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
 
   @override
   void onFilterChanged(String filter) {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(cyclesRecomViewModelProvider(params).notifier).onFilterChanged(filter);
+    ref.read(activityViewModelProvider(_params).notifier).onFilterChanged(filter);
   }
 
   @override
   void onSearchChanged(String query) {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(cyclesRecomViewModelProvider(params).notifier).onSearchChanged(query);
+    ref.read(activityViewModelProvider(_params).notifier).onSearchChanged(query);
   }
 
   @override
   void onSearchCleared() {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(cyclesRecomViewModelProvider(params).notifier).onSearchCleared();
+    ref.read(activityViewModelProvider(_params).notifier).onSearchCleared();
   }
 
   @override
   void onDateFilterChanged(DateFilterRange filter) {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    ref.read(cyclesRecomViewModelProvider(params).notifier).onDateFilterChanged(filter);
+    ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
 
   @override
   Future<void> onRefresh() async {
-    final params = CyclesRecomParams(
-      initialFilter: widget.initialFilter,
-      viewingOperatorId: widget.viewingOperatorId,
-      focusedMachineId: widget.focusedMachineId,
-    );
-    await ref.read(cyclesRecomViewModelProvider(params).notifier).refresh(widget.viewingOperatorId);
+    await ref.read(activityViewModelProvider(_params).notifier).refresh(
+          widget.viewingOperatorId,
+          widget.focusedMachineId,
+        );
   }
 }
