@@ -1,7 +1,6 @@
 // lib/ui/activity_logs/view_model/activity_filter_model.dart
 import 'package:flutter/material.dart';
 
-/// Configuration data for a filter box
 class FilterConfig {
   final IconData icon;
   final String label;
