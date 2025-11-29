@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/activity_section_card.dart';
 import '../widgets/navigation_section_card.dart';
 import '../widgets/batch_filter_section.dart';
-import '../view_model/activity_filter_model.dart';
+import '../view_model/activity_filter_config.dart';
 
 class ActivityLogsScreen extends StatelessWidget {
   final String? focusedMachineId;
