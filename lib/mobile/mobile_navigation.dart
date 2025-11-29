@@ -6,7 +6,7 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
     show HomeScreen;
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
-import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
+import 'package:flutter_application_1/ui/statistics/statistics_screen.dart';
 
 class MobileNavigation extends StatefulWidget {
   const MobileNavigation({super.key});
