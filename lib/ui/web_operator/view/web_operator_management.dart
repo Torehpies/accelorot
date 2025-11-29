@@ -1,16 +1,16 @@
 // lib/screens/operator_management_screen.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/operator_management_controller.dart';
-import '../widgets/operator_action_card.dart';
-import '../widgets/operator_list_item.dart';
-import '../widgets/operator_detail_panel.dart';
-import '../widgets/operator_empty_state.dart';
-import '../widgets/operator_error_state.dart';
-import '../widgets/operator_list_header.dart';
-import '../../utils/operator_dialogs.dart';
-import '../../utils/theme_constants.dart';
-import '../widgets/accept_operators_card.dart';
+import '../view_modal/operator_management_view_modal.dart';
+import '../../../web/admin/widgets/operator_action_card.dart';
+import '../../../web/admin/widgets/operator_list_item.dart';
+import '../../../web/admin/widgets/operator_detail_panel.dart';
+import '../../../web/admin/widgets/operator_empty_state.dart';
+import '../../../web/admin/widgets/operator_error_state.dart';
+import '../../../web/admin/widgets/operator_list_header.dart';
+import '../../../web/utils/operator_dialogs.dart';
+import '../../../web/utils/theme_constants.dart';
+import '../../../web/admin/widgets/accept_operators_card.dart';
 import '../../../web/admin/widgets/add_operator_screen.dart';
 
 class OperatorManagementScreen extends StatefulWidget {

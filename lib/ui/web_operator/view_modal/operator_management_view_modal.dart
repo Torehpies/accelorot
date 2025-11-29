@@ -1,8 +1,8 @@
 // lib/controllers/operator_management_controller.dart
 
 import 'package:flutter/material.dart';
-import '../models/operator_model.dart';
-import '../services/operator_service.dart';
+import '../../../web/admin/models/operator_model.dart';
+import '../../../web/admin/services/operator_service.dart';
 
 class OperatorManagementController extends ChangeNotifier {
   final OperatorService _operatorService = OperatorService();
