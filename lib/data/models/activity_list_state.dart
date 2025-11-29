@@ -6,7 +6,7 @@ part 'activity_list_state.freezed.dart';
 
 /// Represents the complete state of an activity list screen
 @freezed
-class ActivityListState with _$ActivityListState {
+abstract class ActivityListState with _$ActivityListState {
   const factory ActivityListState({
     // Data
     @Default([]) List<ActivityItem> allActivities,
@@ -46,7 +46,7 @@ enum LoadingStatus {
 
 /// Date filter configuration
 @freezed
-class DateFilterRange with _$DateFilterRange {
+abstract class DateFilterRange with _$DateFilterRange {
   const factory DateFilterRange({
     required DateFilterType type,
     DateTime? startDate,
