@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_view_service.dart';
 import 'package:flutter_application_1/data/models/activity_item.dart';
-import 'package:flutter_application_1/data/services/firebase/firestore_collections.dart';
-import 'package:flutter_application_1/data/services/firebase/firestore_upload.dart';
-import 'package:flutter_application_1/data/services/firebase/firestore_fetch.dart';
+import 'package:flutter_application_1/data/services/firebase/activity_logs/firestore_collections.dart';
+import 'package:flutter_application_1/data/services/firebase/activity_logs/firestore_upload.dart';
+import 'package:flutter_application_1/data/services/firebase/activity_logs/firestore_fetch.dart';
 import 'package:flutter_application_1/data/services/firebase/firestore_alert_service.dart';
 
 /// Service layer for activity-related Firestore operations
