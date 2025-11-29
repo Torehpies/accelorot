@@ -1,7 +1,7 @@
 // lib/services/firestore/firestore_helpers.dart
 import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_application_1/data/models/activity_item.dart';
 
 class FirestoreHelpers {
   // Convert Firestore document to ActivityItem

@@ -1,5 +1,5 @@
 // lib/services/firestore/firestore_fetch.dart
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_application_1/data/models/activity_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firestore_collections.dart';
 import 'package:flutter/material.dart';

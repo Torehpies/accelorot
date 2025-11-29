@@ -1,51 +1,7 @@
 // lib/ui/activity_logs/widgets/date_filter_button.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-enum DateFilterType {
-  none,
-  today,
-  last3Days,
-  last7Days,
-  last14Days,
-  customDate,
-}
-
-class DateFilterRange {
-  final DateFilterType type;
-  final DateTime? startDate;
-  final DateTime? endDate;
-  final DateTime? customDate;
-
-  DateFilterRange({
-    required this.type,
-    this.startDate,
-    this.endDate,
-    this.customDate,
-  });
-
-  bool get isActive => type != DateFilterType.none;
-
-  String getDisplayText() {
-    switch (type) {
-      case DateFilterType.today:
-        return 'Today';
-      case DateFilterType.last3Days:
-        return 'Last 3 Days';
-      case DateFilterType.last7Days:
-        return 'Last 7 Days';
-      case DateFilterType.last14Days:
-        return 'Last 14 Days';
-      case DateFilterType.customDate:
-        if (customDate != null) {
-          return DateFormat('MMM d, y').format(customDate!);
-        }
-        return 'Custom Date';
-      case DateFilterType.none:
-        return 'Date Filter';
-    }
-  }
-}
+import 'package:flutter_application_1/data/models/activity_list_state.dart';
 
 class DateFilterButton extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
@@ -57,7 +13,7 @@ class DateFilterButton extends StatefulWidget {
 }
 
 class _DateFilterButtonState extends State<DateFilterButton> {
-  DateFilterRange _currentFilter = DateFilterRange(type: DateFilterType.none);
+  DateFilterRange _currentFilter = const DateFilterRange(type: DateFilterType.none);
 
   void _showFilterMenu() {
     final RenderBox button = context.findRenderObject() as RenderBox;
@@ -80,19 +36,19 @@ class _DateFilterButtonState extends State<DateFilterButton> {
       items: [
         const PopupMenuItem(value: DateFilterType.today, child: Text('Today')),
         const PopupMenuItem(
-          value: DateFilterType.last3Days,
-          child: Text('Last 3 Days'),
+          value: DateFilterType.yesterday,
+          child: Text('Yesterday'),
         ),
         const PopupMenuItem(
           value: DateFilterType.last7Days,
           child: Text('Last 7 Days'),
         ),
         const PopupMenuItem(
-          value: DateFilterType.last14Days,
-          child: Text('Last 14 Days'),
+          value: DateFilterType.last30Days,
+          child: Text('Last 30 Days'),
         ),
         const PopupMenuItem(
-          value: DateFilterType.customDate,
+          value: DateFilterType.custom,
           child: Text('Custom Date'),
         ),
       ],
@@ -118,11 +74,12 @@ class _DateFilterButtonState extends State<DateFilterButton> {
         );
         break;
 
-      case DateFilterType.last3Days:
+      case DateFilterType.yesterday:
+        final yesterday = today.subtract(const Duration(days: 1));
         newFilter = DateFilterRange(
-          type: DateFilterType.last3Days,
-          startDate: today.subtract(const Duration(days: 2)),
-          endDate: today.add(const Duration(days: 1)),
+          type: DateFilterType.yesterday,
+          startDate: yesterday,
+          endDate: today,
         );
         break;
 
@@ -134,15 +91,15 @@ class _DateFilterButtonState extends State<DateFilterButton> {
         );
         break;
 
-      case DateFilterType.last14Days:
+      case DateFilterType.last30Days:
         newFilter = DateFilterRange(
-          type: DateFilterType.last14Days,
-          startDate: today.subtract(const Duration(days: 13)),
+          type: DateFilterType.last30Days,
+          startDate: today.subtract(const Duration(days: 29)),
           endDate: today.add(const Duration(days: 1)),
         );
         break;
 
-      case DateFilterType.customDate:
+      case DateFilterType.custom:
         final pickedDate = await showDatePicker(
           context: context,
           initialDate: today,
@@ -157,7 +114,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
             pickedDate.day,
           );
           newFilter = DateFilterRange(
-            type: DateFilterType.customDate,
+            type: DateFilterType.custom,
             startDate: selectedDay,
             endDate: selectedDay.add(const Duration(days: 1)),
             customDate: selectedDay,
@@ -179,9 +136,29 @@ class _DateFilterButtonState extends State<DateFilterButton> {
 
   void _clearFilter() {
     setState(() {
-      _currentFilter = DateFilterRange(type: DateFilterType.none);
+      _currentFilter = const DateFilterRange(type: DateFilterType.none);
     });
     widget.onFilterChanged(_currentFilter);
+  }
+
+  String _getDisplayText() {
+    switch (_currentFilter.type) {
+      case DateFilterType.today:
+        return 'Today';
+      case DateFilterType.yesterday:
+        return 'Yesterday';
+      case DateFilterType.last7Days:
+        return 'Last 7 Days';
+      case DateFilterType.last30Days:
+        return 'Last 30 Days';
+      case DateFilterType.custom:
+        if (_currentFilter.customDate != null) {
+          return DateFormat('MMM d, y').format(_currentFilter.customDate!);
+        }
+        return 'Custom Date';
+      case DateFilterType.none:
+        return 'Date Filter';
+    }
   }
 
   @override
@@ -213,7 +190,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
                 if (_currentFilter.isActive) ...[
                   const SizedBox(width: 6),
                   Text(
-                    _currentFilter.getDisplayText(),
+                    _getDisplayText(),
                     style: TextStyle(
                       color: Colors.teal.shade700,
                       fontWeight: FontWeight.w600,
