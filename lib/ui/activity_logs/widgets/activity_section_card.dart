@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/activity_section_card.dart
 
 import 'package:flutter/material.dart';
-import '../view_model/activity_filter_config.dart';
+import '../models/activity_filter_config.dart';
 import 'filter_box.dart';
 
 /// Reusable section card for activity logs with filter boxes

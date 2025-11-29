@@ -1,6 +1,6 @@
 // lib/frontend/operator/activity_logs/widgets/activity_card.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/models/activity_item_model.dart';
+import 'package:flutter_application_1/data/models/activity_item.dart';
 
 class ActivityCard extends StatelessWidget {
   final ActivityItem item;
