@@ -96,7 +96,9 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== CONFIGURATION GETTERS =====
 
+  // ignore: avoid_public_notifier_properties
   String get screenTitle => _config.getTitle(machineId: state.focusedMachineId);
+  // ignore: avoid_public_notifier_properties
   List<String> get filters => _config.filters;
 
   // ===== DATA FETCHING =====
