@@ -1,61 +1,11 @@
 // lib/services/machine_services/firestore_uploads.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../frontend/operator/machine_management/models/machine_model.dart';
+import '../../data/models/machine_model.dart';
 import 'firestore_collection.dart';
-import 'machine_mock_data.dart';
+
 
 class MachineFirestoreUpload {
-  // ==================== MOCK DATA UPLOAD ====================
-
-  // Upload mock machines to Firestore (only if none of the mock IDs exist)
-  static Future<void> uploadAllMockMachines() async {
-    try {
-      final allExist = await MachineFirestoreCollections.allMockMachinesExist();
-      if (allExist) return;
-      await uploadMachines();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Force upload (deletes existing and re-uploads)
-  static Future<void> forceUploadAllMockMachines() async {
-    try {
-      await MachineFirestoreCollections.deleteAllMachines();
-      await uploadMachines();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Upload machines from mock data
-  // Upload machines from mock data
-  static Future<void> uploadMachines() async {
-    try {
-      final mockData = MachineMockData.getMockMachines();
-      final batch = FirebaseFirestore.instance.batch();
-
-      for (var data in mockData) {
-        final machine = MachineModel.fromMap(data);
-
-        // Check if machine already exists to prevent duplicates
-        final exists = await MachineFirestoreCollections.machineExists(
-          machine.machineId,
-        );
-
-        if (!exists) {
-          final docRef = MachineFirestoreCollections.getMachinesCollection()
-              .doc(machine.machineId);
-          batch.set(docRef, machine.toFirestore());
-        }
-      }
-
-      await batch.commit();
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   // ==================== CRUD OPERATIONS ====================
 

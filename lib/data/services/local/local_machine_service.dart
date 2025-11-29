@@ -1,11 +1,45 @@
-import 'package:flutter_application_1/data/services/contracts/machine_service.dart';
+import '../../models/machine_model.dart';
+import '../contracts/machine_service.dart';
 
 /// TODO future local db for offline use
-class LocalMachineService implements MachineService{
+class LocalMachineService implements MachineService {
   @override
-  Future<Map<String, dynamic>> fetchRawMachineData(String id) {
-    // TODO: implement fetchRawMachineData
-    throw UnimplementedError();
+  Future<List<MachineModel>> fetchMachinesByTeam(String teamId) {
+    throw UnimplementedError('Local database not yet implemented');
   }
 
+  @override
+  Future<MachineModel?> fetchMachineById(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<void> createMachine(CreateMachineRequest request) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<void> updateMachine(UpdateMachineRequest request) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<void> archiveMachine(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<void> restoreMachine(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<bool> machineExists(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Stream<List<MachineModel>> watchMachinesByTeam(String teamId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
 }

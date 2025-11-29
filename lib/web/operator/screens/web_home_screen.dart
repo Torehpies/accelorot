@@ -9,7 +9,7 @@ import 'package:flutter_application_1/frontend/operator/dashboard/compost_progre
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/cycles/system_card.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/activity_logs_card.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 
 class WebHomeScreen extends StatefulWidget {
   const WebHomeScreen({super.key, required MachineModel? focusedMachine});

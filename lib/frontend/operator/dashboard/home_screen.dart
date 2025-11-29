@@ -8,7 +8,7 @@ import 'add_waste/add_waste_product.dart';
 import 'add_waste/submit_report.dart';
 import 'add_waste/quick_actions_sheet.dart';
 import 'add_waste/activity_logs_card.dart';
-import '../machine_management/models/machine_model.dart';
+import '../../../data/models/machine_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final MachineModel? focusedMachine;

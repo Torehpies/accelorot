@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/admin_machine_model.dart' as AdminModel;
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 // ignore: library_prefixes
-import '../../../frontend/operator/machine_management/models/machine_model.dart'
+import '../../../data/models/machine_model.dart'
     // ignore: library_prefixes
     as OperatorModel;
 
@@ -32,7 +32,7 @@ class AdminMachineController extends ChangeNotifier {
     return AdminModel.MachineModel(
       machineName: operatorModel.machineName,
       machineId: operatorModel.machineId,
-      userId: operatorModel.userId,
+      userId: operatorModel.userId ?? '',
       teamId: operatorModel.teamId,
       dateCreated: operatorModel.dateCreated,
       isArchived: operatorModel.isArchived,
@@ -111,8 +111,6 @@ class AdminMachineController extends ChangeNotifier {
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       _isAuthenticated = currentUserId != null;
 
-      // Upload mock data if needed (works without auth)
-      await FirestoreMachineService.uploadAllMockMachines();
 
       if (_isAuthenticated) {
         // Admin is logged in - fetch their team's machines

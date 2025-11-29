@@ -6,7 +6,7 @@ import 'view_screens/moisture_stats_view.dart';
 import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
 import 'history/history.dart';
-import '../machine_management/models/machine_model.dart';
+import '../../../data/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
 import '../../../services/sess_service.dart';
 

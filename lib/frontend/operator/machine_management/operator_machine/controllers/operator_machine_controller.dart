@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/operator_machine/controllers/operator_machine_controller.dart
 
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 import '../../../../../services/sess_service.dart';
 
@@ -76,8 +76,7 @@ class OperatorMachineController extends ChangeNotifier {
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       _isAuthenticated = currentUserId != null;
 
-      // Upload mock data if needed (works without auth)
-      await FirestoreMachineService.uploadAllMockMachines();
+
 
       final targetUserId = viewingOperatorId ?? currentUserId;
 

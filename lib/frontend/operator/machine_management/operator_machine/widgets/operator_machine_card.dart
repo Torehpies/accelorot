@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 import '../controllers/operator_machine_controller.dart';
 import '../../widgets/machine_detail_row.dart';
 import '../../machine_view/view_confirmation.dart';
@@ -26,7 +26,7 @@ class OperatorMachineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = controller.getUserName(machine.userId) ?? 'Unknown User';
+    final userName = controller.getUserName(machine.userId ?? '') ?? 'Unknown User';
     final dateStr = DateFormat('MMM-dd-yyyy').format(machine.dateCreated);
     final isArchived = machine.isArchived;
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../operator/machine_management/models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 import '../../../../../services/sess_service.dart';
 

@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/admin_machine/controllers/admin_machine_controller.dart
 
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 import '../../../../../services/machine_services/firestore_machine_service.dart';
 
 class AdminMachineController extends ChangeNotifier {
@@ -68,9 +68,6 @@ class AdminMachineController extends ChangeNotifier {
     try {
       final currentUserId = FirestoreMachineService.getCurrentUserId();
       _isAuthenticated = currentUserId != null;
-
-      // Upload mock data if needed (works without auth)
-      await FirestoreMachineService.uploadAllMockMachines();
 
       if (_isAuthenticated) {
         // Admin is logged in - fetch their team's machines

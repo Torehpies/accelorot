@@ -1,6 +1,6 @@
 // lib/services/machine_services/firestore_machine_service.dart
 
-import '../../frontend/operator/machine_management/models/machine_model.dart';
+import '../../data/models/machine_model.dart';
 import 'firestore_collection.dart';
 import 'firestore_uploads.dart';
 import 'firestore_fetchs.dart';
@@ -21,11 +21,6 @@ class FirestoreMachineService {
 
   // ==================== UPLOAD METHODS ====================
 
-  static Future<void> uploadAllMockMachines() =>
-      MachineFirestoreUpload.uploadAllMockMachines();
-
-  static Future<void> forceUploadAllMockMachines() =>
-      MachineFirestoreUpload.forceUploadAllMockMachines();
 
   static Future<void> addMachine(MachineModel machine) =>
       MachineFirestoreUpload.addMachine(machine);
@@ -56,7 +51,7 @@ class FirestoreMachineService {
     String operatorId,
   ) => MachineFirestoreFetch.getMachinesByOperatorId(operatorId);
 
-  /// Fetch machines for Admins and Operators (by teamId + mock data)
+  /// Fetch machines for Admins and Operators (by teamId)
   static Future<List<MachineModel>> getMachinesByTeamId(String teamId) =>
       MachineFirestoreFetch.getMachinesByTeamId(teamId);
 

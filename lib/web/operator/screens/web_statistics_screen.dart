@@ -5,7 +5,7 @@ import '../../../frontend/operator/statistics/view_screens/moisture_stats_view.d
 import '../../../frontend/operator/statistics/view_screens/temperature_stats_view.dart';
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
 import '../../../frontend/operator/statistics/history/history.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import '../../../data/models/machine_model.dart';
 import '../../../services/machine_services/firestore_machine_service.dart';
 import '../../../services/sess_service.dart';
 

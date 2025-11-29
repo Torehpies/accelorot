@@ -1,6 +1,6 @@
 // lib/services/machine_services/firestore_fetchs.dart
 
-import '../../frontend/operator/machine_management/models/machine_model.dart';
+import '../../data/models/machine_model.dart';
 import 'firestore_collection.dart';
 
 class MachineFirestoreFetch {
@@ -57,18 +57,9 @@ class MachineFirestoreFetch {
               .orderBy('dateCreated', descending: true)
               .get();
 
-      // Get machines with empty teamId (mock data visible to all)
-      final mockDataSnapshot =
-          await MachineFirestoreCollections.getMachinesCollection()
-              .where('teamId', isEqualTo: '')
-              .orderBy('dateCreated', descending: true)
-              .get();
-
-      // Combine both lists and remove duplicates (just in case)
-      final allDocs = [...ownTeamSnapshot.docs, ...mockDataSnapshot.docs];
-      final uniqueDocs = allDocs.toSet().toList();
-
-      return uniqueDocs.map((doc) => MachineModel.fromFirestore(doc)).toList();
+      return ownTeamSnapshot.docs
+          .map((doc) => MachineModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       return [];
     }

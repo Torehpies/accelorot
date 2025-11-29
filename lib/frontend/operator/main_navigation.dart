@@ -7,7 +7,7 @@ import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/ac
 import 'profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'machine_management/operator_machine/operator_machine_screen.dart';
-import 'machine_management/models/machine_model.dart';
+import '../../data/models/machine_model.dart';
 
 void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
