@@ -1,5 +1,4 @@
 // lib/data/models/activity_list_state.dart
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'activity_item.dart';
 
@@ -8,8 +7,6 @@ part 'activity_list_state.freezed.dart';
 /// Represents the complete state of an activity list screen
 @freezed
 class ActivityListState with _$ActivityListState {
-  const ActivityListState._();
-  
   const factory ActivityListState({
     // Data
     @Default([]) List<ActivityItem> allActivities,
@@ -31,6 +28,8 @@ class ActivityListState with _$ActivityListState {
     String? focusedMachineId,
   }) = _ActivityListState;
   
+  const ActivityListState._();
+  
   /// Convenience getters
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
@@ -48,14 +47,14 @@ enum LoadingStatus {
 /// Date filter configuration
 @freezed
 class DateFilterRange with _$DateFilterRange {
-  const DateFilterRange._();  // <- Private constructor FIRST
-  
   const factory DateFilterRange({
     required DateFilterType type,
     DateTime? startDate,
     DateTime? endDate,
     DateTime? customDate,
   }) = _DateFilterRange;
+  
+  const DateFilterRange._();
   
   bool get isActive => type != DateFilterType.none && startDate != null && endDate != null;
 }
