@@ -43,16 +43,13 @@ Stream<User?> userProfile(Ref ref) {
   final authUser = ref.watch(authStateChangesProvider).value;
 
   if (authUser == null) return const Stream.empty();
-	debugPrint(authUser.uid.toString());
 
   final rawData = userService.watchRawUserData(authUser.uid);
   return rawData.map((doc) {
     final data = doc.data();
     if (data == null) return null;
-		debugPrint(data.toString());
 
     final user = User.fromJson({...data});
-		debugPrint(user.toString());
 		return user;
   });
 }

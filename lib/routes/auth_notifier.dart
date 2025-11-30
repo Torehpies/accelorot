@@ -83,7 +83,6 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
         state = AuthStatusState.teamSelection();
         break;
       case 'active':
-				debugPrint('USER ROLE: $globalRole $teamRole');
         if (globalRole == 'superadmin') {
           state = AuthStatusState.authenticated(role: globalRole as String);
         }

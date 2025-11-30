@@ -23,19 +23,19 @@ AuthRepository authRepository(Ref ref) {
     ref.watch(firebaseAuthProvider),
     ref.watch(firebaseFirestoreProvider),
     GoogleSignIn.instance,
-    ref.watch(teamRepositoryProvider),
+    ref.watch(teamRepositoryOldProvider),
   );
 }
 
 /// Team Repository provider
 @Riverpod(keepAlive: true)
-TeamRepository teamRepository(Ref ref) {
+TeamRepository teamRepositoryOld(Ref ref) {
   return TeamRepository(ref.watch(firebaseFirestoreProvider));
 }
 
 /// Team list provider
 @riverpod
 Future<List<Team>> teamList(Ref ref) {
-  final teamRepo = ref.watch(teamRepositoryProvider);
+  final teamRepo = ref.watch(teamRepositoryOldProvider);
   return teamRepo.fetchAllTeams();
 }

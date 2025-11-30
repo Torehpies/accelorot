@@ -5,6 +5,7 @@ import 'package:flutter_application_1/data/services/contracts/auth_service.dart'
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/user_service.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 abstract class UserRepository {
   Future<Result<User, DataLayerError>> getUser(String id);
@@ -43,6 +44,8 @@ class UserRepositoryImpl implements UserRepository {
       }
 
       return Result.success(mapRawDataToDomain(rawData));
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e.toString()));
     }
@@ -57,7 +60,7 @@ class UserRepositoryImpl implements UserRepository {
 
       return mapRawDataToDomain(rawData);
     } catch (e) {
-			return null;
+      return null;
     }
   }
 
@@ -82,10 +85,7 @@ class UserRepositoryImpl implements UserRepository {
       });
       return Result.success(null);
     } on FirebaseException catch (e) {
-      if (e.code == 'permission-denied') {
-        return const Result.failure(DataLayerError.permissionError());
-      }
-      return const Result.failure(DataLayerError.networkError());
+      return Result.failure(mapFirebaseException(e));
     } catch (e) {
       debugPrint('Unexpected error on creating user profile: $e');
       return Result.failure(DataLayerError.unknownError(e));
