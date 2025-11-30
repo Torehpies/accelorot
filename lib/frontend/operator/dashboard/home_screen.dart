@@ -23,25 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
 
-  // State lifted from CompostingProgressCard - shared between cards
   CompostBatch? _currentBatch;
 
-  // Callback when batch is started from CompostingProgressCard
   void _handleBatchStarted(CompostBatch batch) {
-    setState(() {
-      _currentBatch = batch;
-    });
+    if (mounted) setState(() => _currentBatch = batch);
   }
 
-  // Callback when batch is completed from CompostingProgressCard
   void _handleBatchCompleted() {
-    setState(() {
-      _currentBatch = null;
-    });
+    if (mounted) setState(() => _currentBatch = null);
   }
 
-  // Handle FAB press - show action sheet
-  void _handleFABPress() async {
+  Future<void> _handleFABPress() async {
     final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -51,52 +43,52 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (action == null || !mounted) return;
 
-    // Handle selected action
-    if (action == 'add_waste') {
-      final result = await showDialog<Map<String, dynamic>>(
-        context: context,
-        builder: (context) => AddWasteProduct(
-          preSelectedMachineId: widget.focusedMachine?.machineId,
-        ),
-      );
-
-      // Refresh activity logs if waste was added
-      if (result != null && mounted) {
-        await _activityLogsKey.currentState?.refresh();
-      }
-    } else if (action == 'submit_report') {
-      final result = await showDialog<Map<String, dynamic>>(
-        context: context,
-        builder: (context) => SubmitReport(
-          preSelectedMachineId: widget.focusedMachine?.machineId,
-        ),
-      );
-
-      // Show confirmation AND refresh activity logs if report was submitted
-      if (result != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Report submitted successfully'),
-            duration: Duration(seconds: 2),
-            backgroundColor: Colors.green,
+    switch (action) {
+      case 'add_waste':
+        final result = await showDialog<Map<String, dynamic>>(
+          context: context,
+          builder: (context) => AddWasteProduct(
+            preSelectedMachineId: widget.focusedMachine?.machineId,
           ),
         );
+        if (result != null && mounted) {
+          await _activityLogsKey.currentState?.refresh();
+        }
+        break;
 
-        // Refresh the activity logs to show the new report
-        await _activityLogsKey.currentState?.refresh();
-      }
+      case 'submit_report':
+        final result = await showDialog<Map<String, dynamic>>(
+          context: context,
+          builder: (context) => SubmitReport(
+            preSelectedMachineId: widget.focusedMachine?.machineId,
+          ),
+        );
+        if (result != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Report submitted successfully'),
+              duration: Duration(seconds: 2),
+              backgroundColor: Colors.green,
+            ),
+          );
+          await _activityLogsKey.currentState?.refresh();
+        }
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isMachineView = widget.focusedMachine != null;
+    final isMachineView = widget.focusedMachine != null;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Dashboard',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: false,
         backgroundColor: Colors.teal,
@@ -104,65 +96,66 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: isMachineView,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Machine Focus Banner
-              if (isMachineView)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.teal.shade50, Colors.teal.shade100],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.teal.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.filter_alt,
-                        color: Colors.teal.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Filtered view • All data shown for this machine only',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.teal.shade900,
-                          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWeb = constraints.maxWidth > 800; // heuristic for desktop/web
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (isMachineView)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE0F7FA), Color(0xFFB2DFDB)],
                         ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.teal.shade200),
                       ),
-                    ],
+                      child: Row(
+                        children: [
+                          Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Filtered view • All data shown for this machine only',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.teal.shade900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  CompostingProgressCard(
+                    currentBatch: _currentBatch,
+                    onBatchStarted: _handleBatchStarted,
+                    onBatchCompleted: _handleBatchCompleted,
                   ),
-                ),
+                  const SizedBox(height: 16),
 
-              // ✅ Environmental Sensors section is PERMANENTLY REMOVED
-              CompostingProgressCard(
-                currentBatch: _currentBatch,
-                onBatchStarted: _handleBatchStarted,
-                onBatchCompleted: _handleBatchCompleted,
+                  SystemCard(currentBatch: _currentBatch),
+                  const SizedBox(height: 16),
+
+                  // ✅ Activity Logs — placed AFTER System Card, as requested
+                  ActivityLogsCard(
+                    key: _activityLogsKey,
+                    focusedMachineId: widget.focusedMachine?.machineId,
+                    maxHeight: isWeb ? null : 160, // Web: full scroll; Mobile: capped
+                  ),
+
+                  const SizedBox(height: 16),
+                ],
               ),
-
-              const SizedBox(height: 16),
-
-              SystemCard(currentBatch: _currentBatch),
-
-              const SizedBox(height: 16),
-
-              ActivityLogsCard(
-                key: _activityLogsKey,
-                focusedMachineId: widget.focusedMachine?.machineId,
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         ),
       ),
       floatingActionButton: Padding(
@@ -173,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FloatingActionButton(
             onPressed: _handleFABPress,
             backgroundColor: Colors.teal,
-            elevation: 5,
+            elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -181,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
