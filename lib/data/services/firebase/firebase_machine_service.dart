@@ -13,8 +13,8 @@ class FirebaseMachineService implements MachineService {
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
-  String? get _currentUserId => _auth.currentUser?.uid;
-
+  String? get currentUserId => _auth.currentUser?.uid;
+  
   CollectionReference get _machinesCollection =>
       _firestore.collection('machines');
 
@@ -47,7 +47,7 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> createMachine(CreateMachineRequest request) async {
-    if (_currentUserId == null) {
+    if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
@@ -62,7 +62,7 @@ class FirebaseMachineService implements MachineService {
         'teamId': request.teamId,
         'dateCreated': FieldValue.serverTimestamp(),
         'isArchived': false,
-        'createdBy': _currentUserId,
+        'createdBy': currentUserId,
       });
     } catch (e) {
       throw Exception('Failed to create machine: $e');
@@ -71,14 +71,14 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> updateMachine(UpdateMachineRequest request) async {
-    if (_currentUserId == null) {
+    if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
     try {
       final updates = <String, dynamic>{
         'lastModified': FieldValue.serverTimestamp(),
-        'modifiedBy': _currentUserId,
+        'modifiedBy': currentUserId,
       };
 
       if (request.machineName != null) {
@@ -99,7 +99,7 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> archiveMachine(String machineId) async {
-    if (_currentUserId == null) {
+    if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
@@ -107,7 +107,7 @@ class FirebaseMachineService implements MachineService {
       await _machinesCollection.doc(machineId).update({
         'isArchived': true,
         'archivedAt': FieldValue.serverTimestamp(),
-        'archivedBy': _currentUserId,
+        'archivedBy': currentUserId,
       });
     } catch (e) {
       throw Exception('Failed to archive machine: $e');
@@ -116,7 +116,7 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> restoreMachine(String machineId) async {
-    if (_currentUserId == null) {
+    if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
@@ -124,7 +124,7 @@ class FirebaseMachineService implements MachineService {
       await _machinesCollection.doc(machineId).update({
         'isArchived': false,
         'restoredAt': FieldValue.serverTimestamp(),
-        'restoredBy': _currentUserId,
+        'restoredBy': currentUserId,
       });
     } catch (e) {
       throw Exception('Failed to restore machine: $e');
