@@ -14,38 +14,24 @@ import '../services/firebase/activity_logs/cycle_service.dart';
 /// Abstract interface for activity data operations
 /// Implementations should handle user authentication internally
 abstract class ActivityRepository {
-  /// Check if user is currently logged in
+
   Future<bool> isUserLoggedIn();
 
-  /// Fetch substrate activities for current user
   Future<List<ActivityLogItem>> getSubstrates();
-
-  /// Fetch alert activities for current user
   Future<List<ActivityLogItem>> getAlerts();
-
-  /// Fetch report activities (machine-based)
   Future<List<ActivityLogItem>> getReports();
-
-  /// Fetch cycle recommendation activities for current user
   Future<List<ActivityLogItem>> getCyclesRecom();
-
-  /// Fetch all activities for current user
-  /// Combines substrates, alerts, cycles, and reports
   Future<List<ActivityLogItem>> getAllActivities();
 }
 
 // ===== FIRESTORE IMPLEMENTATION =====
 
-/// Firestore implementation of ActivityRepository
 /// Orchestrates services and transforms data to UI models
-/// Assumes user is already authenticated (handled by route guards)
 class ActivityLogsRepository implements ActivityRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // ===== USER MANAGEMENT =====
 
-  /// Get current logged-in user ID
-  /// Throws if user is not authenticated
   String _getCurrentUserId() {
     final userId = _auth.currentUser?.uid;
     if (userId == null || userId.isEmpty) {
