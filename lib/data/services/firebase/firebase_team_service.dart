@@ -20,7 +20,9 @@ class FirebaseTeamService implements TeamService {
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
 
-  Future<List<Map<String, dynamic>>> fetchRawPendingMembers(String teamId) async {
+  Future<List<Map<String, dynamic>>> fetchRawPendingMembers(
+    String teamId,
+  ) async {
     final snapshot = await firestore
         .collection('teams')
         .doc(teamId)
@@ -31,9 +33,22 @@ class FirebaseTeamService implements TeamService {
 
   @override
   Future<List<Map<String, dynamic>?>> fetchRawTeams() async {
-		final snapshot = await firestore
-			.collection('teams')
-			.get();
-		return snapshot.docs.map((doc) => doc.data()).toList();
+    final snapshot = await firestore.collection('teams').get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  @override
+  Future<void> addTeam(
+    String teamName,
+    String address,
+    String createdBy,
+  ) async {
+    final data = {
+      "teamName": teamName,
+      "address": address,
+      "createdAt": FieldValue.serverTimestamp(),
+      "createdBy": createdBy,
+    };
+    await firestore.collection('teams').add(data);
   }
 }

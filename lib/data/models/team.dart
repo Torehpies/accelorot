@@ -6,9 +6,8 @@ part 'team.g.dart';
 @freezed
 abstract class Team with _$Team {
   const factory Team({
-		required String teamId,
 		required String teamName,
-    required DateTime createdAt,
+		required String address,
   }) = _Team;
 
   factory Team.fromJson(Map<String, dynamic> json) =>
