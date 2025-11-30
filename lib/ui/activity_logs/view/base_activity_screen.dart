@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/activity_list_state.dart';
+import '../models/activity_list_state.dart';
 import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/search_bar_widget.dart';

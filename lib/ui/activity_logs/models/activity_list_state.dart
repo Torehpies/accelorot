@@ -1,6 +1,7 @@
-// lib/data/models/activity_list_state.dart
+// lib/ui/activity_logs/models/activity_list_state.dart
+
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'activity_item.dart';
+import 'activity_log_item.dart';
 
 part 'activity_list_state.freezed.dart';
 
@@ -9,8 +10,8 @@ part 'activity_list_state.freezed.dart';
 abstract class ActivityListState with _$ActivityListState {
   const factory ActivityListState({
     // Data
-    @Default([]) List<ActivityItem> allActivities,
-    @Default([]) List<ActivityItem> filteredActivities,
+    @Default([]) List<ActivityLogItem> allActivities,
+    @Default([]) List<ActivityLogItem> filteredActivities,
     
     // Filter state
     @Default('All') String selectedFilter,
@@ -27,9 +28,9 @@ abstract class ActivityListState with _$ActivityListState {
     // Screen configuration
     String? focusedMachineId,
   }) = _ActivityListState;
-  
+
   const ActivityListState._();
-  
+
   /// Convenience getters
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
@@ -53,9 +54,9 @@ abstract class DateFilterRange with _$DateFilterRange {
     DateTime? endDate,
     DateTime? customDate,
   }) = _DateFilterRange;
-  
+
   const DateFilterRange._();
-  
+
   bool get isActive => type != DateFilterType.none && startDate != null && endDate != null;
 }
 

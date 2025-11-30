@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/view/substrates_screen.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/activity_list_state.dart';
+import '../models/activity_list_state.dart';
 import '../view_model/activity_viewmodel.dart';
 import 'base_activity_screen.dart';
 

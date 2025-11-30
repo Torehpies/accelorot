@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/date_filter_button.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_application_1/data/models/activity_list_state.dart';
+import '../models/activity_list_state.dart';
 
 class DateFilterButton extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
@@ -120,7 +120,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
             customDate: selectedDay,
           );
         } else {
-          return; // User cancelled date picker
+          return;
         }
         break;
 

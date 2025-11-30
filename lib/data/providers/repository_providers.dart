@@ -1,6 +1,11 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/repositories/activity_repository.dart';
+// lib/data/providers/repository_providers.dart
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../repositories/activity_repository.dart';
+import '../repositories/activity_logs_repository.dart';
+
+/// Provider for activity repository
+/// Returns abstract interface, concrete implementation is ActivityLogsRepository
 final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  return FirestoreActivityRepository();
+  return ActivityLogsRepository();
 });

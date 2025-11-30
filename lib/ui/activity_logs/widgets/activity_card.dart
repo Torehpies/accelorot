@@ -1,9 +1,10 @@
-// lib/frontend/operator/activity_logs/widgets/activity_card.dart
+// lib/ui/activity_logs/widgets/activity_card.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/models/activity_item.dart';
+import '../models/activity_log_item.dart';
 
 class ActivityCard extends StatelessWidget {
-  final ActivityItem item;
+  final ActivityLogItem item;  
 
   const ActivityCard({super.key, required this.item});
 
@@ -40,7 +41,7 @@ class ActivityCard extends StatelessWidget {
                       width: 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: item.statusColorValue,
+                        color: item.statusColor,
                         shape: BoxShape.circle,
                       ),
                     ),

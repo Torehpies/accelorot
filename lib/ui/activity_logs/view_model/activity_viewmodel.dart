@@ -1,8 +1,8 @@
 // lib/ui/activity_logs/view_model/activity_viewmodel.dart
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../data/models/activity_item.dart';
-import '../../../data/models/activity_list_state.dart';
+import '../models/activity_log_item.dart';
+import '../models/activity_list_state.dart';
 import '../../../data/repositories/activity_repository.dart';
 import '../../../data/providers/repository_providers.dart';
 import '../models/activity_filter_config.dart';
@@ -103,7 +103,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== DATA FETCHING =====
 
-  Future<List<ActivityItem>> _fetchData(String? viewingOperatorId) async {
+  Future<List<ActivityLogItem>> _fetchData(String? viewingOperatorId) async {
     switch (_screenType) {
       case ActivityScreenType.substrates:
         return await _repository.getSubstrates(viewingOperatorId: viewingOperatorId);
@@ -143,8 +143,8 @@ class ActivityViewModel extends _$ActivityViewModel {
 
       state = state.copyWith(isLoggedIn: true);
 
-      // Upload mock data (if needed for demo)
-      await _repository.uploadMockData();
+      // ❌ REMOVED: Upload mock data
+      // await _repository.uploadMockData();
 
       await loadActivities(viewingOperatorId, focusedMachineId);
     } catch (e) {
@@ -160,7 +160,7 @@ class ActivityViewModel extends _$ActivityViewModel {
   /// Load activities from repository
   Future<void> loadActivities(String? viewingOperatorId, String? focusedMachineId) async {
     try {
-      List<ActivityItem> activities = await _fetchData(viewingOperatorId);
+      List<ActivityLogItem> activities = await _fetchData(viewingOperatorId);  
 
       // Filter by machine if focusedMachineId is set
       if (focusedMachineId != null) {
@@ -237,7 +237,7 @@ class ActivityViewModel extends _$ActivityViewModel {
     );
   }
 
-  List<ActivityItem> _applyDateFilter(List<ActivityItem> items) {
+  List<ActivityLogItem> _applyDateFilter(List<ActivityLogItem> items) {  
     if (!state.dateFilter.isActive) return items;
 
     return items.where((item) {
@@ -246,7 +246,7 @@ class ActivityViewModel extends _$ActivityViewModel {
     }).toList();
   }
 
-  List<ActivityItem> _applySearchFilter(List<ActivityItem> items) {
+  List<ActivityLogItem> _applySearchFilter(List<ActivityLogItem> items) {  
     if (state.searchQuery.isEmpty) return items;
 
     return items
@@ -254,17 +254,17 @@ class ActivityViewModel extends _$ActivityViewModel {
         .toList();
   }
 
-  Set<String> _computeAutoHighlightedFilters(List<ActivityItem> searchResults) {
+  Set<String> _computeAutoHighlightedFilters(List<ActivityLogItem> searchResults) {  
     if (state.searchQuery.isEmpty) return {};
 
     final categories = searchResults.map((item) => item.category).toSet();
     return _config.categoryHighlighter(categories, _config.filters);
   }
 
-  List<ActivityItem> _applyCategoryFilter(List<ActivityItem> items) {
+  List<ActivityLogItem> _applyCategoryFilter(List<ActivityLogItem> items) {  
     // If manual filter is set and not 'All', apply category filter
     if (state.isManualFilter && state.selectedFilter != 'All') {
-      return _config.categoryMapper<ActivityItem>(
+      return _config.categoryMapper<ActivityLogItem>(
         items,
         state.selectedFilter,
         (item) => item.category,

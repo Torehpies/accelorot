@@ -223,7 +223,7 @@ class AdminMachineController extends ChangeNotifier {
 
       final updatedMachine = existingMachine.copyWith(
         machineName: machineName,
-        userId: '', // Keep empty - not used anymore
+        userId: '',
       );
 
       await FirestoreMachineService.updateMachine(updatedMachine);
