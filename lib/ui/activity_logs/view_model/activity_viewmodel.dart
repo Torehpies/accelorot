@@ -143,9 +143,6 @@ class ActivityViewModel extends _$ActivityViewModel {
 
       state = state.copyWith(isLoggedIn: true);
 
-      // ❌ REMOVED: Upload mock data
-      // await _repository.uploadMockData();
-
       await loadActivities(viewingOperatorId, focusedMachineId);
     } catch (e) {
       state = state.copyWith(
