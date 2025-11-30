@@ -1,0 +1,44 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/temperature_model.dart';
+import '../models/moisture_model.dart';
+import '../models/oxygen_model.dart';
+import '../services/firebase/firestore_statistics_service.dart';
+import '../services/contracts/statistics_service_contract.dart';
+import '../repositories/statistics_repository.dart';
+import '../repositories/contracts/statistics_repository_contract.dart';
+
+// Firestore instance provider
+final firestoreProvider = Provider<FirebaseFirestore>((ref) {
+  return FirebaseFirestore.instance;
+});
+
+// Statistics Service provider
+final statisticsServiceProvider = Provider<StatisticsServiceContract>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return FirestoreStatisticsService(firestore: firestore);
+});
+
+// Statistics Repository provider
+final statisticsRepositoryProvider = Provider<StatisticsRepositoryContract>((ref) {
+  final service = ref.watch(statisticsServiceProvider);
+  return StatisticsRepository(statisticsService: service);
+});
+
+// Temperature data provider
+final temperatureDataProvider = FutureProvider.family<List<TemperatureModel>, String>((ref, machineId) async {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getTemperatureReadings(machineId);
+});
+
+// Moisture data provider
+final moistureDataProvider = FutureProvider.family<List<MoistureModel>, String>((ref, machineId) async {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getMoistureReadings(machineId);
+});
+
+// Oxygen data provider
+final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((ref, machineId) async {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getOxygenReadings(machineId);
+});
