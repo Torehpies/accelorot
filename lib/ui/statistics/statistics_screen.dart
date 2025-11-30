@@ -59,7 +59,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withAlpha((0.03 * 255).round()),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
