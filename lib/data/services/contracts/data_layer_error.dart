@@ -10,6 +10,7 @@ abstract class DataLayerError with _$DataLayerError {
   const factory DataLayerError.permissionError() = PermissionError;
   const factory DataLayerError.mappingError() = MappingError;
   const factory DataLayerError.userExistsError() = UserExistsError;
+  const factory DataLayerError.dataEmptyError() = DataEmptyError;
 
   const factory DataLayerError.validationError({required String message}) =
       ValidationError;
@@ -20,6 +21,7 @@ abstract class DataLayerError with _$DataLayerError {
     permissionError: () => 'Insufficient permissions or unauthenticated.',
     mappingError: () => 'Data recieved from the server was corrupt.',
     userExistsError: () => 'User already exists in database.',
+		dataEmptyError: () => 'Fetched data is empty.',
     validationError: (message) => message,
     unknownError: (_) => 'An unexpected error occurred. Please try again',
   );

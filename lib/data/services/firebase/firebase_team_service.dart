@@ -32,9 +32,8 @@ class FirebaseTeamService implements TeamService {
   }
 
   @override
-  Future<List<Map<String, dynamic>?>> fetchRawTeams() async {
-    final snapshot = await firestore.collection('teams').get();
-    return snapshot.docs.map((doc) => doc.data()).toList();
+  Future<QuerySnapshot<Map<String, dynamic>?>> fetchRawTeams() async {
+		return firestore.collection('teams').get();
   }
 
   @override

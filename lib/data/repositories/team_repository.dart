@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/data/models/team.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 abstract class TeamRepository {
+  Future<Result<List<Team>, DataLayerError>> getTeams();
   Future<Result<void, DataLayerError>> addTeam({
     required String teamName,
     required String address,
@@ -26,6 +28,27 @@ class TeamRepositoryImpl implements TeamRepository {
     try {
       await _teamService.addTeam(teamName, address, createdBy);
       return const Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } on TypeError catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } on FormatException catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
+
+  @override
+  Future<Result<List<Team>, DataLayerError>> getTeams() async {
+    try {
+      final rawData = await _teamService.fetchRawTeams();
+      final teams = rawData.docs.map((doc) {
+        final data = doc.data();
+
+        return Team.fromJson({...?data, 'id': doc.id});
+      }).toList();
+      return Result.success(teams);
     } on FirebaseException catch (e) {
       return Result.failure(mapFirebaseException(e));
     } on TypeError catch (_) {
