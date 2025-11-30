@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import '../../../data/models/oxygen_model.dart';
 import '../../../data/repositories/contracts/statistics_repository_contract.dart';
 
 class OxygenViewModel extends ChangeNotifier {
