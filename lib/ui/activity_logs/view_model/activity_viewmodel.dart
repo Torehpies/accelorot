@@ -106,19 +106,19 @@ class ActivityViewModel extends _$ActivityViewModel {
   Future<List<ActivityLogItem>> _fetchData(String? viewingOperatorId) async {
     switch (_screenType) {
       case ActivityScreenType.substrates:
-        return await _repository.getSubstrates(viewingOperatorId: viewingOperatorId);
+        return await _repository.getSubstrates();
       
       case ActivityScreenType.alerts:
-        return await _repository.getAlerts(viewingOperatorId: viewingOperatorId);
+        return await _repository.getAlerts();
       
       case ActivityScreenType.reports:
-        return await _repository.getReports(viewingOperatorId: viewingOperatorId);
+        return await _repository.getReports();
       
       case ActivityScreenType.cyclesRecom:
-        return await _repository.getCyclesRecom(viewingOperatorId: viewingOperatorId);
+        return await _repository.getCyclesRecom();
       
       case ActivityScreenType.allActivity:
-        return await _repository.getAllActivities(viewingOperatorId: viewingOperatorId);
+        return await _repository.getAllActivities();
     }
   }
 
