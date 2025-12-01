@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import '../../../frontend/operator/machine_management/widgets/search_bar_widget.dart';
-import '../../../frontend/operator/machine_management/components/machine_action_card.dart';
+import 'search_bar_widget.dart';
+import 'machine_action_card.dart';
 import 'add_machine_modal.dart';
 import 'admin_machine_card.dart';
 
