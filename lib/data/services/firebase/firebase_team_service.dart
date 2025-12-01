@@ -1,53 +1,92 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 class FirebaseTeamService implements TeamService {
-  final FirebaseFirestore firestore;
-  FirebaseTeamService(this.firestore);
+  final FirebaseFirestore _firestore;
+  FirebaseTeamService(this._firestore);
 
   @override
-  Future<Map<String, dynamic>?> fetchRawTeamData(String teamId) async {
-    final snapshot = await firestore.collection('teams').doc(teamId).get();
-    return snapshot.data();
+  Future<Result<Team, DataLayerError>> getTeam(String teamId) async {
+    try {
+      final doc = await _firestore.collection('teams').doc(teamId).get();
+      final raw = doc.data();
+      if (raw == null) {
+        return Result.failure(DataLayerError.dataEmptyError());
+      }
+      final team = Team.fromJson(raw);
+      return Result.success(team);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } on TypeError catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } on FormatException catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 
-  Future<List<Map<String, dynamic>>> fetchRawTeamMembers(String teamId) async {
-    final snapshot = await firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('members')
-        .get();
-    return snapshot.docs.map((doc) => doc.data()).toList();
-  }
+  //  Future<Result<List<Team>, DataLayerError>> fetchRawTeamMembers(
+  //    String teamId,
+  //  ) async {
+  //    final snapshot = await _firestore
+  //        .collection('teams')
+  //        .doc(teamId)
+  //        .collection('members')
+  //        .get();
+  //    return snapshot.docs.map((doc) => doc.data()).toList();
+  //  }
+  //
+  //  Future<Result<Team, DataLayerError>> fetchRawPendingMembers(
+  //    String teamId,
+  //  ) async {
+  //    final snapshot = await _firestore
+  //        .collection('teams')
+  //        .doc(teamId)
+  //        .collection('pending_members')
+  //        .get();
+  //    return snapshot.docs.map((doc) => doc.data()).toList();
+  //  }
 
-  Future<List<Map<String, dynamic>>> fetchRawPendingMembers(
-    String teamId,
-  ) async {
-    final snapshot = await firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('pending_members')
-        .get();
-    return snapshot.docs.map((doc) => doc.data()).toList();
+  @override
+  Future<Result<List<Team>, DataLayerError>> getTeams() async {
+    try {
+      final snapshot = await _firestore.collection('teams').get();
+      final teams = snapshot.docs
+          .map((doc) => Team.fromJson(doc.data()))
+          .toList();
+      return Result.success(teams);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } on TypeError catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } on FormatException catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 
   @override
-  Future<QuerySnapshot<Map<String, dynamic>?>> fetchRawTeams() async {
-		return firestore.collection('teams').get();
-  }
+  Future<Result<Team, DataLayerError>> addTeam(Team team) async {
+    try {
+			final docRef = _firestore.collection('teams').doc();
+			final updatedTeam = team.copyWith(teamId: docRef.id);
+      await docRef.set(updatedTeam.toJson());
+			return Result.success(updatedTeam);
 
-  @override
-  Future<void> addTeam(
-    String teamName,
-    String address,
-    String createdBy,
-  ) async {
-    final data = {
-      "teamName": teamName,
-      "address": address,
-      "createdAt": FieldValue.serverTimestamp(),
-      "createdBy": createdBy,
-    };
-    await firestore.collection('teams').add(data);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } on TypeError catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } on FormatException catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 }

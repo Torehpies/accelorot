@@ -6,6 +6,7 @@ part 'team.g.dart';
 @freezed
 abstract class Team with _$Team {
   const factory Team({
+		String? teamId,
 		required String teamName,
 		required String address,
   }) = _Team;

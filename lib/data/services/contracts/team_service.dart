@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 
 abstract class TeamService {
-  Future<Map<String, dynamic>?> fetchRawTeamData(String id);
-  Future<QuerySnapshot<Map<String, dynamic>?>> fetchRawTeams();
-  Future<void> addTeam(String teamName, String address, String createdBy);
+  Future<Result<Team, DataLayerError>> getTeam(String id);
+  Future<Result<List<Team>, DataLayerError>> getTeams();
+  Future<Result<Team, DataLayerError>> addTeam(Team team);
 }
