@@ -1,10 +1,10 @@
 // lib/web/admin/controllers/admin_machine_controller.dart
 
 import 'package:flutter/material.dart';
-import '../models/admin_machine_model.dart' as AdminModel;
-import '../../../data/services/firebase/firebase_machine_service.dart'; // Changed
-import '../../../data/repositories/machine_repository.dart'; // Added
-import '../../../data/models/machine_model.dart' as OperatorModel;
+import '../models/admin_machine_model.dart' as admin_model;
+import '../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../data/repositories/machine_repository.dart'; 
+import '../../../data/models/machine_model.dart' as operator_model;
 
 class AdminMachineController extends ChangeNotifier {
   // ==================== DEPENDENCIES ====================
@@ -20,7 +20,7 @@ class AdminMachineController extends ChangeNotifier {
 
   // ==================== STATE ====================
 
-  List<AdminModel.MachineModel> _allMachines = [];
+  List<admin_model.MachineModel> _allMachines = [];
   bool _showArchived = false;
   bool _isLoading = false;
   String? _errorMessage;
@@ -33,10 +33,10 @@ class AdminMachineController extends ChangeNotifier {
 
   // ==================== CONVERTERS ====================
 
-  AdminModel.MachineModel _convertToAdminModel(
-    OperatorModel.MachineModel operatorModel,
+  admin_model.MachineModel _convertToAdminModel(
+    operator_model.MachineModel operatorModel,
   ) {
-    return AdminModel.MachineModel(
+    return admin_model.MachineModel(
       machineName: operatorModel.machineName,
       machineId: operatorModel.machineId,
       userId: operatorModel.userId ?? '',
@@ -46,35 +46,22 @@ class AdminMachineController extends ChangeNotifier {
     );
   }
 
-  List<AdminModel.MachineModel> _convertList(
-    List<OperatorModel.MachineModel> operatorList,
+  List<admin_model.MachineModel> _convertList(
+    List<operator_model.MachineModel> operatorList,
   ) {
     return operatorList.map(_convertToAdminModel).toList();
   }
 
-  OperatorModel.MachineModel _convertToOperatorModel(
-    AdminModel.MachineModel adminModel,
-  ) {
-    return OperatorModel.MachineModel(
-      machineName: adminModel.machineName,
-      machineId: adminModel.machineId,
-      userId: adminModel.userId.isEmpty ? null : adminModel.userId,
-      teamId: adminModel.teamId,
-      dateCreated: adminModel.dateCreated,
-      isArchived: adminModel.isArchived,
-    );
-  }
-
   // ==================== GETTERS ====================
 
-  List<AdminModel.MachineModel> get machines => _allMachines;
+  List<admin_model.MachineModel> get machines => _allMachines;
   bool get showArchived => _showArchived;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   bool get isAuthenticated => _isAuthenticated;
 
-  List<AdminModel.MachineModel> get filteredMachines {
+  List<admin_model.MachineModel> get filteredMachines {
     var filtered = _showArchived
         ? _allMachines.where((m) => m.isArchived).toList()
         : _allMachines.where((m) => !m.isArchived).toList();
@@ -90,7 +77,7 @@ class AdminMachineController extends ChangeNotifier {
     return filtered;
   }
 
-  List<AdminModel.MachineModel> get displayedMachines {
+  List<admin_model.MachineModel> get displayedMachines {
     return filteredMachines.take(_displayLimit).toList();
   }
 
@@ -214,7 +201,7 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('Machine ID "$machineId" already exists');
       }
 
-      final request = OperatorModel.CreateMachineRequest(
+      final request = operator_model.CreateMachineRequest(
         machineId: machineId,
         machineName: machineName,
         teamId: currentUserId,
@@ -241,7 +228,7 @@ class AdminMachineController extends ChangeNotifier {
         throw Exception('You must be logged in to update machines');
       }
 
-      final request = OperatorModel.UpdateMachineRequest(
+      final request = operator_model.UpdateMachineRequest(
         machineId: machineId,
         machineName: machineName,
       );
