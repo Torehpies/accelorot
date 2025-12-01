@@ -7,6 +7,8 @@ import 'machine_action_card.dart';
 import 'add_machine_modal.dart';
 import 'admin_machine_card.dart';
 
+import '../../reports/widgets/reports_view.dart'; 
+
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
 
@@ -58,6 +60,15 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     if (_teamId != null) {
       await ref.read(adminMachineProvider.notifier).refresh(_teamId!);
     }
+  }
+
+    void _navigateToReports() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ReportsView(),
+      ),
+    );
   }
 
   @override
@@ -128,9 +139,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                           child: MachineActionCard(
                             icon: Icons.report,
                             label: 'Reports',
-                            onPressed: () {
-                              // Navigate to reports (implement later)
-                            },
+                            onPressed: _navigateToReports,
+
                           ),
                         ),
                         const SizedBox(width: 12),
