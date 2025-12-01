@@ -11,7 +11,7 @@ import 'color_mapper.dart';
 /// Transforms data models to UI presentation models
 class ActivityPresentationMapper {
   // ===== SUBSTRATE → ActivityLogItem =====
-  
+
   static ActivityLogItem fromSubstrate(Substrate substrate) {
     return ActivityLogItem(
       id: substrate.id,
@@ -31,10 +31,13 @@ class ActivityPresentationMapper {
   }
 
   // ===== ALERT → ActivityLogItem =====
-  
+
   static ActivityLogItem fromAlert(Alert alert) {
-    // Build description
-    final description = 'Sensor: ${_toProperCase(alert.sensorType)}\n'
+    // Use helper instead of alert.displayCategory (which we removed)
+    final category = _getAlertDisplayCategory(alert.sensorType);
+
+    final description =
+        'Sensor: ${_toProperCase(alert.sensorType)}\n'
         'Reading: ${alert.readingValue}\n'
         'Threshold: ${alert.threshold} (${alert.status})';
 
@@ -45,7 +48,7 @@ class ActivityPresentationMapper {
       statusColor: ActivityColorMapper.getColorForAlert(alert.status),
       icon: ActivityIconMapper.getIconForAlert(alert.sensorType),
       description: description,
-      category: alert.displayCategory,
+      category: category,
       timestamp: alert.timestamp,
       type: ActivityType.alert,
       machineId: alert.machineId,
@@ -53,28 +56,33 @@ class ActivityPresentationMapper {
   }
 
   // ===== REPORT → ActivityLogItem =====
-  
+
   static ActivityLogItem fromReport(Report report) {
-    // Build description
+    // Use helpers instead of report.displayX methods (which we removed)
+    final displayReportType = _getReportDisplayType(report.reportType);
+    final displayStatus = _getDisplayStatus(report.status);
+
     final parts = <String>[];
-    
+
     if (report.description.isNotEmpty) {
       parts.add(report.description);
     }
-    
+
     parts.add('Machine: ${report.machineName}');
     parts.add('By: ${report.userName}');
-    
+
     final description = parts.join('\n');
 
     return ActivityLogItem(
       id: report.id,
       title: report.title,
-      value: report.displayStatus,
-      statusColor: ActivityColorMapper.getColorForReportPriority(report.priority),
+      value: displayStatus,
+      statusColor: ActivityColorMapper.getColorForReportPriority(
+        report.priority,
+      ),
       icon: ActivityIconMapper.getIconForReport(report.reportType),
       description: description,
-      category: report.displayReportType,
+      category: displayReportType,
       timestamp: report.createdAt,
       type: ActivityType.report,
       machineId: report.machineId,
@@ -86,7 +94,7 @@ class ActivityPresentationMapper {
   }
 
   // ===== CYCLE RECOMMENDATION → ActivityLogItem =====
-  
+
   static ActivityLogItem fromCycleRecommendation(CycleRecommendation cycle) {
     return ActivityLogItem(
       id: cycle.id,
@@ -102,8 +110,37 @@ class ActivityPresentationMapper {
     );
   }
 
-  // ===== HELPERS =====
-  
+  // ===== PRIVATE HELPERS (Moved from models) =====
+
+  /// Get display category for alerts (moved from Alert model)
+  static String _getAlertDisplayCategory(String sensorType) {
+    final lower = sensorType.toLowerCase();
+    if (lower.contains('temp')) return 'Temperature';
+    if (lower.contains('moisture')) return 'Moisture';
+    if (lower.contains('oxygen') || lower.contains('air')) return 'Oxygen';
+    return 'Other';
+  }
+
+  /// Get display type for reports (moved from Report model)
+  static String _getReportDisplayType(String reportType) {
+    switch (reportType.toLowerCase()) {
+      case 'maintenance_issue':
+        return 'Maintenance Issue';
+      case 'observation':
+        return 'Observation';
+      case 'safety_concern':
+        return 'Safety Concern';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  /// Get display status (moved from Report model)
+  static String _getDisplayStatus(String status) {
+    return status[0].toUpperCase() + status.substring(1).toLowerCase();
+  }
+
+  /// Helper to convert to proper case
   static String _toProperCase(String input) {
     if (input.isEmpty) return input;
     return input[0].toUpperCase() + input.substring(1).toLowerCase();

@@ -1,34 +1,51 @@
 // lib/data/repositories/activity_repository.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import '../../ui/activity_logs/models/activity_log_item.dart';
 import '../../ui/activity_logs/mappers/activity_presentation_mapper.dart';
-import '../services/firebase/activity_logs/substrate_service.dart';
-import '../services/firebase/activity_logs/alert_service.dart';
-import '../services/firebase/activity_logs/report_service.dart';
-import '../services/firebase/activity_logs/cycle_service.dart';
+import '../services/contracts/substrate_service.dart';
+import '../services/contracts/alert_service.dart';
+import '../services/contracts/report_service.dart';
+import '../services/contracts/cycle_service.dart';
+import '../services/contracts/batch_service.dart';
 
 // ===== ABSTRACT INTERFACE =====
 
 /// Abstract interface for activity data operations
-/// Implementations should handle user authentication internally
 abstract class ActivityRepository {
-
   Future<bool> isUserLoggedIn();
-
   Future<List<ActivityLogItem>> getSubstrates();
   Future<List<ActivityLogItem>> getAlerts();
   Future<List<ActivityLogItem>> getReports();
   Future<List<ActivityLogItem>> getCyclesRecom();
   Future<List<ActivityLogItem>> getAllActivities();
+  Future<void> addSubstrate(Map<String, dynamic> data);
 }
 
 // ===== FIRESTORE IMPLEMENTATION =====
 
 /// Orchestrates services and transforms data to UI models
 class ActivityLogsRepository implements ActivityRepository {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final SubstrateService _substrateService;
+  final AlertService _alertService;
+  final ReportService _reportService;
+  final CycleService _cycleService;
+  final BatchService _batchService;
+  final FirebaseAuth _auth;
+
+  ActivityLogsRepository({
+    required SubstrateService substrateService,
+    required AlertService alertService,
+    required ReportService reportService,
+    required CycleService cycleService,
+    required BatchService batchService,
+    FirebaseAuth? auth,
+  })  : _substrateService = substrateService,
+        _alertService = alertService,
+        _reportService = reportService,
+        _cycleService = cycleService,
+        _batchService = batchService,
+        _auth = auth ?? FirebaseAuth.instance;
 
   // ===== USER MANAGEMENT =====
 
@@ -40,122 +57,108 @@ class ActivityLogsRepository implements ActivityRepository {
     return userId;
   }
 
-  @override
-  Future<bool> isUserLoggedIn() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      return userId != null && userId.isNotEmpty;
-    } catch (e) {
-      return false;
+  Future<String> _getTeamId(String userId) async {
+    final teamId = await _batchService.getUserTeamId(userId);
+    if (teamId == null || teamId.isEmpty) {
+      throw Exception('User is not part of any team');
     }
+    return teamId;
   }
 
-  // ===== FETCH METHODS - ORCHESTRATION + TRANSFORMATION =====
+  @override
+  Future<bool> isUserLoggedIn() async {
+    final userId = _auth.currentUser?.uid;
+    return userId != null && userId.isNotEmpty;
+  }
+
+  // ===== FETCH METHODS =====
 
   @override
   Future<List<ActivityLogItem>> getSubstrates() async {
-    try {
-      final userId = _getCurrentUserId();
-      
-      // Fetch from service (returns data models)
-      final substrates = await SubstrateService.fetchSubstrates(userId);
-      
-      // Transform to UI models
-      return substrates
-          .map((substrate) => ActivityPresentationMapper.fromSubstrate(substrate))
-          .toList();
-    } catch (e) {
-      debugPrint('Repository error fetching substrates: $e');
-      rethrow;
-    }
+    final userId = _getCurrentUserId();
+    final teamId = await _getTeamId(userId);
+
+    final substrates = await _substrateService.fetchTeamSubstrates(teamId);
+
+    return substrates
+        .map((substrate) => ActivityPresentationMapper.fromSubstrate(substrate))
+        .toList();
   }
 
   @override
   Future<List<ActivityLogItem>> getAlerts() async {
-    try {
-      final userId = _getCurrentUserId();
-      
-      // Fetch from service (returns data models)
-      final alerts = await AlertService.fetchAlerts(userId);
-      
-      // Transform to UI models
-      return alerts
-          .map((alert) => ActivityPresentationMapper.fromAlert(alert))
-          .toList();
-    } catch (e) {
-      debugPrint('Repository error fetching alerts: $e');
-      rethrow;
-    }
+    final userId = _getCurrentUserId();
+    final teamId = await _getTeamId(userId);
+
+    final alerts = await _alertService.fetchTeamAlerts(teamId);
+
+    return alerts
+        .map((alert) => ActivityPresentationMapper.fromAlert(alert))
+        .toList();
   }
 
   @override
   Future<List<ActivityLogItem>> getReports() async {
-    try {
-      // Reports are machine-based, not user-based
-      final reports = await ReportService.fetchReports();
-      
-      // Transform to UI models
-      return reports
-          .map((report) => ActivityPresentationMapper.fromReport(report))
-          .toList();
-    } catch (e) {
-      debugPrint('Repository error fetching reports: $e');
-      rethrow;
-    }
+    final userId = _getCurrentUserId();
+    final teamId = await _getTeamId(userId);
+
+    final reports = await _reportService.fetchTeamReports(teamId);
+
+    return reports
+        .map((report) => ActivityPresentationMapper.fromReport(report))
+        .toList();
   }
 
   @override
   Future<List<ActivityLogItem>> getCyclesRecom() async {
-    try {
-      final userId = _getCurrentUserId();
-      
-      // Fetch from service (returns data models)
-      final cycles = await CycleService.fetchCyclesRecom(userId);
-      
-      // Transform to UI models
-      return cycles
-          .map((cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle))
-          .toList();
-    } catch (e) {
-      debugPrint('Repository error fetching cycles: $e');
-      rethrow;
-    }
+    final userId = _getCurrentUserId();
+    final teamId = await _getTeamId(userId);
+
+    final cycles = await _cycleService.fetchTeamCycles(teamId);
+
+    return cycles
+        .map(
+          (cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle),
+        )
+        .toList();
   }
 
   @override
   Future<List<ActivityLogItem>> getAllActivities() async {
-    try {
-      // Fetch all collections in parallel
-      final results = await Future.wait([
-        getSubstrates(),
-        getAlerts(),
-        getCyclesRecom(),
-        getReports(),
-      ]);
+    // ✅ FIXED: Reuse existing methods instead of duplicating logic
+    final results = await Future.wait([
+      getSubstrates(),
+      getAlerts(),
+      getCyclesRecom(),
+      getReports(),
+    ]);
 
-      // Combine all lists
-      final allActivities = <ActivityLogItem>[
-        ...results[0], // substrates
-        ...results[1], // alerts
-        ...results[2], // cycles
-        ...results[3], // reports
-      ];
+    // Flatten list of lists into single list
+    final allActivities = results.expand((list) => list).toList();
 
-      // Sort by timestamp descending
-      allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    // Sort by timestamp descending (newest first)
+    allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-      debugPrint(
-        '✅ Repository: Fetched ${allActivities.length} total activities',
-      );
-      debugPrint('   - ${results[0].length} substrates');
-      debugPrint('   - ${results[1].length} alerts');
-      debugPrint('   - ${results[2].length} cycles');
-      debugPrint('   - ${results[3].length} reports');
+    return allActivities;
+  }
 
-      return allActivities;
-    } catch (e) {
-      debugPrint('❌ Repository error fetching all activities: $e');
-      rethrow;
+  // ===== CREATE OPERATIONS =====
+
+  @override
+  Future<void> addSubstrate(Map<String, dynamic> data) async {
+    final userId = _getCurrentUserId();
+    final machineId = data['machineId'];
+
+    if (machineId == null || machineId.toString().isEmpty) {
+      throw Exception('Machine ID is required');
     }
+
+    String batchId =
+        await _batchService.getBatchId(userId, machineId) ??
+        await _batchService.createBatch(userId, machineId, 1);
+
+    await _substrateService.addSubstrate(data, batchId);
+
+    await _batchService.updateBatchTimestamp(batchId);
   }
 }

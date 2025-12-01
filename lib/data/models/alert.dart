@@ -25,7 +25,7 @@ abstract class Alert with _$Alert {
 
   // ===== FIRESTORE CONVERSION =====
 
-  /// Create from Firestore document data (from FirestoreAlertService)
+  /// Create from Firestore document data
   static Alert fromMap(Map<String, dynamic> data) {
     return Alert(
       id: data['id'] ?? '',
@@ -69,12 +69,4 @@ abstract class Alert with _$Alert {
     return DateTime.now();
   }
 
-  /// Get display category (Temperature, Moisture, Oxygen)
-  String get displayCategory {
-    final lower = sensorType.toLowerCase();
-    if (lower.contains('temp')) return 'Temperature';
-    if (lower.contains('moisture')) return 'Moisture';
-    if (lower.contains('oxygen') || lower.contains('air')) return 'Oxygen';
-    return 'Other';
-  }
 }

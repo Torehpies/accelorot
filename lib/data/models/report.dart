@@ -71,32 +71,9 @@ abstract class Report with _$Report {
     };
   }
 
-  // ===== HELPERS =====
-
-  /// Get display label for report type
-  String get displayReportType {
-    switch (reportType.toLowerCase()) {
-      case 'maintenance_issue':
-        return 'Maintenance Issue';
-      case 'observation':
-        return 'Observation';
-      case 'safety_concern':
-        return 'Safety Concern';
-      default:
-        return 'Unknown';
-    }
-  }
-
-  /// Get display label for priority
-  String get displayPriority {
-    return priority[0].toUpperCase() + priority.substring(1).toLowerCase();
-  }
-
-  /// Get display label for status
-  String get displayStatus {
-    return status[0].toUpperCase() + status.substring(1).toLowerCase();
-  }
+  // ===== DATA LOGIC HELPERS (KEEP) =====
 
   /// Check if report is resolved
   bool get isResolved => status.toLowerCase() == 'resolved';
+
 }
