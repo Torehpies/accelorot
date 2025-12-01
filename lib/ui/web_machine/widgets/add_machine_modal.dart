@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/admin_machine/widgets/add_machine_modal.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/admin_machine_controller.dart';
+import '../view_model/machine_management_view_model.dart';
 
 class AddMachineModal extends StatefulWidget {
   final AdminMachineController controller;

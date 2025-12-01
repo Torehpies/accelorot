@@ -1,8 +1,11 @@
+// lib/screens/web_machine_management.dart
+
 import 'package:flutter/material.dart';
-import '../controllers/admin_machine_controller.dart';
+import '../view_model/machine_management_view_model.dart';
 import '../widgets/add_machine_modal.dart';
 import '../widgets/admin_machine_list.dart';
-import '../widgets/operator_search_bar.dart';
+import '../../core/ui/admin_search_bar.dart';
+import '../../core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class ThemeConstants {
   static const double spacing12 = 12.0;
@@ -64,13 +67,9 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Machine Management',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: ThemeConstants.tealShade700,
-        elevation: 0,
+      // ✅ UPDATED APPBAR
+      appBar: const AdminAppBar(
+        title: 'Machine Management',
       ),
       body: SafeArea(
         child: Padding(
@@ -165,7 +164,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Flexible(
-                                    child: OperatorSearchBar(
+                                    child: AdminSearchBar(
                                       searchQuery: _controller.searchQuery,
                                       onSearchChanged:
                                           _controller.setSearchQuery,

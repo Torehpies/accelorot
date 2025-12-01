@@ -7,11 +7,12 @@ import '../widgets/operator_list_item.dart';
 import '../widgets/operator_detail_panel.dart';
 import '../widgets/operator_empty_state.dart';
 import '../widgets/operator_error_state.dart';
-import '../widgets/operator_list_header.dart';
+import '../../../ui/core/ui/admin_search_bar.dart';
 import '../../utils/operator_dialogs.dart';
 import '../../utils/theme_constants.dart';
 import '../widgets/accept_operators_card.dart';
 import '../../../web/admin/widgets/add_operator_screen.dart';
+import '../../../ui/core/ui/admin_app_bar.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
   const OperatorManagementScreen({super.key});
@@ -53,7 +54,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           borderRadius: BorderRadius.circular(ThemeConstants.borderRadius12),
         ),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 450, maxHeight: 800),
+          constraints: const BoxConstraints(maxWidth: 450, maxHeight: 800),
           child: AddOperatorScreen(),
         ),
       ),
@@ -148,22 +149,15 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: ThemeConstants.tealShade700,
-        elevation: 0,
-        title: const Text(
-          'Operator Management',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        // 🖌️ APP BAR ICONS (e.g., back button) inherit from AppBar brightness or iconTheme
-        // To customize: use `iconTheme: IconThemeData(color: Colors.white)`
+      appBar: const AdminAppBar(
+        title: 'Operator Management',
       ),
       body: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacing12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Action Cards Row - Always visible
+            // Action Cards Row - Only show Add and Accept
             SizedBox(height: 100, child: _buildActionCards()),
             const SizedBox(height: ThemeConstants.spacing12),
 
@@ -172,7 +166,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left Side - Operator List
+                  // Left Side - Operator List with integrated header and search
                   Expanded(child: _buildOperatorList()),
                   // Spacing
                   if (_controller.selectedOperator != null)
@@ -208,11 +202,10 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             label: 'Archive',
             count: _controller.archivedCount,
             onPressed: () => _controller.setShowArchived(true),
-            showCountBelow: true,
-            // 🖌️ ICON COLOR: orange (from theme)
+            showCountBelow: false,
             iconBackgroundColor: ThemeConstants.orangeShade50,
-            iconColor: ThemeConstants.orangeShade600, // ← Icon tint color
-            isActive: _controller.showArchived,
+            iconColor: ThemeConstants.orangeShade600,
+            isActive: false,
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -223,9 +216,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAddOperatorDialog,
             showCountBelow: false,
-            // 🖌️ ICON COLOR: blue (from theme)
             iconBackgroundColor: ThemeConstants.blueShade50,
-            iconColor: ThemeConstants.blueShade600, // ← Icon tint color
+            iconColor: ThemeConstants.blueShade600,
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -236,22 +228,20 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAcceptOperatorDialog,
             showCountBelow: false,
-            // 🖌️ ICON COLOR: green (from theme)
             iconBackgroundColor: ThemeConstants.greenShade50,
-            iconColor: ThemeConstants.greenShade600, // ← Icon tint color
+            iconColor: ThemeConstants.greenShade600,
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
         Expanded(
           child: OperatorActionCard(
             icon: Icons.people,
-            label: 'Active Operators',
-            count: _controller.activeCount,
-            onPressed: () => _controller.setShowArchived(false),
+            label: 'Total Operators',
+            count: _controller.activeCount + _controller.archivedCount,
+            onPressed: null,
             showCountBelow: true,
-            // 🖌️ ICON COLOR: default (likely teal or primary) — check OperatorActionCard implementation
-            // If no iconColor is passed, it may use a default (e.g., ThemeConstants.tealShade700)
-            isActive: !_controller.showArchived,
+            iconBackgroundColor: ThemeConstants.tealShade50,
+            iconColor: ThemeConstants.tealShade600,
           ),
         ),
       ],
@@ -264,22 +254,46 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius20),
         border: Border.all(color: ThemeConstants.greyShade300, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Header (may contain search icon, refresh icon, etc.)
-          OperatorListHeader(
-            showArchived: _controller.showArchived,
+          // Header with toggle and search
+          _buildListHeader(),
+          const Divider(height: 1),
+          Expanded(child: _buildListContent()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(ThemeConstants.spacing16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              _controller.showArchived ? 'Archived Operators' : 'Active Operators',
+              style: TextStyle(
+                fontSize: ThemeConstants.fontSize18,
+                fontWeight: FontWeight.bold,
+                color: ThemeConstants.tealShade600,
+              ),
+            ),
+          ),
+          // Use existing AdminSearchBar widget
+          AdminSearchBar(
             searchQuery: _controller.searchQuery,
             onSearchChanged: (value) => _controller.setSearchQuery(value),
             onRefresh: () => _controller.loadOperators(),
-            onBack: _controller.showArchived
-                ? () => _controller.setShowArchived(false)
-                : null,
           ),
-          const Divider(height: 1),
-          // Content
-          Expanded(child: _buildListContent()),
         ],
       ),
     );
@@ -323,8 +337,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           operator: operator,
           isSelected: isSelected,
           onTap: () => _controller.setSelectedOperator(operator),
-          // 🖌️ ICON COLOR inside OperatorListItem: likely defined in that widget
-          // (e.g., status icon, avatar fallback icon)
         );
       },
     );

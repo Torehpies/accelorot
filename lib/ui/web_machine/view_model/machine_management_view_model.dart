@@ -1,7 +1,7 @@
 // lib/web/admin/controllers/admin_machine_controller.dart
 
 import 'package:flutter/material.dart';
-import '../models/admin_machine_model.dart' as admin_model;
+import '../../../data/models/machine_model.dart' as admin_model;
 import '../../../data/services/firebase/firebase_machine_service.dart'; 
 import '../../../data/repositories/machine_repository.dart'; 
 import '../../../data/models/machine_model.dart' as operator_model;
