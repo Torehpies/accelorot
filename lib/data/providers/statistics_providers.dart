@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/temperature_model.dart';
 import '../models/moisture_model.dart';
 import '../models/oxygen_model.dart';
-import '../services/firebase/firestore_statistics_service.dart';
+import '../services/firebase/firebase_statistics_service.dart';
 import '../services/contracts/statistics_service_contract.dart';
 import '../repositories/statistics_repository.dart';
 import '../repositories/contracts/statistics_repository_contract.dart';
@@ -20,9 +20,9 @@ final statisticsServiceProvider = Provider<StatisticsServiceContract>((ref) {
 });
 
 // Statistics Repository provider
-final statisticsRepositoryProvider = Provider<StatisticsRepositoryContract>((ref) {
+final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   final service = ref.watch(statisticsServiceProvider);
-  return StatisticsRepository(statisticsService: service);
+  return StatisticsRepositorylmpl(statisticsService: service);
 });
 
 // Temperature data provider

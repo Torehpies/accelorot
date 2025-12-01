@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import '../../../data/repositories/contracts/statistics_repository_contract.dart';
 
 class OxygenViewModel extends ChangeNotifier {
-  final StatisticsRepositoryContract _repository;
+  final StatisticsRepository _repository;
   final String machineId;
 
   OxygenViewModel({
-    required StatisticsRepositoryContract repository,
+    required StatisticsRepository repository,
     required this.machineId,
   }) : _repository = repository;
 

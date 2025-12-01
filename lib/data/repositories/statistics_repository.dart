@@ -4,10 +4,10 @@ import '../models/oxygen_model.dart';
 import '../services/contracts/statistics_service_contract.dart';
 import 'contracts/statistics_repository_contract.dart';
 
-class StatisticsRepository implements StatisticsRepositoryContract {
+class StatisticsRepositorylmpl implements StatisticsRepository {
   final StatisticsServiceContract _statisticsService;
 
-  StatisticsRepository({
+  StatisticsRepositorylmpl({
     required StatisticsServiceContract statisticsService,
   }) : _statisticsService = statisticsService;
 
