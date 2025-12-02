@@ -1,24 +1,23 @@
-// lib/frontend/operator/machine_management/admin_machine/widgets/edit_machine_modal.dart
-
 import 'package:flutter/material.dart';
-import '../view_model/machine_management_view_model.dart';
-import '../../../web/admin/models/admin_machine_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/models/machine_model.dart';
+import '../../machine_management/view_model/admin_machine_notifier.dart';
 
-class EditMachineModal extends StatefulWidget {
-  final AdminMachineController controller;
+class WebEditMachineModal extends ConsumerStatefulWidget {
   final MachineModel machine;
+  final String teamId;
 
-  const EditMachineModal({
+  const WebEditMachineModal({
     super.key,
-    required this.controller,
     required this.machine,
+    required this.teamId,
   });
 
   @override
-  State<EditMachineModal> createState() => _EditMachineModalState();
+  ConsumerState<WebEditMachineModal> createState() => _WebEditMachineModalState();
 }
 
-class _EditMachineModalState extends State<EditMachineModal> {
+class _WebEditMachineModalState extends ConsumerState<WebEditMachineModal> {
   late final TextEditingController _nameController;
   late final TextEditingController _idController;
   bool _isSubmitting = false;
@@ -67,79 +66,57 @@ class _EditMachineModalState extends State<EditMachineModal> {
   }
 
   Future<void> _handleSubmit() async {
-    // Check authentication first
-    if (!widget.controller.isAuthenticated) {
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('⚠️ You must be logged in to edit machines'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
-        ),
+        const SnackBar(content: Text('Machine Name is required')),
       );
       return;
     }
 
-    final name = _nameController.text.trim();
-
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Machine Name is required')));
-      return;
-    }
-
-    // Check if anything changed
     if (name == widget.machine.machineName) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('No changes detected')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No changes detected')),
+      );
       return;
     }
 
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.controller.updateMachine(
-        machineId: widget.machine.machineId,
-        machineName: name,
-      );
+      await ref.read(adminMachineProvider.notifier).updateMachine(
+            teamId: widget.teamId,
+            machineId: widget.machine.machineId,
+            machineName: name,
+          );
 
-      if (!mounted) return;
-      Navigator.of(context).pop(); // Close modal
+      if (mounted) {
+        Navigator.of(context).pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('✅ Machine "$name" updated successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Delay handled in controller's updateMachine method
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Machine "$name" updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      if (!mounted) return;
-
-      // Show user-friendly error message
-      final errorMessage = e.toString().contains('logged in')
-          ? 'You must be logged in to edit machines'
-          : 'Failed to update machine: $e';
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        ),
-      );
-
-      // Stay in modal on error
-      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update machine: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isAuthenticated = widget.controller.isAuthenticated;
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -164,18 +141,12 @@ class _EditMachineModalState extends State<EditMachineModal> {
               ),
             ],
           ),
-          Text(
-            isAuthenticated
-                ? 'Update machine details'
-                : 'You can preview the form, but must be logged in to save changes',
-            style: TextStyle(
-              color: isAuthenticated ? Colors.grey : Colors.orange.shade700,
-              fontWeight: isAuthenticated ? FontWeight.normal : FontWeight.w500,
-            ),
+          const Text(
+            'Update machine details',
+            style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 20),
 
-          // Machine Name (Editable)
           TextField(
             controller: _nameController,
             style: const TextStyle(color: Colors.teal),
@@ -185,7 +156,6 @@ class _EditMachineModalState extends State<EditMachineModal> {
           ),
           const SizedBox(height: 16),
 
-          // Machine ID (Read-only, grayed out)
           TextField(
             controller: _idController,
             style: TextStyle(color: Colors.grey[600]),
@@ -198,7 +168,6 @@ class _EditMachineModalState extends State<EditMachineModal> {
           ),
           const SizedBox(height: 16),
 
-          // Assigned Users - Read-only field showing "All Team Members"
           TextField(
             controller: TextEditingController(text: 'All Team Members'),
             decoration: _buildInputDecoration('Assigned Users', readOnly: true),
@@ -208,7 +177,6 @@ class _EditMachineModalState extends State<EditMachineModal> {
           ),
           const SizedBox(height: 24),
 
-          // Buttons
           Row(
             children: [
               Expanded(
@@ -232,9 +200,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isAuthenticated
-                        ? Colors.teal
-                        : Colors.orange,
+                    backgroundColor: Colors.teal,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -252,21 +218,7 @@ class _EditMachineModalState extends State<EditMachineModal> {
                             ),
                           ),
                         )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (!isAuthenticated)
-                              const Padding(
-                                padding: EdgeInsets.only(right: 6),
-                                child: Icon(Icons.lock_outline, size: 16),
-                              ),
-                            Text(
-                              isAuthenticated
-                                  ? 'Update Machine'
-                                  : 'Login Required',
-                            ),
-                          ],
-                        ),
+                      : const Text('Update Machine'),
                 ),
               ),
             ],

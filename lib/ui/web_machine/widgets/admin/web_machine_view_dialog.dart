@@ -1,127 +1,36 @@
-// lib/frontend/operator/machine_management/admin_machine/widgets/admin_machine_view_dialog.dart
-
-// ignore_for_file: library_prefixes
-
 import 'package:flutter/material.dart';
-import '../../../web/admin/models/admin_machine_model.dart' as AdminModel;
-import '../view_model/machine_management_view_model.dart';
-import 'edit_machine_modal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../../../data/models/machine_model.dart';
+import '../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../core/ui/confirmation_dialog.dart';
+import 'web_edit_machine_modal.dart';
 
-class AdminMachineViewDialog extends StatelessWidget {
-  final AdminModel.MachineModel machine;
-  final AdminMachineController controller;
+class WebMachineViewDialog extends ConsumerWidget {
+  final MachineModel machine;
+  final String teamId;
 
-  const AdminMachineViewDialog({
+  const WebMachineViewDialog({
     super.key,
     required this.machine,
-    required this.controller,
+    required this.teamId,
   });
 
-  Future<bool?> _showCompactConfirmationDialog(
-    BuildContext context,
-    String title,
-    String message, {
-    Color? confirmColor,
-    String confirmText = 'Confirm',
-  }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          width: 380,
-          constraints: const BoxConstraints(maxHeight: 280, minHeight: 220),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                title.contains('Archive') ? Icons.archive : Icons.restore,
-                color: confirmColor ?? Colors.orange,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: BorderSide(color: Colors.grey[400]!),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: confirmColor ?? Colors.orange.shade600,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        confirmText,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Future<void> _handleArchive(BuildContext context, WidgetRef ref) async {
+    Navigator.pop(context);
 
-  Future<void> _handleArchive(BuildContext context) async {
-    Navigator.pop(context); // Close view dialog first
-
-    final confirmed = await _showCompactConfirmationDialog(
+    final confirmed = await showConfirmationDialog(
       context,
       'Archive Machine',
       'Are you sure you want to archive "${machine.machineName}"? This will disable the machine.',
-      confirmColor: Colors.orange.shade600,
-      confirmText: 'Archive',
     );
 
     if (confirmed == true) {
       try {
-        await controller.archiveMachine(machine.machineId);
+        await ref.read(adminMachineProvider.notifier).archiveMachine(
+              teamId,
+              machine.machineId,
+            );
         if (!context.mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -130,19 +39,11 @@ class AdminMachineViewDialog extends StatelessWidget {
             backgroundColor: Colors.orange,
           ),
         );
-
-        // Delay before refresh
-        await Future.delayed(const Duration(milliseconds: 1000));
-        if (!context.mounted) return;
-        await controller.refresh();
       } catch (e) {
         if (!context.mounted) return;
-        final errorMsg = e.toString().contains('logged in')
-            ? '⚠️ You must be logged in to archive machines'
-            : 'Failed to archive: $e';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMsg),
+            content: Text('Failed to archive: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -151,20 +52,21 @@ class AdminMachineViewDialog extends StatelessWidget {
     }
   }
 
-  Future<void> _handleRestore(BuildContext context) async {
-    Navigator.pop(context); // Close view dialog first
+  Future<void> _handleRestore(BuildContext context, WidgetRef ref) async {
+    Navigator.pop(context);
 
-    final confirmed = await _showCompactConfirmationDialog(
+    final confirmed = await showConfirmationDialog(
       context,
       'Restore Machine',
       'Are you sure you want to restore "${machine.machineName}"? This will reactivate the machine.',
-      confirmColor: Colors.green.shade600,
-      confirmText: 'Restore',
     );
 
     if (confirmed == true) {
       try {
-        await controller.restoreMachine(machine.machineId);
+        await ref.read(adminMachineProvider.notifier).restoreMachine(
+              teamId,
+              machine.machineId,
+            );
         if (!context.mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -173,19 +75,11 @@ class AdminMachineViewDialog extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
         );
-
-        // Delay before refresh
-        await Future.delayed(const Duration(milliseconds: 1000));
-        if (!context.mounted) return;
-        await controller.refresh();
       } catch (e) {
         if (!context.mounted) return;
-        final errorMsg = e.toString().contains('logged in')
-            ? '⚠️ You must be logged in to restore machines'
-            : 'Failed to restore: $e';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMsg),
+            content: Text('Failed to restore: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -195,23 +89,23 @@ class AdminMachineViewDialog extends StatelessWidget {
   }
 
   void _handleEdit(BuildContext context) {
-    Navigator.pop(context); // Close view dialog first
+    Navigator.pop(context);
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 450),
+          child: WebEditMachineModal(machine: machine, teamId: teamId),
+        ),
       ),
-      builder: (context) =>
-          EditMachineModal(controller: controller, machine: machine),
     );
   }
 
   void _handleViewDetails(BuildContext context) {
-    Navigator.pop(context); // Close dialog first
+    Navigator.pop(context);
 
-    // Show detailed information about the machine in a new dialog
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -269,7 +163,6 @@ class AdminMachineViewDialog extends StatelessWidget {
               ),
               const Divider(height: 32),
 
-              // Machine Details
               _DetailRow(
                 icon: Icons.tag,
                 label: 'Machine ID',
@@ -291,7 +184,7 @@ class AdminMachineViewDialog extends StatelessWidget {
               _DetailRow(
                 icon: Icons.calendar_today,
                 label: 'Date Created',
-                value: _formatDate(machine.dateCreated),
+                value: DateFormat('MMM dd, yyyy hh:mm a').format(machine.dateCreated),
               ),
               const SizedBox(height: 16),
               _DetailRow(
@@ -303,7 +196,6 @@ class AdminMachineViewDialog extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -333,12 +225,8 @@ class AdminMachineViewDialog extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isArchived = machine.isArchived;
 
     return Dialog(
@@ -351,27 +239,21 @@ class AdminMachineViewDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Icon
               Container(
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: isArchived
-                      ? Colors.grey.shade200
-                      : Colors.teal.shade50,
+                  color: isArchived ? Colors.grey.shade200 : Colors.teal.shade50,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.precision_manufacturing,
-                  color: isArchived
-                      ? Colors.grey.shade500
-                      : Colors.teal.shade700,
+                  color: isArchived ? Colors.grey.shade500 : Colors.teal.shade700,
                   size: 32,
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Title
               Text(
                 isArchived ? 'Archived Machine' : 'Manage Machine',
                 style: TextStyle(
@@ -383,7 +265,6 @@ class AdminMachineViewDialog extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Machine Info Box
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -426,7 +307,6 @@ class AdminMachineViewDialog extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Description
               Text(
                 isArchived
                     ? 'This machine is currently disabled. Restore it to reactivate and make it available again.'
@@ -440,9 +320,7 @@ class AdminMachineViewDialog extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Buttons - Different layouts for active vs archived
               if (!isArchived) ...[
-                // Active Machine Buttons (2x2 grid)
                 Row(
                   children: [
                     Expanded(
@@ -465,7 +343,7 @@ class AdminMachineViewDialog extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => _handleArchive(context),
+                        onPressed: () => _handleArchive(context, ref),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red.shade600,
                           foregroundColor: Colors.white,
@@ -525,7 +403,6 @@ class AdminMachineViewDialog extends StatelessWidget {
                   ],
                 ),
               ] else ...[
-                // Archived Machine Buttons (1 row)
                 Row(
                   children: [
                     Expanded(
@@ -550,7 +427,7 @@ class AdminMachineViewDialog extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () => _handleRestore(context),
+                        onPressed: () => _handleRestore(context, ref),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green.shade600,
                           foregroundColor: Colors.white,
@@ -576,9 +453,6 @@ class AdminMachineViewDialog extends StatelessWidget {
   }
 }
 
-extension on BuildContext {}
-
-// Helper widget for detail rows
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;

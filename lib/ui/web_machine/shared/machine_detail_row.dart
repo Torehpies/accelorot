@@ -1,4 +1,3 @@
-// lib/frontend/operator/machine_management/widgets/machine_detail_row.dart
 import 'package:flutter/material.dart';
 
 class MachineDetailRow extends StatelessWidget {

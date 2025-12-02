@@ -1,83 +1,118 @@
-// lib/screens/web_machine_management.dart
-
 import 'package:flutter/material.dart';
-import '../view_model/machine_management_view_model.dart';
-import '../widgets/add_machine_modal.dart';
-import '../widgets/admin_machine_list.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../services/sess_service.dart';
 import '../../core/ui/admin_search_bar.dart';
-import '../../core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
+import '../../core/ui/admin_app_bar.dart';
+import 'web_admin_machine_list.dart';
+import 'web_add_machine_modal.dart';
 
-class ThemeConstants {
-  static const double spacing12 = 12.0;
-  static const double spacing8 = 8.0;
-  static const double borderRadius20 = 20.0;
-  static const double borderRadius12 = 12.0;
-  static final Color greyShade300 = Colors.grey[300]!;
-  static final Color tealShade700 = Colors.teal.shade700;
-}
-
-class WebMachineManagement extends StatefulWidget {
-  const WebMachineManagement({super.key, this.viewingOperatorId});
-  final String? viewingOperatorId;
+class WebAdminMachineView extends ConsumerStatefulWidget {
+  const WebAdminMachineView({super.key});
 
   @override
-  State<WebMachineManagement> createState() => _WebMachineManagementState();
+  ConsumerState<WebAdminMachineView> createState() => _WebAdminMachineViewState();
 }
 
-class _WebMachineManagementState extends State<WebMachineManagement> {
-  late final AdminMachineController _controller;
-  final FocusNode _searchFocusNode = FocusNode();
+class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
+  final _searchFocusNode = FocusNode();
+  String? _teamId;
+  bool _isInitializing = true; //  loading state
 
   @override
   void initState() {
     super.initState();
-    _controller = AdminMachineController();
-    _controller.addListener(_onControllerUpdate);
-    _controller.initialize();
+    _loadTeamIdAndInit();
+  }
+
+  Future<void> _loadTeamIdAndInit() async {
+    try {
+      final sessionService = SessionService();
+      final userData = await sessionService.getCurrentUserData();
+      _teamId = userData?['teamId'] as String?;
+
+      if (_teamId != null && mounted) {
+        await ref.read(adminMachineProvider.notifier).initialize(_teamId!);
+      }
+    } catch (e) {
+      debugPrint('Error loading team ID: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isInitializing = false); 
+      }
+    }
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
-    _controller.removeListener(_onControllerUpdate);
-    _controller.dispose();
     super.dispose();
   }
 
-  void _onControllerUpdate() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   void _showAddMachineModal() {
+    if (_teamId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Team ID not available. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-          child: AddMachineModal(controller: _controller),
+          child: WebAddMachineModal(teamId: _teamId!),
         ),
       ),
     );
   }
 
+  Future<void> _handleRefresh() async {
+    if (_teamId != null) {
+      await ref.read(adminMachineProvider.notifier).refresh(_teamId!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(adminMachineProvider);
+    final notifier = ref.read(adminMachineProvider.notifier);
+
+    // ✅ Show loading while initializing
+    if (_isInitializing || _teamId == null) {
+      return Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: const AdminAppBar(title: 'Machine Management'),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.teal),
+              SizedBox(height: 16),
+              Text(
+                'Loading machine data...',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      // ✅ UPDATED APPBAR
-      appBar: const AdminAppBar(
-        title: 'Machine Management',
-      ),
+      appBar: const AdminAppBar(title: 'Machine Management'),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(ThemeConstants.spacing12),
+          padding: const EdgeInsets.all(12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🟩 ACTION CARDS ROW
+              // Action Cards Row
               SizedBox(
                 height: 100,
                 child: Row(
@@ -87,12 +122,12 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                         icon: Icons.archive,
                         label: 'Archive',
                         count: null,
-                        onPressed: () => _controller.setShowArchived(true),
+                        onPressed: () => notifier.setShowArchived(true),
                         iconBackgroundColor: Colors.orange[50]!,
                         iconColor: Colors.orange.shade700,
                       ),
                     ),
-                    const SizedBox(width: ThemeConstants.spacing12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _buildActionCard(
                         icon: Icons.add_circle_outline,
@@ -103,13 +138,13 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                         iconColor: Colors.blue.shade700,
                       ),
                     ),
-                    const SizedBox(width: ThemeConstants.spacing12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _buildActionCard(
                         icon: Icons.devices,
                         label: 'Total Machines',
-                        count: _controller.filteredMachines.length,
-                        onPressed: () => _controller.setShowArchived(false),
+                        count: state.filteredMachines.length,
+                        onPressed: () => notifier.setShowArchived(false),
                         iconBackgroundColor: Colors.teal[50]!,
                         iconColor: Colors.teal.shade700,
                       ),
@@ -117,71 +152,46 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
                   ],
                 ),
               ),
-              const SizedBox(height: ThemeConstants.spacing12),
+              const SizedBox(height: 12),
 
-              // 🟦 MAIN CONTENT CONTAINER — SEARCH BAR INSIDE
+              // Main Container
               Expanded(
                 child: Container(
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(
-                      ThemeConstants.borderRadius20,
-                    ),
-                    border: Border.all(
-                      color: ThemeConstants.greyShade300,
-                      width: 1.0,
-                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Column(
                     children: [
-                      // 🔹 HEADER + SEARCH BAR IN SAME ROW
+                      // Header with Title and Search
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: ThemeConstants.spacing12,
-                          vertical: 16,
-                        ),
+                        padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
-                            // LEFT: Section Title
                             Text(
-                              _controller.showArchived
-                                  ? 'Archived Machines'
-                                  : 'Active Machines',
+                              state.showArchived ? 'Archived Machines' : 'Active Machines',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.teal,
                               ),
                             ),
-
                             const Spacer(),
-
-                            // RIGHT: Search Bar + Refresh Button
                             ConstrainedBox(
                               constraints: const BoxConstraints(maxWidth: 500),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Flexible(
-                                    child: AdminSearchBar(
-                                      searchQuery: _controller.searchQuery,
-                                      onSearchChanged:
-                                          _controller.setSearchQuery,
-                                      onRefresh: _controller.initialize,
-                                    ),
-                                  ),
-                                ],
+                              child: AdminSearchBar(
+                                searchQuery: state.searchQuery,
+                                onSearchChanged: notifier.setSearchQuery,
+                                onRefresh: _handleRefresh,
                               ),
                             ),
                           ],
                         ),
                       ),
-
                       const Divider(height: 1),
-
-                      // MACHINE LIST
-                      Expanded(child: _buildContent()),
+                      Expanded(child: _buildContent(state)),
                     ],
                   ),
                 ),
@@ -193,49 +203,51 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
     );
   }
 
-  Widget _buildContent() {
-    if (_controller.isLoading) {
+  Widget _buildContent(AdminMachineState state) {
+    if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_controller.errorMessage != null) {
+    if (state.errorMessage != null) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-              const SizedBox(height: 16),
-              Text(
-                _controller.errorMessage!,
-                style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-                textAlign: TextAlign.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+            const SizedBox(height: 16),
+            Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.read(adminMachineProvider.notifier).clearError();
+                if (_teamId != null) {
+                  ref.read(adminMachineProvider.notifier).initialize(_teamId!);
+                }
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
               ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  _controller.clearError();
-                  _controller.initialize();
-                },
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
 
-    return AdminMachineList(controller: _controller);
+    // ✅ Pass non-null teamId
+    return WebAdminMachineList(
+      machines: state.displayedMachines,
+      hasMoreToLoad: state.hasMoreToLoad,
+      remainingCount: state.remainingCount,
+      onLoadMore: ref.read(adminMachineProvider.notifier).loadMore,
+      teamId: _teamId!, 
+    );
   }
 
   Widget _buildActionCard({
@@ -251,7 +263,7 @@ class _WebMachineManagementState extends State<WebMachineManagement> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: ThemeConstants.greyShade300, width: 1.0),
+        side: BorderSide(color: Colors.grey.shade300, width: 1.0),
       ),
       child: InkWell(
         onTap: onPressed,
