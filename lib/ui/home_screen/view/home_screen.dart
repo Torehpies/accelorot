@@ -1,14 +1,15 @@
 // lib/frontend/operator/dashboard/home_screen.dart
 
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/dashboard/cycles/system_card.dart';
-import '../../../frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
-import '../../../frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
-import '../../../frontend/operator/dashboard/add_waste/add_waste_product.dart';
-import '../../../frontend/operator/dashboard/add_waste/submit_report.dart';
-import '../../../frontend/operator/dashboard/add_waste/quick_actions_sheet.dart';
-import '../../../frontend/operator/dashboard/add_waste/activity_logs_card.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
+import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
+import '../widgets/system_card.dart';
+import '../widgets/composting_progress_card.dart';
+import '../widgets/add_waste/add_waste_product.dart';
+import '../widgets/add_waste/submit_report.dart';
+import '../widgets/add_waste/quick_actions_sheet.dart';
+import '../widgets/activity_logs_card.dart';
+
 
 class HomeScreen extends StatefulWidget {
   final MachineModel? focusedMachine;

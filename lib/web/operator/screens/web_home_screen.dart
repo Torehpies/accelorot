@@ -3,12 +3,12 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/submit_report.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
+import 'package:flutter_application_1/ui/home_screen/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/home_screen/widgets/add_waste/submit_report.dart';
+import 'package:flutter_application_1/ui/home_screen/widgets/composting_progress_card.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/cycles/system_card.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/home_screen/widgets/system_card.dart';
+import 'package:flutter_application_1/ui/home_screen/widgets/activity_logs_card.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
 
 class WebHomeScreen extends StatefulWidget {
