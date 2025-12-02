@@ -1,8 +1,7 @@
-// lib/data/services/firebase/activity_logs/firestore_batch_service.dart
+// lib/data/services/firebase/firestore_batch_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../contracts/batch_service.dart';
-import 'firestore_collections.dart';
 
 /// Firestore implementation of BatchService
 class FirestoreBatchService implements BatchService {
@@ -10,9 +9,14 @@ class FirestoreBatchService implements BatchService {
 
   FirestoreBatchService(this._firestore);
 
+  // Direct collection references
+  CollectionReference get _batches => _firestore.collection('batches');
+  CollectionReference get _users => _firestore.collection('users');
+  CollectionReference get _machines => _firestore.collection('machines');
+
   @override
   Future<String?> getBatchId(String userId, String machineId) async {
-    final batchQuery = await FirestoreCollections.batches
+    final batchQuery = await _batches
         .where('userId', isEqualTo: userId)
         .where('machineId', isEqualTo: machineId)
         .where('isActive', isEqualTo: true)
@@ -28,7 +32,7 @@ class FirestoreBatchService implements BatchService {
   @override
   Future<String> createBatch(String userId, String machineId, int batchNumber) async {
     final batchId = '${machineId}_batch_$batchNumber';
-    final batchRef = FirestoreCollections.batches.doc(batchId);
+    final batchRef = _batches.doc(batchId);
 
     await batchRef.set({
       'userId': userId,
@@ -44,25 +48,25 @@ class FirestoreBatchService implements BatchService {
 
   @override
   Future<void> updateBatchTimestamp(String batchId) async {
-    await FirestoreCollections.batches.doc(batchId).update({
+    await _batches.doc(batchId).update({
       'updatedAt': Timestamp.now(),
     });
   }
 
   @override
   Future<String?> getUserTeamId(String userId) async {
-    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final userDoc = await _users.doc(userId).get();
 
     if (userDoc.exists) {
-      return userDoc.data()?['teamId'] as String?;
+      final data = userDoc.data() as Map<String, dynamic>?;
+      return data?['teamId'] as String?;
     }
     return null;
   }
 
   @override
   Future<List<String>> getTeamMachineIds(String teamId) async {
-    final machinesSnapshot = await _firestore
-        .collection('machines')
+    final machinesSnapshot = await _machines
         .where('teamId', isEqualTo: teamId)
         .get();
 

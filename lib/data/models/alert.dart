@@ -1,5 +1,4 @@
 // lib/data/models/alert.dart
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,12 +19,29 @@ abstract class Alert with _$Alert {
     required DateTime timestamp,
     Map<String, dynamic>? readings, // Additional sensor readings
   }) = _Alert;
-
+  
   const Alert._();
 
   // ===== FIRESTORE CONVERSION =====
+  
+  /// Create from Firestore document (NEW - services expect this)
+  static Alert fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+    
+    return Alert(
+      id: doc.id,
+      machineId: data['machine_id'] ?? '',
+      sensorType: data['sensor_type'] ?? '',
+      readingValue: _parseDouble(data['reading_value']),
+      threshold: _parseDouble(data['threshold']),
+      status: data['status'] ?? '',
+      message: data['message'] ?? '',
+      timestamp: _parseTimestamp(data['timestamp']),
+      readings: data['readings'] as Map<String, dynamic>?,
+    );
+  }
 
-  /// Create from Firestore document data
+  /// Create from map (KEEP for backwards compatibility)
   static Alert fromMap(Map<String, dynamic> data) {
     return Alert(
       id: data['id'] ?? '',
@@ -55,7 +71,7 @@ abstract class Alert with _$Alert {
   }
 
   // ===== HELPERS =====
-
+  
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
@@ -68,5 +84,4 @@ abstract class Alert with _$Alert {
     if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
     return DateTime.now();
   }
-
 }

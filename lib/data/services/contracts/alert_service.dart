@@ -2,15 +2,17 @@
 
 import '../../models/alert.dart';
 
-/// Abstract interface for alert operations
-/// Implementation: FirestoreAlertService
+/// Abstract interface for alert data operations
 abstract class AlertService {
-  /// Fetch all alerts for a team
-  Future<List<Alert>> fetchTeamAlerts(String teamId);
+  /// Fetch all alerts for the current user's team
+  /// Handles authentication and team resolution internally
+  Future<List<Alert>> fetchTeamAlerts();
   
-  /// Fetch alerts for a specific batch (for other features)
+  /// Fetch alerts for a specific batch
+  /// @param batchId - the batch identifier
   Future<List<Alert>> fetchAlertsForBatch(String batchId);
   
-  /// Stream real-time alerts for a batch
+  /// Stream alerts for real-time updates
+  /// @param batchId - the batch identifier
   Stream<List<Alert>> streamAlerts(String batchId);
 }

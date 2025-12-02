@@ -2,62 +2,84 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../repositories/activity_repository.dart';
-import '../services/contracts/substrate_service.dart';
-import '../services/contracts/alert_service.dart';
-import '../services/contracts/report_service.dart';
-import '../services/contracts/cycle_service.dart';
-import '../services/contracts/batch_service.dart';
-import '../services/firebase/firestore_substrate_service.dart';
-import '../services/firebase/firestore_alert_service.dart';
-import '../services/firebase/firestore_report_service.dart';
-import '../services/firebase/firestore_cycle_service.dart';
-import '../services/firebase/firestore_batch_service.dart';
-
-// ===== FIRESTORE INSTANCE =====
-
-final _firestoreProvider = Provider<FirebaseFirestore>((ref) {
-  return FirebaseFirestore.instance;
-});
+import '../services/firebase/firebase_substrate_service.dart';
+import '../services/firebase/firebase_alert_service.dart';
+import '../services/firebase/firebase_report_service.dart';
+import '../services/firebase/firebase_cycle_service.dart';
+import '../services/firebase/firebase_batch_service.dart';
+import '../repositories/substrate_repository.dart';
+import '../repositories/alert_repository.dart';
+import '../repositories/report_repository.dart';
+import '../repositories/cycle_repository.dart';
+import '../repositories/activity__log_repository.dart';
 
 // ===== SERVICE PROVIDERS =====
 
-final batchServiceProvider = Provider<BatchService>((ref) {
-  final firestore = ref.read(_firestoreProvider);
-  return FirestoreBatchService(firestore);
+/// Batch service provider (shared dependency)
+final batchServiceProvider = Provider((ref) {
+  return FirestoreBatchService(FirebaseFirestore.instance);
 });
 
-final substrateServiceProvider = Provider<SubstrateService>((ref) {
-  final firestore = ref.read(_firestoreProvider);
-  final batchService = ref.read(batchServiceProvider);
-  return FirestoreSubstrateService(firestore, batchService);
+/// Substrate service provider
+final substrateServiceProvider = Provider((ref) {
+  return FirestoreSubstrateService(
+    batchService: ref.watch(batchServiceProvider),
+  );
 });
 
-final alertServiceProvider = Provider<AlertService>((ref) {
-  final batchService = ref.read(batchServiceProvider);
-  return FirestoreAlertService(batchService);
+/// Alert service provider
+final alertServiceProvider = Provider((ref) {
+  return FirestoreAlertService(
+    batchService: ref.watch(batchServiceProvider),
+  );
 });
 
-final reportServiceProvider = Provider<ReportService>((ref) {
-  final firestore = ref.read(_firestoreProvider);
-  return FirestoreReportService(firestore);
+/// Report service provider
+final reportServiceProvider = Provider((ref) {
+  return FirestoreReportService(
+    batchService: ref.watch(batchServiceProvider),
+  );
 });
 
-final cycleServiceProvider = Provider<CycleService>((ref) {
-  final batchService = ref.read(batchServiceProvider);
-  return FirestoreCycleService(batchService);
+/// Cycle service provider
+final cycleServiceProvider = Provider((ref) {
+  return FirestoreCycleService(
+    batchService: ref.watch(batchServiceProvider),
+  );
 });
 
-// ===== REPOSITORY PROVIDER =====
+// ===== REPOSITORY PROVIDERS =====
 
-/// Provider for activity repository
-/// Returns abstract interface, concrete implementation is ActivityLogsRepository
+/// Substrate repository provider
+final substrateRepositoryProvider = Provider<SubstrateRepository>((ref) {
+  final service = ref.watch(substrateServiceProvider);
+  return SubstrateRepository(service);
+});
+
+/// Alert repository provider
+final alertRepositoryProvider = Provider<AlertRepository>((ref) {
+  final service = ref.watch(alertServiceProvider);
+  return AlertRepository(service);
+});
+
+/// Report repository provider
+final reportRepositoryProvider = Provider<ReportRepository>((ref) {
+  final service = ref.watch(reportServiceProvider);
+  return ReportRepository(service);
+});
+
+/// Cycle repository provider
+final cycleRepositoryProvider = Provider<CycleRepository>((ref) {
+  final service = ref.watch(cycleServiceProvider);
+  return CycleRepository(service);
+});
+
+/// Activity repository provider (aggregates all activities for UI)
 final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  return ActivityLogsRepository(
-    substrateService: ref.read(substrateServiceProvider),
-    alertService: ref.read(alertServiceProvider),
-    reportService: ref.read(reportServiceProvider),
-    cycleService: ref.read(cycleServiceProvider),
-    batchService: ref.read(batchServiceProvider),
+  return ActivityRepository(
+    substrateRepo: ref.watch(substrateRepositoryProvider),
+    alertRepo: ref.watch(alertRepositoryProvider),
+    reportRepo: ref.watch(reportRepositoryProvider),
+    cycleRepo: ref.watch(cycleRepositoryProvider),
   );
 });

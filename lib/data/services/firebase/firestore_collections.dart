@@ -1,4 +1,4 @@
-// lib/data/services/firebase/activity_logs/firestore_collections.dart
+// lib/data/services/firebase/firestore_collections.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

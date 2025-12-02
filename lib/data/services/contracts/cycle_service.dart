@@ -2,9 +2,9 @@
 
 import '../../models/cycle_recommendation.dart';
 
-/// Abstract interface for cycle and recommendation operations
-/// Implementation: FirestoreCycleService
+/// Abstract interface for cycle recommendation data operations
 abstract class CycleService {
-  /// Fetch all cycles and recommendations for a team
-  Future<List<CycleRecommendation>> fetchTeamCycles(String teamId);
+  /// Fetch all cycle recommendations for the current user's team
+  /// Handles authentication and team resolution internally
+  Future<List<CycleRecommendation>> fetchTeamCycles();
 }
