@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/data/providers/core_providers.dart';
-import 'package:flutter_application_1/data/repositories/team_repository.dart';
+import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
+import 'package:flutter_application_1/data/repositories/team_management/team_repository_remote.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_team_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,8 +14,8 @@ TeamService teamService(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-TeamRepository teamRepository(Ref ref) {
+TeamRepository teamRepositoryRemote(Ref ref) {
 	final teamService = ref.read(teamServiceProvider);
-	return TeamRepositoryImpl(teamService);
+	return TeamRepositoryRemote(teamService);
 }
 

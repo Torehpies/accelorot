@@ -9,6 +9,7 @@ abstract class Team with _$Team {
 		String? teamId,
 		required String teamName,
 		required String address,
+		String? createdBy,
   }) = _Team;
 
   factory Team.fromJson(Map<String, dynamic> json) =>

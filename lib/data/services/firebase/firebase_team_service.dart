@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
@@ -17,6 +18,7 @@ class FirebaseTeamService implements TeamService {
       if (raw == null) {
         return Result.failure(DataLayerError.dataEmptyError());
       }
+			debugPrint(raw.toString());
       final team = Team.fromJson(raw);
       return Result.success(team);
     } on FirebaseException catch (e) {

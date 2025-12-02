@@ -1,48 +1,47 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_application_1/data/models/team.dart';
 import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
-import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
-import 'package:flutter_application_1/repositories/team_repository.dart';
-
 
 class TeamRepositoryRemote implements TeamRepository {
   TeamRepositoryRemote(this._teamService);
 
   final TeamService _teamService;
-	List<Team>? _cachedTeams;
+  List<Team>? _cachedTeams;
 
   @override
-  Future<Result<Team, DataLayerError>> addTeam({
-    required String teamName,
-    required String address,
-    required String createdBy,
-  }) async {
-      await _teamService.addTeam(teamName, address, createdBy);
+  Future<Result<Team, DataLayerError>> addTeam(Team team) async {
+    final result = await _teamService.addTeam(team);
 
-      return const Result.success(null);
+    result.when(
+      success: (team) => _cachedTeams?.add(team),
+      failure: (_) => _cachedTeams,
+    );
+
+		return result;
   }
 
   @override
-  Future<Result<List<Team>, DataLayerError>> getTeams() async {
-    try {
-      final rawData = await _teamService.fetchRawTeams();
-      final teams = rawData.docs.map((doc) {
-        final data = doc.data();
-
-        return Team.fromJson({...?data, 'id': doc.id});
-      }).toList();
-      return Result.success(teams);
-    } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
-    } on TypeError catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } on FormatException catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } catch (e) {
-      return Result.failure(DataLayerError.unknownError(e));
+  Future<Result<List<Team>, DataLayerError>> getTeams({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _cachedTeams != null) {
+      return Result.success(_cachedTeams!);
     }
+
+    final result = await _teamService.getTeams();
+
+    result.when(
+      success: (teams) => _cachedTeams = teams,
+      failure: (_) => _cachedTeams,
+    );
+
+    return result;
+  }
+
+  @override
+  void clearCache() {
+    _cachedTeams = null;
   }
 }
