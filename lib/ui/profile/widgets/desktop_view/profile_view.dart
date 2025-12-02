@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile_info_view_widget.dart';
-import '../view_model/profile_view_model.dart';
+import '../../view_model/profile_view_model.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -45,7 +45,7 @@ class _ProfileViewState extends State<ProfileView> {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      // example: implement edit or change password
+                      // implement edit or change password here
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
