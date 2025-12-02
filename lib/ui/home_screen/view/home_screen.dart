@@ -1,14 +1,14 @@
 // lib/frontend/operator/dashboard/home_screen.dart
 
 import 'package:flutter/material.dart';
-import 'cycles/system_card.dart';
-import 'compost_progress/composting_progress_card.dart';
-import 'compost_progress/models/compost_batch_model.dart';
-import 'add_waste/add_waste_product.dart';
-import 'add_waste/submit_report.dart';
-import 'add_waste/quick_actions_sheet.dart';
-import 'add_waste/activity_logs_card.dart';
-import '../machine_management/models/machine_model.dart';
+import '../../../frontend/operator/dashboard/cycles/system_card.dart';
+import '../../../frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
+import '../../../frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
+import '../../../frontend/operator/dashboard/add_waste/add_waste_product.dart';
+import '../../../frontend/operator/dashboard/add_waste/submit_report.dart';
+import '../../../frontend/operator/dashboard/add_waste/quick_actions_sheet.dart';
+import '../../../frontend/operator/dashboard/add_waste/activity_logs_card.dart';
+import '../../../frontend/operator/machine_management/models/machine_model.dart';
 
 class HomeScreen extends StatefulWidget {
   final MachineModel? focusedMachine;
