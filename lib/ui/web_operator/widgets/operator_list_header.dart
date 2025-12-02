@@ -1,7 +1,7 @@
-// lib/widgets/operator_list_header.dart
+// lib/ui/web_operator/widgets/operator_list_header.dart
 
 import 'package:flutter/material.dart';
-import '../../../ui/core/ui/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class OperatorListHeader extends StatelessWidget {
   final bool showArchived;

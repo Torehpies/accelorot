@@ -1,10 +1,10 @@
-// lib/controllers/operator_management_controller.dart
+// lib/ui/web_operator/view_modal/operator_management_view_model.dart
 
 import 'package:flutter/material.dart';
-import '../../../web/admin/models/operator_model.dart';
-import '../../../web/admin/services/operator_service.dart';
+import '../../../data/models/operator_view_model.dart';
+import '../../../data/services/contracts/operator_service.dart';
 
-class OperatorManagementController extends ChangeNotifier {
+class OperatorManagementViewModel extends ChangeNotifier {
   final OperatorService _operatorService = OperatorService();
 
   List<OperatorModel> _operators = [];

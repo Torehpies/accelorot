@@ -1,7 +1,7 @@
-// lib/widgets/operator_action_card.dart
+// lib/ui/web_operator/widgets/operator_action_card.dart
 
 import 'package:flutter/material.dart';
-import '../../../ui/core/ui/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class OperatorActionCard extends StatelessWidget {
   final IconData icon;

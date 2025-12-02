@@ -2,8 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/operator_model.dart';
-import '../models/pending_member_model.dart'; // Fixed: was pending_member_modal.dart
+import '../../models/operator_view_model.dart';
+import '../../../web/admin/models/pending_member_model.dart'; 
 
 class OperatorService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

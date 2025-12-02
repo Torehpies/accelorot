@@ -1,8 +1,8 @@
-// lib/widgets/operator_detail_panel.dart
+// lib/ui/web_operator/widgets/operator_detail_panel.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/operator_view_model.dart';
-import '../../../ui/core/ui/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class OperatorDetailPanel extends StatelessWidget {
   final OperatorModel operator;

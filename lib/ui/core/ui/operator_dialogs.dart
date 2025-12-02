@@ -1,4 +1,4 @@
-// lib/utils/operator_dialogs.dart
+// lib/ui/core/ui/operator_dialogs.dart
 
 import 'package:flutter/material.dart';
 import 'theme_constants.dart';

@@ -1,4 +1,4 @@
-// lib/web/admin/screens/web_operator_detail_screen.dart
+// lib/ui/web_operator/widgets/web_operator_detail_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

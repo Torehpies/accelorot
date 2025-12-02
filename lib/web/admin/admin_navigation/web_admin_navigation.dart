@@ -4,8 +4,7 @@ import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
 import '../screens/web_admin_machine.dart';
 import '../screens/web_profile_screen.dart';
-import '../../../ui/web_operator/view/web_operator_management.dart';
-
+import '../../../ui/web_operator/view/web_operator_management_view.dart';
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
 
@@ -34,7 +33,6 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
         onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
       const OperatorManagementScreen(),
-
       const WebMachineManagement(),
       const WebProfileScreen(),
     ];

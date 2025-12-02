@@ -1,10 +1,10 @@
-// lib/controllers/pending_members_controller.dart
+// lib/ui/web_operator/view_modal/pending_members_view_model.dart
 
 import 'package:flutter/material.dart';
-import '../models/pending_member_model.dart';
-import '../services/operator_service.dart';
+import '../../../web/admin/models/pending_member_model.dart';
+import '../../../data/services/contracts/operator_service.dart';
 
-class PendingMembersController extends ChangeNotifier {
+class PendingMembersViewModel extends ChangeNotifier {
   final OperatorService _operatorService = OperatorService();
 
   List<PendingMemberModel> _pendingMembers = [];

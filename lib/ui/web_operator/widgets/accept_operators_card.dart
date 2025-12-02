@@ -1,10 +1,10 @@
-// lib/screens/accept_operators_screen.dart
+// lib/ui/web_operator/widgets/accept_operators_card.dart
 
 import 'package:flutter/material.dart';
-import '../../../ui/web_operator/view_modal/pending_members_view_model.dart';
-import '../../../ui/core/ui/theme_constants.dart';
-import '../../../ui/core/ui/operator_dialogs.dart';
-import '../models/pending_member_model.dart';
+import '../view_modal/pending_members_view_model.dart';
+import '../../core/ui/theme_constants.dart';
+import '../../core/ui/operator_dialogs.dart';
+import '../../../web/admin/models/pending_member_model.dart';
 
 class AcceptOperatorsScreen extends StatefulWidget {
   const AcceptOperatorsScreen({super.key});

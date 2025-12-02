@@ -1,7 +1,7 @@
-// lib/widgets/operator_error_state.dart
+// lib/ui/web_operator/widgets/operator_error_state.dart
 
 import 'package:flutter/material.dart';
-import '../../../ui/core/ui/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class OperatorErrorState extends StatelessWidget {
   final String error;
