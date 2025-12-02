@@ -11,7 +11,7 @@ import '../repositories/substrate_repository.dart';
 import '../repositories/alert_repository.dart';
 import '../repositories/report_repository.dart';
 import '../repositories/cycle_repository.dart';
-import '../repositories/activity__log_repository.dart';
+import '../repositories/activity_repository.dart';
 
 // ===== SERVICE PROVIDERS =====
 
