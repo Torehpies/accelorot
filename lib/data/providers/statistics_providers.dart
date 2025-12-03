@@ -4,9 +4,9 @@ import '../models/temperature_model.dart';
 import '../models/moisture_model.dart';
 import '../models/oxygen_model.dart';
 import '../services/firebase/firebase_statistics_service.dart';
-import '../services/contracts/statistics_service_contract.dart';
-import '../repositories/statistics_repository.dart';
-import '../repositories/contracts/statistics_repository_contract.dart';
+import '../services/contracts/statistics_service.dart';
+import '../repositories/statistics_repository_remote.dart';
+import '../repositories/contracts/statistics_repository.dart';
 
 // Firestore instance provider
 final firestoreProvider = Provider<FirebaseFirestore>((ref) {
@@ -14,15 +14,15 @@ final firestoreProvider = Provider<FirebaseFirestore>((ref) {
 });
 
 // Statistics Service provider
-final statisticsServiceProvider = Provider<StatisticsServiceContract>((ref) {
+final statisticsServiceProvider = Provider<StatisticsService>((ref) {
   final firestore = ref.watch(firestoreProvider);
-  return FirestoreStatisticsService(firestore: firestore);
+  return FirebaseStatisticsService(firestore: firestore);
 });
 
 // Statistics Repository provider
 final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   final service = ref.watch(statisticsServiceProvider);
-  return StatisticsRepositorylmpl(statisticsService: service);
+  return StatisticsRepositoryRemote (statisticsService: service);
 });
 
 // Temperature data provider
