@@ -68,29 +68,43 @@ class AuthNotifier extends StateNotifier<AuthStatusState> {
     }
 
     final data = doc.data()! as Map<String, dynamic>;
-    final globalRole = (data['globalRole'] as String?)?.toLowerCase();
-    final teamRole = (data['teamRole'] as String?)?.toLowerCase();
-    final status = data['status'];
+    final String? globalRole = (data['globalRole'] as String?)
+        ?.toLowerCase()
+        .trim();
+    final String? teamRole = (data['teamRole'] as String?)
+        ?.toLowerCase()
+        .trim();
+    final String? status = data['status'] as String?;
+
+    if (status == null) {
+      state = AuthStatusState.unauthenticated();
+      return;
+    }
 
     switch (status) {
       case 'archived':
         state = AuthStatusState.archived();
-        break;
+        return;
       case 'pending':
         state = AuthStatusState.pendingAdminApproval();
-        break;
+        return;
       case 'registered':
         state = AuthStatusState.teamSelection();
-        break;
+        return;
       case 'active':
         if (globalRole == 'superadmin') {
-          state = AuthStatusState.authenticated(role: globalRole as String);
+          state = AuthStatusState.authenticated(role: 'superadmin');
+          return;
         }
-        state = AuthStatusState.authenticated(role: teamRole as String);
-        break;
+        if (teamRole != null && teamRole.isNotEmpty) {
+          state = AuthStatusState.authenticated(role: teamRole);
+          return;
+        }
+        state = AuthStatusState.authenticated(role: 'user');
+        return;
       default:
         state = AuthStatusState.unauthenticated();
-        break;
+        return;
     }
   }
 
