@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/machine_model.dart';
+import '../../../../data/models/machine_model.dart';
 import 'web_admin_machine_card.dart';
 
 class WebAdminMachineList extends StatelessWidget {

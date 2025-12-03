@@ -44,7 +44,7 @@ class MachineViewDialog extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2), // ✅ FIXED
+                      color: Colors.white.withValues(alpha: 0.2), 
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -71,7 +71,7 @@ class MachineViewDialog extends StatelessWidget {
                           'ID: ${machine.machineId}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.9), // ✅ FIXED
+                            color: Colors.white.withValues(alpha: 0.9), 
                           ),
                         ),
                       ],

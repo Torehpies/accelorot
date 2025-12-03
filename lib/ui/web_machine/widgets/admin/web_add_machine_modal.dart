@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../machine_management/view_model/admin_machine_notifier.dart';
 
 class WebAddMachineModal extends ConsumerStatefulWidget {
   final String teamId;

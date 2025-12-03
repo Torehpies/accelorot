@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../data/models/machine_model.dart';
-import '../../machine_management/view_model/admin_machine_notifier.dart';
-import '../../core/ui/confirmation_dialog.dart';
+import '../../../../data/models/machine_model.dart';
+import '../../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../core/ui/confirmation_dialog.dart';
 import 'web_machine_view_dialog.dart';
 import 'web_edit_machine_modal.dart';
 

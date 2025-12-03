@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../machine_management/view_model/operator_machine_notifier.dart';
 import '../../../../services/sess_service.dart';
 import '../../../core/ui/admin_search_bar.dart';
 import '../../../core/ui/admin_app_bar.dart';
-import 'web_admin_machine_list.dart';
-import 'web_add_machine_modal.dart';
+import 'web_operator_machine_list.dart';
 
-class WebAdminMachineView extends ConsumerStatefulWidget {
-  const WebAdminMachineView({super.key});
+class WebOperatorMachineView extends ConsumerStatefulWidget {
+  const WebOperatorMachineView({super.key});
 
   @override
-  ConsumerState<WebAdminMachineView> createState() => _WebAdminMachineViewState();
+  ConsumerState<WebOperatorMachineView> createState() => _WebOperatorMachineViewState();
 }
 
-class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
+class _WebOperatorMachineViewState extends ConsumerState<WebOperatorMachineView> {
   final _searchFocusNode = FocusNode();
   String? _teamId;
-  bool _isInitializing = true; //  loading state
+  bool _isInitializing = true;
 
   @override
   void initState() {
@@ -32,13 +31,13 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       _teamId = userData?['teamId'] as String?;
 
       if (_teamId != null && mounted) {
-        await ref.read(adminMachineProvider.notifier).initialize(_teamId!);
+        await ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
       }
     } catch (e) {
       debugPrint('Error loading team ID: $e');
     } finally {
       if (mounted) {
-        setState(() => _isInitializing = false); 
+        setState(() => _isInitializing = false);
       }
     }
   }
@@ -49,45 +48,21 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     super.dispose();
   }
 
-  void _showAddMachineModal() {
-    if (_teamId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Team ID not available. Please try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-          child: WebAddMachineModal(teamId: _teamId!),
-        ),
-      ),
-    );
-  }
-
   Future<void> _handleRefresh() async {
     if (_teamId != null) {
-      await ref.read(adminMachineProvider.notifier).refresh(_teamId!);
+      await ref.read(operatorMachineProvider.notifier).refresh(_teamId!);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(adminMachineProvider);
-    final notifier = ref.read(adminMachineProvider.notifier);
+    final state = ref.watch(operatorMachineProvider);
+    final notifier = ref.read(operatorMachineProvider.notifier);
 
-    // ✅ Show loading while initializing
     if (_isInitializing || _teamId == null) {
       return Scaffold(
         backgroundColor: Colors.grey[50],
-        appBar: const AdminAppBar(title: 'Machine Management'),
+        appBar: const AdminAppBar(title: 'My Machines'),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -106,45 +81,42 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const AdminAppBar(title: 'Machine Management'),
+      appBar: const AdminAppBar(title: 'My Machines'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              // Action Cards Row
+              // Summary Cards Row
               SizedBox(
                 height: 100,
                 child: Row(
                   children: [
                     Expanded(
-                      child: _buildActionCard(
+                      child: _buildSummaryCard(
+                        icon: Icons.devices,
+                        label: 'Active Machines',
+                        count: state.activeMachinesCount,
+                        iconBackgroundColor: Colors.green[50]!,
+                        iconColor: Colors.green.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildSummaryCard(
                         icon: Icons.archive,
-                        label: 'Archive',
-                        count: null,
-                        onPressed: () => notifier.setShowArchived(true),
+                        label: 'Archived',
+                        count: state.archivedMachinesCount,
                         iconBackgroundColor: Colors.orange[50]!,
                         iconColor: Colors.orange.shade700,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildActionCard(
-                        icon: Icons.add_circle_outline,
-                        label: 'Add Machine',
-                        count: null,
-                        onPressed: _showAddMachineModal,
-                        iconBackgroundColor: Colors.blue[50]!,
-                        iconColor: Colors.blue.shade700,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionCard(
-                        icon: Icons.devices,
+                      child: _buildSummaryCard(
+                        icon: Icons.folder,
                         label: 'Total Machines',
-                        count: state.filteredMachines.length,
-                        onPressed: () => notifier.setShowArchived(false),
+                        count: state.machines.length,
                         iconBackgroundColor: Colors.teal[50]!,
                         iconColor: Colors.teal.shade700,
                       ),
@@ -170,9 +142,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
-                            Text(
-                              state.showArchived ? 'Archived Machines' : 'Active Machines',
-                              style: const TextStyle(
+                            const Text(
+                              'My Machines',
+                              style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.teal,
@@ -203,7 +175,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     );
   }
 
-  Widget _buildContent(AdminMachineState state) {
+  Widget _buildContent(OperatorMachineState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -223,9 +195,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                ref.read(adminMachineProvider.notifier).clearError();
+                ref.read(operatorMachineProvider.notifier).clearError();
                 if (_teamId != null) {
-                  ref.read(adminMachineProvider.notifier).initialize(_teamId!);
+                  ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
                 }
               },
               icon: const Icon(Icons.refresh),
@@ -240,21 +212,18 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       );
     }
 
-    // ✅ Pass non-null teamId
-    return WebAdminMachineList(
+    return WebOperatorMachineList(
       machines: state.displayedMachines,
       hasMoreToLoad: state.hasMoreToLoad,
       remainingCount: state.remainingCount,
-      onLoadMore: ref.read(adminMachineProvider.notifier).loadMore,
-      teamId: _teamId!, 
+      onLoadMore: ref.read(operatorMachineProvider.notifier).loadMore,
     );
   }
 
-  Widget _buildActionCard({
+  Widget _buildSummaryCard({
     required IconData icon,
     required String label,
-    required int? count,
-    required VoidCallback onPressed,
+    required int count,
     required Color iconBackgroundColor,
     required Color iconColor,
   }) {
@@ -265,52 +234,46 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade300, width: 1.0),
       ),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: iconBackgroundColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 22, color: iconColor),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+              child: Icon(icon, size: 22, color: iconColor),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
                     ),
-                    if (count != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        count.toString(),
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: iconColor,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    count.toString(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: iconColor,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

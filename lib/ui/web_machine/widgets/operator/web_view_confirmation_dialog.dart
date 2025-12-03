@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/machine_model.dart';
+import 'web_machine_view_screen.dart'; 
 
 class WebViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
@@ -137,12 +138,13 @@ class WebViewConfirmationDialog extends StatelessWidget {
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.pop(context);
-                      // Navigate to machine dashboard (implement later)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Opening machine dashboard...'),
-                          backgroundColor: Colors.teal,
+                      Navigator.pop(context); // Close dialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebMachineViewScreen(
+                            machine: machine, 
+                          ),
                         ),
                       );
                     },
