@@ -4,7 +4,7 @@ import '../../../data/models/substrate.dart';
 import '../../../data/models/alert.dart';
 import '../../../data/models/report.dart';
 import '../../../data/models/cycle_recommendation.dart';
-import '../models/activity_log_item.dart';
+import '../../../data/models/activity_log_item.dart';
 import 'icon_mapper.dart';
 import 'color_mapper.dart';
 

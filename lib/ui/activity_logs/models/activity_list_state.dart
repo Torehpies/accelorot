@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/models/activity_list_state.dart
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'activity_log_item.dart';
+import '../../../data/models/activity_log_item.dart';
 
 part 'activity_list_state.freezed.dart';
 

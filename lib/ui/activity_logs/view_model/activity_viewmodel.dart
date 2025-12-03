@@ -1,10 +1,10 @@
 // lib/ui/activity_logs/view_model/activity_viewmodel.dart
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../models/activity_log_item.dart';
+import '../../../data/models/activity_log_item.dart';
 import '../models/activity_list_state.dart';
 import '../../../data/repositories/activity_repository.dart';
-import '../../../data/providers/repository_providers.dart';
+import '../../../data/providers/activity_providers.dart';
 import '../models/activity_filter_config.dart';
 
 part 'activity_viewmodel.g.dart';

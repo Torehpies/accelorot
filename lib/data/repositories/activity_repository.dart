@@ -1,7 +1,7 @@
 // lib/data/repositories/activity_repository.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../ui/activity_logs/models/activity_log_item.dart';
+import '../models/activity_log_item.dart';
 import '../../ui/activity_logs/mappers/activity_presentation_mapper.dart';
 import 'substrate_repository.dart';
 import 'alert_repository.dart';
@@ -84,12 +84,5 @@ class ActivityRepository {
     allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return allActivities;
-  }
-
-  // ===== CREATE OPERATIONS =====
-
-  /// Add substrate - delegates to SubstrateRepository
-  Future<void> addSubstrate(Map<String, dynamic> data) async {
-    await _substrateRepo.addSubstrate(data);
   }
 }
