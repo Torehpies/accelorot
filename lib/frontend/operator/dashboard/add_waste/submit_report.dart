@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'fields/report_type_field.dart';
-import 'fields/report_title_field.dart';
-import 'fields/machine_selection_field.dart';
-import 'fields/priority_field.dart';
-import 'fields/description_field.dart';
-import 'fields/submit_button.dart';
+import '../../../../data/services/contracts/waste/report_type_field.dart';
+import '../../../../data/services/contracts/waste/report_title_field.dart';
+import '../../../../data/services/contracts/waste/machine_selection_field.dart';
+import '../../../../data/services/contracts/waste/priority_field.dart';
+import '../../../../data/services/contracts/waste/description_field.dart';
+import '../../../../data/services/contracts/waste/submit_button.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
 class SubmitReport extends StatefulWidget {

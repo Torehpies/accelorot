@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../models/drum_rotation_settings.dart';
-import '../models/system_status.dart';
-import '../widgets/drum_input_fields.dart';
-import '../widgets/system_action_buttons.dart';
+import '../../../data/models/cycles/drum_rotation_settings.dart';
+import '../../../data/models/cycles/system_status.dart';
+import '../widgets/cycles/drum_input_fields.dart';
+import '../widgets/cycles/system_action_buttons.dart';
 import 'info_item.dart';
 
 class ActiveState extends StatefulWidget {

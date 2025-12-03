@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../operator/machine_management/models/machine_model.dart';
-import '../../../../../services/machine_services/firestore_machine_service.dart';
-import '../../../../../services/sess_service.dart';
+import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
+import '../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../services/sess_service.dart';
 
 class MachineSelectionField extends StatelessWidget {
   final String? selectedMachineId;
