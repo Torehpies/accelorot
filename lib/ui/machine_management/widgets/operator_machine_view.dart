@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/operator_machine_notifier.dart';
 import '../../../services/sess_service.dart';
 import 'operator_machine_card.dart';
+import 'search_bar_widget.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
   const OperatorMachineView({super.key});
@@ -14,6 +15,7 @@ class OperatorMachineView extends ConsumerStatefulWidget {
 
 class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
   String? _teamId;
 
   @override
@@ -35,7 +37,14 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleRefresh() async {
+    if (_teamId != null) {
+      await ref.read(operatorMachineProvider.notifier).refresh(_teamId!);
+    }
   }
 
   @override
@@ -43,28 +52,23 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     final state = ref.watch(operatorMachineProvider);
     final notifier = ref.read(operatorMachineProvider.notifier);
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'My Machines',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () => _searchFocusNode.unfocus(),
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          title: const Text(
+            'Machine Management',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.teal,
+          elevation: 0,
         ),
-        backgroundColor: Colors.teal,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              if (_teamId != null) notifier.refresh(_teamId!);
-            },
-          ),
-        ],
+        body: _buildBody(state, notifier),
       ),
-      body: _buildBody(state, notifier),
     );
   }
 
@@ -73,7 +77,9 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     OperatorMachineNotifier notifier,
   ) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.teal),
+      );
     }
 
     if (state.errorMessage != null) {
@@ -81,115 +87,119 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
             const SizedBox(height: 16),
-            Text(state.errorMessage!, textAlign: TextAlign.center),
+            Text(
+              state.errorMessage!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                if (_teamId != null) {
-                  notifier.clearError();
-                  notifier.initialize(_teamId!);
-                }
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+            ElevatedButton(
+              onPressed: _handleRefresh,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
             ),
           ],
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Stats Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.teal.shade400, Colors.teal.shade600],
-              ),
-              borderRadius: BorderRadius.circular(12),
+    return RefreshIndicator(
+      onRefresh: _handleRefresh,
+      color: Colors.teal,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Search Bar
+            SearchBarWidget(
+              onSearchChanged: (query) {
+                notifier.setSearchQuery(query);
+              },
+              onClear: () {
+                _searchController.clear();
+                notifier.clearSearch();
+              },
+              focusNode: _searchFocusNode,
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatItem(
-                  icon: Icons.check_circle,
-                  label: 'Active',
-                  value: '${state.activeMachinesCount}',
-                ),
-                Container(
-                  width: 1,
-                  height: 40,
-                  color: Colors.white.withValues(alpha: 0.3), // ✅ FIXED
-                ),
-                _buildStatItem(
-                  icon: Icons.archive,
-                  label: 'Archived',
-                  value: '${state.archivedMachinesCount}',
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Search Bar
-          TextField(
-            controller: _searchController,
-            onChanged: notifier.setSearchQuery,
-            decoration: InputDecoration(
-              hintText: 'Search machines...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: state.searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        notifier.clearSearch();
-                      },
-                    )
-                  : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+            // Machine Count Stats (Simple style like old version)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
               ),
-              filled: true,
-              fillColor: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    icon: Icons.precision_manufacturing,
+                    label: 'Active Machines',
+                    value: '${state.activeMachinesCount}',
+                    color: Colors.teal,
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.grey.shade300,
+                  ),
+                  _buildStatItem(
+                    icon: Icons.archive_outlined,
+                    label: 'Archived',
+                    value: '${state.archivedMachinesCount}',
+                    color: Colors.grey,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Machine List
-          Expanded(
-            child: state.filteredMachines.isEmpty
-                ? _buildEmptyState(state)
-                : ListView.builder(
-                    itemCount: state.displayedMachines.length +
-                        (state.hasMoreToLoad ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == state.displayedMachines.length) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: ElevatedButton.icon(
-                              onPressed: notifier.loadMore,
-                              icon: const Icon(Icons.add_circle_outline),
-                              label: Text(
-                                'Load More (${state.remainingCount} remaining)',
+            // Machine List
+            Expanded(
+              child: state.displayedMachines.isEmpty
+                  ? _buildEmptyState(state)
+                  : ListView.builder(
+                      itemCount: state.displayedMachines.length +
+                          (state.hasMoreToLoad ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == state.displayedMachines.length) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child: ElevatedButton.icon(
+                                onPressed: notifier.loadMore,
+                                icon: const Icon(Icons.expand_more),
+                                label: Text(
+                                  'Load More (${state.remainingCount} remaining)',
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.teal,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }
+                          );
+                        }
 
-                      final machine = state.displayedMachines[index];
-                      return OperatorMachineCard(machine: machine);
-                    },
-                  ),
-          ),
-        ],
+                        return OperatorMachineCard(
+                          machine: state.displayedMachines[index],
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -198,24 +208,25 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     required IconData icon,
     required String label,
     required String value,
+    required Color color,
   }) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white, size: 28),
-        const SizedBox(height: 8),
+        Icon(icon, color: color, size: 28),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: color,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.9), // ✅ FIXED
+            color: Colors.grey.shade600,
           ),
         ),
       ],
@@ -228,32 +239,33 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: Colors.grey[400],
+            state.searchQuery.isNotEmpty
+                ? Icons.search_off
+                : Icons.precision_manufacturing_outlined,
+            size: 80,
+            color: Colors.grey.shade400,
           ),
           const SizedBox(height: 16),
           Text(
             state.searchQuery.isNotEmpty
                 ? 'No machines found'
-                : 'No machines assigned yet',
+                : 'No machines available',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
+              fontSize: 18,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            state.searchQuery.isNotEmpty
-                ? 'Try adjusting your search'
-                : 'Contact your administrator to get started',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+          if (state.searchQuery.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Try a different search term',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
+          ],
         ],
       ),
     );
