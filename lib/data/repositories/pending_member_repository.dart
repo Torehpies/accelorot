@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/models/pending_member_user.dart';
-import 'package:flutter_application_1/data/repositories/user_repository.dart';
+import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
@@ -27,8 +28,13 @@ abstract class PendingMemberRepository {
 
 class PendingMemberRepositoryImpl implements PendingMemberRepository {
   final PendingMemberService _pendingMemberService;
-  final UserRepository _userRepository;
-  PendingMemberRepositoryImpl(this._pendingMemberService, this._userRepository);
+  final AppUserRepository _userRepository;
+  final AppUserService _userService;
+  PendingMemberRepositoryImpl(
+    this._pendingMemberService,
+    this._userRepository,
+    this._userService,
+  );
 
   @override
   Future<Result<PendingMember, DataLayerError>> getPendingMember(String id) {
@@ -50,7 +56,7 @@ class PendingMemberRepositoryImpl implements PendingMemberRepository {
         startCursor: startCursor,
       );
 
-      final cleanItems = await Future.wait(
+      final cleanItems = (await Future.wait(
         rawResult.items.map((rawMap) async {
           final requestedAtTimestamp = rawMap['requestedAt'] as Timestamp;
           final requestedAtDate = requestedAtTimestamp.toDate();
@@ -60,14 +66,21 @@ class PendingMemberRepositoryImpl implements PendingMemberRepository {
 
           if (existingUserId != null) {
             try {
-              final existingUser = await _userRepository.getUser(
+              final rawData = await _userService.fetchRawUserData(
                 existingUserId,
               );
+
+              if (rawData == null) {
+                return null;
+              }
+
+              final user = _userRepository.mapRawDataToDomain(rawData);
+
               existingPendingMemberUser = PendingMemberUser(
-                uid: existingUser.uid,
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,
-                email: existingUser.email,
+                uid: user.uid,
+                firstName: user.firstname,
+                lastName: user.lastname,
+                email: user.email,
               );
             } catch (_) {
               existingPendingMemberUser = null;
@@ -79,7 +92,7 @@ class PendingMemberRepositoryImpl implements PendingMemberRepository {
             requestedAt: requestedAtDate,
           );
         }),
-      );
+      )).whereType<PendingMember>().toList();
 
       return Result.success(
         PaginationResult(items: cleanItems, nextCursor: rawResult.nextCursor),

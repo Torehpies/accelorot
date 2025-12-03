@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/models/user.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,10 +8,10 @@ class WebBranding extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userProfileProvider);
+    final userAsync = ref.watch(appUserProvider);
 
     return userAsync.when(
-      data: (User? data) {
+      data: (AppUser? data) {
         final String? role = data?.globalRole ?? data?.teamRole;
         String? roleString = role == 'SuperAdmin' ? 'Super Admin' : role;
         final String firstName = data?.firstname ?? '';
