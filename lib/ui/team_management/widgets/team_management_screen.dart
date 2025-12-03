@@ -19,12 +19,34 @@ class TeamManagementScreen extends ConsumerWidget {
       teamManagementProvider.select((s) => s.isLoadingTeams),
     );
 
+    final isSaving = ref.watch(
+      teamManagementProvider.select((s) => s.isSavingTeams),
+    );
+
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
       appBar: AppBar(
         title: Text("Team Management", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.yellow.shade800,
+        actions: [
+          IconButton(
+            onPressed: (isLoading || isSaving)
+                ? null
+                : () {
+                    ref
+                        .read(teamManagementProvider.notifier)
+                        .getTeams(forceRefresh: true);
+                  },
+            icon: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(color: Colors.white),
+                  )
+                : Icon(Icons.refresh, color: Colors.white),
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: isLoading

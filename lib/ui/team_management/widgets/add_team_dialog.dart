@@ -27,16 +27,34 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
       ref
           .read(teamManagementProvider.notifier)
           .addTeam(nameController.text, addressController.text);
-      Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = ref.watch(
-      teamManagementProvider.select((s) => s.isSavingTeams),
+    final state = ref.watch(teamManagementProvider);
+    final isSaving = state.isSavingTeams;
+    final errorMessage = state.errorMessage;
+
+    ref.listen<String?>(
+      teamManagementProvider.select((s) => s.successMessage),
+      (previous, next) {
+        if (next != null) {
+          Navigator.of(context).pop();
+        }
+      },
     );
 
+    ref.listen<String?>(teamManagementProvider.select((s) => s.errorMessage), (
+      previous,
+      next,
+    ) {
+      if (next != null) {
+        Future.delayed(Duration(seconds: 5), () {
+          ref.read(teamManagementProvider.notifier).clearError();
+        });
+      }
+    });
     return AlertDialog(
       title: Text("Add Team"),
       content: Form(
@@ -44,30 +62,46 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Text(
+                  errorMessage,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
             CustomTextField(
               labelText: "Team Name",
-              hintText: "Team Name",
               prefixIcon: Icons.group,
               controller: nameController,
+              autoFocus: true,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return "Please enter a team name.";
                 }
                 return null;
               },
+              textInputAction: TextInputAction.next,
             ),
             SizedBox(height: 10),
             CustomTextField(
+              onFieldSubmitted: (value) => isSaving ? null : _addTeam(),
+              autoFocus: true,
               labelText: "Address",
-              hintText: "Address",
               prefixIcon: Icons.location_on,
               controller: addressController,
+              keyboardType: TextInputType.streetAddress,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return "Please enter a team name.";
                 }
                 return null;
               },
+              textInputAction: TextInputAction.done,
             ),
           ],
         ),

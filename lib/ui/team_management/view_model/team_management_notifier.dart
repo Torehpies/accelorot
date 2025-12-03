@@ -32,7 +32,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
 
     final teamRepo = ref.read(teamRepositoryRemoteProvider);
 
-    final result = await teamRepo.getTeams();
+    final result = await teamRepo.getTeams(forceRefresh: forceRefresh);
 
     result.when(
       success: (teams) => state = state.copyWith(
@@ -50,7 +50,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   }
 
   Future<void> addTeam(String teamName, String address) async {
-		final user = ref.watch(appUserProvider).value;
+    final user = ref.watch(appUserProvider).value;
 
     teamName = teamName.trim();
     address = address.trim();
@@ -72,7 +72,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
 
     result.when(
       success: (resultTeam) async {
-				await getTeams(forceRefresh: true);
+        await getTeams(forceRefresh: true);
         state = state.copyWith(
           isSavingTeams: false,
           errorMessage: null,
@@ -87,5 +87,9 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
         );
       },
     );
+  }
+
+  void clearError() {
+    state = state.copyWith(errorMessage: null);
   }
 }

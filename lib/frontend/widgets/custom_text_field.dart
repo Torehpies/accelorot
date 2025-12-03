@@ -2,28 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/theme/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
-  final String hintText;
+  final String? hintText;
   final IconData prefixIcon;
   final bool obscureText;
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
-  final String? labelText;
+  final String labelText;
+  final bool autoFocus;
+	final ValueChanged<String>? onFieldSubmitted;
+  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
-    required this.hintText,
+    this.hintText,
     required this.prefixIcon,
     this.obscureText = false,
     required this.controller,
     this.keyboardType,
     this.validator,
-    this.labelText,
+    required this.labelText,
+    this.autoFocus = false,
+    this.textInputAction, this.onFieldSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+			onFieldSubmitted: onFieldSubmitted,
+      textInputAction: textInputAction,
+      autofocus: autoFocus,
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
