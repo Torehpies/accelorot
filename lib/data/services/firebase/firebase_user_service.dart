@@ -1,7 +1,4 @@
-import 'dart:js_interop';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/services/contracts/user_service.dart';
 
 class FirebaseUserService implements UserService {
@@ -18,7 +15,6 @@ class FirebaseUserService implements UserService {
   @override
   Stream<DocumentSnapshot<Map<String, dynamic>>> watchRawUserData(String id) {
     final result = firestore.collection('users').doc(id).snapshots();
-		debugPrint(result.toString());
 		return result;
   }
 }
