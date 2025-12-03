@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/data/services/contracts/user_service.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 
-class FirebaseUserService implements UserService {
+class FirebaseAppUserService implements AppUserService {
   final FirebaseFirestore firestore;
-  FirebaseUserService(this.firestore);
+  FirebaseAppUserService(this.firestore);
 
   @override
   Future<Map<String, dynamic>?> fetchRawUserData(String id) async {

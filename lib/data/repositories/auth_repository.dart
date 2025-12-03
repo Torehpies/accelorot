@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart' hide User;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/data/models/user.dart';
-import 'package:flutter_application_1/data/repositories/user_repository.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
@@ -9,8 +9,8 @@ import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
 abstract class AuthRepository {
-  Stream<User?> get authStateChanges;
-  User? get currentUser;
+  Stream<AppUser?> get authStateChanges;
+  AppUser? get currentUser;
   Future<Result<void, DataLayerError>> signIn({
     required String email,
     required String password,
@@ -29,11 +29,11 @@ abstract class AuthRepository {
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthService _authService;
-  final UserRepository _userRepository;
+  final AppUserRepository _userRepository;
   final PendingMemberService _pendingMemberService;
   final FirebaseAuth _firebaseAuth;
 
-  User? _lastKnownUser;
+  AppUser? _lastKnownUser;
 
   AuthRepositoryImpl(
     this._authService,
@@ -43,14 +43,14 @@ class AuthRepositoryImpl implements AuthRepository {
   );
 
   @override
-  Stream<User?> get authStateChanges {
+  Stream<AppUser?> get authStateChanges {
     return _authService.onAuthStateChanged.asyncMap((uid) async {
       if (uid == null) {
         _lastKnownUser = null;
         return null;
       }
 
-			User? fetchedUser;
+			AppUser? fetchedUser;
 
       try {
         final result = await _userRepository.getUser(uid);
@@ -79,7 +79,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  User? get currentUser => _lastKnownUser;
+  AppUser? get currentUser => _lastKnownUser;
 
   @override
   Future<Result<void, DataLayerError>> signIn({

@@ -2,12 +2,12 @@ import 'package:flutter_application_1/utils/timestamp_converter.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'user.freezed.dart';
-part 'user.g.dart';
+part 'app_user.freezed.dart';
+part 'app_user.g.dart';
 
 @freezed
-abstract class User with _$User {
-  const factory User({
+abstract class AppUser with _$AppUser {
+  const factory AppUser({
     required String uid,
     required String email,
     required String firstname,
@@ -17,7 +17,7 @@ abstract class User with _$User {
     @Default('') String teamId,
     @Default(UserStatus.unverified) UserStatus status,
     @TimestampConverter() required DateTime createdAt,
-  }) = _User;
+  }) = _AppUser;
 
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 }

@@ -1,42 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_application_1/data/models/user.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
-import 'package:flutter_application_1/data/services/contracts/user_service.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
-abstract class UserRepository {
-  Future<Result<User, DataLayerError>> getUser(String id);
-  Future<Result<void, DataLayerError>> createUserProfile({
-    required String uid,
-    required String email,
-    required String firstName,
-    required String lastName,
-    required String globalRole,
-    required String status,
-  });
-  User mapRawDataToDomain(Map<String, dynamic> rawData);
-}
-
-class UserRepositoryImpl implements UserRepository {
-  final UserService userService;
+class AppUserRepositoryRemote implements AppUserRepository {
+  final AppUserService userService;
   final AuthService authService;
   final FirebaseFirestore firestore;
 
-  UserRepositoryImpl(this.userService, this.authService, this.firestore);
+  AppUserRepositoryRemote(this.userService, this.authService, this.firestore);
 
   @override
-  User mapRawDataToDomain(Map<String, dynamic> rawData) {
+  AppUser mapRawDataToDomain(Map<String, dynamic> rawData) {
     final Timestamp timestamp = rawData['createdAt'] as Timestamp;
     final cleanMap = Map<String, dynamic>.from(rawData);
     cleanMap['createdAt'] = timestamp.toDate();
-    return User.fromJson(cleanMap);
+    return AppUser.fromJson(cleanMap);
   }
 
   @override
-  Future<Result<User, DataLayerError>> getUser(String id) async {
+  Future<Result<AppUser, DataLayerError>> getUser(String id) async {
     try {
       final rawData = await userService.fetchRawUserData(id);
       if (rawData == null) {
@@ -51,7 +39,7 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  Future<User?> getUserModel(String id) async {
+  Future<AppUser?> getUserModel(String id) async {
     try {
       final rawData = await userService.fetchRawUserData(id);
       if (rawData == null) {
