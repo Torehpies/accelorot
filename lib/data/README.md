@@ -15,7 +15,7 @@ services/
 | contracts/ -- abstract classes for services
 | | machine_service.dart
 | firebase/ -- implementations of contracts/services for firebase 
-| | firebase_machine_service.dart -- implementation of machine_service for firebase
+| | firebase_macAhine_service.dart -- implementation of machine_service for firebase
 | local/ -- implementations of contracts for local db
 | | local_machine_service.dart 
 
