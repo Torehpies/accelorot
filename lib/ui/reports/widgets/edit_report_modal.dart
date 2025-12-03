@@ -187,7 +187,7 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
 
             // Status
             DropdownButtonFormField<String>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: _buildInputDecoration('Status *'),
               items: _statusOptions.map((option) {
                 return DropdownMenuItem(
@@ -203,7 +203,7 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
 
             // Priority
             DropdownButtonFormField<String>(
-              value: _selectedPriority,
+              initialValue: _selectedPriority,
               decoration: _buildInputDecoration('Priority *'),
               items: _priorityOptions.map((option) {
                 return DropdownMenuItem(
