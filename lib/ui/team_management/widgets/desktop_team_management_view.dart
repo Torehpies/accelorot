@@ -6,6 +6,16 @@ class DesktopTeamManagementView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: TeamManagementLayout());
+    return Row(
+      children: [
+        Container(width: 200, color: Colors.grey),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: TeamManagementLayout(),
+          ),
+        ),
+      ],
+    );
   }
 }

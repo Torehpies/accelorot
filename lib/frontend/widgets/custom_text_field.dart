@@ -1,5 +1,5 @@
-// lib/widgets/custom_text_field.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
+  final String? labelText;
 
   const CustomTextField({
     super.key,
@@ -17,30 +18,30 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     this.keyboardType,
     this.validator,
+    this.labelText,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: Icon(prefixIcon, color: Colors.grey),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.teal, width: 2),
-          ),
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        prefixIcon: Icon(prefixIcon, color: Colors.grey),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        validator: validator,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(6),
+          borderSide: const BorderSide(color: Colors.teal, width: 2),
+        ),
       ),
+      validator: validator,
+      style: TextStyle(color: AppColors.textPrimary),
     );
   }
 }

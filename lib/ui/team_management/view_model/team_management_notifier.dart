@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
@@ -29,7 +27,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
     return const TeamManagementState();
   }
 
-  Future<void> getTeams() async {
+  Future<void> getTeams({bool forceRefresh = false}) async {
     state = state.copyWith(isLoadingTeams: true);
 
     final teamRepo = ref.read(teamRepositoryRemoteProvider);
@@ -73,17 +71,17 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
     final result = await _repository.addTeam(team);
 
     result.when(
-      success: (resultTeam) {
+      success: (resultTeam) async {
+				await getTeams(forceRefresh: true);
         state = state.copyWith(
-          teams: [...state.teams, resultTeam],
-          isLoadingTeams: false,
+          isSavingTeams: false,
           errorMessage: null,
           successMessage: 'Team $teamName added successfully!',
         );
       },
       failure: (e) {
         state = state.copyWith(
-          isLoadingTeams: false,
+          isSavingTeams: false,
           errorMessage: e.userFriendlyMessage,
           successMessage: null,
         );

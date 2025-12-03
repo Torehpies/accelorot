@@ -34,6 +34,10 @@ final ThemeData appTheme = ThemeData(
       fontWeight: FontWeight.bold,
       color: AppColors.textPrimary,
     ),
+    titleMedium: TextStyle(
+      fontSize: 16,
+      color: AppColors.textPrimary, // Use the dark text color
+    ),
     // Used for secondary text (e.g., "Sign in to continue")
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textSecondary),
   ),
