@@ -2,7 +2,8 @@ import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_members_providers.dart';
-import 'package:flutter_application_1/data/repositories/auth_repository.dart';
+import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository.dart';
+import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository_remote.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_auth_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -22,7 +23,7 @@ AuthRepository authRepository(Ref ref) {
   final pendingMemberService = ref.read(pendingMemberServiceProvider);
   final firebaseAuth = ref.read(firebaseAuthProvider);
 
-  return AuthRepositoryImpl(
+  return AuthRepositoryRemote(
     authService,
     userRepository,
     pendingMemberService,

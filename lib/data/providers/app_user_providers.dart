@@ -3,7 +3,7 @@ import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository_remote.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
-import 'package:flutter_application_1/data/services/firebase/firebase_user_service.dart';
+import 'package:flutter_application_1/data/services/firebase/firebase_app_user_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_user_providers.g.dart';
