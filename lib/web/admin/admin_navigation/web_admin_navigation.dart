@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
-import '../screens/web_admin_machine.dart';
+import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../screens/web_profile_screen.dart';
-import '../../../web/admin/screens/web_operator_management.dart';
+import '../screens/web_operator_management_screen.dart';
 
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
@@ -34,8 +34,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
         onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
       const OperatorManagementScreen(),
-
-      const WebMachineManagement(),
+      const WebAdminMachineView(),
       const WebProfileScreen(),
     ];
   }

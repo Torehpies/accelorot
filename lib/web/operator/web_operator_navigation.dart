@@ -4,8 +4,9 @@ import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../operator/screens/web_home_screen.dart';
 import 'screens/web_activity_logs_screen.dart';
 import '../../ui/web_statistics/web_statistics_screen.dart';
-import 'screens/web_operator_machine_screen.dart';
 import 'screens/operator_web_profile_screen.dart';
+import '../../ui/web_machine/widgets/operator/web_operator_machine_view.dart';
+
 
 class WebOperatorNavigation extends StatefulWidget {
   const WebOperatorNavigation({super.key});
@@ -34,7 +35,8 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
       WebHomeScreen(focusedMachine: null),
       const WebActivityLogsScreen(),
       const WebStatisticsScreen(),
-      WebOperatorMachineScreen(focusedMachine: null),
+      const WebOperatorMachineView(),
+      //WebOperatorMachineScreen(focusedMachine: null),
       const WebProfileScreen(),
     ];
   }
