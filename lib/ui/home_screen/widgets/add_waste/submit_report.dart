@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../data/services/contracts/waste/description_field.dart';
-import '../../../../data/services/contracts/waste/submit_button.dart';
-import '../../../../data/services/contracts/waste/machine_selection_field.dart';
-import '../../../../data/services/contracts/waste/report_type_field.dart';
-import '../../../../data/services/contracts/waste/report_title_field.dart';
-import '../../../../data/services/contracts/waste/priority_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/description_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/submit_button.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/machine_selection_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/report_type_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/report_title_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/priority_field.dart';
 // waste_config.dart & info_box.dart are imported internally — no need to import here
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 

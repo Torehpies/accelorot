@@ -1,15 +1,15 @@
 //add_waste_product.dart
 import 'package:flutter/material.dart';
-import '../../../../data/services/contracts/waste/waste_category_section.dart';
-import '../../../../data/services/contracts/waste/plant_type_section.dart';
-import '../../../../data/services/contracts/waste/quantity_field.dart';
-import '../../../../data/services/contracts/waste/description_field.dart';
-import '../../../../data/services/contracts/waste/submit_button.dart';
-import '../../../../data/services/contracts/waste/machine_selection_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/waste_category_section.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/plant_type_section.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/quantity_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/description_field.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/submit_button.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../../data/services/contracts/waste/waste_config.dart';
+import '../../../../frontend/operator/dashboard/add_waste/fields/waste_config.dart';
 
 class AddWasteProduct extends StatefulWidget {
   final String? preSelectedMachineId;

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../../../ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import '../../../../ui/home_screen/compost_progress_components/batch_complete_dialog.dart';
-import '../../../../data/models/compost/compost_batch_model.dart';
+import 'models/compost_batch_model.dart';
 
 class CompostingProgressCard extends StatelessWidget {
   static const int totalDays = 12; // Fixed 12-day cycle
