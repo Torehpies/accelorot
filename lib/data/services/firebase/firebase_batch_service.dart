@@ -1,4 +1,4 @@
-// lib/data/services/firebase/firestore_batch_service.dart
+// lib/data/services/firebase/firebase_batch_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';

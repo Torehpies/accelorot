@@ -7,6 +7,11 @@ import '../models/activity_filter_config.dart';
 import '../services/activity_aggregator_service.dart';
 import '../services/activity_filter_service.dart';
 import '../../../data/providers/activity_providers.dart';
+import 'substrate_config.dart';
+import 'alert_config.dart';
+import 'report_config.dart';
+import 'cycle_config.dart';
+import 'all_activity_config.dart';
 
 part 'activity_viewmodel.g.dart';
 
@@ -25,50 +30,11 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== CONFIGURATION MAP FOR ALL SCREEN TYPES =====
   
   static final Map<ActivityScreenType, ActivityFilterConfig> _configs = {
-    ActivityScreenType.substrates: ActivityFilterConfig(
-      screenTitle: 'Substrate Logs',
-      filters: const ['All', 'Greens', 'Browns', 'Compost'],
-      categoryMapper: CategoryMappers.simple(),
-      categoryHighlighter: CategoryHighlighters.simple(['Greens', 'Browns', 'Compost']),
-    ),
-    
-    ActivityScreenType.alerts: ActivityFilterConfig(
-      screenTitle: 'Alerts Logs',
-      filters: const ['All', 'Temperature', 'Moisture', 'Air Quality'],
-      categoryMapper: CategoryMappers.simple(),
-      categoryHighlighter: CategoryHighlighters.simple(['Temperature', 'Moisture', 'Oxygen']),
-    ),
-    
-    ActivityScreenType.reports: ActivityFilterConfig(
-      screenTitle: 'Reports',
-      filters: const ['All', 'Maintenance', 'Observation', 'Safety'],
-      categoryMapper: CategoryMappers.simple(),
-      categoryHighlighter: CategoryHighlighters.simple(['Maintenance', 'Observation', 'Safety']),
-    ),
-    
-    ActivityScreenType.cyclesRecom: ActivityFilterConfig(
-      screenTitle: 'Cycles & Recommendations',
-      filters: const ['All', 'Recoms', 'Cycles'],
-      categoryMapper: CategoryMappers.simple(),
-      categoryHighlighter: CategoryHighlighters.simple(['Recoms', 'Cycles']),
-    ),
-    
-    ActivityScreenType.allActivity: ActivityFilterConfig(
-      screenTitle: 'All Activity Logs',
-      filters: const ['All', 'Substrate', 'Alerts', 'Cycles', 'Reports'],
-      categoryMapper: CategoryMappers.grouped({
-        'Substrate': ['Greens', 'Browns', 'Compost'],
-        'Alerts': ['Temperature', 'Moisture', 'Oxygen'],
-        'Cycles': ['Recoms', 'Cycles'],
-        'Reports': ['Maintenance', 'Observation', 'Safety'],
-      }),
-      categoryHighlighter: CategoryHighlighters.grouped({
-        'Substrate': ['Greens', 'Browns', 'Compost'],
-        'Alerts': ['Temperature', 'Moisture', 'Oxygen'],
-        'Cycles': ['Recoms', 'Cycles'],
-        'Reports': ['Maintenance', 'Observation', 'Safety'],
-      }),
-    ),
+    ActivityScreenType.substrates: SubstratesConfig.config,
+    ActivityScreenType.alerts: AlertsConfig.config,
+    ActivityScreenType.reports: ReportsConfig.config,
+    ActivityScreenType.cyclesRecom: CyclesConfig.config,
+    ActivityScreenType.allActivity: AllActivityConfig.config,
   };
 
   late final ActivityAggregatorService _aggregator;
