@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../utils/theme_constants.dart';
+import '../../../ui/core/ui/theme_constants.dart';
 
 void showInvitationOverlay(
   BuildContext context,
