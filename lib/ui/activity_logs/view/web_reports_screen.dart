@@ -6,12 +6,10 @@ import '../widgets/web_activity_list_view.dart';
 
 /// Full reports list screen
 class WebReportsScreen extends StatelessWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const WebReportsScreen({
     super.key,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
@@ -19,7 +17,6 @@ class WebReportsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = ActivityParams(
       screenType: ActivityScreenType.reports,
-      viewingOperatorId: viewingOperatorId,
       focusedMachineId: focusedMachineId,
     );
 

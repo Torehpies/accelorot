@@ -6,12 +6,10 @@ import '../widgets/web_activity_list_view.dart';
 
 /// Full substrate list screen
 class WebSubstrateScreen extends StatelessWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const WebSubstrateScreen({
     super.key,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
@@ -19,7 +17,6 @@ class WebSubstrateScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = ActivityParams(
       screenType: ActivityScreenType.substrates,
-      viewingOperatorId: viewingOperatorId,
       focusedMachineId: focusedMachineId,
     );
 

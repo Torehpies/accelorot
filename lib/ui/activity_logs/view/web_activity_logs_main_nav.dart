@@ -9,17 +9,16 @@ import 'web_cycles_screen.dart';
 
 /// Main web activity logs screen with tab navigation
 class WebActivityLogsMainView extends StatefulWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const WebActivityLogsMainView({
     super.key,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
   @override
-  State<WebActivityLogsMainView> createState() => _WebActivityLogsMainViewState();
+  State<WebActivityLogsMainView> createState() =>
+      _WebActivityLogsMainViewState();
 }
 
 class _WebActivityLogsMainViewState extends State<WebActivityLogsMainView> {
@@ -70,7 +69,7 @@ class _WebActivityLogsMainViewState extends State<WebActivityLogsMainView> {
                 border: Border.all(color: Colors.grey.shade300, width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -134,7 +133,9 @@ class _WebActivityLogsMainViewState extends State<WebActivityLogsMainView> {
                     label,
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.grey[700],
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       fontSize: 14,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -151,31 +152,19 @@ class _WebActivityLogsMainViewState extends State<WebActivityLogsMainView> {
   Widget _buildContent() {
     return switch (_selectedTab) {
       'all' => WebDashboardScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-          onViewAll: (tab) => setState(() => _selectedTab = tab),
-        ),
+        focusedMachineId: widget.focusedMachineId,
+        onViewAll: (tab) => setState(() => _selectedTab = tab),
+      ),
       'substrate' => WebSubstrateScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-        ),
-      'alerts' => WebAlertsScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-        ),
-      'reports' => WebReportsScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-        ),
-      'cycles' => WebCyclesScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-        ),
+        focusedMachineId: widget.focusedMachineId,
+      ),
+      'alerts' => WebAlertsScreen(focusedMachineId: widget.focusedMachineId),
+      'reports' => WebReportsScreen(focusedMachineId: widget.focusedMachineId),
+      'cycles' => WebCyclesScreen(focusedMachineId: widget.focusedMachineId),
       _ => WebDashboardScreen(
-          viewingOperatorId: widget.viewingOperatorId,
-          focusedMachineId: widget.focusedMachineId,
-          onViewAll: (tab) => setState(() => _selectedTab = tab),
-        ),
+        focusedMachineId: widget.focusedMachineId,
+        onViewAll: (tab) => setState(() => _selectedTab = tab),
+      ),
     };
   }
 }

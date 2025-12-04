@@ -6,12 +6,10 @@ import '../widgets/web_activity_list_view.dart';
 
 /// Full alerts list screen
 class WebAlertsScreen extends StatelessWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const WebAlertsScreen({
     super.key,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
@@ -19,7 +17,6 @@ class WebAlertsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = ActivityParams(
       screenType: ActivityScreenType.alerts,
-      viewingOperatorId: viewingOperatorId,
       focusedMachineId: focusedMachineId,
     );
 

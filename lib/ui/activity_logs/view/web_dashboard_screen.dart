@@ -10,16 +10,10 @@ import '../widgets/web_activity_card.dart';
 
 /// Dashboard screen with preview sections
 class WebDashboardScreen extends ConsumerWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
   final Function(String)? onViewAll;
 
-  const WebDashboardScreen({
-    super.key,
-    this.viewingOperatorId,
-    this.focusedMachineId,
-    this.onViewAll,
-  });
+  const WebDashboardScreen({super.key, this.focusedMachineId, this.onViewAll});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +33,7 @@ class WebDashboardScreen extends ConsumerWidget {
           // Recent Activity (full width)
           _buildRecentActivitySection(context, ref),
           const SizedBox(height: 24),
-          
+
           // Three columns
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +46,7 @@ class WebDashboardScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           // Cycles (full width)
           _buildCyclesPreview(context, ref),
         ],
@@ -113,7 +107,7 @@ class WebDashboardScreen extends ConsumerWidget {
   Widget _buildRecentActivitySection(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.allActivity,
-      viewingOperatorId: viewingOperatorId,
+
       focusedMachineId: focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
@@ -132,7 +126,7 @@ class WebDashboardScreen extends ConsumerWidget {
   Widget _buildSubstratePreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.substrates,
-      viewingOperatorId: viewingOperatorId,
+
       focusedMachineId: focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
@@ -151,7 +145,7 @@ class WebDashboardScreen extends ConsumerWidget {
   Widget _buildAlertsPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.alerts,
-      viewingOperatorId: viewingOperatorId,
+
       focusedMachineId: focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
@@ -170,7 +164,7 @@ class WebDashboardScreen extends ConsumerWidget {
   Widget _buildReportsPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.reports,
-      viewingOperatorId: viewingOperatorId,
+
       focusedMachineId: focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
@@ -189,7 +183,6 @@ class WebDashboardScreen extends ConsumerWidget {
   Widget _buildCyclesPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.cyclesRecom,
-      viewingOperatorId: viewingOperatorId,
       focusedMachineId: focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
@@ -254,18 +247,13 @@ class WebDashboardScreen extends ConsumerWidget {
             ),
           ),
           const Divider(height: 1, color: Color.fromARGB(255, 243, 243, 243)),
-          
+
           if (isLoading)
-            const Padding(
-              padding: EdgeInsets.all(32),
-              child: WebLoadingState(),
-            )
+            const Padding(padding: EdgeInsets.all(32), child: WebLoadingState())
           else if (isEmpty)
             Padding(
               padding: const EdgeInsets.all(32),
-              child: WebEmptyState(
-                message: 'No ${title.toLowerCase()}',
-              ),
+              child: WebEmptyState(message: 'No ${title.toLowerCase()}'),
             )
           else
             ListView.builder(

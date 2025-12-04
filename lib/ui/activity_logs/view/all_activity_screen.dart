@@ -8,7 +8,6 @@ import 'base_activity_screen.dart';
 class AllActivityScreen extends BaseActivityScreen {
   const AllActivityScreen({
     super.key,
-    super.viewingOperatorId,
     super.focusedMachineId,
   });
 
@@ -19,7 +18,6 @@ class AllActivityScreen extends BaseActivityScreen {
 class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.allActivity,
-        viewingOperatorId: widget.viewingOperatorId,
         focusedMachineId: widget.focusedMachineId,
       );
 
@@ -63,9 +61,6 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
 
   @override
   Future<void> onRefresh() async {
-    await ref.read(activityViewModelProvider(_params).notifier).refresh(
-          widget.viewingOperatorId,
-          widget.focusedMachineId,
-        );
+    await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
 }

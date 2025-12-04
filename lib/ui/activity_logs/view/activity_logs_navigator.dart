@@ -11,19 +11,17 @@ import 'reports_screen.dart';
 /// Main navigator for Activity Logs tab with nested routing
 class ActivityLogsNavigator extends StatelessWidget {
   final String? focusedMachineId;
-  final String? viewingOperatorId;
 
   const ActivityLogsNavigator({
     super.key,
     this.focusedMachineId,
-    this.viewingOperatorId,
   });
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
       onGenerateRoute: (settings) {
-        // Route handler - passes focusedMachineId and viewingOperatorId to all screens
+        // Route handler - passes focusedMachineId to all screens
         Widget page;
         
         switch (settings.name) {
@@ -37,7 +35,6 @@ class ActivityLogsNavigator extends StatelessWidget {
           case '/all-activity':
             page = AllActivityScreen(
               focusedMachineId: focusedMachineId,
-              viewingOperatorId: viewingOperatorId,
             );
             break;
 
@@ -45,7 +42,6 @@ class ActivityLogsNavigator extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             page = SubstratesScreen(
               focusedMachineId: focusedMachineId,
-              viewingOperatorId: viewingOperatorId,
               initialFilter: args?['initialFilter'],
             );
             break;
@@ -54,7 +50,6 @@ class ActivityLogsNavigator extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             page = AlertsScreen(
               focusedMachineId: focusedMachineId,
-              viewingOperatorId: viewingOperatorId,
               initialFilter: args?['initialFilter'],
             );
             break;
@@ -63,7 +58,6 @@ class ActivityLogsNavigator extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             page = CyclesRecomScreen(
               focusedMachineId: focusedMachineId,
-              viewingOperatorId: viewingOperatorId,
               initialFilter: args?['initialFilter'],
             );
             break;
@@ -72,7 +66,6 @@ class ActivityLogsNavigator extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>?;
             page = ReportsScreen(
               focusedMachineId: focusedMachineId,
-              viewingOperatorId: viewingOperatorId,
               initialFilter: args?['initialFilter'],
             );
             break;

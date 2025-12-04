@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/activity_log_item.dart';
-import '../models/activity_list_state.dart';
 import '../view_model/activity_viewmodel.dart';
 import 'web_loading_state.dart';
 import 'web_empty_state.dart';
@@ -46,10 +44,7 @@ class _WebActivityListViewState extends ConsumerState<WebActivityListView> {
     if (state.hasError) {
       return WebErrorState(
         error: state.errorMessage ?? 'Unknown error',
-        onRetry: () => viewModel.refresh(
-          widget.params.viewingOperatorId,
-          widget.params.focusedMachineId,
-        ),
+        onRetry: () => viewModel.refresh(),
       );
     }
 

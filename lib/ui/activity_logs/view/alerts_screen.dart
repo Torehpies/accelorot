@@ -9,7 +9,6 @@ class AlertsScreen extends BaseActivityScreen {
   const AlertsScreen({
     super.key,
     super.initialFilter,
-    super.viewingOperatorId,
     super.focusedMachineId,
   });
 
@@ -21,7 +20,6 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.alerts,
         initialFilter: widget.initialFilter,
-        viewingOperatorId: widget.viewingOperatorId,
         focusedMachineId: widget.focusedMachineId,
       );
 
@@ -63,9 +61,6 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
 
   @override
   Future<void> onRefresh() async {
-    await ref.read(activityViewModelProvider(_params).notifier).refresh(
-          widget.viewingOperatorId,
-          widget.focusedMachineId,
-        );
+    await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
 }

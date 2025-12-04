@@ -6,12 +6,10 @@ import '../widgets/web_activity_list_view.dart';
 
 /// Full cycles list screen
 class WebCyclesScreen extends StatelessWidget {
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const WebCyclesScreen({
     super.key,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
@@ -19,7 +17,6 @@ class WebCyclesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = ActivityParams(
       screenType: ActivityScreenType.cyclesRecom,
-      viewingOperatorId: viewingOperatorId,
       focusedMachineId: focusedMachineId,
     );
 
