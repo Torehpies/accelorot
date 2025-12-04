@@ -220,7 +220,7 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
             // Machine (Read-only)
             TextField(
               controller: TextEditingController(
-                text: widget.report.machineName ?? widget.report.machineId,
+                text: widget.report.machineName, // ??widget.report.machineId ,
               ),
               decoration: _buildInputDecoration('Machine', readOnly: true),
               enabled: false,

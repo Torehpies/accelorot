@@ -131,7 +131,7 @@ class ReportCard extends StatelessWidget {
                       children: [
                         // Machine info
                         Text(
-                          'Machine: ${report.machineName ?? report.machineId}',
+                          'Machine: ${report.machineName }', //?? report.machineId}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black45,
