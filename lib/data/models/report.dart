@@ -71,8 +71,8 @@ abstract class Report with _$Report {
     };
   }
 
-  // ===== DATA LOGIC HELPERS (KEEP) =====
-
+  // ===== DATA LOGIC HELPERS =====
+  
   /// Check if report is resolved
   bool get isResolved => status.toLowerCase() == 'resolved';
 

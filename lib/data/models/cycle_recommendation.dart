@@ -53,8 +53,8 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     };
   }
 
-  // ===== HELPERS =====
-
+  // ===== DATA LOGIC HELPERS =====
+  
   /// Check if this is a recommendation
   bool get isRecommendation => category.toLowerCase() == 'recoms';
 
