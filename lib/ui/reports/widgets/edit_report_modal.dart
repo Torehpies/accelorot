@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../data/models/report_model.dart';
+import '../../../data/models/report.dart';
 import '../view_model/reports_notifier.dart';
 
 class EditReportModal extends ConsumerStatefulWidget {
-  final ReportModel report;
+  final Report report;
 
   const EditReportModal({
     super.key,
@@ -107,7 +107,7 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
     try {
       await ref.read(reportsProvider.notifier).updateReport(
             machineId: widget.report.machineId,
-            reportId: widget.report.reportId,
+            reportId: widget.report.id,
             title: title,
             description: description,
             status: _selectedStatus,

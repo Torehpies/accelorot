@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../data/models/report_model.dart';
+import '../../../data/models/report.dart';
 
 class ReportCard extends StatelessWidget {
-  final ReportModel report;
+  final Report report;
   final VoidCallback onTap;
 
   const ReportCard({

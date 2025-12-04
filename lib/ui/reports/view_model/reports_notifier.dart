@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../data/models/report_model.dart';
+import '../../../data/models/report.dart';
 import '../../../data/repositories/report_repository.dart';
 import '../../../data/providers/report_providers.dart';
 import '../../../services/sess_service.dart';
@@ -9,7 +9,7 @@ part 'reports_notifier.g.dart';
 enum SortOption { newest, oldest, priorityHighToLow }
 
 class ReportsState {
-  final List<ReportModel> reports;
+  final List<Report> reports;
   final bool isLoading;
   final String? errorMessage;
   final String searchQuery;
@@ -28,7 +28,7 @@ class ReportsState {
   });
 
   ReportsState copyWith({
-    List<ReportModel>? reports,
+    List<Report>? reports,
     bool? isLoading,
     String? errorMessage,
     String? searchQuery,
@@ -47,8 +47,8 @@ class ReportsState {
     );
   }
 
-  List<ReportModel> get filteredReports {
-    var filtered = List<ReportModel>.from(reports);
+  List<Report> get filteredReports {
+    var filtered = List<Report>.from(reports);
 
     // Apply filter chips
     if (selectedFilter != 'All') {
@@ -90,7 +90,7 @@ class ReportsState {
     return filtered;
   }
 
-  List<ReportModel> get displayedReports {
+  List<Report> get displayedReports {
     return filteredReports.take(displayLimit).toList();
   }
 

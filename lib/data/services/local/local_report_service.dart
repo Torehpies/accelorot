@@ -1,20 +1,25 @@
-import '../../models/report_model.dart';
+import '../../models/report.dart';
 import '../contracts/report_service.dart';
 
 /// TODO: Future local database for offline use
 class LocalReportService implements ReportService {
   @override
-  Future<List<ReportModel>> fetchReportsByTeam(String teamId) {
+  Future<List<Report>> fetchTeamReports() {
     throw UnimplementedError('Local database not yet implemented');
   }
 
   @override
-  Future<List<ReportModel>> fetchReportsByMachine(String machineId) {
+  Future<List<Report>> fetchReportsByTeam(String teamId) {
     throw UnimplementedError('Local database not yet implemented');
   }
 
   @override
-  Future<ReportModel?> fetchReportById(String machineId, String reportId) {
+  Future<List<Report>> fetchReportsForMachine(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
+  Future<Report?> fetchReportById(String machineId, String reportId) {
     throw UnimplementedError('Local database not yet implemented');
   }
 
@@ -34,12 +39,12 @@ class LocalReportService implements ReportService {
   }
 
   @override
-  Stream<List<ReportModel>> watchReportsByTeam(String teamId) {
+  Stream<List<Report>> watchReportsByTeam(String teamId) {
     throw UnimplementedError('Local database not yet implemented');
   }
 
   @override
-  Stream<List<ReportModel>> watchReportsByMachine(String machineId) {
+  Stream<List<Report>> watchReportsByMachine(String machineId) {
     throw UnimplementedError('Local database not yet implemented');
   }
 }
