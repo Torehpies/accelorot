@@ -1,23 +1,27 @@
-// lib/data/repositories/activity_repository.dart
+// lib/ui/activity_logs/services/activity_aggregator_service.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/activity_log_item.dart';
-import '../../ui/activity_logs/mappers/activity_presentation_mapper.dart';
-import 'substrate_repository.dart';
-import 'alert_repository.dart';
-import 'report_repository.dart';
-import 'cycle_repository.dart';
+import '../../../data/models/activity_log_item.dart';
+import '../../../data/repositories/substrate_repository.dart';
+import '../../../data/repositories/alert_repository.dart';
+import '../../../data/repositories/report_repository.dart';
+import '../../../data/repositories/cycle_repository.dart';
+import '../mappers/activity_presentation_mapper.dart';
 
-/// Repository that aggregates activities from multiple sources
-/// and transforms them to UI-ready models
-class ActivityRepository {
+/// Service that aggregates activities from multiple repositories
+/// and transforms them into UI-ready presentation models.
+/// 
+/// This is a presentation-layer service, not a data repository.
+/// It orchestrates data fetching from multiple sources and applies
+/// UI-specific transformations.
+class ActivityAggregatorService {
   final SubstrateRepository _substrateRepo;
   final AlertRepository _alertRepo;
   final ReportRepository _reportRepo;
   final CycleRepository _cycleRepo;
   final FirebaseAuth _auth;
 
-  ActivityRepository({
+  ActivityAggregatorService({
     required SubstrateRepository substrateRepo,
     required AlertRepository alertRepo,
     required ReportRepository reportRepo,
@@ -31,6 +35,7 @@ class ActivityRepository {
 
   // ===== USER MANAGEMENT =====
 
+  /// Check if a user is currently logged in
   Future<bool> isUserLoggedIn() async {
     final userId = _auth.currentUser?.uid;
     return userId != null && userId.isNotEmpty;
@@ -38,6 +43,7 @@ class ActivityRepository {
 
   // ===== FETCH & TRANSFORM METHODS =====
 
+  /// Fetch and transform substrate activities
   Future<List<ActivityLogItem>> getSubstrates() async {
     final substrates = await _substrateRepo.getTeamSubstrates();
     return substrates
@@ -45,6 +51,7 @@ class ActivityRepository {
         .toList();
   }
 
+  /// Fetch and transform alert activities
   Future<List<ActivityLogItem>> getAlerts() async {
     final alerts = await _alertRepo.getTeamAlerts();
     return alerts
@@ -52,6 +59,7 @@ class ActivityRepository {
         .toList();
   }
 
+  /// Fetch and transform report activities
   Future<List<ActivityLogItem>> getReports() async {
     final reports = await _reportRepo.getTeamReports();
     return reports
@@ -59,17 +67,19 @@ class ActivityRepository {
         .toList();
   }
 
+  /// Fetch and transform cycle & recommendation activities
   Future<List<ActivityLogItem>> getCyclesRecom() async {
     final cycles = await _cycleRepo.getTeamCycles();
     return cycles
-        .map(
-          (cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle),
-        )
+        .map((cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle))
         .toList();
   }
 
+  /// Fetch all activities from all sources and combine them
+  /// 
+  /// Returns a sorted list (newest first) containing all activity types
   Future<List<ActivityLogItem>> getAllActivities() async {
-    // Fetch all activity types in parallel
+    // Fetch all activity types in parallel for better performance
     final results = await Future.wait([
       getSubstrates(),
       getAlerts(),

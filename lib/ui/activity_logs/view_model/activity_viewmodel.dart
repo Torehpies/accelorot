@@ -3,9 +3,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/activity_list_state.dart';
-import '../../../data/repositories/activity_repository.dart';
-import '../../../data/providers/activity_providers.dart';
 import '../models/activity_filter_config.dart';
+import '../services/activity_aggregator_service.dart';
+import '../services/activity_filter_service.dart';
+import '../../../data/providers/activity_providers.dart';
 
 part 'activity_viewmodel.g.dart';
 
@@ -70,7 +71,8 @@ class ActivityViewModel extends _$ActivityViewModel {
     ),
   };
 
-  late final ActivityRepository _repository;
+  late final ActivityAggregatorService _aggregator;
+  late final ActivityFilterService _filterService;
   late final ActivityFilterConfig _config;
   late final ActivityScreenType _screenType;
 
@@ -78,7 +80,8 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   @override
   ActivityListState build(ActivityParams params) {
-    _repository = ref.read(activityRepositoryProvider);
+    _aggregator = ref.read(activityAggregatorProvider);
+    _filterService = ActivityFilterService();
     _screenType = params.screenType;
     _config = _configs[_screenType]!;
     
@@ -106,19 +109,19 @@ class ActivityViewModel extends _$ActivityViewModel {
   Future<List<ActivityLogItem>> _fetchData(String? viewingOperatorId) async {
     switch (_screenType) {
       case ActivityScreenType.substrates:
-        return await _repository.getSubstrates();
+        return await _aggregator.getSubstrates();
       
       case ActivityScreenType.alerts:
-        return await _repository.getAlerts();
+        return await _aggregator.getAlerts();
       
       case ActivityScreenType.reports:
-        return await _repository.getReports();
+        return await _aggregator.getReports();
       
       case ActivityScreenType.cyclesRecom:
-        return await _repository.getCyclesRecom();
+        return await _aggregator.getCyclesRecom();
       
       case ActivityScreenType.allActivity:
-        return await _repository.getAllActivities();
+        return await _aggregator.getAllActivities();
     }
   }
 
@@ -131,7 +134,7 @@ class ActivityViewModel extends _$ActivityViewModel {
     );
 
     try {
-      final isLoggedIn = await _repository.isUserLoggedIn();
+      final isLoggedIn = await _aggregator.isUserLoggedIn();
 
       if (!isLoggedIn) {
         state = state.copyWith(
@@ -154,7 +157,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== PUBLIC METHODS =====
 
-  /// Load activities from repository
+  /// Load activities from aggregator service
   Future<void> loadActivities(String? viewingOperatorId, String? focusedMachineId) async {
     try {
       List<ActivityLogItem> activities = await _fetchData(viewingOperatorId);  
@@ -216,60 +219,19 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== PRIVATE FILTERING LOGIC =====
 
   void _applyFilters() {
-    // Step 1: Apply date filter
-    final dateFiltered = _applyDateFilter(state.allActivities);
-
-    // Step 2: Apply search filter
-    final searchFiltered = _applySearchFilter(dateFiltered);
-
-    // Step 3: Compute auto-highlighted filters
-    final highlighted = _computeAutoHighlightedFilters(searchFiltered);
-
-    // Step 4: Apply category filter
-    final categoryFiltered = _applyCategoryFilter(searchFiltered);
+    final result = _filterService.applyAllFilters(
+      items: state.allActivities,
+      selectedFilter: state.selectedFilter,
+      searchQuery: state.searchQuery,
+      dateFilter: state.dateFilter,
+      config: _config,
+      isManualFilter: state.isManualFilter,
+    );
 
     state = state.copyWith(
-      filteredActivities: categoryFiltered,
-      autoHighlightedFilters: highlighted,
+      filteredActivities: result.filteredItems,
+      autoHighlightedFilters: result.highlightedFilters,
     );
-  }
-
-  List<ActivityLogItem> _applyDateFilter(List<ActivityLogItem> items) {  
-    if (!state.dateFilter.isActive) return items;
-
-    return items.where((item) {
-      return item.timestamp.isAfter(state.dateFilter.startDate!) &&
-          item.timestamp.isBefore(state.dateFilter.endDate!);
-    }).toList();
-  }
-
-  List<ActivityLogItem> _applySearchFilter(List<ActivityLogItem> items) {  
-    if (state.searchQuery.isEmpty) return items;
-
-    return items
-        .where((item) => item.matchesSearchQuery(state.searchQuery))
-        .toList();
-  }
-
-  Set<String> _computeAutoHighlightedFilters(List<ActivityLogItem> searchResults) {  
-    if (state.searchQuery.isEmpty) return {};
-
-    final categories = searchResults.map((item) => item.category).toSet();
-    return _config.categoryHighlighter(categories, _config.filters);
-  }
-
-  List<ActivityLogItem> _applyCategoryFilter(List<ActivityLogItem> items) {  
-    // If manual filter is set and not 'All', apply category filter
-    if (state.isManualFilter && state.selectedFilter != 'All') {
-      return _config.categoryMapper<ActivityLogItem>(
-        items,
-        state.selectedFilter,
-        (item) => item.category,
-      );
-    }
-
-    // If 'All' or no manual filter, show all search results
-    return items;
   }
 }
 
