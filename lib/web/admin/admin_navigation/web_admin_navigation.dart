@@ -32,7 +32,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
         onManageOperators: () => setState(() => _selectedIndex = 1),
         onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
-      const OperatorManagementScreen(),
+      OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
       const WebMachineManagement(),
       const WebProfileScreen(),
     ];

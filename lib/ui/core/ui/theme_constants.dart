@@ -1,9 +1,6 @@
-// lib/ui/core/ui/theme_constants.dart
-
 import 'package:flutter/material.dart';
 
 class ThemeConstants {
-  // Colors
   static const Color primaryColor = Color(0xFF2E7D32);
   static const Color tealColor = Color(0xFF008080);
   static Color tealShade50 = Colors.teal.shade50;
@@ -34,7 +31,6 @@ class ThemeConstants {
 
   static const Color borderColor = Color.fromARGB(255, 170, 169, 169);
 
-  // Border Radius
   static const double borderRadius6 = 6.0;
   static const double borderRadius8 = 8.0;
   static const double borderRadius10 = 10.0;
@@ -43,7 +39,6 @@ class ThemeConstants {
   static const double borderRadius20 = 20.0;
   static const double borderRadius24 = 24.0;
 
-  // Sizes
   static const double iconSize14 = 14.0;
   static const double iconSize15 = 15.0;
   static const double iconSize18 = 18.0;
@@ -56,11 +51,9 @@ class ThemeConstants {
   static const double avatarSize48 = 48.0;
   static const double avatarSize56 = 56.0;
 
-  // Animation
   static const int animationDuration = 300;
   static const Duration animationDurationMs = Duration(milliseconds: 300);
 
-  // Spacing
   static const double spacing4 = 4.0;
   static const double spacing8 = 8.0;
   static const double spacing10 = 10.0;
@@ -69,7 +62,6 @@ class ThemeConstants {
   static const double spacing20 = 20.0;
   static const double spacing24 = 24.0;
 
-  // Font Sizes
   static const double fontSize9 = 9.0;
   static const double fontSize11 = 11.0;
   static const double fontSize12 = 12.0;
@@ -81,7 +73,7 @@ class ThemeConstants {
   static const double fontSize20 = 20.0;
   static const double fontSize32 = 32.0;
 
-  // Border Radius Styles
+
   static BorderRadius borderRadiusCircular(double radius) {
     return BorderRadius.circular(radius);
   }

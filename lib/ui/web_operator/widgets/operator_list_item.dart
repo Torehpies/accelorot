@@ -1,7 +1,7 @@
 // lib/ui/web_operator/widgets/operator_list_item.dart
 
 import 'package:flutter/material.dart';
-import '../../../data/models/operator_view_model.dart';
+import '../../../data/models/operator_model.dart';
 import '../../core/ui/theme_constants.dart';
 
 class OperatorListItem extends StatelessWidget {

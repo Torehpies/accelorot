@@ -1,11 +1,18 @@
 // lib/ui/web_operator/view_modal/operator_management_view_model.dart
 
 import 'package:flutter/material.dart';
-import '../../../data/models/operator_view_model.dart';
-import '../../../data/services/contracts/operator_service.dart';
+import '../../../data/models/operator_model.dart';
+import '../../../data/repositories/operator_repository.dart';
 
 class OperatorManagementViewModel extends ChangeNotifier {
-  final OperatorService _operatorService = OperatorService();
+  final OperatorRepository _repository;
+  final String _teamId; // Add teamId field
+
+  OperatorManagementViewModel({
+    required OperatorRepository repository,
+    required String teamId,
+  })  : _repository = repository,
+        _teamId = teamId;
 
   List<OperatorModel> _operators = [];
   bool _loading = true;
@@ -70,7 +77,7 @@ class OperatorManagementViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _operators = await _operatorService.loadOperators();
+      _operators = await _repository.getOperators(_teamId);
       _loading = false;
       notifyListeners();
     } catch (e) {
@@ -83,7 +90,7 @@ class OperatorManagementViewModel extends ChangeNotifier {
   // Archive operator
   Future<bool> archiveOperator(OperatorModel operator) async {
     try {
-      await _operatorService.archiveOperator(operator.uid);
+      await _repository.archive(_teamId, operator.uid);
       await loadOperators();
       return true;
     } catch (e) {
@@ -98,7 +105,7 @@ class OperatorManagementViewModel extends ChangeNotifier {
     }
 
     try {
-      await _operatorService.restoreOperator(operator.uid);
+      await _repository.restore(_teamId, operator.uid);
       await loadOperators();
       return true;
     } catch (e) {
@@ -109,7 +116,7 @@ class OperatorManagementViewModel extends ChangeNotifier {
   // Remove operator permanently
   Future<bool> removeOperatorPermanently(OperatorModel operator) async {
     try {
-      await _operatorService.removeOperatorPermanently(operator.uid);
+      await _repository.remove(_teamId, operator.uid);
       await loadOperators();
       return true;
     } catch (e) {

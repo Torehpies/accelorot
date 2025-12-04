@@ -1,18 +1,24 @@
 // lib/ui/web_operator/view_modal/pending_members_view_model.dart
 
 import 'package:flutter/material.dart';
-import '../../../web/admin/models/pending_member_model.dart';
-import '../../../data/services/contracts/operator_service.dart';
+import '../../../data/repositories/operator_repository.dart';
 
 class PendingMembersViewModel extends ChangeNotifier {
-  final OperatorService _operatorService = OperatorService();
+  final OperatorRepository _repository;
+  final String _teamId;
 
-  List<PendingMemberModel> _pendingMembers = [];
+  PendingMembersViewModel({
+    required OperatorRepository repository,
+    required String teamId,
+  })  : _repository = repository,
+        _teamId = teamId;
+
+  List<Map<String, dynamic>> _pendingMembers = [];
   bool _loading = true;
   String? _error;
 
   // Getters
-  List<PendingMemberModel> get pendingMembers => _pendingMembers;
+  List<Map<String, dynamic>> get pendingMembers => _pendingMembers;
   bool get loading => _loading;
   String? get error => _error;
   bool get hasPendingMembers => _pendingMembers.isNotEmpty;
@@ -24,7 +30,7 @@ class PendingMembersViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _pendingMembers = await _operatorService.loadPendingMembers();
+      _pendingMembers = await _repository.getPendingMembers(_teamId);
       _loading = false;
       notifyListeners();
     } catch (e) {
@@ -43,7 +49,13 @@ class PendingMembersViewModel extends ChangeNotifier {
     final member = _pendingMembers[index];
 
     try {
-      await _operatorService.acceptPendingMember(member);
+      await _repository.accept(
+        teamId: _teamId,
+        requestorId: member['requestorId'] as String,
+        name: member['name'] as String,
+        email: member['email'] as String,
+        pendingDocId: member['id'] as String,
+      );
       _pendingMembers.removeAt(index);
       notifyListeners();
       return true;
@@ -61,7 +73,11 @@ class PendingMembersViewModel extends ChangeNotifier {
     final member = _pendingMembers[index];
 
     try {
-      await _operatorService.declinePendingMember(member);
+      await _repository.decline(
+        teamId: _teamId,
+        requestorId: member['requestorId'] as String,
+        pendingDocId: member['id'] as String,
+      );
       _pendingMembers.removeAt(index);
       notifyListeners();
       return true;
