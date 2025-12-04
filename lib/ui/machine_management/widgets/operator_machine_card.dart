@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
+import '../../../ui/web_machine/shared/machine_detail_row.dart';
 import 'machine_view_dialog.dart';
 
 class OperatorMachineCard extends StatelessWidget {
@@ -20,115 +21,160 @@ class OperatorMachineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('MMM dd, yyyy').format(machine.dateCreated);
+    final dateStr = DateFormat('MMM-dd-yyyy').format(machine.dateCreated);
+    final isArchived = machine.isArchived;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: machine.isArchived
-              ? Colors.grey.shade300
-              : Colors.teal.shade200,
-          width: 1,
+    return InkWell(
+      onTap: () => _showMachineDetails(context),
+      borderRadius: BorderRadius.circular(14),
+      child: Card(
+        elevation: 0,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: isArchived ? Colors.grey[100] : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: isArchived ? Colors.grey[300]! : Colors.grey[200]!,
+            width: 0.5,
+          ),
         ),
-      ),
-      child: InkWell(
-        onTap: () => _showMachineDetails(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: machine.isArchived
-                      ? Colors.grey.shade100
-                      : Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.precision_manufacturing,
-                  color: machine.isArchived
-                      ? Colors.grey.shade600
-                      : Colors.teal.shade700,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Details
-              Expanded(
-                child: Column(
+        child: Opacity(
+          opacity: isArchived ? 0.6 : 1.0,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row with Icon, Machine Name, and Status
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isArchived
+                            ? Colors.grey.shade300
+                            : Colors.teal.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.devices,
+                        color: isArchived
+                            ? Colors.grey.shade600
+                            : Colors.teal.shade700,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
                             machine.machineName,
                             style: TextStyle(
+                              fontWeight: FontWeight.w600,
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: machine.isArchived
-                                  ? Colors.grey.shade700
-                                  : Colors.black87,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (machine.isArchived) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              'ARCHIVED',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade700,
-                              ),
+                              color: isArchived
+                                  ? Colors.grey[700]
+                                  : Colors.black,
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'ID: ${machine.machineId}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Created: $dateStr',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade500,
+                    const SizedBox(width: 12),
+                    // Status Badge - Upper Right
+                    if (isArchived)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: Colors.red.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.block,
+                              size: 14,
+                              color: Colors.red.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Disabled',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: Colors.green.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Active',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 16),
 
-              // Arrow
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey.shade400,
-              ),
-            ],
+                // Machine Details
+                MachineDetailRow(
+                  label: 'Machine ID:',
+                  value: machine.machineId,
+                ),
+                const SizedBox(height: 8),
+                MachineDetailRow(
+                  label: 'Assigned User:',
+                  value: 'All Team Members',
+                ),
+                const SizedBox(height: 8),
+                MachineDetailRow(label: 'Date Created:', value: dateStr),
+              ],
+            ),
           ),
         ),
       ),
