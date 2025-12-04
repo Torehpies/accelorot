@@ -5,8 +5,9 @@ import '../../../frontend/operator/statistics/view_screens/temperature_stats_vie
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
 import '../../../frontend/operator/statistics/history/history.dart';
 import '../../../data/models/machine_model.dart';
-import '../../../data/services/firebase/firebase_machine_service.dart'; // Changed
-import '../../../data/repositories/machine_repository.dart'; // Added
+import '../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository_remote.dart'; 
 import '../../../services/sess_service.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
   void initState() {
     super.initState();
     _machineService = FirebaseMachineService();
-    _repository = MachineRepository(_machineService);
+    _repository = MachineRepositoryRemote(_machineService); 
     _loadMachines();
   }
 

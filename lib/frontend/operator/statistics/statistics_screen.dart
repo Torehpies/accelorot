@@ -8,7 +8,8 @@ import 'widgets/date_filter.dart';
 import 'history/history.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/services/firebase/firebase_machine_service.dart'; 
-import '../../../data/repositories/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   void initState() {
     super.initState();
     _machineService = FirebaseMachineService();
-    _repository = MachineRepository(_machineService);
+    _repository = MachineRepositoryRemote(_machineService); // Changed
     _loadMachines();
   }
 

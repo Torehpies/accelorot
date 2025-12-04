@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/machine_model.dart';
-import '../../../data/repositories/machine_repository.dart';
+import '../../../data/repositories/machine_repository/machine_repository.dart';
 import '../../../data/providers/machine_providers.dart';
 
 part 'admin_machine_notifier.g.dart';

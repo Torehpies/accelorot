@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/firebase/firebase_machine_service.dart';
-import '../repositories/machine_repository.dart';
+import '../repositories/machine_repository/machine_repository.dart';
+import '../repositories/machine_repository/machine_repository_remote.dart';
 import '../models/machine_model.dart';
 
 // Service Provider
@@ -11,7 +12,7 @@ final machineServiceProvider = Provider<FirebaseMachineService>((ref) {
 // Repository Provider
 final machineRepositoryProvider = Provider<MachineRepository>((ref) {
   final service = ref.watch(machineServiceProvider);
-  return MachineRepository(service);
+  return MachineRepositoryRemote(service); 
 });
 
 // Provider for machines by team

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../../data/models/machine_model.dart';
 import '../../../../../data/services/firebase/firebase_machine_service.dart'; 
-import '../../../../../data/repositories/machine_repository.dart';
+import '../../../../../data/repositories/machine_repository/machine_repository.dart';
+import '../../../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../../../services/sess_service.dart';
 
 class OperatorMachineController extends ChangeNotifier {
@@ -26,7 +27,7 @@ class OperatorMachineController extends ChangeNotifier {
     this.viewingOperatorId,
     MachineRepository? repository,
     FirebaseMachineService? service,
-  })  : _repository = repository ?? MachineRepository(FirebaseMachineService()),
+  })  : _repository = repository ?? MachineRepositoryRemote(FirebaseMachineService()), 
         _service = service ?? FirebaseMachineService();
 
   // ==================== GETTERS ====================
