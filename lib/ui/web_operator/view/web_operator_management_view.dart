@@ -1,20 +1,27 @@
-// lib/screens/operator_management_screen.dart
+// lib/ui/web_operator/view/web_operator_management_view.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/operator_management_controller.dart';
+import '../view_modal/operator_management_view_model.dart';
+import '../../../data/services/firebase/firebase_operator_service.dart';
+import '../../../data/repositories/operator_repository.dart';
 import '../widgets/operator_action_card.dart';
 import '../widgets/operator_list_item.dart';
 import '../widgets/operator_detail_panel.dart';
 import '../widgets/operator_empty_state.dart';
 import '../widgets/operator_error_state.dart';
 import '../widgets/operator_list_header.dart';
-import '../../utils/operator_dialogs.dart';
-import '../../utils/theme_constants.dart';
+import '../../core/ui/operator_dialogs.dart';
+import '../../core/ui/theme_constants.dart';
 import '../widgets/accept_operators_card.dart';
-import '../../../web/admin/widgets/add_operator_screen.dart';
+import '../widgets/add_operator_screen.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
-  const OperatorManagementScreen({super.key});
+  final String teamId; // Add teamId parameter
+  
+  const OperatorManagementScreen({
+    super.key,
+    required this.teamId,
+  });
 
   @override
   State<OperatorManagementScreen> createState() =>
@@ -22,12 +29,18 @@ class OperatorManagementScreen extends StatefulWidget {
 }
 
 class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
-  late OperatorManagementController _controller;
+  late OperatorManagementViewModel _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = OperatorManagementController();
+    // Create the service, repository, and viewmodel with proper dependencies
+    final service = FirebaseOperatorService();
+    final repository = OperatorRepositoryImpl(service);
+    _controller = OperatorManagementViewModel(
+      repository: repository,
+      teamId: widget.teamId, // Use teamId from widget
+    );
     _controller.addListener(_onControllerUpdate);
     _controller.loadOperators();
   }
@@ -64,7 +77,9 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     showDialog(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) => const AcceptOperatorsScreen(),
+      builder: (context) => AcceptOperatorsScreen(
+        teamId: widget.teamId, // Pass teamId to dialog
+      ),
     ).then((_) => _controller.loadOperators());
   }
 
@@ -155,29 +170,21 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           'Operator Management',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        // 🖌️ APP BAR ICONS (e.g., back button) inherit from AppBar brightness or iconTheme
-        // To customize: use `iconTheme: IconThemeData(color: Colors.white)`
       ),
       body: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacing12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Action Cards Row - Always visible
             SizedBox(height: 100, child: _buildActionCards()),
             const SizedBox(height: ThemeConstants.spacing12),
-
-            // Main Content Area
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left Side - Operator List
                   Expanded(child: _buildOperatorList()),
-                  // Spacing
                   if (_controller.selectedOperator != null)
                     const SizedBox(width: ThemeConstants.spacing12),
-                  // Right Side - Detail Panel
                   if (_controller.selectedOperator != null)
                     SizedBox(
                       width: 320,
@@ -209,9 +216,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.archivedCount,
             onPressed: () => _controller.setShowArchived(true),
             showCountBelow: true,
-            // 🖌️ ICON COLOR: orange (from theme)
             iconBackgroundColor: ThemeConstants.orangeShade50,
-            iconColor: ThemeConstants.orangeShade600, // ← Icon tint color
+            iconColor: ThemeConstants.orangeShade600,
             isActive: _controller.showArchived,
           ),
         ),
@@ -223,9 +229,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAddOperatorDialog,
             showCountBelow: false,
-            // 🖌️ ICON COLOR: blue (from theme)
             iconBackgroundColor: ThemeConstants.blueShade50,
-            iconColor: ThemeConstants.blueShade600, // ← Icon tint color
+            iconColor: ThemeConstants.blueShade600,
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -236,9 +241,8 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: null,
             onPressed: _showAcceptOperatorDialog,
             showCountBelow: false,
-            // 🖌️ ICON COLOR: green (from theme)
             iconBackgroundColor: ThemeConstants.greenShade50,
-            iconColor: ThemeConstants.greenShade600, // ← Icon tint color
+            iconColor: ThemeConstants.greenShade600,
           ),
         ),
         const SizedBox(width: ThemeConstants.spacing12),
@@ -249,8 +253,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
             count: _controller.activeCount,
             onPressed: () => _controller.setShowArchived(false),
             showCountBelow: true,
-            // 🖌️ ICON COLOR: default (likely teal or primary) — check OperatorActionCard implementation
-            // If no iconColor is passed, it may use a default (e.g., ThemeConstants.tealShade700)
             isActive: !_controller.showArchived,
           ),
         ),
@@ -267,7 +269,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
       ),
       child: Column(
         children: [
-          // Header (may contain search icon, refresh icon, etc.)
           OperatorListHeader(
             showArchived: _controller.showArchived,
             searchQuery: _controller.searchQuery,
@@ -278,7 +279,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
                 : null,
           ),
           const Divider(height: 1),
-          // Content
           Expanded(child: _buildListContent()),
         ],
       ),
@@ -323,8 +323,6 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
           operator: operator,
           isSelected: isSelected,
           onTap: () => _controller.setSelectedOperator(operator),
-          // 🖌️ ICON COLOR inside OperatorListItem: likely defined in that widget
-          // (e.g., status icon, avatar fallback icon)
         );
       },
     );

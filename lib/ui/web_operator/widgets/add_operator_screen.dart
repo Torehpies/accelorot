@@ -1,7 +1,7 @@
-// lib/screens/add_operator_screen.dart
+// lib/ui/web_operator/widgets/add_operator_screen.dart
 
 import 'package:flutter/material.dart';
-import '../../utils/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class AddOperatorScreen extends StatefulWidget {
   const AddOperatorScreen({super.key});

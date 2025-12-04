@@ -1,25 +1,37 @@
-// lib/screens/accept_operators_screen.dart
+// lib/ui/web_operator/widgets/accept_operators_card.dart
 
 import 'package:flutter/material.dart';
-import '../controllers/pending_members_controller.dart';
-import '../../utils/theme_constants.dart';
-import '../../utils/operator_dialogs.dart';
-import '../models/pending_member_model.dart';
+import '../view_modal/pending_members_view_model.dart';
+import '../../../data/services/firebase/firebase_operator_service.dart';
+import '../../../data/repositories/operator_repository.dart';
+import '../../core/ui/theme_constants.dart';
+import '../../core/ui/operator_dialogs.dart';
 
 class AcceptOperatorsScreen extends StatefulWidget {
-  const AcceptOperatorsScreen({super.key});
+  final String teamId; 
+  
+  const AcceptOperatorsScreen({
+    super.key,
+    required this.teamId,
+  });
 
   @override
   State<AcceptOperatorsScreen> createState() => _AcceptOperatorsScreenState();
 }
 
 class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
-  late PendingMembersController _controller;
+  late PendingMembersViewModel _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = PendingMembersController();
+    // Create the service, repository, and viewmodel with proper dependencies
+    final service = FirebaseOperatorService();
+    final repository = OperatorRepositoryImpl(service);
+    _controller = PendingMembersViewModel(
+      repository: repository,
+      teamId: widget.teamId, // Use teamId from widget
+    );
     _controller.addListener(_onControllerUpdate);
     _controller.loadPendingMembers();
   }
@@ -39,6 +51,8 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
 
   Future<void> _acceptInvitation(int index) async {
     final member = _controller.pendingMembers[index];
+    final memberName = member['name'] as String? ?? 'Unknown'; // Extract name from Map
+    
     final success = await _controller.acceptInvitation(index);
 
     if (!mounted) return;
@@ -46,7 +60,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
     if (success) {
       OperatorDialogs.showSuccessSnackbar(
         context,
-        '✅ Accepted ${member.name} to the team',
+        '✅ Accepted $memberName to the team',
       );
     } else {
       OperatorDialogs.showErrorSnackbar(context, 'Error accepting invitation');
@@ -55,6 +69,8 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
 
   Future<void> _declineInvitation(int index) async {
     final member = _controller.pendingMembers[index];
+    final memberName = member['name'] as String? ?? 'Unknown'; // Extract name from Map
+    
     final success = await _controller.declineInvitation(index);
 
     if (!mounted) return;
@@ -62,7 +78,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
     if (success) {
       OperatorDialogs.showWarningSnackbar(
         context,
-        'Declined invitation from ${member.name}',
+        'Declined invitation from $memberName',
       );
     } else {
       OperatorDialogs.showErrorSnackbar(context, 'Error declining invitation');
@@ -74,7 +90,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(ThemeConstants.spacing24),
-      // Main Dialog Container
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450, maxHeight: 500),
         decoration: BoxDecoration(
@@ -83,7 +98,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
         ),
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.all(ThemeConstants.spacing24),
               child: Column(
@@ -126,7 +140,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
               ),
             ),
             const Divider(height: 1),
-            // Content
             Expanded(child: _buildContent()),
           ],
         ),
@@ -222,8 +235,26 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
     );
   }
 
-  Widget _buildPendingMemberCard(PendingMemberModel member, int index) {
-    // Pending Member Card Container
+  Widget _buildPendingMemberCard(Map<String, dynamic> member, int index) {
+    // Extract data from Map
+    final name = member['name'] as String? ?? 'Unknown';
+    final email = member['email'] as String? ?? '';
+    final requestedAt = member['requestedAt'] as DateTime?;
+    
+    String requestedText = 'Requested: ';
+    if (requestedAt != null) {
+      final difference = DateTime.now().difference(requestedAt);
+      if (difference.inDays > 0) {
+        requestedText += '${difference.inDays}d ago';
+      } else if (difference.inHours > 0) {
+        requestedText += '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        requestedText += '${difference.inMinutes}m ago';
+      } else {
+        requestedText += 'Just now';
+      }
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -233,7 +264,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
         padding: const EdgeInsets.all(ThemeConstants.spacing16),
         child: Row(
           children: [
-            // Avatar Container
             Container(
               width: ThemeConstants.avatarSize48,
               height: ThemeConstants.avatarSize48,
@@ -250,13 +280,12 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
               ),
             ),
             const SizedBox(width: ThemeConstants.spacing16),
-            // User Info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    member.name,
+                    name,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: ThemeConstants.fontSize14,
@@ -265,7 +294,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
                   ),
                   const SizedBox(height: ThemeConstants.spacing4),
                   Text(
-                    member.email,
+                    email,
                     style: TextStyle(
                       fontSize: ThemeConstants.fontSize12,
                       color: ThemeConstants.greyShade600,
@@ -273,7 +302,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
                   ),
                   const SizedBox(height: ThemeConstants.spacing4),
                   Text(
-                    'Requested: ',
+                    requestedText,
                     style: TextStyle(
                       fontSize: ThemeConstants.fontSize11,
                       color: ThemeConstants.greyShade500,
@@ -283,7 +312,6 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
               ),
             ),
             const SizedBox(width: ThemeConstants.spacing12),
-            // Action Buttons
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [

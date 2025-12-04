@@ -1,10 +1,7 @@
-// lib/utils/operator_dialogs.dart
-
 import 'package:flutter/material.dart';
 import 'theme_constants.dart';
 
 class OperatorDialogs {
-  // Show archive confirmation dialog
   static Future<bool?> showArchiveConfirmation(
     BuildContext context,
     String operatorName,
@@ -40,7 +37,7 @@ class OperatorDialogs {
     );
   }
 
-  // Show remove permanently confirmation dialog
+  
   static Future<bool?> showRemovePermanentlyConfirmation(
     BuildContext context,
     String operatorName,
@@ -91,7 +88,6 @@ class OperatorDialogs {
     );
   }
 
-  // Show success snackbar
   static void showSuccessSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
 
@@ -104,7 +100,6 @@ class OperatorDialogs {
     );
   }
 
-  // Show error snackbar
   static void showErrorSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
 
@@ -117,7 +112,6 @@ class OperatorDialogs {
     );
   }
 
-  // Show warning snackbar
   static void showWarningSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
 
@@ -130,7 +124,6 @@ class OperatorDialogs {
     );
   }
 
-  // Show info snackbar
   static void showInfoSnackbar(BuildContext context, String message) {
     if (!context.mounted) return;
 

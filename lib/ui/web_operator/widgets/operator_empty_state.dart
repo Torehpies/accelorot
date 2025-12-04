@@ -1,7 +1,7 @@
-// lib/widgets/operator_empty_state.dart
+// lib/ui/web_operator/widgets/operator_empty_state.dart
 
 import 'package:flutter/material.dart';
-import '../../utils/theme_constants.dart';
+import '../../core/ui/theme_constants.dart';
 
 class OperatorEmptyState extends StatelessWidget {
   final bool isSearching;
