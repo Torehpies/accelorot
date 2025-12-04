@@ -1,7 +1,7 @@
 // lib/widgets/operator_search_bar.dart
 
 import 'package:flutter/material.dart';
-import '../../utils/theme_constants.dart';
+import '../../../ui/core/ui/theme_constants.dart';
 
 class OperatorSearchBar extends StatelessWidget {
   final String searchQuery;
