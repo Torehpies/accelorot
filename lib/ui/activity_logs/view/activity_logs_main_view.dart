@@ -140,10 +140,10 @@ class ActivityLogsScreen extends StatelessWidget {
                                 filters: const [
                                   FilterConfig(
                                     icon: Icons.thermostat,
-                                    label: 'Temp',
+                                    label: 'Temperature',
                                     filterValue: 'Temp',
                                     route: '/alerts',
-                                    initialFilterArg: 'Temp',
+                                    initialFilterArg: 'Temperature',
                                   ),
                                   FilterConfig(
                                     icon: Icons.water_drop,

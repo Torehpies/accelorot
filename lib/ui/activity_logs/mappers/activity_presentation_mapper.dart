@@ -125,11 +125,11 @@ class ActivityPresentationMapper {
   static String _getReportDisplayType(String reportType) {
     switch (reportType.toLowerCase()) {
       case 'maintenance_issue':
-        return 'Maintenance Issue';
+        return 'Maintenance';
       case 'observation':
         return 'Observation';
       case 'safety_concern':
-        return 'Safety Concern';
+        return 'Safety';
       default:
         return 'Unknown';
     }
