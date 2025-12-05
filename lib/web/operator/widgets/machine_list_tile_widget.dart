@@ -1,6 +1,6 @@
 // lib/frontend/operator/machine_management/widgets/machine_list_tile_widget.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart'
+import 'package:flutter_application_1/data/models/machine_model.dart'
     show MachineModel;
 
 class MachineListTileWidget extends StatelessWidget {
