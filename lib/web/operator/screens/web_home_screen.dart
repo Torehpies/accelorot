@@ -3,16 +3,18 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/home_screen/widgets/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/ui/home_screen/widgets/add_waste/submit_report.dart';
-import 'package:flutter_application_1/ui/home_screen/widgets/composting_progress_card.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/submit_report.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/composting_progress_card.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
-import 'package:flutter_application_1/ui/home_screen/widgets/system_card.dart';
-import 'package:flutter_application_1/ui/home_screen/widgets/activity_logs_card.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/cycles/system_card.dart';
+import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 
 class WebHomeScreen extends StatefulWidget {
-  const WebHomeScreen({super.key, required MachineModel? focusedMachine});
+  final MachineModel? focusedMachine; 
+
+  const WebHomeScreen({super.key, this.focusedMachine}); 
 
   @override
   State<WebHomeScreen> createState() => _WebHomeScreenState();
@@ -96,7 +98,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     if (action == 'add_waste') {
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (context) => const AddWasteProduct(),
+        builder: (context) => AddWasteProduct(
+          preSelectedMachineId: widget.focusedMachine?.machineId,
+        ),
       );
 
       if (result != null && mounted) {
@@ -111,7 +115,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     } else if (action == 'submit_report') {
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
-        builder: (context) => const SubmitReport(),
+        builder: (context) => SubmitReport(
+          preSelectedMachineId: widget.focusedMachine?.machineId, 
+        ),
       );
 
       if (result != null && mounted) {
@@ -267,7 +273,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 children: [
                                   ActivityLogsCard(
                                     key: _activityLogsKey,
-                                    focusedMachineId: null,
+                                    focusedMachineId: widget.focusedMachine?.machineId,
                                   ),
                                   Positioned(
                                     bottom: 16,

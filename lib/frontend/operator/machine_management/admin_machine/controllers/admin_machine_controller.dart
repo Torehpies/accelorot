@@ -1,10 +1,22 @@
-// lib/frontend/operator/machine_management/admin_machine/controllers/admin_machine_controller.dart
-
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
-import '../../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../../data/models/machine_model.dart';
+import '../../../../../data/repositories/machine_repository/machine_repository.dart';
+import '../../../../../data/repositories/machine_repository/machine_repository_remote.dart';
+import '../../../../../data/services/firebase/firebase_machine_service.dart';
 
 class AdminMachineController extends ChangeNotifier {
+  // ==================== DEPENDENCIES ====================
+  
+  final MachineRepository _repository;
+  final FirebaseMachineService _service;
+
+  AdminMachineController({
+    MachineRepository? repository,
+    FirebaseMachineService? service,
+  })  : _repository = repository ?? MachineRepositoryRemote(FirebaseMachineService()), // Changed
+        _service = service ?? FirebaseMachineService();
+
+
   // ==================== STATE ====================
 
   List<MachineModel> _allMachines = [];
@@ -65,19 +77,15 @@ class AdminMachineController extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
+    
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      _isAuthenticated = currentUserId != null;
-
-      // Upload mock data if needed (works without auth)
-      await FirestoreMachineService.uploadAllMockMachines();
+      _isAuthenticated = _service.currentUserId != null;
 
       if (_isAuthenticated) {
-        // Admin is logged in - fetch their team's machines
-        await _fetchMachinesByTeamId(currentUserId!);
+        await _fetchMachinesByTeamId(_service.currentUserId!);
       } else {
-        // Not logged in - show all machines for preview
-        await _fetchAllMachines();
+        // Not authenticated - fetch all for preview
+        _allMachines = await _repository.getMachinesByTeam('');
       }
 
       _isLoading = false;
@@ -93,18 +101,7 @@ class AdminMachineController extends ChangeNotifier {
 
   Future<void> _fetchMachinesByTeamId(String teamId) async {
     try {
-      _allMachines = await FirestoreMachineService.getMachinesByTeamId(teamId);
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Failed to fetch machines: $e';
-      notifyListeners();
-    }
-  }
-
-  Future<void> _fetchAllMachines() async {
-    try {
-      // Fetch all machines for preview when not authenticated
-      _allMachines = await FirestoreMachineService.getAllMachines();
+      _allMachines = await _repository.getMachinesByTeam(teamId);
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to fetch machines: $e';
@@ -114,16 +111,14 @@ class AdminMachineController extends ChangeNotifier {
 
   Future<void> refresh() async {
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      _isAuthenticated = currentUserId != null;
+      _isAuthenticated = _service.currentUserId != null;
 
       if (_isAuthenticated) {
-        await _fetchMachinesByTeamId(currentUserId!);
+        await _fetchMachinesByTeamId(_service.currentUserId!);
       } else {
-        await _fetchAllMachines();
+        _allMachines = await _repository.getMachinesByTeam('');
       }
 
-      // ✅ Force UI update after refresh
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to refresh: $e';
@@ -167,35 +162,32 @@ class AdminMachineController extends ChangeNotifier {
 
   // ==================== CRUD OPERATIONS ====================
 
-  /// Add new machine (auto-sets teamId to admin's UID)
+  /// Add new machine
   Future<void> addMachine({
     required String machineName,
     required String machineId,
   }) async {
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      if (currentUserId == null) {
+      if (!_isAuthenticated) {
         throw Exception('You must be logged in to add machines');
       }
 
+      final currentUserId = _service.currentUserId!;
+
       // Check if machine ID already exists
-      final exists = await FirestoreMachineService.machineExists(machineId);
+      final exists = await _repository.checkMachineExists(machineId);
       if (exists) {
         throw Exception('Machine ID "$machineId" already exists');
       }
 
-      final machine = MachineModel(
-        machineName: machineName,
+      final request = CreateMachineRequest(
         machineId: machineId,
-        userId: '', // No longer used - machines are team-wide
-        teamId: currentUserId, // Auto-set to admin's UID
-        dateCreated: DateTime.now(),
-        isArchived: false,
+        machineName: machineName,
+        teamId: currentUserId,
       );
 
-      await FirestoreMachineService.addMachine(machine);
+      await _repository.createMachine(request);
 
-      // Delay before refresh
       await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
     } catch (e) {
@@ -205,30 +197,23 @@ class AdminMachineController extends ChangeNotifier {
     }
   }
 
-  /// Update existing machine (can change name only)
+  /// Update existing machine
   Future<void> updateMachine({
     required String machineId,
     required String machineName,
   }) async {
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      if (currentUserId == null) {
+      if (!_isAuthenticated) {
         throw Exception('You must be logged in to update machines');
       }
 
-      // Find the existing machine to preserve immutable fields
-      final existingMachine = _allMachines.firstWhere(
-        (m) => m.machineId == machineId,
-      );
-
-      final updatedMachine = existingMachine.copyWith(
+      final request = UpdateMachineRequest(
+        machineId: machineId,
         machineName: machineName,
-        userId: '',
       );
 
-      await FirestoreMachineService.updateMachine(updatedMachine);
+      await _repository.updateMachine(request);
 
-      // Delay before refresh
       await Future.delayed(const Duration(milliseconds: 1000));
       await refresh();
     } catch (e) {
@@ -240,15 +225,12 @@ class AdminMachineController extends ChangeNotifier {
 
   Future<void> archiveMachine(String machineId) async {
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      if (currentUserId == null) {
+      if (!_isAuthenticated) {
         throw Exception('You must be logged in to archive machines');
       }
 
-      await FirestoreMachineService.deleteMachine(machineId);
-
+      await _repository.archiveMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));
-
       await refresh();
     } catch (e) {
       _errorMessage = 'Failed to archive machine: $e';
@@ -259,15 +241,12 @@ class AdminMachineController extends ChangeNotifier {
 
   Future<void> restoreMachine(String machineId) async {
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      if (currentUserId == null) {
+      if (!_isAuthenticated) {
         throw Exception('You must be logged in to restore machines');
       }
 
-      await FirestoreMachineService.restoreMachine(machineId);
-
+      await _repository.restoreMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));
-
       await refresh();
     } catch (e) {
       _errorMessage = 'Failed to restore machine: $e';
@@ -283,10 +262,10 @@ class AdminMachineController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Check if a machine ID already exists (used by AddMachineModal)
+  /// Check if a machine ID already exists
   Future<bool> machineExists(String machineId) async {
     try {
-      return await FirestoreMachineService.machineExists(machineId);
+      return await _repository.checkMachineExists(machineId);
     } catch (e) {
       debugPrint('Error checking machine existence: $e');
       return false;

@@ -8,12 +8,32 @@ abstract class ReportService {
   /// Handles authentication and team resolution internally
   Future<List<Report>> fetchTeamReports();
   
+  /// Fetch all reports for a specific team (admin use)
+  Future<List<Report>> fetchReportsByTeam(String teamId);
+  
   /// Fetch reports for a specific machine
   /// @param machineId - the machine identifier
   Future<List<Report>> fetchReportsForMachine(String machineId);
   
-  /// Submit a new report
-  /// Handles authentication internally
-  /// @param reportEntry - report data
-  Future<void> submitReport(Map<String, dynamic> reportEntry);
+  /// Fetch a single report by ID
+  Future<Report?> fetchReportById(String machineId, String reportId);
+  
+  /// Create a new report
+  /// @param machineId - the machine identifier
+  /// @param request - report creation data
+  Future<void> createReport(String machineId, CreateReportRequest request);
+  
+  /// Update an existing report
+  /// @param machineId - the machine identifier
+  /// @param request - report update data
+  Future<void> updateReport(String machineId, UpdateReportRequest request);
+  
+  /// Delete a report
+  Future<void> deleteReport(String machineId, String reportId);
+  
+  /// Stream of reports for real-time updates (team-wide)
+  Stream<List<Report>> watchReportsByTeam(String teamId);
+  
+  /// Stream of reports for a specific machine
+  Stream<List<Report>> watchReportsByMachine(String machineId);
 }

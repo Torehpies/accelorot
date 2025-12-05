@@ -6,8 +6,10 @@ import 'view_screens/moisture_stats_view.dart';
 import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
 import 'history/history.dart';
-import '../machine_management/models/machine_model.dart';
-import '../../../services/machine_services/firestore_machine_service.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -28,14 +30,20 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   DateTimeRange? _selectedRange;
   String _selectedFilterLabel = "Date Filter";
   List<MachineModel> _machines = [];
-  List<MachineModel> _filteredMachines = []; // 🔹 For search filtering
+  List<MachineModel> _filteredMachines = [];
   bool _isLoading = true;
   String? _errorMessage;
-  String _searchQuery = ""; // 🔹 Current search query
+  String _searchQuery = "";
+  
+  // Add these
+  late final FirebaseMachineService _machineService;
+  late final MachineRepository _repository;
 
   @override
   void initState() {
     super.initState();
+    _machineService = FirebaseMachineService();
+    _repository = MachineRepositoryRemote(_machineService); // Changed
     _loadMachines();
   }
 
@@ -55,10 +63,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         return;
       }
 
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
+      final currentUserId = _machineService.currentUserId;
 
       if (widget.focusedMachineId != null) {
-        final allMachines = await FirestoreMachineService.getAllMachines();
+        // Get all machines and filter for the focused one
+        final allMachines = await _repository.getMachinesByTeam('');
         _machines = allMachines
             .where((m) => m.machineId == widget.focusedMachineId)
             .toList();
@@ -68,18 +77,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           final userData = await sessionService.getCurrentUserData();
           final teamId = userData?['teamId'] as String?;
           if (teamId != null && teamId.isNotEmpty) {
-            _machines = await FirestoreMachineService.getMachinesByTeamId(
-              teamId,
-            );
+            _machines = await _repository.getMachinesByTeam(teamId);
           } else {
-            _machines = await FirestoreMachineService.getAllMachines();
+            _machines = await _repository.getMachinesByTeam('');
           }
         } else {
-          _machines = await FirestoreMachineService.getAllMachines();
+          _machines = await _repository.getMachinesByTeam('');
         }
       }
 
-      _filteredMachines = _machines; // 🔹 Initialize filtered list
+      _filteredMachines = _machines;
 
       setState(() {
         _isLoading = false;
@@ -118,11 +125,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       _selectedRange = null;
       _selectedFilterLabel = "Date Filter";
       _searchQuery = "";
-      _filteredMachines = _machines; // 🔹 Reset search filter
+      _filteredMachines = _machines;
     });
   }
 
-  // 🔹 Handle search input changes
   void _onSearchChanged(String query) {
     setState(() {
       _searchQuery = query;
@@ -249,7 +255,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
-        // ⭐ Only show summary header when NOT in machine view
         if (widget.focusedMachineId == null)
           Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -295,7 +300,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-        // 🔹 SEARCH BAR
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
           child: TextField(
@@ -317,14 +321,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           ),
         ),
 
-        // Machine Statistics Cards
         ..._filteredMachines.map((machine) => _buildMachineSection(machine)),
       ],
     );
   }
 
   Widget _buildMachineSection(MachineModel machine) {
-    // ⭐ Simplified card for machine view (no header needed)
     if (widget.focusedMachineId != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -340,7 +342,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       );
     }
 
-    // ⭐ Full card with header for multi-machine view
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -356,7 +357,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Compact Machine Header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -436,12 +436,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   ),
                 ),
 
-                // 🔹 DATE FILTER BUTTON INSIDE MACHINE CARD
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.teal.shade200, // background color
+                      color: Colors.teal.shade200,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     padding: const EdgeInsets.symmetric(
@@ -455,7 +454,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ),
           ),
 
-          // Sensor Readings - Vertical layout for mobile
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
