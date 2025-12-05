@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/models/machine_model.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 import '../widgets/system_card.dart';
 import '../widgets/composting_progress_card.dart';
 import '../widgets/add_waste/add_waste_product.dart';
