@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../operator/machine_management/models/machine_model.dart';
-import '../../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../../data/models/machine_model.dart';
+import '../../../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../../../services/sess_service.dart';
 
-class MachineSelectionField extends StatelessWidget {
+class MachineSelectionField extends StatefulWidget {
   final String? selectedMachineId;
   final Function(String?)? onChanged;
   final bool isLocked;
@@ -16,6 +18,19 @@ class MachineSelectionField extends StatelessWidget {
     this.isLocked = false,
     this.errorText,
   });
+
+  @override
+  State<MachineSelectionField> createState() => _MachineSelectionFieldState();
+}
+
+class _MachineSelectionFieldState extends State<MachineSelectionField> {
+  late final MachineRepository _repository;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = MachineRepositoryRemote(FirebaseMachineService()); 
+  }
 
   /// Fetch machines based on user's teamId
   Future<List<MachineModel>> _fetchTeamMachines() async {
@@ -31,8 +46,7 @@ class MachineSelectionField extends StatelessWidget {
       throw Exception('User not assigned to a team');
     }
 
-    // ⭐ Fetch machines by teamId instead of operatorId
-    return await FirestoreMachineService.getMachinesByTeamId(teamId);
+    return await _repository.getMachinesByTeam(teamId);
   }
 
   @override
@@ -100,7 +114,7 @@ class MachineSelectionField extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          initialValue: selectedMachineId,
+          initialValue: widget.selectedMachineId,
           decoration: InputDecoration(
             labelText: 'Select Machine',
             prefixIcon: const Icon(Icons.precision_manufacturing, size: 18),
@@ -109,24 +123,24 @@ class MachineSelectionField extends StatelessWidget {
               horizontal: 12,
               vertical: 8,
             ),
-            suffixIcon: isLocked
+            suffixIcon: widget.isLocked
                 ? const Icon(Icons.lock, size: 18, color: Colors.grey)
                 : null,
-            errorText: errorText,
+            errorText: widget.errorText,
           ),
           items: machines.map((machine) {
             return DropdownMenuItem<String>(
               value: machine.machineId,
-              enabled: !isLocked,
+              enabled: !widget.isLocked,
               child: Text(
                 machine.machineName,
                 style: TextStyle(
-                  color: isLocked ? Colors.grey : Colors.black87,
+                  color: widget.isLocked ? Colors.grey : Colors.black87,
                 ),
               ),
             );
           }).toList(),
-          onChanged: isLocked ? null : onChanged,
+          onChanged: widget.isLocked ? null : widget.onChanged,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please select a machine';

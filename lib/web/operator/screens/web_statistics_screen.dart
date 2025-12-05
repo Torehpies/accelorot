@@ -1,12 +1,13 @@
-// lib/frontend/operator/web/web_statistics_screen.dart
 import 'package:flutter/material.dart';
 import '../../../frontend/operator/statistics/view_screens/oxygen_stats_view.dart';
 import '../../../frontend/operator/statistics/view_screens/moisture_stats_view.dart';
 import '../../../frontend/operator/statistics/view_screens/temperature_stats_view.dart';
 import '../../../frontend/operator/statistics/widgets/date_filter.dart';
 import '../../../frontend/operator/statistics/history/history.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
-import '../../../services/machine_services/firestore_machine_service.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository_remote.dart'; 
 import '../../../services/sess_service.dart';
 
 class WebStatisticsScreen extends StatefulWidget {
@@ -24,10 +25,16 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
   List<MachineModel> _machines = [];
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Add these
+  late final FirebaseMachineService _machineService;
+  late final MachineRepository _repository;
 
   @override
   void initState() {
     super.initState();
+    _machineService = FirebaseMachineService();
+    _repository = MachineRepositoryRemote(_machineService); 
     _loadMachines();
   }
 
@@ -38,21 +45,20 @@ class _WebStatisticsScreenState extends State<WebStatisticsScreen> {
     });
 
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
-      // ⭐ Load machines by user's teamId
+      final currentUserId = _machineService.currentUserId;
+      
       if (currentUserId != null) {
-        // Get user's teamId and fetch team machines
         final sessionService = SessionService();
         final userData = await sessionService.getCurrentUserData();
         final teamId = userData?['teamId'] as String?;
 
         if (teamId != null && teamId.isNotEmpty) {
-          _machines = await FirestoreMachineService.getMachinesByTeamId(teamId);
+          _machines = await _repository.getMachinesByTeam(teamId);
         } else {
-          _machines = await FirestoreMachineService.getAllMachines();
+          _machines = await _repository.getMachinesByTeam('');
         }
       } else {
-        _machines = await FirestoreMachineService.getAllMachines();
+        _machines = await _repository.getMachinesByTeam('');
       }
 
       setState(() {
