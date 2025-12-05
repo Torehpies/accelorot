@@ -10,7 +10,7 @@ class AlertsConfig {
     categoryHighlighter: CategoryHighlighters.simple([
       'Temperature',
       'Moisture',
-      'Oxygen',
+      'Air Quality',
     ]),
   );
 }

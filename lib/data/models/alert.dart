@@ -13,7 +13,7 @@ abstract class Alert with _$Alert {
   const factory Alert({
     required String id,
     required String machineId,
-    required String sensorType, // 'temperature', 'moisture', 'oxygen'
+    required String sensorType, // 'temperature', 'moisture', 'air quality'
     required double readingValue,
     required double threshold,
     required String status, // 'above', 'below', 'normal'

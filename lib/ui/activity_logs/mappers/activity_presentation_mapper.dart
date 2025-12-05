@@ -117,7 +117,7 @@ class ActivityPresentationMapper {
     final lower = sensorType.toLowerCase();
     if (lower.contains('temp')) return 'Temperature';
     if (lower.contains('moisture')) return 'Moisture';
-    if (lower.contains('oxygen') || lower.contains('air')) return 'Oxygen';
+    if (lower.contains('oxygen') || lower.contains('air')) return 'Air Quality';
     return 'Other';
   }
 
