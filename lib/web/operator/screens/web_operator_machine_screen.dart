@@ -1,7 +1,7 @@
 // lib/frontend/operator/web/web_operator_machine_screen.dart
 import 'package:flutter/material.dart';
 import '../../../frontend/operator/machine_management/operator_machine/controllers/operator_machine_controller.dart';
-import '../../../frontend/operator/machine_management/widgets/search_bar_widget.dart';
+import '../../../ui/machine_management/widgets/search_bar_widget.dart';
 import '../../operator/widgets/summary_card_widget.dart';
 import '../../operator/widgets/machine_card_widget.dart';
 import '../../operator/widgets/machine_list_tile_widget.dart';

@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/admin_machine/widgets/admin_machine_view_dialog.dart
 
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 import '../../../main_navigation.dart';
 import '../controllers/admin_machine_controller.dart';
 import '../../widgets/confirmation_dialog.dart';

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class WebAdminHomeScreen extends StatelessWidget {
   final VoidCallback onManageOperators;
@@ -133,15 +134,9 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade700,
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(
-            color: Color.fromARGB(255, 253, 253, 253),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      // ✅ UPDATED APPBAR
+      appBar: AdminAppBar(
+        title: 'Dashboard',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
