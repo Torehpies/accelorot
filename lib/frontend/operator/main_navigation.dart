@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
-import 'dashboard/home_screen.dart';
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
 import 'profile/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
