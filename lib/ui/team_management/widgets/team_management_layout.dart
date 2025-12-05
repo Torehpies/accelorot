@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/ui/status_message.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,25 +42,10 @@ class TeamManagementLayout extends ConsumerWidget {
           ),
         Expanded(
           child: teams.isEmpty && !isLoading
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        "No teams found.",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                      Text(
-                        "Tap the + button to create the first team.",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+              ? StatusMessage(
+                  title: "No teams yet",
+                  icon: Icons.group,
+                  description: "Tap the + button to create teams",
                 )
               : ListView.builder(
                   itemCount: teams.length,

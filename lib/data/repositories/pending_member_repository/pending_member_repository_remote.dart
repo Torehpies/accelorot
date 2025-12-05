@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';

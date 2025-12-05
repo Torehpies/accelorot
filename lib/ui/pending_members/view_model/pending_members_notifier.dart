@@ -1,4 +1,7 @@
-import 'package:flutter_application_1/data/providers/pending_members_providers.dart';
+import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
+import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/pending_members/view_model/pending_members_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,70 +9,91 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'pending_members_notifier.g.dart';
 
 @riverpod
-class PendingMembers extends _$PendingMembers {
-  final int _pageSize = 20;
+class PendingMembersNotifier extends _$PendingMembersNotifier {
+  late final PendingMemberRepository _repository;
 
   @override
-  AsyncValue<PendingMembersState> build() {
-    _fetchPage(
-      teamId: 'current-team-id',
-      limit: _pageSize,
-      startCursor: null,
-      isInitialLoad: true,
-    );
-    return const AsyncValue.loading();
+  PendingMembersState build() {
+    _repository = ref.read(pendingMemberRepositoryProvider);
+    ref.listen(appUserProvider, (_, next) {
+      next.whenData((user) {
+        if (user != null) {
+          fetchMembers(forceRefresh: true);
+        } else {
+          state = state.copyWith(members: []);
+        }
+      });
+    });
+    return const PendingMembersState();
   }
 
-  Future<void> _fetchPage({
-    required String teamId,
-    required int limit,
-    required String? startCursor,
-    required bool isInitialLoad,
-  }) async {
-    final repository = ref.read(pendingMemberRepositoryProvider);
+  Future<void> fetchMembers({bool forceRefresh = false}) async {
+    state = state.copyWith(isLoadingMembers: true);
+    final user = ref.watch(appUserProvider).value;
 
-    if (isInitialLoad) {
-      state = const AsyncValue.loading();
-    } else if (state.value != null) {
-      state = AsyncValue.data(state.value!.copyWith(isLoadingMore: true));
-    }
-    final result = await repository.getPendingMembers(
-      teamId: teamId,
-      limit: limit,
-      startCursor: startCursor,
+    final result = await _repository.getPendingMembers(
+      teamId: user!.teamId,
+      forceRefresh: forceRefresh,
     );
 
     result.when(
-      success: (paginationResult) {
-        final currentMembers = isInitialLoad ? [] : state.value!.members;
-
-        final newState = PendingMembersState(
-          members: [...currentMembers, ...paginationResult.items],
-          nextCursor: paginationResult.nextCursor,
-          isLoadingMore: false,
-          hasMoreData: paginationResult.nextCursor != null,
-        );
-
-        state = AsyncValue.data(newState);
+      success: (members) {
+        state = state.copyWith(members: members, isLoadingMembers: false);
       },
-      failure: (error) {
-        state = AsyncValue.error(error, StackTrace.current);
-      },
+      failure: (e) => null,
     );
   }
 
-  Future<void> loadNextPage() async {
-    if (state.isLoading || state.hasError || !state.hasValue) return;
+  Future<void> acceptInvitation(PendingMember member) async {
+    state = state.copyWith(isSavingMembers: true);
+    final admin = ref.watch(appUserProvider);
 
-    final currentState = state.value!;
-
-    if (!currentState.hasMoreData || currentState.isLoadingMore) return;
-
-    await _fetchPage(
-      teamId: 'current-team-id',
-      limit: _pageSize,
-      startCursor: currentState.nextCursor,
-      isInitialLoad: false,
+    final result = await _repository.acceptInvitation(
+      teamId: admin.value!.teamId,
+      member: member,
     );
+
+    result.when(
+      success: (_) {
+        state = state.copyWith(
+          isSavingMembers: false,
+          successMessage: "Member accepted.",
+        );
+      },
+      failure: (_) {
+        state = state.copyWith(
+          isSavingMembers: false,
+          errorMessage: "Error accepting member.",
+        );
+      },
+    );
+    //showSnackbar(context, 'Accepted $member.user.firstName to the team');
+    //showSnackbar(context, 'Error accepting member $e', isError: true);
+  }
+
+  Future<void> declineInvitation(PendingMember member) async {
+    state = state.copyWith(isSavingMembers: true);
+    final admin = ref.watch(appUserProvider);
+    final result = await _repository.declineInvitation(
+      teamId: admin.value!.teamId,
+      member: member,
+    );
+
+    result.when(
+      success: (_) {
+        state = state.copyWith(
+          isSavingMembers: false,
+          successMessage: "Declined request.",
+        );
+      },
+      failure: (_) {
+        state = state.copyWith(
+          isSavingMembers: false,
+          errorMessage: "Error declining request.",
+        );
+      },
+    );
+    //showSnackbar(context, "Declined $member.user.firstName's request");
+    //showSnackbar( context, "Error declining member's request $e", isError: true,);
   }
 }

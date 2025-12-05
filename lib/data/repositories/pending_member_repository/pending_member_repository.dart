@@ -12,6 +12,7 @@ abstract class PendingMemberRepository {
   //});
   Future<Result<List<PendingMember>, DataLayerError>> getPendingMembers({
     required String teamId,
+    bool forceRefresh = false,
   });
   Future<Result<void, DataLayerError>> acceptInvitation({
     required String teamId,
