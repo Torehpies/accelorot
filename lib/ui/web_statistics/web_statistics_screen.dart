@@ -1,4 +1,3 @@
-
 // web_statistics_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,29 +36,32 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         ),
         backgroundColor: Colors.teal.shade700,
         elevation: 0,
-        centerTitle: false,
       ),
       body: RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Section with Machine Selector
-              _buildHeader(),
-              const SizedBox(height: 24),
-
-              // Statistics Grid
-              _buildStatisticsGrid(),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final padding = width < 600 ? 16.0 : 24.0;
+            
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(padding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(width),
+                  const SizedBox(height: 24),
+                  _buildStatisticsCards(width),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double width) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -67,54 +69,71 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.05 * 255).round()),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.teal.shade50,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.precision_manufacturing,
-              color: Colors.teal.shade700,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
+      child: width < 600
+          ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Machine Monitoring',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Real-time sensor data and analytics',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                _buildHeaderContent(),
+                const SizedBox(height: 16),
+                _buildMachineSelector(),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: _buildHeaderContent()),
+                const SizedBox(width: 16),
+                _buildMachineSelector(),
               ],
             ),
+    );
+  }
+
+  Widget _buildHeaderContent() {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.teal.shade50,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 16),
-          _buildMachineSelector(),
-        ],
-      ),
+          child: Icon(
+            Icons.precision_manufacturing,
+            color: Colors.teal.shade700,
+            size: 28,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Machine Monitoring',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Real-time sensor data and analytics',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -129,7 +148,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.analytics, color: Colors.grey[700], size: 20),
+          Icon(Icons.analytics, color: Colors.grey[700], size: 18),
           const SizedBox(width: 8),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -157,31 +176,54 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildStatisticsGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Responsive grid: 1 column for narrow, 2 for medium, 3 for wide
-        final crossAxisCount = constraints.maxWidth > 1200
-            ? 3
-            : constraints.maxWidth > 800
-                ? 2
-                : 1;
-
-        return GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 20,
-          crossAxisSpacing: 20,
-          childAspectRatio: 1.4,
-          children: [
-            _buildTemperatureCard(),
-            _buildMoistureCard(),
-            _buildOxygenCard(),
-          ],
-        );
-      },
-    );
+  Widget _buildStatisticsCards(double width) {
+    // Determine layout based on width
+    if (width < 700) {
+      // Mobile: Single column
+      return Column(
+        children: [
+          _buildTemperatureCard(),
+          const SizedBox(height: 20),
+          _buildMoistureCard(),
+          const SizedBox(height: 20),
+          _buildOxygenCard(),
+        ],
+      );
+    } else if (width < 1100) {
+      // Tablet: 2 columns
+      return Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildTemperatureCard()),
+              const SizedBox(width: 20),
+              Expanded(child: _buildMoistureCard()),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildOxygenCard()),
+              const Expanded(child: SizedBox()), // Empty space
+            ],
+          ),
+        ],
+      );
+    } else {
+      // Desktop: 3 columns
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _buildTemperatureCard()),
+          const SizedBox(width: 20),
+          Expanded(child: _buildMoistureCard()),
+          const SizedBox(width: 20),
+          Expanded(child: _buildOxygenCard()),
+        ],
+      );
+    }
   }
 
   Widget _buildTemperatureCard() {
@@ -189,32 +231,17 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       temperatureDataProvider(_selectedMachineId),
     );
 
-    return _buildCardWrapper(
+    return _buildSensorCard(
       title: 'Temperature',
       icon: Icons.thermostat,
       iconColor: Colors.orange,
-      child: temperatureAsync.when(
-        data: (readings) {
-          final currentTemp = readings.isNotEmpty ? readings.last.value : 0.0;
-          final hourlyReadings = readings.map((r) => r.value).toList();
-          final lastUpdated =
-              readings.isNotEmpty ? readings.last.timestamp : null;
-
-          return TemperatureStatisticCard(
-            currentTemperature: currentTemp,
-            hourlyReadings: hourlyReadings,
-            lastUpdated: lastUpdated,
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-        error: (error, stack) => _buildErrorState(
-          onRetry: () => ref.invalidate(
-            temperatureDataProvider(_selectedMachineId),
-          ),
-        ),
+      asyncValue: temperatureAsync,
+      builder: (readings) => TemperatureStatisticCard(
+        currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
+        hourlyReadings: readings.map((r) => r.value).toList(),
+        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
+      onRetry: () => ref.invalidate(temperatureDataProvider(_selectedMachineId)),
     );
   }
 
@@ -223,33 +250,17 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       moistureDataProvider(_selectedMachineId),
     );
 
-    return _buildCardWrapper(
+    return _buildSensorCard(
       title: 'Moisture',
       icon: Icons.water_drop,
       iconColor: Colors.blue,
-      child: moistureAsync.when(
-        data: (readings) {
-          final currentMoisture =
-              readings.isNotEmpty ? readings.last.value : 0.0;
-          final hourlyReadings = readings.map((r) => r.value).toList();
-          final lastUpdated =
-              readings.isNotEmpty ? readings.last.timestamp : null;
-
-          return MoistureStatisticCard(
-            currentMoisture: currentMoisture,
-            hourlyReadings: hourlyReadings,
-            lastUpdated: lastUpdated,
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-        error: (error, stack) => _buildErrorState(
-          onRetry: () => ref.invalidate(
-            moistureDataProvider(_selectedMachineId),
-          ),
-        ),
+      asyncValue: moistureAsync,
+      builder: (readings) => MoistureStatisticCard(
+        currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
+        hourlyReadings: readings.map((r) => r.value).toList(),
+        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
+      onRetry: () => ref.invalidate(moistureDataProvider(_selectedMachineId)),
     );
   }
 
@@ -258,40 +269,27 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       oxygenDataProvider(_selectedMachineId),
     );
 
-    return _buildCardWrapper(
+    return _buildSensorCard(
       title: 'Air Quality',
       icon: Icons.air,
       iconColor: Colors.green,
-      child: oxygenAsync.when(
-        data: (readings) {
-          final currentOxygen = readings.isNotEmpty ? readings.last.value : 0.0;
-          final hourlyReadings = readings.map((r) => r.value).toList();
-          final lastUpdated =
-              readings.isNotEmpty ? readings.last.timestamp : null;
-
-          return OxygenStatisticCard(
-            currentOxygen: currentOxygen,
-            hourlyReadings: hourlyReadings,
-            lastUpdated: lastUpdated,
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-        error: (error, stack) => _buildErrorState(
-          onRetry: () => ref.invalidate(
-            oxygenDataProvider(_selectedMachineId),
-          ),
-        ),
+      asyncValue: oxygenAsync,
+      builder: (readings) => OxygenStatisticCard(
+        currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
+        hourlyReadings: readings.map((r) => r.value).toList(),
+        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
+      onRetry: () => ref.invalidate(oxygenDataProvider(_selectedMachineId)),
     );
   }
 
-  Widget _buildCardWrapper({
+  Widget _buildSensorCard<T>({
     required String title,
     required IconData icon,
     required Color iconColor,
-    required Widget child,
+    required AsyncValue<List<T>> asyncValue,
+    required Widget Function(List<T>) builder,
+    required VoidCallback onRetry,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -299,7 +297,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.08 * 255).round()),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -307,12 +305,13 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Card Header
+          // Header
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: iconColor.withAlpha((0.1 * 255).round()),
+              color: iconColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -327,49 +326,52 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: iconColor.withAlpha((0.9 * 255).round()),
+                    color: iconColor,
                   ),
                 ),
               ],
             ),
           ),
-          // Card Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState({required VoidCallback onRetry}) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 40, color: Colors.grey[400]),
-          const SizedBox(height: 12),
-          Text(
-            'Error loading data',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Retry'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: asyncValue.when(
+              data: (readings) => builder(readings),
+              loading: () => const SizedBox(
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (error, stack) => SizedBox(
+                height: 200,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 36, color: Colors.grey[400]),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Error loading data',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: onRetry,
+                        icon: const Icon(Icons.refresh, size: 16),
+                        label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
