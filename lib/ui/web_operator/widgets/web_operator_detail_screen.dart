@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class WebOperatorDetailScreen extends StatefulWidget {
   final String operatorId;
@@ -97,10 +96,16 @@ class _WebOperatorDetailScreenState extends State<WebOperatorDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      // ✅ UPDATED APPBAR
-      appBar: AdminAppBar(
-        title: 'Operator Details',
-        automaticallyImplyLeading: true,
+      appBar: AppBar(
+        backgroundColor: Colors.teal.shade700,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Operator Details',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications, color: Colors.white),
