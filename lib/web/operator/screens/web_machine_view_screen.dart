@@ -1,6 +1,6 @@
 // lib/web/operator/screens/web_machine_view_screen.dart
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
+import '../../../data/models/machine_model.dart';
 import 'web_home_screen.dart';
 import 'web_activity_logs_screen.dart';
 import 'web_statistics_screen.dart';
