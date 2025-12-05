@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
@@ -16,18 +17,57 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
   Future<Result<void, DataLayerError>> acceptInvitation({
     required String teamId,
     required PendingMember member,
-  }) {
-    // TODO: implement acceptInvitation
-    throw UnimplementedError();
+  }) async {
+    try {
+      final memberId = member.user?.uid;
+      if (memberId == null) {
+        return const Result.failure(MappingError());
+      }
+
+      await _pendingMemberService.processAcceptanceTransaction(
+        teamId: teamId,
+        memberId: memberId,
+        email: member.user!.email,
+        firstName: member.user!.firstName,
+        lastName: member.user!.lastName,
+      );
+
+      return const Result.success(null);
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return const Result.failure(PermissionError());
+      }
+      return const Result.failure(NetworkError());
+    } catch (e) {
+      return const Result.failure(NetworkError());
+    }
   }
 
   @override
   Future<Result<void, DataLayerError>> declineInvitation({
     required String teamId,
     required PendingMember member,
-  }) {
-    // TODO: implement declineInvitation
-    throw UnimplementedError();
+  }) async {
+    try {
+      final memberId = member.user?.uid;
+      if (memberId == null) {
+        return const Result.failure(MappingError());
+      }
+
+      await _pendingMemberService.deletePendingMember(
+        teamId: teamId,
+        memberId: memberId,
+      );
+
+      return const Result.success(null);
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return const Result.failure(PermissionError());
+      }
+      return const Result.failure(NetworkError());
+    } catch (e) {
+      return const Result.failure(NetworkError());
+    }
   }
 
   @override
@@ -45,7 +85,78 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
       return Result.success(_cache!);
     }
     final result = await _pendingMemberService.fetchPendingMembers(teamId);
-    result.when(success: (members) => _cache = members, failure: (_) => _cache);
+    result.when(success: (members) {
+      return _cache = members;
+    }, failure: (error) {
+      return _cache;
+    });
     return result;
   }
+
+  //  @override
+  //  Future<Result<PaginationResult<PendingMember>, DataLayerError>>
+  //  getPendingMembers({
+  //    required String teamId,
+  //    required int limit,
+  //    String? startCursor,
+  //  }) async {
+  //    try {
+  //      final rawResult = await _pendingMemberService.fetchRawPendingMembers(
+  //        teamId: teamId,
+  //        limit: limit,
+  //        startCursor: startCursor,
+  //      );
+  //
+  //      final cleanItems = (await Future.wait(
+  //        rawResult.items.map((rawMap) async {
+  //          final requestedAtTimestamp = rawMap['requestedAt'] as Timestamp;
+  //          final requestedAtDate = requestedAtTimestamp.toDate();
+  //
+  //          final existingUserId = rawMap['requestorId'] as String?;
+  //          PendingMemberUser? existingPendingMemberUser;
+  //
+  //          if (existingUserId != null) {
+  //            try {
+  //              final rawData = await _userService.fetchRawUserData(
+  //                existingUserId,
+  //              );
+  //
+  //              if (rawData == null) {
+  //                return null;
+  //              }
+  //
+  //              final user = _userRepository.mapRawDataToDomain(rawData);
+  //
+  //              existingPendingMemberUser = PendingMemberUser(
+  //                uid: user.uid,
+  //                firstName: user.firstname,
+  //                lastName: user.lastname,
+  //                email: user.email,
+  //              );
+  //            } catch (_) {
+  //              existingPendingMemberUser = null;
+  //            }
+  //          }
+  //
+  //          return PendingMember(
+  //            user: existingPendingMemberUser,
+  //            requestedAt: requestedAtDate,
+  //          );
+  //        }),
+  //      )).whereType<PendingMember>().toList();
+  //
+  //      return Result.success(
+  //        PaginationResult(items: cleanItems, nextCursor: rawResult.nextCursor),
+  //      );
+  //    } on FirebaseException catch (e) {
+  //      if (e.code == 'permission-denied') {
+  //        return const Result.failure(PermissionError());
+  //      }
+  //      return const Result.failure(NetworkError());
+  //    } on MappingError catch (e) {
+  //      return Result.failure(e);
+  //    } catch (e) {
+  //      return const Result.failure(NetworkError());
+  //    }
+  //  }
 }

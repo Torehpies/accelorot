@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/models/pending_member_user.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
@@ -9,7 +12,8 @@ import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 class FirebasePendingMemberService implements PendingMemberService {
   final FirebaseFirestore _firestore;
-  FirebasePendingMemberService(this._firestore);
+  final AppUserService _userService;
+  FirebasePendingMemberService(this._firestore, this._userService);
 
   @override
   Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id) {
@@ -134,28 +138,91 @@ class FirebasePendingMemberService implements PendingMemberService {
   Future<Result<List<PendingMember>, DataLayerError>> fetchPendingMembers(
     String teamId,
   ) async {
+    print("DEBUG: Fetching pending members for teamId = $teamId");
+
     try {
-      final query = _firestore
+      final snapshot = await _firestore
           .collection('teams')
           .doc(teamId)
           .collection('pending_members')
-          .orderBy('requested_at', descending: true);
+          .orderBy('requestedAt', descending: true)
+          .get();
 
-      final snapshot = await query.get();
+      print("DEBUG: pending_members docs count = ${snapshot.docs.length}");
 
-      final pendingMembers = snapshot.docs.map((doc) {
-        return PendingMember.fromJson(doc.data());
-      }).toList();
-      debugPrint(pendingMembers.toString());
+      final pendingMembers = <PendingMember>[];
+
+      for (var doc in snapshot.docs) {
+        print("---------------------------------------------");
+        print("DEBUG: Processing pending member docId = ${doc.id}");
+        print("DEBUG: Raw Firestore Data = ${doc.data()}");
+
+        try {
+          final data = doc.data();
+
+          // DEBUG requested_at
+          final ts = data['requestedAt'];
+          print("DEBUG: requested_at field = $ts (type: ${ts.runtimeType})");
+
+          final requestedAt = (ts as Timestamp?)?.toDate();
+          print("DEBUG: requestedAt parsed = $requestedAt");
+
+          // DEBUG requestorId
+          final userId = data['requestorId'];
+          print("DEBUG: requestorId = $userId");
+
+          if (requestedAt == null || userId == null) {
+            print("ERROR: Missing required field in docId ${doc.id}");
+            return const Result.failure(DataLayerError.mappingError());
+          }
+
+          // DEBUG user fetch
+          print("DEBUG: Fetching User Firestore doc for ID $userId");
+
+          final rawUser = await _userService.fetchRawUserData(userId);
+
+          print("DEBUG: rawUserData = $rawUser");
+
+          if (rawUser == null) {
+            print("ERROR: rawUserData is null for userId $userId");
+            return const Result.failure(DataLayerError.mappingError());
+          }
+
+          // DEBUG AppUser model conversion
+          final user = AppUser.fromJson(rawUser);
+          print("DEBUG: Parsed AppUser = $user");
+
+          final pendingMemberUser = PendingMemberUser(
+            uid: userId,
+            firstName: user.firstname,
+            lastName: user.lastname,
+            email: user.email,
+          );
+
+          pendingMembers.add(
+            PendingMember(user: pendingMemberUser, requestedAt: requestedAt),
+          );
+
+          print("DEBUG: Successfully added PendingMember");
+        } catch (e, st) {
+          print("ERROR during mapping of pending member:");
+          print(e);
+          print(st);
+          return const Result.failure(DataLayerError.mappingError());
+        }
+      }
+
+      print(
+        "DEBUG: Final pendingMembers list length = ${pendingMembers.length}",
+      );
 
       return Result.success(pendingMembers);
     } on FirebaseException catch (e) {
+      print("FIREBASE ERROR: ${e.message}");
       return Result.failure(mapFirebaseException(e));
-    } on TypeError catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } on FormatException catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } catch (e) {
+    } catch (e, st) {
+      print("UNKNOWN ERROR: $e");
+      print(st);
       return Result.failure(DataLayerError.unknownError(e));
     }
   }

@@ -4,7 +4,6 @@ import 'package:flutter_application_1/data/models/user_doc.dart';
 import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
-import 'package:flutter_application_1/data/providers/pending_members_providers.dart';
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository.dart';
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository_remote.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';

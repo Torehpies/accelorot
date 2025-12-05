@@ -14,7 +14,7 @@ abstract class PendingMemberService {
 	//	required int limit,
 	//	String? startCursor,
 	//});
-	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers();
+	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers(String teamId);
 	Future<void> deletePendingMember({
 		required String teamId,
 		required String memberId,

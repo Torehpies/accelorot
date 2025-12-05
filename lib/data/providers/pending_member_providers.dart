@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository_remote.dart';
@@ -9,14 +10,15 @@ part 'pending_member_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 PendingMemberService pendingMemberService(Ref ref) {
-  return FirebasePendingMemberService(ref.read(firebaseFirestoreProvider));
+  return FirebasePendingMemberService(
+    ref.read(firebaseFirestoreProvider),
+    ref.read(appUserServiceProvider),
+  );
 }
 
 @Riverpod(keepAlive: true)
 PendingMemberRepository pendingMemberRepository(Ref ref) {
   final pendingMemberService = ref.read(pendingMemberServiceProvider);
 
-  return PendingMemberRepositoryRemote(
-		pendingMemberService,
-	);
+  return PendingMemberRepositoryRemote(pendingMemberService);
 }
