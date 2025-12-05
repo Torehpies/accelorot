@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/email_verify/email_verify_state.dart';
+import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../utils/snackbar_utils.dart';
 import 'email_verify_notifier.dart';

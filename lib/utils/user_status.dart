@@ -1,6 +1,8 @@
 enum UserStatus {
+  loading('loading'),
+  unauthenticated('unauthenticated'),
   unverified('unverified'),
-  registered('registered'),
+  teamSelect('teamSelect'),
   pending('pending'),
   archived('archived'),
   active('active');

@@ -1,20 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 class FirebaseAppUserService implements AppUserService {
-  final FirebaseFirestore firestore;
-  FirebaseAppUserService(this.firestore);
+  final FirebaseFirestore _firestore;
+  FirebaseAppUserService(this._firestore);
 
   @override
   Future<Map<String, dynamic>?> fetchRawUserData(String id) async {
-    final snapshot = await firestore.collection('users').doc(id).get();
+    final snapshot = await _firestore.collection('users').doc(id).get();
 
     return snapshot.data();
   }
 
   @override
   Stream<DocumentSnapshot<Map<String, dynamic>>> watchRawUserData(String id) {
-    final result = firestore.collection('users').doc(id).snapshots();
-		return result;
+    final result = _firestore.collection('users').doc(id).snapshots();
+    return result;
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> updateUserField(
+    String uid,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _firestore.collection('users').doc(uid).update(data);
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } catch (e) {
+      debugPrint('Unexpected error on creating user profile: $e');
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 }

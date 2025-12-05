@@ -32,28 +32,6 @@ class FirebaseTeamService implements TeamService {
     }
   }
 
-  //  Future<Result<List<Team>, DataLayerError>> fetchRawTeamMembers(
-  //    String teamId,
-  //  ) async {
-  //    final snapshot = await _firestore
-  //        .collection('teams')
-  //        .doc(teamId)
-  //        .collection('members')
-  //        .get();
-  //    return snapshot.docs.map((doc) => doc.data()).toList();
-  //  }
-  //
-  //  Future<Result<Team, DataLayerError>> fetchRawPendingMembers(
-  //    String teamId,
-  //  ) async {
-  //    final snapshot = await _firestore
-  //        .collection('teams')
-  //        .doc(teamId)
-  //        .collection('pending_members')
-  //        .get();
-  //    return snapshot.docs.map((doc) => doc.data()).toList();
-  //  }
-
   @override
   Future<Result<List<Team>, DataLayerError>> getTeams() async {
     try {

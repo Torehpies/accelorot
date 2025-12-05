@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
@@ -14,6 +15,7 @@ class AuthRepositoryRemote implements AuthRepository {
   final AppUserRepository _userRepository;
   final PendingMemberService _pendingMemberService;
   final FirebaseAuth _firebaseAuth;
+  final AppUserService _userService;
 
   AppUser? _lastKnownUser;
 
@@ -22,6 +24,7 @@ class AuthRepositoryRemote implements AuthRepository {
     this._userRepository,
     this._pendingMemberService,
     this._firebaseAuth,
+    this._userService,
   );
 
   @override
@@ -32,7 +35,7 @@ class AuthRepositoryRemote implements AuthRepository {
         return null;
       }
 
-			AppUser? fetchedUser;
+      AppUser? fetchedUser;
 
       try {
         final result = await _userRepository.getUser(uid);
@@ -113,7 +116,7 @@ class AuthRepositoryRemote implements AuthRepository {
         firstName: firstName,
         lastName: lastName,
         globalRole: globalRole,
-        status: UserStatus.unverified.value,
+        status: UserStatus.pending.value,
       );
 
       if (profileResult.isFailure) {
@@ -161,5 +164,43 @@ class AuthRepositoryRemote implements AuthRepository {
     } catch (e) {
       return Result.failure(NetworkError());
     }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> updateUserStatus(
+    UserStatus status,
+  ) async {
+    try {
+      final userId = _firebaseAuth.currentUser?.uid;
+      final data = {'status': status};
+      await _userService.updateUserField(userId!, data);
+      return Result.success(null);
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> syncEmailVerification(String uid) async {
+    final result = await _authService.checkEmailVerified();
+
+    return result.when(
+      success: (isVerified) async {
+        if (!isVerified) {
+          return Result.failure(DataLayerError.emailNotVerifiedError());
+        }
+
+        await updateUserStatus(UserStatus.pending);
+        debugPrint("Updating user status.");
+        return Result.success(null);
+      },
+      failure: (error) => Result.failure(error),
+    );
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> resendVerificationEmail() async {
+    debugPrint("Sending email verification.");
+    return await _authService.sendVerificationEmail();
   }
 }
