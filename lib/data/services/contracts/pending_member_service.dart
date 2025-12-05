@@ -1,4 +1,6 @@
-import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
+import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 
 abstract class PendingMemberService {
 	Future<String> addPendingMember({
@@ -7,11 +9,12 @@ abstract class PendingMemberService {
 		required String memberEmail
 	});
 	Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id);
-	Future<PaginationResult<Map<String, dynamic>>> fetchRawPendingMembers({
-		required String teamId,
-		required int limit,
-		String? startCursor,
-	});
+	//Future<PaginationResult<Map<String, dynamic>>> fetchRawPendingMembers({
+	//	required String teamId,
+	//	required int limit,
+	//	String? startCursor,
+	//});
+	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers();
 	Future<void> deletePendingMember({
 		required String teamId,
 		required String memberId,

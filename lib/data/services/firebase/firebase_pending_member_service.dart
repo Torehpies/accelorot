@@ -1,6 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 
 class FirebasePendingMemberService implements PendingMemberService {
   final FirebaseFirestore _firestore;
@@ -12,7 +17,7 @@ class FirebasePendingMemberService implements PendingMemberService {
     throw UnimplementedError();
   }
 
-  @override
+  //@override
   Future<PaginationResult<Map<String, dynamic>>> fetchRawPendingMembers({
     required String teamId,
     required int limit,
@@ -94,9 +99,9 @@ class FirebasePendingMemberService implements PendingMemberService {
   Future<void> processAcceptanceTransaction({
     required String teamId,
     required String memberId,
-		required String email,
-		required String firstName,
-		required String lastName,
+    required String email,
+    required String firstName,
+    required String lastName,
   }) async {
     final batch = _firestore.batch();
 
@@ -117,11 +122,41 @@ class FirebasePendingMemberService implements PendingMemberService {
     batch.set(teamMemberRef, {
       'role': 'Operator',
       'addedAt': FieldValue.serverTimestamp(),
-			'email': email,
-			'firstName': firstName,
-			'lastName': lastName,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
     });
 
-		await batch.commit();
+    await batch.commit();
+  }
+
+  @override
+  Future<Result<List<PendingMember>, DataLayerError>> fetchPendingMembers(
+    String teamId,
+  ) async {
+    try {
+      final query = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .orderBy('requested_at', descending: true);
+
+      final snapshot = await query.get();
+
+      final pendingMembers = snapshot.docs.map((doc) {
+        return PendingMember.fromJson(doc.data());
+      }).toList();
+      debugPrint(pendingMembers.toString());
+
+      return Result.success(pendingMembers);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } on TypeError catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } on FormatException catch (_) {
+      return const Result.failure(DataLayerError.mappingError());
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 }
