@@ -64,7 +64,6 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       StatisticsScreen(
         focusedMachineId: widget.focusedMachine?.machineId,
-
       ),
       const OperatorMachineView(), 
       const ProfileScreen(),
