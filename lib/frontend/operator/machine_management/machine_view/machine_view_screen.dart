@@ -1,7 +1,7 @@
 // lib/frontend/operator/machine_management/machine_view/machine_view_screen.dart
 import 'package:flutter/material.dart';
 import '../../../../data/models/machine_model.dart';
-import '../../../operator/dashboard/home_screen.dart';
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart';
 
 class MachineViewScreen extends StatelessWidget {
   final MachineModel machine;

@@ -9,7 +9,6 @@ class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
     super.key,
     super.initialFilter,
-    super.viewingOperatorId,
     super.focusedMachineId,
   });
 
@@ -21,7 +20,6 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.cyclesRecom,
         initialFilter: widget.initialFilter,
-        viewingOperatorId: widget.viewingOperatorId,
         focusedMachineId: widget.focusedMachineId,
       );
 
@@ -65,9 +63,6 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
 
   @override
   Future<void> onRefresh() async {
-    await ref.read(activityViewModelProvider(_params).notifier).refresh(
-          widget.viewingOperatorId,
-          widget.focusedMachineId,
-        );
+    await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
 }

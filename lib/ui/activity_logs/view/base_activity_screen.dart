@@ -12,13 +12,11 @@ import '../widgets/date_filter_button.dart';
 /// All business logic is in ViewModels
 abstract class BaseActivityScreen extends ConsumerStatefulWidget {
   final String? initialFilter;
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   const BaseActivityScreen({
     super.key,
     this.initialFilter,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 }

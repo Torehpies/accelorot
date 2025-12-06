@@ -1,6 +1,8 @@
 // lib/data/models/alert.dart
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/parsers.dart';
 
 part 'alert.freezed.dart';
 
@@ -11,7 +13,7 @@ abstract class Alert with _$Alert {
   const factory Alert({
     required String id,
     required String machineId,
-    required String sensorType, // 'temperature', 'moisture', 'oxygen'
+    required String sensorType, // 'temperature', 'moisture', 'air quality'
     required double readingValue,
     required double threshold,
     required String status, // 'above', 'below', 'normal'
@@ -24,7 +26,7 @@ abstract class Alert with _$Alert {
 
   // ===== FIRESTORE CONVERSION =====
   
-  /// Create from Firestore document (NEW - services expect this)
+  /// Create from Firestore document
   static Alert fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     
@@ -32,26 +34,26 @@ abstract class Alert with _$Alert {
       id: doc.id,
       machineId: data['machine_id'] ?? '',
       sensorType: data['sensor_type'] ?? '',
-      readingValue: _parseDouble(data['reading_value']),
-      threshold: _parseDouble(data['threshold']),
+      readingValue: DataParsers.parseDouble(data['reading_value']),
+      threshold: DataParsers.parseDouble(data['threshold']),
       status: data['status'] ?? '',
       message: data['message'] ?? '',
-      timestamp: _parseTimestamp(data['timestamp']),
+      timestamp: DataParsers.parseTimestamp(data['timestamp']),
       readings: data['readings'] as Map<String, dynamic>?,
     );
   }
 
-  /// Create from map (KEEP for backwards compatibility)
+  /// Create from map (for backwards compatibility)
   static Alert fromMap(Map<String, dynamic> data) {
     return Alert(
       id: data['id'] ?? '',
       machineId: data['machine_id'] ?? '',
       sensorType: data['sensor_type'] ?? '',
-      readingValue: _parseDouble(data['reading_value']),
-      threshold: _parseDouble(data['threshold']),
+      readingValue: DataParsers.parseDouble(data['reading_value']),
+      threshold: DataParsers.parseDouble(data['threshold']),
       status: data['status'] ?? '',
       message: data['message'] ?? '',
-      timestamp: _parseTimestamp(data['timestamp']),
+      timestamp: DataParsers.parseTimestamp(data['timestamp']),
       readings: data['readings'] as Map<String, dynamic>?,
     );
   }
@@ -68,20 +70,5 @@ abstract class Alert with _$Alert {
       'timestamp': timestamp.toIso8601String(),
       'readings': readings,
     };
-  }
-
-  // ===== HELPERS =====
-  
-  static double _parseDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is num) return value.toDouble();
-    return double.tryParse(value.toString()) ?? 0.0;
-  }
-
-  static DateTime _parseTimestamp(dynamic value) {
-    if (value == null) return DateTime.now();
-    if (value is Timestamp) return value.toDate();
-    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
-    return DateTime.now();
   }
 }

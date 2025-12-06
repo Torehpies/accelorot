@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart'
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart'
     show HomeScreen;
 import '../../ui/machine_management/widgets/operator_machine_view.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';

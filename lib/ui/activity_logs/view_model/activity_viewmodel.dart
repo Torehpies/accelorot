@@ -58,7 +58,7 @@ class ActivityViewModel extends _$ActivityViewModel {
     );
     
     // Initialize asynchronously
-    Future.microtask(() => _initialize(params.viewingOperatorId, params.focusedMachineId));
+    Future.microtask(() => _initialize(params.focusedMachineId));
     
     return initialState;
   }
@@ -72,7 +72,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== DATA FETCHING =====
 
-  Future<List<ActivityLogItem>> _fetchData(String? viewingOperatorId) async {
+  Future<List<ActivityLogItem>> _fetchData() async {
     switch (_screenType) {
       case ActivityScreenType.substrates:
         return await _aggregator.getSubstrates();
@@ -93,7 +93,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== INITIALIZATION =====
 
-  Future<void> _initialize(String? viewingOperatorId, String? focusedMachineId) async {
+  Future<void> _initialize(String? focusedMachineId) async {
     state = state.copyWith(
       status: LoadingStatus.loading,
       errorMessage: null,
@@ -112,7 +112,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
       state = state.copyWith(isLoggedIn: true);
 
-      await loadActivities(viewingOperatorId, focusedMachineId);
+      await loadActivities(focusedMachineId);
     } catch (e) {
       state = state.copyWith(
         status: LoadingStatus.error,
@@ -124,9 +124,9 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== PUBLIC METHODS =====
 
   /// Load activities from aggregator service
-  Future<void> loadActivities(String? viewingOperatorId, String? focusedMachineId) async {
+  Future<void> loadActivities(String? focusedMachineId) async {
     try {
-      List<ActivityLogItem> activities = await _fetchData(viewingOperatorId);  
+      List<ActivityLogItem> activities = await _fetchData();
 
       // Filter by machine if focusedMachineId is set
       if (focusedMachineId != null) {
@@ -151,8 +151,8 @@ class ActivityViewModel extends _$ActivityViewModel {
   }
 
   /// Reload data (for pull-to-refresh)
-  Future<void> refresh(String? viewingOperatorId, String? focusedMachineId) async {
-    await loadActivities(viewingOperatorId, focusedMachineId);
+  Future<void> refresh() async {
+    await loadActivities(state.focusedMachineId);
   }
 
   /// Handle filter chip selection
@@ -206,13 +206,11 @@ class ActivityViewModel extends _$ActivityViewModel {
 class ActivityParams {
   final ActivityScreenType screenType;
   final String? initialFilter;
-  final String? viewingOperatorId;
   final String? focusedMachineId;
 
   ActivityParams({
     required this.screenType,
     this.initialFilter,
-    this.viewingOperatorId,
     this.focusedMachineId,
   });
 
@@ -222,13 +220,11 @@ class ActivityParams {
       other is ActivityParams &&
           screenType == other.screenType &&
           initialFilter == other.initialFilter &&
-          viewingOperatorId == other.viewingOperatorId &&
           focusedMachineId == other.focusedMachineId;
 
   @override
   int get hashCode =>
       screenType.hashCode ^
       initialFilter.hashCode ^
-      viewingOperatorId.hashCode ^
       focusedMachineId.hashCode;
 }

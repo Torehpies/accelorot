@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../utils/parsers.dart';
 
 part 'substrate.freezed.dart';
 
@@ -23,7 +24,7 @@ abstract class Substrate with _$Substrate {
     String? operatorName,
   }) = _Substrate;
 
-  const Substrate._(); // Enable custom methods
+  const Substrate._();
 
   // ===== FIRESTORE CONVERSION =====
 
@@ -34,7 +35,7 @@ abstract class Substrate with _$Substrate {
     return Substrate(
       id: doc.id,
       title: data['title'] ?? '',
-      quantity: _parseQuantity(data['value']),
+      quantity: DataParsers.parseQuantity(data['value']),
       category: data['category'] ?? '',
       description: data['description'] ?? '',
       timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -60,17 +61,5 @@ abstract class Substrate with _$Substrate {
       'batchId': batchId,
       'operatorName': operatorName,
     };
-  }
-
-  // ===== HELPERS =====
-
-  /// Parse quantity from various formats ("10kg", "10", 10)
-  static double _parseQuantity(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is num) return value.toDouble();
-    
-    final str = value.toString();
-    final numStr = str.replaceAll(RegExp(r'[^0-9.]'), '');
-    return double.tryParse(numStr) ?? 0.0;
   }
 }

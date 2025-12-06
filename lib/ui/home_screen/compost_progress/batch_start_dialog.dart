@@ -1,6 +1,6 @@
 // lib/frontend/operator/dashboard/compost_progress/components/batch_start_dialog.dart
 import 'package:flutter/material.dart';
-import '../models/compost_batch_model.dart';
+import '../../../frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
 
 class BatchStartDialog extends StatefulWidget {
   const BatchStartDialog({super.key});
