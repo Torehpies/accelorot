@@ -1,67 +1,131 @@
-// web_statistics_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/statistics_providers.dart';
 import '../mobile_statistics/widgets/temperature_statistic_card.dart';
 import '../mobile_statistics/widgets/moisture_statistic_card.dart';
 import '../mobile_statistics/widgets/oxygen_statistic_card.dart';
+import '../../data/providers/machine_providers.dart';
+import '../../data/providers/selected_machine_provider.dart'; 
+import '../../data/models/machine_model.dart';
+import '../../services/sess_service.dart';
 
-class WebStatisticsScreen extends ConsumerStatefulWidget {
+class WebStatisticsScreen extends ConsumerWidget {
   final String? focusedMachineId;
 
   const WebStatisticsScreen({super.key, this.focusedMachineId});
 
   @override
-  ConsumerState<WebStatisticsScreen> createState() => _WebStatisticsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sessionService = SessionService();
+    
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: sessionService.getCurrentUserData(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
-  late String _selectedMachineId;
-  final List<String> _availableMachines = ["01", "02", "03", "04"];
+        final userData = userSnapshot.data;
+        final teamId = userData?['teamId'] as String?;
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedMachineId = widget.focusedMachineId ?? "01";
-  }
+        if (teamId == null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Statistics'),
+              backgroundColor: Colors.teal.shade700,
+            ),
+            body: const Center(
+              child: Text('No team assigned. Please contact your administrator.'),
+            ),
+          );
+        }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          "Statistics",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.teal.shade700,
-        elevation: 0,
-      ),
-      body: RefreshIndicator(
-        onRefresh: _handleRefresh,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final padding = width < 600 ? 16.0 : 24.0;
-            
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(padding),
+        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
+
+        return Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: AppBar(
+            title: const Text(
+              "Statistics",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.teal.shade700,
+            elevation: 0,
+          ),
+          body: machinesAsync.when(
+            data: (machines) {
+              final activeMachines = machines
+                  .where((m) => !m.isArchived && m.id != null)
+                  .toList();
+              
+              if (activeMachines.isEmpty) {
+                return const Center(
+                  child: Text('No active machines available'),
+                );
+              }
+
+              // Initialize selected machine if needed
+              final selectedMachineId = ref.watch(selectedMachineIdProvider);
+              if (selectedMachineId.isEmpty || 
+                  !activeMachines.any((m) => m.id == selectedMachineId)) {
+                final initialId = focusedMachineId ?? activeMachines.first.id!;
+                Future.microtask(() {
+                  ref.read(selectedMachineIdProvider.notifier).setMachine(initialId);
+                });
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return RefreshIndicator(
+                onRefresh: () => _handleRefresh(ref, selectedMachineId),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final width = constraints.maxWidth;
+                    final padding = width < 600 ? 16.0 : 24.0;
+                    
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.all(padding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHeader(width, activeMachines, ref),
+                          const SizedBox(height: 24),
+                          _buildStatisticsCards(width, selectedMachineId, ref),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildHeader(width),
-                  const SizedBox(height: 24),
-                  _buildStatisticsCards(width),
+                  Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Error loading machines',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => ref.invalidate(machinesStreamProvider(teamId)),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
                 ],
               ),
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader(double width) {
+  Widget _buildHeader(double width, List<MachineModel> machines, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -81,14 +145,14 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               children: [
                 _buildHeaderContent(),
                 const SizedBox(height: 16),
-                _buildMachineSelector(),
+                _buildMachineSelector(machines, ref),
               ],
             )
           : Row(
               children: [
                 Expanded(child: _buildHeaderContent()),
                 const SizedBox(width: 16),
-                _buildMachineSelector(),
+                _buildMachineSelector(machines, ref),
               ],
             ),
     );
@@ -137,7 +201,9 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildMachineSelector() {
+  Widget _buildMachineSelector(List<MachineModel> machines, WidgetRef ref) {
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -152,21 +218,21 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           const SizedBox(width: 8),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: _selectedMachineId,
+              value: selectedMachineId,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
-              items: _availableMachines.map((m) {
+              items: machines.map((machine) {
                 return DropdownMenuItem(
-                  value: m,
-                  child: Text('Machine $m'),
+                  value: machine.id!,
+                  child: Text(machine.machineName),
                 );
               }).toList(),
               onChanged: (val) {
                 if (val != null) {
-                  setState(() => _selectedMachineId = val);
+                  ref.read(selectedMachineIdProvider.notifier).setMachine(val);
                 }
               },
             ),
@@ -176,17 +242,17 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildStatisticsCards(double width) {
+  Widget _buildStatisticsCards(double width, String machineId, WidgetRef ref) {
     // Determine layout based on width
     if (width < 700) {
       // Mobile: Single column
       return Column(
         children: [
-          _buildTemperatureCard(),
+          _buildTemperatureCard(machineId, ref),
           const SizedBox(height: 20),
-          _buildMoistureCard(),
+          _buildMoistureCard(machineId, ref),
           const SizedBox(height: 20),
-          _buildOxygenCard(),
+          _buildOxygenCard(machineId, ref),
         ],
       );
     } else if (width < 1100) {
@@ -196,16 +262,16 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildTemperatureCard()),
+              Expanded(child: _buildTemperatureCard(machineId, ref)),
               const SizedBox(width: 20),
-              Expanded(child: _buildMoistureCard()),
+              Expanded(child: _buildMoistureCard(machineId, ref)),
             ],
           ),
           const SizedBox(height: 20),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildOxygenCard()),
+              Expanded(child: _buildOxygenCard(machineId, ref)),
               const Expanded(child: SizedBox()), // Empty space
             ],
           ),
@@ -216,20 +282,18 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _buildTemperatureCard()),
+          Expanded(child: _buildTemperatureCard(machineId, ref)),
           const SizedBox(width: 20),
-          Expanded(child: _buildMoistureCard()),
+          Expanded(child: _buildMoistureCard(machineId, ref)),
           const SizedBox(width: 20),
-          Expanded(child: _buildOxygenCard()),
+          Expanded(child: _buildOxygenCard(machineId, ref)),
         ],
       );
     }
   }
 
-  Widget _buildTemperatureCard() {
-    final temperatureAsync = ref.watch(
-      temperatureDataProvider(_selectedMachineId),
-    );
+  Widget _buildTemperatureCard(String machineId, WidgetRef ref) {
+    final temperatureAsync = ref.watch(temperatureDataProvider(machineId));
 
     return _buildSensorCard(
       title: 'Temperature',
@@ -241,14 +305,12 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         hourlyReadings: readings.map((r) => r.value).toList(),
         lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
-      onRetry: () => ref.invalidate(temperatureDataProvider(_selectedMachineId)),
+      onRetry: () => ref.invalidate(temperatureDataProvider(machineId)),
     );
   }
 
-  Widget _buildMoistureCard() {
-    final moistureAsync = ref.watch(
-      moistureDataProvider(_selectedMachineId),
-    );
+  Widget _buildMoistureCard(String machineId, WidgetRef ref) {
+    final moistureAsync = ref.watch(moistureDataProvider(machineId));
 
     return _buildSensorCard(
       title: 'Moisture',
@@ -260,14 +322,12 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         hourlyReadings: readings.map((r) => r.value).toList(),
         lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
-      onRetry: () => ref.invalidate(moistureDataProvider(_selectedMachineId)),
+      onRetry: () => ref.invalidate(moistureDataProvider(machineId)),
     );
   }
 
-  Widget _buildOxygenCard() {
-    final oxygenAsync = ref.watch(
-      oxygenDataProvider(_selectedMachineId),
-    );
+  Widget _buildOxygenCard(String machineId, WidgetRef ref) {
+    final oxygenAsync = ref.watch(oxygenDataProvider(machineId));
 
     return _buildSensorCard(
       title: 'Air Quality',
@@ -279,7 +339,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         hourlyReadings: readings.map((r) => r.value).toList(),
         lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
       ),
-      onRetry: () => ref.invalidate(oxygenDataProvider(_selectedMachineId)),
+      onRetry: () => ref.invalidate(oxygenDataProvider(machineId)),
     );
   }
 
@@ -380,10 +440,10 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Future<void> _handleRefresh() async {
-    ref.invalidate(temperatureDataProvider(_selectedMachineId));
-    ref.invalidate(moistureDataProvider(_selectedMachineId));
-    ref.invalidate(oxygenDataProvider(_selectedMachineId));
+  Future<void> _handleRefresh(WidgetRef ref, String machineId) async {
+    ref.invalidate(temperatureDataProvider(machineId));
+    ref.invalidate(moistureDataProvider(machineId));
+    ref.invalidate(oxygenDataProvider(machineId));
     await Future.delayed(const Duration(milliseconds: 500));
   }
 }
