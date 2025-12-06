@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
@@ -73,6 +74,7 @@ class AuthRepositoryRemote implements AuthRepository {
   }) async {
     try {
       await _authService.signInWithEmail(email, password);
+      debugPrint(appUserProvider.toString());
       return Result.success(null);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
@@ -120,15 +122,17 @@ class AuthRepositoryRemote implements AuthRepository {
       );
 
       if (profileResult.isFailure) {
-        return profileResult;
+        return Result.failure(profileResult.asFailure);
       }
 
       /// Add request in pending members
-      await _pendingMemberService.addPendingMember(
+      final pendingAdd = await _pendingMemberService.addPendingMember(
         teamId: teamId,
         memberId: uid,
         memberEmail: email,
       );
+
+      if (pendingAdd.isFailure) return Result.failure(pendingAdd.asFailure);
 
       return const Result.success(null);
     } on FirebaseAuthException catch (e) {

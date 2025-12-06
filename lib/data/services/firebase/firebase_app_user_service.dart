@@ -31,9 +31,11 @@ class FirebaseAppUserService implements AppUserService {
       await _firestore.collection('users').doc(uid).update(data);
       return Result.success(null);
     } on FirebaseException catch (e) {
+			print("DEBUG: update user field, firebase exception");
+			print(e.toString());
       return Result.failure(mapFirebaseException(e));
     } catch (e) {
-      debugPrint('Unexpected error on creating user profile: $e');
+			print("DEBUG: update user field, unknown error");
       return Result.failure(DataLayerError.unknownError(e));
     }
   }

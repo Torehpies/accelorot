@@ -8,6 +8,7 @@ import 'package:flutter_application_1/data/services/contracts/pagination_result.
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
+import 'package:flutter_application_1/utils/user_status.dart';
 
 class FirebasePendingMemberService implements PendingMemberService {
   final FirebaseFirestore _firestore;
@@ -62,26 +63,32 @@ class FirebasePendingMemberService implements PendingMemberService {
   }
 
   @override
-  Future<String> addPendingMember({
+  Future<Result<void, DataLayerError>> addPendingMember({
     required String teamId,
     required String memberId,
     required String memberEmail,
   }) async {
-    final docRef = _firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('pending_members')
-        .doc(memberId);
+    try {
+      final docRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(memberId);
 
-    final rawData = {
-      'requestedAt': FieldValue.serverTimestamp(),
-      'requestorId': memberId,
-      'requestorEmail': memberEmail,
-    };
+      final rawData = {
+        'requestedAt': FieldValue.serverTimestamp(),
+        'requestorId': memberId,
+        'requestorEmail': memberEmail,
+      };
 
-    await docRef.set(rawData);
+      await docRef.set(rawData);
 
-    return memberId;
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } catch (e) {
+			return Result.failure(DataLayerError.unknownError(e));
+		}
   }
 
   @override
@@ -101,18 +108,21 @@ class FirebasePendingMemberService implements PendingMemberService {
   @override
   Future<void> processAcceptanceTransaction({
     required String teamId,
-    required String memberId,
-    required String email,
-    required String firstName,
-    required String lastName,
+    required PendingMember member,
   }) async {
+    final user = member.user;
+
+    if (user == null) return;
+
     final batch = _firestore.batch();
+
+    final uid = user.uid;
 
     final pendingRef = _firestore
         .collection('teams')
         .doc(teamId)
         .collection('pending_members')
-        .doc(memberId);
+        .doc(uid);
 
     batch.delete(pendingRef);
 
@@ -120,14 +130,21 @@ class FirebasePendingMemberService implements PendingMemberService {
         .collection('teams')
         .doc(teamId)
         .collection('members')
-        .doc(memberId);
+        .doc(uid);
 
     batch.set(teamMemberRef, {
-      'role': 'Operator',
+      'teamRole': 'Operator',
       'addedAt': FieldValue.serverTimestamp(),
-      'email': email,
-      'firstName': firstName,
-      'lastName': lastName,
+      'email': member.user?.email,
+      'firstName': member.user?.firstName,
+      'lastName': member.user?.lastName,
+    });
+
+    final userRef = _firestore.collection("users").doc(uid);
+
+    batch.set(userRef, {
+      "status": UserStatus.active.value,
+      "teamRole": "Operator",
     });
 
     await batch.commit();
@@ -137,7 +154,6 @@ class FirebasePendingMemberService implements PendingMemberService {
   Future<Result<List<PendingMember>, DataLayerError>> fetchPendingMembers(
     String teamId,
   ) async {
-
     try {
       final snapshot = await _firestore
           .collection('teams')
@@ -146,11 +162,9 @@ class FirebasePendingMemberService implements PendingMemberService {
           .orderBy('requestedAt', descending: true)
           .get();
 
-
       final pendingMembers = <PendingMember>[];
 
       for (var doc in snapshot.docs) {
-
         try {
           final data = doc.data();
 
@@ -170,7 +184,6 @@ class FirebasePendingMemberService implements PendingMemberService {
 
           final rawUser = await _userService.fetchRawUserData(userId);
 
-
           if (rawUser == null) {
             return const Result.failure(DataLayerError.mappingError());
           }
@@ -188,7 +201,6 @@ class FirebasePendingMemberService implements PendingMemberService {
           pendingMembers.add(
             PendingMember(user: pendingMemberUser, requestedAt: requestedAt),
           );
-
         } catch (e) {
           return const Result.failure(DataLayerError.mappingError());
         }

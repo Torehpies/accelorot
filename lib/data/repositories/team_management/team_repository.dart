@@ -7,5 +7,6 @@ abstract class TeamRepository {
     bool forceRefresh = false,
   });
   Future<Result<Team, DataLayerError>> addTeam(Team team);
+  Future<Result<void, DataLayerError>> requestToJoinTeam(String teamId, String userId, String email);
 	void clearCache();
 }

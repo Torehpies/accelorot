@@ -3,7 +3,7 @@ import 'package:flutter_application_1/data/services/contracts/data_layer_error.d
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 
 abstract class PendingMemberService {
-	Future<String> addPendingMember({
+	Future<Result<void, DataLayerError>> addPendingMember({
 		required String teamId,
 		required String memberId,
 		required String memberEmail
@@ -21,9 +21,6 @@ abstract class PendingMemberService {
 	});
 	Future<void> processAcceptanceTransaction({
 		required String teamId,
-		required String memberId,
-		required String email,
-		required String firstName,
-		required String lastName,
+		required PendingMember member,
 	});
 }
