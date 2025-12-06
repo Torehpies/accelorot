@@ -1,0 +1,95 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/providers/team_providers.dart';
+import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'team_selection_notifier.g.dart';
+
+@riverpod
+class TeamSelectionNotifier extends _$TeamSelectionNotifier {
+  late final TeamRepository _repository;
+
+  @override
+  TeamSelectionState build() {
+    _repository = ref.read(teamRepositoryProvider);
+    Future.microtask(() => loadTeams());
+    return const TeamSelectionState();
+  }
+
+  Future<void> loadTeams() async {
+    state = state.copyWith(isLoadingTeams: true);
+    final result = await _repository.getTeams();
+    result.when(
+      success: (teams) {
+        state = state.copyWith(teams: teams, isLoadingTeams: false);
+      },
+      failure: (failure) {
+        _setError(failure.userFriendlyMessage);
+      },
+    );
+  }
+
+  void selectedTeam(Team team) {
+    state = state.copyWith(selectedTeam: team);
+  }
+
+  Future<void> submitTeamRequest(User user) async {
+    state = state.copyWith(isSubmitting: true);
+
+    final team = state.selectedTeam;
+    if (team == null) {
+      _setError("No team selected.");
+      return;
+    }
+
+		final teamId = team.teamId;
+
+    final userId = user.uid;
+    final email = user.email;
+
+    if (email == null) {
+      _setError("Email is missing.");
+      return;
+    }
+
+    try {
+      final result = await _repository.requestToJoinTeam(teamId!, userId, email);
+
+      result.when(
+        success: (_) {
+          _setSuccess("Request submitted!");
+        },
+        failure: (failure) {
+          _setError(failure.userFriendlyMessage);
+        },
+      );
+    } catch (e) {
+      _setError("Unexpected error: $e");
+    }
+  }
+
+  Future<void> handleBackToLogin() async {
+    await ref.read(authRepositoryProvider).signOut();
+  }
+
+  void _setError(String message) {
+    state = state.copyWith(
+			isSubmitting: false,
+      isLoadingTeams: false,
+      message: UiMessage.error(message),
+    );
+  }
+
+  void _setSuccess(String message) {
+    state = state.copyWith(
+			isSubmitting: false,
+      isLoadingTeams: false,
+      message: UiMessage.success(message),
+    );
+  }
+}

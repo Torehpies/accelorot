@@ -5,7 +5,6 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
@@ -28,17 +27,16 @@ import 'package:flutter_application_1/screens/login/login_screen.dart';
 import 'package:flutter_application_1/screens/registration/registration_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
+import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
-  //final authStateStream = ref.watch(authStateProvider.notifier).stream;
 	final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
-    //refreshListenable: GoRouterRefreshStream(authStateStream),
 		refreshListenable: notifier,
     initialLocation: RoutePath.signin.path,
     debugLogDiagnostics: true,

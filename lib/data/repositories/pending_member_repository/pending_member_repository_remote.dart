@@ -26,10 +26,7 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
 
       await _pendingMemberService.processAcceptanceTransaction(
         teamId: teamId,
-        memberId: memberId,
-        email: member.user!.email,
-        firstName: member.user!.firstName,
-        lastName: member.user!.lastName,
+				member: member
       );
 
       return const Result.success(null);

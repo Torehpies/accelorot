@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/pending_members/widgets/accept_operator_screen.dart';
 import 'operator_detail_screen.dart';
 import 'add_operator_screen.dart';
-import 'accept_operator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

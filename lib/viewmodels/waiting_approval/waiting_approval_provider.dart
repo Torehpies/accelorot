@@ -52,7 +52,7 @@ class WaitingApproval extends _$WaitingApproval {
     _waitingTimer?.cancel();
     _waitingTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
       final authRepo = ref.read(authRepositoryProvider);
-      final teamRepo = ref.read(teamRepositoryProvider);
+      final teamRepo = ref.read(teamRepositoryOldProvider);
 
       if (authRepo.currentUser == null) {
         _waitingTimer?.cancel();

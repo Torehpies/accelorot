@@ -14,7 +14,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
 
   @override
   TeamManagementState build() {
-    _repository = ref.read(teamRepositoryRemoteProvider);
+    _repository = ref.read(teamRepositoryProvider);
     ref.listen(appUserProvider, (_, next) {
       next.whenData((user) {
         if (user != null) {
@@ -30,7 +30,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   Future<void> getTeams({bool forceRefresh = false}) async {
     state = state.copyWith(isLoadingTeams: true);
 
-    final teamRepo = ref.read(teamRepositoryRemoteProvider);
+    final teamRepo = ref.read(teamRepositoryProvider);
 
     final result = await teamRepo.getTeams(forceRefresh: forceRefresh);
 

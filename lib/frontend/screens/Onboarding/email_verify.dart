@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
+import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../../../utils/snackbar_utils.dart';
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/team_selection_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/providers/auth_providers.dart';

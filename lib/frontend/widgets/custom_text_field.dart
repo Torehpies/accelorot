@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/theme/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? hintText;
