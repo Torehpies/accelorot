@@ -3,6 +3,7 @@ import 'package:flutter_application_1/data/providers/app_auth_state.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,90 +11,63 @@ part 'email_verify_notifier.g.dart';
 
 @riverpod
 class EmailVerifyNotifier extends _$EmailVerifyNotifier {
-  Timer? _cooldownTimer;
-  Timer? _verificationTimer;
-  Timer? _redirectTimer;
-
-  static const int _cooldownDuration = 60; // 60 seconds
+  StreamSubscription<bool>? _verificationSubscription;
 
   @override
   EmailVerifyState build() {
+    // Start polling email verification
     _startVerificationPolling();
 
     ref.onDispose(() {
-      _cooldownTimer?.cancel();
-      _verificationTimer?.cancel();
-      _redirectTimer?.cancel();
+      _verificationSubscription?.cancel();
     });
 
     return const EmailVerifyState();
   }
 
-  // --- Core Verification Logic FIX ---
-
   void _startVerificationPolling() {
-    _verificationTimer?.cancel();
+    _verificationSubscription?.cancel();
 
-    _verificationTimer = Timer.periodic(const Duration(seconds: 3), (
-      timer,
-    ) async {
-      final auth = ref.watch(firebaseAuthProvider);
+    // Poll every 3 seconds
+    _verificationSubscription = Stream.periodic(const Duration(seconds: 3))
+        .asyncMap((_) async {
+      final auth = ref.read(firebaseAuthProvider);
       final user = auth.currentUser;
-      user?.reload();
-      final updatedUser = auth.currentUser;
+      if (user == null) return false;
 
-      if (updatedUser!.emailVerified) {
-        timer.cancel();
+      await user.reload(); // Force refresh
+      return user.emailVerified;
+    }).listen((isVerified) {
+      if (isVerified) {
+        _verificationSubscription?.cancel();
         state = state.copyWith(isVerified: true);
-        _startRedirectCountdown();
-      }
-    });
-  }
 
-  void _startRedirectCountdown() {
-    _redirectTimer?.cancel();
-    state = state.copyWith(dashboardCountdown: 3);
+        // Invalidate providers to refresh auth state
+        ref.invalidate(authStateChangesProvider);
+        ref.invalidate(appUserProvider);
+        ref.invalidate(authStateModelProvider);
 
-    _redirectTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (state.dashboardCountdown > 0) {
-        state = state.copyWith(
-          dashboardCountdown: state.dashboardCountdown - 1,
-        );
-      } else {
-        timer.cancel();
-				ref.invalidate(authStateModelProvider);
-      }
-    });
-  }
-
-  void _startCooldown() {
-    _cooldownTimer?.cancel();
-    state = state.copyWith(resendCooldown: _cooldownDuration);
-
-    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.resendCooldown > 0) {
-        state = state.copyWith(resendCooldown: state.resendCooldown - 1);
-      } else {
-        timer.cancel();
-        state = state.copyWith(resendCooldown: 0);
+        // Notify GoRouter to refresh redirect
+        ref.read(routerNotifierProvider).notifyListeners();
       }
     });
   }
 
   Future<void> resendVerificationEmail() async {
-    if (state.resendCooldown > 0 || state.isResending) return;
+    if (state.isResending) return;
 
     state = state.copyWith(isResending: true);
 
-    final result = await ref
-        .read(authRepositoryProvider)
-        .resendVerificationEmail();
+    final result = await ref.read(authRepositoryProvider).resendVerificationEmail();
     result.when(
-      success: (_) => _startCooldown(),
+      success: (_) {
+        // Optionally show a success message
+      },
       failure: (error) {
-        //state = state.copyWith(errorMessage: error.userFriendlyMessage);
+        // Optionally show an error message
       },
     );
+
     state = state.copyWith(isResending: false);
   }
 

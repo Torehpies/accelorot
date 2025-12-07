@@ -44,22 +44,15 @@ Stream<User?> authUser(Ref ref) {
 @Riverpod(keepAlive: true)
 Stream<AppUser?> appUser(Ref ref) {
   final authUser = ref.watch(authUserProvider);
-  final appUserService = ref.watch(appUserServiceProvider);
 
   return authUser.when(
-    data: (user) {
-      if (user == null) return const Stream.empty();
-      final rawData = appUserService.watchRawUserData(user.uid);
-      return rawData.map((doc) {
-        final data = doc.data();
-        if (data == null) return null;
-
-        final user = AppUser.fromJson({...data});
-        return user;
-      });
-    },
     error: (_, _) => const Stream.empty(),
     loading: () => const Stream.empty(),
+    data: (firebaseUser) {
+      if (firebaseUser == null) return Stream.value(null);
+      final service = ref.watch(appUserServiceProvider);
+      return service.getAppUser(firebaseUser.uid);
+    },
   );
 }
 

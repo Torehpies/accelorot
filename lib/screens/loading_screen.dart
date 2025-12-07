@@ -13,7 +13,7 @@ class LoadingScreen extends StatelessWidget {
             CircularProgressIndicator(color: Colors.teal),
             SizedBox(height: 20),
             Text(
-              "Checking Authorizaiton...",
+              "Loading...",
               style: TextStyle(fontSize: 18, color: Colors.teal),
             ),
           ],

@@ -2,16 +2,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/utils/user_status.dart';
 
 class PendingMemberRepositoryRemote extends PendingMemberRepository {
   final PendingMemberService _pendingMemberService;
+  final AppUserService _userService;
 
   List<PendingMember>? _cache;
 
-  PendingMemberRepositoryRemote(this._pendingMemberService);
+  PendingMemberRepositoryRemote(this._pendingMemberService, this._userService);
 
   @override
   Future<Result<void, DataLayerError>> acceptInvitation({
@@ -43,18 +46,16 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
   @override
   Future<Result<void, DataLayerError>> declineInvitation({
     required String teamId,
-    required PendingMember member,
+    required String id,
   }) async {
     try {
-      final memberId = member.user?.uid;
-      if (memberId == null) {
-        return const Result.failure(MappingError());
-      }
-
       await _pendingMemberService.deletePendingMember(
         teamId: teamId,
-        memberId: memberId,
+        memberId: id,
       );
+
+			final data = {"status": UserStatus.teamSelect.value, "requestTeamId": null};
+			await _userService.updateUserField(id, data);
 
       return const Result.success(null);
     } on FirebaseException catch (e) {

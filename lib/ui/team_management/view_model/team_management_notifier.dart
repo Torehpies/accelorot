@@ -15,15 +15,16 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   @override
   TeamManagementState build() {
     _repository = ref.read(teamRepositoryProvider);
-    ref.listen(appUserProvider, (_, next) {
-      next.whenData((user) {
-        if (user != null) {
-          getTeams();
-        } else {
-          state = state.copyWith(teams: []);
-        }
-      });
-    });
+    Future.microtask(() => getTeams());
+    //    ref.listen(appUserProvider, (_, next) {
+    //      next.whenData((user) {
+    //        if (user != null) {
+    //          getTeams();
+    //        } else {
+    //          state = state.copyWith(teams: []);
+    //        }
+    //      });
+    //    });
     return const TeamManagementState();
   }
 

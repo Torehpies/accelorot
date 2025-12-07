@@ -18,7 +18,8 @@ PendingMemberService pendingMemberService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 PendingMemberRepository pendingMemberRepository(Ref ref) {
-  final pendingMemberService = ref.read(pendingMemberServiceProvider);
-
-  return PendingMemberRepositoryRemote(pendingMemberService);
+  return PendingMemberRepositoryRemote(
+    ref.read(pendingMemberServiceProvider),
+    ref.read(appUserServiceProvider),
+  );
 }

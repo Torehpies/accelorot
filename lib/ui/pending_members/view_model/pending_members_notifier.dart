@@ -15,15 +15,16 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   @override
   PendingMembersState build() {
     _repository = ref.read(pendingMemberRepositoryProvider);
-    ref.listen(appUserProvider, (_, next) {
-      next.whenData((user) {
-        if (user != null) {
-          fetchMembers(forceRefresh: true);
-        } else {
-          state = state.copyWith(members: []);
-        }
-      });
-    });
+		Future.microtask(() => fetchMembers());
+//    ref.listen(appUserProvider, (_, next) {
+//      next.whenData((user) {
+//        if (user != null) {
+//          fetchMembers(forceRefresh: true);
+//        } else {
+//          state = state.copyWith(members: []);
+//        }
+//      });
+//    });
     return const PendingMembersState();
   }
 
@@ -40,7 +41,9 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       success: (members) {
         state = state.copyWith(members: members, isLoadingMembers: false);
       },
-      failure: (e) => null,
+      failure: (e) {
+				state = state.copyWith(isLoadingMembers: false, errorMessage: e.toString());
+			},
     );
   }
 
@@ -76,7 +79,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final admin = ref.watch(appUserProvider);
     final result = await _repository.declineInvitation(
       teamId: admin.value!.teamId,
-      member: member,
+			id: admin.value!.uid
     );
 
     result.when(

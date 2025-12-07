@@ -2,64 +2,62 @@ import 'package:flutter_application_1/data/models/app_auth_state.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/utils/role_mapper.dart';
-import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_auth_state.g.dart';
 
 @Riverpod(keepAlive: true)
 AppAuthState authStateModel(Ref ref) {
-  final firebaseUserAsync = ref.watch(firebaseAuthProvider);
-  final userDocAsync = ref.watch(userDocProvider);
+  final authStream = ref.watch(authStateChangesProvider);
 
-  final firebaseUser = firebaseUserAsync.currentUser;
-  final userDoc = userDocAsync.value;
+  return authStream.when(
+    data: (firebaseUser) {
+      if (firebaseUser == null) {
+        return const AppAuthState.unauthenticated();
+      }
 
-  // Case 1: Not logged in
-  if (firebaseUser == null) {
-    return const AppAuthState(
-      firebaseUser: null,
-      userDoc: null,
-      status: UserStatus.unauthenticated,
-    );
-  }
+      if (!firebaseUser.emailVerified) {
+        return AppAuthState.unverified(firebaseUser: firebaseUser);
+      }
 
-  // Case 2: Not verified
-  if (!firebaseUser.emailVerified) {
-    return AppAuthState(
-      firebaseUser: firebaseUser,
-      userDoc: userDoc,
-      status: UserStatus.unverified,
-    );
-  }
+      final appUserAsync = ref.watch(appUserProvider);
 
-  // Case 3: No userDoc yet
-  if (userDoc == null) {
-    return AppAuthState(
-      firebaseUser: firebaseUser,
-      userDoc: null,
-      status: UserStatus.unauthenticated,
-    );
-  }
+      return appUserAsync.when(
+        data: (appUser) {
+          if (appUser == null && !appUserAsync.isLoading) {
+					print("MISSUNG USER DOC");
+            return AppAuthState.missingUserDoc(firebaseUser: firebaseUser);
+          }
+          if (appUser == null) {
+            return AppAuthState.loading();
+          }
+          final globalRole = parseGlobalRole(appUser.globalRole);
+          final teamRole = parseTeamRole(appUser.teamRole);
 
-  // Map status
-  final mappedStatus = switch (userDoc.status) {
-    'pending' => UserStatus.pending,
-    'active' => UserStatus.active,
-    'archived' => UserStatus.archived,
-    'teamSelect' => UserStatus.teamSelect,
-    _ => UserStatus.pending,
-  };
+					print("AUTHENTICATED");
+          return AppAuthState.authenticated(
+            firebaseUser: firebaseUser,
+            userDoc: appUser,
+            status: appUser.status,
+            globalRole: globalRole,
+            teamRole: teamRole,
+          );
+        },
+        error: (_, _) {
+          return const AppAuthState.unauthenticated();
+        },
+        loading: () {
+          return const AppAuthState.loading();
+        },
+      );
 
-  // Map roles
-  final globalRole = parseGlobalRole(userDoc.globalRole);
-  final teamRole = parseTeamRole(userDoc.teamRole);
-
-  return AppAuthState(
-    firebaseUser: firebaseUser,
-    userDoc: userDoc,
-    status: mappedStatus,
-    globalRole: globalRole,
-    teamRole: teamRole,
+      //final appUser = appUserAsync.value;
+    },
+    error: (_, _) {
+      return const AppAuthState.unauthenticated();
+    },
+    loading: () {
+      return const AppAuthState.loading();
+    },
   );
 }

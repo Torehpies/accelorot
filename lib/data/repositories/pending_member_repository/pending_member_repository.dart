@@ -20,6 +20,6 @@ abstract class PendingMemberRepository {
   });
   Future<Result<void, DataLayerError>> declineInvitation({
     required String teamId,
-    required PendingMember member,
+    required String id,
   });
 }

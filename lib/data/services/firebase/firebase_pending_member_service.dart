@@ -87,8 +87,8 @@ class FirebasePendingMemberService implements PendingMemberService {
     } on FirebaseException catch (e) {
       return Result.failure(mapFirebaseException(e));
     } catch (e) {
-			return Result.failure(DataLayerError.unknownError(e));
-		}
+      return Result.failure(DataLayerError.unknownError(e));
+    }
   }
 
   @override
@@ -145,7 +145,9 @@ class FirebasePendingMemberService implements PendingMemberService {
     batch.set(userRef, {
       "status": UserStatus.active.value,
       "teamRole": "Operator",
-    });
+      "teamId": teamId,
+      "requestTeamId": FieldValue.delete(),
+    }, SetOptions(merge: true));
 
     await batch.commit();
   }

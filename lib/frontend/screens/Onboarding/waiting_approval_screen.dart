@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/routes/auth_notifier.dart';
+import 'package:flutter_application_1/data/models/pending_member.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,9 +19,13 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
 
   Future<void> _cancelRequest(BuildContext context, WidgetRef ref) async {
     setState(() => _loading = true);
-    final authNotifier = ref.read(authStateProvider.notifier);
+    final memberRepo = ref.read(pendingMemberRepositoryProvider);
+    final appUser = ref.read(appUserProvider);
     try {
-      await authNotifier.cancelTeam();
+      await memberRepo.declineInvitation(
+        teamId: appUser.value!.teamId,
+        id: appUser.value!.uid,
+      );
     } catch (e) {
       showSnackbar(
         context,

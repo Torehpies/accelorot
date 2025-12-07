@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
@@ -31,12 +31,21 @@ class FirebaseAppUserService implements AppUserService {
       await _firestore.collection('users').doc(uid).update(data);
       return Result.success(null);
     } on FirebaseException catch (e) {
-			print("DEBUG: update user field, firebase exception");
-			print(e.toString());
       return Result.failure(mapFirebaseException(e));
     } catch (e) {
-			print("DEBUG: update user field, unknown error");
       return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
+
+  @override
+  Stream<AppUser?> getAppUser(String id) {
+    try {
+      return _firestore.collection('users').doc(id).snapshots().map((doc) {
+        if (!doc.exists || doc.data() == null) return null;
+        return AppUser.fromJson(doc.data()!);
+      });
+    } catch (e) {
+      return Stream.error(DataLayerError.databaseError(message: e.toString()));
     }
   }
 }

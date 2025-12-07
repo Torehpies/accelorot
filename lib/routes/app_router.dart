@@ -5,7 +5,6 @@ import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.da
 import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'package:flutter_application_1/routes/auth_notifier.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
@@ -34,10 +33,10 @@ import 'package:go_router/go_router.dart';
 const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
-	final notifier = ref.watch(routerNotifierProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
-		refreshListenable: notifier,
+    refreshListenable: notifier,
     initialLocation: RoutePath.signin.path,
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
@@ -96,11 +95,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extraReason = state.extra as String?;
 
-          final authStatusState = ref.read(authStateProvider);
-          final fallbackReason = authStatusState.restrictedReason;
+          //final authStatusState = ref.read(authStateProvider);
+          //final fallbackReason = authStatusState.restrictedReason;
+
+          final fallbackReason = "archived";
 
           final reason = extraReason ?? fallbackReason;
-          return RestrictedAccessScreen(reason: reason ?? 'Unknown reason');
+          return RestrictedAccessScreen(reason: reason);
         },
       ),
       ShellRoute(

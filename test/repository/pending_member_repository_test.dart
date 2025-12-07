@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/data/models/user.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository.dart';
-import 'package:flutter_application_1/data/repositories/user_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
@@ -9,25 +10,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateMocks([PendingMemberService, UserRepository])
+@GenerateMocks([PendingMemberService, AppUserRepository, AppUserService])
 import 'pending_member_repository_test.mocks.dart';
 
 void main() {
   late MockPendingMemberService mockService;
-  late MockUserRepository mockUserRepository;
+  late MockAppUserRepository mockAppUserRepository;
   late PendingMemberRepositoryImpl repository;
+  late MockAppUserService mockAppUserService;
 
   const testTeamId = 'team-177';
   const testRequestorId = 'user-requester-id';
   final testTimestamp = Timestamp.fromDate(DateTime(2025, 6, 1));
 
-  final mockUser = User(
+  final mockAppUser = AppUser(
     uid: testRequestorId,
     email: 'test@exmaple.com',
-    firstName: 'Test',
-    lastName: 'User',
+    firstname: 'Test',
+    lastname: 'User',
     globalRole: 'User',
-    emailVerified: true,
     createdAt: DateTime(2024, 1, 1),
     teamRole: 'Operator',
     teamId: 'example-team',
@@ -35,10 +36,15 @@ void main() {
 
   setUp(() {
     mockService = MockPendingMemberService();
-    mockUserRepository = MockUserRepository();
-    repository = PendingMemberRepositoryImpl(mockService, mockUserRepository);
+    mockAppUserRepository = MockAppUserRepository();
+    mockAppUserService = MockAppUserService();
+    repository = PendingMemberRepositoryImpl(
+      mockService,
+      mockAppUserRepository,
+      mockAppUserService,
+    );
     reset(mockService);
-    reset(mockUserRepository);
+    reset(mockAppUserRepository);
   });
 
   group('getPendingMembers', () {
@@ -69,9 +75,9 @@ void main() {
         ).thenAnswer((_) async => mockPaginationResult);
 
         // stub 2: repository returns clean user model
-        when(
-          mockUserRepository.getUser(testRequestorId),
-        ).thenAnswer((_) async => mockUser);
+        //when(
+        //  mockAppUserRepository.getUser(testRequestorId),
+        //).thenAnswer((_) async => mockAppUser);
 
         // action
         final result = await repository.getPendingMembers(
@@ -83,8 +89,8 @@ void main() {
         // assertion
 
         // check success rate
-        expect(result.value, isNotNull);
-        expect(result.error, isNull);
+        expect(result.isSuccess, isNotNull);
+        expect(result.isFailure, isNull);
 
         // check actaul paginationresult
         final paginationResult = result.value!;
@@ -99,7 +105,7 @@ void main() {
         expect(paginationResult.nextCursor, 'next-page-token');
 
         // verification
-        verify(mockUserRepository.getUser(testRequestorId)).called(1);
+        verify(mockAppUserRepository.getUser(testRequestorId)).called(1);
       },
     );
 

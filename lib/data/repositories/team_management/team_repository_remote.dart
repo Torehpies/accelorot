@@ -70,7 +70,7 @@ class TeamRepositoryRemote implements TeamRepository {
       return Result.failure(addRequestResult.asFailure);
     }
 
-    final data = {"status": UserStatus.pending.value};
+    final data = {"status": UserStatus.pending.value, "requestTeamId": teamId};
 
     final updateUserResult = await _appUserService.updateUserField(
       userId,

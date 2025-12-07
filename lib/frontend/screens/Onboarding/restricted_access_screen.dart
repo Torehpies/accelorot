@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
-import 'login_screen.dart';
 
 class RestrictedAccessScreen extends StatefulWidget {
   final String reason;

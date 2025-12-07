@@ -74,7 +74,6 @@ class AuthRepositoryRemote implements AuthRepository {
   }) async {
     try {
       await _authService.signInWithEmail(email, password);
-      debugPrint(appUserProvider.toString());
       return Result.success(null);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
