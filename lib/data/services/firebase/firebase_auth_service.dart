@@ -34,15 +34,21 @@ class FirebaseAuthService implements AuthService {
   }
 
   @override
-  Future<String> signUp(String email, String password) async {
+  Future<User> signUp(String email, String password) async {
     try {
-      UserCredential result = await _firebaseAuth
+      final UserCredential result = await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
       final user = result.user;
 
-      await user?.sendEmailVerification();
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'user-null',
+          message: 'User is null after sign-up',
+        );
+      }
 
-      return result.user!.uid;
+      await user.sendEmailVerification();
+      return user;
     } on FirebaseAuthException {
       rethrow;
     }
@@ -71,8 +77,23 @@ class FirebaseAuthService implements AuthService {
       final user = _firebaseAuth.currentUser;
       if (user == null) return Result.success(false);
       await user.reload();
-			debugPrint("Email verified.");
+      debugPrint("Email verified.");
       return Result.success(_firebaseAuth.currentUser?.emailVerified ?? false);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseException(e));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> updateDisplayName(
+    User user,
+    String name,
+  ) async {
+    try {
+      await user.updateDisplayName(name);
+      return Result.success(null);
     } on FirebaseException catch (e) {
       return Result.failure(mapFirebaseException(e));
     } catch (e) {

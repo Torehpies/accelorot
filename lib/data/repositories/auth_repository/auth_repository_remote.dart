@@ -109,11 +109,13 @@ class AuthRepositoryRemote implements AuthRepository {
   }) async {
     try {
       /// Signup through Firebase
-      final uid = await _authService.signUp(email, password);
+      final user = await _authService.signUp(email, password);
+
+			await _authService.updateDisplayName(user, "$firstName $lastName");
 
       /// Add user profile in firestore
       final profileResult = await _userRepository.createUserProfile(
-        uid: uid,
+        uid: user.uid,
         email: email,
         firstName: firstName,
         lastName: lastName,
@@ -128,7 +130,7 @@ class AuthRepositoryRemote implements AuthRepository {
       /// Add request in pending members
       final pendingAdd = await _pendingMemberService.addPendingMember(
         teamId: teamId,
-        memberId: uid,
+        memberId: user.uid,
         memberEmail: email,
       );
 
