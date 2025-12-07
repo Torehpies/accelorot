@@ -1,11 +1,11 @@
 // lib/frontend/operator/web/web_operator_machine_screen.dart
 import 'package:flutter/material.dart';
 import '../../../frontend/operator/machine_management/operator_machine/controllers/operator_machine_controller.dart';
-import '../../../ui/machine_management/widgets/search_bar_widget.dart';
-import '../../operator/widgets/summary_card_widget.dart';
-import '../../operator/widgets/machine_card_widget.dart';
-import '../../operator/widgets/machine_list_tile_widget.dart';
-import '../widgets/web_view_confirmation_dialog.dart';
+import '../../machine_management/widgets/search_bar_widget.dart';
+import '../../../web/operator/widgets/summary_card_widget.dart';
+import '../widgets/machine_card_widget.dart';
+import '../widgets/machine_list_tile_widget.dart';
+import '../../../web/operator/widgets/web_view_confirmation_dialog.dart';
 
 class WebOperatorMachineScreen extends StatefulWidget {
   const WebOperatorMachineScreen({super.key, required focusedMachine});
