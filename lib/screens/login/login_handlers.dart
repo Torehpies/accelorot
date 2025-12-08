@@ -205,7 +205,7 @@ class LoginFormContent extends ConsumerWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
+            color: theme.colorScheme.onSecondaryFixedVariant,
           ),
         ),
         const SizedBox(height: 4),

@@ -7,7 +7,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_auth_state.g.dart';
 
-//@Riverpod(keepAlive: true)
 @riverpod
 AppAuthState authStateModel(Ref ref) {
   final authStream = ref.watch(authStateChangesProvider);

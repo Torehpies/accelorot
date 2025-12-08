@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/viewmodels/login_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,7 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // 2. Delegate to the ResponsiveLayout
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: appTheme.scaffoldBackgroundColor,
       body: SafeArea(
         child: ResponsiveLayout(
           mobileView: MobileLoginView(handlers: handlers),
