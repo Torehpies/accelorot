@@ -46,6 +46,10 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               if (currentPath.startsWith('/admin')) return null;
               return RoutePath.adminDashboard.path;
             }
+            if (teamRole == TeamRole.operator) {
+              if (currentPath.startsWith('/operator')) return null;
+              return RoutePath.dashboard.path;
+            }
           }
           return null;
         case UserStatus.teamSelect:
