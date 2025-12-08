@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/machine_model.dart';
-import '../../../../web/operator/screens/web_home_screen.dart';
-import '../../../../web/operator/screens/web_activity_logs_screen.dart';
-import '../../../../web/operator/screens/web_statistics_screen.dart';
+import '../../../web_operator_dashboard/view/web_home_screen.dart';
+import '../../../web_operator_dashboard/view/web_activity_logs_screen.dart';
+import '../../../web_operator_dashboard/view/web_statistics_screen.dart';
 
 /// Web-specific machine-focused view screen with sidebar navigation
 /// Shows dashboard, activity logs, and statistics filtered for a specific machine
