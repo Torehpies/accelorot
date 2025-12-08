@@ -41,7 +41,8 @@ Stream<User?> authUser(Ref ref) {
   return firebase.authStateChanges();
 }
 
-@Riverpod(keepAlive: true)
+//@Riverpod(keepAlive: true)
+@riverpod
 Stream<AppUser?> appUser(Ref ref) {
   final authUser = ref.watch(authUserProvider);
 

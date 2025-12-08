@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/app_router.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';

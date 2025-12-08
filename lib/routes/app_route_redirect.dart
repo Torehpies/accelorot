@@ -37,16 +37,19 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               : RoutePath.restricted.path;
         case UserStatus.active:
           if (globalRole == GlobalRole.superadmin) {
+					debugPrint("ROUTED TO SUPERADMIN");
             if (currentPath.startsWith('/superAdmin')) return null;
             return RoutePath.superAdminTeams.path;
           }
 
           if (globalRole == GlobalRole.user) {
             if (teamRole == TeamRole.admin) {
+					debugPrint("ROUTED TO ADMIN");
               if (currentPath.startsWith('/admin')) return null;
               return RoutePath.adminDashboard.path;
             }
             if (teamRole == TeamRole.operator) {
+					debugPrint("ROUTED TO OPERATOR");
               if (currentPath.startsWith('/operator')) return null;
               return RoutePath.dashboard.path;
             }
