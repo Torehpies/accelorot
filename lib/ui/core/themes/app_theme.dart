@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 
 // --- 1. Color Palette ---
 class AppColors {
-  static const Color primary = Colors.teal;
-  static const Color primaryLight = Color(0xFF4DB6AC); // Teal 400
-  static const Color background = Colors.white;
-  static const Color textPrimary = Color(0xFF333333);
-  static const Color textSecondary = Color(
-    0xFF757575,
-  ); // Hint/Placeholder Color
-  static const Color error = Color(0xFFD32F2F);
+  static const Color green100 = Color(0x22C55EFF);
+  static const Color green200 = Color(0x10B981FF);
+  static const Color green300 = Color(0x059669FF);
+  static const Color green400 = Color(0x047857FF);
+  static const Color green500 = Color(0x065F46FF);
+  static const Color background = Color(0xE0F2FEFF);
+  static const Color background1 = Color(0xE0F2FEFF);
+  static const Color background2 = Colors.white;
+  //static const Color textPrimary = Color(0x374151FF);
+  static const Color textPrimary = Colors.black;
+  static const Color textSecondary = Color(0x6B7280FF);
+  static const Color error = Color(0xFF2D552F);
 }
 
 // --- 2. Theme Data Definition ---
 final ThemeData appTheme = ThemeData(
   // Global Scaffold Background
+	fontFamily: 'dm-sans',
   scaffoldBackgroundColor: AppColors.background,
 
   // Defines the default color palette using the modern ColorScheme
   colorScheme: const ColorScheme.light(
-    primary: AppColors.primary,
-    secondary: AppColors.primaryLight,
+    primary: AppColors.green100,
+    secondary: AppColors.green200,
+    tertiary: AppColors.green300,
     surface: AppColors.background,
     onSurface: AppColors.textPrimary,
     error: AppColors.error,
@@ -39,7 +45,7 @@ final ThemeData appTheme = ThemeData(
       color: AppColors.textPrimary, // Use the dark text color
     ),
     // Used for secondary text (e.g., "Sign in to continue")
-    bodyLarge: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+    bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
   ),
 
   // --- Input Field Styling (Applies to all TextFormFields) ---
@@ -52,7 +58,7 @@ final ThemeData appTheme = ThemeData(
     // Border when the field is focused
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      borderSide: const BorderSide(color: AppColors.green100, width: 2),
     ),
     // Label color
     labelStyle: const TextStyle(color: AppColors.textSecondary),
@@ -79,7 +85,7 @@ final ThemeData appTheme = ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       // The background color of the button (the filled part)
-      backgroundColor: AppColors.primary, // This is Teal
+      backgroundColor: AppColors.green100, // This is Teal
       // The foreground color (the text color)
       foregroundColor: AppColors.background, // Set this to white for contrast
       // Optional: Increase minimum size

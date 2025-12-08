@@ -44,5 +44,12 @@ flutter:
     - assets/icons/
     - assets/images/
 
+  fonts:
+    - family: dm-sans
+      fonts:
+        - asset: assets/fonts/dm-sans.ttf
+        - asset: assets/fonts/dm-sans-italic.ttf
+          style: italic
+
 
 
