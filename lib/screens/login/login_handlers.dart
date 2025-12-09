@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 const double kMaxFormWidth = 450.0;
 
 /// Simple class to bundle all the methods/controllers/state needed by the UI.
@@ -127,7 +127,6 @@ class LoginFormContent extends ConsumerWidget {
                   ),
                 ),
 
-                // Login Button
                 SizedBox(
                   width: double.infinity,
                   child: PrimaryButton(
@@ -179,11 +178,7 @@ class LoginFormContent extends ConsumerWidget {
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.teal.shade400, Colors.teal.shade700],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+				color: AppColors.green100,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../utils/snackbar_utils.dart';
@@ -34,16 +35,13 @@ class EmailVerifyScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      // The background color for web/large screens
-      backgroundColor: isDesktop
-          ? theme.colorScheme.surfaceContainerHighest
-          : theme.colorScheme.surface,
+      backgroundColor: AppColors.background,
       body: Center(
         child: Container(
-          // Max width for the entire verification flow container
           constraints: const BoxConstraints(maxWidth: 500),
           padding: const EdgeInsets.all(24),
           child: Card(
+            color: AppColors.background2,
             elevation: isDesktop ? 12 : 4, // Higher elevation on web for depth
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
@@ -92,7 +90,7 @@ class EmailVerifyScreen extends ConsumerWidget {
                       Icon(
                         Icons.email_outlined,
                         size: 80,
-                        color: theme.colorScheme.secondary,
+                        color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -121,7 +119,6 @@ class EmailVerifyScreen extends ConsumerWidget {
                       const Text(
                         'Please check your inbox (and spam folder!) and click the link to continue.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontStyle: FontStyle.italic),
                       ),
                       const SizedBox(height: 40),
                       SizedBox(
@@ -195,8 +192,8 @@ class EmailVerifyScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
 
                       // Back to login button
-                      TextButton(
-                        onPressed: notifier.signOutAndNavigate,
+                      OutlinedButton(
+                        onPressed: () => notifier.signOutAndNavigate,
                         child: const Text('Log Out and Go Back to Login'),
                       ),
                     ],

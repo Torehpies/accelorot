@@ -2,21 +2,11 @@ import 'package:flutter/material.dart';
 
 // --- 2. Theme Data Definition ---
 final ThemeData appTheme = ThemeData(
-  // Global Scaffold Background
   useMaterial3: true,
   fontFamily: 'dm-sans',
   scaffoldBackgroundColor: AppColors.background,
 
-  // Defines the default color palette using the modern ColorScheme
   colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green100),
-  //colorScheme: const ColorScheme.light(
-  //  primary: AppColors.green100,
-  //  secondary: AppColors.green200,
-  //  tertiary: AppColors.green300,
-  //  surface: AppColors.background,
-  //  onSurface: AppColors.textPrimary,
-  //  error: AppColors.error,
-  //),
 
   // --- Typography ---
   textTheme: const TextTheme(
@@ -61,27 +51,16 @@ final ThemeData appTheme = ThemeData(
   textButtonTheme: TextButtonThemeData(
     style: TextButton.styleFrom(
       foregroundColor: AppColors.textPrimary,
-      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-      padding:
-          EdgeInsets.zero, // Often used for small links like "Forgot Password?"
+      padding: EdgeInsets.zero,
     ),
   ),
 
-  // Custom button styling for PrimaryButton component (if needed)
-  // elevatedButtonTheme: ElevatedButtonThemeData(...)
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      // The background color of the button (the filled part)
       backgroundColor: AppColors.green100, // This is Teal
-      // The foreground color (the text color)
-      foregroundColor: AppColors.background, // Set this to white for contrast
-      // Optional: Increase minimum size
-      //minimumSize: const Size(
-      //  double.infinity,
-      //  48,
-      //), // Full width, standard height
-      // Optional: Customize shape
+      foregroundColor: Colors.white, // Set this to white for contrast
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      //textStyle: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'dm-sans'),
     ),
   ),
 );

@@ -7,24 +7,28 @@ class MobileLoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Uses SingleChildScrollView for keyboard safety on mobile
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: kMaxFormWidth,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 80.0,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: kMaxFormWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 80.0,
+                    ),
+                    child: LoginFormContent(handlers: handlers),
+                  ),
+                ),
+              ),
             ),
-            // Delegates the content rendering to the shared form
-            child: LoginFormContent(handlers: handlers),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
-
