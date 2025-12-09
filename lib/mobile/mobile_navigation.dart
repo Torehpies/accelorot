@@ -5,7 +5,7 @@ import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_naviga
 import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart'
     show HomeScreen;
 import '../../ui/machine_management/widgets/operator_machine_view.dart';
-import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
+import '../../ui/profile_screen/widgets/profile_view.dart';
 import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
 
 class MobileNavigation extends StatefulWidget {
@@ -28,7 +28,7 @@ class _MobileNavigationState extends State<MobileNavigation> {
     ),
     const StatisticsScreen(),
      const OperatorMachineView(),
-    const ProfileScreen(),
+    const ProfileView(),
   ];
 
   @override
