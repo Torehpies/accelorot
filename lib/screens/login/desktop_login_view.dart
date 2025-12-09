@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'login_handlers.dart';
 
 class DesktopLoginView extends StatelessWidget {
@@ -11,13 +12,16 @@ class DesktopLoginView extends StatelessWidget {
       children: [
         // Left Side: Branding and Contextual Information
         Expanded(
-          flex: 2,
+          flex: 3,
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.teal.shade600, Colors.teal.shade800],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+								begin: Alignment.topCenter,
+								end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.background2,
+                  AppColors.background1,
+                ],
               ),
             ),
             child: const Center(
@@ -30,7 +34,7 @@ class DesktopLoginView extends StatelessWidget {
                     Text(
                       'ACCEL-O-ROT',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.green100,
                         fontSize: 68,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
@@ -40,12 +44,16 @@ class DesktopLoginView extends StatelessWidget {
                     Text(
                       'Where rot meets acceleration.',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.textPrimary,
                         fontSize: 18,
                       ),
                     ),
                     SizedBox(height: 80),
-                    Icon(Icons.lock_outline, color: Colors.white, size: 100),
+                    Icon(
+                      Icons.lock_outline,
+                      color: AppColors.green100,
+                      size: 100,
+                    ),
                   ],
                 ),
               ),
@@ -55,7 +63,7 @@ class DesktopLoginView extends StatelessWidget {
 
         // Right Side: The Form Area
         Expanded(
-          flex: 3,
+          flex: 4,
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
@@ -73,4 +81,3 @@ class DesktopLoginView extends StatelessWidget {
     );
   }
 }
-

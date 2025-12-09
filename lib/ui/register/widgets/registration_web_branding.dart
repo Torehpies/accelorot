@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class RegistrationWebBranding extends StatelessWidget {
   const RegistrationWebBranding({super.key});
@@ -8,9 +9,9 @@ class RegistrationWebBranding extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.teal.shade600, Colors.teal.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.background2, AppColors.background1],
         ),
       ),
       child: const Center(
@@ -23,7 +24,7 @@ class RegistrationWebBranding extends StatelessWidget {
               Text(
                 'JOIN US',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.green100,
                   fontSize: 68,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
@@ -32,12 +33,12 @@ class RegistrationWebBranding extends StatelessWidget {
               SizedBox(height: 20),
               Text(
                 'Create your account to start accelerating.',
-                style: TextStyle(color: Colors.white70, fontSize: 18),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 18),
               ),
               SizedBox(height: 80),
               Icon(
                 Icons.person_add_alt_1_outlined,
-                color: Colors.white,
+                color: AppColors.green100,
                 size: 100,
               ),
             ],

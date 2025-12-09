@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/repositories/team_repository.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -348,7 +349,7 @@ class RegistrationFormContent extends ConsumerWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Colors.teal,
+            color: AppColors.green100,
           ),
         ),
         const SizedBox(height: 4),

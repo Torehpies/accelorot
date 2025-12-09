@@ -48,7 +48,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
         ref.invalidate(authStateModelProvider);
 
         // Notify GoRouter to refresh redirect
-        ref.read(routerNotifierProvider).notifyListeners();
+        // ref.read(routerNotifierProvider).notifyListeners();
       }
     });
   }

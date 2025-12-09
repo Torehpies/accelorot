@@ -82,7 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // 2. Delegate to the ResponsiveLayout
     return Scaffold(
-      backgroundColor: appTheme.scaffoldBackgroundColor,
+      backgroundColor: AppColors.background2,
       body: SafeArea(
         child: ResponsiveLayout(
           mobileView: MobileLoginView(handlers: handlers),

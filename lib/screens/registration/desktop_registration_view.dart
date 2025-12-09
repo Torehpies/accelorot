@@ -12,13 +12,13 @@ class DesktopRegistrationView extends StatelessWidget {
       children: [
         // Left Side: Branding and Contextual Information (same flex ratio as login)
         Expanded(
-          flex: 2,
+          flex: 3,
           child: RegistrationWebBranding(),
         ),
 
         // Right Side: The Form Area
         Expanded(
-          flex: 3,
+          flex: 4,
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(

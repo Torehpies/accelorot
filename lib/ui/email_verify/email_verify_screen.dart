@@ -193,9 +193,13 @@ class EmailVerifyScreen extends ConsumerWidget {
 
                       // Back to login button
                       OutlinedButton(
-                        onPressed: () => notifier.signOutAndNavigate,
+                        onPressed: notifier.signOutAndNavigate,
                         child: const Text('Log Out and Go Back to Login'),
                       ),
+                      // TextButton(
+                      //   onPressed: notifier.signOutAndNavigate,
+                      //   child: const Text("Logout"),
+                      // ),
                     ],
                   ],
                 ),
