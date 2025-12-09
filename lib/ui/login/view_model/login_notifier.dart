@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/utils/firebase_error.dart';
 import 'package:flutter_application_1/providers/auth_providers.dart';
 
-import '../utils/google_auth_result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'login_notifier.g.dart';
@@ -95,13 +94,13 @@ class LoginNotifier extends _$LoginNotifier {
     try {
       final result = await authRepo.signInWithGoogle();
 
-      if (result is GoogleLoginSuccess) {
-        /// stop loading on google sign-in success
-        state = state.copyWith(isLoading: false, errorMessage: null);
-      } else if (result is GoogleLoginFailure) {
-        /// stop loading on google sign-in failure
-        state = state.copyWith(isLoading: false, errorMessage: result.message);
-      }
+      // if (result is GoogleLoginSuccess) {
+      //   /// stop loading on google sign-in success
+      //   state = state.copyWith(isLoading: false, errorMessage: null);
+      // } else if (result is GoogleLoginFailure) {
+      //   /// stop loading on google sign-in failure
+      //   state = state.copyWith(isLoading: false, errorMessage: result.message);
+      // }
     } on Exception {
       // Catch unexpected errors during the sign-in call itself
       state = state.copyWith(

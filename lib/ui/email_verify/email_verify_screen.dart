@@ -90,7 +90,7 @@ class EmailVerifyScreen extends ConsumerWidget {
                       Icon(
                         Icons.email_outlined,
                         size: 80,
-                        color: theme.colorScheme.primary,
+                        color: AppColors.green100,
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -111,7 +111,7 @@ class EmailVerifyScreen extends ConsumerWidget {
                         email,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: AppColors.green100,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -194,12 +194,8 @@ class EmailVerifyScreen extends ConsumerWidget {
                       // Back to login button
                       OutlinedButton(
                         onPressed: notifier.signOutAndNavigate,
-                        child: const Text('Log Out and Go Back to Login'),
+                        child: const Text('Logout'),
                       ),
-                      // TextButton(
-                      //   onPressed: notifier.signOutAndNavigate,
-                      //   child: const Text("Logout"),
-                      // ),
                     ],
                   ],
                 ),

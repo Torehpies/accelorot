@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/viewmodels/registration/registration_notifier.dart';
+import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
-import 'package:flutter_application_1/viewmodels/registration/registration_state.dart';
+import 'package:flutter_application_1/ui/registration/view_model/registration_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'registration_notifier.g.dart';

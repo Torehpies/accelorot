@@ -21,10 +21,10 @@ import 'package:flutter_application_1/routes/navigations/operator_mobile_shell.d
 import 'package:flutter_application_1/routes/navigations/operator_web_shell.dart';
 import 'package:flutter_application_1/routes/route_path.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
-import 'package:flutter_application_1/screens/loading_screen.dart';
-import 'package:flutter_application_1/screens/login/login_screen.dart';
-import 'package:flutter_application_1/screens/registration/registration_screen.dart';
+import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
+import 'package:flutter_application_1/ui/login/views/login_screen.dart';
+import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

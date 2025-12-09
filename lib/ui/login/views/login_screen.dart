@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/viewmodels/login_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
+import 'package:flutter_application_1/ui/login/view_model/login_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

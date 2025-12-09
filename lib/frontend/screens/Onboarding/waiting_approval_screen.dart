@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
 import 'package:flutter_application_1/utils/snackbar_utils.dart';

@@ -3,7 +3,6 @@ import 'package:flutter_application_1/data/providers/app_auth_state.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
-import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

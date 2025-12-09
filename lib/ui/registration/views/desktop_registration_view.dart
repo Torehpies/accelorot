@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/register/widgets/registration_web_branding.dart';
+import 'package:flutter_application_1/ui/registration/widgets/registration_web_branding.dart';
 import 'registration_handlers.dart';
 
 class DesktopRegistrationView extends StatelessWidget {

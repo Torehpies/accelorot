@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
@@ -29,7 +28,7 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
 
       await _pendingMemberService.processAcceptanceTransaction(
         teamId: teamId,
-				member: member
+        member: member,
       );
 
       return const Result.success(null);
@@ -54,13 +53,16 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
         memberId: id,
       );
 
-			final data = {"status": UserStatus.teamSelect.value, "requestTeamId": null};
-			await _userService.updateUserField(id, data);
+      final data = {
+        "status": UserStatus.teamSelect.value,
+        "requestTeamId": FieldValue.delete,
+      };
+      await _userService.updateUserField(id, data);
 
       return const Result.success(null);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        return const Result.failure(PermissionError());
+        return const Result.failure(DataLayerError.permissionError());
       }
       return const Result.failure(NetworkError());
     } catch (e) {
@@ -83,11 +85,14 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
       return Result.success(_cache!);
     }
     final result = await _pendingMemberService.fetchPendingMembers(teamId);
-    result.when(success: (members) {
-      return _cache = members;
-    }, failure: (error) {
-      return _cache;
-    });
+    result.when(
+      success: (members) {
+        return _cache = members;
+      },
+      failure: (error) {
+        return _cache;
+      },
+    );
     return result;
   }
 
