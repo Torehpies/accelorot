@@ -1,7 +1,7 @@
 // operator_card.dart
 import 'package:flutter/material.dart';
-import '../../models/operator_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../../../data/models/mobile_admin/operator_model.dart';
+import '../admin/status_indicator.dart';
 
 /// Card widget displaying operator information with teal theme
 class OperatorCard extends StatelessWidget {

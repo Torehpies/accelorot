@@ -1,8 +1,8 @@
 // machine_management_section.dart
 import 'package:flutter/material.dart';
-import '../models/machine_model.dart';
-import 'widgets/machine_card.dart';
-import 'widgets/machine_detail_dialog.dart';
+import '../../../data/models/mobile_admin/machine_model.dart';
+import '../../../frontend/screens/admin/home_screen/machine_management/widgets/machine_card.dart';
+import '../../../frontend/screens/admin/home_screen/machine_management/widgets/machine_detail_dialog.dart';
 
 /// Section widget for displaying and managing machines with unlimited scroll
 class MachineManagementSection extends StatelessWidget {

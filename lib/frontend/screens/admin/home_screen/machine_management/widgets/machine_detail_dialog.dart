@@ -1,8 +1,8 @@
 // machine_detail_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/machine_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../../../../../data/models/mobile_admin/machine_model.dart';
+import '../../../../../../ui/mobile_admin_dashboard/widgets/admin/status_indicator.dart';
 
 /// Dialog showing detailed machine information with white background
 class MachineDetailDialog extends StatelessWidget {

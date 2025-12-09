@@ -1,14 +1,14 @@
 // lib/frontend/screens/admin/home_screen/admin_home_screen.dart
 import 'package:flutter/material.dart';
-import 'widgets/stat_card.dart';
-import 'operator_management/operator_management_section.dart';
-import 'machine_management/machine_management_section.dart';
-import 'models/admin_stats.dart';
-import 'models/operator_model.dart';
-import 'models/machine_model.dart';
-import '../../../../services/admin_dashboard/mock_admin_data.dart';
-import '../../../../services/admin_dashboard/admin_firestore_service.dart';
-import '../../../../services/sess_service.dart';
+import '../widgets/admin/stat_card.dart';
+import '../operator_management/operator_management_section.dart';
+import '../machine_management/machine_management_section.dart';
+import '../../../data/models/mobile_admin/admin_stats.dart';
+import '../../../data/models/mobile_admin/operator_model.dart';
+import '../../../data/models/mobile_admin/machine_model.dart';
+import '../../../services/admin_dashboard/mock_admin_data.dart';
+import '../../../data/services/firebase/admin_firestore_service.dart';
+import '../../../services/sess_service.dart';
 
 /// Admin home screen with teal theme and auth-based data loading
 class AdminHomeScreen extends StatefulWidget {

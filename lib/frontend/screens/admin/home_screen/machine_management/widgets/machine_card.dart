@@ -1,7 +1,7 @@
 // machine_card.dart
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../../../../../data/models/mobile_admin/machine_model.dart';
+import '../../../../../../ui/mobile_admin_dashboard/widgets/admin/status_indicator.dart';
 
 /// Card widget displaying machine information with teal theme
 class MachineCard extends StatelessWidget {

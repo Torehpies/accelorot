@@ -1,8 +1,8 @@
 // operator_management_section.dart
 import 'package:flutter/material.dart';
-import '../models/operator_model.dart';
-import 'widgets/operator_card.dart';
-import 'widgets/operator_detail_dialog.dart';
+import '../../../data/models/mobile_admin/operator_model.dart';
+import '../widgets/operator/operator_card.dart';
+import '../widgets/operator/operator_detail_dialog.dart';
 
 /// Section widget for displaying and managing operators with unlimited scroll
 class OperatorManagementSection extends StatelessWidget {
