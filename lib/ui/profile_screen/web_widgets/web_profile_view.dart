@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/profile_model.dart';
 import '../view_model/profile_notifier.dart';
 import '../../../ui/core/ui/change_password_dialog.dart';
+import '../widgets/profile_view.dart'; 
 
 class WebProfileView extends ConsumerStatefulWidget {
   const WebProfileView({super.key});
@@ -83,6 +84,22 @@ class _WebProfileViewState extends ConsumerState<WebProfileView> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(profileProvider);
+
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+
+        if (constraints.maxWidth < 430) {
+          return const ProfileView(); // Mobile version
+        }
+
+        // Otherwise, use web version 
+        return _buildWebLayout(state);
+      },
+    );
+  }
+
+  Widget _buildWebLayout(ProfileState state) {
     final notifier = ref.read(profileProvider.notifier);
 
     if (state.profile != null) {
@@ -134,106 +151,89 @@ class _WebProfileViewState extends ConsumerState<WebProfileView> {
                   padding: const EdgeInsets.all(32.0),
                   child: Align(
                     alignment: Alignment.center,
-                    child: Card(
-                      elevation: 4,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(32.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Header Row with Avatar, Info, and Buttons
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 40,
-                                  backgroundImage: NetworkImage(
-                                    'https://via.placeholder.com/150/2E7D32/FFFFFF?text=${state.profile!.initials}',
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Card(
+                        elevation: 4,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Header Row with Avatar, Info, and Buttons
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 40,
+                                    backgroundImage: NetworkImage(
+                                      'https://via.placeholder.com/150/2E7D32/FFFFFF?text=${state.profile!.initials}',
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 32),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        state.profile!.displayName,
-                                        style: const TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
+                                  const SizedBox(width: 32),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          state.profile!.displayName,
+                                          style: const TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        state.profile!.email,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.teal[50],
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        child: Text(
-                                          state.profile!.role,
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          state.profile!.email,
                                           style: TextStyle(
-                                            color: Colors.teal[800],
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
+                                            color: Colors.grey[600],
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Action Buttons
-                                if (!state.isEditing)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      OutlinedButton.icon(
-                                        onPressed: () =>
-                                            ChangePasswordDialog.show(context),
-                                        icon: const Icon(
-                                          Icons.lock_reset,
-                                          size: 18,
-                                        ),
-                                        label: const Text('Change Password'),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: Colors.orange,
-                                          side: const BorderSide(
-                                            color: Colors.orange,
-                                          ),
-                                          backgroundColor: Colors.white,
+                                        const SizedBox(height: 8),
+                                        Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 12,
+                                            horizontal: 12,
+                                            vertical: 6,
                                           ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.teal[50],
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            state.profile!.role,
+                                            style: TextStyle(
+                                              color: Colors.teal[800],
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      SizedBox(
-                                        width: 180,
-                                        child: ElevatedButton.icon(
-                                          onPressed: () => notifier.setEditing(true),
-                                          icon: const Icon(Icons.edit, size: 18),
-                                          label: const Text('Edit Profile'),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.teal,
-                                            foregroundColor: Colors.white,
+                                      ],
+                                    ),
+                                  ),
+                                  // Action Buttons
+                                  if (!state.isEditing)
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        OutlinedButton.icon(
+                                          onPressed: () =>
+                                              ChangePasswordDialog.show(context),
+                                          icon: const Icon(
+                                            Icons.lock_reset,
+                                            size: 18,
+                                          ),
+                                          label: const Text('Change Password'),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.orange,
+                                            side: const BorderSide(
+                                              color: Colors.orange,
+                                            ),
+                                            backgroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 20,
                                               vertical: 12,
@@ -243,32 +243,52 @@ class _WebProfileViewState extends ConsumerState<WebProfileView> {
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 32),
-                            Divider(color: Colors.grey[300]),
-                            const SizedBox(height: 24),
-                            // Personal Information Header
-                            Text(
-                              'Personal Information',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800],
-                                  ),
-                            ),
-                            const SizedBox(height: 24),
-                            // Form or Info Display
-                            if (state.isEditing)
-                              _buildEditForm(state.profile!)
-                            else
-                              _buildInfoDisplay(state.profile!),
-                          ],
+                                        const SizedBox(height: 8),
+                                        SizedBox(
+                                          width: 180,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () => notifier.setEditing(true),
+                                            icon: const Icon(Icons.edit, size: 18),
+                                            label: const Text('Edit Profile'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.teal,
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                                vertical: 12,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 32),
+                              Divider(color: Colors.grey[300]),
+                              const SizedBox(height: 24),
+                              // Personal Information Header
+                              Text(
+                                'Personal Information',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[800],
+                                    ),
+                              ),
+                              const SizedBox(height: 24),
+                              // Form or Info Display
+                              if (state.isEditing)
+                                _buildEditForm(state.profile!)
+                              else
+                                _buildInfoDisplay(state.profile!),
+                            ],
+                          ),
                         ),
                       ),
                     ),
