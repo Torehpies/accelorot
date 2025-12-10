@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'login_handlers.dart';
+import 'package:flutter_application_1/ui/login/views/login_form.dart';
 
 class DesktopLoginView extends StatelessWidget {
-  final LoginHandlers handlers;
-  const DesktopLoginView({super.key, required this.handlers});
+  const DesktopLoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Left Side: Branding and Contextual Information
         Expanded(
           flex: 3,
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-								begin: Alignment.topCenter,
-								end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.background2,
-                  AppColors.background1,
-                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.background2, AppColors.background1],
               ),
             ),
             child: const Center(
@@ -71,7 +66,7 @@ class DesktopLoginView extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   // Delegates the content rendering to the shared form
-                  child: LoginFormContent(handlers: handlers, isDesktop: true),
+                  child: LoginForm(),
                 ),
               ),
             ),

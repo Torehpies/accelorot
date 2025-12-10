@@ -3,48 +3,73 @@ import 'package:flutter_application_1/frontend/components/google_signin_button.d
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
+import 'package:flutter_application_1/ui/login/view_model/login_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
 const double kMaxFormWidth = 450.0;
 
-/// Simple class to bundle all the methods/controllers/state needed by the UI.
-class LoginHandlers {
-  final GlobalKey<FormState> formKey;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final bool isLoading;
-  final bool obscurePassword;
-  final VoidCallback togglePasswordVisibility;
-  final VoidCallback onSubmitLogin;
-  final VoidCallback onGoogleSignIn;
-  final VoidCallback onNavigateToForgotPass;
-  final VoidCallback onNavigateToRegistration;
-
-  LoginHandlers({
-    required this.formKey,
-    required this.emailController,
-    required this.passwordController,
-    required this.isLoading,
-    required this.obscurePassword,
-    required this.togglePasswordVisibility,
-    required this.onSubmitLogin,
-    required this.onGoogleSignIn,
-    required this.onNavigateToForgotPass,
-    required this.onNavigateToRegistration,
-  });
-}
-
-class LoginFormContent extends ConsumerWidget {
-  final LoginHandlers handlers;
-  final bool isDesktop;
-
-  const LoginFormContent({
-    super.key,
-    required this.handlers,
-    this.isDesktop = false,
-  });
+class LoginForm extends ConsumerStatefulWidget {
+  const LoginForm({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends ConsumerState<LoginForm> {
+  final formKey = GlobalKey<FormState>();
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Email is required";
+    }
+
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return "Enter a valid email";
+    }
+
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Password is required";
+    }
+    if (value.length < 8) {
+      return "Minimum 8 characters";
+    }
+    return null;
+  }
+
+  void _submit() {
+    final isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
+    ref
+        .read(loginProvider.notifier)
+        .signInWithEmail(
+          emailController.text.trim(),
+          passwordController.text.trim(),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loginState = ref.watch(loginProvider);
+
     final theme = Theme.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -53,17 +78,18 @@ class LoginFormContent extends ConsumerWidget {
         Center(child: _buildLogo()),
         const SizedBox(height: 16),
         Center(child: _buildTitle(theme)),
-        SizedBox(height: isDesktop ? 40 : 32),
+        SizedBox(height: 32),
 
-        RepaintBoundary(
-          child: Form(
-            key: handlers.formKey,
+        Form(
+          key: formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: AutofillGroup(
             child: Column(
               children: [
-                // Email Field
                 TextFormField(
-                  controller: handlers.emailController,
+                  controller: emailController,
                   keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: 'Email Address',
@@ -72,49 +98,38 @@ class LoginFormContent extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email is required';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
+                  validator: _validateEmail,
                 ),
                 const SizedBox(height: 16),
 
                 // Password Field
                 TextFormField(
-                  controller: handlers.passwordController,
-                  obscureText: handlers.obscurePassword,
+                  controller: passwordController,
+                  obscureText: true,
+                  autofillHints: const [AutofillHints.password],
                   textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => handlers.onSubmitLogin(),
+                  onFieldSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        handlers.obscurePassword
+                        _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
                         color: Colors.grey,
                       ),
-                      onPressed: handlers.togglePasswordVisibility,
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    if (value.length < 8) {
-                      return 'Password must be at least 8 characters';
-                    }
-                    return null;
-                  },
+                  validator: _validatePassword,
                 ),
                 const SizedBox(height: 8),
 
@@ -122,7 +137,7 @@ class LoginFormContent extends ConsumerWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: handlers.onNavigateToForgotPass,
+                    onPressed: () => context.go('/forgot-password'),
                     child: const Text('Forgot Password?'),
                   ),
                 ),
@@ -131,8 +146,8 @@ class LoginFormContent extends ConsumerWidget {
                   width: double.infinity,
                   child: PrimaryButton(
                     text: 'Login',
-                    isLoading: handlers.isLoading,
-                    onPressed: handlers.onSubmitLogin,
+                    isLoading: loginState.isLoading,
+                    onPressed: _submit,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -142,8 +157,9 @@ class LoginFormContent extends ConsumerWidget {
 
                 // Google Sign-In Button
                 GoogleSignInButton(
-                  isLoading: handlers.isLoading,
-                  onPressed: handlers.onGoogleSignIn,
+                  isLoading: loginState.isLoading,
+                  // onPressed: handlers.onGoogleSignIn,
+                  onPressed: () => null,
                 ),
 
                 // Sign Up Link
@@ -153,7 +169,7 @@ class LoginFormContent extends ConsumerWidget {
                   children: [
                     const Text("Don't have an account? "),
                     TextButton(
-                      onPressed: handlers.onNavigateToRegistration,
+                      onPressed: () => context.go('/signup'),
                       child: const Text(
                         "Sign up",
                         style: TextStyle(
@@ -178,7 +194,7 @@ class LoginFormContent extends ConsumerWidget {
       width: 80,
       height: 80,
       decoration: BoxDecoration(
-				color: AppColors.green100,
+        color: AppColors.green100,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'login_handlers.dart'; // Import the handlers and the shared form
+import 'package:flutter_application_1/ui/login/views/login_form.dart';
 
 class MobileLoginView extends StatelessWidget {
-  final LoginHandlers handlers;
-  const MobileLoginView({super.key, required this.handlers});
+  const MobileLoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,7 @@ class MobileLoginView extends StatelessWidget {
                       horizontal: 24.0,
                       vertical: 80.0,
                     ),
-                    child: LoginFormContent(handlers: handlers),
+                    child: LoginForm(),
                   ),
                 ),
               ),
