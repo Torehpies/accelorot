@@ -1,28 +1,28 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'operator_model.dart';
+//import 'operator_model.dart';
 
-class ProfileModel {
-  final String uid;
-  final String email;
-  final String firstName;
-  final String lastName;
-  final String role;
-  final String? teamId;
-  final DateTime? lastLogin;
-  final bool isActive;
-  final bool emailVerified;
+part 'profile_model.freezed.dart';
+part 'profile_model.g.dart';
 
-  ProfileModel({
-    required this.uid,
-    required this.email,
-    required this.firstName,
-    required this.lastName,
-    required this.role,
-    this.teamId,
-    this.lastLogin,
-    this.isActive = true,
-    this.emailVerified = true,
-  });
+@freezed
+abstract class ProfileModel with _$ProfileModel {
+  const ProfileModel._();
+
+  const factory ProfileModel({
+    required String uid,
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String role,
+    String? teamId,
+    @TimestampConverter() DateTime? lastLogin,
+    @Default(true) bool isActive,
+    @Default(true) bool emailVerified,
+  }) = _ProfileModel;
+
+  factory ProfileModel.fromJson(Map<String, dynamic> json) =>
+      _$ProfileModelFromJson(json);
 
   /// Create ProfileModel from Firestore user document
   factory ProfileModel.fromFirestore(
@@ -42,22 +42,6 @@ class ProfileModel {
     );
   }
 
-  /// Convert from OperatorModel (useful when viewing team member profiles)
-  factory ProfileModel.fromOperator(OperatorModel operator) {
-    final nameParts = operator.name.split(' ');
-    final firstName = nameParts.isNotEmpty ? nameParts.first : '';
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-
-    return ProfileModel(
-      uid: operator.uid,
-      email: operator.email,
-      firstName: firstName,
-      lastName: lastName,
-      role: operator.role,
-      isActive: !operator.isArchived && !operator.hasLeft,
-      emailVerified: true,
-    );
-  }
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -86,28 +70,21 @@ class ProfileModel {
     final last = lastName.isNotEmpty ? lastName[0] : '';
     return (first + last).toUpperCase();
   }
+}
 
-  ProfileModel copyWith({
-    String? uid,
-    String? email,
-    String? firstName,
-    String? lastName,
-    String? role,
-    String? teamId,
-    DateTime? lastLogin,
-    bool? isActive,
-    bool? emailVerified,
-  }) {
-    return ProfileModel(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      role: role ?? this.role,
-      teamId: teamId ?? this.teamId,
-      lastLogin: lastLogin ?? this.lastLogin,
-      isActive: isActive ?? this.isActive,
-      emailVerified: emailVerified ?? this.emailVerified,
-    );
+class TimestampConverter implements JsonConverter<DateTime?, Object?> {
+  const TimestampConverter();
+
+  @override
+  DateTime? fromJson(Object? json) {
+    if (json is Timestamp) {
+      return json.toDate();
+    }
+    return null;
+  }
+
+  @override
+  Object? toJson(DateTime? object) {
+    return object != null ? Timestamp.fromDate(object) : null;
   }
 }
