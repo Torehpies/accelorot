@@ -83,4 +83,20 @@ class TeamRepositoryRemote implements TeamRepository {
 
     return Result.success(null);
   }
+
+  @override
+  Future<Result<bool, DataLayerError>> isInTeam(String userId) async {
+    final getUserResult = await _appUserService.getAppUserAsync(userId);
+    if (getUserResult.isFailure) {
+      return Result.failure(getUserResult.asFailure);
+    }
+		final appUser = getUserResult.asSuccess;
+
+		if (appUser == null) {
+			return Result.failure(DataLayerError.userNullError());
+		}
+
+		final isInTeam = appUser.teamId.isNotEmpty;
+		return Result.success(isInTeam);
+  }
 }

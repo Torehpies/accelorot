@@ -13,4 +13,5 @@ abstract class Result<T, E> with _$Result<T, E> {
   bool get isFailure => this is Failure<T, E>;
 
   E get asFailure => (this as Failure<T, E>).failure;
+  T get asSuccess => (this as Success<T, E>).data;
 }

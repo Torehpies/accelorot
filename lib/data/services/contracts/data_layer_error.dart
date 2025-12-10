@@ -12,6 +12,7 @@ abstract class DataLayerError with _$DataLayerError {
       DatabaseError;
   const factory DataLayerError.mappingError() = MappingError;
   const factory DataLayerError.userExistsError() = UserExistsError;
+  const factory DataLayerError.userNullError() = UserNullError;
   const factory DataLayerError.dataEmptyError() = DataEmptyError;
   const factory DataLayerError.emailVerificationError() =
       EmailVerificationError;
@@ -26,6 +27,7 @@ abstract class DataLayerError with _$DataLayerError {
     databaseError: (message) => message,
     mappingError: () => 'Data recieved from the server was corrupt.',
     userExistsError: () => 'User already exists in database.',
+    userNullError: () => 'User does not exist in database.',
     dataEmptyError: () => 'Fetched data is empty.',
     validationError: (message) => message,
     unknownError: (_) => 'An unexpected error occurred. Please try again',
