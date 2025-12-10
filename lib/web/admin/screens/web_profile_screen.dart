@@ -7,7 +7,7 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.d
 import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
 import '../../../ui/core/ui/change_password_dialog.dart';
-import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
+import '../../../ui/core/ui/admin_app_bar.dart';
 
 class WebProfileScreen extends StatefulWidget {
   const WebProfileScreen({super.key});
