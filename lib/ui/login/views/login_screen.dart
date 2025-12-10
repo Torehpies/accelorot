@@ -12,7 +12,6 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-		debugPrint("LOGIN SCREEN REBUILD");
     ref.listen(loginProvider, (previous, next) {
       next.when(
         data: (_) {

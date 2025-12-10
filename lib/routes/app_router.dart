@@ -9,7 +9,6 @@ import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shel
 import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/waiting_approval_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart'; // Corrected import reference
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
@@ -27,6 +26,7 @@ import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
+import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

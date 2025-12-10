@@ -105,7 +105,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                 // Password Field
                 TextFormField(
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   autofillHints: const [AutofillHints.password],
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (_) => _submit(),
