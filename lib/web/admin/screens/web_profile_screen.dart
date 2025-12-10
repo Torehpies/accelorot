@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
 import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
-import '../../../frontend/operator/profile/change_password_dialog.dart';
+import '../../../ui/core/ui/change_password_dialog.dart';
 import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
 
 class WebProfileScreen extends StatefulWidget {

@@ -5,7 +5,7 @@ import '../../../services/auth_wrapper.dart';
 import '../view_model/profile_notifier.dart';
 import 'profile_edit_form.dart';
 import 'profile_info_card.dart';
-import '../../../frontend/operator/profile/change_password_dialog.dart';
+import '../../core/ui/change_password_dialog.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});
