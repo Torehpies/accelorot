@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/profile_model.dart';
-import '../../../data/repositories/profile_repository.dart';
+import '../../../data/repositories/profile_repository/profile_repository.dart';
 import '../../../data/providers/profile_providers.dart';
 
 part 'profile_notifier.g.dart';

@@ -1,27 +1,12 @@
-import '../models/profile_model.dart';
-import '../services/contracts/profile_service.dart';
+import 'profile_repository.dart';
+import '../../models/profile_model.dart';
+import '../../services/contracts/profile_service.dart';
 
-abstract class ProfileRepository {
-  /// Get the current user's profile
-  Future<ProfileModel?> getCurrentProfile();
-  
-  /// Get any user's profile by UID
-  Future<ProfileModel?> getProfileByUid(String uid);
-  
-  /// Update the current user's profile
-  Future<void> updateCurrentProfile({
-    required String firstName,
-    required String lastName,
-  });
-  
-  /// Watch current user's profile for real-time updates
-  Stream<ProfileModel?> watchCurrentProfile();
-}
 
-class ProfileRepositoryImpl implements ProfileRepository {
+class ProfileRepositoryRemote implements ProfileRepository {
   final ProfileService _service;
 
-  ProfileRepositoryImpl(this._service);
+  ProfileRepositoryRemote(this._service);
 
   @override
   Future<ProfileModel?> getCurrentProfile() =>
