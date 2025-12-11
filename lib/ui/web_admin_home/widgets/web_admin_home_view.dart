@@ -261,7 +261,7 @@ class _WebAdminHomeContent extends StatelessWidget {
             const Divider(height: 16, color: Colors.grey),
             Expanded(
               child: ListView.separated(
-                separatorBuilder: (_, __) => const Divider(height: 16, color: Colors.grey),
+                separatorBuilder: (_, _) => const Divider(height: 16, color: Colors.grey),
                 itemCount: operators.length,
                 itemBuilder: (context, index) {
                   final op = operators[index];
@@ -384,7 +384,7 @@ class _WebAdminHomeContent extends StatelessWidget {
             const Divider(height: 16, color: Colors.grey),
             Expanded(
               child: ListView.separated(
-                separatorBuilder: (_, __) => const Divider(height: 16, color: Colors.grey),
+                separatorBuilder: (_, _) => const Divider(height: 16, color: Colors.grey),
                 itemCount: machines.length,
                 itemBuilder: (context, index) {
                   final m = machines[index];
