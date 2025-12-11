@@ -1,14 +1,14 @@
-// machine_card.dart
+// operator_card.dart
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../view_model/operator_model.dart';
+import '../status_indicator.dart';
 
-/// Card widget displaying machine information with teal theme
-class MachineCard extends StatelessWidget {
-  final MachineModel machine;
+/// Card widget displaying operator information with teal theme
+class OperatorCard extends StatelessWidget {
+  final OperatorModel operator;
   final VoidCallback? onTap;
 
-  const MachineCard({super.key, required this.machine, this.onTap});
+  const OperatorCard({super.key, required this.operator, this.onTap});
 
   /// Build the card widget with grey border
   @override
@@ -37,7 +37,7 @@ class MachineCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildMachineIcon(),
+                _buildAvatar(),
                 const SizedBox(height: 8),
                 _buildName(),
               ],
@@ -47,7 +47,7 @@ class MachineCard extends StatelessWidget {
               top: 4,
               right: 4,
               child: StatusIndicator(
-                isArchived: machine.isArchived,
+                isArchived: operator.isArchived,
                 showText: false,
                 size: 12,
               ),
@@ -58,8 +58,8 @@ class MachineCard extends StatelessWidget {
     );
   }
 
-  /// Build teal machine icon
-  Widget _buildMachineIcon() {
+  /// Build teal person icon instead of avatar image
+  Widget _buildAvatar() {
     return Container(
       width: 70,
       height: 70,
@@ -67,20 +67,16 @@ class MachineCard extends StatelessWidget {
         color: Colors.teal.shade50,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.precision_manufacturing,
-        size: 40,
-        color: Colors.teal.shade600,
-      ),
+      child: Icon(Icons.person, size: 40, color: Colors.teal.shade600),
     );
   }
 
-  /// Build machine name text
+  /// Build operator name text
   Widget _buildName() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
-        machine.machineName,
+        operator.name,
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,

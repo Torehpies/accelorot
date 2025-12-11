@@ -1,8 +1,8 @@
 // operator_detail_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/operator_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../view_model/operator_model.dart';
+import '../status_indicator.dart';
 
 /// Dialog showing detailed operator information with white background
 class OperatorDetailDialog extends StatelessWidget {
