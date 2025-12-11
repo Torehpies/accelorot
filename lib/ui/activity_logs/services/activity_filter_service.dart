@@ -13,12 +13,17 @@ class ActivityFilterService {
     required DateFilterRange dateFilter,
     required ActivityFilterConfig config,
     required bool isManualFilter,
+    String? selectedBatchId,
   }) {
+
+    var filtered = applyBatchFilter(items, selectedBatchId);
     // Step 1: Apply date filter
-    var filtered = applyDateFilter(items, dateFilter);
+    filtered = applyDateFilter(filtered, dateFilter);
 
     // Step 2: Apply search filter
     filtered = applySearchFilter(filtered, searchQuery);
+
+    
 
     // Step 3: Compute auto-highlighted filters based on search results
     final highlighted = computeHighlightedFilters(
@@ -68,6 +73,14 @@ class ActivityFilterService {
     return items
         .where((item) => item.matchesSearchQuery(query))
         .toList();
+  }
+
+  List<ActivityLogItem> applyBatchFilter(
+    List<ActivityLogItem> items,
+    String? selectedBatchId,
+  ) {
+    if (selectedBatchId == null || selectedBatchId.isEmpty) return items;
+    return items.where((item) => item.batchId == selectedBatchId).toList();
   }
 
   /// Compute which filter chips should be highlighted based on search results

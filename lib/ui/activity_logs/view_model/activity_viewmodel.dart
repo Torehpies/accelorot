@@ -182,6 +182,15 @@ class ActivityViewModel extends _$ActivityViewModel {
     _applyFilters();
   }
 
+  void onBatchChanged(String? batchId) {
+    state = state.copyWith(
+      selectedBatchId: batchId,
+      selectedFilter: 'All',
+      isManualFilter: false,
+    );
+    _applyFilters();
+  }
+
   // ===== PRIVATE FILTERING LOGIC =====
 
   void _applyFilters() {
@@ -192,6 +201,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       dateFilter: state.dateFilter,
       config: _config,
       isManualFilter: state.isManualFilter,
+      selectedBatchId: state.selectedBatchId, 
     );
 
     state = state.copyWith(

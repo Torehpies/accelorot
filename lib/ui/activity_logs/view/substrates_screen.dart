@@ -20,7 +20,7 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.substrates,
         initialFilter: widget.initialFilter,
-        focusedMachineId: widget.focusedMachineId,
+        focusedMachineId: widget.focusedMachineId,  
       );
 
   @override
@@ -59,6 +59,12 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
   void onDateFilterChanged(DateFilterRange filter) {
     ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
+  }
+
+  
+  @override
+  void onBatchChanged(String? batchId) {
+    ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
   }
 
   @override

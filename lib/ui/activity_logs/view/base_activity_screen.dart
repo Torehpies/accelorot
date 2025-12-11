@@ -7,6 +7,7 @@ import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/date_filter_button.dart';
+import '../../../data/providers/batch_providers.dart';
 
 /// Clean base screen that only handles UI rendering
 /// All business logic is in ViewModels
@@ -46,6 +47,8 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
   /// Callback when date filter changes
   void onDateFilterChanged(DateFilterRange filter);
+
+  void onBatchChanged(String? batchId);
 
   /// Optional: Callback for refresh
   Future<void> onRefresh() async {}
@@ -112,6 +115,10 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
         children: [
           // Machine filter banner
           if (state.focusedMachineId != null) _buildMachineBanner(),
+
+          // Batch selector
+          _buildBatchSelector(state),
+          const SizedBox(height: 12),
 
           // Search bar
           SearchBarWidget(
@@ -312,5 +319,70 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       return 'No results found for "${state.searchQuery}"';
     }
     return 'No ${state.selectedFilter.toLowerCase()} activities found';
+  }
+
+
+  Widget _buildBatchSelector(ActivityListState state) {
+    final batchesAsync = ref.watch(userTeamBatchesProvider);
+
+    return batchesAsync.when(
+      data: (batches) {
+        if (batches.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.inventory_2, color: Colors.teal.shade700, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Batch:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButton<String>(
+                  value: state.selectedBatchId,
+                  hint: const Text(
+                    'All Batches',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.teal.shade700),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('All Batches'),
+                    ),
+                    ...batches.map((batch) {
+                      return DropdownMenuItem<String>(
+                        value: batch.id,
+                        child: Text(
+                          batch.id,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                  onChanged: (value) => onBatchChanged(value),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
   }
 }
