@@ -279,7 +279,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                         Expanded(
                           flex: 4,
                           child: Text(
-                            op.email ?? '—',
+                            op.email,
                             style: const TextStyle(fontSize: 12, color: Color.fromARGB(255, 73, 73, 73)),
                           ),
                         ),

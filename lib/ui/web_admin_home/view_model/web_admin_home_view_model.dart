@@ -25,7 +25,7 @@ class WebAdminHomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _stats = await _repository.loadStats(_teamId!);
+      _stats = await _repository.loadStats(_teamId);
     } catch (e) {
       // TODO: Handle error (e.g., via callback or state)
     } finally {
