@@ -6,27 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'waiting_approval_notifier.g.dart';
 
-// @riverpod
-// class WaitingApproval extends _$WaitingApproval {
-//   Timer? _redirectTimer;
-//
-//   @override
-//   WaitingApprovalState build() {
-//     final initialState = const WaitingApprovalState();
-//
-//     _startAcceptedCheck();
-//
-//     ref.onDispose(() {
-//       _redirectTimer?.cancel();
-//       _waitingTimer?.cancel();
-//     });
-//
-//     return initialState;
-//   }
-//
-//
-// }
-
 @riverpod
 class WaitingApprovalNotifier extends _$WaitingApprovalNotifier {
   @override
@@ -37,10 +16,12 @@ class WaitingApprovalNotifier extends _$WaitingApprovalNotifier {
   Future<void> cancelRequest() async {
     state = AsyncLoading();
     final memberRepo = ref.read(pendingMemberRepositoryProvider);
-    final appUser = ref.read(appUserProvider);
+    final appUser = ref.read(appUserProvider).value;
+		final teamId = appUser?.requestTeamId ?? '';
+		final id = appUser?.uid ?? '';
     final result = await memberRepo.declineInvitation(
-      teamId: appUser.value!.teamId,
-      id: appUser.value!.uid,
+      teamId: teamId,
+      id: id,
     );
     result.when(
       success: (success) {
@@ -55,7 +36,7 @@ class WaitingApprovalNotifier extends _$WaitingApprovalNotifier {
   Future<void> signOut() async {
     state = AsyncLoading();
     final result = await ref.read(authRepositoryProvider).signOut();
-    result.when(
+    state = result.when(
       success: (_) => AsyncData(null),
       failure: (err) => AsyncError(err, StackTrace.current),
     );
