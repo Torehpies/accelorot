@@ -14,18 +14,16 @@ class FirebaseMachineService implements MachineService {
         _auth = auth ?? FirebaseAuth.instance;
 
   String? get currentUserId => _auth.currentUser?.uid;
-
-  // Helper: get team-scoped machines subcollection
-  CollectionReference _getMachinesCollection(String teamId) {
-    return _firestore.collection('teams').doc(teamId).collection('machines');
-  }
+  
+  CollectionReference get _machinesCollection =>
+      _firestore.collection('machines');
 
   @override
   Future<List<MachineModel>> fetchMachinesByTeam(String teamId) async {
-    if (teamId.isEmpty) throw Exception('teamId is required');
     try {
-      final snapshot = await _getMachinesCollection(teamId)
-          .orderBy('dateCreated', descending: true) // Note: field must exist
+      final snapshot = await _machinesCollection
+          .where('teamId', isEqualTo: teamId)
+          .orderBy('dateCreated', descending: true)
           .get();
 
       return snapshot.docs
@@ -38,16 +36,8 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<MachineModel?> fetchMachineById(String machineId) async {
-    // ❗ You cannot fetch by ID alone without teamId!
-    // This method is **not usable** in a subcollection architecture.
-    // Consider removing it or adding teamId to signature.
-    throw UnimplementedError('Use fetchMachineByIdAndTeam instead');
-  }
-
-  // ✅ Alternative (recommended):
-  Future<MachineModel?> fetchMachineByIdAndTeam(String teamId, String machineId) async {
     try {
-      final doc = await _getMachinesCollection(teamId).doc(machineId).get();
+      final doc = await _machinesCollection.doc(machineId).get();
       if (!doc.exists) return null;
       return MachineModel.fromFirestore(doc);
     } catch (e) {
@@ -60,20 +50,14 @@ class FirebaseMachineService implements MachineService {
     if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
-    if (request.teamId.isEmpty) {
-      throw Exception('teamId is required');
-    }
 
-    // Since machines live under team, machineId only needs to be unique per team
-    // So machineExists() must also include teamId!
-    final exists = await machineExistsInTeam(request.teamId, request.machineId);
+    final exists = await machineExists(request.machineId);
     if (exists) {
-      throw Exception('Machine ID already exists in this team');
+      throw Exception('Machine ID already exists');
     }
 
     try {
-      await _getMachinesCollection(request.teamId).doc(request.machineId).set({
-        'machineId': request.machineId, // store it explicitly
+      await _machinesCollection.doc(request.machineId).set({
         'machineName': request.machineName,
         'teamId': request.teamId,
         'dateCreated': FieldValue.serverTimestamp(),
@@ -87,13 +71,6 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> updateMachine(UpdateMachineRequest request) async {
-    // ❗ Again: you need teamId to locate the machine!
-    // This method signature is insufficient.
-    throw UnimplementedError('updateMachine must include teamId');
-  }
-
-  // ✅ Fix: Add teamId
-  Future<void> updateMachineInTeam(String teamId, UpdateMachineRequest request) async {
     if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
@@ -114,7 +91,7 @@ class FirebaseMachineService implements MachineService {
         updates['metadata'] = request.metadata;
       }
 
-      await _getMachinesCollection(teamId).doc(request.machineId).update(updates);
+      await _machinesCollection.doc(request.machineId).update(updates);
     } catch (e) {
       throw Exception('Failed to update machine: $e');
     }
@@ -122,18 +99,12 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> archiveMachine(String machineId) async {
-    // ❗ Same issue: need teamId
-    throw UnimplementedError('archiveMachine must include teamId');
-  }
-
-  // ✅ Proper version:
-  Future<void> archiveMachineInTeam(String teamId, String machineId) async {
     if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
     try {
-      await _getMachinesCollection(teamId).doc(machineId).update({
+      await _machinesCollection.doc(machineId).update({
         'isArchived': true,
         'archivedAt': FieldValue.serverTimestamp(),
         'archivedBy': currentUserId,
@@ -145,16 +116,12 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<void> restoreMachine(String machineId) async {
-    throw UnimplementedError('restoreMachine must include teamId');
-  }
-
-  Future<void> restoreMachineInTeam(String teamId, String machineId) async {
     if (currentUserId == null) {
       throw Exception('User must be authenticated');
     }
 
     try {
-      await _getMachinesCollection(teamId).doc(machineId).update({
+      await _machinesCollection.doc(machineId).update({
         'isArchived': false,
         'restoredAt': FieldValue.serverTimestamp(),
         'restoredBy': currentUserId,
@@ -166,13 +133,8 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Future<bool> machineExists(String machineId) async {
-    // ❗ Cannot check globally — must check within a team
-    throw UnimplementedError('Use machineExistsInTeam(teamId, machineId)');
-  }
-
-  Future<bool> machineExistsInTeam(String teamId, String machineId) async {
     try {
-      final doc = await _getMachinesCollection(teamId).doc(machineId).get();
+      final doc = await _machinesCollection.doc(machineId).get();
       return doc.exists;
     } catch (e) {
       return false;
@@ -181,8 +143,8 @@ class FirebaseMachineService implements MachineService {
 
   @override
   Stream<List<MachineModel>> watchMachinesByTeam(String teamId) {
-    if (teamId.isEmpty) throw Exception('teamId is required');
-    return _getMachinesCollection(teamId)
+    return _machinesCollection
+        .where('teamId', isEqualTo: teamId)
         .orderBy('dateCreated', descending: true)
         .snapshots()
         .map((snapshot) =>
