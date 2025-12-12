@@ -395,7 +395,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                               style: const TextStyle(fontSize: 14),
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                       onChanged: (value) => onMachineChanged(value),
                     ),
@@ -462,7 +462,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                           style: const TextStyle(fontSize: 14),
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                   onChanged: (value) => onBatchChanged(value),
                 ),
