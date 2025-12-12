@@ -1,3 +1,5 @@
+// lib/data/services/contracts/machine_service.dart
+
 import '../../models/machine_model.dart';
 
 abstract class MachineService {
