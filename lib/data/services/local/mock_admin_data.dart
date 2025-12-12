@@ -1,6 +1,6 @@
-import '../../ui/mobile_admin_dashboard/view_model/operator_model.dart';
-import '../../ui/mobile_admin_dashboard/view_model/machine_model.dart';
-import '../../ui/mobile_admin_dashboard/view_model/admin_stats.dart';
+import '../../../ui/mobile_admin_dashboard/view_model/operator_model.dart';
+import '../../../ui/mobile_admin_dashboard/view_model/machine_model.dart';
+import '../../../ui/mobile_admin_dashboard/view_model/admin_stats.dart';
 
 /// Mock data service for admin dashboard
 /// Used when user is NOT logged in or as fallback

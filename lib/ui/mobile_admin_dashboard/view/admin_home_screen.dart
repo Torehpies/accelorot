@@ -6,8 +6,8 @@ import '../machine_management/machine_management_section.dart';
 import '../view_model/admin_stats.dart';
 import '../view_model/operator_model.dart';
 import '../view_model/machine_model.dart';
-import '../../../services/admin_dashboard/mock_admin_data.dart';
-import '../../../services/admin_dashboard/admin_firestore_service.dart';
+import '../../../data/services/local/mock_admin_data.dart';
+import '../../../data/services/firebase/admin_firestore_service.dart';
 import '../../../services/sess_service.dart';
 
 /// Admin home screen with teal theme and auth-based data loading
