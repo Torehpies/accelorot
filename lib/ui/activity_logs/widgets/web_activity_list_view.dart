@@ -11,10 +11,9 @@ import 'web_activity_filter_bar.dart';
 import 'web_activity_search_bar.dart';
 import 'web_date_filter_button.dart';
 import 'web_pagination_bar.dart';
-import '../models/activity_list_state.dart';
-import '../../../data/providers/batch_providers.dart';
-import '../../../data/providers/machine_providers.dart';
-import '../../../services/sess_service.dart';
+import 'machine_selector.dart'; 
+import 'batch_selector.dart';  
+
 
 /// Composite widget that shows a complete paginated activity list
 class WebActivityListView extends ConsumerStatefulWidget {
@@ -79,12 +78,22 @@ class _WebActivityListViewState extends ConsumerState<WebActivityListView> {
           // Machine & Batch Selector Row
           Row(
             children: [
-              // Machine Selector
-              Expanded(child: _buildMachineSelector(state, viewModel)),
+              Expanded(
+                child: MachineSelector(
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: (value) => viewModel.onMachineChanged(value),
+                  isCompact: true,
+                ),
+              ),
               const SizedBox(width: 16),
-              
-              // Batch Selector
-              Expanded(child: _buildBatchSelector(state, viewModel)),
+              Expanded(
+                child: BatchSelector(
+                  selectedBatchId: state.selectedBatchId,
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: (value) => viewModel.onBatchChanged(value),
+                  isCompact: true,
+                ),
+              ),
             ],
           ),
 
@@ -179,142 +188,6 @@ class _WebActivityListViewState extends ConsumerState<WebActivityListView> {
           ],
         ],
       ),
-    );
-  }
-
-  Widget _buildMachineSelector(ActivityListState state, ActivityViewModel viewModel) {
-    final sessionService = SessionService();
-    
-    return FutureBuilder<Map<String, dynamic>?>(
-      future: sessionService.getCurrentUserData(),
-      builder: (context, userSnapshot) {
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox.shrink();
-        }
-
-        final userData = userSnapshot.data;
-        final teamId = userData?['teamId'] as String?;
-
-        if (teamId == null) return const SizedBox.shrink();
-
-        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
-
-        return machinesAsync.when(
-          data: (machines) {
-            if (machines.isEmpty) return const SizedBox.shrink();
-
-            final activeMachines = machines.where((m) => !m.isArchived).toList();
-            if (activeMachines.isEmpty) return const SizedBox.shrink();
-
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.precision_manufacturing, color: Colors.teal.shade700, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: DropdownButton<String>(
-                      value: state.selectedMachineId,
-                      hint: const Text(
-                        'All Machines',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                      ),
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      icon: Icon(Icons.arrow_drop_down, color: Colors.teal.shade700),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text('All Machines'),
-                        ),
-                        ...activeMachines.map((machine) {
-                          return DropdownMenuItem<String>(
-                            value: machine.id,
-                            child: Text(
-                              machine.machineName,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          );
-                        }),
-                      ],
-                      onChanged: (value) => viewModel.onMachineChanged(value),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-          loading: () => const SizedBox.shrink(),
-          error: (_, _) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildBatchSelector(ActivityListState state, ActivityViewModel viewModel) {
-    final batchesAsync = ref.watch(userTeamBatchesProvider);
-
-    return batchesAsync.when(
-      data: (batches) {
-        if (batches.isEmpty) return const SizedBox.shrink();
-
-        // Filter batches by selected machine if applicable
-        final filteredBatches = state.selectedMachineId != null
-            ? batches.where((b) => b.machineId == state.selectedMachineId).toList()
-            : batches;
-
-        if (filteredBatches.isEmpty) return const SizedBox.shrink();
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.inventory_2, color: Colors.teal.shade700, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: state.selectedBatchId,
-                  hint: const Text(
-                    'All Batches',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: Icon(Icons.arrow_drop_down, color: Colors.teal.shade700),
-                  items: [
-                    const DropdownMenuItem<String>(
-                      value: null,
-                      child: Text('All Batches'),
-                    ),
-                    ...filteredBatches.map((batch) {
-                      return DropdownMenuItem<String>(
-                        value: batch.id,
-                        child: Text(
-                          batch.id, // Display actual Firestore batch ID
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      );
-                    }),
-                  ],
-                  onChanged: (value) => viewModel.onBatchChanged(value),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

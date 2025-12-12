@@ -7,9 +7,8 @@ import '../widgets/web_responsive_layout.dart';
 import '../widgets/web_loading_state.dart';
 import '../widgets/web_empty_state.dart';
 import '../widgets/web_activity_card.dart';
-import '../../../data/providers/batch_providers.dart';
-import '../../../data/providers/machine_providers.dart';
-import '../../../services/sess_service.dart';
+import '../widgets/machine_selector.dart'; 
+import '../widgets/batch_selector.dart';
 
 
 /// Dashboard screen with preview sections
@@ -31,14 +30,33 @@ class _WebDashboardScreenState extends ConsumerState<WebDashboardScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Machine & Batch Selector Row (at top of dashboard)
+        // Machine & Batch Selector Row
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Expanded(child: _buildMachineSelector()),
+              Expanded(
+                child: MachineSelector(
+                  selectedMachineId: _selectedMachineId,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedMachineId = value;
+                      _selectedBatchId = null; 
+                    });
+                  },
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildBatchSelector()),
+              Expanded(
+                child: BatchSelector(
+                  selectedBatchId: _selectedBatchId,
+                  selectedMachineId: _selectedMachineId,
+                  onChanged: (value) {
+                    setState(() => _selectedBatchId = value);
+                  },
+                  showLabel: false,
+                ),
+              ),
             ],
           ),
         ),
@@ -54,152 +72,6 @@ class _WebDashboardScreenState extends ConsumerState<WebDashboardScreen> {
       ],
     );
   }
-
-    Widget _buildMachineSelector() {
-    final sessionService = SessionService();
-    
-    return FutureBuilder<Map<String, dynamic>?>(
-      future: sessionService.getCurrentUserData(),
-      builder: (context, userSnapshot) {
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox.shrink();
-        }
-
-        final userData = userSnapshot.data;
-        final teamId = userData?['teamId'] as String?;
-
-        if (teamId == null) return const SizedBox.shrink();
-
-        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
-
-        return machinesAsync.when(
-          data: (machines) {
-            if (machines.isEmpty) return const SizedBox.shrink();
-
-            final activeMachines = machines.where((m) => !m.isArchived).toList();
-            if (activeMachines.isEmpty) return const SizedBox.shrink();
-
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.precision_manufacturing, color: Colors.grey[700]),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: DropdownButton<String>(
-                      value: _selectedMachineId,
-                      hint: const Text('All Machines', style: TextStyle(fontWeight: FontWeight.w600)),
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text('All Machines'),
-                        ),
-                        ...activeMachines.map((machine) {
-                          return DropdownMenuItem<String>(
-                            value: machine.id,
-                            child: Text(machine.machineName),
-                          );
-                        }),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedMachineId = value;
-                          _selectedBatchId = null; // Reset batch when machine changes
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-          loading: () => const SizedBox.shrink(),
-          error: (_, _) => const SizedBox.shrink(),
-        );
-      },
-    );
-  }
-
-  Widget _buildBatchSelector() {
-    final batchesAsync = ref.watch(userTeamBatchesProvider);
-
-    return batchesAsync.when(
-      data: (batches) {
-        if (batches.isEmpty) return const SizedBox.shrink();
-
-        // Filter batches by selected machine
-        final filteredBatches = _selectedMachineId != null
-            ? batches.where((b) => b.machineId == _selectedMachineId).toList()
-            : batches;
-
-        if (filteredBatches.isEmpty) return const SizedBox.shrink();
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade300),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.inventory_2, color: Colors.grey[700]),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: _selectedBatchId,
-                  hint: const Text('All Batches', style: TextStyle(fontWeight: FontWeight.w600)),
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-                  items: [
-                    const DropdownMenuItem<String>(
-                      value: null,
-                      child: Text('All Batches'),
-                    ),
-                    ...filteredBatches.map((batch) {
-                      return DropdownMenuItem<String>(
-                        value: batch.id,
-                        child: Text(batch.id),
-                      );
-                    }),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _selectedBatchId = value);
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
-    );
-  }
-
 
   Widget _buildWideLayout(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
