@@ -63,4 +63,14 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   Future<void> onRefresh() async {
     await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
+  
+  @override
+  void onBatchChanged(String? batchId) {
+    ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
+  }
+  
+  @override
+  void onMachineChanged(String? machineId) {
+    ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+  }
 }

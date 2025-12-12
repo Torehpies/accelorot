@@ -7,6 +7,9 @@ import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/date_filter_button.dart';
+import '../../../data/providers/batch_providers.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../services/sess_service.dart';
 
 /// Clean base screen that only handles UI rendering
 /// All business logic is in ViewModels
@@ -46,6 +49,11 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
   /// Callback when date filter changes
   void onDateFilterChanged(DateFilterRange filter);
+
+  void onBatchChanged(String? batchId);
+  
+  
+  void onMachineChanged(String? machineId);
 
   /// Optional: Callback for refresh
   Future<void> onRefresh() async {}
@@ -112,6 +120,19 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
         children: [
           // Machine filter banner
           if (state.focusedMachineId != null) _buildMachineBanner(),
+
+          Row(
+            children: [
+              // Machine Selector
+              Expanded(child: _buildMachineSelector(state)),
+              const SizedBox(width: 12),
+              
+              // Batch Selector
+              Expanded(child: _buildBatchSelector(state)),
+            ],
+          ),
+          const SizedBox(height: 12),
+
 
           // Search bar
           SearchBarWidget(
@@ -312,5 +333,146 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       return 'No results found for "${state.searchQuery}"';
     }
     return 'No ${state.selectedFilter.toLowerCase()} activities found';
+  }
+
+    Widget _buildMachineSelector(ActivityListState state) {
+    // Get current user's team ID to fetch machines
+    final sessionService = SessionService();
+    
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: sessionService.getCurrentUserData(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        final userData = userSnapshot.data;
+        final teamId = userData?['teamId'] as String?;
+
+        if (teamId == null) return const SizedBox.shrink();
+
+        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
+
+        return machinesAsync.when(
+          data: (machines) {
+            if (machines.isEmpty) return const SizedBox.shrink();
+
+            // Filter out archived machines
+            final activeMachines = machines.where((m) => !m.isArchived).toList();
+            if (activeMachines.isEmpty) return const SizedBox.shrink();
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.precision_manufacturing, color: Colors.teal.shade700, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: state.selectedMachineId,
+                      hint: const Text(
+                        'All Machines',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      icon: Icon(Icons.arrow_drop_down, color: Colors.teal.shade700),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('All Machines'),
+                        ),
+                        ...activeMachines.map((machine) {
+                          return DropdownMenuItem<String>(
+                            value: machine.id,
+                            child: Text(
+                              machine.machineName,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          );
+                        }),
+                      ],
+                      onChanged: (value) => onMachineChanged(value),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+
+  Widget _buildBatchSelector(ActivityListState state) {
+    final batchesAsync = ref.watch(userTeamBatchesProvider);
+
+    return batchesAsync.when(
+      data: (batches) {
+        if (batches.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.inventory_2, color: Colors.teal.shade700, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Batch:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButton<String>(
+                  value: state.selectedBatchId,
+                  hint: const Text(
+                    'All Batches',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.teal.shade700),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('All Batches'),
+                    ),
+                    ...batches.map((batch) {
+                      return DropdownMenuItem<String>(
+                        value: batch.id,
+                        child: Text(
+                          batch.id,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) => onBatchChanged(value),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
   }
 }
