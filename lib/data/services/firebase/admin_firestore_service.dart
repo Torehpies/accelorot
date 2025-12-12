@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../frontend/screens/admin/home_screen/models/operator_model.dart';
-import '../../../frontend/screens/admin/home_screen/models/machine_model.dart';
-import '../../../frontend/screens/admin/home_screen/models/admin_stats.dart';
+import '../../models/mobile_admin/operator_model.dart';
+import '../../models/mobile_admin/machine_model.dart';
+import '../../models/mobile_admin/admin_stats.dart';
 
 /// Firestore service for admin dashboard data
 /// Handles all Firestore queries for operators and machines

@@ -1,14 +1,14 @@
-// operator_detail_dialog.dart
+// machine_detail_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/operator_model.dart';
-import '../../widgets/status_indicator.dart';
+import '../../../../data/models/mobile_admin/machine_model.dart';
+import '../status_indicator.dart';
 
-/// Dialog showing detailed operator information with white background
-class OperatorDetailDialog extends StatelessWidget {
-  final OperatorModel operator;
+/// Dialog showing detailed machine information with white background
+class MachineDetailDialog extends StatelessWidget {
+  final MachineModel machine;
 
-  const OperatorDetailDialog({super.key, required this.operator});
+  const MachineDetailDialog({super.key, required this.machine});
 
   /// Format date to readable string (e.g., "October 24, 2025")
   String _formatDate(DateTime date) {
@@ -34,11 +34,11 @@ class OperatorDetailDialog extends StatelessWidget {
           children: [
             _buildHeader(),
             const Divider(height: 32),
-            _buildDetailRow('Name', operator.name),
+            _buildDetailRow('Machine Name', machine.machineName),
             const SizedBox(height: 16),
-            _buildDetailRow('Email', operator.email),
+            _buildDetailRow('Machine ID', machine.machineId),
             const SizedBox(height: 16),
-            _buildDetailRow('Date Added', _formatDate(operator.addedAt)),
+            _buildDetailRow('Date Added', _formatDate(machine.dateCreated)),
             const SizedBox(height: 24),
             _buildCloseButton(context),
           ],
@@ -53,7 +53,7 @@ class OperatorDetailDialog extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         const Text(
-          'Operator Details',
+          'Machine Details',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -61,7 +61,7 @@ class OperatorDetailDialog extends StatelessWidget {
           ),
         ),
         StatusIndicator(
-          isArchived: operator.isArchived,
+          isArchived: machine.isArchived,
           showText: true,
           size: 12,
         ),

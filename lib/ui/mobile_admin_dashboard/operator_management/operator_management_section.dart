@@ -1,25 +1,25 @@
-// machine_management_section.dart
+// operator_management_section.dart
 import 'package:flutter/material.dart';
-import '../models/machine_model.dart';
-import 'widgets/machine_card.dart';
-import 'widgets/machine_detail_dialog.dart';
+import '../../../data/models/mobile_admin/operator_model.dart';
+import '../widgets/operator_management/operator_card.dart';
+import '../widgets/operator_management/operator_detail_dialog.dart';
 
-/// Section widget for displaying and managing machines with unlimited scroll
-class MachineManagementSection extends StatelessWidget {
-  final List<MachineModel> machines;
+/// Section widget for displaying and managing operators with unlimited scroll
+class OperatorManagementSection extends StatelessWidget {
+  final List<OperatorModel> operators;
   final VoidCallback? onManageTap;
 
-  const MachineManagementSection({
+  const OperatorManagementSection({
     super.key,
-    required this.machines,
+    required this.operators,
     this.onManageTap,
   });
 
-  /// Show machine detail dialog on card tap
-  void _showMachineDetails(BuildContext context, MachineModel machine) {
+  /// Show operator detail dialog on card tap
+  void _showOperatorDetails(BuildContext context, OperatorModel operator) {
     showDialog(
       context: context,
-      builder: (context) => MachineDetailDialog(machine: machine),
+      builder: (context) => OperatorDetailDialog(operator: operator),
     );
   }
 
@@ -37,7 +37,7 @@ class MachineManagementSection extends StatelessWidget {
           children: [
             _buildHeader(),
             const SizedBox(height: 16),
-            _buildMachineList(context),
+            _buildOperatorList(context),
           ],
         ),
       ),
@@ -48,16 +48,12 @@ class MachineManagementSection extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        // Small teal machine icon (same size as text)
-        Icon(
-          Icons.precision_manufacturing,
-          color: Colors.teal.shade600,
-          size: 20,
-        ),
+        // Small teal person icon (same size as text)
+        Icon(Icons.person, color: Colors.teal.shade600, size: 20),
         const SizedBox(width: 8),
         // Section title
         const Text(
-          'Machine Management',
+          'Operator Management',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -81,9 +77,9 @@ class MachineManagementSection extends StatelessWidget {
     );
   }
 
-  /// Build horizontal scrolling list of machine cards (unlimited scroll)
-  Widget _buildMachineList(BuildContext context) {
-    if (machines.isEmpty) {
+  /// Build horizontal scrolling list of operator cards (unlimited scroll)
+  Widget _buildOperatorList(BuildContext context) {
+    if (operators.isEmpty) {
       return Container(
         height: 140,
         decoration: BoxDecoration(
@@ -92,7 +88,7 @@ class MachineManagementSection extends StatelessWidget {
         ),
         child: const Center(
           child: Text(
-            'No machines available',
+            'No operators available',
             style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
@@ -103,15 +99,15 @@ class MachineManagementSection extends StatelessWidget {
       height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: machines.length,
+        itemCount: operators.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: EdgeInsets.only(
-              right: index < machines.length - 1 ? 12 : 0,
+              right: index < operators.length - 1 ? 12 : 0,
             ),
-            child: MachineCard(
-              machine: machines[index],
-              onTap: () => _showMachineDetails(context, machines[index]),
+            child: OperatorCard(
+              operator: operators[index],
+              onTap: () => _showOperatorDetails(context, operators[index]),
             ),
           );
         },
