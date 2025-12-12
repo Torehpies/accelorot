@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../utils/snackbar_utils.dart';
@@ -192,9 +193,9 @@ class EmailVerifyScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
 
                       // Back to login button
-                      OutlinedButton(
+                      OutlineAppButton(
                         onPressed: notifier.signOutAndNavigate,
-                        child: const Text('Logout'),
+                        text: 'Logout',
                       ),
                     ],
                   ],
