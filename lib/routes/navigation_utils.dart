@@ -11,7 +11,7 @@ class NavItem {
 }
 
 List<NavItem> operatorNavItems = [
-  NavItem(Icons.home, "Dashboard", RoutePath.dashboard.path),
+  NavItem(Icons.dashboard, "Dashboard", RoutePath.dashboard.path),
   NavItem(Icons.history, "Activity", RoutePath.activity.path),
   NavItem(Icons.bar_chart, "Stats", RoutePath.statistics.path),
   NavItem(Icons.settings, "Machines", RoutePath.operatorMachines.path),
@@ -19,9 +19,9 @@ List<NavItem> operatorNavItems = [
 ];
 
 List<NavItem> adminNavItems = [
-  NavItem(Icons.home, "Dashboard", RoutePath.adminDashboard.path),
-  NavItem(Icons.history, "Operators", RoutePath.adminOperators.path),
-  NavItem(Icons.bar_chart, "Machines", RoutePath.adminMachines.path),
+  NavItem(Icons.dashboard, "Dashboard", RoutePath.adminDashboard.path),
+  NavItem(Icons.group, "Operators", RoutePath.adminOperators.path),
+  NavItem(Icons.settings, "Machines", RoutePath.adminMachines.path),
   NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
 ];
 

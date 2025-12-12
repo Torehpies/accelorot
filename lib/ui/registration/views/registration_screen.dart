@@ -91,7 +91,6 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-		debugPrint("REGISTRATION SCREEN REBUILD");
     final isLoading = ref.watch(
       registrationProvider.select((state) => state.isRegistrationLoading),
     );

@@ -77,5 +77,5 @@ class AppColors {
   static const Color background2 = Colors.white;
   static const Color textPrimary = Color(0xFF374151);
   static const Color textSecondary = Color(0xFF6B7280);
-  static const Color error = Color(0xFF2D552F);
+  static const Color error = Colors.red;
 }

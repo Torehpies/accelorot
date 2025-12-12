@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class WebBranding extends ConsumerWidget {
@@ -12,19 +13,19 @@ class WebBranding extends ConsumerWidget {
 
     return userAsync.when(
       data: (AppUser? data) {
-        final String? role = data?.globalRole ?? data?.teamRole;
+        final String? role = data?.teamRole ?? data?.globalRole;
         String? roleString = role == 'SuperAdmin' ? 'Super Admin' : role;
         final String firstName = data?.firstname ?? '';
         final String lastName = data?.lastname ?? '';
         final String name = '$firstName $lastName';
         return Column(
           children: [
-            const Icon(Icons.security, size: 50, color: Colors.white),
+            const Icon(Icons.security, size: 50, color: AppColors.green400),
             const SizedBox(height: 8),
             Text(
               '$roleString Portal',
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.green400,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -33,12 +34,18 @@ class WebBranding extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.white.withValues(alpha: .25),
+                borderRadius: BorderRadius.circular(8),
+                border: BoxBorder.all(color: Colors.grey, width: 2),
+                // color: AppColors.textPrimary.withValues(alpha: .25),
               ),
               child: Text(
                 name,
-                style: TextStyle(letterSpacing: 1.0 ,color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  letterSpacing: 1.0,
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),

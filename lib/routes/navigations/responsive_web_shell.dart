@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ResponsiveWebShell extends StatelessWidget {
   final Widget child;
   final List<NavItem> navItems;
-  final Color primaryColor;
-  final Color secondaryColor;
+  // final Color primaryColor;
+  // final Color secondaryColor;
+  final Color color;
   final String roleName;
   final Widget brandingWidget;
   final double sidebarWidth;
@@ -14,8 +16,9 @@ class ResponsiveWebShell extends StatelessWidget {
     super.key,
     required this.child,
     required this.navItems,
-    required this.primaryColor,
-    required this.secondaryColor,
+    // required this.primaryColor,
+    // required this.secondaryColor,
+    required this.color,
     required this.roleName,
     required this.brandingWidget,
     this.sidebarWidth = 250,
@@ -30,13 +33,14 @@ class ResponsiveWebShell extends StatelessWidget {
         children: [
           Container(
             width: sidebarWidth,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [primaryColor, secondaryColor],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
+            color: color,
+            // decoration: BoxDecoration(
+            //   gradient: LinearGradient(
+            //     colors: [primaryColor, secondaryColor],
+            //     begin: Alignment.topCenter,
+            //     end: Alignment.bottomCenter,
+            //   ),
+            // ),
             child: SafeArea(
               child: Column(
                 children: [
@@ -60,7 +64,7 @@ class ResponsiveWebShell extends StatelessWidget {
                                 item.icon,
                                 color: isSelected
                                     ? Colors.white
-                                    : Colors.white70,
+                                    : AppColors.textPrimary,
                                 size: 22,
                               ),
                               title: Text(
@@ -68,17 +72,13 @@ class ResponsiveWebShell extends StatelessWidget {
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
-                                      : Colors.white70,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
+                                      : AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
                               ),
                               selected: isSelected,
-                              selectedTileColor: Colors.white.withValues(
-                                alpha: .15,
-                              ),
+                              selectedTileColor: AppColors.green100,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -93,13 +93,16 @@ class ResponsiveWebShell extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.all(20),
                     child: ElevatedButton.icon(
-                      icon: Icon(Icons.logout, color: primaryColor),
+                      icon: Icon(Icons.logout, color: AppColors.textPrimary),
                       label: Text(
                         'Logout',
-                        style: TextStyle(color: primaryColor),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.background,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -109,8 +112,7 @@ class ResponsiveWebShell extends StatelessWidget {
                       onPressed: () => handleLogout(
                         context,
                         roleName: roleName,
-                        confirmColor:
-                            secondaryColor, // Use the darker color for confirmation button
+                        confirmColor: AppColors.error,
                       ),
                     ),
                   ),
