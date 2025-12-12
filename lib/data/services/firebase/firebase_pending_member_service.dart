@@ -96,13 +96,15 @@ class FirebasePendingMemberService implements PendingMemberService {
     required String teamId,
     required String memberId,
   }) async {
-    final docRef = _firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('pending_members')
-        .doc(memberId);
+    try {
+      final docRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(memberId);
 
-    await docRef.delete();
+      await docRef.delete();
+    } catch (e) {}
   }
 
   @override
