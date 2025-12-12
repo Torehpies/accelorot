@@ -7,22 +7,199 @@ import '../widgets/web_responsive_layout.dart';
 import '../widgets/web_loading_state.dart';
 import '../widgets/web_empty_state.dart';
 import '../widgets/web_activity_card.dart';
+import '../../../data/providers/batch_providers.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../services/sess_service.dart';
+
 
 /// Dashboard screen with preview sections
-class WebDashboardScreen extends ConsumerWidget {
+class WebDashboardScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
   final Function(String)? onViewAll;
 
   const WebDashboardScreen({super.key, this.focusedMachineId, this.onViewAll});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return WebResponsiveLayout(
-      wide: (context) => _buildWideLayout(context, ref),
-      medium: (context) => _buildMediumLayout(context, ref),
-      narrow: (context) => _buildNarrowLayout(context, ref),
+  ConsumerState<WebDashboardScreen> createState() => _WebDashboardScreenState();
+}
+
+class _WebDashboardScreenState extends ConsumerState<WebDashboardScreen> {
+  String? _selectedMachineId;
+  String? _selectedBatchId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Machine & Batch Selector Row (at top of dashboard)
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(child: _buildMachineSelector()),
+              const SizedBox(width: 16),
+              Expanded(child: _buildBatchSelector()),
+            ],
+          ),
+        ),
+
+        // Dashboard content
+        Expanded(
+          child: WebResponsiveLayout(
+            wide: (context) => _buildWideLayout(context, ref),
+            medium: (context) => _buildMediumLayout(context, ref),
+            narrow: (context) => _buildNarrowLayout(context, ref),
+          ),
+        ),
+      ],
     );
   }
+
+    Widget _buildMachineSelector() {
+    final sessionService = SessionService();
+    
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: sessionService.getCurrentUserData(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+
+        final userData = userSnapshot.data;
+        final teamId = userData?['teamId'] as String?;
+
+        if (teamId == null) return const SizedBox.shrink();
+
+        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
+
+        return machinesAsync.when(
+          data: (machines) {
+            if (machines.isEmpty) return const SizedBox.shrink();
+
+            final activeMachines = machines.where((m) => !m.isArchived).toList();
+            if (activeMachines.isEmpty) return const SizedBox.shrink();
+
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.precision_manufacturing, color: Colors.grey[700]),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: _selectedMachineId,
+                      hint: const Text('All Machines', style: TextStyle(fontWeight: FontWeight.w600)),
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
+                      items: [
+                        const DropdownMenuItem<String>(
+                          value: null,
+                          child: Text('All Machines'),
+                        ),
+                        ...activeMachines.map((machine) {
+                          return DropdownMenuItem<String>(
+                            value: machine.id,
+                            child: Text(machine.machineName),
+                          );
+                        }),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedMachineId = value;
+                          _selectedBatchId = null; // Reset batch when machine changes
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  Widget _buildBatchSelector() {
+    final batchesAsync = ref.watch(userTeamBatchesProvider);
+
+    return batchesAsync.when(
+      data: (batches) {
+        if (batches.isEmpty) return const SizedBox.shrink();
+
+        // Filter batches by selected machine
+        final filteredBatches = _selectedMachineId != null
+            ? batches.where((b) => b.machineId == _selectedMachineId).toList()
+            : batches;
+
+        if (filteredBatches.isEmpty) return const SizedBox.shrink();
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.inventory_2, color: Colors.grey[700]),
+              const SizedBox(width: 10),
+              Expanded(
+                child: DropdownButton<String>(
+                  value: _selectedBatchId,
+                  hint: const Text('All Batches', style: TextStyle(fontWeight: FontWeight.w600)),
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('All Batches'),
+                    ),
+                    ...filteredBatches.map((batch) {
+                      return DropdownMenuItem<String>(
+                        value: batch.id,
+                        child: Text(batch.id),
+                      );
+                    }),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedBatchId = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+
 
   Widget _buildWideLayout(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
@@ -108,7 +285,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.allActivity,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -119,7 +296,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(5).toList(),
-      onViewAll: null, // No view all for recent
+      onViewAll: null, 
     );
   }
 
@@ -127,7 +304,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.substrates,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -138,15 +315,14 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('substrate'),
+      onViewAll: () => widget.onViewAll?.call('substrate'),
     );
   }
 
   Widget _buildAlertsPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.alerts,
-
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -157,7 +333,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('alerts'),
+      onViewAll: () => widget.onViewAll?.call('alerts'),
     );
   }
 
@@ -165,7 +341,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.reports,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -176,14 +352,14 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('reports'),
+      onViewAll: () => widget.onViewAll?.call('reports'),
     );
   }
 
   Widget _buildCyclesPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.cyclesRecom,
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -194,7 +370,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('cycles'),
+      onViewAll: () => widget.onViewAll?.call('cycles'),
     );
   }
 
