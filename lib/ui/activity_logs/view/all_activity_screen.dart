@@ -68,4 +68,8 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
   }
+  @override
+  void onMachineChanged(String? machineId) {
+    ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+  }
 }

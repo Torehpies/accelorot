@@ -64,6 +64,11 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   }
 
   @override
+  void onMachineChanged(String? machineId) {
+    ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+  }
+
+  @override
   Future<void> onRefresh() async {
     await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }

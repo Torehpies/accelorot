@@ -20,6 +20,7 @@ abstract class ActivityListState with _$ActivityListState {
     @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
     @Default({}) Set<String> autoHighlightedFilters,
     String? selectedBatchId,
+    String? selectedMachineId,
     
     // UI state
     @Default(LoadingStatus.initial) LoadingStatus status,

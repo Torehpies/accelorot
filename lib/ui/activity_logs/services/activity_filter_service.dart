@@ -14,9 +14,13 @@ class ActivityFilterService {
     required ActivityFilterConfig config,
     required bool isManualFilter,
     String? selectedBatchId,
+    String? selectedMachineId,
   }) {
 
-    var filtered = applyBatchFilter(items, selectedBatchId);
+    var filtered = applyMachineFilter(items, selectedMachineId);
+
+    filtered = applyBatchFilter(filtered, selectedBatchId);
+
     // Step 1: Apply date filter
     filtered = applyDateFilter(filtered, dateFilter);
 
@@ -81,6 +85,14 @@ class ActivityFilterService {
   ) {
     if (selectedBatchId == null || selectedBatchId.isEmpty) return items;
     return items.where((item) => item.batchId == selectedBatchId).toList();
+  }
+
+  List<ActivityLogItem> applyMachineFilter(
+    List<ActivityLogItem> items,
+    String? selectedMachineId,
+  ) {
+    if (selectedMachineId == null || selectedMachineId.isEmpty) return items;
+    return items.where((item) => item.machineId == selectedMachineId).toList();
   }
 
   /// Compute which filter chips should be highlighted based on search results

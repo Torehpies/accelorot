@@ -191,6 +191,16 @@ class ActivityViewModel extends _$ActivityViewModel {
     _applyFilters();
   }
 
+    void onMachineChanged(String? machineId) {
+    state = state.copyWith(
+      selectedMachineId: machineId,
+      selectedBatchId: null, 
+      selectedFilter: 'All',
+      isManualFilter: false,
+    );
+    _applyFilters();
+  }
+
   // ===== PRIVATE FILTERING LOGIC =====
 
   void _applyFilters() {
@@ -202,6 +212,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       config: _config,
       isManualFilter: state.isManualFilter,
       selectedBatchId: state.selectedBatchId, 
+      selectedMachineId: state.selectedMachineId,
     );
 
     state = state.copyWith(
