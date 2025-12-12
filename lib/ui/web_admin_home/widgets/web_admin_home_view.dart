@@ -6,7 +6,6 @@ import '../../../../../ui/core/ui/admin_app_bar.dart';
 import '../view_model/web_admin_home_view_model.dart';
 import '../../../../data/models/operator_model.dart';
 import '../../../../data/models/machine_model.dart';
-import '../../../../data/repositories/admin_dashboard_repository.dart'; // needed for AdminDashboardStats
 
 class WebAdminHomeView extends StatelessWidget {
   final VoidCallback onManageOperators;
@@ -35,16 +34,12 @@ class WebAdminHomeView extends StatelessWidget {
         ],
       ),
       body: Consumer<WebAdminHomeViewModel>(
-        builder: (context, vm, _) {
-          if (vm.loading) {
+        builder: (context, viewModel, _) {
+          if (viewModel.loading) {
             return const Center(child: CircularProgressIndicator());
           }
-          final stats = vm.stats;
-          if (stats == null) {
-            return const Center(child: Text('No data available'));
-          }
           return _WebAdminHomeContent(
-            stats: stats,
+            viewModel: viewModel,
             onManageOperators: onManageOperators,
             onManageMachines: onManageMachines,
           );
@@ -55,13 +50,13 @@ class WebAdminHomeView extends StatelessWidget {
 }
 
 class _WebAdminHomeContent extends StatelessWidget {
-  final AdminDashboardStats stats;
+  final WebAdminHomeViewModel viewModel;
   final VoidCallback onManageOperators;
   final VoidCallback onManageMachines;
   final Color borderColor = const Color.fromARGB(255, 230, 229, 229); // #E6E6E6
 
   const _WebAdminHomeContent({
-    required this.stats,
+    required this.viewModel,
     required this.onManageOperators,
     required this.onManageMachines,
   });
@@ -80,7 +75,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                 child: _buildInfoCard(
                   icon: Icons.people_outline,
                   label: 'Active Operators',
-                  count: stats.activeOperators,
+                  count: viewModel.activeOperators,
                 ),
               ),
               const SizedBox(width: 12),
@@ -88,7 +83,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                 child: _buildInfoCard(
                   icon: Icons.archive_outlined,
                   label: 'Archived Operators',
-                  count: stats.archivedOperators,
+                  count: viewModel.archivedOperators,
                 ),
               ),
               const SizedBox(width: 12),
@@ -96,7 +91,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                 child: _buildInfoCard(
                   icon: Icons.devices_other_outlined,
                   label: 'Active Machines',
-                  count: stats.activeMachines,
+                  count: viewModel.activeMachines,
                 ),
               ),
               const SizedBox(width: 12),
@@ -104,7 +99,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                 child: _buildInfoCard(
                   icon: Icons.archive_rounded,
                   label: 'Archived Machines',
-                  count: stats.archivedMachines,
+                  count: viewModel.archivedMachines,
                 ),
               ),
             ],
@@ -114,9 +109,9 @@ class _WebAdminHomeContent extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                _buildOperatorTable(stats.recentOperators, onManageOperators, borderColor),
+                _buildOperatorTable(viewModel.recentOperators, onManageOperators, borderColor),
                 const SizedBox(width: 12),
-                _buildMachineTable(stats.recentMachines, onManageMachines, borderColor),
+                _buildMachineTable(viewModel.recentMachines, onManageMachines, borderColor),
               ],
             ),
           ),
@@ -304,7 +299,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.edit, size: 14),
                                 onPressed: () {
-                                  // TODO: Implement edit
+                                  // TODO: Navigate to edit operator
                                 },
                                 color: Colors.blue,
                                 padding: EdgeInsets.zero,
@@ -314,7 +309,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.delete, size: 14),
                                 onPressed: () {
-                                  // TODO: Implement delete/archive
+                                  // TODO: Archive operator
                                 },
                                 color: Colors.red,
                                 padding: EdgeInsets.zero,
@@ -414,7 +409,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.edit, size: 14),
                                 onPressed: () {
-                                  // TODO: Implement edit
+                                  // TODO: Navigate to edit machine
                                 },
                                 color: Colors.blue,
                                 padding: EdgeInsets.zero,
@@ -424,7 +419,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.delete, size: 14),
                                 onPressed: () {
-                                  // TODO: Implement delete/archive
+                                  // TODO: Archive machine
                                 },
                                 color: Colors.red,
                                 padding: EdgeInsets.zero,
