@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/repositories/pending_member_repository/pending_member_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
 class PendingMemberRepositoryRemote extends PendingMemberRepository {
@@ -55,18 +57,16 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
 
       final data = {
         "status": UserStatus.teamSelect.value,
-        "requestTeamId": FieldValue.delete,
+        "requestTeamId": FieldValue.delete(),
       };
-      await _userService.updateUserField(id, data);
+      final result = await _userService.updateUserField(id, data);
+      if (result.isFailure) return Result.failure(result.asFailure);
 
       return const Result.success(null);
     } on FirebaseException catch (e) {
-      if (e.code == 'permission-denied') {
-        return const Result.failure(DataLayerError.permissionError());
-      }
-      return const Result.failure(NetworkError());
+      return Result.failure(mapFirebaseException(e));
     } catch (e) {
-      return const Result.failure(NetworkError());
+      return Result.failure(DataLayerError.unknownError(e));
     }
   }
 

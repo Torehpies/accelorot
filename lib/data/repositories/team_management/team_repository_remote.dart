@@ -96,7 +96,7 @@ class TeamRepositoryRemote implements TeamRepository {
 			return Result.failure(DataLayerError.userNullError());
 		}
 
-		final isInTeam = appUser.teamId.isNotEmpty;
+		final isInTeam = appUser.teamId!.isNotEmpty;
 		return Result.success(isInTeam);
   }
 }

@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/app_user.dart';
-import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
@@ -120,6 +119,7 @@ class AuthRepositoryRemote implements AuthRepository {
         lastName: lastName,
         globalRole: globalRole,
         status: UserStatus.pending.value,
+				requestTeamId: teamId,
       );
 
       if (profileResult.isFailure) {
