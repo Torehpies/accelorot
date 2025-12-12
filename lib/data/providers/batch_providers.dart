@@ -2,7 +2,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firebase/firebase_batch_service.dart';
-import '../repositories/batch_repository.dart';
+import '../repositories/batch_repository/batch_repository.dart';
+import '../repositories/batch_repository/batch_repository_remote.dart';
 import '../models/batch_model.dart';
 import 'profile_providers.dart';
 
@@ -13,7 +14,7 @@ final batchServiceProvider = Provider((ref) {
 
 /// Batch repository provider
 final batchRepositoryProvider = Provider<BatchRepository>((ref) {
-  return BatchRepository(ref.watch(batchServiceProvider));
+  return BatchRepositoryRemote(ref.watch(batchServiceProvider));
 });
 
 /// Provider for batches by machine IDs
