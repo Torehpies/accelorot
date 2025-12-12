@@ -60,6 +60,7 @@ class AppUserRepositoryRemote implements AppUserRepository {
     required String lastName,
     required String globalRole,
     required String status,
+    required String requestTeamId,
   }) async {
     try {
       await firestore.collection('users').doc(uid).set({
@@ -70,6 +71,7 @@ class AppUserRepositoryRemote implements AppUserRepository {
         'globalRole': globalRole,
         'createdAt': FieldValue.serverTimestamp(),
         'status': status,
+        'requestTeamId': requestTeamId,
       });
       return Result.success(null);
     } on FirebaseException catch (e) {

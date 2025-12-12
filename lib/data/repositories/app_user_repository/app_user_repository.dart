@@ -11,6 +11,7 @@ abstract class AppUserRepository {
     required String lastName,
     required String globalRole,
     required String status,
+    required String requestTeamId,
   });
   AppUser mapRawDataToDomain(Map<String, dynamic> rawData);
 }

@@ -14,7 +14,8 @@ abstract class AppUser with _$AppUser {
     required String lastname,
     required String globalRole,
     String? teamRole,
-    @Default('') String teamId,
+    String? teamId,
+    String? requestTeamId,
     @Default(UserStatus.unverified) UserStatus status,
     @TimestampConverter() required DateTime createdAt,
   }) = _AppUser;
