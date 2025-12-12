@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_notifier.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
@@ -49,9 +51,9 @@ class TeamSelectionScreen extends ConsumerWidget {
           child: Padding(
             padding: EdgeInsets.all(isDesktop ? 32 : 24),
             child: Card(
-              elevation: isDesktop ? 8 : 0,
+              elevation: 8,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(isDesktop ? 20 : 0),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
                 padding: EdgeInsets.all(isDesktop ? 40 : 24),
@@ -59,12 +61,17 @@ class TeamSelectionScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Icon(
+                      Icons.group_add,
+                      size: isDesktop ? 60 : 50,
+                      color: AppColors.green100,
+                    ),
                     Text(
                       'Join a Team',
                       style: TextStyle(
                         fontSize: isDesktop ? 32 : 26,
                         fontWeight: FontWeight.bold,
-                        color: Colors.teal,
+                        color: AppColors.textPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -103,7 +110,6 @@ class TeamSelectionScreen extends ConsumerWidget {
 
                     const SizedBox(height: 24),
 
-                    // Submit button
                     ElevatedButton(
                       onPressed:
                           state.selectedTeam == null ||
@@ -111,26 +117,28 @@ class TeamSelectionScreen extends ConsumerWidget {
                               user == null
                           ? null
                           : () => notifier.submitTeamRequest(user),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                       child: state.isSubmitting
                           ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Submit Request'),
+                          : const Text(
+                              'Submit Request',
+                              style: TextStyle(fontSize: 16),
+                            ),
                     ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: state.isSubmitting || user == null
-                          ? null
-                          : () => notifier.handleBackToLogin(),
-                      child: state.isSubmitting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Logout'),
+                    const SizedBox(height: 12),
+                    OutlineAppButton(
+                      text: 'Logout',
+                      onPressed: () => notifier.handleBackToLogin(),
+                      isLoading: state.isSubmitting,
                     ),
                   ],
                 ),
