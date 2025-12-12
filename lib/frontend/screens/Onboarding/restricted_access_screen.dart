@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 
 class RestrictedAccessScreen extends StatefulWidget {
@@ -158,7 +160,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
     final isDesktop = screenWidth > 600;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -168,6 +170,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
               ),
               padding: EdgeInsets.all(isDesktop ? 32.0 : 24.0),
               child: Card(
+                color: AppColors.background2,
                 elevation: isDesktop ? 10 : 8,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -177,14 +180,13 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Icon
                       Container(
                         width: isDesktop ? 100 : 80,
                         height: isDesktop ? 100 : 80,
                         decoration: BoxDecoration(
                           color: widget.reason == 'archived'
-                              ? Colors.orange.shade100
-                              : Colors.red.shade100,
+                              ? AppColors.background
+                              : AppColors.background,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -193,8 +195,8 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                               : Icons.exit_to_app,
                           size: isDesktop ? 50 : 40,
                           color: widget.reason == 'archived'
-                              ? Colors.orange.shade700
-                              : Colors.red.shade700,
+                              ? AppColors.green100
+                              : AppColors.green100,
                         ),
                       ),
                       SizedBox(height: isDesktop ? 32 : 24),
@@ -250,8 +252,8 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                                   ? 'Leaving...'
                                   : 'Leave Team Permanently',
                               style: TextStyle(
+                                fontFamily: 'dm-sans',
                                 fontSize: isDesktop ? 16 : 14,
-                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -280,9 +282,9 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                                   await FirebaseAuth.instance.signOut();
                                 },
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.teal,
+                            foregroundColor: AppColors.green100,
                             side: const BorderSide(
-                              color: Colors.teal,
+                              color: AppColors.green100,
                               width: 2,
                             ),
                             padding: EdgeInsets.symmetric(
@@ -295,6 +297,7 @@ class _RestrictedAccessScreenState extends State<RestrictedAccessScreen> {
                           child: Text(
                             'Back to Login',
                             style: TextStyle(
+                              fontFamily: 'dm-sans',
                               fontSize: isDesktop ? 16 : 14,
                               fontWeight: FontWeight.bold,
                             ),

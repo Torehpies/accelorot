@@ -42,7 +42,6 @@ class EmailVerifyScreen extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 500),
           padding: const EdgeInsets.all(24),
           child: Card(
-            color: AppColors.background2,
             elevation: isDesktop ? 12 : 4, // Higher elevation on web for depth
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

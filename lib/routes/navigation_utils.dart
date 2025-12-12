@@ -22,6 +22,7 @@ List<NavItem> adminNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.adminDashboard.path),
   NavItem(Icons.group, "Operators", RoutePath.adminOperators.path),
   NavItem(Icons.settings, "Machines", RoutePath.adminMachines.path),
+  NavItem(Icons.file_open, "Reports", RoutePath.adminMachines.path),
   NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
 ];
 
