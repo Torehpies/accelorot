@@ -7,6 +7,8 @@ DataLayerError mapFirebaseException(FirebaseException e) {
       return const DataLayerError.permissionError();
 		case 'network-request-failed':
       return const DataLayerError.networkError();
+		case 'invalid-credential':
+      return const DataLayerError.invalidCredentialError();
     default:
 			return DataLayerError.unknownError(e);
   }

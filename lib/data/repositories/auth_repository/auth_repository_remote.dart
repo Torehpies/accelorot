@@ -8,6 +8,7 @@ import 'package:flutter_application_1/data/services/contracts/data_layer_error.d
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
 class AuthRepositoryRemote implements AuthRepository {
@@ -75,14 +76,11 @@ class AuthRepositoryRemote implements AuthRepository {
       await _authService.signInWithEmail(email, password);
       return Result.success(null);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-        return const Result.failure(PermissionError());
-      } else if (e.code == 'network-request-failed') {
-        return const Result.failure(NetworkError());
-      }
-      return const Result.failure(PermissionError());
+			debugPrint("FIREBASE AUTH ERROR");
+      return Result.failure(mapFirebaseException(e));
     } catch (e) {
-      return const Result.failure(NetworkError());
+			debugPrint("UNKNOWN ERROR");
+      return Result.failure(DataLayerError.unknownError(e));
     }
   }
 
@@ -109,7 +107,7 @@ class AuthRepositoryRemote implements AuthRepository {
       /// Signup through Firebase
       final user = await _authService.signUp(email, password);
 
-			await _authService.updateDisplayName(user, "$firstName $lastName");
+      await _authService.updateDisplayName(user, "$firstName $lastName");
 
       /// Add user profile in firestore
       final profileResult = await _userRepository.createUserProfile(
@@ -119,7 +117,7 @@ class AuthRepositoryRemote implements AuthRepository {
         lastName: lastName,
         globalRole: globalRole,
         status: UserStatus.pending.value,
-				requestTeamId: teamId,
+        requestTeamId: teamId,
       );
 
       if (profileResult.isFailure) {
