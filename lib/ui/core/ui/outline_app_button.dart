@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class OutlineAppButton extends StatelessWidget {
   final String text;
@@ -13,25 +12,49 @@ class OutlineAppButton extends StatelessWidget {
     this.isLoading = false,
   });
 
+  bool get _isDisabled => isLoading || onPressed == null;
+
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-      onPressed: isLoading ? null : onPressed,
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: AppColors.green100, width: 1.5),
-        foregroundColor: AppColors.green100,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+      onPressed: _isDisabled ? null : onPressed,
+      style: ButtonStyle(
+        side: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return const BorderSide(color: Colors.black26, width: 1.5);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return const BorderSide(color: Colors.black12, width: 1.5);
+          }
+          return const BorderSide(color: Colors.black54, width: 1.5);
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return Colors.black26;
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return Colors.white;
+          }
+          return Colors.black54;
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return Colors.black54;
+          }
+          return Colors.transparent;
+        }),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        ),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
       child: isLoading
           ? const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             )
           : Text(text, style: const TextStyle(fontSize: 16)),
     );
