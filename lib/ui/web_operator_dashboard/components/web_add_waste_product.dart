@@ -3,12 +3,12 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/fields/description_field.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/fields/plant_type_section.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/fields/quantity_field.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/fields/description_field.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/fields/plant_type_section.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/fields/quantity_field.dart';
 
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/fields/waste_category_section.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/fields/waste_config.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/fields/waste_category_section.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/fields/waste_config.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

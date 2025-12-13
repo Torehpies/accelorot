@@ -1,7 +1,7 @@
 // lib/frontend/operator/dashboard/compost_progress/components/batch_complete_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../frontend/operator/dashboard/compost_progress/models/compost_batch_model.dart';
+import '../../mobile_operator_dashboard/view_model/compost_batch_model.dart';
 
 class BatchCompleteDialog extends StatefulWidget {
   final CompostBatch batch;

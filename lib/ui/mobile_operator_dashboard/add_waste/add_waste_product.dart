@@ -1,12 +1,12 @@
 //add_waste_product.dart
 import 'package:flutter/material.dart';
-import 'fields/waste_category_section.dart';
-import 'fields/plant_type_section.dart';
-import 'fields/quantity_field.dart';
-import 'fields/description_field.dart';
-import 'fields/submit_button.dart';
-import 'fields/waste_config.dart';
-import 'fields/machine_selection_field.dart';
+import '../fields/waste_category_section.dart';
+import '../fields/plant_type_section.dart';
+import '../fields/quantity_field.dart';
+import '../fields/description_field.dart';
+import '../fields/submit_button.dart';
+import '../fields/waste_config.dart';
+import '../fields/machine_selection_field.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

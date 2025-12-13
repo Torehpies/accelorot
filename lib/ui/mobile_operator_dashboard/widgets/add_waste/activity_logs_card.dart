@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../services/firestore_activity_service.dart';
-import '../../activity_logs/models/activity_item.dart';
-import 'widgets/activity_log_item.dart';
+import '../../../../frontend/operator/activity_logs/models/activity_item.dart';
+import '../activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
   final String? focusedMachineId;
