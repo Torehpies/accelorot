@@ -1,11 +1,11 @@
 // lib/frontend/operator/dashboard/cycles/system_card.dart
 
 import 'package:flutter/material.dart';
-import 'models/drum_rotation_settings.dart';
-import 'models/system_status.dart';
-import '../../../../ui/home_screen/cycles/empty_state.dart';
-import '../../../../ui/home_screen/cycles/active_state.dart';
-import '../compost_progress/models/compost_batch_model.dart';
+import '../view_model/cycles/drum_rotation_settings.dart';
+import '../view_model/cycles/system_status.dart';
+import '../../home_screen/cycles/empty_state.dart';
+import '../../home_screen/cycles/active_state.dart';
+import '../view_model/compost_batch_model.dart';
 
 class SystemCard extends StatefulWidget {
   final CompostBatch? currentBatch;

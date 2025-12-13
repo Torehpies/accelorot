@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../frontend/operator/dashboard/cycles/models/system_status.dart';
+import '../../../mobile_operator_dashboard/view_model/cycles/system_status.dart';
 import 'stop_confirmation_dialog.dart';
 
 class SystemActionButtons extends StatelessWidget {

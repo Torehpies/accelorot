@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../mobile_operator_dashboard/fields/description_field.dart';
-import '../../../mobile_operator_dashboard/fields/submit_button.dart';
-import '../../../mobile_operator_dashboard/fields/machine_selection_field.dart';
-import '../../../mobile_operator_dashboard/fields/report_type_field.dart';
-import '../../../mobile_operator_dashboard/fields/report_title_field.dart';
-import '../../../mobile_operator_dashboard/fields/priority_field.dart';
-// waste_config.dart & info_box.dart are imported internally — no need to import here
+import '../fields/report_type_field.dart';
+import '../fields/report_title_field.dart';
+import '../fields/machine_selection_field.dart';
+import '../fields/priority_field.dart';
+import '../fields/description_field.dart';
+import '../fields/submit_button.dart';
 import 'package:flutter_application_1/services/firestore_activity_service.dart';
 
 class SubmitReport extends StatefulWidget {
