@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
+import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_notifier.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
@@ -110,29 +112,22 @@ class TeamSelectionScreen extends ConsumerWidget {
 
                     const SizedBox(height: 24),
 
-                    ElevatedButton(
-                      onPressed:
-                          state.selectedTeam == null ||
-                              state.isSubmitting ||
-                              user == null
-                          ? null
-                          : () => notifier.submitTeamRequest(user),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: state.isSubmitting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Submit Request',
-                              style: TextStyle(fontSize: 16),
-                            ),
+                    PrimaryButton(
+                      text: 'Submit Request',
+                      onPressed: () async {
+                        final confirmed = await showConfirmDialog(
+                          context: context,
+                          title: 'Team Selection Confirmation',
+                          message:
+                              'Are you sure you want to join ${state.selectedTeam?.teamName}',
+                        );
+
+                        if (confirmed == true) {
+                          notifier.submitTeamRequest(user!);
+                        }
+                      },
+                      enabled: state.selectedTeam != null,
+                      isLoading: state.isSubmitting || state.isLoadingTeams,
                     ),
                     const SizedBox(height: 12),
                     OutlineAppButton(

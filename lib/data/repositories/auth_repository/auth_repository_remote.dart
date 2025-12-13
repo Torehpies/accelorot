@@ -201,7 +201,6 @@ class AuthRepositoryRemote implements AuthRepository {
 
   @override
   Future<Result<void, DataLayerError>> resendVerificationEmail() async {
-    debugPrint("Sending email verification.");
     return await _authService.sendVerificationEmail();
   }
 }

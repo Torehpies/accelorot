@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/waiting_approval/view_model/waiting_approval_notifier.dart';
@@ -106,7 +107,17 @@ class _WaitingApprovalScreenState extends ConsumerState<WaitingApprovalScreen> {
                             child: PrimaryButton(
                               text: 'Cancel Request',
                               isLoading: state.isLoading,
-                              onPressed: _cancelRequest,
+                              // onPressed: _cancelRequest,
+                              onPressed: () async {
+                                final confirmed = await showConfirmDialog(
+                                  context: context,
+                                  title: 'Cancel request to join',
+                                  message:
+                                      'This will cancel your pending approval request. You cannot undo this action.',
+                                );
+
+                                if (confirmed == true) _cancelRequest();
+                              },
                             ),
                           ),
 
