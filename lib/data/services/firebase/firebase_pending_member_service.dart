@@ -85,7 +85,7 @@ class FirebasePendingMemberService implements PendingMemberService {
 
       return Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }
@@ -212,7 +212,7 @@ class FirebasePendingMemberService implements PendingMemberService {
 
       return Result.success(pendingMembers);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }

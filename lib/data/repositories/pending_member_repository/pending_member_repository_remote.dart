@@ -63,7 +63,7 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
 
       return const Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }

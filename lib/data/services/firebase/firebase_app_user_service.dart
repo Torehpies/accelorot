@@ -25,7 +25,7 @@ class FirebaseAppUserService implements AppUserService {
       await _firestore.collection('users').doc(uid).update(data);
       return Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }
@@ -39,7 +39,7 @@ class FirebaseAppUserService implements AppUserService {
         return AppUser.fromJson(doc.data()!);
       });
     } catch (e) {
-      return Stream.error(DataLayerError.databaseError(message: e.toString()));
+      return Stream.error(DataLayerError.databaseError(e.toString()));
     }
   }
 
@@ -52,7 +52,7 @@ class FirebaseAppUserService implements AppUserService {
       }
       return Result.success(AppUser.fromJson(doc.data()!));
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }

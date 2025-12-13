@@ -64,7 +64,7 @@ class FirebaseAuthService implements AuthService {
       await user.sendEmailVerification();
       return Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       debugPrint('Unexpected error on creating user profile: $e');
       return Result.failure(DataLayerError.unknownError(e));
@@ -80,7 +80,7 @@ class FirebaseAuthService implements AuthService {
       debugPrint("Email verified.");
       return Result.success(_firebaseAuth.currentUser?.emailVerified ?? false);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }
@@ -95,7 +95,7 @@ class FirebaseAuthService implements AuthService {
       await user.updateDisplayName(name);
       return Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }

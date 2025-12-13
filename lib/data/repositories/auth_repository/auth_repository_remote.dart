@@ -76,10 +76,9 @@ class AuthRepositoryRemote implements AuthRepository {
       await _authService.signInWithEmail(email, password);
       return Result.success(null);
     } on FirebaseAuthException catch (e) {
-			debugPrint("FIREBASE AUTH ERROR");
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
-			debugPrint("UNKNOWN ERROR");
+      debugPrint("UNKNOWN ERROR");
       return Result.failure(DataLayerError.unknownError(e));
     }
   }
@@ -141,8 +140,7 @@ class AuthRepositoryRemote implements AuthRepository {
       if (e.code == 'weak-password' || e.code == 'invalid-email') {
         return Result.failure(
           DataLayerError.validationError(
-            message:
-                'Invalid input. Please check your email and password strength.',
+            'Invalid input. Please check your email and password strength.',
           ),
         );
       }

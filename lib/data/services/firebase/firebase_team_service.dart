@@ -22,7 +22,7 @@ class FirebaseTeamService implements TeamService {
       final team = Team.fromJson(raw);
       return Result.success(team);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } on FormatException catch (_) {
@@ -41,7 +41,7 @@ class FirebaseTeamService implements TeamService {
           .toList();
       return Result.success(teams);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } on FormatException catch (_) {
@@ -60,7 +60,7 @@ class FirebaseTeamService implements TeamService {
 			return Result.success(updatedTeam);
 
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } on FormatException catch (_) {

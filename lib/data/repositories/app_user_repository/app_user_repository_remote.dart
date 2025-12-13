@@ -33,7 +33,7 @@ class AppUserRepositoryRemote implements AppUserRepository {
 
       return Result.success(mapRawDataToDomain(rawData));
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e.toString()));
     }
@@ -75,7 +75,7 @@ class AppUserRepositoryRemote implements AppUserRepository {
       });
       return Result.success(null);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseException(e));
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       debugPrint('Unexpected error on creating user profile: $e');
       return Result.failure(DataLayerError.unknownError(e));
