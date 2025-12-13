@@ -77,8 +77,8 @@ class RegistrationHandlers {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters';
     }
     return null;
   }
@@ -125,11 +125,10 @@ class RegistrationFormContent extends ConsumerWidget {
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-    //    borderSide: const BorderSide(color: Color(0xFF2B7326)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.teal, width: 2),
+        borderSide: const BorderSide(color: AppColors.green100, width: 2),
       ),
     );
 
@@ -302,7 +301,7 @@ class RegistrationFormContent extends ConsumerWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.teal, width: 2),
+              borderSide: const BorderSide(color: AppColors.green100, width: 2),
             ),
           ),
           hint: const Text('Choose your team'),

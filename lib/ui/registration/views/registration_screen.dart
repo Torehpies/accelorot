@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../utils/snackbar_utils.dart';
 import 'desktop_registration_view.dart';
 import 'mobile_registration_view.dart';
 import 'registration_handlers.dart';
@@ -31,19 +31,12 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   void initState() {
     super.initState();
 
-    // 1. Listen for errors from the notifier
     ref.listenManual(registrationProvider, (previous, next) {
-      if (next.errorMessage != null &&
-          previous?.errorMessage != next.errorMessage) {
-        if (mounted) {
-          showSnackbar(context, next.errorMessage!, isError: true);
-        }
+      if (next.errorMessage != null) {
+        AppSnackbar.error(context, next.errorMessage!);
       }
-      if (next.successMessage != null &&
-          previous?.successMessage != next.successMessage) {
-        if (mounted) {
-          showSnackbar(context, next.successMessage!);
-        }
+      if (next.successMessage != null) {
+        AppSnackbar.success(context, next.successMessage!);
       }
     });
   }
@@ -56,7 +49,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
       final state = ref.read(registrationProvider);
 
       if (state.selectedTeamId == null) {
-        showSnackbar(context, 'Please select a team.');
+        AppSnackbar.error(context, "Please select a team.");
         return;
       }
 

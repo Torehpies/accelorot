@@ -13,22 +13,19 @@ class AppSnackbar {
     final snackBar = SnackBar(
       content: Row(
         children: [
-          Icon(
-            _icon(type),
-            color: Colors.white,
-          ),
+          Icon(_icon(type), color: Colors.white),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(message, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
       backgroundColor: _backgroundColor(type),
       duration: duration,
       behavior: SnackBarBehavior.floating,
+      width: MediaQuery.of(context).size.width > 600
+          ? 600 // max width on wide screens
+          : null,
     );
 
     ScaffoldMessenger.of(context)
