@@ -1,5 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/providers/auth_providers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
+// import 'package:flutter_application_1/providers/auth_providers.dart';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,15 +17,15 @@ class LoginNotifier extends _$LoginNotifier {
   Future<void> signInWithEmail(String email, String password) async {
     state = const AsyncLoading();
     final authRepo = ref.read(authRepositoryProvider);
-
-    try {
-      await authRepo.signInWithEmail(email, password);
-      state = AsyncLoading();
-    } on FirebaseAuthException catch (e, st) {
-      state = AsyncError(e, st);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
+    final result = await authRepo.signIn(email: email, password: password);
+    result.when(
+      success: (success) {
+        state = AsyncData(success);
+      },
+      failure: (error) {
+        state = AsyncError(error.userFriendlyMessage, StackTrace.current);
+      },
+    );
   }
 
   Future<void> signInWithGoogle() async {
@@ -32,7 +34,7 @@ class LoginNotifier extends _$LoginNotifier {
 
     try {
       final result = await authRepo.signInWithGoogle();
-			//TODO GOOGLE SIGN IN
+      //TODO GOOGLE SIGN IN
 
       // if (result is GoogleLoginSuccess) {
       //   /// stop loading on google sign-in success

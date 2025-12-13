@@ -5,6 +5,7 @@ enum UserStatus {
   teamSelect('teamSelect'),
   pending('pending'),
   archived('archived'),
+  removed('removed'),
   active('active');
 
   final String value;
