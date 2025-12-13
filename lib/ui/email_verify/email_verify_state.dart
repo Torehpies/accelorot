@@ -1,27 +1,17 @@
-class EmailVerifyState {
-  final bool isVerified;
-  final bool isResending;
-  final int resendCooldown;
-  final int dashboardCountdown;
+import 'package:flutter_application_1/utils/ui_message.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const EmailVerifyState({
-    this.isVerified = false,
-    this.isResending = false,
-    this.resendCooldown = 0,
-    this.dashboardCountdown = 3,
-  });
+part 'email_verify_state.freezed.dart';
 
-  EmailVerifyState copyWith({
-    bool? isVerified,
-    bool? isResending,
-    int? resendCooldown,
-    int? dashboardCountdown,
-  }) {
-    return EmailVerifyState(
-      isVerified: isVerified ?? this.isVerified,
-      isResending: isResending ?? this.isResending,
-      resendCooldown: resendCooldown ?? this.resendCooldown,
-      dashboardCountdown: dashboardCountdown ?? this.dashboardCountdown,
-    );
-  }
+@freezed
+abstract class EmailVerifyState with _$EmailVerifyState{
+  const factory EmailVerifyState({
+    @Default(false) bool isVerified,
+    @Default(false) bool isResending,
+    @Default(0) int resendCooldown,
+    @Default(3) int dashboardCountdown,
+		UiMessage? message,
+  }) = _EmailVerifyState;
+
+
 }

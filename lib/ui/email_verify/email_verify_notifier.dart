@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'email_verify_notifier.g.dart';
@@ -14,7 +15,6 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
 
   @override
   EmailVerifyState build() {
-    // Start polling email verification
     _startVerificationPolling();
 
     ref.onDispose(() {
@@ -27,50 +27,79 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
   void _startVerificationPolling() {
     _verificationSubscription?.cancel();
 
-    // Poll every 3 seconds
     _verificationSubscription = Stream.periodic(const Duration(seconds: 3))
         .asyncMap((_) async {
-      final auth = ref.read(firebaseAuthProvider);
-      final user = auth.currentUser;
-      if (user == null) return false;
+          final auth = ref.read(firebaseAuthProvider);
+          final user = auth.currentUser;
+          if (user == null) return false;
 
-      await user.reload(); // Force refresh
-      return user.emailVerified;
-    }).listen((isVerified) {
-      if (isVerified) {
-        _verificationSubscription?.cancel();
-        state = state.copyWith(isVerified: true);
+          await user.reload();
+          return user.emailVerified;
+        })
+        .listen((isVerified) {
+          if (isVerified) {
+            _verificationSubscription?.cancel();
+            state = state.copyWith(isVerified: true);
 
-        // Invalidate providers to refresh auth state
-        ref.invalidate(authStateChangesProvider);
-        ref.invalidate(appUserProvider);
-        ref.invalidate(authStateModelProvider);
+            // Invalidate providers to refresh auth state
+            ref.invalidate(authStateChangesProvider);
+            ref.invalidate(appUserProvider);
+            ref.invalidate(authStateModelProvider);
 
-        // Notify GoRouter to refresh redirect
-        // ref.read(routerNotifierProvider).notifyListeners();
-      }
-    });
+            // Notify GoRouter to refresh redirect
+            // ref.read(routerNotifierProvider).notifyListeners();
+          }
+        });
   }
 
   Future<void> resendVerificationEmail() async {
-    if (state.isResending) return;
+    if (state.isResending || state.resendCooldown > 0) return;
 
-    state = state.copyWith(isResending: true);
+    state = state.copyWith(isResending: true, message: null);
 
-    final result = await ref.read(authRepositoryProvider).resendVerificationEmail();
+    final result = await ref
+        .read(authRepositoryProvider)
+        .resendVerificationEmail();
     result.when(
       success: (_) {
-        // Optionally show a success message
+        state = state.copyWith(
+          isResending: false,
+          resendCooldown: 60,
+          message: UiMessage.success("Verification email sent successfully!"),
+        );
+        _startCooldown();
       },
       failure: (error) {
-        // Optionally show an error message
+        state = state.copyWith(
+          isResending: false,
+          message: UiMessage.error(error.userFriendlyMessage),
+        );
       },
     );
 
     state = state.copyWith(isResending: false);
   }
 
+  // if (e.code == 'too-many-requests') {
+  //   showSnackbar(
+  //     context,
+  //     'Max send limit reached. Please wait a bit before sending another message.',
+  //     isError: true,
   Future<void> signOutAndNavigate() async {
     await ref.read(authServiceProvider).signOut();
+  }
+
+  void _startCooldown() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.resendCooldown <= 0) {
+        timer.cancel();
+      } else {
+        state = state.copyWith(resendCooldown: state.resendCooldown - 1);
+      }
+    });
+  }
+
+  void clearMessage() {
+    state = state.copyWith(message: null);
   }
 }

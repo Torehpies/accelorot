@@ -1,10 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
+import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_state.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../utils/snackbar_utils.dart';
 import 'email_verify_notifier.dart';
 
 class EmailVerifyScreen extends ConsumerWidget {
@@ -17,7 +18,7 @@ class EmailVerifyScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final state = ref.watch(emailVerifyProvider);
     final notifier = ref.read(emailVerifyProvider.notifier);
-    final canResend = state.resendCooldown == 0;
+    final canResend = state.resendCooldown > 0;
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 600;
@@ -27,12 +28,16 @@ class EmailVerifyScreen extends ConsumerWidget {
         ? const EdgeInsets.all(40.0)
         : const EdgeInsets.all(24.0);
 
-    ref.listen<EmailVerifyState>(emailVerifyProvider, (previous, current) {
-      if (!previous!.isVerified && current.isVerified) {
-        Future.microtask(() {
-          showSnackbar(context, 'Email successfully verified!');
-        });
-      }
+    ref.listen<EmailVerifyState>(emailVerifyProvider, (previous, next) {
+      final message = next.message;
+      if (message == null) return;
+
+      message.when(
+        success: (text) => AppSnackbar.success(context, text),
+        error: (text) => AppSnackbar.error(context, text),
+      );
+
+      ref.read(emailVerifyProvider.notifier).clearMessage();
     });
 
     return Scaffold(
@@ -42,7 +47,7 @@ class EmailVerifyScreen extends ConsumerWidget {
           constraints: const BoxConstraints(maxWidth: 500),
           padding: const EdgeInsets.all(24),
           child: Card(
-            elevation: isDesktop ? 12 : 4, // Higher elevation on web for depth
+            elevation: isDesktop ? 12 : 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -75,18 +80,8 @@ class EmailVerifyScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyLarge,
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${state.dashboardCountdown}',
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
                       const SizedBox(height: 32),
                     ] else ...[
-                      // 📧 PENDING UI
                       Icon(
                         Icons.email_outlined,
                         size: 80,
@@ -121,73 +116,15 @@ class EmailVerifyScreen extends ConsumerWidget {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 40),
-                      SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: state.isResending || !canResend
-                              ? null
-                              : () async {
-                                  try {
-                                    if (context.mounted) {
-                                      await notifier.resendVerificationEmail();
-
-                                      if (context.mounted) {
-                                        showSnackbar(
-                                          context,
-                                          'New verification email sent to $email.',
-                                        );
-                                      }
-                                    }
-                                  } on FirebaseAuthException catch (e) {
-                                    if (context.mounted) {
-                                      // Check for the specific Firebase rate limit error code
-                                      if (e.code == 'too-many-requests') {
-                                        showSnackbar(
-                                          context,
-                                          'Max send limit reached. Please wait a bit before sending another message.',
-                                          isError: true,
-                                        );
-                                      } else {
-                                        // Handle other FirebaseAuth errors gracefully
-                                        showSnackbar(
-                                          context,
-                                          'Error: ${e.message}. Try again later.',
-                                          isError: true,
-                                        );
-                                      }
-                                    }
-                                  } catch (e) {
-                                    // Handle generic errors (network, unknown)
-                                    if (context.mounted) {
-                                      showSnackbar(
-                                        context,
-                                        'An unexpected error occurred. Try again later.',
-                                        isError: true,
-                                      );
-                                    }
-                                  }
-                                },
-                          child: state.isResending
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  canResend
-                                      ? 'Resend Verification Email'
-                                      : 'Resend in ${state.resendCooldown}s',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                        ),
+                      PrimaryButton(
+                        text: canResend
+                            ? 'Resend in ${state.resendCooldown}s'
+                            : 'Resend Verification Email',
+                        onPressed: state.isResending || canResend
+                            ? null
+                            : notifier.resendVerificationEmail,
+                        isLoading: state.isResending,
+												enabled: !canResend,
                       ),
                       const SizedBox(height: 16),
 
