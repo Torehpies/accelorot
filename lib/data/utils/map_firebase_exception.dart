@@ -9,6 +9,8 @@ DataLayerError mapFirebaseAuthException(FirebaseException e) {
       return const DataLayerError.networkError();
 		case 'invalid-credential':
       return const DataLayerError.invalidCredentialError();
+		case 'too-many-requests':
+      return const DataLayerError.tooManyRequestsError();
     default:
 			return DataLayerError.unknownError(e);
   }

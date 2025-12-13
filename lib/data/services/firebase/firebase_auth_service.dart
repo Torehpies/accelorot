@@ -66,7 +66,6 @@ class FirebaseAuthService implements AuthService {
     } on FirebaseException catch (e) {
       return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
-      debugPrint('Unexpected error on creating user profile: $e');
       return Result.failure(DataLayerError.unknownError(e));
     }
   }
