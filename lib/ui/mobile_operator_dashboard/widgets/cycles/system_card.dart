@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import '../view_model/cycles/drum_rotation_settings.dart';
 import '../view_model/cycles/system_status.dart';
-import '../../home_screen/cycles/empty_state.dart';
-import '../../home_screen/cycles/active_state.dart';
-import '../view_model/compost_batch_model.dart';
+import '../../../home_screen/cycles/empty_state.dart';
+import '../../../home_screen/cycles/active_state.dart';
+import '../view_model/compost_progress/compost_batch_model.dart';
 
 class SystemCard extends StatefulWidget {
   final CompostBatch? currentBatch;

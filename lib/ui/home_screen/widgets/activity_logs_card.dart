@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../services/firestore_activity_service.dart';
 import '../../../frontend/operator/activity_logs/models/activity_item.dart';
-import '../../mobile_operator_dashboard/widgets/activity_log_item.dart';
+import '../../mobile_operator_dashboard/widgets/activity_log/activity_log_item.dart';
 
 class ActivityLogsCard extends StatefulWidget {
   final String? focusedMachineId;

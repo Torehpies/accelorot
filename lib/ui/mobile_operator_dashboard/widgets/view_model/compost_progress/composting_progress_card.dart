@@ -1,7 +1,7 @@
 // lib/frontend/operator/dashboard/compost_progress/composting_progress_card.dart
 import 'package:flutter/material.dart';
-import '../../home_screen/compost_progress_components/batch_start_dialog.dart';
-import '../../home_screen/compost_progress_components/batch_complete_dialog.dart';
+import '../../../../home_screen/compost_progress_components/batch_start_dialog.dart';
+import '../../../../home_screen/compost_progress_components/batch_complete_dialog.dart';
 import 'compost_batch_model.dart';
 
 class CompostingProgressCard extends StatelessWidget {
