@@ -10,6 +10,7 @@ import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepositoryRemote implements AuthRepository {
   final AuthService _authService;
@@ -17,6 +18,7 @@ class AuthRepositoryRemote implements AuthRepository {
   final PendingMemberService _pendingMemberService;
   final FirebaseAuth _firebaseAuth;
   final AppUserService _userService;
+  final GoogleSignIn _googleSignIn;
 
   AppUser? _lastKnownUser;
 
@@ -26,6 +28,7 @@ class AuthRepositoryRemote implements AuthRepository {
     this._pendingMemberService,
     this._firebaseAuth,
     this._userService,
+    this._googleSignIn,
   );
 
   @override
@@ -153,18 +156,51 @@ class AuthRepositoryRemote implements AuthRepository {
 
   @override
   Future<Result<void, DataLayerError>> signInWithGoogle() async {
-    try {
-      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      await _firebaseAuth.signInWithPopup(googleProvider);
+    UserCredential userCredential;
+    if (kIsWeb) {
+      try {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+      } on FirebaseAuthException catch (e) {
+        debugPrint(e.toString());
+        return Result.failure(mapFirebaseAuthException(e));
+      } catch (e) {
+        return Result.failure(DataLayerError.unknownError(e));
+      }
+      final saveUserResult = await saveGoogleUserToFirestore(userCredential);
 
-      return Result.success(null);
-    } on FirebaseAuthException catch (e) {
-      //TODO proper code checking
-      debugPrint(e.toString());
-      return Result.failure(NetworkError());
-    } catch (e) {
-      return Result.failure(NetworkError());
+      saveUserResult.when(
+        success: (success) => Result.success(success),
+        failure: (failure) => Result.failure(failure),
+      );
+    } else {
+      // await _ensureGoogleSignInInitialized();
+
+      try {
+        await _initializeGoogleSignIn();
+
+        final GoogleSignInAccount googleUser = await _googleSignIn
+            .authenticate();
+
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _firebaseAuth.signInWithCredential(credential);
+      } on FirebaseAuthException catch (e) {
+        debugPrint(e.toString());
+        return Result.failure(mapFirebaseAuthException(e));
+      } catch (e) {
+        return Result.failure(DataLayerError.unknownError(e));
+      }
+      final saveUserResult = await saveGoogleUserToFirestore(userCredential);
+
+      saveUserResult.when(
+        success: (success) => Result.success(success),
+        failure: (failure) => Result.failure(failure),
+      );
     }
+    return Result.failure(DataLayerError.invalidCredentialError());
   }
 
   @override
@@ -202,5 +238,53 @@ class AuthRepositoryRemote implements AuthRepository {
   @override
   Future<Result<void, DataLayerError>> resendVerificationEmail() async {
     return await _authService.sendVerificationEmail();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize();
+    } catch (e) {
+      debugPrint('Failed to initialize Google Sign-In: $e');
+    }
+  }
+
+  Future<Result<void, DataLayerError>> saveGoogleUserToFirestore(
+    UserCredential credential,
+  ) async {
+    try {
+      final user = credential.user;
+      if (user == null) return Result.failure(DataLayerError.dataEmptyError());
+      if (user.email == null) {
+        return Result.failure(DataLayerError.dataEmptyError());
+      }
+      if (user.displayName == null) {
+        return Result.failure(DataLayerError.dataEmptyError());
+      }
+
+      final names = user.displayName?.split(' ');
+      final firstName = (names?.isNotEmpty ?? false)
+          ? names?.first
+          : (user.email?.split('@').first);
+      final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
+
+      final profileResult = await _userRepository.createUserProfile(
+        uid: user.uid,
+        email: user.email ?? '',
+        firstName: firstName ?? '',
+        lastName: lastName,
+        globalRole: "User",
+        status: UserStatus.teamSelect.value,
+      );
+
+      if (profileResult.isFailure) {
+        return Result.failure(profileResult.asFailure);
+      }
+
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseAuthException(e));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError());
+    }
   }
 }
