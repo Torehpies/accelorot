@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 // import 'package:flutter_application_1/providers/auth_providers.dart';
@@ -32,19 +31,11 @@ class LoginNotifier extends _$LoginNotifier {
     final authRepo = ref.read(authRepositoryProvider);
     state = AsyncLoading();
 
-    try {
-      final result = await authRepo.signInWithGoogle();
-      //TODO GOOGLE SIGN IN
-
-      // if (result is GoogleLoginSuccess) {
-      //   /// stop loading on google sign-in success
-      //   state = state.copyWith(isLoading: false, errorMessage: null);
-      // } else if (result is GoogleLoginFailure) {
-      //   /// stop loading on google sign-in failure
-      //   state = state.copyWith(isLoading: false, errorMessage: result.message);
-      // }
-    } on Exception catch (e, st) {
-      state = AsyncError(e, st);
-    }
+    final result = await authRepo.signInWithGoogle();
+    result.when(
+      success: (_) => AsyncData(null),
+      failure: (error) =>
+          AsyncError(error.userFriendlyMessage, StackTrace.current),
+    );
   }
 }

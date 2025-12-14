@@ -16,20 +16,22 @@ class LoginScreen extends ConsumerWidget {
     ref.listen(loginProvider, (previous, next) {
       next.when(
         data: (_) {
-					AppSnackbar.success(context, "Login Success");
+          AppSnackbar.success(context, "Login Success");
         },
         loading: () {},
         error: (err, _) {
-					AppSnackbar.error(context, err.toString());
+          AppSnackbar.error(context, err.toString());
         },
       );
     });
     return Scaffold(
       backgroundColor: AppColors.background2,
       body: SafeArea(
-        child: ResponsiveLayout(
-          mobileView: MobileLoginView(),
-          desktopView: DesktopLoginView(),
+        child: RepaintBoundary(
+          child: ResponsiveLayout(
+            mobileView: const MobileLoginView(),
+            desktopView: const DesktopLoginView(),
+          ),
         ),
       ),
     );

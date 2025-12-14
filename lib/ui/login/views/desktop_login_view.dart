@@ -11,45 +11,47 @@ class DesktopLoginView extends StatelessWidget {
       children: [
         Expanded(
           flex: 3,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.background2, AppColors.background1],
+          child: RepaintBoundary(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [AppColors.background2, AppColors.background1],
+                ),
               ),
-            ),
-            child: const Center(
-              child: Padding(
-                padding: EdgeInsets.all(40.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'ACCEL-O-ROT',
-                      style: TextStyle(
+              child: const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(40.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ACCEL-O-ROT',
+                        style: TextStyle(
+                          color: AppColors.green100,
+                          fontSize: 68,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Where rot meets acceleration.',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 18,
+                        ),
+                      ),
+                      SizedBox(height: 80),
+                      Icon(
+                        Icons.lock_outline,
                         color: AppColors.green100,
-                        fontSize: 68,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
+                        size: 100,
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Where rot meets acceleration.',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(height: 80),
-                    Icon(
-                      Icons.lock_outline,
-                      color: AppColors.green100,
-                      size: 100,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -66,7 +68,7 @@ class DesktopLoginView extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   // Delegates the content rendering to the shared form
-                  child: LoginForm(),
+                  child: const LoginForm(),
                 ),
               ),
             ),

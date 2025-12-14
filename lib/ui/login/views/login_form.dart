@@ -66,6 +66,10 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         );
   }
 
+	void _signInWithGoogle() {
+		ref.read(loginProvider.notifier).signInWithGoogle();
+	}
+
   @override
   Widget build(BuildContext context) {
     final loginState = ref.watch(loginProvider);
@@ -158,8 +162,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                 // Google Sign-In Button
                 GoogleSignInButton(
                   isLoading: loginState.isLoading,
-                  // onPressed: handlers.onGoogleSignIn,
-                  onPressed: () => null,
+                  onPressed: _signInWithGoogle,
                 ),
 
                 // Sign Up Link
