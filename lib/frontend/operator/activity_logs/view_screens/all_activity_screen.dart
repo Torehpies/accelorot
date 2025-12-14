@@ -20,7 +20,6 @@ class _AllActivityScreenState
       : 'All Activity Logs';
 
   @override
-  // UPDATED: Added 'Cycles' and 'Reports'
   List<String> get filters => const [
     'All',
     'Substrate',
@@ -98,7 +97,6 @@ class _AllActivityScreenState
     if (hasCycles) result.add('Cycles');
     if (hasReports) result.add('Reports');
 
-    // UPDATED: All requires all 4 categories
     if (hasSubstrate && hasAlerts && hasCycles && hasReports) {
       result.add('All');
     }

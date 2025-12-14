@@ -1,7 +1,7 @@
 // lib/web/operator/widgets/web_view_confirmation_dialog.dart
 import 'package:flutter/material.dart';
-import '../../../frontend/operator/machine_management/models/machine_model.dart';
-import '../screens/web_machine_view_screen.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../ui/web_operator_dashboard/view/web_machine_view_screen.dart';
 
 class WebViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
