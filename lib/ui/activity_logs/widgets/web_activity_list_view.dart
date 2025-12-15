@@ -11,6 +11,9 @@ import 'web_activity_filter_bar.dart';
 import 'web_activity_search_bar.dart';
 import 'web_date_filter_button.dart';
 import 'web_pagination_bar.dart';
+import 'machine_selector.dart'; 
+import 'batch_selector.dart';  
+
 
 /// Composite widget that shows a complete paginated activity list
 class WebActivityListView extends ConsumerStatefulWidget {
@@ -72,6 +75,30 @@ class _WebActivityListViewState extends ConsumerState<WebActivityListView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Machine & Batch Selector Row
+          Row(
+            children: [
+              Expanded(
+                child: MachineSelector(
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: (value) => viewModel.onMachineChanged(value),
+                  isCompact: true,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: BatchSelector(
+                  selectedBatchId: state.selectedBatchId,
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: (value) => viewModel.onBatchChanged(value),
+                  isCompact: true,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
           // Filter Bar
           WebActivityFilterBar(
             filters: viewModel.filters,

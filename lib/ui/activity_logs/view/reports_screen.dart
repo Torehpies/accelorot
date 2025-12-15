@@ -58,6 +58,15 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   void onDateFilterChanged(DateFilterRange filter) {
     ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
+  @override
+  void onBatchChanged(String? batchId) {
+    ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
+  }
+
+  @override
+  void onMachineChanged(String? machineId) {
+    ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+  }
 
   @override
   Future<void> onRefresh() async {
