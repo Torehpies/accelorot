@@ -3,7 +3,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../data/providers/repository_providers.dart';
+import '../../../data/providers/operator_providers.dart';
+import '../../../data/providers/machine_providers.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/models/operator_model.dart';
 
