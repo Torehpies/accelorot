@@ -19,7 +19,7 @@ abstract class PendingMemberService {
 		required String teamId,
 		required String memberId,
 	});
-	Future<void> processAcceptanceTransaction({
+	Future<Result<void, DataLayerError>> processAcceptanceTransaction({
 		required String teamId,
 		required PendingMember member,
 	});

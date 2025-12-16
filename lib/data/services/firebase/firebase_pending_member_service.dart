@@ -108,50 +108,57 @@ class FirebasePendingMemberService implements PendingMemberService {
   }
 
   @override
-  Future<void> processAcceptanceTransaction({
+  Future<Result<void, DataLayerError>> processAcceptanceTransaction({
     required String teamId,
     required PendingMember member,
   }) async {
-    final user = member.user;
+    try {
+      final user = member.user;
 
-    if (user == null) return;
+      if (user == null) return Result.failure(DataLayerError.userNullError());
 
-    final batch = _firestore.batch();
+      final batch = _firestore.batch();
 
-    final uid = user.uid;
+      final uid = user.uid;
 
-    final pendingRef = _firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('pending_members')
-        .doc(uid);
+      final pendingRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('pending_members')
+          .doc(uid);
 
-    batch.delete(pendingRef);
+      batch.delete(pendingRef);
 
-    final teamMemberRef = _firestore
-        .collection('teams')
-        .doc(teamId)
-        .collection('members')
-        .doc(uid);
+      final teamMemberRef = _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('members')
+          .doc(uid);
 
-    batch.set(teamMemberRef, {
-      'teamRole': 'Operator',
-      'addedAt': FieldValue.serverTimestamp(),
-      'email': member.user?.email,
-      'firstName': member.user?.firstName,
-      'lastName': member.user?.lastName,
-    });
+      batch.set(teamMemberRef, {
+        'teamRole': 'Operator',
+        'addedAt': FieldValue.serverTimestamp(),
+        'email': member.user?.email,
+        'firstName': member.user?.firstName,
+        'lastName': member.user?.lastName,
+      });
 
-    final userRef = _firestore.collection("users").doc(uid);
+      final userRef = _firestore.collection("users").doc(uid);
 
-    batch.set(userRef, {
-      "status": UserStatus.active.value,
-      "teamRole": "Operator",
-      "teamId": teamId,
-      "requestTeamId": FieldValue.delete(),
-    }, SetOptions(merge: true));
+      batch.set(userRef, {
+        "status": UserStatus.active.value,
+        "teamRole": "Operator",
+        "teamId": teamId,
+        "requestTeamId": FieldValue.delete(),
+      }, SetOptions(merge: true));
 
-    await batch.commit();
+      await batch.commit();
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseAuthException(e));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError());
+    }
   }
 
   @override
