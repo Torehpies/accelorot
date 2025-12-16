@@ -1,4 +1,4 @@
-// lib/frontend/operator/dashboard/cycles/system_card.dart
+// lib/frontend/operator/dashboard/cycles/aerator_card.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
@@ -7,16 +7,16 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_
 import 'package:flutter_application_1/ui/home_screen/cycles/empty_state.dart';
 import 'package:flutter_application_1/ui/home_screen/cycles/info_item.dart';
 
-class SystemCard extends StatefulWidget {
+class AeratorCard extends StatefulWidget {
   final CompostBatch? currentBatch;
 
-  const SystemCard({super.key, this.currentBatch});
+  const AeratorCard({super.key, this.currentBatch});
 
   @override
-  State<SystemCard> createState() => _SystemCardState();
+  State<AeratorCard> createState() => _AeratorCardState();
 }
 
-class _SystemCardState extends State<SystemCard> {
+class _AeratorCardState extends State<AeratorCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
@@ -27,15 +27,13 @@ class _SystemCardState extends State<SystemCard> {
   void initState() {
     super.initState();
     if (widget.currentBatch != null) {
-      // Initialize with default settings when batch is active
       settings = DrumRotationSettings();
     }
   }
 
   @override
-  void didUpdateWidget(SystemCard oldWidget) {
+  void didUpdateWidget(AeratorCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Reset when batch changes
     if (oldWidget.currentBatch != widget.currentBatch) {
       if (widget.currentBatch == null) {
         setState(() {
@@ -51,7 +49,6 @@ class _SystemCardState extends State<SystemCard> {
   void _handleStart() {
     setState(() {
       status = SystemStatus.running;
-      // Start uptime tracking here if needed
     });
   }
 
@@ -82,12 +79,11 @@ class _SystemCardState extends State<SystemCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and status badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Drum Controller',
+                  'Aerator',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -121,7 +117,6 @@ class _SystemCardState extends State<SystemCard> {
             ),
             const SizedBox(height: 24),
 
-            // Content based on batch state
             if (!hasActiveBatch)
               const Expanded(child: EmptyState())
             else
@@ -136,7 +131,6 @@ class _SystemCardState extends State<SystemCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Info Grid - Machine Name and Batch Name
         Row(
           children: [
             Expanded(
@@ -156,7 +150,6 @@ class _SystemCardState extends State<SystemCard> {
         ),
         const SizedBox(height: 16),
 
-        // Info Grid - Uptime and No. of Cycles
         Row(
           children: [
             Expanded(
@@ -176,7 +169,6 @@ class _SystemCardState extends State<SystemCard> {
         ),
         const SizedBox(height: 24),
 
-        // Set Controller Section
         const Text(
           'Set Controller',
           style: TextStyle(
@@ -187,7 +179,6 @@ class _SystemCardState extends State<SystemCard> {
         ),
         const SizedBox(height: 12),
 
-        // Dropdowns Row
         Row(
           children: [
             Expanded(
@@ -224,7 +215,6 @@ class _SystemCardState extends State<SystemCard> {
         ),
         const SizedBox(height: 24),
 
-        // Start Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(

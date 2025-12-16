@@ -8,6 +8,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_w
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/composting_progress_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/system_card.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 
@@ -132,42 +133,13 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 1024;
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade700, Colors.teal.shade900],
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
-        elevation: 2,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No new notifications'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -207,10 +179,21 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Right side - System Card
+                    // Right side - Drum Controller and Aerator Cards
                     Expanded(
                       flex: 2,
-                      child: SystemCard(currentBatch: _currentBatch),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: SystemCard(currentBatch: _currentBatch),
+                          ),
+                          const SizedBox(height: 16),
+                          Expanded(
+                            child: AeratorCard(currentBatch: _currentBatch),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

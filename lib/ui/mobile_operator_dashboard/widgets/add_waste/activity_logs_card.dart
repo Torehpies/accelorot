@@ -67,50 +67,13 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
   }
 
   Color _getActivityColor(ActivityItem log) {
-    if (log.isReport) {
-      // Report colors based on priority
-      switch (log.priority?.toLowerCase()) {
-        case 'high':
-          return const Color(0xFFEF4444); // Red
-        case 'medium':
-          return const Color(0xFFF59E0B); // Orange
-        case 'low':
-          return const Color(0xFF10B981); // Green
-        default:
-          return const Color(0xFF06B6D4); // Cyan
-      }
-    } else {
-      // Waste product colors based on category
-      switch (log.category.toLowerCase()) {
-        case 'vegetable':
-          return const Color(0xFF10B981); // Green
-        case 'fruit':
-          return const Color(0xFFF59E0B); // Orange
-        case 'meat':
-          return const Color(0xFFEF4444); // Red
-        case 'grain':
-          return const Color(0xFF8B5CF6); // Purple
-        default:
-          return const Color(0xFF6B7280); // Gray
-      }
-    }
+    // Use the statusColor from the log itself
+    return log.statusColorValue;
   }
 
   IconData _getActivityIcon(ActivityItem log) {
-    if (log.isReport) {
-      switch (log.reportType?.toLowerCase()) {
-        case 'maintenance_issue':
-          return Icons.build_outlined;
-        case 'observation':
-          return Icons.visibility_outlined;
-        case 'safety_concern':
-          return Icons.warning_outlined;
-        default:
-          return Icons.description_outlined;
-      }
-    } else {
-      return Icons.delete_outline;
-    }
+    // Use the icon from the log itself
+    return log.icon;
   }
 
   String _formatDate(DateTime date) {
@@ -184,11 +147,11 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(24.0),
             child: const Text(
               'Recent Activities',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF1a1a1a),
                 letterSpacing: -0.5,
@@ -198,7 +161,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
 
           // Table Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
               border: Border(
@@ -213,7 +176,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                   child: Text(
                     'Description',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                       letterSpacing: 0.5,
@@ -225,7 +188,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                   child: Text(
                     'Category',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                       letterSpacing: 0.5,
@@ -237,7 +200,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                   child: Text(
                     'Status',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                       letterSpacing: 0.5,
@@ -249,7 +212,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                   child: Text(
                     'Date',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                       letterSpacing: 0.5,
@@ -283,13 +246,13 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       if (user == null) {
         return const Center(
           child: Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(24.0),
             child: Text(
               'Please log in to view recent logs.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF9CA3AF),
-                fontSize: 13,
+                fontSize: 14,
               ),
             ),
           ),
@@ -297,16 +260,16 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       } else {
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.inbox_outlined,
-                  size: 40,
+                  size: 48,
                   color: Colors.grey.shade300,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 Text(
                   widget.focusedMachineId != null
                       ? 'No activity logs for this machine yet.'
@@ -314,7 +277,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Color(0xFF9CA3AF),
-                    fontSize: 13,
+                    fontSize: 14,
                   ),
                 ),
               ],
@@ -332,13 +295,13 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
       if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
         return const Center(
           child: Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(24.0),
             child: Text(
               'No activity logs for this machine yet.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Color(0xFF9CA3AF),
-                fontSize: 13,
+                fontSize: 14,
               ),
             ),
           ),
@@ -364,13 +327,13 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
                   // Icon
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.circular(8),
@@ -378,10 +341,10 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                     child: Icon(
                       icon,
                       color: Colors.white,
-                      size: 18,
+                      size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
 
                   // Description
                   Expanded(
@@ -394,18 +357,18 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                               ? log.description 
                               : log.title,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF1a1a1a),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
                           log.operatorName ?? 'Unknown',
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: Color(0xFF9CA3AF),
                           ),
                         ),
@@ -419,7 +382,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                     child: Text(
                       _getCategoryText(log),
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: Color(0xFF6B7280),
                       ),
                       maxLines: 1,
@@ -433,7 +396,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                     child: Text(
                       _getStatusText(log),
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: Color(0xFF6B7280),
                       ),
                     ),
@@ -445,7 +408,7 @@ class ActivityLogsCardState extends State<ActivityLogsCard> {
                     child: Text(
                       _formatDate(log.timestamp),
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         color: Color(0xFF6B7280),
                       ),
                       textAlign: TextAlign.right,
