@@ -1,6 +1,5 @@
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
-// import 'package:flutter_application_1/providers/auth_providers.dart';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -33,9 +32,9 @@ class LoginNotifier extends _$LoginNotifier {
 
     final result = await authRepo.signInWithGoogle();
     result.when(
-      success: (_) => AsyncData(null),
+      success: (_) => state = AsyncData(null),
       failure: (error) =>
-          AsyncError(error.userFriendlyMessage, StackTrace.current),
+          state = AsyncError(error.userFriendlyMessage, StackTrace.current),
     );
   }
 }

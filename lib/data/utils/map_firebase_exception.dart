@@ -11,6 +11,8 @@ DataLayerError mapFirebaseAuthException(FirebaseException e) {
       return const DataLayerError.invalidCredentialError();
 		case 'too-many-requests':
       return const DataLayerError.tooManyRequestsError();
+		case 'popup-closed-by-user':
+      return const DataLayerError.popupClosedByUserError();
     default:
 			return DataLayerError.unknownError(e);
   }

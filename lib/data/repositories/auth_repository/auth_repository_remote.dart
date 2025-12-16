@@ -160,22 +160,18 @@ class AuthRepositoryRemote implements AuthRepository {
     if (kIsWeb) {
       try {
         final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.setCustomParameters({
+          'prompt': 'select_account',
+        });
         userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
+        createUserDocIfNull(userCredential);
+        return Result.success(null);
       } on FirebaseAuthException catch (e) {
-        debugPrint(e.toString());
         return Result.failure(mapFirebaseAuthException(e));
       } catch (e) {
         return Result.failure(DataLayerError.unknownError(e));
       }
-      final saveUserResult = await saveGoogleUserToFirestore(userCredential);
-
-      saveUserResult.when(
-        success: (success) => Result.success(success),
-        failure: (failure) => Result.failure(failure),
-      );
     } else {
-      // await _ensureGoogleSignInInitialized();
-
       try {
         await _initializeGoogleSignIn();
 
@@ -187,20 +183,15 @@ class AuthRepositoryRemote implements AuthRepository {
           idToken: googleAuth.idToken,
         );
         userCredential = await _firebaseAuth.signInWithCredential(credential);
+        createUserDocIfNull(userCredential);
+        return Result.success(null);
       } on FirebaseAuthException catch (e) {
         debugPrint(e.toString());
         return Result.failure(mapFirebaseAuthException(e));
       } catch (e) {
         return Result.failure(DataLayerError.unknownError(e));
       }
-      final saveUserResult = await saveGoogleUserToFirestore(userCredential);
-
-      saveUserResult.when(
-        success: (success) => Result.success(success),
-        failure: (failure) => Result.failure(failure),
-      );
     }
-    return Result.failure(DataLayerError.invalidCredentialError());
   }
 
   @override
@@ -286,5 +277,32 @@ class AuthRepositoryRemote implements AuthRepository {
     } catch (e) {
       return Result.failure(DataLayerError.unknownError());
     }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> createUserDocIfNull(
+    UserCredential userCredential,
+  ) async {
+    final user = await _userService.getAppUserAsync(userCredential.user!.uid);
+
+    user.when(
+      success: (success) {
+        return Result.success(null);
+      },
+      failure: (failure) async {
+        if (failure == DataLayerError.userNullError()) {
+          final saveUserResult = await saveGoogleUserToFirestore(
+            userCredential,
+          );
+
+          saveUserResult.when(
+            success: (success) => Result.success(success),
+            failure: (failure) => Result.failure(failure),
+          );
+        }
+        return Result.failure(failure);
+      },
+    );
+    return Result.success(null);
   }
 }

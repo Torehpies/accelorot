@@ -11,6 +11,7 @@ abstract class DataLayerError with _$DataLayerError {
       InvalidCredentialError;
   const factory DataLayerError.permissionError() = PermissionError;
   const factory DataLayerError.tooManyRequestsError() = TooManyRequestsError;
+  const factory DataLayerError.popupClosedByUserError() = PopupClosedByUserError;
   const factory DataLayerError.databaseError(String message) = DatabaseError;
   const factory DataLayerError.mappingError() = MappingError;
   const factory DataLayerError.userExistsError() = UserExistsError;
@@ -28,6 +29,7 @@ abstract class DataLayerError with _$DataLayerError {
     invalidCredentialError: () => 'Wrong password or email. Try again.',
     permissionError: () => 'Insufficient permissions or unauthenticated.',
     tooManyRequestsError: () => 'Too many requests. Try again later.',
+    popupClosedByUserError: () => 'The popup was closed by the user.',
     databaseError: (message) => message,
     mappingError: () => 'Data received from the server was corrupt.',
     userExistsError: () => 'User already exists in database.',
