@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/machine_model.dart';
-import '../../../web_operator_dashboard/view/web_home_screen.dart';
+import '../../../home_screen/web_home_screen/web_home_screen.dart';
 import '../../../web_operator_dashboard/view/web_activity_logs_screen.dart';
 import '../../../web_operator_dashboard/view/web_statistics_screen.dart';
 

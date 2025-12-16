@@ -181,13 +181,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Left side - Batch Tracker and Recent Activity
                     Expanded(
                       flex: 3,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Fixed height for Composting Progress Card
                           SizedBox(
-                            height: 250,
+                            height: 360,
                             child: CompostingProgressCard(
                               currentBatch: _currentBatch,
                               onBatchStarted: _handleBatchStarted,
@@ -195,115 +197,39 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            height: 250,
-                            child: SystemCard(currentBatch: _currentBatch),
+                          Expanded(
+                            child: ActivityLogsCard(
+                              key: _activityLogsKey,
+                              focusedMachineId: widget.focusedMachine?.machineId,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 16),
+                    // Right side - System Card
                     Expanded(
                       flex: 2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Recent Activity',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.teal[700],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.refresh,
-                                      color: Colors.grey,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: () async {
-                                      await _activityLogsKey.currentState
-                                          ?.refresh();
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Activity logs refreshed',
-                                            ),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: Colors.grey,
-                            ),
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  ActivityLogsCard(
-                                    key: _activityLogsKey,
-                                    focusedMachineId: widget.focusedMachine?.machineId,
-                                  ),
-                                  Positioned(
-                                    bottom: 16,
-                                    right: 16,
-                                    child: FloatingActionButton(
-                                      onPressed: _handleFABPress,
-                                      backgroundColor: Colors.teal[800],
-                                      elevation: 5,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Icon(
-                                        Icons.add,
-                                        size: 32,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: SystemCard(currentBatch: _currentBatch),
                     ),
                   ],
                 ),
               ),
             );
           },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _handleFABPress,
+        backgroundColor: Colors.teal[800],
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.add,
+          size: 32,
+          color: Colors.white,
         ),
       ),
     );
