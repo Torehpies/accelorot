@@ -1,7 +1,7 @@
 // lib/ui/web_operator/view_modal/pending_members_view_model.dart
 
 import 'package:flutter/material.dart';
-import '../../../data/repositories/operator_repository.dart';
+import '../../../data/repositories/operator_repository/operator_repository.dart';
 
 class PendingMembersViewModel extends ChangeNotifier {
   final OperatorRepository _repository;

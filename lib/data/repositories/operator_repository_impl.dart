@@ -2,7 +2,7 @@
 
 // lib/data/repositories/operator_repository_impl.dart
 
-import './operator_repository.dart';
+import './operator_repository/operator_repository.dart';
 import '../models/operator_model.dart';
 import '../services/contracts/operator_service.dart';
 

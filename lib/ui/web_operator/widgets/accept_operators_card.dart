@@ -1,9 +1,10 @@
 // lib/ui/web_operator/widgets/accept_operators_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/repositories/operator_repository/operator_repository_remote.dart';
 import '../view_modal/pending_members_view_model.dart';
 import '../../../data/services/firebase/firebase_operator_service.dart';
-import '../../../data/repositories/operator_repository.dart';
+//import '../../../data/repositories/operator_repository/operator_repository.dart';
 import '../../core/ui/theme_constants.dart';
 import '../../core/ui/operator_dialogs.dart';
 
@@ -27,7 +28,7 @@ class _AcceptOperatorsScreenState extends State<AcceptOperatorsScreen> {
     super.initState();
     // Create the service, repository, and viewmodel with proper dependencies
     final service = FirebaseOperatorService();
-    final repository = OperatorRepositoryImpl(service);
+    final repository = OperatorRepositoryRemote(service);
     _controller = PendingMembersViewModel(
       repository: repository,
       teamId: widget.teamId, // Use teamId from widget

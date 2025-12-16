@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/operator_model.dart';
-import '../../../data/repositories/operator_repository.dart';
+import '../../../data/repositories/operator_repository/operator_repository.dart';
 
 class OperatorManagementViewModel extends ChangeNotifier {
   final OperatorRepository _repository;

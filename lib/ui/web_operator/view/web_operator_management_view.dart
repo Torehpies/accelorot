@@ -1,9 +1,10 @@
 // lib/ui/web_operator/view/web_operator_management_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/repositories/operator_repository/operator_repository_remote.dart';
 import '../view_modal/operator_management_view_model.dart';
 import '../../../data/services/firebase/firebase_operator_service.dart';
-import '../../../data/repositories/operator_repository.dart';
+//import '../../../data/repositories/operator_repository/operator_repository.dart';
 import '../widgets/operator_action_card.dart';
 import '../widgets/operator_list_item.dart';
 import '../widgets/operator_detail_panel.dart';
@@ -36,7 +37,7 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     super.initState();
     // Create the service, repository, and viewmodel with proper dependencies
     final service = FirebaseOperatorService();
-    final repository = OperatorRepositoryImpl(service);
+    final repository = OperatorRepositoryRemote(service);
     _controller = OperatorManagementViewModel(
       repository: repository,
       teamId: widget.teamId, // Use teamId from widget
