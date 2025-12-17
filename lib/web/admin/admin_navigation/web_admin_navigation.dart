@@ -4,7 +4,7 @@ import 'package:flutter_application_1/services/auth_wrapper.dart';
 import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
-import '../../../ui/web_operator/view/web_operator_management_view.dart';
+import '../../../ui/web_operator_management/view/web_operator_management_view.dart';
 
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
