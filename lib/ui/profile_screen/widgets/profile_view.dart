@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../services/auth_wrapper.dart';
 import '../view_model/profile_notifier.dart';
 import 'profile_edit_form.dart';
 import 'profile_info_card.dart';
@@ -17,6 +16,7 @@ class ProfileView extends ConsumerStatefulWidget {
 class _ProfileViewState extends ConsumerState<ProfileView> {
   @override
   void initState() {
+		debugPrint("ROUTED TO PROFILE");
     super.initState();
     Future.microtask(
       () => ref.read(profileProvider.notifier).initialize(),
@@ -25,13 +25,13 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthWrapper()),
-        (route) => false,
-      );
-    }
+    // if (mounted) {
+    //   Navigator.pushAndRemoveUntil(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const AuthWrapper()),
+    //     (route) => false,
+    //   );
+    // }
   }
 
   @override

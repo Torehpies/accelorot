@@ -19,14 +19,14 @@ enum RoutePath {
 
   //admin paths
   adminDashboard(path: '/admin/dashboard'),
-  adminActivity(path: '/admin/activity'),
-  adminStatistics(path: '/admin/statistics'),
-  adminMachines(path: '/admin/machines'),
   adminOperators(path: '/admin/operators'),
+  adminMachines(path: '/admin/machines'),
+  adminReports(path: '/admin/reports'),
   adminProfile(path: '/admin/profile'),
 
-  //TODO placeholder super admin paths
+  //super admin paths
   superAdminTeams(path: '/superadmin/teams'),
+  superAdminMachines(path: '/superadmin/machines'),
   superAdminProfile(path: '/superadmin/profile');
 
   const RoutePath({required this.path});

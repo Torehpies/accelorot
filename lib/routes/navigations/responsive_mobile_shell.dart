@@ -4,16 +4,14 @@ import 'package:flutter_application_1/routes/navigation_utils.dart';
 class ResponsiveMobileShell extends StatelessWidget {
   final Widget child;
   final List<NavItem> navItems;
-  final Color primaryColor;
-  final Color selectedItemColor;
+  final Color color;
   final Function(BuildContext, int) onTapped;
 
   const ResponsiveMobileShell({
     super.key,
     required this.child,
     required this.navItems,
-    required this.primaryColor,
-    required this.selectedItemColor,
+    required this.color,
     required this.onTapped,
   });
 
@@ -31,7 +29,7 @@ class ResponsiveMobileShell extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
-        selectedItemColor: selectedItemColor,
+        selectedItemColor: color,
         unselectedItemColor: Colors.grey,
         onTap: (index) => onTapped(context, index),
         items: navItems.map((item) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
 import 'package:flutter_application_1/routes/navigations/responsive_mobile_shell.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class SuperAdminMobileShell extends StatelessWidget {
   final Widget child;
@@ -15,8 +16,7 @@ class SuperAdminMobileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveMobileShell(
       navItems: adminNavItems,
-      primaryColor: Colors.yellow.shade200,
-      selectedItemColor: Colors.yellow.shade700,
+      color: AppColors.green100,
       onTapped: _onItemTapped,
       child: child,
     );

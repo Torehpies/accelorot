@@ -1,16 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/admin_machine/admin_machine_screen.dart';
-import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
+import 'package:flutter_application_1/ui/machine_management/widgets/operator_machine_view.dart';
 import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart'; // Corrected import reference
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_management_screen.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -23,7 +22,9 @@ import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
+import 'package:flutter_application_1/ui/profile_screen/widgets/profile_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
+import 'package:flutter_application_1/ui/reports/widgets/reports_view.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
@@ -142,7 +143,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const OperatorMachineScreen(),
+              child: const OperatorMachineView(),
               key: state.pageKey,
             ),
           ),
@@ -150,7 +151,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.profile.path,
             name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const ProfileScreen(),
+              child: const ProfileView(),
               key: state.pageKey,
             ),
           ),
@@ -188,7 +189,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminMachines.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const AdminMachineScreen(),
+              child: const AdminMachineView(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.adminReports.path,
+            name: RoutePath.adminReports.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ReportsView(),
             ),
           ),
           GoRoute(
@@ -196,7 +205,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileScreen(),
+              child: const ProfileView(),
             ),
           ),
         ],
@@ -221,11 +230,19 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: RoutePath.superAdminMachines.path,
+            name: RoutePath.superAdminMachines.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const AdminMachineView(),
+            ),
+          ),
+          GoRoute(
             path: RoutePath.superAdminProfile.path,
             name: RoutePath.superAdminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileScreen(),
+              child: const ProfileView(),
             ),
           ),
         ],
