@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
-import 'package:flutter_application_1/data/providers/profile_providers.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BatchStartDialog extends ConsumerStatefulWidget {

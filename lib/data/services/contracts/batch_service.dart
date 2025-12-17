@@ -14,6 +14,13 @@ abstract class BatchService {
   /// Update batch timestamp
   Future<void> updateBatchTimestamp(String batchId);
   
+  /// Complete a batch with final details
+  Future<void> completeBatch(
+    String batchId, {
+    required double finalWeight,
+    String? completionNotes,
+  });
+  
   /// Get user's team ID
   Future<String?> getUserTeamId(String userId);
   

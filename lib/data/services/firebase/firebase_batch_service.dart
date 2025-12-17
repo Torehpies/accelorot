@@ -26,20 +26,21 @@ class FirestoreBatchService implements BatchService {
   @override
   Future<String?> getBatchId(String userId, String machineId) async {
     try {
-      final batchQuery = await _batches
+      final querySnapshot = await _batches
           .where('userId', isEqualTo: userId)
           .where('machineId', isEqualTo: machineId)
           .where('isActive', isEqualTo: true)
           .limit(1)
           .get();
 
-      if (batchQuery.docs.isNotEmpty) {
-        return batchQuery.docs.first.id;
+      if (querySnapshot.docs.isEmpty) {
+        return null;
       }
-      return null;
+
+      return querySnapshot.docs.first.id;
     } catch (e) {
-      debugPrint('❌ Error getting batch ID: $e');
-      rethrow;
+      debugPrint('Error getting batch ID: $e');
+      return null;
     }
   }
 
@@ -50,26 +51,24 @@ class FirestoreBatchService implements BatchService {
     int batchNumber,
   ) async {
     try {
-      final batchId = '${machineId}_batch_$batchNumber';
-      final batchRef = _batches.doc(batchId);
-
-      // Get user's teamId
-      final teamId = await getUserTeamId(userId);
-
-      await batchRef.set({
+      final docRef = await _batches.add({
         'userId': userId,
         'machineId': machineId,
         'batchNumber': batchNumber,
         'isActive': true,
-        'createdAt': Timestamp.now(),
-        'updatedAt': Timestamp.now(),
-        'teamId': teamId,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      debugPrint('✅ Created batch: $batchId with teamId: $teamId');
-      return batchId;
+      // Update machine's currentBatchId
+      await _machines.doc(machineId).update({
+        'currentBatchId': docRef.id,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+
+      return docRef.id;
     } catch (e) {
-      debugPrint('❌ Error creating batch: $e');
+      debugPrint('Error creating batch: $e');
       rethrow;
     }
   }
@@ -78,10 +77,46 @@ class FirestoreBatchService implements BatchService {
   Future<void> updateBatchTimestamp(String batchId) async {
     try {
       await _batches.doc(batchId).update({
-        'updatedAt': Timestamp.now(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      debugPrint('❌ Error updating batch timestamp: $e');
+      debugPrint('Error updating batch timestamp: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> completeBatch(
+    String batchId, {
+    required double finalWeight,
+    String? completionNotes,
+  }) async {
+    try {
+      // Get batch to find machineId
+      final batchDoc = await _batches.doc(batchId).get();
+      final batchData = batchDoc.data() as Map<String, dynamic>?;
+      final machineId = batchData?['machineId'] as String?;
+
+      // Update batch to completed
+      await _batches.doc(batchId).update({
+        'isActive': false,
+        'completedAt': FieldValue.serverTimestamp(),
+        'finalWeight': finalWeight,
+        'completionNotes': completionNotes,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Clear machine's currentBatchId
+      if (machineId != null) {
+        await _machines.doc(machineId).update({
+          'currentBatchId': null,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+      }
+
+      debugPrint('Batch $batchId completed successfully');
+    } catch (e) {
+      debugPrint('Error completing batch: $e');
       rethrow;
     }
   }
@@ -92,14 +127,12 @@ class FirestoreBatchService implements BatchService {
   Future<String?> getUserTeamId(String userId) async {
     try {
       final userDoc = await _users.doc(userId).get();
+      if (!userDoc.exists) return null;
 
-      if (userDoc.exists) {
-        final data = userDoc.data() as Map<String, dynamic>?;
-        return data?['teamId'] as String?;
-      }
-      return null;
+      final data = userDoc.data() as Map<String, dynamic>?;
+      return data?['teamId'] as String?;
     } catch (e) {
-      debugPrint('❌ Error getting user teamId: $e');
+      debugPrint('Error getting user team ID: $e');
       return null;
     }
   }
@@ -107,13 +140,14 @@ class FirestoreBatchService implements BatchService {
   @override
   Future<List<String>> getTeamMachineIds(String teamId) async {
     try {
-      final machinesSnapshot = await _machines
+      final querySnapshot = await _machines
           .where('teamId', isEqualTo: teamId)
+          .where('isArchived', isEqualTo: false)
           .get();
 
-      return machinesSnapshot.docs.map((doc) => doc.id).toList();
+      return querySnapshot.docs.map((doc) => doc.id).toList();
     } catch (e) {
-      debugPrint('❌ Error getting team machines: $e');
+      debugPrint('Error getting team machine IDs: $e');
       return [];
     }
   }
@@ -129,41 +163,24 @@ class FirestoreBatchService implements BatchService {
     if (machineIds.isEmpty) return [];
 
     try {
-      // If under Firestore's whereIn limit, query normally
-      if (machineIds.length <= firestoreWhereinLimit) {
-        final snapshot = await _batches
-            .where('machineId', whereIn: machineIds)
+      final List<QueryDocumentSnapshot> allDocs = [];
+
+      // Split into chunks of 10 (Firestore whereIn limit)
+      for (int i = 0; i < machineIds.length; i += firestoreWhereinLimit) {
+        final chunk = machineIds.skip(i).take(firestoreWhereinLimit).toList();
+
+        final querySnapshot = await _batches
+            .where('machineId', whereIn: chunk)
             .where('isActive', isEqualTo: true)
+            .orderBy('createdAt', descending: true)
             .get();
 
-        debugPrint('✅ Found ${snapshot.docs.length} batches for ${machineIds.length} machines');
-        return snapshot.docs;
+        allDocs.addAll(querySnapshot.docs);
       }
 
-      // Split into chunks of 10 for large teams
-      final List<List<String>> chunks = [];
-      for (int i = 0; i < machineIds.length; i += firestoreWhereinLimit) {
-        final end = (i + firestoreWhereinLimit < machineIds.length)
-            ? i + firestoreWhereinLimit
-            : machineIds.length;
-        chunks.add(machineIds.sublist(i, end));
-      }
-
-      // Query each chunk in parallel
-      final futures = chunks.map((chunk) =>
-        _batches
-          .where('machineId', whereIn: chunk)
-          .where('isActive', isEqualTo: true)
-          .get()
-      );
-
-      final results = await Future.wait(futures);
-      final allDocs = results.expand((snapshot) => snapshot.docs).toList();
-
-      debugPrint('✅ Found ${allDocs.length} batches for ${machineIds.length} machines (${chunks.length} queries)');
       return allDocs;
     } catch (e) {
-      debugPrint('❌ Error getting batches for machines: $e');
+      debugPrint('Error getting batches for machines: $e');
       return [];
     }
   }

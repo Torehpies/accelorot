@@ -165,6 +165,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
 
     final isActive = _activeBatch?.isActive ?? false;
     final progress = _getProgress();
+    final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
+
 
     return Container(
       decoration: BoxDecoration(
@@ -205,19 +207,25 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive 
-                        ? const Color(0xFFD1FAE5) 
-                        : const Color(0xFFFEF3C7),
+                    color: batchIsCompleted
+                        ? const Color(0xFFF3F4F6)
+                        : (isActive 
+                            ? const Color(0xFFD1FAE5) 
+                            : const Color(0xFFFEF3C7)),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    isActive ? 'Active' : 'Inactive',
+                    batchIsCompleted 
+                        ? 'Completed' 
+                        : (isActive ? 'Active' : 'Inactive'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isActive 
-                          ? const Color(0xFF065F46) 
-                          : const Color(0xFF92400E),
+                      color: batchIsCompleted
+                          ? const Color(0xFF6B7280)
+                          : (isActive 
+                              ? const Color(0xFF065F46) 
+                              : const Color(0xFF92400E)),
                     ),
                   ),
                 ),
@@ -314,7 +322,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             const SizedBox(height: 16),
 
             // Conditional content
-            if (!isActive)
+              if (!isActive && !batchIsCompleted)
               Column(
                 children: [
                   // Empty state icon and text
@@ -363,7 +371,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                 ],
               ),
 
-            if (isActive && _activeBatch != null)
+            if (_activeBatch != null)
               Column(
                 children: [
                   // Batch details grid
@@ -421,7 +429,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => _completeBatch(context),
+                      onPressed: batchIsCompleted ? null : () => _completeBatch(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF10B981),
                         foregroundColor: Colors.white,
@@ -430,10 +438,12 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                           borderRadius: BorderRadius.circular(8),
                         ),
                         elevation: 0,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        disabledForegroundColor: Colors.grey.shade500,
                       ),
-                      child: const Text(
-                        'Complete Batch',
-                        style: TextStyle(
+                      child: Text(
+                        batchIsCompleted ? 'Batch Already Completed' : 'Complete Batch',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),

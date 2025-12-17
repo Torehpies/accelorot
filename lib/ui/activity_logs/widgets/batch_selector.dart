@@ -25,10 +25,11 @@ class BatchSelector extends ConsumerWidget {
 
     return batchesAsync.when(
       data: (batches) {
-        final filteredBatches = selectedMachineId != null
-            ? batches.where((b) => b.machineId == selectedMachineId).toList()
-            : batches;
+      final filteredBatches = selectedMachineId != null
+          ? batches.where((b) => b.machineId == selectedMachineId).toList()
+          : batches;
 
+        filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final hasNoBatches = filteredBatches.isEmpty;
 
         return Container(
@@ -109,9 +110,34 @@ class BatchSelector extends ConsumerWidget {
                           ...filteredBatches.map((batch) {
                             return DropdownMenuItem<String>(
                               value: batch.id,
-                              child: Text(
-                                batch.id,
-                                style: TextStyle(fontSize: isCompact ? 13 : 14),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      '#${batch.batchNumber}',
+                                      style: TextStyle(fontSize: isCompact ? 13 : 14),
+                                    ),
+                                  ),
+                                  if (!batch.isActive)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        'Completed',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             );
                           }),

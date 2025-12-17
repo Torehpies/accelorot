@@ -17,6 +17,9 @@ abstract class BatchModel with _$BatchModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     String? teamId,
+    DateTime? completedAt,
+    double? finalWeight,
+    String? completionNotes,
   }) = _BatchModel;
 
   factory BatchModel.fromJson(Map<String, dynamic> json) =>
@@ -35,6 +38,9 @@ abstract class BatchModel with _$BatchModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       teamId: data['teamId'],
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      finalWeight: (data['finalWeight'] as num?)?.toDouble(),
+      completionNotes: data['completionNotes'] as String?,
     );
   }
 
@@ -48,9 +54,19 @@ abstract class BatchModel with _$BatchModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       if (teamId != null) 'teamId': teamId,
+      if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
+      if (finalWeight != null) 'finalWeight': finalWeight,
+      if (completionNotes != null) 'completionNotes': completionNotes,
     };
   }
 
   /// Get formatted batch name
   String get displayName => 'Batch #$batchNumber';
+  
+  /// Get completion progress percentage
+  double getProgress({int totalDays = 12}) {
+    if (!isActive && completedAt != null) return 100.0;
+    final daysPassed = DateTime.now().difference(createdAt).inDays;
+    return (daysPassed / totalDays * 100).clamp(0.0, 100.0);
+  }
 }

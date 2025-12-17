@@ -2,7 +2,6 @@ import 'batch_repository.dart';
 import '../../models/batch_model.dart';
 import '../../services/contracts/batch_service.dart';
 
-
 class BatchRepositoryRemote implements BatchRepository {
   final BatchService _batchService;
 
@@ -23,6 +22,18 @@ class BatchRepositoryRemote implements BatchRepository {
   @override
   Future<void> updateBatchTimestamp(String batchId) =>
       _batchService.updateBatchTimestamp(batchId);
+
+  @override
+  Future<void> completeBatch(
+    String batchId, {
+    required double finalWeight,
+    String? completionNotes,
+  }) =>
+      _batchService.completeBatch(
+        batchId,
+        finalWeight: finalWeight,
+        completionNotes: completionNotes,
+      );
 
   @override
   Future<String?> getUserTeamId(String userId) =>
