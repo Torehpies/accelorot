@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/web_date_filter_button.dart
 
 import 'package:flutter/material.dart';
-import '../models/activity_list_state.dart';
+import '../models/activity_common.dart';
 
 /// Date filter dropdown button
 class WebDateFilterButton extends StatelessWidget {

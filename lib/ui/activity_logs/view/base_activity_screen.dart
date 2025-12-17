@@ -9,6 +9,7 @@ import '../widgets/search_bar_widget.dart';
 import '../widgets/date_filter_button.dart';
 import '../widgets/machine_selector.dart'; 
 import '../widgets/batch_selector.dart';
+import '../models/activity_common.dart';
 
 
 /// Clean base screen that only handles UI rendering

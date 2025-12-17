@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/models/activity_log_item.dart
+// lib/data/models/activity_log_item.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

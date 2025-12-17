@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
+import 'activity_common.dart';
 
 part 'activity_list_state.freezed.dart';
 
@@ -37,36 +38,4 @@ abstract class ActivityListState with _$ActivityListState {
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
   bool get isEmpty => filteredActivities.isEmpty && status == LoadingStatus.success;
-}
-
-/// Loading status enum
-enum LoadingStatus {
-  initial,
-  loading,
-  success,
-  error,
-}
-
-/// Date filter configuration
-@freezed
-abstract class DateFilterRange with _$DateFilterRange {
-  const factory DateFilterRange({
-    required DateFilterType type,
-    DateTime? startDate,
-    DateTime? endDate,
-    DateTime? customDate,
-  }) = _DateFilterRange;
-
-  const DateFilterRange._();
-
-  bool get isActive => type != DateFilterType.none && startDate != null && endDate != null;
-}
-
-enum DateFilterType {
-  none,
-  today,
-  yesterday,
-  last7Days,
-  last30Days,
-  custom,
 }

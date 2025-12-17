@@ -12,8 +12,7 @@ import 'web_activity_search_bar.dart';
 import 'web_date_filter_button.dart';
 import 'web_pagination_bar.dart';
 import 'machine_selector.dart'; 
-import 'batch_selector.dart';  
-
+import 'batch_selector.dart';
 
 /// Composite widget that shows a complete paginated activity list
 class WebActivityListView extends ConsumerStatefulWidget {
