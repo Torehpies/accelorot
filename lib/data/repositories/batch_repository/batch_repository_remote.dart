@@ -15,9 +15,18 @@ class BatchRepositoryRemote implements BatchRepository {
   Future<String> createBatch(
     String userId,
     String machineId,
-    int batchNumber,
+    int batchNumber,{
+    String? batchName,
+    String? startNotes,
+  }
   ) =>
-      _batchService.createBatch(userId, machineId, batchNumber);
+      _batchService.createBatch(
+        userId,
+        machineId,
+        batchNumber,
+        batchName: batchName,
+        startNotes: startNotes,
+      );
 
   @override
   Future<void> updateBatchTimestamp(String batchId) =>

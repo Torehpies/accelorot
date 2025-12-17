@@ -48,8 +48,10 @@ class FirestoreBatchService implements BatchService {
   Future<String> createBatch(
     String userId,
     String machineId,
-    int batchNumber,
-  ) async {
+    int batchNumber, {
+    String? batchName,
+    String? startNotes,
+  }) async {
     try {
       final docRef = await _batches.add({
         'userId': userId,
@@ -58,6 +60,8 @@ class FirestoreBatchService implements BatchService {
         'isActive': true,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        if (batchName != null) 'batchName': batchName,
+        if (startNotes != null) 'startNotes': startNotes,
       });
 
       // Update machine's currentBatchId

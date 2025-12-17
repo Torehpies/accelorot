@@ -1,5 +1,3 @@
-// lib/data/services/contracts/batch_service.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Abstract interface for batch operations
@@ -9,7 +7,13 @@ abstract class BatchService {
   Future<String?> getBatchId(String userId, String machineId);
   
   /// Create a new batch (returns new batch ID)
-  Future<String> createBatch(String userId, String machineId, int batchNumber);
+  Future<String> createBatch(
+    String userId,
+    String machineId,
+    int batchNumber, {
+    String? batchName,
+    String? startNotes,
+  });
   
   /// Update batch timestamp
   Future<void> updateBatchTimestamp(String batchId);

@@ -114,7 +114,7 @@ class BatchSelector extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      '#${batch.batchNumber}',
+                                      batch.displayName, 
                                       style: TextStyle(fontSize: isCompact ? 13 : 14),
                                     ),
                                   ),

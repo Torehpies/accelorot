@@ -6,8 +6,10 @@ abstract class BatchRepository {
   Future<String> createBatch(
     String userId,
     String machineId,
-    int batchNumber,
-  );
+    int batchNumber, {
+    String? batchName,
+    String? startNotes,
+  });
 
   Future<void> updateBatchTimestamp(String batchId);
   

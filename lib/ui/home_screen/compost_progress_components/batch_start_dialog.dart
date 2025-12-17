@@ -71,9 +71,17 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
       String? batchId = await batchRepo.getBatchId(userId, _selectedMachineId!);
       
       if (batchId == null) {
-        // Generate batch number (you can implement counter logic later)
+        // Generate batch number
         final batchNumber = DateTime.now().millisecondsSinceEpoch % 1000000;
-        batchId = await batchRepo.createBatch(userId, _selectedMachineId!, batchNumber);
+        batchId = await batchRepo.createBatch(
+          userId,
+          _selectedMachineId!,
+          batchNumber,
+          batchName: _batchNameController.text.trim(),
+          startNotes: _startNotesController.text.trim().isEmpty 
+              ? null 
+              : _startNotesController.text.trim(),
+        );
       } else {
         // Update existing batch timestamp
         await batchRepo.updateBatchTimestamp(batchId);
@@ -88,7 +96,7 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
         ),
       );
       
-      Navigator.of(context).pop(true); // Return success
+      Navigator.of(context).pop(true); 
 
     } catch (e) {
       if (!mounted) return;
