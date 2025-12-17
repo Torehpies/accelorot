@@ -7,16 +7,16 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_
 import 'package:flutter_application_1/ui/home_screen/cycles/empty_state.dart';
 import 'package:flutter_application_1/ui/home_screen/cycles/info_item.dart';
 
-class SystemCard extends StatefulWidget {
+class DrumControlCard extends StatefulWidget {
   final CompostBatch? currentBatch;
 
-  const SystemCard({super.key, this.currentBatch});
+  const DrumControlCard({super.key, this.currentBatch});
 
   @override
-  State<SystemCard> createState() => _SystemCardState();
+  State<DrumControlCard> createState() => _DrumControlCardState();
 }
 
-class _SystemCardState extends State<SystemCard> {
+class _DrumControlCardState extends State<DrumControlCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
@@ -33,7 +33,7 @@ class _SystemCardState extends State<SystemCard> {
   }
 
   @override
-  void didUpdateWidget(SystemCard oldWidget) {
+  void didUpdateWidget(DrumControlCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Reset when batch changes
     if (oldWidget.currentBatch != widget.currentBatch) {
