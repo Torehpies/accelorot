@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/login/login_screen.dart';
 import '../../../services/sess_service.dart';
-import '../../../frontend/operator/profile/change_password_dialog.dart';
+import '../../../ui/core/ui/change_password_dialog.dart';
 
 class WebProfileScreen extends StatefulWidget {
   const WebProfileScreen({super.key});

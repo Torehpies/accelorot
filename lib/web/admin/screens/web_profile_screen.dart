@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/sess_service.dart';
-import '../../../frontend/operator/profile/change_password_dialog.dart';
+import '../../../ui/core/ui/change_password_dialog.dart';
+import '../../../ui/core/ui/admin_app_bar.dart';
 
 class WebProfileScreen extends StatefulWidget {
   const WebProfileScreen({super.key});
@@ -121,28 +122,9 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade700, Colors.teal.shade900],
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
+      // ✅ UPDATED APPBAR
+      appBar: const AdminAppBar(
+        title: 'Profile',
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

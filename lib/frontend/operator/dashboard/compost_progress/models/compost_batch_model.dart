@@ -57,7 +57,6 @@ class CompostBatch {
     );
   }
 
-  // Create a copy with updated fields
   CompostBatch copyWith({
     String? batchName,
     String? batchNumber,

@@ -1,11 +1,16 @@
-// lib/frontend/operator/machine_management/operator_machine/controllers/operator_machine_controller.dart
-
 import 'package:flutter/material.dart';
-import '../../models/machine_model.dart';
-import '../../../../../services/machine_services/firestore_machine_service.dart';
+import '../../../../../data/models/machine_model.dart';
+import '../../../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../../../data/repositories/machine_repository/machine_repository.dart';
+import '../../../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../../../services/sess_service.dart';
 
 class OperatorMachineController extends ChangeNotifier {
+  // ==================== DEPENDENCIES ====================
+  
+  final MachineRepository _repository;
+  final FirebaseMachineService _service;
+
   // ==================== STATE ====================
 
   List<MachineModel> _allMachines = [];
@@ -18,7 +23,12 @@ class OperatorMachineController extends ChangeNotifier {
   int _displayLimit = 10;
   static const int _pageSize = 10;
 
-  OperatorMachineController({this.viewingOperatorId});
+  OperatorMachineController({
+    this.viewingOperatorId,
+    MachineRepository? repository,
+    FirebaseMachineService? service,
+  })  : _repository = repository ?? MachineRepositoryRemote(FirebaseMachineService()), 
+        _service = service ?? FirebaseMachineService();
 
   // ==================== GETTERS ====================
 
@@ -29,7 +39,6 @@ class OperatorMachineController extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   bool get isAuthenticated => _isAuthenticated;
 
-  /// Get filtered machines based on search query
   List<MachineModel> get filteredMachines {
     if (_searchQuery.isEmpty) {
       return _allMachines;
@@ -42,26 +51,21 @@ class OperatorMachineController extends ChangeNotifier {
     }).toList();
   }
 
-  /// Get machines to display with pagination
   List<MachineModel> get displayedMachines {
     return filteredMachines.take(_displayLimit).toList();
   }
 
-  /// Check if there are more machines to load
   bool get hasMoreToLoad {
     return displayedMachines.length < filteredMachines.length;
   }
 
-  /// Get count of remaining machines
   int get remainingCount {
     return filteredMachines.length - displayedMachines.length;
   }
 
-  // Get active machines count
   int get activeMachinesCount =>
       _allMachines.where((m) => !m.isArchived).length;
 
-  // Get archived machines count
   int get archivedMachinesCount =>
       _allMachines.where((m) => m.isArchived).length;
 
@@ -73,22 +77,17 @@ class OperatorMachineController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final currentUserId = FirestoreMachineService.getCurrentUserId();
+      final currentUserId = _service.currentUserId;
       _isAuthenticated = currentUserId != null;
-
-      // Upload mock data if needed (works without auth)
-      await FirestoreMachineService.uploadAllMockMachines();
 
       final targetUserId = viewingOperatorId ?? currentUserId;
 
       if (targetUserId != null) {
-        // Fetch ALL team machines for this operator
         await Future.wait([
           _fetchMachinesByOperatorId(targetUserId),
           _fetchUsers(),
         ]);
       } else {
-        // Not logged in - show mock/all machines for preview
         await Future.wait([_fetchAllMachines(), _fetchUsers()]);
       }
 
@@ -103,20 +102,16 @@ class OperatorMachineController extends ChangeNotifier {
 
   // ==================== FETCH OPERATIONS ====================
 
-  /// Fetch all team machines by user's teamId
   Future<void> _fetchMachinesByOperatorId(String operatorId) async {
     try {
-      // ⭐ Get user's teamId and fetch team machines
       final sessionService = SessionService();
       final userData = await sessionService.getCurrentUserData();
       final teamId = userData?['teamId'] as String?;
 
       if (teamId != null && teamId.isNotEmpty) {
-        _allMachines = await FirestoreMachineService.getMachinesByTeamId(
-          teamId,
-        );
+        _allMachines = await _repository.getMachinesByTeam(teamId);
       } else {
-        _allMachines = await FirestoreMachineService.getAllMachines();
+        _allMachines = await _repository.getMachinesByTeam('');
       }
       notifyListeners();
     } catch (e) {
@@ -127,8 +122,7 @@ class OperatorMachineController extends ChangeNotifier {
 
   Future<void> _fetchAllMachines() async {
     try {
-      // Fetch all machines for preview when not authenticated
-      _allMachines = await FirestoreMachineService.getAllMachines();
+      _allMachines = await _repository.getMachinesByTeam('');
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to fetch machines: $e';
@@ -138,18 +132,17 @@ class OperatorMachineController extends ChangeNotifier {
 
   Future<void> _fetchUsers() async {
     try {
-      _users = await FirestoreMachineService.getOperators();
+      // TODO: Move this to a UserRepository when created
+      _users = []; // For now, empty - implement when UserRepository exists
       notifyListeners();
     } catch (e) {
-      // Don't set error for users fetch, it's not critical
       _users = [];
       notifyListeners();
     }
   }
 
-  // Refresh machines list
   Future<void> refresh() async {
-    final currentUserId = FirestoreMachineService.getCurrentUserId();
+    final currentUserId = _service.currentUserId;
     _isAuthenticated = currentUserId != null;
 
     final targetUserId = viewingOperatorId ?? currentUserId;
@@ -177,13 +170,13 @@ class OperatorMachineController extends ChangeNotifier {
 
   void setSearchQuery(String query) {
     _searchQuery = query;
-    resetPagination(); // Reset pagination when searching
+    resetPagination();
     notifyListeners();
   }
 
   void clearSearch() {
     _searchQuery = '';
-    resetPagination(); // Reset pagination when clearing search
+    resetPagination();
     notifyListeners();
   }
 

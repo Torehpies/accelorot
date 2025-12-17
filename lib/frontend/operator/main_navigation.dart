@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/statistics/statistics_screen.dart';
-import 'dashboard/home_screen.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/widgets/activity_logs_navigator.dart';
-import 'profile/profile_screen.dart';
+import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart';
+import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
+import '../../ui/profile_screen/widgets/profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'machine_management/operator_machine/operator_machine_screen.dart';
-import 'machine_management/models/machine_model.dart';
+import '../../ui/machine_management/widgets/operator_machine_view.dart'; 
+import '../../data/models/machine_model.dart';
 
 void logCurrentUser(BuildContext context) {
   final user = FirebaseAuth.instance.currentUser;
@@ -64,17 +64,16 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       StatisticsScreen(
         focusedMachineId: widget.focusedMachine?.machineId,
-        focusedMachine: widget.focusedMachine, // ⭐ Pass the full machine object
+
       ),
-      const OperatorMachineScreen(),
-      const ProfileScreen(),
+      const OperatorMachineView(), 
+      const ProfileView(),
     ];
   }
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return;
 
-    // Reset ActivityLogsNavigator when leaving the Activity tab
     if (_selectedIndex == 1) {
       _activityNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
@@ -88,7 +87,6 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Show machine info in AppBar when in machine-focused mode
       appBar: widget.focusedMachine != null
           ? AppBar(
               leading: IconButton(
