@@ -1,10 +1,10 @@
 // lib/mobile/navigation/mobile_navigation.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/activity_logs_screen.dart';
-import 'package:flutter_application_1/frontend/operator/dashboard/home_screen.dart'
+import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
+import 'package:flutter_application_1/ui/home_screen/view/home_screen.dart'
     show HomeScreen;
-import 'package:flutter_application_1/frontend/operator/machine_management/operator_machine/operator_machine_screen.dart';
+import '../../ui/machine_management/widgets/operator_machine_view.dart';
 import 'package:flutter_application_1/frontend/operator/profile/profile_screen.dart';
 import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
 
@@ -21,9 +21,13 @@ class _MobileNavigationState extends State<MobileNavigation> {
   // ✅ Use late final to avoid rebuilding list on every setState
   late final List<Widget> _screens = [
     const HomeScreen(),
-    const ActivityLogsScreen(),
+    // ✅ Now uses the navigator instead of direct screen
+    const ActivityLogsNavigator(
+      focusedMachineId: null, // null = show all machines
+      // viewingOperatorId will be fetched from auth inside screens
+    ),
     const StatisticsScreen(),
-    const OperatorMachineScreen(),
+     const OperatorMachineView(),
     const ProfileScreen(),
   ];
 
@@ -61,11 +65,11 @@ class _MobileNavigationState extends State<MobileNavigation> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.history), label: "Activity"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: "Machines",
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
       floatingActionButton: FloatingActionButton(

@@ -1,10 +1,8 @@
-// lib/frontend/admin/navigation/admin_main_navigation.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../operator/profile/profile_screen.dart';
-import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart';
+import '../../../../ui/machine_management/widgets/admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
 import '../home_screen/admin_home_screen.dart';
 
@@ -28,7 +26,6 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
     });
   }
 
-  /// Navigate to a specific tab programmatically
   void _navigateToTab(int index) {
     if (index == _selectedIndex) return;
 
@@ -37,12 +34,11 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
     });
   }
 
-  /// Build the list of screens with navigation callback
   List<Widget> _buildScreens() {
     return [
       AdminHomeScreen(onNavigateToTab: _navigateToTab),
       const OperatorManagementScreen(),
-      const AdminMachineScreen(),
+      const AdminMachineView(), 
       const ProfileScreen(),
     ];
   }
