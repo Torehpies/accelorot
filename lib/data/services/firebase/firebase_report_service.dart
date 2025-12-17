@@ -240,6 +240,7 @@ class FirebaseReportService implements ReportService {
 
   @override
   Stream<List<Report>> watchReportsByMachine(String machineId) {
+    // PATH: machines/{machineId}/reports
     return _firestore
         .collection('machines')
         .doc(machineId)
