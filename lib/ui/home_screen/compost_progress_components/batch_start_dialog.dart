@@ -1,19 +1,31 @@
-// lib/frontend/operator/dashboard/compost_progress/components/batch_start_dialog.dart
+// lib/ui/home_screen/compost_progress_components/batch_start_dialog.dart
 import 'package:flutter/material.dart';
-import '../../mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
+import 'package:flutter_application_1/data/providers/profile_providers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class BatchStartDialog extends StatefulWidget {
-  const BatchStartDialog({super.key});
+class BatchStartDialog extends ConsumerStatefulWidget {
+  final String? preSelectedMachineId;
+
+  const BatchStartDialog({super.key, this.preSelectedMachineId});
 
   @override
-  State<BatchStartDialog> createState() => _BatchStartDialogState();
+  ConsumerState<BatchStartDialog> createState() => _BatchStartDialogState();
 }
 
-class _BatchStartDialogState extends State<BatchStartDialog> {
+class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
   final _batchNameController = TextEditingController();
   final _startNotesController = TextEditingController();
-
+  String? _selectedMachineId;
   String? _nameError;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMachineId = widget.preSelectedMachineId;
+  }
 
   @override
   void dispose() {
@@ -32,27 +44,65 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
     return null;
   }
 
-  void _handleConfirm() {
+  Future<void> _handleConfirm() async {
     final nameError = _validateBatchName(_batchNameController.text);
 
     if (nameError != null) {
-      setState(() {
-        _nameError = nameError;
-      });
+      setState(() => _nameError = nameError);
       return;
     }
 
-    // Create batch object with hardcoded batch number
-    final batch = CompostBatch(
-      batchName: _batchNameController.text.trim(),
-      batchNumber: 'Batch-1', // Hardcoded for now
-      batchStart: DateTime.now(),
-      startNotes: _startNotesController.text.trim().isEmpty
-          ? null
-          : _startNotesController.text.trim(),
-    );
+    if (_selectedMachineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a machine')),
+      );
+      return;
+    }
 
-    Navigator.of(context).pop(batch);
+    setState(() => _isLoading = true);
+
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) throw Exception('User not logged in');
+
+      final batchRepo = ref.read(batchRepositoryProvider);
+      
+      // Get existing active batch ID or create new one
+      String? batchId = await batchRepo.getBatchId(userId, _selectedMachineId!);
+      
+      if (batchId == null) {
+        // Generate batch number (you can implement counter logic later)
+        final batchNumber = DateTime.now().millisecondsSinceEpoch % 1000000;
+        batchId = await batchRepo.createBatch(userId, _selectedMachineId!, batchNumber);
+      } else {
+        // Update existing batch timestamp
+        await batchRepo.updateBatchTimestamp(batchId);
+      }
+
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Batch started successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      Navigator.of(context).pop(true); // Return success
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to start batch: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -102,6 +152,21 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               ),
               const SizedBox(height: 16),
 
+              // Machine Selection (if not pre-selected)
+              if (widget.preSelectedMachineId == null) ...[
+                Text(
+                  'Select Machine',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Add machine dropdown here (you can reuse MachineSelectionField)
+                const SizedBox(height: 16),
+              ],
+
               // Batch Name Field
               Text(
                 'Batch Name',
@@ -114,22 +179,15 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _batchNameController,
+                enabled: !_isLoading,
                 decoration: InputDecoration(
                   hintText: 'e.g., October Vegetable Waste',
-                  prefixIcon: Icon(
-                    Icons.label_outline,
-                    color: Colors.teal[600],
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  prefixIcon: Icon(Icons.label_outline, color: Colors.teal[600]),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   errorText: _nameError,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.teal.shade600,
-                      width: 2,
-                    ),
+                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
                   ),
                 ),
                 onChanged: (value) {
@@ -137,38 +195,6 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                     setState(() => _nameError = null);
                   }
                 },
-              ),
-              const SizedBox(height: 16),
-
-              // Batch Number Field (Read-only)
-              Text(
-                'Batch Number',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                readOnly: true,
-                controller: TextEditingController(text: 'Batch-1'),
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.tag, color: Colors.grey[400]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                ),
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
-                ),
               ),
               const SizedBox(height: 16),
 
@@ -184,18 +210,14 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _startNotesController,
+                enabled: !_isLoading,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: 'Add any observations or notes...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.teal.shade600,
-                      width: 2,
-                    ),
+                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
                   ),
                 ),
               ),
@@ -206,27 +228,30 @@ class _BatchStartDialogState extends State<BatchStartDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                    onPressed: _isLoading ? null : () => Navigator.pop(context),
+                    child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
-                    onPressed: _handleConfirm,
-                    icon: const Icon(Icons.play_arrow, size: 18),
-                    label: const Text('Start Batch'),
+                    onPressed: _isLoading ? null : _handleConfirm,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Icon(Icons.play_arrow, size: 18),
+                    label: Text(_isLoading ? 'Starting...' : 'Start Batch'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal[700],
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
                   ),
                 ],

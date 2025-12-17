@@ -1,54 +1,136 @@
 // lib/frontend/operator/dashboard/compost_progress/composting_progress_card.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../home_screen/compost_progress_components/batch_start_dialog.dart';
 import '../../../../home_screen/compost_progress_components/batch_complete_dialog.dart';
 import 'compost_batch_model.dart';
+import '../../../../activity_logs/widgets/machine_selector.dart';
+import '../../../../activity_logs/widgets/batch_selector.dart';
+import '../../../../../data/providers/batch_providers.dart';
+import '../../../../../data/models/batch_model.dart';
 
-class CompostingProgressCard extends StatelessWidget {
+class CompostingProgressCard extends ConsumerStatefulWidget {
   static const int totalDays = 12; // Fixed 12-day cycle
 
   final CompostBatch? currentBatch;
   final Function(CompostBatch) onBatchStarted;
   final VoidCallback onBatchCompleted;
+  final String? preSelectedMachineId;
 
   const CompostingProgressCard({
     super.key,
     required this.currentBatch,
     required this.onBatchStarted,
     required this.onBatchCompleted,
+    this.preSelectedMachineId,
   });
 
+  @override
+  ConsumerState<CompostingProgressCard> createState() => _CompostingProgressCardState();
+}
+
+class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard> {
+  String? _selectedMachineId;
+  String? _selectedBatchId;
+  BatchModel? _activeBatch;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMachineId = widget.preSelectedMachineId;
+  }
+
+  @override
+  void didUpdateWidget(CompostingProgressCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update machine if it changed from parent
+    if (widget.preSelectedMachineId != oldWidget.preSelectedMachineId) {
+      setState(() {
+        _selectedMachineId = widget.preSelectedMachineId;
+        _selectedBatchId = null;
+        _activeBatch = null;
+      });
+    }
+  }
+
   void _startBatch(BuildContext context) async {
-    final batch = await showDialog<CompostBatch>(
+    final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => const BatchStartDialog(),
+      builder: (ctx) => BatchStartDialog(
+        preSelectedMachineId: _selectedMachineId,
+      ),
     );
 
-    if (batch != null) {
-      onBatchStarted(batch);
+    if (result == true && mounted) {
+      // Invalidate the batches provider to refresh data
+      ref.invalidate(userTeamBatchesProvider);
+      
+      // Auto-select the newly created batch for the current machine
+      if (_selectedMachineId != null) {
+        // Wait a bit for Firestore to update
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        final batchesAsync = ref.read(userTeamBatchesProvider);
+        batchesAsync.whenData((batches) {
+          final machineBatches = batches
+              .where((b) => b.machineId == _selectedMachineId && b.isActive)
+              .toList();
+          
+          if (machineBatches.isNotEmpty) {
+            // Sort by createdAt to get the newest
+            machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            final newestBatch = machineBatches.first;
+            
+            setState(() {
+              _selectedBatchId = newestBatch.id;
+              _activeBatch = newestBatch;
+            });
+          }
+        });
+      }
     }
   }
 
   void _completeBatch(BuildContext context) {
-    if (currentBatch == null) return;
+    if (_activeBatch == null) return;
 
     showDialog(
       context: context,
       builder: (ctx) => BatchCompleteDialog(
-        batch: currentBatch!,
-        onComplete: onBatchCompleted,
+        batch: _convertToCompostBatch(_activeBatch!),
+        onComplete: () {
+          widget.onBatchCompleted();
+          setState(() {
+            _selectedBatchId = null;
+            _activeBatch = null;
+          });
+          // Invalidate to refresh the list
+          ref.invalidate(userTeamBatchesProvider);
+        },
       ),
     );
   }
 
+  // Helper to convert BatchModel to CompostBatch for the dialog
+  CompostBatch _convertToCompostBatch(BatchModel batch) {
+    return CompostBatch(
+      batchName: 'Batch #${batch.batchNumber}',
+      batchNumber: batch.id,
+      startedBy: null,
+      batchStart: batch.createdAt,
+      startNotes: null,
+      status: batch.isActive ? 'active' : 'completed',
+    );
+  }
+
   int _getDaysPassed() {
-    if (currentBatch == null) return 0;
+    if (_activeBatch == null) return 0;
     final now = DateTime.now();
-    return now.difference(currentBatch!.batchStart).inDays.clamp(0, totalDays);
+    return now.difference(_activeBatch!.createdAt).inDays.clamp(0, CompostingProgressCard.totalDays);
   }
 
   double _getProgress() {
-    return (_getDaysPassed() / totalDays).clamp(0.0, 1.0);
+    return (_getDaysPassed() / CompostingProgressCard.totalDays).clamp(0.0, 1.0);
   }
 
   String _formatDate(DateTime date) {
@@ -61,7 +143,27 @@ class CompostingProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isActive = currentBatch != null;
+    // Watch the batches to auto-update when selected batch changes
+    final batchesAsync = ref.watch(userTeamBatchesProvider);
+
+    // Update active batch when selection changes
+    batchesAsync.whenData((batches) {
+      if (_selectedBatchId != null) {
+        final batch = batches.firstWhere(
+          (b) => b.id == _selectedBatchId,
+          orElse: () => batches.first,
+        );
+        if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
+          Future.microtask(() {
+            if (mounted) {
+              setState(() => _activeBatch = batch);
+            }
+          });
+        }
+      }
+    });
+
+    final isActive = _activeBatch?.isActive ?? false;
     final progress = _getProgress();
 
     return Container(
@@ -84,7 +186,7 @@ class CompostingProgressCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and status badge
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -123,68 +225,37 @@ class CompostingProgressCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Dropdown row (Machine and Batch selectors)
+            // Machine and Batch Selector Row
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Select a machine',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.grey.shade600,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+                  child: MachineSelector(
+                    selectedMachineId: _selectedMachineId,
+                    onChanged: (machineId) {
+                      setState(() {
+                        _selectedMachineId = machineId;
+                        _selectedBatchId = null; // Reset batch when machine changes
+                        _activeBatch = null;
+                      });
+                    },
+                    isCompact: true,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Select Batch',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.grey.shade600,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+                  child: BatchSelector(
+                    selectedBatchId: _selectedBatchId,
+                    selectedMachineId: _selectedMachineId,
+                    onChanged: (batchId) {
+                      setState(() {
+                        _selectedBatchId = batchId;
+                        if (batchId == null) {
+                          _activeBatch = null;
+                        }
+                      });
+                    },
+                    isCompact: true,
+                    showLabel: false,
                   ),
                 ),
               ],
@@ -265,7 +336,9 @@ class CompostingProgressCard extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => _startBatch(context),
+                      onPressed: _selectedMachineId == null 
+                          ? null 
+                          : () => _startBatch(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF10B981),
                         foregroundColor: Colors.white,
@@ -274,10 +347,13 @@ class CompostingProgressCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         elevation: 0,
+                        disabledBackgroundColor: Colors.grey.shade300,
                       ),
-                      child: const Text(
-                        'Start Batch',
-                        style: TextStyle(
+                      child: Text(
+                        _selectedMachineId == null 
+                            ? 'Select Machine First' 
+                            : 'Start Batch',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -287,7 +363,7 @@ class CompostingProgressCard extends StatelessWidget {
                 ],
               ),
 
-            if (isActive)
+            if (isActive && _activeBatch != null)
               Column(
                 children: [
                   // Batch details grid
@@ -295,22 +371,22 @@ class CompostingProgressCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildDetailItem(
-                          'Machine Name',
-                          'Sample Text...',
+                          'Machine ID',
+                          _activeBatch!.machineId,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
-                          'Batch Name',
-                          currentBatch!.batchName,
+                          'Batch Number',
+                          '#${_activeBatch!.batchNumber}',
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
                           'Batch Started',
-                          _formatDate(currentBatch!.batchStart),
+                          _formatDate(_activeBatch!.createdAt),
                         ),
                       ),
                     ],
@@ -320,15 +396,8 @@ class CompostingProgressCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildDetailItem(
-                          'Machine ID',
-                          'Sample Text...',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildDetailItem(
                           'Batch ID',
-                          currentBatch!.batchNumber,
+                          _activeBatch!.id,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -336,6 +405,13 @@ class CompostingProgressCard extends StatelessWidget {
                         child: _buildDetailItem(
                           'Days Elapsed',
                           '${_getDaysPassed()} days',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildDetailItem(
+                          'Status',
+                          _activeBatch!.isActive ? 'Active' : 'Completed',
                         ),
                       ),
                     ],

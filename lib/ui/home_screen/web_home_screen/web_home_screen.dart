@@ -10,6 +10,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 
 class WebHomeScreen extends StatefulWidget {
@@ -26,9 +27,22 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
 
-  void _handleBatchStarted(CompostBatch batch) {
-    setState(() => _currentBatch = batch);
+  void _handleBatchStarted(CompostBatch batch) async {
+    // Show dialog and wait for result
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => BatchStartDialog(
+        preSelectedMachineId: widget.focusedMachine?.machineId,
+      ),
+    );
+
+    if (result == true && mounted) {
+      // Refresh the activity logs after batch is created
+      await _activityLogsKey.currentState?.refresh();
+      setState(() {}); // Trigger rebuild to show new batch
+    }
   }
+
 
   void _handleBatchCompleted() {
     setState(() => _currentBatch = null);
@@ -166,6 +180,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               currentBatch: _currentBatch,
                               onBatchStarted: _handleBatchStarted,
                               onBatchCompleted: _handleBatchCompleted,
+                              preSelectedMachineId: widget.focusedMachine?.machineId,
                             ),
                           ),
                           const SizedBox(height: 16),
