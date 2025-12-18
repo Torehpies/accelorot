@@ -16,6 +16,7 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
   final Function(CompostBatch) onBatchStarted;
   final VoidCallback onBatchCompleted;
   final String? preSelectedMachineId;
+  final Function(BatchModel?)? onBatchChanged;
 
   const CompostingProgressCard({
     super.key,
@@ -23,6 +24,7 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
     required this.onBatchStarted,
     required this.onBatchCompleted,
     this.preSelectedMachineId,
+    this.onBatchChanged,
   });
 
   @override
@@ -205,7 +207,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             .where((b) => b.machineId == _selectedMachineId)
             .toList();
         
-        if (machineBatches.isNotEmpty) {
+if (machineBatches.isNotEmpty) {
           Future.microtask(() {
             if (mounted) {
               machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -214,11 +216,19 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                 _selectedBatchId = latestBatch.id;
                 _activeBatch = latestBatch;
               });
+              // Notify parent of batch change
+              widget.onBatchChanged?.call(latestBatch);
+            }
+          });
+        } else {
+          // No batches for this machine
+          Future.microtask(() {
+            if (mounted) {
+              widget.onBatchChanged?.call(null);
             }
           });
         }
       } else if (_selectedBatchId != null) {
-        // Update active batch when selection changes
         final batch = batches.firstWhere(
           (b) => b.id == _selectedBatchId,
           orElse: () => batches.first,
@@ -227,6 +237,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
           Future.microtask(() {
             if (mounted) {
               setState(() => _activeBatch = batch);
+              // Notify parent of batch change
+              widget.onBatchChanged?.call(batch);
             }
           });
         }

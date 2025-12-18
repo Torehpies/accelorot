@@ -12,6 +12,9 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycle
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
+import 'package:flutter_application_1/data/models/batch_model.dart';
+
 
 class WebHomeScreen extends StatefulWidget {
   final MachineModel? focusedMachine; 
@@ -26,6 +29,34 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
+  String? _selectedMachineId;
+  String? _selectedBatchId;
+  BatchModel? _activeBatchModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMachineId = widget.focusedMachine?.machineId;
+  }
+
+  void _updateActiveBatch(BatchModel? batch) {
+    setState(() {
+      _activeBatchModel = batch;
+      // Also update the old _currentBatch if needed for backward compatibility
+      if (batch != null) {
+        _currentBatch = CompostBatch(
+          batchName: batch.displayName,
+          batchNumber: batch.id,
+          startedBy: null,
+          batchStart: batch.createdAt,
+          startNotes: batch.startNotes,
+          status: batch.isActive ? 'active' : 'completed',
+        );
+      } else {
+        _currentBatch = null;
+      }
+    });
+  }
 
   void _handleBatchStarted(CompostBatch batch) async {
     // Show dialog and wait for result
@@ -173,7 +204,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Fixed height for Composting Progress Card
                           SizedBox(
                             height: 360,
                             child: CompostingProgressCard(
@@ -181,6 +211,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               onBatchStarted: _handleBatchStarted,
                               onBatchCompleted: _handleBatchCompleted,
                               preSelectedMachineId: widget.focusedMachine?.machineId,
+                              onBatchChanged: _updateActiveBatch, // Add this callback
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -201,11 +232,15 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            child: DrumControlCard(currentBatch: _currentBatch),
+                            child: DrumControlCard(
+                              currentBatch: _activeBatchModel, 
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Expanded(
-                            child: AeratorCard(currentBatch: _currentBatch),
+                            child: AeratorCard(
+                              currentBatch: _activeBatchModel, 
+                            ),
                           ),
                         ],
                       ),

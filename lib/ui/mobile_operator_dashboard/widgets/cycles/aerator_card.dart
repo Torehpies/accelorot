@@ -1,55 +1,290 @@
-// lib/frontend/operator/dashboard/cycles/aerator_card.dart
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
+import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/cycles/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/cycles/system_status.dart';
 import 'package:flutter_application_1/ui/home_screen/cycles/empty_state.dart';
 import 'package:flutter_application_1/ui/home_screen/cycles/info_item.dart';
+import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/data/providers/cycle_providers.dart';
+import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
-class AeratorCard extends StatefulWidget {
-  final CompostBatch? currentBatch;
+class AeratorCard extends ConsumerStatefulWidget {
+  final BatchModel? currentBatch;
 
   const AeratorCard({super.key, this.currentBatch});
 
   @override
-  State<AeratorCard> createState() => _AeratorCardState();
+  ConsumerState<AeratorCard> createState() => _AeratorCardState();
 }
 
-class _AeratorCardState extends State<AeratorCard> {
+class _AeratorCardState extends ConsumerState<AeratorCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
-  String? _uptime = '00:00:00';
+  String _uptime = '00:00:00';
   int _completedCycles = 0;
+  DateTime? _startTime;
+  Timer? _timer;
+  Timer? _cycleTimer;
+  String? _currentCycleId;
+  CycleRecommendation? _cycleDoc;
 
   @override
   void initState() {
     super.initState();
-    if (widget.currentBatch != null) {
-      settings = DrumRotationSettings();
+    if (widget.currentBatch != null && widget.currentBatch!.isActive) {
+      _loadExistingCycle();
     }
   }
 
   @override
   void didUpdateWidget(AeratorCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentBatch != widget.currentBatch) {
-      if (widget.currentBatch == null) {
+    
+    if (oldWidget.currentBatch?.id != widget.currentBatch?.id) {
+      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+        _stopTimer();
+        _cycleTimer?.cancel();
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
           _uptime = '00:00:00';
           _completedCycles = 0;
+          _startTime = null;
+          _currentCycleId = null;
+          _cycleDoc = null;
         });
+      } else {
+        _loadExistingCycle();
+      }
+    } else if (widget.currentBatch != null && 
+               oldWidget.currentBatch?.isActive == true && 
+               !widget.currentBatch!.isActive) {
+      _stopTimer();
+      _cycleTimer?.cancel();
+      
+      if (_currentCycleId != null && widget.currentBatch?.id != null) {
+        _completeCycleInFirebase();
+      }
+      
+      setState(() {
+        status = SystemStatus.stopped;
+      });
+    }
+  }
+
+  Future<void> _loadExistingCycle() async {
+    if (widget.currentBatch == null) return;
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      final cycle = await cycleRepository.getOrCreateCycleForBatch(
+        batchId: widget.currentBatch!.id,
+        machineId: widget.currentBatch!.machineId,
+        userId: user.uid,
+      );
+
+      if (mounted && cycle.hasAerator) {
+        setState(() {
+          _cycleDoc = cycle;
+          _currentCycleId = cycle.id;
+          settings = DrumRotationSettings(
+            cycles: cycle.aeratorCycles ?? 50,
+            period: cycle.aeratorDuration ?? '1 hour',
+          );
+          _completedCycles = cycle.aeratorCompletedCycles ?? 0;
+
+          if (cycle.aeratorStatus == 'running') {
+            status = SystemStatus.running;
+            _startTime = cycle.aeratorStartedAt;
+            if (_startTime != null) {
+              _startTimer();
+              _simulateCycles();
+            }
+          } else if (cycle.aeratorStatus == 'completed') {
+            status = SystemStatus.stopped;
+            if (cycle.aeratorTotalRuntimeSeconds != null) {
+              _uptime = _formatDuration(
+                Duration(seconds: cycle.aeratorTotalRuntimeSeconds!),
+              );
+            }
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading aerator cycle: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopTimer();
+    _cycleTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted && _startTime != null) {
+        final elapsed = DateTime.now().difference(_startTime!);
+        setState(() {
+          _uptime = _formatDuration(elapsed);
+        });
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
+
+  Future<void> _handleStart() async {
+    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot start: No active batch'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to start the aerator'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      
+      // Get or create cycle document
+      if (_currentCycleId == null) {
+        final cycle = await cycleRepository.getOrCreateCycleForBatch(
+          batchId: widget.currentBatch!.id,
+          machineId: widget.currentBatch!.machineId,
+          userId: user.uid,
+        );
+        _currentCycleId = cycle.id;
+      }
+
+      // Start aerator in Firebase
+      await cycleRepository.startAerator(
+        batchId: widget.currentBatch!.id,
+        cycleId: _currentCycleId!,
+        cycles: settings.cycles,
+        duration: settings.period,
+      );
+
+      setState(() {
+        status = SystemStatus.running;
+        _startTime = DateTime.now();
+        _completedCycles = 0;
+        _startTimer();
+      });
+
+      _simulateCycles();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
 
-  void _handleStart() {
-    setState(() {
-      status = SystemStatus.running;
+  void _simulateCycles() {
+    final periodMinutes = _getPeriodMinutes(settings.period);
+    
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
+      if (mounted && status == SystemStatus.running) {
+        setState(() {
+          _completedCycles++;
+        });
+
+        // Update progress in Firebase
+        if (_currentCycleId != null && widget.currentBatch?.id != null && _startTime != null) {
+          try {
+            final cycleRepository = ref.read(cycleRepositoryProvider);
+            await cycleRepository.updateAeratorProgress(
+              batchId: widget.currentBatch!.id,
+              cycleId: _currentCycleId!,
+              completedCycles: _completedCycles,
+              totalRuntime: DateTime.now().difference(_startTime!),
+            );
+          } catch (e) {
+            debugPrint('Failed to update aerator progress: $e');
+          }
+        }
+
+        if (_completedCycles >= settings.cycles) {
+          _stopTimer();
+          timer.cancel();
+          
+          // Complete cycle in Firebase
+          if (_currentCycleId != null && widget.currentBatch?.id != null) {
+            await _completeCycleInFirebase();
+          }
+          
+          setState(() {
+            status = SystemStatus.stopped;
+          });
+        }
+      } else {
+        timer.cancel();
+      }
     });
+  }
+
+  Future<void> _completeCycleInFirebase() async {
+    if (_currentCycleId == null || widget.currentBatch?.id == null) return;
+
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      await cycleRepository.completeAerator(
+        batchId: widget.currentBatch!.id,
+        cycleId: _currentCycleId!,
+      );
+    } catch (e) {
+      debugPrint('Failed to complete aerator: $e');
+    }
+  }
+
+  int _getPeriodMinutes(String period) {
+    switch (period) {
+      case '15 minutes':
+        return 15;
+      case '30 minutes':
+        return 30;
+      case '1 hour':
+        return 60;
+      case '2 hours':
+        return 120;
+      default:
+        return 60;
+    }
   }
 
   String _getCyclesLabel(int cycles) {
@@ -58,7 +293,8 @@ class _AeratorCardState extends State<AeratorCard> {
 
   @override
   Widget build(BuildContext context) {
-    final hasActiveBatch = widget.currentBatch != null;
+    final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;
+    final batchCompleted = widget.currentBatch != null && !widget.currentBatch!.isActive;
 
     return Container(
       decoration: BoxDecoration(
@@ -97,19 +333,25 @@ class _AeratorCardState extends State<AeratorCard> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: hasActiveBatch
-                        ? const Color(0xFFD1FAE5)
-                        : const Color(0xFFFEF3C7),
+                    color: batchCompleted
+                        ? const Color(0xFFF3F4F6)
+                        : (hasActiveBatch
+                            ? const Color(0xFFD1FAE5)
+                            : const Color(0xFFFEF3C7)),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    hasActiveBatch ? 'Active' : 'Inactive',
+                    batchCompleted
+                        ? 'Completed'
+                        : (hasActiveBatch ? 'Active' : 'Inactive'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: hasActiveBatch
-                          ? const Color(0xFF065F46)
-                          : const Color(0xFF92400E),
+                      color: batchCompleted
+                          ? const Color(0xFF6B7280)
+                          : (hasActiveBatch
+                              ? const Color(0xFF065F46)
+                              : const Color(0xFF92400E)),
                     ),
                   ),
                 ),
@@ -117,17 +359,19 @@ class _AeratorCardState extends State<AeratorCard> {
             ),
             const SizedBox(height: 24),
 
-            if (!hasActiveBatch)
+            if (!hasActiveBatch && !batchCompleted)
               const Expanded(child: EmptyState())
             else
-              _buildActiveState(),
+              _buildActiveState(batchCompleted),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActiveState() {
+  Widget _buildActiveState(bool batchCompleted) {
+    final canInteract = !batchCompleted && status == SystemStatus.idle;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,14 +380,14 @@ class _AeratorCardState extends State<AeratorCard> {
             Expanded(
               child: InfoItem(
                 label: 'Machine Name',
-                value: 'Sample Text...',
+                value: widget.currentBatch!.machineId,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
-                value: widget.currentBatch!.batchName,
+                value: widget.currentBatch!.displayName,
               ),
             ),
           ],
@@ -155,7 +399,7 @@ class _AeratorCardState extends State<AeratorCard> {
             Expanded(
               child: InfoItem(
                 label: 'Uptime',
-                value: _uptime ?? '00:00:00',
+                value: _uptime,
               ),
             ),
             const SizedBox(width: 16),
@@ -186,13 +430,15 @@ class _AeratorCardState extends State<AeratorCard> {
                 label: 'Select Duration',
                 value: settings.period,
                 items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      settings = settings.copyWith(period: value);
-                    });
-                  }
-                },
+                onChanged: canInteract
+                    ? (value) {
+                        if (value != null) {
+                          setState(() {
+                            settings = settings.copyWith(period: value);
+                          });
+                        }
+                      }
+                    : null,
               ),
             ),
             const SizedBox(width: 12),
@@ -201,14 +447,16 @@ class _AeratorCardState extends State<AeratorCard> {
                 label: 'Select No. of Cycles',
                 value: _getCyclesLabel(settings.cycles),
                 items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                onChanged: (value) {
-                  if (value != null) {
-                    final cycles = int.parse(value.split(' ')[0]);
-                    setState(() {
-                      settings = settings.copyWith(cycles: cycles);
-                    });
-                  }
-                },
+                onChanged: canInteract
+                    ? (value) {
+                        if (value != null) {
+                          final cycles = int.parse(value.split(' ')[0]);
+                          setState(() {
+                            settings = settings.copyWith(cycles: cycles);
+                          });
+                        }
+                      }
+                    : null,
               ),
             ),
           ],
@@ -218,9 +466,11 @@ class _AeratorCardState extends State<AeratorCard> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: status == SystemStatus.idle ? _handleStart : null,
+            onPressed: canInteract ? _handleStart : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
+              backgroundColor: batchCompleted
+                  ? Colors.grey.shade400
+                  : const Color(0xFF10B981),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
@@ -230,7 +480,9 @@ class _AeratorCardState extends State<AeratorCard> {
               disabledBackgroundColor: Colors.grey.shade300,
             ),
             child: Text(
-              status == SystemStatus.idle ? 'Start' : status.displayName,
+              batchCompleted
+                  ? 'Completed'
+                  : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -246,12 +498,12 @@ class _AeratorCardState extends State<AeratorCard> {
     required String label,
     required String? value,
     required List<String> items,
-    required Function(String?) onChanged,
+    required Function(String?)? onChanged,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: onChanged == null ? Colors.grey.shade100 : Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
