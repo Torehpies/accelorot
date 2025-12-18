@@ -3,7 +3,7 @@ import 'package:flutter_application_1/data/services/contracts/data_layer_error.d
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 
 abstract class TeamRepository {
-  Future<Result<List<Team>, DataLayerError>> getTeams({
+  Future<List<Team>> getTeams({
     bool forceRefresh = false,
   });
   Future<Result<Team, DataLayerError>> addTeam(Team team);

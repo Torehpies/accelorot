@@ -104,7 +104,9 @@ class FirebasePendingMemberService implements PendingMemberService {
           .doc(memberId);
 
       await docRef.delete();
-    } catch (e) {}
+    } catch (e) {
+			throw Exception("Failed to delete pending member. $e");
+		}
   }
 
   @override

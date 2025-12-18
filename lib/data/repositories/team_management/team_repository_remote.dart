@@ -32,21 +32,20 @@ class TeamRepositoryRemote implements TeamRepository {
   }
 
   @override
-  Future<Result<List<Team>, DataLayerError>> getTeams({
-    bool forceRefresh = false,
-  }) async {
+  Future<List<Team>> getTeams({bool forceRefresh = false}) async {
     if (!forceRefresh && _cachedTeams != null) {
-      return Result.success(_cachedTeams!);
+      return _cachedTeams!;
     }
 
     final result = await _teamService.getTeams();
 
-    result.when(
-      success: (teams) => _cachedTeams = teams,
-      failure: (_) => _cachedTeams,
+    return result.when(
+      success: (teams) {
+        _cachedTeams = teams;
+        return teams;
+      },
+      failure: (_) => _cachedTeams ?? <Team>[],
     );
-
-    return result;
   }
 
   @override
@@ -90,13 +89,13 @@ class TeamRepositoryRemote implements TeamRepository {
     if (getUserResult.isFailure) {
       return Result.failure(getUserResult.asFailure);
     }
-		final appUser = getUserResult.asSuccess;
+    final appUser = getUserResult.asSuccess;
 
-		if (appUser == null) {
-			return Result.failure(DataLayerError.userNullError());
-		}
+    if (appUser == null) {
+      return Result.failure(DataLayerError.userNullError());
+    }
 
-		final isInTeam = appUser.teamId!.isNotEmpty;
-		return Result.success(isInTeam);
+    final isInTeam = appUser.teamId!.isNotEmpty;
+    return Result.success(isInTeam);
   }
 }
