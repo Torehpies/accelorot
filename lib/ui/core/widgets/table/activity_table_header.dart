@@ -34,9 +34,16 @@ class ActivityTableHeader extends StatelessWidget {
     final validType = availableTypes.contains(selectedType) ? selectedType : 'All';
 
     return Container(
-      padding: EdgeInsets.symmetric(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF0F8FF), // Light blue header background
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.tableCellHorizontal,
-        vertical: AppSpacing.tableHeaderVertical,
+        vertical: 8, // Reduced from 12 to 8 - smaller than body rows
       ),
       child: Row(
         children: [

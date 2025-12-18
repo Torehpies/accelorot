@@ -92,31 +92,43 @@ class UnifiedTableContainer extends StatelessWidget {
             onSearchChanged: onSearchChanged,
           ),
           
-          // Divider
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-          
-          // Table Header
-          ActivityTableHeader(
-            selectedCategory: selectedCategory,
-            selectedType: selectedType,
-            sortColumn: sortColumn,
-            sortAscending: sortAscending,
-            onCategoryChanged: onCategoryChanged,
-            onTypeChanged: onTypeChanged,
-            onSort: onSort,
-          ),
-          
-          // Table Body
+          // Table Wrapper (Header + Body with border) - Expanded to fill available space
           Expanded(
-            child: ActivityTableBody(
-              items: items,
-              onViewDetails: onViewDetails,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    // Table Header
+                    ActivityTableHeader(
+                      selectedCategory: selectedCategory,
+                      selectedType: selectedType,
+                      sortColumn: sortColumn,
+                      sortAscending: sortAscending,
+                      onCategoryChanged: onCategoryChanged,
+                      onTypeChanged: onTypeChanged,
+                      onSort: onSort,
+                    ),
+                    
+                    // Table Body
+                    Expanded(
+                      child: ActivityTableBody(
+                        items: items,
+                        onViewDetails: onViewDetails,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           
-          // Pagination Footer
-          if (currentPage != null && totalPages != null && itemsPerPage != null) ...[
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+          // Pagination Footer (no divider above)
+          if (currentPage != null && totalPages != null && itemsPerPage != null)
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.tableCellHorizontal,
@@ -130,7 +142,6 @@ class UnifiedTableContainer extends StatelessWidget {
                 onItemsPerPageChanged: onItemsPerPageChanged,
               ),
             ),
-          ],
         ],
       ),
     );
