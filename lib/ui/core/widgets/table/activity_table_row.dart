@@ -36,7 +36,7 @@ class ActivityTableRow extends StatelessWidget {
           children: [
             // Title Column
             Expanded(
-              flex: 4,
+              flex: 2,
               child: Text(
                 item.title,
                 style: const TextStyle(
@@ -47,25 +47,29 @@ class ActivityTableRow extends StatelessWidget {
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
+                textAlign: TextAlign.center,
               ),
             ),
             
             const SizedBox(width: AppSpacing.md),
             
             // Category Badge
-            SizedBox(
-              child: TableBadge(text: categoryName),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: TableBadge(text: categoryName),
+              ),
             ),
             
             const SizedBox(width: AppSpacing.md),
             
             // Type Chip
-            SizedBox(
-              child: TableChip(text: item.category, color: typeColor),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: TableChip(text: item.category, color: typeColor),
+              ),
             ),
-            
-            const Spacer(),
             
             const SizedBox(width: AppSpacing.md),
             
@@ -106,10 +110,12 @@ class ActivityTableRow extends StatelessWidget {
             // Actions Column
             SizedBox(
               width: 70,
-              child: IconButton(
-                icon: const Icon(Icons.visibility_outlined, size: 18),
-                color: const Color(0xFF6B7280),
-                onPressed: () => onViewDetails(item),
+              child: Center(
+                child: IconButton(
+                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  color: const Color(0xFF6B7280),
+                  onPressed: () => onViewDetails(item),
+                ),
               ),
             ),
           ],

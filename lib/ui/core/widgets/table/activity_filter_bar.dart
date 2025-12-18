@@ -35,7 +35,7 @@ class ActivityFilterBar extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Machine Selector
+          // Left Group: Machine and Batch
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: SizedBox(
@@ -47,8 +47,6 @@ class ActivityFilterBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          
-          // Batch Selector
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: SizedBox(
@@ -60,18 +58,10 @@ class ActivityFilterBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
           
-          // Date Filter Dropdown
-          SizedBox(
-            height: 32,
-            child: DateFilterDropdown(
-              onFilterChanged: onDateFilterChanged,
-            ),
-          ),
-          const SizedBox(width: 12),
+          const Spacer(), // Create space in the middle
           
-          // Search Bar
+          // Right Group: Search and Date
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: Container(
@@ -117,6 +107,13 @@ class ActivityFilterBar extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            height: 32,
+            child: DateFilterDropdown(
+              onFilterChanged: onDateFilterChanged,
             ),
           ),
         ],

@@ -41,7 +41,7 @@ class ActivityTableHeader extends StatelessWidget {
         children: [
           // Title Column (sortable)
           Expanded(
-            flex: 4,
+            flex: 2,
             child: TableHeaderCell(
               label: 'Title',
               sortable: true,
@@ -81,7 +81,7 @@ class ActivityTableHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           
           // Value Column Header
-          Expanded(
+          const Expanded(
             flex: 2,
             child: TableHeaderCell(label: 'Value'),
           ),
@@ -106,13 +106,15 @@ class ActivityTableHeader extends StatelessWidget {
           // Actions Column Header
           const SizedBox(
             width: 70,
-            child: Text(
-              'Actions',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+            child: Center(
+              child: Text(
+                'Actions',
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF6B7280),
+                ),
               ),
             ),
           ),
