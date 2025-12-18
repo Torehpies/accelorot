@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/sess_service.dart';
-import '../../../ui/core/ui/change_password_dialog.dart';
+import 'package:flutter_application_1/ui/change_password_dialog/widgets/change_password_dialog.dart';
 import '../../../ui/core/ui/admin_app_bar.dart';
 
 class WebProfileScreen extends StatefulWidget {
