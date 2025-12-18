@@ -8,8 +8,8 @@ import '../../../core/widgets/table/base_table_container.dart';
 import '../../../core/widgets/filters/search_field.dart';
 import '../../../core/widgets/table/activity_table_header.dart';
 import '../../../core/widgets/table/activity_table_body.dart';
-import '../unified_machine_selector.dart';
-import '../unified_batch_selector.dart';
+import 'unified_machine_selector.dart';
+import 'unified_batch_selector.dart';
 import '../date_filter_dropdown.dart';
 
 /// Unified container for activity logs using BaseTableContainer
@@ -68,6 +68,7 @@ class UnifiedTableContainer extends StatelessWidget {
     this.currentPage,
     this.totalPages,
     this.itemsPerPage,
+    this.totalItems,
     this.onPageChanged,
     this.onItemsPerPageChanged,
   });
