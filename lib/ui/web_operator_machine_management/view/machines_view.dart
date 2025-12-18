@@ -208,7 +208,7 @@ class _MachinesViewState extends State<MachinesView> {
 
   Widget _buildListHeader(bool isDesktop, bool isMobile) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
