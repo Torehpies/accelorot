@@ -1,8 +1,8 @@
 // lib/ui/core/widgets/table/activity_filter_bar.dart
 
 import 'package:flutter/material.dart';
-import '../../../activity_logs/widgets/machine_selector.dart';
-import '../../../activity_logs/widgets/batch_selector.dart';
+import '../../../activity_logs/widgets/unified/unified_machine_selector.dart';
+import '../../../activity_logs/widgets/unified/unified_batch_selector.dart';
 import '../../../activity_logs/widgets/date_filter_dropdown.dart';
 import '../../../activity_logs/models/activity_common.dart';
 
@@ -35,31 +35,28 @@ class ActivityFilterBar extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Machine Selector - Natural width
+          // Machine Selector
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: SizedBox(
               height: 32,
-              child: MachineSelector(
+              child: UnifiedMachineSelector(
                 selectedMachineId: selectedMachineId,
                 onChanged: onMachineChanged,
-                isCompact: true,
               ),
             ),
           ),
           const SizedBox(width: 12),
           
-          // Batch Selector - Natural width
+          // Batch Selector
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: SizedBox(
               height: 32,
-              child: BatchSelector(
+              child: UnifiedBatchSelector(
                 selectedBatchId: selectedBatchId,
                 selectedMachineId: selectedMachineId,
                 onChanged: onBatchChanged,
-                isCompact: true,
-                showLabel: false,
               ),
             ),
           ),
@@ -74,8 +71,9 @@ class ActivityFilterBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           
-          // Search Bar - Takes remaining space
-          Expanded(
+          // Search Bar
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: Container(
               height: 32,
               padding: const EdgeInsets.symmetric(horizontal: 12),
