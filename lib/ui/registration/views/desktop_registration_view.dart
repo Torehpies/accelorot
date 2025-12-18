@@ -3,18 +3,14 @@ import 'package:flutter_application_1/ui/registration/widgets/registration_web_b
 import 'registration_handlers.dart';
 
 class DesktopRegistrationView extends StatelessWidget {
-  final RegistrationHandlers handlers;
-  const DesktopRegistrationView({super.key, required this.handlers});
+  const DesktopRegistrationView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         // Left Side: Branding and Contextual Information (same flex ratio as login)
-        Expanded(
-          flex: 3,
-          child: RegistrationWebBranding(),
-        ),
+        Expanded(flex: 3, child: RegistrationWebBranding()),
 
         // Right Side: The Form Area
         Expanded(
@@ -25,8 +21,7 @@ class DesktopRegistrationView extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: kMaxFormWidth),
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
-                  // Delegates the content rendering to the shared form
-                  child: RegistrationFormContent(handlers: handlers, isDesktop: true),
+                  child: RegistrationFormContent(),
                 ),
               ),
             ),

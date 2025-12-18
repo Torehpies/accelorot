@@ -1,124 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
 import 'package:flutter_application_1/frontend/components/or_divider.dart';
-import 'package:flutter_application_1/repositories/team_repository.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
+import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+const int kDesktopBreakpoint = 1024;
 const double kMaxFormWidth = 450.0;
 
-/// Simple class to bundle all the methods/controllers/state needed by the UI.
-class RegistrationHandlers {
-  final GlobalKey<FormState> formKey;
-  final TextEditingController firstNameController;
-  final TextEditingController lastNameController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-
-  final AsyncValue<List<Team>> asyncTeamList;
-
-  final String? selectedTeamId;
-  final bool isLoading;
-  final bool isGoogleLoading;
-  final bool obscurePassword;
-  final bool obscureConfirmPassword;
-
-  final void Function(String?) onTeamSelected;
-  final VoidCallback togglePasswordVisibility;
-  final VoidCallback toggleConfirmPasswordVisibility;
-  final VoidCallback onSubmitRegistration;
-  final VoidCallback onGoogleSignIn;
-  final VoidCallback onNavigateToLogin;
-
-  RegistrationHandlers({
-    required this.formKey,
-    required this.firstNameController,
-    required this.lastNameController,
-    required this.emailController,
-    required this.passwordController,
-    required this.confirmPasswordController,
-
-    required this.asyncTeamList,
-    required this.selectedTeamId,
-    required this.onTeamSelected,
-
-    required this.isLoading,
-    required this.isGoogleLoading,
-    required this.obscurePassword,
-    required this.obscureConfirmPassword,
-    required this.togglePasswordVisibility,
-    required this.toggleConfirmPasswordVisibility,
-    required this.onSubmitRegistration,
-    required this.onGoogleSignIn,
-    required this.onNavigateToLogin,
-  });
-
-  // --- Validators ---
-  String? nameValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Name is required';
-    }
-    return null;
-  }
-
-  String? emailValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'Enter a valid email address';
-    }
-    return null;
-  }
-
-  String? passwordValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    return null;
-  }
-
-  String? confirmPasswordValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    // Check against the current state's password value, not the controller.
-    // However, since the controller updates the state, checking the controller is fine
-    // as long as the check happens on form submit.
-    if (value != passwordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
-}
-
-// --- Shared Form UI Component ---
-
 class RegistrationFormContent extends ConsumerWidget {
-  final RegistrationHandlers handlers;
-  final bool isDesktop;
-
-  const RegistrationFormContent({
-    super.key,
-    required this.handlers,
-    this.isDesktop = false,
-  });
+  const RegistrationFormContent({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
 
-    // Common Text Field Decoration style (based on your original screen)
+    final state = ref.watch(registrationProvider);
+    final notifier = ref.read(registrationProvider.notifier);
+
+    ref.listen(registrationProvider, (previous, next) {
+      if (next.message != null && previous?.message != next.message) {
+        final message = next.message!;
+        if (!context.mounted) return;
+
+        message.maybeWhen(
+          success: (text) => AppSnackbar.success(context, text),
+          error: (text) => AppSnackbar.error(context, text),
+          orElse: () {},
+        );
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          notifier.clearMessage();
+        });
+      }
+    });
+
     InputDecoration inputDecoration(
-      String labelText, {
+      String labelText,
+      String? errorText, {
       Widget? suffixIcon,
       Icon? prefixIcon,
     }) => InputDecoration(
+      errorText: errorText,
+      errorStyle: const TextStyle(height: 0.5),
       labelText: labelText,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
@@ -141,179 +71,160 @@ class RegistrationFormContent extends ConsumerWidget {
         Center(child: _buildTitle(theme)),
         SizedBox(height: isDesktop ? 10 : 32),
 
-        Form(
-          key: handlers.formKey,
-          child: Column(
-            children: [
-              // First Name and Last Name Row
-              Row(
-                children: [
-                  // First Name Field
-                  Expanded(
-                    child: TextFormField(
-                      controller: handlers.firstNameController,
-                      textInputAction: TextInputAction.next,
-                      decoration: inputDecoration('First Name'),
-                      validator: handlers.nameValidator,
-                    ),
+        Row(
+          children: [
+            // First Name Field
+            Expanded(
+              child: SizedBox(
+                height: 65,
+                child: TextField(
+                  textInputAction: TextInputAction.next,
+                  decoration: inputDecoration(
+                    'First Name',
+                    state.firstNameError,
                   ),
-                  const SizedBox(width: 16),
-                  // Last Name Field
-                  Expanded(
-                    child: TextFormField(
-                      controller: handlers.lastNameController,
-                      textInputAction: TextInputAction.next,
-                      decoration: inputDecoration('Last Name'),
-                      validator: handlers.nameValidator,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Email Field
-              TextFormField(
-                controller: handlers.emailController,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: inputDecoration(
-                  'Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-                validator: handlers.emailValidator,
-              ),
-              const SizedBox(height: 16),
-
-              // Password Field
-              TextFormField(
-                controller: handlers.passwordController,
-                obscureText: handlers.obscurePassword,
-                textInputAction: TextInputAction.next,
-                decoration: inputDecoration(
-                  'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      handlers.obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.grey,
-                    ),
-                    onPressed: handlers.togglePasswordVisibility,
-                  ),
-                ),
-                validator: handlers.passwordValidator,
-              ),
-              const SizedBox(height: 16),
-
-              // Confirm Password Field
-              TextFormField(
-                controller: handlers.confirmPasswordController,
-                obscureText: handlers.obscureConfirmPassword,
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => handlers.onSubmitRegistration(),
-                decoration: inputDecoration(
-                  'Confirm Password',
-                  prefixIcon: const Icon(Icons.lock_open_outlined),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      handlers.obscureConfirmPassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: Colors.grey,
-                    ),
-                    onPressed: handlers.toggleConfirmPasswordVisibility,
-                  ),
-                ),
-                validator: handlers.confirmPasswordValidator,
-              ),
-              const SizedBox(height: 16),
-              buildTeamDropdown(context, isDesktop),
-              const SizedBox(height: 16),
-
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  text: 'Register',
-                  isLoading: handlers.isLoading,
-                  onPressed: handlers.onSubmitRegistration,
+                  onChanged: notifier.updateFirstName,
+                  autofocus: true,
                 ),
               ),
-              const SizedBox(height: 24),
-
-              const OrDivider(),
-              const SizedBox(height: 10),
-
-              // Google Sign-In Button
-              GoogleSignInButton(
-                isLoading: handlers.isGoogleLoading,
-                onPressed: handlers.onGoogleSignIn,
+            ),
+            SizedBox(width: 16),
+            // Last Name Field
+            Expanded(
+              child: SizedBox(
+                height: 65,
+                child: TextField(
+                  textInputAction: TextInputAction.next,
+                  onChanged: notifier.updateLastName,
+                  decoration: inputDecoration('Last Name', state.lastNameError),
+                ),
               ),
+            ),
+          ],
+        ),
 
-              // Sign In Link
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Already have an account? "),
-                  TextButton(
-                    onPressed: handlers.onNavigateToLogin,
-                    child: const Text(
-                      "Sign in",
-                      style: TextStyle(
-                        color: Colors.teal,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+        SizedBox(
+          height: 65,
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            decoration: inputDecoration(
+              'Email Address',
+              state.emailError,
+              prefixIcon: const Icon(Icons.email_outlined),
+            ),
+            onChanged: notifier.updateEmail,
           ),
         ),
-      ],
-    );
-  }
 
-  Widget buildTeamDropdown(BuildContext context, bool isDesktop) {
-    return handlers.asyncTeamList.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Text(
-        'Error loading teams: $err',
-        style: TextStyle(color: Colors.red),
-      ),
-      data: (teams) {
-        if (teams.isEmpty) {
-          return const Text(
-            'No teams available.',
-            style: TextStyle(color: Colors.orange),
-          );
-        }
-
-        return DropdownButtonFormField<String>(
-          key: const ValueKey('team-dropdown'),
-          initialValue: handlers.selectedTeamId,
-          decoration: InputDecoration(
-            labelText: 'Select Team',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+        SizedBox(
+          height: 65,
+          child: TextField(
+            obscureText: state.obscurePassword,
+            textInputAction: TextInputAction.next,
+            decoration: inputDecoration(
+              'Password',
+              state.passwordError,
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  state.obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.grey,
+                ),
+                onPressed: notifier.togglePasswordVisibility,
+              ),
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.green100, width: 2),
-            ),
+            onChanged: notifier.updatePassword,
           ),
-          hint: const Text('Choose your team'),
-          items: teams.map((team) {
-            return DropdownMenuItem<String>(
-              value: team.id,
-              child: Text(team.name),
-            );
-          }).toList(),
-          onChanged: handlers.onTeamSelected,
-        );
-      },
+        ),
+
+        SizedBox(
+          height: 65,
+          child: TextField(
+            obscureText: state.obscureConfirmPassword,
+            textInputAction: TextInputAction.done,
+            decoration: inputDecoration(
+              'Confirm Password',
+              state.confirmPasswordError,
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  state.obscureConfirmPassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.grey,
+                ),
+                onPressed: notifier.toggleConfirmPasswordVisibility,
+              ),
+            ),
+            onChanged: notifier.updateConfirmPassword,
+          ),
+        ),
+
+        SizedBox(
+          height: 65,
+          child: state.teams.when(
+            data: (teams) => teams.isEmpty
+                ? const Text('No teams available')
+                : DropdownButtonFormField<Team>(
+                    initialValue: state.selectedTeam,
+                    hint: const Text('Select a team'),
+                    items: teams
+                        .map(
+                          (t) => DropdownMenuItem<Team>(
+                            value: t,
+                            child: Text(t.teamName),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: notifier.selectTeam,
+                  ),
+            error: (e, _) => Text('Error: $e'),
+            loading: () => const Center(child: CircularProgressIndicator()),
+          ),
+        ),
+        SizedBox(
+          width: double.infinity,
+          child: PrimaryButton(
+            text: state.isFormValid ? 'Register' : 'Please complete all fields',
+            isLoading: state.isRegistrationLoading,
+            onPressed: notifier.registerUser,
+            enabled: state.isFormValid && !state.isRegistrationLoading,
+          ),
+        ),
+
+        // const SizedBox(height: 24),
+        const OrDivider(),
+        const SizedBox(height: 10),
+
+        Center(
+          child: GoogleSignInButton(
+            isLoading: state.isGoogleLoading,
+            onPressed: notifier.signInWithGoogle,
+          ),
+        ),
+
+        // Sign In Link
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Already have an account? "),
+            TextButton(
+              onPressed: () => context.go('/signin'),
+              child: Text(
+                "Sign in",
+                style: TextStyle(
+                  color: AppColors.green100,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

@@ -1,144 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
-import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
-import 'package:flutter_application_1/providers/auth_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'desktop_registration_view.dart';
 import 'mobile_registration_view.dart';
-import 'registration_handlers.dart';
 
-class RegistrationScreen extends ConsumerStatefulWidget {
+class RegistrationScreen extends ConsumerWidget {
   const RegistrationScreen({super.key});
 
   @override
-  ConsumerState<RegistrationScreen> createState() => _RegistrationScreenState();
-}
-
-class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  // Initialize all text controllers
-  final firstNameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    ref.listenManual(registrationProvider, (previous, next) {
-      if (next.errorMessage != null) {
-        AppSnackbar.error(context, next.errorMessage!);
-      }
-      if (next.successMessage != null) {
-        AppSnackbar.success(context, next.successMessage!);
-      }
-    });
-  }
-
-  // --- Handler Methods ---
-
-  void _submitRegistration() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      final notifier = ref.read(registrationProvider.notifier);
-      final state = ref.read(registrationProvider);
-
-      if (state.selectedTeamId == null) {
-        AppSnackbar.error(context, "Please select a team.");
-        return;
-      }
-
-      await notifier.registerUser(
-        firstName: firstNameController.text.trim(),
-        lastName: lastNameController.text.trim(),
-        email: emailController.text.trim(),
-        password: passwordController.text,
-      );
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    await ref.read(registrationProvider.notifier).signInWithGoogle();
-  }
-
-  void _onTeamSelected(String? teamId) {
-    ref.read(registrationProvider.notifier).updateSelectedTeamId(teamId);
-  }
-
-  // --- Dispose Controllers ---
-
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isLoading = ref.watch(
-      registrationProvider.select((state) => state.isRegistrationLoading),
-    );
-    final isGoogleLoading = ref.watch(
-      registrationProvider.select((state) => state.isGoogleLoading),
-    );
-    final obscurePassword = ref.watch(
-      registrationProvider.select((state) => state.obscurePassword),
-    );
-    final obscureConfirmPassword = ref.watch(
-      registrationProvider.select((state) => state.obscureConfirmPassword),
-    );
-    final selectedTeamId = ref.watch(
-      registrationProvider.select((state) => state.selectedTeamId),
-    );
-    final notifier = ref.read(registrationProvider.notifier);
-    final asyncTeamList = ref.watch(teamListProvider);
-
-    final RegistrationHandlers handlers = RegistrationHandlers(
-      formKey: _formKey,
-      firstNameController: firstNameController,
-      lastNameController: lastNameController,
-      emailController: emailController,
-      passwordController: passwordController,
-      confirmPasswordController: confirmPasswordController,
-
-      asyncTeamList: asyncTeamList,
-      selectedTeamId: selectedTeamId,
-      onTeamSelected: _onTeamSelected,
-
-      // State from Notifier
-      isLoading: isLoading,
-      isGoogleLoading: isGoogleLoading,
-      obscurePassword: obscurePassword,
-      obscureConfirmPassword: obscureConfirmPassword,
-
-      // Methods from Notifier
-      togglePasswordVisibility: notifier.togglePasswordVisibility,
-      toggleConfirmPasswordVisibility: notifier.toggleConfirmPasswordVisibility,
-
-      // Local Handler Methods
-      onSubmitRegistration: _submitRegistration,
-      onGoogleSignIn: _handleGoogleSignIn,
-
-      // Navigation
-      onNavigateToLogin: () => context.go('/signin'),
-    );
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: ResponsiveLayout(
-          mobileView: MobileRegistrationView(handlers: handlers),
-          // We will define this next
-          desktopView: DesktopRegistrationView(handlers: handlers),
+          mobileView: MobileRegistrationView(),
+          desktopView: DesktopRegistrationView(),
         ),
       ),
     );
