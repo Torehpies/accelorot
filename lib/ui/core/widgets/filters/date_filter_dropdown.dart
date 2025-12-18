@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../core/themes/web_text_styles.dart';
-import '../models/activity_common.dart';
+import '../../themes/web_text_styles.dart';
+import '../../../activity_logs/models/activity_common.dart';
 
 /// Web-optimized date filter dropdown that matches Machine/Batch selector style
 class DateFilterDropdown extends StatefulWidget {

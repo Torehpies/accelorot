@@ -10,7 +10,7 @@ import 'table_badge.dart';
 import 'table_chip.dart';
 
 import 'table_cell.dart';
-import 'generic_table_row.dart';
+import 'table_row.dart';
 
 /// Single table row for activity log items
 class ActivityTableRow extends StatelessWidget {

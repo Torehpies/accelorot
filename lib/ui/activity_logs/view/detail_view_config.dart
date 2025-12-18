@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/view/detail_view_config.dart
 
 import 'package:intl/intl.dart';
-import '../../../../data/models/activity_log_item.dart';
+import '../../../data/models/activity_log_item.dart';
 
 /// Configuration for detail views based on activity type
 class DetailViewConfig {

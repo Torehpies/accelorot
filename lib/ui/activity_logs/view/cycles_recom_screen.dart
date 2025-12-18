@@ -1,25 +1,25 @@
-// lib/ui/activity_logs/view/alerts_screen.dart
+// lib/ui/activity_logs/view/cycles_recom_screen.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/activity_list_state.dart';
-import '../../view_model/activity_viewmodel.dart';
-import '../../models/activity_common.dart';
+import '../models/activity_list_state.dart';
+import '../view_model/activity_viewmodel.dart';
 import 'base_activity_screen.dart';
+import '../models/activity_common.dart';
 
-class AlertsScreen extends BaseActivityScreen {
-  const AlertsScreen({
+class CyclesRecomScreen extends BaseActivityScreen {
+  const CyclesRecomScreen({
     super.key,
     super.initialFilter,
     super.focusedMachineId,
   });
 
   @override
-  ConsumerState<AlertsScreen> createState() => _AlertsScreenState();
+  ConsumerState<CyclesRecomScreen> createState() => _CyclesRecomScreenState();
 }
 
-class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
+class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen> {
   ActivityParams get _params => ActivityParams(
-        screenType: ActivityScreenType.alerts,
+        screenType: ActivityScreenType.cyclesRecom,
         initialFilter: widget.initialFilter,
         focusedMachineId: widget.focusedMachineId,
       );
@@ -32,12 +32,14 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   @override
   String getScreenTitle() {
     final state = getState();
-    return state.focusedMachineId != null ? 'Machine Alerts' : 'Alerts Logs';
+    return state.focusedMachineId != null
+        ? 'Machine Cycles & Recommendations'
+        : 'Cycles & Recommendations';
   }
 
   @override
   List<String> getFilters() {
-    return const ['All', 'Temperature', 'Moisture', 'Air Quality'];
+    return const ['All', 'Recoms', 'Cycles'];
   }
 
   @override
@@ -64,7 +66,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   Future<void> onRefresh() async {
     await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
-  
+
   @override
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);

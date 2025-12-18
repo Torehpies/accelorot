@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../activity_logs/widgets/unified/unified_machine_selector.dart';
 import '../../../activity_logs/widgets/unified/unified_batch_selector.dart';
-import '../../../activity_logs/widgets/date_filter_dropdown.dart';
+import '../filters/date_filter_dropdown.dart';
 import '../../../activity_logs/models/activity_common.dart';
 import '../../themes/web_text_styles.dart';
 
