@@ -1,7 +1,3 @@
-// lib/web/operator/screens/web_home_screen.dart
-
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/submit_report.dart';

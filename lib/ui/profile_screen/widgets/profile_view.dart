@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../view_model/profile_notifier.dart';
 import 'profile_edit_form.dart';
 import 'profile_info_card.dart';
-import '../../core/ui/change_password_dialog.dart';
+import 'package:flutter_application_1/ui/change_password_dialog/widgets/change_password_dialog.dart';
 
 class ProfileView extends ConsumerStatefulWidget {
   const ProfileView({super.key});

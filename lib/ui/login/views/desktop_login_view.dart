@@ -20,7 +20,7 @@ class DesktopLoginView extends StatelessWidget {
                   colors: [AppColors.background2, AppColors.background1],
                 ),
               ),
-              child: const Center(
+              child:  Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
                   child: Column(

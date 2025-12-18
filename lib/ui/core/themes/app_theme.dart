@@ -8,7 +8,6 @@ final ThemeData appTheme = ThemeData(
 
   colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green100),
 
-  // --- Typography ---
   textTheme: const TextTheme(
     // Used for main headings (e.g., "Welcome Back!")
     headlineLarge: TextStyle(
