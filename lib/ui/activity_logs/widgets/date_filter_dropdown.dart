@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../core/themes/web_text_styles.dart';
 import '../models/activity_common.dart';
 
 /// Web-optimized date filter dropdown that matches Machine/Batch selector style
@@ -172,12 +173,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
               const SizedBox(width: 8),
               Text(
                 _getDisplayText(),
-                style: const TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF374151),
-                ),
+                style: WebTextStyles.bodyMedium,
               ),
               const SizedBox(width: 4),
               Icon(

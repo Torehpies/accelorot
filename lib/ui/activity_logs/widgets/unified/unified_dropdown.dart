@@ -1,6 +1,7 @@
 // lib/ui/activity_logs/widgets/unified/unified_dropdown.dart
 
 import 'package:flutter/material.dart';
+import '../../../core/themes/web_text_styles.dart';
 
 /// Reusable web-optimized dropdown that uses showMenu for a premium feel
 class UnifiedDropdown<T> extends StatelessWidget {
@@ -88,12 +89,7 @@ class UnifiedDropdown<T> extends StatelessWidget {
                       : (items.isEmpty && disabledHint != null 
                           ? disabledHint! 
                           : (displayText ?? hintText)),
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: hasValue ? const Color(0xFF374151) : const Color(0xFF6B7280),
-                  ),
+                  style: hasValue ? WebTextStyles.bodyMedium : WebTextStyles.bodyMediumGray,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../activity_logs/models/unified_activity_config.dart';
 import '../../constants/spacing.dart';
+import '../../themes/web_text_styles.dart';
 import '../filters/filter_dropdown.dart';
 import 'table_header_cell.dart';
 
@@ -63,12 +64,7 @@ class ActivityTableHeader extends StatelessWidget {
                 children: [
                   const Text(
                     'Category:',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: WebTextStyles.label,
                   ),
                   const SizedBox(width: 8),
                   FilterDropdown(
@@ -93,12 +89,7 @@ class ActivityTableHeader extends StatelessWidget {
                 children: [
                   const Text(
                     'Type:',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: WebTextStyles.label,
                   ),
                   const SizedBox(width: 8),
                   FilterDropdown(
@@ -143,12 +134,7 @@ class ActivityTableHeader extends StatelessWidget {
             child: Center(
               child: Text(
                 'Actions',
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF6B7280),
-                ),
+                style: WebTextStyles.label,
               ),
             ),
           ),

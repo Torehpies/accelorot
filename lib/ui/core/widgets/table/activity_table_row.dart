@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../../activity_logs/models/unified_activity_config.dart';
 import '../../constants/spacing.dart';
+import '../../themes/web_text_styles.dart';
 import 'table_badge.dart';
 import 'table_chip.dart';
 
@@ -39,12 +40,7 @@ class ActivityTableRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 item.title,
-                style: const TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF111827),
-                ),
+                style: WebTextStyles.body,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -78,12 +74,7 @@ class ActivityTableRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 item.value,
-                style: const TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF111827),
-                ),
+                style: WebTextStyles.body,
                 textAlign: TextAlign.center,
               ),
             ),
@@ -95,12 +86,7 @@ class ActivityTableRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 DateFormat('MM/dd/yyyy').format(item.timestamp),
-                style: const TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF111827),
-                ),
+                style: WebTextStyles.body,
                 textAlign: TextAlign.center,
               ),
             ),

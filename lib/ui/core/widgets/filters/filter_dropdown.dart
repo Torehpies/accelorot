@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/filters/filter_dropdown.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Reusable styled dropdown for filters that matches DateFilterDropdown styling
 class FilterDropdown extends StatelessWidget {
@@ -68,12 +69,7 @@ class FilterDropdown extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: isActive ? const Color(0xFF374151) : const Color(0xFF6B7280),
-                ),
+                style: isActive ? WebTextStyles.bodyMedium : WebTextStyles.bodyMediumGray,
               ),
               const SizedBox(width: 4),
               Icon(

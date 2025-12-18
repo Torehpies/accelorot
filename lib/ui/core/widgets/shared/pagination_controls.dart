@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../constants/spacing.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Reusable pagination controls with numbered page buttons
 class PaginationControls extends StatelessWidget {
@@ -51,11 +52,7 @@ class PaginationControls extends StatelessWidget {
           children: [
             const Text(
               'Items per page:',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 13,
-                color: Color(0xFF6B7280),
-              ),
+              style: WebTextStyles.bodyMediumGray,
             ),
             const SizedBox(width: AppSpacing.sm),
             DropdownButton<int>(
@@ -98,11 +95,7 @@ class PaginationControls extends StatelessWidget {
                     SizedBox(width: 4),
                     Text(
                       'Back',
-                      style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: WebTextStyles.bodyMedium,
                     ),
                   ],
                 ),
@@ -161,11 +154,7 @@ class PaginationControls extends StatelessWidget {
                   children: const [
                     Text(
                       'Next',
-                      style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: WebTextStyles.bodyMedium,
                     ),
                     SizedBox(width: 4),
                     Icon(Icons.chevron_right, size: 16),
