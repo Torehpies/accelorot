@@ -85,30 +85,31 @@ class TeamSelectionScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
 
-                    // Loading / Error / Empty
-                    if (state.isLoadingTeams)
-                      const Center(child: CircularProgressIndicator())
-                    else if (state.teams.isEmpty)
-                      Center(child: Text('No teams available'))
-                    else
-                      DropdownButtonFormField<Team>(
-                        initialValue: state.selectedTeam,
-                        decoration: InputDecoration(
-                          labelText: 'Select a Team',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        items: state.teams.map((team) {
-                          return DropdownMenuItem<Team>(
-                            value: team,
-                            child: Text(team.teamName),
-                          );
-                        }).toList(),
-                        onChanged: state.isSubmitting
-                            ? null
-                            : (team) => notifier.selectedTeam(team!),
-                      ),
+                    state.teams.when(
+                      data: (teams) => teams.isEmpty
+                          ? const Center(child: Text('No teams available'))
+                          : DropdownButtonFormField<Team>(
+                              initialValue: state.selectedTeam,
+                              decoration: InputDecoration(
+                                labelText: 'Select a Team',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              items: teams.map((team) {
+                                return DropdownMenuItem<Team>(
+                                  value: team,
+                                  child: Text(team.teamName),
+                                );
+                              }).toList(),
+                              onChanged: state.isSubmitting
+                                  ? null
+                                  : (team) => notifier.selectedTeam(team!),
+                            ),
+                      error: (e, _) => Text('Error loading teams'),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                    ),
 
                     const SizedBox(height: 24),
 
@@ -127,7 +128,7 @@ class TeamSelectionScreen extends ConsumerWidget {
                         }
                       },
                       enabled: state.selectedTeam != null,
-                      isLoading: state.isSubmitting || state.isLoadingTeams,
+                      isLoading: state.isSubmitting || state.teams.isLoading,
                     ),
                     const SizedBox(height: 12),
                     OutlineAppButton(

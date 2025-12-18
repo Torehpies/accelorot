@@ -22,16 +22,20 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
   }
 
   Future<void> loadTeams() async {
-    state = state.copyWith(isLoadingTeams: true);
-    final result = await _repository.getTeams();
-    result.when(
-      success: (teams) {
-        state = state.copyWith(teams: teams, isLoadingTeams: false);
-      },
-      failure: (failure) {
-        _setError(failure.userFriendlyMessage);
-      },
+    state = state.copyWith(teams: AsyncLoading());
+    state = state.copyWith(
+      teams: await AsyncValue.guard(
+        () => ref.read(teamRepositoryProvider).getTeams(),
+      ),
     );
+    // result.when(
+    //   success: (teams) {
+    //     state = state.copyWith(teams: teams, isLoadingTeams: false);
+    //   },
+    //   failure: (failure) {
+    //     _setError(failure.userFriendlyMessage);
+    //   },
+    // );
   }
 
   void selectedTeam(Team team) {
@@ -47,7 +51,7 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
       return;
     }
 
-		final teamId = team.teamId;
+    final teamId = team.teamId;
 
     final userId = user.uid;
     final email = user.email;
@@ -58,7 +62,11 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
     }
 
     try {
-      final result = await _repository.requestToJoinTeam(teamId!, userId, email);
+      final result = await _repository.requestToJoinTeam(
+        teamId!,
+        userId,
+        email,
+      );
 
       result.when(
         success: (_) {
@@ -79,16 +87,14 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
 
   void _setError(String message) {
     state = state.copyWith(
-			isSubmitting: false,
-      isLoadingTeams: false,
+      isSubmitting: false,
       message: UiMessage.error(message),
     );
   }
 
   void _setSuccess(String message) {
     state = state.copyWith(
-			isSubmitting: false,
-      isLoadingTeams: false,
+      isSubmitting: false,
       message: UiMessage.success(message),
     );
   }
