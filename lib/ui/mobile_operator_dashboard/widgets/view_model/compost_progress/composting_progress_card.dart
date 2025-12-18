@@ -50,10 +50,62 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
         _selectedBatchId = null;
         _activeBatch = null;
       });
+      // Auto-select latest batch for the new machine
+      if (_selectedMachineId != null) {
+        _autoSelectLatestBatch();
+      }
     }
   }
+    void _autoSelectLatestBatch() {
+    final batchesAsync = ref.read(userTeamBatchesProvider);
+    batchesAsync.whenData((batches) {
+      if (_selectedMachineId != null) {
+        final machineBatches = batches
+            .where((b) => b.machineId == _selectedMachineId)
+            .toList();
+        
+        if (machineBatches.isNotEmpty) {
+          // Sort by createdAt to get the newest
+          machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          final latestBatch = machineBatches.first;
+          
+          if (mounted) {
+            setState(() {
+              _selectedBatchId = latestBatch.id;
+              _activeBatch = latestBatch;
+            });
+          }
+        }
+      }
+    });
+  }
 
-  void _startBatch(BuildContext context) async {
+ void _startBatch(BuildContext context) async {
+    // Check if there's an active batch for this machine
+    if (_selectedMachineId != null) {
+      final batchesAsync = ref.read(userTeamBatchesProvider);
+      final hasActiveBatch = await batchesAsync.when(
+        data: (batches) {
+          return batches.any((b) => 
+            b.machineId == _selectedMachineId && b.isActive
+          );
+        },
+        loading: () => false,
+        error: (_, __) => false,
+      );
+
+      if (hasActiveBatch && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot start new batch: An active batch already exists for this machine'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+    }
+
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => BatchStartDialog(
@@ -69,24 +121,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
       if (_selectedMachineId != null) {
         // Wait a bit for the refresh to complete
         await Future.delayed(const Duration(milliseconds: 300));
-        
-        final batchesAsync = ref.read(userTeamBatchesProvider);
-        batchesAsync.whenData((batches) {
-          final machineBatches = batches
-              .where((b) => b.machineId == _selectedMachineId && b.isActive)
-              .toList();
-          
-          if (machineBatches.isNotEmpty) {
-            // Sort by createdAt to get the newest
-            machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            final newestBatch = machineBatches.first;
-            
-            setState(() {
-              _selectedBatchId = newestBatch.id;
-              _activeBatch = newestBatch;
-            });
-          }
-        });
+        _autoSelectLatestBatch();
       }
     }
   }
@@ -158,14 +193,32 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     ];
     return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }
-  @override
+@override
   Widget build(BuildContext context) {
     //  auto-update when selected batch changes
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
     // Update active batch when selection changes
     batchesAsync.whenData((batches) {
-      if (_selectedBatchId != null) {
+      if (_selectedMachineId != null && _selectedBatchId == null) {
+        final machineBatches = batches
+            .where((b) => b.machineId == _selectedMachineId)
+            .toList();
+        
+        if (machineBatches.isNotEmpty) {
+          Future.microtask(() {
+            if (mounted) {
+              machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final latestBatch = machineBatches.first;
+              setState(() {
+                _selectedBatchId = latestBatch.id;
+                _activeBatch = latestBatch;
+              });
+            }
+          });
+        }
+      } else if (_selectedBatchId != null) {
+        // Update active batch when selection changes
         final batch = batches.firstWhere(
           (b) => b.id == _selectedBatchId,
           orElse: () => batches.first,
@@ -184,6 +237,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     final progress = _getProgress();
     final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
     final hasBatchSelected = _activeBatch != null;
+    final hasMachineSelected = _selectedMachineId != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -263,6 +317,10 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                         _selectedBatchId = null;
                         _activeBatch = null;
                       });
+                      // Auto-select latest batch for new machine
+                      if (machineId != null) {
+                        _autoSelectLatestBatch();
+                      }
                     },
                     isCompact: true,
                   ),
@@ -282,6 +340,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     },
                     isCompact: true,
                     showLabel: false,
+                    showAllOption: false, 
                   ),
                 ),
               ],
@@ -289,7 +348,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             const SizedBox(height: 16),
 
             // Decomposition Progress section
-                        Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
@@ -352,7 +411,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'No batch selected, select or start a batch!',
+                    hasMachineSelected 
+                        ? 'No batch selected, select or start a batch!'
+                        : 'Select a machine to get started',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
@@ -362,9 +423,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _selectedMachineId == null 
-                          ? null 
-                          : () => _startBatch(context),
+                      onPressed: hasMachineSelected 
+                          ? () => _startBatch(context)
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF10B981),
                         foregroundColor: Colors.white,
@@ -374,11 +435,12 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                         ),
                         elevation: 0,
                         disabledBackgroundColor: Colors.grey.shade300,
+                        disabledForegroundColor: Colors.grey.shade600,
                       ),
                       child: Text(
-                        _selectedMachineId == null 
-                            ? 'Select Machine First' 
-                            : 'Start New Batch',
+                        hasMachineSelected 
+                            ? 'Start New Batch'
+                            : 'Select a Machine First',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -445,11 +507,26 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Complete Batch button
+                  
+                  // Complete Batch / Start New Batch / Select Machine button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: batchIsCompleted ? null : () => _completeBatch(context),
+                      onPressed: (!hasMachineSelected && batchIsCompleted)
+                          ? null  // Disabled when machine not selected and batch completed
+                          : () {
+                              // If machine is not selected and batch is active, allow complete
+                              if (!hasMachineSelected && !batchIsCompleted) {
+                                _completeBatch(context);
+                                return;
+                              }
+                              // Normal flow: machine is selected
+                              if (batchIsCompleted) {
+                                _startBatch(context);
+                              } else {
+                                _completeBatch(context);
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF10B981),
                         foregroundColor: Colors.white,
@@ -459,10 +536,12 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                         ),
                         elevation: 0,
                         disabledBackgroundColor: Colors.grey.shade300,
-                        disabledForegroundColor: Colors.grey.shade500,
+                        disabledForegroundColor: Colors.grey.shade600,
                       ),
                       child: Text(
-                        batchIsCompleted ? 'Batch Completed' : 'Complete Batch',
+                        !hasMachineSelected && batchIsCompleted
+                            ? 'Select a Machine First'
+                            : (batchIsCompleted ? 'Start New Batch' : 'Complete Batch'),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -477,6 +556,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
       ),
     );
   }
+
+
   Widget _buildDetailItem(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

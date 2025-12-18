@@ -9,6 +9,7 @@ class BatchSelector extends ConsumerWidget {
   final ValueChanged<String?> onChanged;
   final bool isCompact;
   final bool showLabel;
+  final bool showAllOption;
 
   const BatchSelector({
     super.key,
@@ -17,6 +18,7 @@ class BatchSelector extends ConsumerWidget {
     this.selectedMachineId,
     this.isCompact = false,
     this.showLabel = true,
+    this.showAllOption = true,
   });
 
   @override
@@ -79,9 +81,9 @@ class BatchSelector extends ConsumerWidget {
                   hint: Text(
                     hasNoBatches
                         ? (selectedMachineId != null
-                            ? 'No batches for this machine'
-                            : 'No batches available')
-                        : 'All Batches',
+                              ? 'No batches for this machine'
+                              : 'No batches available')
+                        : (showAllOption ? 'All Batches' : 'Select Batch'),
                     style: TextStyle(
                       fontSize: isCompact ? 13 : 14,
                       fontWeight: FontWeight.w600,
@@ -99,10 +101,12 @@ class BatchSelector extends ConsumerWidget {
                   items: hasNoBatches
                       ? null
                       : [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('All Batches'),
-                          ),
+                          // Only show "All Batches" if showAllOption is true
+                          if (showAllOption)
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text('All Batches'),
+                            ),
                           ...filteredBatches.map((batch) {
                             return DropdownMenuItem<String>(
                               value: batch.id,
@@ -111,7 +115,9 @@ class BatchSelector extends ConsumerWidget {
                                   Expanded(
                                     child: Text(
                                       batch.displayName,
-                                      style: TextStyle(fontSize: isCompact ? 13 : 14),
+                                      style: TextStyle(
+                                        fontSize: isCompact ? 13 : 14,
+                                      ),
                                     ),
                                   ),
                                   if (!batch.isActive)
