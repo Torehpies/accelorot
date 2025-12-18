@@ -1,93 +1,104 @@
+// lib/ui/web_admin_home/widgets/calendar_widget.dart
 import 'package:flutter/material.dart';
 
 class CalendarWidget extends StatelessWidget {
-  final DateTime currentDate = DateTime.now();
+  final DateTime now = DateTime.now();
+
+  CalendarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final year = currentDate.year;
-    final month = currentDate.month;
-    final firstDayOfMonth = DateTime(year, month, 1);
-    final lastDayOfMonth = DateTime(year, month + 1, 0);
-    final daysInMonth = lastDayOfMonth.day;
-    final firstDayWeekday = firstDayOfMonth.weekday; // 1=Mon, 7=Sun
+    final year = now.year;
+    final month = now.month;
+    final firstDay = DateTime(year, month, 1);
+    final lastDay = DateTime(year, month + 1, 0);
+    final daysInMonth = lastDay.day;
+    final firstDayWeekday = firstDay.weekday; // Monday = 1
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('December 2025', style: Theme.of(context).textTheme.titleMedium),
-                Row(
-                  children: [
-                    IconButton(onPressed: () {}, icon: Icon(Icons.arrow_back_ios, size: 16)),
-                    IconButton(onPressed: () {}, icon: Icon(Icons.arrow_forward_ios, size: 16)),
-                  ],
+    const weekDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('${monthNames[month - 1]} $year', 
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {}, 
+                    icon: const Icon(Icons.chevron_left, size: 18, color: Color(0xFF6B7280)),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () {}, 
+                    icon: const Icon(Icons.chevron_right, size: 18, color: Color(0xFF6B7280)),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Weekday headers
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: weekDays.map((day) {
+              return SizedBox(
+                width: 32,
+                child: Text(
+                  day,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF9CA3AF)),
                 ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Table(
-              border: TableBorder.all(color: Colors.grey[300]!),
-              children: [
-                TableRow(
-                  children: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-                      .map((day) => TableCell(
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Center(child: Text(day, style: Theme.of(context).textTheme.bodySmall)),
-                            ),
-                          ))
-                      .toList(),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 12),
+          // Calendar grid
+          Wrap(
+            spacing: 4,
+            runSpacing: 8,
+            children: List.generate(42, (index) {
+              final day = index - firstDayWeekday + 2;
+              final isToday = day == now.day && month == now.month && year == now.year;
+              final isCurrentMonth = day > 0 && day <= daysInMonth;
+
+              return Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isToday ? const Color(0xFF10B981) : Colors.transparent,
+                  shape: BoxShape.circle,
                 ),
-                ...List.generate(
-                  (daysInMonth + firstDayWeekday - 1) ~/ 7 + 1,
-                  (weekIndex) {
-                    return TableRow(
-                      children: List.generate(7, (dayIndex) {
-                        final dayNum = weekIndex * 7 + dayIndex - firstDayWeekday + 2;
-                        if (dayNum < 1 || dayNum > daysInMonth) {
-                          return TableCell(child: Container());
-                        }
-                        final isToday = dayNum == currentDate.day && month == currentDate.month;
-                        return TableCell(
-                          child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Center(
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: isToday ? Colors.green : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '$dayNum',
-                                    style: TextStyle(
-                                      color: isToday ? Colors.white : Colors.black,
-                                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    );
-                  },
+                child: Text(
+                  isCurrentMonth ? '$day' : '',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isToday ? Colors.white : (isCurrentMonth ? const Color(0xFF374151) : Colors.grey[300]),
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

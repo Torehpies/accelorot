@@ -1,7 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-import '../screens/web_admin_home_screen.dart';
+// ✅ ADD THESE TWO IMPORTS (keep all your existing imports too)
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
+import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
+
+// Keep your existing imports below (no deletion)
+//import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 import '../../../ui/web_operator/view/web_operator_management_view.dart';
@@ -29,14 +35,15 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
   void initState() {
     super.initState();
     _screens = [
-      WebAdminHomeScreen(
-        onManageOperators: () => setState(() => _selectedIndex = 1),
-        onManageMachines: () => setState(() => _selectedIndex = 2),
+      // ✅ REPLACED THIS LINE ONLY:
+      ChangeNotifierProvider(
+        create: (context) => WebAdminDashboardViewModel(),
+        child: const DashboardView(),
       ),
 
+      // Rest unchanged
       OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
       const WebAdminMachineView(),
-
       const WebProfileView(),
     ];
   }
@@ -77,7 +84,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
     return Scaffold(
       body: Row(
         children: [
-          // Sidebar
+          // Sidebar (100% unchanged)
           Container(
             width: 250,
             decoration: BoxDecoration(
@@ -91,7 +98,6 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
               child: Column(
                 children: [
                   const SizedBox(height: 24),
-                  // Logo & Title
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -118,7 +124,6 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // User Info
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(12),
@@ -153,7 +158,6 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                   ),
                   const Divider(color: Colors.white30, height: 32),
 
-                  // Navigation Items
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -201,7 +205,6 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
                     ),
                   ),
 
-                  // Logout Button
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: Material(
@@ -231,7 +234,7 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
             ),
           ),
 
-          // Main Content Area
+          // Main Content (unchanged structure)
           Expanded(
             child: Container(
               color: Colors.grey[50],
