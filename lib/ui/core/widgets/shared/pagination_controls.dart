@@ -77,101 +77,107 @@ class PaginationControls extends StatelessWidget {
           ],
         ),
 
-        // Page navigation with numbered buttons
-        Row(
-          children: [
-            // Back button
-            TextButton(
-              onPressed: (currentPage > 1 && onPageChanged != null)
-                  ? () => onPageChanged!(currentPage - 1)
-                  : null,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // Centered page navigation with numbered buttons
+        Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Back button
+              TextButton(
+                onPressed: (currentPage > 1 && onPageChanged != null)
+                    ? () => onPageChanged!(currentPage - 1)
+                    : null,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.chevron_left, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      'Back',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                children: const [
-                  Icon(Icons.chevron_left, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    'Back',
+
+              const SizedBox(width: AppSpacing.sm),
+
+              // First page if not visible
+              if (showLeftEllipsis) ...[
+                _buildPageButton(1),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    '...',
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF6B7280),
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.sm),
-
-            // First page if not visible
-            if (showLeftEllipsis) ...[
-              _buildPageButton(1),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  '...',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                  ),
                 ),
-              ),
-            ],
+              ],
 
-            // Visible page numbers
-            ...visiblePages.map((page) => _buildPageButton(page)),
+              // Visible page numbers
+              ...visiblePages.map((page) => _buildPageButton(page)),
 
-            // Last page if not visible
-            if (showRightEllipsis) ...[
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  '...',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                  ),
-                ),
-              ),
-              _buildPageButton(totalPages),
-            ],
-
-            const SizedBox(width: AppSpacing.sm),
-
-            // Next button
-            TextButton(
-              onPressed: (currentPage < totalPages && onPageChanged != null)
-                  ? () => onPageChanged!(currentPage + 1)
-                  : null,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Row(
-                children: const [
-                  Text(
-                    'Next',
+              // Last page if not visible
+              if (showRightEllipsis) ...[
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    '...',
                     style: TextStyle(
                       fontFamily: 'DM Sans',
                       fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF6B7280),
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(Icons.chevron_right, size: 16),
-                ],
+                ),
+                _buildPageButton(totalPages),
+              ],
+
+              const SizedBox(width: AppSpacing.sm),
+
+              // Next button
+              TextButton(
+                onPressed: (currentPage < totalPages && onPageChanged != null)
+                    ? () => onPageChanged!(currentPage + 1)
+                    : null,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Row(
+                  children: const [
+                    Text(
+                      'Next',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(Icons.chevron_right, size: 16),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        
+        // Empty spacer to keep items-per-page on the left
+        const SizedBox(width: 150),
       ],
     );
   }

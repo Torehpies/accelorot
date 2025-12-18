@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/providers/batch_providers.dart';
-import '../../../../data/models/batch_model.dart';
 import 'unified_dropdown.dart';
 
 class UnifiedBatchSelector extends ConsumerWidget {
@@ -30,19 +29,15 @@ class UnifiedBatchSelector extends ConsumerWidget {
 
         final hasNoBatches = filteredBatches.isEmpty;
         
-        final selectedBatch = filteredBatches.any((b) => b.id == selectedBatchId)
-            ? filteredBatches.firstWhere((b) => b.id == selectedBatchId)
-            : null;
-
         return UnifiedDropdown<String>(
           value: selectedBatchId,
           label: 'Batch',
           hintText: 'All Batches',
-          displayText: selectedBatchId == null ? 'All Batches' : (selectedBatch?.displayName ?? selectedBatchId),
+          displayText: selectedBatchId ?? 'All Batches',
           icon: Icons.inventory_2,
-          onChanged: onChanged,
+          onChanged: hasNoBatches ? (_) {} : onChanged,
           items: hasNoBatches
-              ? []
+              ? const []
               : [
                   const PopupMenuItem<String>(
                     value: null,
@@ -51,7 +46,7 @@ class UnifiedBatchSelector extends ConsumerWidget {
                   ...filteredBatches.map((batch) {
                     return PopupMenuItem<String>(
                       value: batch.id,
-                      child: Text(batch.displayName),
+                      child: Text(batch.id),
                     );
                   }),
                 ],

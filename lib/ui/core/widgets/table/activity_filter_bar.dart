@@ -61,7 +61,14 @@ class ActivityFilterBar extends StatelessWidget {
           
           const Spacer(), // Create space in the middle
           
-          // Right Group: Search and Date
+          // Right Group: Date and Search (swapped order)
+          SizedBox(
+            height: 32,
+            child: DateFilterDropdown(
+              onFilterChanged: onDateFilterChanged,
+            ),
+          ),
+          const SizedBox(width: 12),
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
             child: Container(
@@ -107,13 +114,6 @@ class ActivityFilterBar extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          SizedBox(
-            height: 32,
-            child: DateFilterDropdown(
-              onFilterChanged: onDateFilterChanged,
             ),
           ),
         ],

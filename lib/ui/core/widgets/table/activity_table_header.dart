@@ -104,8 +104,8 @@ class ActivityTableHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           
           // Actions Column Header
-          const SizedBox(
-            width: 70,
+          const Expanded(
+            flex: 1,
             child: Center(
               child: Text(
                 'Actions',

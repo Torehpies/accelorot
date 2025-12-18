@@ -108,11 +108,11 @@ class ActivityTableRow extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             
             // Actions Column
-            SizedBox(
-              width: 70,
+            Expanded(
+              flex: 1,
               child: Center(
                 child: IconButton(
-                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  icon: const Icon(Icons.open_in_new, size: 18),
                   color: const Color(0xFF6B7280),
                   onPressed: () => onViewDetails(item),
                 ),
