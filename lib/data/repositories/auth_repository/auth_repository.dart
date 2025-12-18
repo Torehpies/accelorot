@@ -27,4 +27,5 @@ abstract class AuthRepository {
   Future<Result<void, DataLayerError>> createUserDocIfNull(
     UserCredential userCredential,
   );
+  Future<Map<String, dynamic>> sendPasswordResetEmail(String email);
 }
