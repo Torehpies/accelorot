@@ -24,7 +24,7 @@ class UnifiedActivityView extends ConsumerWidget {
     final state = ref.watch(unifiedActivityViewModelProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: const Color(0xFFF0F8FF), // Light blue page background
       body: SafeArea(
         child: state.isLoading
             ? const Center(child: CircularProgressIndicator())

@@ -55,21 +55,38 @@ class PaginationControls extends StatelessWidget {
               style: WebTextStyles.bodyMediumGray,
             ),
             const SizedBox(width: AppSpacing.sm),
-            DropdownButton<int>(
-              value: itemsPerPage,
-              items: [10, 25, 50, 100].map((value) {
-                return DropdownMenuItem(
-                  value: value,
-                  child: Text('$value'),
-                );
-              }).toList(),
-              onChanged: onItemsPerPageChanged != null
-                  ? (value) {
-                      if (value != null) {
-                        onItemsPerPageChanged!(value);
-                      }
-                    }
-                  : null,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: itemsPerPage,
+                  isDense: true,
+                  icon: const Icon(
+                    Icons.arrow_drop_down,
+                    size: 20,
+                    color: Color(0xFF6B7280),
+                  ),
+                  style: WebTextStyles.bodyMedium,
+                  items: [10, 25, 50, 100].map((value) {
+                    return DropdownMenuItem(
+                      value: value,
+                      child: Text('$value'),
+                    );
+                  }).toList(),
+                  onChanged: onItemsPerPageChanged != null
+                      ? (value) {
+                          if (value != null) {
+                            onItemsPerPageChanged!(value);
+                          }
+                        }
+                      : null,
+                ),
+              ),
             ),
           ],
         ),

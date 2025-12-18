@@ -95,7 +95,7 @@ class UnifiedTableContainer extends StatelessWidget {
           // Table Wrapper (Header + Body with border) - Expanded to fill available space
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFE5E7EB)),
@@ -103,15 +103,22 @@ class UnifiedTableContainer extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Table Header
-                    ActivityTableHeader(
-                      selectedCategory: selectedCategory,
-                      selectedType: selectedType,
-                      sortColumn: sortColumn,
-                      sortAscending: sortAscending,
-                      onCategoryChanged: onCategoryChanged,
-                      onTypeChanged: onTypeChanged,
-                      onSort: onSort,
+                    // Table Header with bottom border
+                    Container(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                        ),
+                      ),
+                      child: ActivityTableHeader(
+                        selectedCategory: selectedCategory,
+                        selectedType: selectedType,
+                        sortColumn: sortColumn,
+                        sortAscending: sortAscending,
+                        onCategoryChanged: onCategoryChanged,
+                        onTypeChanged: onTypeChanged,
+                        onSort: onSort,
+                      ),
                     ),
                     
                     // Table Body
