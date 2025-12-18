@@ -1,0 +1,120 @@
+// lib/ui/core/widgets/table/activity_table_row.dart
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../../data/models/activity_log_item.dart';
+import '../../../activity_logs/models/unified_activity_config.dart';
+import '../../constants/spacing.dart';
+import 'table_badge.dart';
+import 'table_chip.dart';
+
+/// Single table row for activity log items
+class ActivityTableRow extends StatelessWidget {
+  final ActivityLogItem item;
+  final ValueChanged<ActivityLogItem> onViewDetails;
+
+  const ActivityTableRow({
+    super.key,
+    required this.item,
+    required this.onViewDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryName = UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
+    final typeColor = UnifiedActivityConfig.getColorForType(item.category);
+
+    return InkWell(
+      onTap: () => onViewDetails(item),
+      hoverColor: const Color(0xFFF9FAFB),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.tableCellHorizontal,
+          vertical: AppSpacing.tableCellVertical,
+        ),
+        child: Row(
+          children: [
+            // Title Column
+            Expanded(
+              flex: 4,
+              child: Text(
+                item.title,
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF111827),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+              ),
+            ),
+            
+            const SizedBox(width: AppSpacing.md),
+            
+            // Category Badge
+            SizedBox(
+              child: TableBadge(text: categoryName),
+            ),
+            
+            const SizedBox(width: AppSpacing.md),
+            
+            // Type Chip
+            SizedBox(
+              child: TableChip(text: item.category, color: typeColor),
+            ),
+            
+            const Spacer(),
+            
+            const SizedBox(width: AppSpacing.md),
+            
+            // Value Column
+            Expanded(
+              flex: 2,
+              child: Text(
+                item.value,
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF111827),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            
+            const SizedBox(width: AppSpacing.md),
+            
+            // Date Added Column
+            Expanded(
+              flex: 2,
+              child: Text(
+                DateFormat('MM/dd/yyyy').format(item.timestamp),
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF111827),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            
+            const SizedBox(width: AppSpacing.md),
+            
+            // Actions Column
+            SizedBox(
+              width: 70,
+              child: IconButton(
+                icon: const Icon(Icons.visibility_outlined, size: 18),
+                color: const Color(0xFF6B7280),
+                onPressed: () => onViewDetails(item),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

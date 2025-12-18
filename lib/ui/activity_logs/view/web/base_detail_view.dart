@@ -1,9 +1,9 @@
 // lib/ui/activity_logs/view/base_detail_view.dart
 
 import 'package:flutter/material.dart';
-import '../../../data/models/activity_log_item.dart';
-import '../../core/constants/spacing.dart';
-import '../../core/widgets/shared/detail_field.dart';
+import '../../../../data/models/activity_log_item.dart';
+import '../../../core/constants/spacing.dart';
+import '../../../core/widgets/shared/detail_field.dart';
 import 'detail_view_config.dart';
 
 /// Universal detail view for all activity types

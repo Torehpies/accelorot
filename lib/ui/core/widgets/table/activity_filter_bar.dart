@@ -1,0 +1,128 @@
+// lib/ui/core/widgets/table/activity_filter_bar.dart
+
+import 'package:flutter/material.dart';
+import '../../../activity_logs/widgets/machine_selector.dart';
+import '../../../activity_logs/widgets/batch_selector.dart';
+import '../../../activity_logs/widgets/date_filter_dropdown.dart';
+import '../../../activity_logs/models/activity_common.dart';
+
+/// Filter bar for activity logs with Machine, Batch, Date, and Search filters
+class ActivityFilterBar extends StatelessWidget {
+  final String? selectedMachineId;
+  final String? selectedBatchId;
+  final DateFilterRange dateFilter;
+  final String searchQuery;
+  final ValueChanged<String?> onMachineChanged;
+  final ValueChanged<String?> onBatchChanged;
+  final ValueChanged<DateFilterRange> onDateFilterChanged;
+  final ValueChanged<String> onSearchChanged;
+
+  const ActivityFilterBar({
+    super.key,
+    required this.selectedMachineId,
+    required this.selectedBatchId,
+    required this.dateFilter,
+    required this.searchQuery,
+    required this.onMachineChanged,
+    required this.onBatchChanged,
+    required this.onDateFilterChanged,
+    required this.onSearchChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Machine Selector - Natural width
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
+            child: SizedBox(
+              height: 32,
+              child: MachineSelector(
+                selectedMachineId: selectedMachineId,
+                onChanged: onMachineChanged,
+                isCompact: true,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // Batch Selector - Natural width
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
+            child: SizedBox(
+              height: 32,
+              child: BatchSelector(
+                selectedBatchId: selectedBatchId,
+                selectedMachineId: selectedMachineId,
+                onChanged: onBatchChanged,
+                isCompact: true,
+                showLabel: false,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // Date Filter Dropdown
+          SizedBox(
+            height: 32,
+            child: DateFilterDropdown(
+              onFilterChanged: onDateFilterChanged,
+            ),
+          ),
+          const SizedBox(width: 12),
+          
+          // Search Bar - Takes remaining space
+          Expanded(
+            child: Container(
+              height: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.search,
+                    color: Color(0xFF6B7280),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      onChanged: onSearchChanged,
+                      decoration: const InputDecoration(
+                        hintText: 'Search...',
+                        hintStyle: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF6B7280),
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF374151),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

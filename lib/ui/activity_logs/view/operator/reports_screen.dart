@@ -1,25 +1,25 @@
-// lib/ui/activity_logs/view/alerts_screen.dart
+// lib/ui/activity_logs/view/reports_screen.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/activity_list_state.dart';
-import '../view_model/activity_viewmodel.dart';
-import '../models/activity_common.dart';
+import '../../models/activity_list_state.dart';
+import '../../view_model/activity_viewmodel.dart';
 import 'base_activity_screen.dart';
+import '../../models/activity_common.dart';
 
-class AlertsScreen extends BaseActivityScreen {
-  const AlertsScreen({
+class ReportsScreen extends BaseActivityScreen {
+  const ReportsScreen({
     super.key,
     super.initialFilter,
     super.focusedMachineId,
   });
 
   @override
-  ConsumerState<AlertsScreen> createState() => _AlertsScreenState();
+  ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
+class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   ActivityParams get _params => ActivityParams(
-        screenType: ActivityScreenType.alerts,
+        screenType: ActivityScreenType.reports,
         initialFilter: widget.initialFilter,
         focusedMachineId: widget.focusedMachineId,
       );
@@ -32,12 +32,12 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   @override
   String getScreenTitle() {
     final state = getState();
-    return state.focusedMachineId != null ? 'Machine Alerts' : 'Alerts Logs';
+    return state.focusedMachineId != null ? 'Machine Reports' : 'Reports';
   }
 
   @override
   List<String> getFilters() {
-    return const ['All', 'Temperature', 'Moisture', 'Air Quality'];
+    return const ['All', 'Maintenance', 'Observation', 'Safety'];
   }
 
   @override
@@ -59,19 +59,18 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   void onDateFilterChanged(DateFilterRange filter) {
     ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
-
-  @override
-  Future<void> onRefresh() async {
-    await ref.read(activityViewModelProvider(_params).notifier).refresh();
-  }
-  
   @override
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
   }
-  
+
   @override
   void onMachineChanged(String? machineId) {
     ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+  }
+
+  @override
+  Future<void> onRefresh() async {
+    await ref.read(activityViewModelProvider(_params).notifier).refresh();
   }
 }
