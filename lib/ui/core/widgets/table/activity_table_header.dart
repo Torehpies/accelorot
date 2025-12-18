@@ -54,27 +54,61 @@ class ActivityTableHeader extends StatelessWidget {
           
           const SizedBox(width: AppSpacing.md),
           
-          // Category Dropdown
+          // Category Column with Static Label
           Expanded(
             flex: 2,
-            child: FilterDropdown(
-              label: 'Category',
-              value: selectedCategory,
-              items: UnifiedActivityConfig.categories,
-              onChanged: onCategoryChanged,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Category:',
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilterDropdown(
+                    label: 'Category',
+                    value: selectedCategory,
+                    items: UnifiedActivityConfig.categories,
+                    onChanged: onCategoryChanged,
+                  ),
+                ],
+              ),
             ),
           ),
           
           const SizedBox(width: AppSpacing.md),
           
-          // Type Dropdown
+          // Type Column with Static Label
           Expanded(
             flex: 2,
-            child: FilterDropdown(
-              label: 'Type',
-              value: validType,
-              items: availableTypes,
-              onChanged: onTypeChanged,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Type:',
+                    style: TextStyle(
+                      fontFamily: 'DM Sans',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  FilterDropdown(
+                    label: 'Type',
+                    value: validType,
+                    items: availableTypes,
+                    onChanged: onTypeChanged,
+                  ),
+                ],
+              ),
             ),
           ),
           

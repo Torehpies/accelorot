@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-/// Reusable styled dropdown for filters
+/// Reusable styled dropdown for filters that matches DateFilterDropdown styling
 class FilterDropdown extends StatelessWidget {
   final String label;
   final String value;
@@ -17,30 +17,73 @@ class FilterDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
+  void _showFilterMenu(BuildContext context) async {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final String? selected = await showMenu<String>(
+      context: context,
+      position: position,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 8,
+      color: Colors.white, // White background for popup menu
+      items: items.map((item) {
+        return PopupMenuItem<String>(
+          value: item,
+          child: Text(item), // Show only the value, no label prefix
+        );
+      }).toList(),
+    );
+
+    if (selected != null) {
+      onChanged(selected);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-        value: value,
-        isExpanded: true,
-        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF6B7280), size: 20),
-        style: const TextStyle(
-          fontFamily: 'DM Sans',
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF374151),
+    final isActive = value != 'All';
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: InkWell(
+        onTap: () => _showFilterMenu(context),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE5E7EB)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: isActive ? const Color(0xFF374151) : const Color(0xFF6B7280),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_drop_down,
+                size: 20,
+                color: isActive ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+              ),
+            ],
+          ),
         ),
-        items: items.map((item) {
-          return DropdownMenuItem(
-            value: item,
-            child: Text('$label: $item'),
-          );
-        }).toList(),
-        onChanged: (newValue) {
-          if (newValue != null) {
-            onChanged(newValue);
-          }
-        },
       ),
     );
   }

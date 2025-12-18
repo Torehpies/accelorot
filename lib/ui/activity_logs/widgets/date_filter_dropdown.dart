@@ -31,6 +31,9 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
     showMenu<DateFilterType>(
       context: context,
       position: position,
+      color: Colors.white, // White background for popup menu
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 8,
       items: [
         const PopupMenuItem(value: DateFilterType.today, child: Text('Today')),
         const PopupMenuItem(value: DateFilterType.yesterday, child: Text('Yesterday')),
