@@ -1,0 +1,62 @@
+// lib/ui/core/widgets/filters/search_field.dart
+
+import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
+
+/// Reusable search field with icon and consistent styling
+class SearchField extends StatelessWidget {
+  final String? hintText;
+  final ValueChanged<String> onChanged;
+  final double? width;
+
+  const SearchField({
+    super.key,
+    this.hintText = 'Search...',
+    required this.onChanged,
+    this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: width ?? 150,
+        maxWidth: width ?? 220,
+      ),
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.search,
+              color: Color(0xFF6B7280),
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                onChanged: onChanged,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: WebTextStyles.bodyMediumGray,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                ),
+                style: WebTextStyles.bodyMedium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

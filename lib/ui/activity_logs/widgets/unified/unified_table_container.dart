@@ -3,13 +3,16 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../models/activity_common.dart';
-import '../../../core/constants/spacing.dart';
 import '../../../core/widgets/shared/pagination_controls.dart';
-import '../../../core/widgets/table/activity_filter_bar.dart';
+import '../../../core/widgets/table/base_table_container.dart';
+import '../../../core/widgets/filters/search_field.dart';
 import '../../../core/widgets/table/activity_table_header.dart';
 import '../../../core/widgets/table/activity_table_body.dart';
+import '../unified_machine_selector.dart';
+import '../unified_batch_selector.dart';
+import '../date_filter_dropdown.dart';
 
-/// Unified container that composes filter bar, table header, body, and pagination
+/// Unified container for activity logs using BaseTableContainer
 class UnifiedTableContainer extends StatelessWidget {
   final List<ActivityLogItem> items;
   
@@ -65,92 +68,81 @@ class UnifiedTableContainer extends StatelessWidget {
     this.currentPage,
     this.totalPages,
     this.itemsPerPage,
-    this.totalItems,
     this.onPageChanged,
     this.onItemsPerPageChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
+    return BaseTableContainer(
+      // Left header: Machine and Batch selectors
+      leftHeaderWidget: Row(
         children: [
-          // Filter Bar Section
-          ActivityFilterBar(
-            selectedMachineId: selectedMachineId,
-            selectedBatchId: selectedBatchId,
-            dateFilter: dateFilter,
-            searchQuery: searchQuery,
-            onMachineChanged: onMachineChanged,
-            onBatchChanged: onBatchChanged,
-            onDateFilterChanged: onDateFilterChanged,
-            onSearchChanged: onSearchChanged,
-          ),
-          
-          // Table Wrapper (Header + Body with border) - Expanded to fill available space
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    // Table Header with bottom border
-                    Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
-                        ),
-                      ),
-                      child: ActivityTableHeader(
-                        selectedCategory: selectedCategory,
-                        selectedType: selectedType,
-                        sortColumn: sortColumn,
-                        sortAscending: sortAscending,
-                        onCategoryChanged: onCategoryChanged,
-                        onTypeChanged: onTypeChanged,
-                        onSort: onSort,
-                      ),
-                    ),
-                    
-                    // Table Body
-                    Expanded(
-                      child: ActivityTableBody(
-                        items: items,
-                        onViewDetails: onViewDetails,
-                      ),
-                    ),
-                  ],
-                ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
+            child: SizedBox(
+              height: 32,
+              child: UnifiedMachineSelector(
+                selectedMachineId: selectedMachineId,
+                onChanged: onMachineChanged,
               ),
             ),
           ),
-          
-          // Pagination Footer (no divider above)
-          if (currentPage != null && totalPages != null && itemsPerPage != null)
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.tableCellHorizontal,
-                vertical: AppSpacing.lg,
-              ),
-              child: PaginationControls(
-                currentPage: currentPage!,
-                totalPages: totalPages!,
-                itemsPerPage: itemsPerPage!,
-                onPageChanged: onPageChanged,
-                onItemsPerPageChanged: onItemsPerPageChanged,
+          const SizedBox(width: 12),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 150, maxWidth: 220),
+            child: SizedBox(
+              height: 32,
+              child: UnifiedBatchSelector(
+                selectedBatchId: selectedBatchId,
+                selectedMachineId: selectedMachineId,
+                onChanged: onBatchChanged,
               ),
             ),
+          ),
         ],
       ),
+      
+      // Right header: Date filter and Search
+      rightHeaderWidgets: [
+        SizedBox(
+          height: 32,
+          child: DateFilterDropdown(
+            onFilterChanged: onDateFilterChanged,
+          ),
+        ),
+        SearchField(
+          onChanged: onSearchChanged,
+        ),
+      ],
+      
+      // Table header
+      tableHeader: ActivityTableHeader(
+        selectedCategory: selectedCategory,
+        selectedType: selectedType,
+        sortColumn: sortColumn,
+        sortAscending: sortAscending,
+        onCategoryChanged: onCategoryChanged,
+        onTypeChanged: onTypeChanged,
+        onSort: onSort,
+      ),
+      
+      // Table body
+      tableBody: ActivityTableBody(
+        items: items,
+        onViewDetails: onViewDetails,
+      ),
+      
+      // Pagination (if provided)
+      paginationWidget: (currentPage != null && totalPages != null && itemsPerPage != null)
+          ? PaginationControls(
+              currentPage: currentPage!,
+              totalPages: totalPages!,
+              itemsPerPage: itemsPerPage!,
+              onPageChanged: onPageChanged,
+              onItemsPerPageChanged: onItemsPerPageChanged,
+            )
+          : null,
     );
   }
 }
