@@ -175,7 +175,7 @@ class FirestoreBatchService implements BatchService {
 
         final querySnapshot = await _batches
             .where('machineId', whereIn: chunk)
-            .where('isActive', isEqualTo: true)
+            //.where('isActive', isEqualTo: true)
             .orderBy('createdAt', descending: true)
             .get();
 

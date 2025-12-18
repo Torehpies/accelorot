@@ -21,13 +21,14 @@ class BatchSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the AsyncNotifierProvider properly
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
     return batchesAsync.when(
       data: (batches) {
-      final filteredBatches = selectedMachineId != null
-          ? batches.where((b) => b.machineId == selectedMachineId).toList()
-          : batches;
+        final filteredBatches = selectedMachineId != null
+            ? batches.where((b) => b.machineId == selectedMachineId).toList()
+            : batches;
 
         filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final hasNoBatches = filteredBatches.isEmpty;
@@ -76,7 +77,11 @@ class BatchSelector extends ConsumerWidget {
                 child: DropdownButton<String>(
                   value: selectedBatchId,
                   hint: Text(
-                    'All Batches',
+                    hasNoBatches
+                        ? (selectedMachineId != null
+                            ? 'No batches for this machine'
+                            : 'No batches available')
+                        : 'All Batches',
                     style: TextStyle(
                       fontSize: isCompact ? 13 : 14,
                       fontWeight: FontWeight.w600,
@@ -90,15 +95,6 @@ class BatchSelector extends ConsumerWidget {
                     color: hasNoBatches
                         ? Colors.grey[400]
                         : (isCompact ? Colors.teal.shade700 : Colors.teal),
-                  ),
-                  disabledHint: Text(
-                    selectedMachineId != null
-                        ? 'No batches for this machine'
-                        : 'No batches available',
-                    style: TextStyle(
-                      fontSize: isCompact ? 13 : 14,
-                      color: Colors.grey[400],
-                    ),
                   ),
                   items: hasNoBatches
                       ? null
@@ -114,7 +110,7 @@ class BatchSelector extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      batch.displayName, 
+                                      batch.displayName,
                                       style: TextStyle(fontSize: isCompact ? 13 : 14),
                                     ),
                                   ),
@@ -161,10 +157,15 @@ class BatchSelector extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.inventory_2,
-              color: Colors.grey[400],
-              size: isCompact ? 18 : 20,
+            SizedBox(
+              width: isCompact ? 18 : 20,
+              height: isCompact ? 18 : 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isCompact ? Colors.teal.shade700 : Colors.teal,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             if (showLabel) ...[
@@ -191,7 +192,36 @@ class BatchSelector extends ConsumerWidget {
           ],
         ),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (error, stack) => Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8 : 12,
+          vertical: isCompact ? 6 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: isCompact ? Colors.grey[50] : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.red[400],
+              size: isCompact ? 18 : 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Failed to load batches',
+                style: TextStyle(
+                  fontSize: isCompact ? 13 : 14,
+                  color: Colors.red[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

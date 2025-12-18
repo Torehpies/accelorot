@@ -62,13 +62,13 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     );
 
     if (result == true && mounted) {
-      // Invalidate the batches provider to refresh data
-      ref.invalidate(userTeamBatchesProvider);
+      // Refresh the batches using the new notifier method
+      await ref.read(userTeamBatchesProvider.notifier).refresh();
       
       // Auto-select the newly created batch for the current machine
       if (_selectedMachineId != null) {
-        // Wait a bit for Firestore to update
-        await Future.delayed(const Duration(milliseconds: 500));
+        // Wait a bit for the refresh to complete
+        await Future.delayed(const Duration(milliseconds: 300));
         
         final batchesAsync = ref.read(userTeamBatchesProvider);
         batchesAsync.whenData((batches) {
@@ -94,18 +94,36 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
   void _completeBatch(BuildContext context) {
     if (_activeBatch == null) return;
 
-    showDialog(
+      showDialog(
       context: context,
       builder: (ctx) => BatchCompleteDialog(
         batch: _convertToCompostBatch(_activeBatch!),
-        onComplete: () {
+        onComplete: () async {
+          // Refresh the provider first
+          await ref.read(userTeamBatchesProvider.notifier).refresh();
+          
+          // Wait a bit for the refresh to complete
+          await Future.delayed(const Duration(milliseconds: 300));
+          
+          // Update local state to reflect the completed batch
+          if (mounted) {
+            final batchesAsync = ref.read(userTeamBatchesProvider);
+            batchesAsync.whenData((batches) {
+              final updatedBatch = batches.firstWhere(
+                (b) => b.id == _selectedBatchId,
+                orElse: () => batches.first,
+              );
+              
+              if (mounted) {
+                setState(() {
+                  _activeBatch = updatedBatch;
+                });
+              }
+            });
+          }
+          
+          // Call parent callback
           widget.onBatchCompleted();
-          setState(() {
-            _selectedBatchId = null;
-            _activeBatch = null;
-          });
-          // Invalidate to refresh the list
-          ref.invalidate(userTeamBatchesProvider);
         },
       ),
     );
@@ -140,10 +158,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     ];
     return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }
-
   @override
   Widget build(BuildContext context) {
-    // Watch the batches to auto-update when selected batch changes
+    //  auto-update when selected batch changes
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
     // Update active batch when selection changes
@@ -166,7 +183,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     final isActive = _activeBatch?.isActive ?? false;
     final progress = _getProgress();
     final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
-
+    final hasBatchSelected = _activeBatch != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -201,34 +218,35 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     letterSpacing: -0.5,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: batchIsCompleted
-                        ? const Color(0xFFF3F4F6)
-                        : (isActive 
-                            ? const Color(0xFFD1FAE5) 
-                            : const Color(0xFFFEF3C7)),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    batchIsCompleted 
-                        ? 'Completed' 
-                        : (isActive ? 'Active' : 'Inactive'),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
+                if (hasBatchSelected)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
                       color: batchIsCompleted
-                          ? const Color(0xFF6B7280)
+                          ? const Color(0xFFF3F4F6)
                           : (isActive 
-                              ? const Color(0xFF065F46) 
-                              : const Color(0xFF92400E)),
+                              ? const Color(0xFFD1FAE5) 
+                              : const Color(0xFFFEF3C7)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      batchIsCompleted 
+                          ? 'Completed' 
+                          : (isActive ? 'Active' : 'Inactive'),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: batchIsCompleted
+                            ? const Color(0xFF6B7280)
+                            : (isActive 
+                                ? const Color(0xFF065F46) 
+                                : const Color(0xFF92400E)),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -242,7 +260,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     onChanged: (machineId) {
                       setState(() {
                         _selectedMachineId = machineId;
-                        _selectedBatchId = null; // Reset batch when machine changes
+                        _selectedBatchId = null;
                         _activeBatch = null;
                       });
                     },
@@ -271,7 +289,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             const SizedBox(height: 16),
 
             // Decomposition Progress section
-            Row(
+                        Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
@@ -311,7 +329,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     child: Container(
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981),
+                        color: batchIsCompleted 
+                            ? const Color(0xFF6B7280)
+                            : const Color(0xFF10B981),
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -322,10 +342,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             const SizedBox(height: 16),
 
             // Conditional content
-              if (!isActive && !batchIsCompleted)
+            if (!hasBatchSelected)
               Column(
                 children: [
-                  // Empty state icon and text
                   Icon(
                     Icons.lightbulb_outline,
                     size: 40,
@@ -333,14 +352,13 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'No batch in progress, start now!',
+                    'No batch selected, select or start a batch!',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Start Batch button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -360,7 +378,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                       child: Text(
                         _selectedMachineId == null 
                             ? 'Select Machine First' 
-                            : 'Start Batch',
+                            : 'Start New Batch',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -371,7 +389,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                 ],
               ),
 
-            if (_activeBatch != null)
+            if (hasBatchSelected)
               Column(
                 children: [
                   // Batch details grid
@@ -379,8 +397,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     children: [
                       Expanded(
                         child: _buildDetailItem(
-                          'Machine ID',
-                          _activeBatch!.machineId,
+                          'Batch Name',
+                          _activeBatch!.displayName,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -393,7 +411,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
-                          'Batch Started',
+                          'Started',
                           _formatDate(_activeBatch!.createdAt),
                         ),
                       ),
@@ -404,8 +422,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                     children: [
                       Expanded(
                         child: _buildDetailItem(
-                          'Batch ID',
-                          _activeBatch!.id,
+                          'Machine ID',
+                          _activeBatch!.machineId,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -418,8 +436,10 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
-                          'Status',
-                          _activeBatch!.isActive ? 'Active' : 'Completed',
+                          batchIsCompleted ? 'Completed' : 'Status',
+                          batchIsCompleted 
+                              ? _formatDate(_activeBatch!.completedAt!)
+                              : (_activeBatch!.isActive ? 'Active' : 'Inactive'),
                         ),
                       ),
                     ],
@@ -442,7 +462,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                         disabledForegroundColor: Colors.grey.shade500,
                       ),
                       child: Text(
-                        batchIsCompleted ? 'Batch Already Completed' : 'Complete Batch',
+                        batchIsCompleted ? 'Batch Completed' : 'Complete Batch',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -457,7 +477,6 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
       ),
     );
   }
-
   Widget _buildDetailItem(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
