@@ -195,7 +195,7 @@ class RegistrationFormContent extends ConsumerWidget {
           ),
         ),
 
-        // const SizedBox(height: 24),
+        const SizedBox(height: 16),
         const OrDivider(),
         const SizedBox(height: 10),
 

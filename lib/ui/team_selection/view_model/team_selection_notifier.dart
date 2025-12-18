@@ -12,11 +12,8 @@ part 'team_selection_notifier.g.dart';
 
 @riverpod
 class TeamSelectionNotifier extends _$TeamSelectionNotifier {
-  late final TeamRepository _repository;
-
   @override
   TeamSelectionState build() {
-    _repository = ref.read(teamRepositoryProvider);
     Future.microtask(() => loadTeams());
     return const TeamSelectionState();
   }
@@ -62,11 +59,9 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
     }
 
     try {
-      final result = await _repository.requestToJoinTeam(
-        teamId!,
-        userId,
-        email,
-      );
+      final result = await ref
+          .read(teamRepositoryProvider)
+          .requestToJoinTeam(teamId!, userId, email);
 
       result.when(
         success: (_) {

@@ -15,6 +15,7 @@ class TeamManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+		//TODO FIX ACCEPT OPERATOR
     final teams = ref.watch(
       teamManagementProvider.select((s) => s.teams),
     );
