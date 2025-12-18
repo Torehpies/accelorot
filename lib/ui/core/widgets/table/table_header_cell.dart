@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/table/table_header_cell.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Reusable table header cell with optional sorting
 class TableHeaderCell extends StatelessWidget {
@@ -29,12 +30,7 @@ class TableHeaderCell extends StatelessWidget {
       return Center(
         child: Text(
           label,
-          style: const TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
-          ),
+          style: WebTextStyles.label,
         ),
       );
     }
@@ -48,12 +44,7 @@ class TableHeaderCell extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isActive ? const Color(0xFF374151) : const Color(0xFF6B7280),
-              ),
+              style: isActive ? WebTextStyles.label.copyWith(color: const Color(0xFF374151)) : WebTextStyles.label,
             ),
             const SizedBox(width: 4),
             Icon(

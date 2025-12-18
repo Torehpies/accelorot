@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../../core/constants/spacing.dart';
+import '../../../core/themes/web_text_styles.dart';
 import '../../../core/widgets/shared/detail_field.dart';
 import 'detail_view_config.dart';
 
@@ -62,21 +63,12 @@ class BaseDetailView extends StatelessWidget {
               children: [
                 Text(
                   config.title,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF111827),
-                  ),
+                  style: WebTextStyles.label.copyWith(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   config.subtitle,
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
+                  style: WebTextStyles.bodyMediumGray,
                 ),
               ],
             ),
@@ -157,13 +149,9 @@ class BaseDetailView extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Close',
-              style: TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: WebTextStyles.bodyMedium.copyWith(fontSize: 14),
             ),
           ),
         ],

@@ -5,6 +5,7 @@ import '../../../activity_logs/widgets/unified/unified_machine_selector.dart';
 import '../../../activity_logs/widgets/unified/unified_batch_selector.dart';
 import '../../../activity_logs/widgets/date_filter_dropdown.dart';
 import '../../../activity_logs/models/activity_common.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Filter bar for activity logs with Machine, Batch, Date, and Search filters
 class ActivityFilterBar extends StatelessWidget {
@@ -92,24 +93,14 @@ class ActivityFilterBar extends StatelessWidget {
                       onChanged: onSearchChanged,
                       decoration: const InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B7280),
-                        ),
+                        hintStyle: WebTextStyles.bodyMediumGray,
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                         isDense: true,
                       ),
-                      style: const TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF374151),
-                      ),
+                      style: WebTextStyles.bodyMedium,
                     ),
                   ),
                 ],

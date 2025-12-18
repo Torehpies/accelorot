@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/shared/detail_field.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Reusable field widget for detail views
 /// Replaces all _buildField methods across detail views
@@ -23,12 +24,7 @@ class DetailField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
-          ),
+          style: WebTextStyles.label.copyWith(color: const Color(0xFF374151)),
         ),
         const SizedBox(height: 6),
         Container(
@@ -41,11 +37,7 @@ class DetailField extends StatelessWidget {
           ),
           child: Text(
             value,
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 13,
-              color: Color(0xFF6B7280),
-            ),
+            style: WebTextStyles.bodyMediumGray,
             maxLines: isMultiline ? null : 1,
           ),
         ),

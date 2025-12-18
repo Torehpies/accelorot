@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../constants/spacing.dart';
+import '../themes/web_text_styles.dart';
 
 /// Reusable stats card with icon in top-right corner
 class BaseStatsCard extends StatelessWidget {
@@ -53,12 +54,7 @@ class BaseStatsCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B7280),
-                  ),
+                  style: WebTextStyles.label.copyWith(fontSize: 14),
                 ),
               ),
               // Icon (top-right)
@@ -71,11 +67,10 @@ class BaseStatsCard extends StatelessWidget {
           // Value
           Text(
             '$value',
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
+            style: WebTextStyles.body.copyWith(
               fontSize: 40,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF374151),
+              color: const Color(0xFF374151),
               height: 1.0,
             ),
           ),
@@ -85,12 +80,7 @@ class BaseStatsCard extends StatelessWidget {
           // Change/Percentage (placeholder)
           Text(
             changeText ?? '—',
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF6B7280),
-            ),
+            style: WebTextStyles.bodyMediumGray.copyWith(fontSize: 12, fontWeight: FontWeight.w400),
           ),
         ],
       ),

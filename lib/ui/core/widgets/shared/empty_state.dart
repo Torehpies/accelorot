@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/shared/empty_state.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Reusable empty state widget
 /// Replaces all _buildEmptyState methods
@@ -32,21 +33,12 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-              ),
+              style: WebTextStyles.label.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: const TextStyle(
-                fontFamily: 'DM Sans',
-                fontSize: 13,
-                color: Color(0xFF9CA3AF),
-              ),
+              style: WebTextStyles.bodyMediumGray.copyWith(color: const Color(0xFF9CA3AF)),
             ),
           ],
         ),

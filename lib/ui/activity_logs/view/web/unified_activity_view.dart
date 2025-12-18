@@ -6,6 +6,7 @@ import '../../view_model/unified_activity_viewmodel.dart';
 import '../../widgets/unified/stats_card_row.dart';
 import '../../widgets/unified/unified_table_container.dart';
 import '../../../core/constants/spacing.dart';
+import '../../../core/themes/web_text_styles.dart';
 import 'base_detail_view.dart';
 
 /// Main unified activity view - replaces WebActivityLogsMainView
@@ -106,7 +107,7 @@ class UnifiedActivityView extends ConsumerWidget {
           const Text(
             'Error',
             style: TextStyle(
-              fontFamily: 'DM Sans',
+              fontFamily: 'dm-sans',
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Color(0xFF374151),
@@ -115,11 +116,7 @@ class UnifiedActivityView extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: const TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 14,
-              color: Color(0xFF6B7280),
-            ),
+            style: WebTextStyles.bodyMediumGray.copyWith(fontSize: 14),
             textAlign: TextAlign.center,
           ),
         ],

@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/table/table_chip.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Colored chip for type display in tables
 class TableChip extends StatelessWidget {
@@ -24,12 +25,7 @@ class TableChip extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          fontFamily: 'DM Sans',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: WebTextStyles.label.copyWith(fontSize: 12, color: color),
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
       ),

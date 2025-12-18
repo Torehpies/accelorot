@@ -110,11 +110,7 @@ class PaginationControls extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     '...',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: WebTextStyles.bodyMediumGray,
                   ),
                 ),
               ],
@@ -128,11 +124,7 @@ class PaginationControls extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     '...',
-                    style: TextStyle(
-                      fontFamily: 'DM Sans',
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: WebTextStyles.bodyMediumGray,
                   ),
                 ),
                 _buildPageButton(totalPages),
@@ -187,12 +179,7 @@ class PaginationControls extends StatelessWidget {
           ),
           child: Text(
             '$page',
-            style: TextStyle(
-              fontFamily: 'DM Sans',
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isActive ? Colors.white : const Color(0xFF374151),
-            ),
+            style: isActive ? WebTextStyles.bodyMedium.copyWith(color: Colors.white) : WebTextStyles.bodyMedium,
           ),
         ),
       ),

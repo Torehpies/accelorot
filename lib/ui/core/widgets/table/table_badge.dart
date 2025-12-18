@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/table/table_badge.dart
 
 import 'package:flutter/material.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Gray badge for category display in tables
 class TableBadge extends StatelessWidget {
@@ -21,12 +22,7 @@ class TableBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontFamily: 'DM Sans',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF6B7280),
-        ),
+        style: WebTextStyles.bodyMediumGray.copyWith(fontSize: 12),
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
       ),
