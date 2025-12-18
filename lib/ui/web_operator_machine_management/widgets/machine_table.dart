@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/machines_view_model.dart';
+import 'package:intl/intl.dart';
+import '../../../data/models/machine_model.dart';
 
 class MachineTableWidget extends StatefulWidget {
-  final List<Machine> machines;
+  final List<MachineModel> machines;
   final Function(String) onMachineAction;
 
   const MachineTableWidget({
@@ -16,18 +17,27 @@ class MachineTableWidget extends StatefulWidget {
 }
 
 class _MachineTableWidgetState extends State<MachineTableWidget> {
-  late List<Machine> displayedMachines;
+  late List<MachineModel> displayedMachines;
   String sortColumn = 'ID';
   bool ascending = true;
   String statusFilter = 'All';
 
-  final List<String> statusOptions = ['All', 'Active', 'Inactive', 'Suspended'];
+  final List<String> statusOptions = ['All', 'Active', 'Archived'];
 
   @override
   void initState() {
     super.initState();
     displayedMachines = List.from(widget.machines);
     _applySortAndFilter();
+  }
+
+  @override
+  void didUpdateWidget(MachineTableWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.machines != oldWidget.machines) {
+      displayedMachines = List.from(widget.machines);
+      _applySortAndFilter();
+    }
   }
 
   void _applySortAndFilter({String? column}) {
@@ -42,18 +52,22 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
 
     displayedMachines = widget.machines.where((machine) {
       if (statusFilter == 'All') return true;
-      return machine.status.toLowerCase() == statusFilter.toLowerCase();
+      if (statusFilter == 'Active') return !machine.isArchived;
+      if (statusFilter == 'Archived') return machine.isArchived;
+      return true;
     }).toList();
 
     displayedMachines.sort((a, b) {
       int cmp;
       switch (sortColumn) {
         case 'ID':
-          cmp = a.id.compareTo(b.id);
+          cmp = a.machineId.compareTo(b.machineId);
           break;
         case 'Name':
-          cmp = ('${a.firstName} ${a.lastName}')
-              .compareTo('${b.firstName} ${b.lastName}');
+          cmp = a.machineName.compareTo(b.machineName);
+          break;
+        case 'Created':
+          cmp = a.dateCreated.compareTo(b.dateCreated);
           break;
         default:
           cmp = 0;
@@ -66,28 +80,15 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    const headerStyle = TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF6B7280),
-      letterSpacing: 0.5,
-    );
-
-    const rowStyle = TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      color: Color(0xFF111827),
-    );
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8), // slightly smaller radius
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03), // lighter shadow
+              color: Colors.black.withOpacity(0.03),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -97,30 +98,40 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
           children: [
             // Table Header
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // reduced padding
-              decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(8)),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
               ),
               child: Row(
                 children: [
                   Expanded(
+                    flex: 2,
                     child: GestureDetector(
                       onTap: () => _applySortAndFilter(column: 'ID'),
-                      child: _buildColumnHeader('ID', sortable: true),
+                      child: _buildColumnHeader('Machine ID', sortable: true),
                     ),
                   ),
                   Expanded(
+                    flex: 3,
                     child: GestureDetector(
                       onTap: () => _applySortAndFilter(column: 'Name'),
                       child: _buildColumnHeader('Name', sortable: true),
                     ),
                   ),
                   Expanded(
+                    flex: 2,
+                    child: GestureDetector(
+                      onTap: () => _applySortAndFilter(column: 'Created'),
+                      child: _buildColumnHeader('Created', sortable: true),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
                     child: _buildStatusFilterHeader(),
                   ),
                   Expanded(
+                    flex: 1,
                     child: Center(
                       child: _buildColumnHeader('Actions', sortable: false),
                     ),
@@ -143,7 +154,7 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
                           children: displayedMachines
                               .map((machine) => Column(
                                     children: [
-                                      _buildTableRow(machine, rowStyle),
+                                      _buildTableRow(machine),
                                       const Divider(
                                         height: 1,
                                         color: Color(0xFFE5E7EB),
@@ -162,25 +173,31 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
   }
 
   Widget _buildColumnHeader(String text, {bool sortable = false}) {
+    final isCurrentSort = sortColumn == text || 
+                          (sortColumn == 'ID' && text == 'Machine ID') ||
+                          (sortColumn == 'Created' && text == 'Created');
+    
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
+            color: isCurrentSort ? const Color(0xFF3B82F6) : const Color(0xFF6B7280),
             letterSpacing: 0.5,
           ),
         ),
         if (sortable) ...[
           const SizedBox(width: 4),
-          const Icon(
-            Icons.unfold_more,
+          Icon(
+            isCurrentSort
+                ? (ascending ? Icons.arrow_upward : Icons.arrow_downward)
+                : Icons.unfold_more,
             size: 16,
-            color: Color(0xFF9CA3AF),
+            color: isCurrentSort ? const Color(0xFF3B82F6) : const Color(0xFF9CA3AF),
           ),
         ],
       ],
@@ -191,17 +208,25 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           'Status',
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
+            color: statusFilter != 'All' 
+                ? const Color(0xFF3B82F6) 
+                : const Color(0xFF6B7280),
           ),
         ),
         const SizedBox(width: 4),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.filter_alt, size: 16, color: Color(0xFF6B7280)),
+          icon: Icon(
+            Icons.filter_alt,
+            size: 16,
+            color: statusFilter != 'All' 
+                ? const Color(0xFF3B82F6) 
+                : const Color(0xFF6B7280),
+          ),
           onSelected: (value) {
             setState(() {
               statusFilter = value;
@@ -212,7 +237,18 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
             return statusOptions
                 .map((status) => PopupMenuItem(
                       value: status,
-                      child: Text(status),
+                      child: Row(
+                        children: [
+                          if (statusFilter == status)
+                            const Icon(
+                              Icons.check,
+                              size: 16,
+                              color: Color(0xFF3B82F6),
+                            ),
+                          if (statusFilter == status) const SizedBox(width: 8),
+                          Text(status),
+                        ],
+                      ),
                     ))
                 .toList();
           },
@@ -221,78 +257,96 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
     );
   }
 
-  Widget _buildTableRow(Machine machine, TextStyle rowStyle) {
-    return InkWell(
-      onTap: () => widget.onMachineAction(machine.id),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // reduced vertical padding
-        child: Row(
-          children: [
-            Expanded(
-              child: Center(
-                child: Text(
-                  machine.id,
-                  style: rowStyle.copyWith(
-                    fontSize: 13,
-                    color: const Color(0xFF6B7280),
-                  ),
-                  textAlign: TextAlign.center,
+  Widget _buildTableRow(MachineModel machine) {
+    final dateFormat = DateFormat('MMM dd, yyyy');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          // Machine ID
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text(
+                machine.machineId,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF6B7280),
                 ),
               ),
             ),
-            Expanded(
-              child: Center(
-                child: Text(
-                  '${machine.firstName} ${machine.lastName}',
-                  style: rowStyle,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+          ),
+
+          // Name
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: Text(
+                machine.machineName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF111827),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+
+          // Date Created
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text(
+                dateFormat.format(machine.dateCreated),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF6B7280),
                 ),
               ),
             ),
-            Expanded(
-              child: Center(child: _buildStatusBadge(machine.status)),
+          ),
+
+          // Status
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: _buildStatusBadge(machine.isArchived),
             ),
-            Expanded(
-              child: Center(
-                child: IconButton(
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  color: const Color(0xFF6B7280),
-                  onPressed: () => widget.onMachineAction(machine.id),
-                  tooltip: 'View Machine',
-                ),
+          ),
+
+          // ✅ Actions (ONLY clickable part)
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: IconButton(
+                icon: const Icon(Icons.open_in_new, size: 18),
+                color: const Color(0xFF6B7280),
+                tooltip: 'View Machine',
+                onPressed: () {
+                  widget.onMachineAction(machine.machineId);
+                },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatusBadge(String status) {
-    Color bgColor;
-    Color textColor;
-
-    switch (status.toLowerCase()) {
-      case 'active':
-        bgColor = const Color(0xFFD1FAE5);
-        textColor = const Color(0xFF065F46);
-        break;
-      case 'inactive':
-        bgColor = const Color(0xFFFEF3C7);
-        textColor = const Color(0xFF92400E);
-        break;
-      case 'suspended':
-        bgColor = const Color(0xFFFEE2E2);
-        textColor = const Color(0xFF991B1B);
-        break;
-      default:
-        bgColor = const Color(0xFFF3F4F6);
-        textColor = const Color(0xFF4B5563);
-    }
+  Widget _buildStatusBadge(bool isArchived) {
+    final status = isArchived ? 'Archived' : 'Active';
+    final bgColor = isArchived 
+        ? const Color(0xFFFEF3C7) 
+        : const Color(0xFFD1FAE5);
+    final textColor = isArchived 
+        ? const Color(0xFF92400E) 
+        : const Color(0xFF065F46);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3), // smaller badge
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
@@ -309,7 +363,7 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
     );
   }
 
-  static Widget _buildEmptyState() {
+  Widget _buildEmptyState() {
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

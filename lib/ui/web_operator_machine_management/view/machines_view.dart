@@ -1,43 +1,74 @@
 import 'package:flutter/material.dart';
-import '../models/machines_view_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../ui/machine_management/view_model/operator_machine_notifier.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
+import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart'; // Add this import
 
-/// Main machines view - the screen itself
-class MachinesView extends StatefulWidget {
-  const MachinesView({super.key});
+/// Main machines view connected to real data
+class MachinesView extends ConsumerStatefulWidget {
+  final String teamId;
+
+  const MachinesView({
+    super.key,
+    required this.teamId,
+  });
 
   @override
-  State<MachinesView> createState() => _MachinesViewState();
+  ConsumerState<MachinesView> createState() => _MachinesViewState();
 }
 
-class _MachinesViewState extends State<MachinesView> {
-  late final MachinesViewModel _viewModel;
+class _MachinesViewState extends ConsumerState<MachinesView> {
   final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _viewModel = MachinesViewModel();
     _searchController.addListener(_onSearchChanged);
+    // Initialize the notifier with teamId
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(operatorMachineProvider.notifier).initialize(widget.teamId);
+    });
   }
 
   void _onSearchChanged() {
-    _viewModel.searchMachines(_searchController.text);
+    ref.read(operatorMachineProvider.notifier)
+        .setSearchQuery(_searchController.text);
   }
 
   @override
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    _viewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(operatorMachineProvider);
+
+    // Show error if any
+    if (state.errorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.errorMessage!),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () {
+                ref.read(operatorMachineProvider.notifier).clearError();
+              },
+            ),
+          ),
+        );
+        ref.read(operatorMachineProvider.notifier).clearError();
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: LayoutBuilder(
@@ -47,75 +78,85 @@ class _MachinesViewState extends State<MachinesView> {
           final isTablet = screenWidth > 768 && screenWidth <= 1200;
           final isMobile = screenWidth <= 768;
 
-          return AnimatedBuilder(
-            animation: _viewModel,
-            builder: (context, child) {
-              return Column(
-                children: [
-                  // Stats Cards
-                  _buildStatsSection(isDesktop, isTablet, isMobile),
+          if (state.isLoading && state.machines.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                  // Machine List Card
-                  Expanded(
-                    child: _buildMachineListCard(
-                      isDesktop,
-                      isTablet,
-                      isMobile,
-                    ),
-                  ),
-                ],
-              );
-            },
+          return Column(
+            children: [
+              // Stats Cards
+              _buildStatsSection(state, isDesktop, isTablet, isMobile),
+
+              // Machine List Card
+              Expanded(
+                child: _buildMachineListCard(
+                  state,
+                  isDesktop,
+                  isTablet,
+                  isMobile,
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildStatsSection(bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildStatsSection(
+    OperatorMachineState state,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+  ) {
     return Padding(
       padding: EdgeInsets.all(isDesktop ? 32.0 : 16.0),
-      child: _buildStatsCards(isDesktop, isTablet, isMobile),
+      child: _buildStatsCards(state, isDesktop, isTablet, isMobile),
     );
   }
 
-  Widget _buildStatsCards(bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildStatsCards(
+    OperatorMachineState state,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+  ) {
     final stats = [
       StatCardData(
         label: 'Active Machines',
-        count: _viewModel.activeMachines.toString(),
-        change: _viewModel.activeChange,
-        subtext: 'activated machines this month',
+        count: state.activeMachinesCount.toString(),
+        change: '+0', // You can calculate this based on historical data
+        subtext: 'currently active',
         color: const Color(0xFF10B981),
         lightColor: const Color(0xFFD1FAE5),
         icon: Icons.check_circle_outline,
       ),
       StatCardData(
-        label: 'Inactive Machines',
-        count: _viewModel.inactiveMachines.toString(),
-        change: _viewModel.inactiveChange,
-        subtext: 'disabled machines this month',
+        label: 'Archived Machines',
+        count: state.archivedMachinesCount.toString(),
+        change: '+0',
+        subtext: 'archived machines',
         color: const Color(0xFFF59E0B),
         lightColor: const Color(0xFFFEF3C7),
-        icon: Icons.cancel_outlined,
+        icon: Icons.archive_outlined,
       ),
       StatCardData(
-        label: 'Suspended Machines',
-        count: _viewModel.suspendedMachines.toString().padLeft(2, '0'),
-        change: _viewModel.suspendedChange,
-        subtext: 'suspended machines this month',
-        color: const Color(0xFFEF4444),
-        lightColor: const Color(0xFFFEE2E2),
-        icon: Icons.pause_circle_outline,
-      ),
-      StatCardData(
-        label: 'New Machines',
-        count: _viewModel.newMachines.toString().padLeft(2, '0'),
-        change: _viewModel.newChange,
-        subtext: 'new machines this month',
+        label: 'Total Machines',
+        count: state.machines.length.toString().padLeft(2, '0'),
+        change: '+0',
+        subtext: 'all machines',
         color: const Color(0xFF3B82F6),
         lightColor: const Color(0xFFDBEAFE),
-        icon: Icons.add_circle_outline,
+        icon: Icons.precision_manufacturing_outlined,
+      ),
+      StatCardData(
+        label: 'Filtered Results',
+        count: state.filteredMachines.length.toString().padLeft(2, '0'),
+        change: '+0',
+        subtext: 'matching search',
+        color: const Color(0xFF8B5CF6),
+        lightColor: const Color(0xFFEDE9FE),
+        icon: Icons.filter_alt_outlined,
       ),
     ];
 
@@ -153,7 +194,12 @@ class _MachinesViewState extends State<MachinesView> {
     }
   }
 
-  Widget _buildMachineListCard(bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildMachineListCard(
+    OperatorMachineState state,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+  ) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         isDesktop ? 32.0 : 16.0,
@@ -178,28 +224,31 @@ class _MachinesViewState extends State<MachinesView> {
           children: [
             _buildListHeader(isDesktop, isMobile),
             Expanded(
-              child: isMobile
-                  ? MachineMobileCardWidget(
-                      machines: _viewModel.getMachinesForCurrentPage(),
-                    )
-                  : MachineTableWidget(
-                      machines: _viewModel.getMachinesForCurrentPage(),
-                      onMachineAction: (machineId) {
-                        // Handle machine action
-                        print('Action on machine: $machineId');
-                      },
-                    ),
+              child: state.displayedMachines.isEmpty
+                  ? _buildEmptyState()
+                  : (isMobile
+                      ? MachineMobileCardWidget(
+                          machines: state.displayedMachines,
+                          onMachineAction: _handleMachineAction,
+                        )
+                      : MachineTableWidget(
+                          machines: state.displayedMachines,
+                          onMachineAction: _handleMachineAction,
+                        )),
             ),
-            PaginationWidget(
-              currentPage: _viewModel.currentPage,
-              totalPages: _viewModel.totalPages,
-              onPageChanged: _viewModel.goToPage,
-              onNext: _viewModel.nextPage,
-              onPrevious: _viewModel.previousPage,
-              canGoNext: _viewModel.canGoNext,
-              canGoPrevious: _viewModel.canGoPrevious,
-              isDesktop: isDesktop,
-            ),
+            if (state.hasMoreToLoad)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ref.read(operatorMachineProvider.notifier).loadMore();
+                  },
+                  icon: const Icon(Icons.expand_more),
+                  label: Text(
+                    'Load More (${state.remainingCount} remaining)',
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -227,7 +276,7 @@ class _MachinesViewState extends State<MachinesView> {
               if (isDesktop)
                 Row(
                   children: [
-                    _buildHeaderButton(Icons.calendar_today_outlined),
+                    _buildRefreshButton(),
                     const SizedBox(width: 12),
                     _buildSearchField(),
                   ],
@@ -236,18 +285,29 @@ class _MachinesViewState extends State<MachinesView> {
           ),
           if (isMobile) ...[
             const SizedBox(height: 16),
-            _buildSearchField(),
+            Row(
+              children: [
+                Expanded(child: _buildSearchField()),
+                const SizedBox(width: 8),
+                _buildRefreshButton(),
+              ],
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildHeaderButton(IconData icon) {
+  Widget _buildRefreshButton() {
+    final state = ref.watch(operatorMachineProvider);
     return InkWell(
-      onTap: () {
-        // Handle calendar action
-      },
+      onTap: state.isLoading
+          ? null
+          : () {
+              ref
+                  .read(operatorMachineProvider.notifier)
+                  .refresh(widget.teamId);
+            },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(10),
@@ -255,7 +315,17 @@ class _MachinesViewState extends State<MachinesView> {
           border: Border.all(color: const Color(0xFFE5E7EB)),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, size: 20, color: const Color(0xFF6B7280)),
+        child: state.isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(
+                Icons.refresh,
+                size: 20,
+                color: Color(0xFF6B7280),
+              ),
       ),
     );
   }
@@ -270,20 +340,100 @@ class _MachinesViewState extends State<MachinesView> {
       ),
       child: TextField(
         controller: _searchController,
-        decoration: const InputDecoration(
-          hintText: 'Search...',
-          hintStyle: TextStyle(
+        decoration: InputDecoration(
+          hintText: 'Search by name or ID...',
+          hintStyle: const TextStyle(
             color: Color(0xFF9CA3AF),
             fontSize: 14,
           ),
-          prefixIcon: Icon(
+          prefixIcon: const Icon(
             Icons.search,
             size: 20,
             color: Color(0xFF9CA3AF),
           ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: () {
+                    _searchController.clear();
+                    ref
+                        .read(operatorMachineProvider.notifier)
+                        .clearSearch();
+                  },
+                )
+              : null,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final state = ref.watch(operatorMachineProvider);
+    final hasSearch = state.searchQuery.isNotEmpty;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              hasSearch ? Icons.search_off : Icons.precision_manufacturing_outlined,
+              size: 64,
+              color: const Color(0xFF9CA3AF),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              hasSearch ? 'No machines found' : 'No machines yet',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              hasSearch
+                  ? 'Try adjusting your search query'
+                  : 'Add your first machine to get started',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF9CA3AF),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (hasSearch) ...[
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _searchController.clear();
+                  ref.read(operatorMachineProvider.notifier).clearSearch();
+                },
+                icon: const Icon(Icons.clear),
+                label: const Text('Clear Search'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleMachineAction(String machineId) {
+    // Find the machine from the state
+    final state = ref.read(operatorMachineProvider);
+    final machine = state.machines.firstWhere(
+      (m) => m.machineId == machineId,
+      orElse: () => throw Exception('Machine not found'),
+    );
+
+    // Show the MachineViewDialog with machine details
+    showDialog(
+      context: context,
+      builder: (context) => MachineViewDialog(
+        machine: machine,
       ),
     );
   }
