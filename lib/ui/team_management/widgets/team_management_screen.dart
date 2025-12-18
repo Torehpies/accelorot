@@ -15,8 +15,8 @@ class TeamManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLoading = ref.watch(
-      teamManagementProvider.select((s) => s.isLoadingTeams),
+    final teams = ref.watch(
+      teamManagementProvider.select((s) => s.teams),
     );
 
     final isSaving = ref.watch(
@@ -31,14 +31,14 @@ class TeamManagementScreen extends ConsumerWidget {
         backgroundColor: Colors.yellow.shade800,
         actions: [
           IconButton(
-            onPressed: (isLoading || isSaving)
+            onPressed: (teams.isLoading || isSaving)
                 ? null
                 : () {
                     ref
                         .read(teamManagementProvider.notifier)
                         .getTeams(forceRefresh: true);
                   },
-            icon: isLoading
+            icon: teams.isLoading
                 ? const SizedBox(
                     width: 24,
                     height: 24,
@@ -49,7 +49,7 @@ class TeamManagementScreen extends ConsumerWidget {
         ],
       ),
       backgroundColor: Colors.white,
-      body: isLoading
+      body: teams.isLoading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
               child: ResponsiveLayout(

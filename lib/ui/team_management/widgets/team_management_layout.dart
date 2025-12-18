@@ -13,10 +13,7 @@ class TeamManagementLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final teams = ref.watch(teamManagementProvider.select((s) => s.teams));
-    final isLoading = ref.watch(
-      teamManagementProvider.select((s) => s.isLoadingTeams),
-    );
+    final state = ref.watch(teamManagementProvider);
 
     return Column(
       children: [
@@ -31,7 +28,7 @@ class TeamManagementLayout extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 ElevatedButton.icon(
-                  onPressed: isLoading
+                  onPressed: state.teams.isLoading || state.isSavingTeams
                       ? null
                       : () => _showAddTeamDialog(context),
                   label: Text("Add Team"),
@@ -41,30 +38,40 @@ class TeamManagementLayout extends ConsumerWidget {
             ),
           ),
         Expanded(
-          child: teams.isEmpty && !isLoading
-              ? StatusMessage(
-                  title: "No teams yet",
-                  icon: Icons.group,
-                  description: "Tap the + button to create teams",
-                )
-              : ListView.builder(
-                  itemCount: teams.length,
-                  itemBuilder: (context, index) {
-                    final team = teams[index];
+          child: state.teams.when(
+            data: (teams) => teams.isEmpty
+                ? StatusMessage(
+                    title: "No teams yet",
+                    icon: Icons.group,
+                    description: "Tap the + button to create teams",
+                  )
+                : ListView.builder(
+                    itemCount: teams.length,
+                    itemBuilder: (context, index) {
+                      final team = teams[index];
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        child: Text(team.teamName[0].toUpperCase()),
-                      ),
-                      title: Text(
-                        team.teamName,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(team.address),
-                    );
-                  },
-                ),
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          child: Text(team.teamName[0].toUpperCase()),
+                        ),
+                        title: Text(
+                          team.teamName,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(team.address),
+                      );
+                    },
+                  ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => StatusMessage(
+              title: "Error loading teams",
+              icon: Icons.error,
+              description: error.toString(),
+            ),
+          ),
         ),
       ],
     );

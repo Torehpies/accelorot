@@ -34,10 +34,10 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
   Widget build(BuildContext context) {
     final state = ref.watch(teamManagementProvider);
     final isSaving = state.isSavingTeams;
-    final errorMessage = state.errorMessage;
+    final errorMessage = state.message;
 
     ref.listen<String?>(
-      teamManagementProvider.select((s) => s.successMessage),
+      teamManagementProvider.select((s) => s.message.toString()),
       (previous, next) {
         if (next != null) {
           Navigator.of(context).pop();
@@ -45,16 +45,16 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
       },
     );
 
-    ref.listen<String?>(teamManagementProvider.select((s) => s.errorMessage), (
-      previous,
-      next,
-    ) {
-      if (next != null) {
-        Future.delayed(Duration(seconds: 5), () {
-          ref.read(teamManagementProvider.notifier).clearError();
-        });
-      }
-    });
+    ref.listen<String?>(
+      teamManagementProvider.select((s) => s.message.toString()),
+      (previous, next) {
+        if (next != null) {
+          Future.delayed(Duration(seconds: 5), () {
+            ref.read(teamManagementProvider.notifier).clearError();
+          });
+        }
+      },
+    );
     return AlertDialog(
       title: Text("Add Team"),
       content: Form(
@@ -66,7 +66,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: Text(
-                  errorMessage,
+                  errorMessage.toString(),
                   style: TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,

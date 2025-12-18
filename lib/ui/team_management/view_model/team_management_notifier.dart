@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/repositories/team_management/team_rep
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_state.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'team_management_notifier.g.dart';
@@ -16,36 +17,16 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   TeamManagementState build() {
     _repository = ref.read(teamRepositoryProvider);
     Future.microtask(() => getTeams());
-    //    ref.listen(appUserProvider, (_, next) {
-    //      next.whenData((user) {
-    //        if (user != null) {
-    //          getTeams();
-    //        } else {
-    //          state = state.copyWith(teams: []);
-    //        }
-    //      });
-    //    });
     return const TeamManagementState();
   }
 
   Future<void> getTeams({bool forceRefresh = false}) async {
-    state = state.copyWith(isLoadingTeams: true);
-
-    final teamRepo = ref.read(teamRepositoryProvider);
-
-    final result = await teamRepo.getTeams(forceRefresh: forceRefresh);
-
-    result.when(
-      success: (teams) => state = state.copyWith(
-        teams: teams,
-        isLoadingTeams: false,
-        errorMessage: null,
-        successMessage: null,
-      ),
-      failure: (e) => state = state.copyWith(
-        isLoadingTeams: false,
-        errorMessage: e.userFriendlyMessage,
-        successMessage: null,
+    state = state.copyWith(teams: AsyncLoading());
+    state = state.copyWith(
+      teams: await AsyncValue.guard(
+        () => ref
+            .read(teamRepositoryProvider)
+            .getTeams(forceRefresh: forceRefresh),
       ),
     );
   }
@@ -57,7 +38,9 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
     address = address.trim();
 
     if (teamName.isEmpty || address.isEmpty) {
-      state = state.copyWith(errorMessage: "Please fill out fields.");
+      state = state.copyWith(
+        message: UiMessage.error("Please fill out fields."),
+      );
       return;
     }
 
@@ -76,21 +59,19 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
         await getTeams(forceRefresh: true);
         state = state.copyWith(
           isSavingTeams: false,
-          errorMessage: null,
-          successMessage: 'Team $teamName added successfully!',
+          message: UiMessage.success('Team $teamName added successfully!'),
         );
       },
       failure: (e) {
         state = state.copyWith(
           isSavingTeams: false,
-          errorMessage: e.userFriendlyMessage,
-          successMessage: null,
+          message: UiMessage.error(e.userFriendlyMessage),
         );
       },
     );
   }
 
   void clearError() {
-    state = state.copyWith(errorMessage: null);
+    state = state.copyWith(message: null);
   }
 }
