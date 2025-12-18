@@ -15,7 +15,7 @@ class SuperAdminMobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveMobileShell(
-      navItems: adminNavItems,
+      navItems: superAdminNavItems,
       color: AppColors.green100,
       onTapped: _onItemTapped,
       child: child,

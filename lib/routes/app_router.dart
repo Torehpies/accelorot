@@ -22,6 +22,7 @@ import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
+import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/profile_screen/widgets/profile_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/widgets/reports_view.dart';
@@ -151,7 +152,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.profile.path,
             name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const ProfileView(),
+              child: const WebProfileView(),
               key: state.pageKey,
             ),
           ),
@@ -205,7 +206,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileView(),
+              child: const WebProfileView(),
             ),
           ),
         ],
@@ -242,7 +243,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.superAdminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileView(),
+              child: const WebProfileView(),
             ),
           ),
         ],
