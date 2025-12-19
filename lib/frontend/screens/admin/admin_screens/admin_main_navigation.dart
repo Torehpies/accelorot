@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../operator/profile/profile_screen.dart';
+import '../../../../ui/profile_screen/widgets/profile_view.dart';
 import '../../../../ui/machine_management/widgets/admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
 import '../home_screen/admin_home_screen.dart';
@@ -39,7 +39,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
       AdminHomeScreen(onNavigateToTab: _navigateToTab),
       const OperatorManagementScreen(),
       const AdminMachineView(), 
-      const ProfileScreen(),
+      const ProfileView(),
     ];
   }
 

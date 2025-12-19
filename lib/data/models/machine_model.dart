@@ -7,7 +7,7 @@ part 'machine_model.g.dart';
 @freezed
 abstract class MachineModel with _$MachineModel {
   const MachineModel._(); // Private constructor for custom methods
-
+  
   const factory MachineModel({
     String? id, 
     required String machineId,

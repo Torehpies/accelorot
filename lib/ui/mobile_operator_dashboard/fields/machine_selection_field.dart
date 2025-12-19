@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../../data/models/machine_model.dart';
-import '../../../../../data/services/firebase/firebase_machine_service.dart'; 
-import '../../../../../data/repositories/machine_repository/machine_repository.dart'; 
-import '../../../../../data/repositories/machine_repository/machine_repository_remote.dart';
-import '../../../../../services/sess_service.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../data/services/firebase/firebase_machine_service.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/repositories/machine_repository/machine_repository_remote.dart';
+import '../../../services/sess_service.dart';
 
 class MachineSelectionField extends StatefulWidget {
   final String? selectedMachineId;

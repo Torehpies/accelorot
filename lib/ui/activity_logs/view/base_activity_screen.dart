@@ -7,6 +7,9 @@ import '../widgets/filter_section.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/date_filter_button.dart';
+import '../widgets/machine_selector.dart'; 
+import '../widgets/batch_selector.dart';
+
 
 /// Clean base screen that only handles UI rendering
 /// All business logic is in ViewModels
@@ -46,6 +49,11 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
   /// Callback when date filter changes
   void onDateFilterChanged(DateFilterRange filter);
+
+  void onBatchChanged(String? batchId);
+  
+  
+  void onMachineChanged(String? machineId);
 
   /// Optional: Callback for refresh
   Future<void> onRefresh() async {}
@@ -112,6 +120,29 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
         children: [
           // Machine filter banner
           if (state.focusedMachineId != null) _buildMachineBanner(),
+
+          Row(
+            children: [
+              Expanded(
+                child: MachineSelector(
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: onMachineChanged,
+                  isCompact: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: BatchSelector(
+                  selectedBatchId: state.selectedBatchId,
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: onBatchChanged,
+                  isCompact: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
 
           // Search bar
           SearchBarWidget(

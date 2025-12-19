@@ -7,20 +7,69 @@ import '../widgets/web_responsive_layout.dart';
 import '../widgets/web_loading_state.dart';
 import '../widgets/web_empty_state.dart';
 import '../widgets/web_activity_card.dart';
+import '../widgets/machine_selector.dart'; 
+import '../widgets/batch_selector.dart';
+
 
 /// Dashboard screen with preview sections
-class WebDashboardScreen extends ConsumerWidget {
+class WebDashboardScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
   final Function(String)? onViewAll;
 
   const WebDashboardScreen({super.key, this.focusedMachineId, this.onViewAll});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return WebResponsiveLayout(
-      wide: (context) => _buildWideLayout(context, ref),
-      medium: (context) => _buildMediumLayout(context, ref),
-      narrow: (context) => _buildNarrowLayout(context, ref),
+  ConsumerState<WebDashboardScreen> createState() => _WebDashboardScreenState();
+}
+
+class _WebDashboardScreenState extends ConsumerState<WebDashboardScreen> {
+  String? _selectedMachineId;
+  String? _selectedBatchId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Machine & Batch Selector Row
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: MachineSelector(
+                  selectedMachineId: _selectedMachineId,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedMachineId = value;
+                      _selectedBatchId = null; 
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: BatchSelector(
+                  selectedBatchId: _selectedBatchId,
+                  selectedMachineId: _selectedMachineId,
+                  onChanged: (value) {
+                    setState(() => _selectedBatchId = value);
+                  },
+                  showLabel: false,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Dashboard content
+        Expanded(
+          child: WebResponsiveLayout(
+            wide: (context) => _buildWideLayout(context, ref),
+            medium: (context) => _buildMediumLayout(context, ref),
+            narrow: (context) => _buildNarrowLayout(context, ref),
+          ),
+        ),
+      ],
     );
   }
 
@@ -108,7 +157,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.allActivity,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -119,7 +168,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(5).toList(),
-      onViewAll: null, // No view all for recent
+      onViewAll: null, 
     );
   }
 
@@ -127,7 +176,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.substrates,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -138,15 +187,14 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('substrate'),
+      onViewAll: () => widget.onViewAll?.call('substrate'),
     );
   }
 
   Widget _buildAlertsPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.alerts,
-
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -157,7 +205,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('alerts'),
+      onViewAll: () => widget.onViewAll?.call('alerts'),
     );
   }
 
@@ -165,7 +213,7 @@ class WebDashboardScreen extends ConsumerWidget {
     final params = ActivityParams(
       screenType: ActivityScreenType.reports,
 
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId, 
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -176,14 +224,14 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('reports'),
+      onViewAll: () => widget.onViewAll?.call('reports'),
     );
   }
 
   Widget _buildCyclesPreview(BuildContext context, WidgetRef ref) {
     final params = ActivityParams(
       screenType: ActivityScreenType.cyclesRecom,
-      focusedMachineId: focusedMachineId,
+      focusedMachineId: widget.focusedMachineId,
     );
     final state = ref.watch(activityViewModelProvider(params));
 
@@ -194,7 +242,7 @@ class WebDashboardScreen extends ConsumerWidget {
       isLoading: state.isLoading,
       isEmpty: state.isEmpty,
       items: state.filteredActivities.take(3).toList(),
-      onViewAll: () => onViewAll?.call('cycles'),
+      onViewAll: () => widget.onViewAll?.call('cycles'),
     );
   }
 

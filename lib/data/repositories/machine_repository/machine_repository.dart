@@ -1,6 +1,5 @@
 import '../../models/machine_model.dart';
 
-/// Abstract repository interface - defines the contract
 abstract class MachineRepository {
   Future<List<MachineModel>> getMachinesByTeam(String teamId);
   Future<MachineModel?> getMachineById(String machineId);
