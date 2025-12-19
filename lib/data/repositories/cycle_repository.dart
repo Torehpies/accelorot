@@ -9,84 +9,75 @@ class CycleRepository {
   Future<List<CycleRecommendation>> getTeamCycles() =>
       _cycleService.fetchTeamCycles();
 
-  Future<CycleRecommendation> getOrCreateCycleForBatch({
+  Future<CycleRecommendation?> getDrumController({
+    required String batchId,
+  }) =>
+      _cycleService.getDrumController(batchId: batchId);
+
+  Future<CycleRecommendation?> getAerator({
+    required String batchId,
+  }) =>
+      _cycleService.getAerator(batchId: batchId);
+
+  Future<String> startDrumController({
     required String batchId,
     required String machineId,
     required String userId,
-  }) =>
-      _cycleService.getOrCreateCycleForBatch(
-        batchId: batchId,
-        machineId: machineId,
-        userId: userId,
-      );
-
-  Future<void> startDrumController({
-    required String batchId,
-    required String cycleId,
     required int cycles,
     required String duration,
   }) =>
       _cycleService.startDrumController(
         batchId: batchId,
-        cycleId: cycleId,
+        machineId: machineId,
+        userId: userId,
         cycles: cycles,
         duration: duration,
       );
 
   Future<void> updateDrumProgress({
     required String batchId,
-    required String cycleId,
     required int completedCycles,
     required Duration totalRuntime,
   }) =>
       _cycleService.updateDrumProgress(
         batchId: batchId,
-        cycleId: cycleId,
         completedCycles: completedCycles,
         totalRuntime: totalRuntime,
       );
 
   Future<void> completeDrumController({
     required String batchId,
-    required String cycleId,
   }) =>
-      _cycleService.completeDrumController(
-        batchId: batchId,
-        cycleId: cycleId,
-      );
+      _cycleService.completeDrumController(batchId: batchId);
 
-  Future<void> startAerator({
+  Future<String> startAerator({
     required String batchId,
-    required String cycleId,
+    required String machineId,
+    required String userId,
     required int cycles,
     required String duration,
   }) =>
       _cycleService.startAerator(
         batchId: batchId,
-        cycleId: cycleId,
+        machineId: machineId,
+        userId: userId,
         cycles: cycles,
         duration: duration,
       );
 
   Future<void> updateAeratorProgress({
     required String batchId,
-    required String cycleId,
     required int completedCycles,
     required Duration totalRuntime,
   }) =>
       _cycleService.updateAeratorProgress(
         batchId: batchId,
-        cycleId: cycleId,
         completedCycles: completedCycles,
         totalRuntime: totalRuntime,
       );
 
   Future<void> completeAerator({
     required String batchId,
-    required String cycleId,
   }) =>
-      _cycleService.completeAerator(
-        batchId: batchId,
-        cycleId: cycleId,
-      );
+      _cycleService.completeAerator(batchId: batchId);
 }

@@ -28,7 +28,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   DateTime? _startTime;
   Timer? _timer;
   Timer? _cycleTimer;
-  String? _currentCycleId;
   CycleRecommendation? _cycleDoc;
 
   @override
@@ -53,7 +52,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _uptime = '00:00:00';
           _completedCycles = 0;
           _startTime = null;
-          _currentCycleId = null;
           _cycleDoc = null;
         });
       } else {
@@ -65,7 +63,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       _stopTimer();
       _cycleTimer?.cancel();
       
-      if (_currentCycleId != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
         _completeCycleInFirebase();
       }
       
@@ -79,38 +77,32 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     if (widget.currentBatch == null) return;
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycle = await cycleRepository.getOrCreateCycleForBatch(
+      final cycle = await cycleRepository.getAerator(
         batchId: widget.currentBatch!.id,
-        machineId: widget.currentBatch!.machineId,
-        userId: user.uid,
       );
 
-      if (mounted && cycle.hasAerator) {
+      if (mounted && cycle != null) {
         setState(() {
           _cycleDoc = cycle;
-          _currentCycleId = cycle.id;
           settings = DrumRotationSettings(
-            cycles: cycle.aeratorCycles ?? 50,
-            period: cycle.aeratorDuration ?? '1 hour',
+            cycles: cycle.cycles ?? 50,
+            period: cycle.duration ?? '1 hour',
           );
-          _completedCycles = cycle.aeratorCompletedCycles ?? 0;
+          _completedCycles = cycle.completedCycles ?? 0;
 
-          if (cycle.aeratorStatus == 'running') {
+          if (cycle.status == 'running') {
             status = SystemStatus.running;
-            _startTime = cycle.aeratorStartedAt;
+            _startTime = cycle.startedAt;
             if (_startTime != null) {
               _startTimer();
               _simulateCycles();
             }
-          } else if (cycle.aeratorStatus == 'completed') {
+          } else if (cycle.status == 'completed') {
             status = SystemStatus.stopped;
-            if (cycle.aeratorTotalRuntimeSeconds != null) {
+            if (cycle.totalRuntimeSeconds != null) {
               _uptime = _formatDuration(
-                Duration(seconds: cycle.aeratorTotalRuntimeSeconds!),
+                Duration(seconds: cycle.totalRuntimeSeconds!),
               );
             }
           }
@@ -177,25 +169,22 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       
-      // Get or create cycle document
-      if (_currentCycleId == null) {
-        final cycle = await cycleRepository.getOrCreateCycleForBatch(
-          batchId: widget.currentBatch!.id,
-          machineId: widget.currentBatch!.machineId,
-          userId: user.uid,
-        );
-        _currentCycleId = cycle.id;
-      }
-
       // Start aerator in Firebase
       await cycleRepository.startAerator(
         batchId: widget.currentBatch!.id,
-        cycleId: _currentCycleId!,
+        machineId: widget.currentBatch!.machineId,
+        userId: user.uid,
         cycles: settings.cycles,
         duration: settings.period,
       );
 
+      // Reload the cycle to get the ID
+      final cycle = await cycleRepository.getAerator(
+        batchId: widget.currentBatch!.id,
+      );
+
       setState(() {
+        _cycleDoc = cycle;
         status = SystemStatus.running;
         _startTime = DateTime.now();
         _completedCycles = 0;
@@ -225,12 +214,11 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         });
 
         // Update progress in Firebase
-        if (_currentCycleId != null && widget.currentBatch?.id != null && _startTime != null) {
+        if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
             await cycleRepository.updateAeratorProgress(
               batchId: widget.currentBatch!.id,
-              cycleId: _currentCycleId!,
               completedCycles: _completedCycles,
               totalRuntime: DateTime.now().difference(_startTime!),
             );
@@ -244,7 +232,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           timer.cancel();
           
           // Complete cycle in Firebase
-          if (_currentCycleId != null && widget.currentBatch?.id != null) {
+          if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
           
@@ -259,13 +247,12 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   }
 
   Future<void> _completeCycleInFirebase() async {
-    if (_currentCycleId == null || widget.currentBatch?.id == null) return;
+    if (widget.currentBatch?.id == null) return;
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       await cycleRepository.completeAerator(
         batchId: widget.currentBatch!.id,
-        cycleId: _currentCycleId!,
       );
     } catch (e) {
       debugPrint('Failed to complete aerator: $e');

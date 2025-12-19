@@ -3,37 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 part 'cycle_recommendation.freezed.dart';
 
-/// Model for a cycle containing both drum controller and aerator settings
+/// Model for individual cycle controller (drum or aerator)
 @freezed
 abstract class CycleRecommendation with _$CycleRecommendation {
   const factory CycleRecommendation({
     required String id,
-    required String title,
-    required String value,
-    required String category, // 'recoms' or 'cycles'
-    required String description,
-    required DateTime timestamp,
+    required String category, // 'cycles'
+    required String controllerType, // 'drum_controller' or 'aerator'
     String? machineId,
     String? userId,
     String? batchId,
     
-    // Drum Controller fields
-    int? drumCycles,
-    String? drumDuration,
-    int? drumCompletedCycles,
-    String? drumStatus, // 'idle', 'running', 'stopped', 'completed'
-    DateTime? drumStartedAt,
-    DateTime? drumCompletedAt,
-    int? drumTotalRuntimeSeconds,
-    
-    // Aerator fields
-    int? aeratorCycles,
-    String? aeratorDuration,
-    int? aeratorCompletedCycles,
-    String? aeratorStatus, // 'idle', 'running', 'stopped', 'completed'
-    DateTime? aeratorStartedAt,
-    DateTime? aeratorCompletedAt,
-    int? aeratorTotalRuntimeSeconds,
+    // Cycle settings
+    int? cycles,
+    String? duration,
+    int? completedCycles,
+    String? status, // 'idle', 'running', 'stopped', 'completed'
+    DateTime? startedAt,
+    DateTime? completedAt,
+    int? totalRuntimeSeconds,
   }) = _CycleRecommendation;
 
   const CycleRecommendation._();
@@ -46,84 +34,77 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     
     return CycleRecommendation(
       id: doc.id,
-      title: data['title'] ?? '',
-      value: data['value'] ?? '',
-      category: data['category'] ?? '',
-      description: data['description'] ?? '',
-      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      category: data['category'] ?? 'cycles',
+      controllerType: data['controllerType'] ?? '',
       machineId: data['machineId'],
       userId: data['userId'],
       batchId: data['batchId'],
-      
-      // Drum Controller
-      drumCycles: data['drumCycles'],
-      drumDuration: data['drumDuration'],
-      drumCompletedCycles: data['drumCompletedCycles'],
-      drumStatus: data['drumStatus'],
-      drumStartedAt: (data['drumStartedAt'] as Timestamp?)?.toDate(),
-      drumCompletedAt: (data['drumCompletedAt'] as Timestamp?)?.toDate(),
-      drumTotalRuntimeSeconds: data['drumTotalRuntimeSeconds'],
-      
-      // Aerator
-      aeratorCycles: data['aeratorCycles'],
-      aeratorDuration: data['aeratorDuration'],
-      aeratorCompletedCycles: data['aeratorCompletedCycles'],
-      aeratorStatus: data['aeratorStatus'],
-      aeratorStartedAt: (data['aeratorStartedAt'] as Timestamp?)?.toDate(),
-      aeratorCompletedAt: (data['aeratorCompletedAt'] as Timestamp?)?.toDate(),
-      aeratorTotalRuntimeSeconds: data['aeratorTotalRuntimeSeconds'],
+      cycles: data['cycles'],
+      duration: data['duration'],
+      completedCycles: data['completedCycles'],
+      status: data['status'],
+      startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      totalRuntimeSeconds: data['totalRuntimeSeconds'],
     );
   }
 
   /// Convert to Firestore map
   Map<String, dynamic> toFirestore() {
     return {
-      'title': title,
-      'value': value,
       'category': category,
-      'description': description,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'controllerType': controllerType,
       if (machineId != null) 'machineId': machineId,
       if (userId != null) 'userId': userId,
       if (batchId != null) 'batchId': batchId,
-      
-      // Drum Controller
-      if (drumCycles != null) 'drumCycles': drumCycles,
-      if (drumDuration != null) 'drumDuration': drumDuration,
-      if (drumCompletedCycles != null) 'drumCompletedCycles': drumCompletedCycles,
-      if (drumStatus != null) 'drumStatus': drumStatus,
-      if (drumStartedAt != null) 'drumStartedAt': Timestamp.fromDate(drumStartedAt!),
-      if (drumCompletedAt != null) 'drumCompletedAt': Timestamp.fromDate(drumCompletedAt!),
-      if (drumTotalRuntimeSeconds != null) 'drumTotalRuntimeSeconds': drumTotalRuntimeSeconds,
-      
-      // Aerator
-      if (aeratorCycles != null) 'aeratorCycles': aeratorCycles,
-      if (aeratorDuration != null) 'aeratorDuration': aeratorDuration,
-      if (aeratorCompletedCycles != null) 'aeratorCompletedCycles': aeratorCompletedCycles,
-      if (aeratorStatus != null) 'aeratorStatus': aeratorStatus,
-      if (aeratorStartedAt != null) 'aeratorStartedAt': Timestamp.fromDate(aeratorStartedAt!),
-      if (aeratorCompletedAt != null) 'aeratorCompletedAt': Timestamp.fromDate(aeratorCompletedAt!),
-      if (aeratorTotalRuntimeSeconds != null) 'aeratorTotalRuntimeSeconds': aeratorTotalRuntimeSeconds,
+      if (cycles != null) 'cycles': cycles,
+      if (duration != null) 'duration': duration,
+      if (completedCycles != null) 'completedCycles': completedCycles,
+      if (status != null) 'status': status,
+      if (startedAt != null) 'startedAt': Timestamp.fromDate(startedAt!),
+      if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
+      if (totalRuntimeSeconds != null) 'totalRuntimeSeconds': totalRuntimeSeconds,
     };
   }
 
   // ===== DATA LOGIC HELPERS =====
   
-  /// Check if this is a recommendation
-  bool get isRecommendation => category.toLowerCase() == 'recoms';
-
   /// Check if this is a cycle
   bool get isCycle => category.toLowerCase() == 'cycles';
   
-  /// Check if drum controller has been started
-  bool get hasDrumController => drumCycles != null;
+  /// Check if this is a drum controller
+  bool get isDrumController => controllerType == 'drum_controller';
   
-  /// Check if aerator has been started
-  bool get hasAerator => aeratorCycles != null;
+  /// Check if this is an aerator
+  bool get isAerator => controllerType == 'aerator';
   
-  /// Check if drum controller is running
-  bool get isDrumRunning => drumStatus == 'running';
+  /// Check if controller is running
+  bool get isRunning => status == 'running';
   
-  /// Check if aerator is running
-  bool get isAeratorRunning => aeratorStatus == 'running';
+  /// Check if controller is completed
+  bool get isCompleted => status == 'completed';
+  
+  // ===== COMPUTED/DERIVED PROPERTIES =====
+  
+  /// Get display title
+  String get title {
+    switch (controllerType) {
+      case 'drum_controller':
+        return 'Drum Controller';
+      case 'aerator':
+        return 'Aerator';
+      default:
+        return 'Controller';
+    }
+  }
+  
+  /// Get display value (formatted cycles)
+  String get value => cycles != null ? '$cycles cycles' : '0 cycles';
+  
+  /// Get description (formatted duration and cycles)
+  String get description => 
+      'Duration: ${duration ?? "N/A"}, Cycles: ${cycles ?? 0}';
+  
+  /// Get timestamp for sorting/display (use startedAt or completedAt)
+  DateTime get timestamp => completedAt ?? startedAt ?? DateTime.now();
 }
