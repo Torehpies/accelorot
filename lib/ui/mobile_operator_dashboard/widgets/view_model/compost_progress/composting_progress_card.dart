@@ -79,6 +79,11 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             // Notify parent of batch change
             widget.onBatchChanged?.call(latestBatch);
           }
+        } else {
+          // No batches for this machine - notify parent
+          if (mounted) {
+            widget.onBatchChanged?.call(null);
+          }
         }
       }
     });
@@ -331,6 +336,8 @@ if (machineBatches.isNotEmpty) {
                         _selectedBatchId = null;
                         _activeBatch = null;
                       });
+                      // Notify parent immediately that batch is cleared
+                      widget.onBatchChanged?.call(null);
                       // Auto-select latest batch for new machine
                       if (machineId != null) {
                         _autoSelectLatestBatch();
