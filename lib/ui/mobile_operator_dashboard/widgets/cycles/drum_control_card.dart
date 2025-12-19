@@ -29,41 +29,65 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
+  String? _lastLoadedBatchId;
 
   @override
   void initState() {
     super.initState();
+    _initializeFromBatch();
+  }
+
+  void _initializeFromBatch() {
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      _loadExistingCycle();
+      _lastLoadedBatchId = widget.currentBatch!.id;
+      // Schedule load after build completes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _loadExistingCycle();
+        }
+      });
+    } else {
+      _resetState();
     }
+  }
+
+  void _resetState() {
+    _stopTimer();
+    _cycleTimer?.cancel();
+    setState(() {
+      settings.reset();
+      status = SystemStatus.idle;
+      _uptime = '00:00:00';
+      _completedCycles = 0;
+      _startTime = null;
+      _cycleDoc = null;
+      _lastLoadedBatchId = null;
+    });
   }
 
   @override
   void didUpdateWidget(DrumControlCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    if (oldWidget.currentBatch?.id != widget.currentBatch?.id) {
-      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-        _stopTimer();
-        _cycleTimer?.cancel();
-        setState(() {
-          settings.reset();
-          status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _completedCycles = 0;
-          _startTime = null;
-          _cycleDoc = null;
-        });
-      } else {
-        _loadExistingCycle();
-      }
-    } else if (widget.currentBatch != null && 
-               oldWidget.currentBatch?.isActive == true && 
-               !widget.currentBatch!.isActive) {
+    final currentBatchId = widget.currentBatch?.id;
+    final oldBatchId = oldWidget.currentBatch?.id;
+    
+    debugPrint('🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId');
+    
+    // Batch changed
+    if (currentBatchId != oldBatchId) {
+      debugPrint('✅ Batch ID changed - reinitializing');
+      _initializeFromBatch();
+    }
+    // Same batch became inactive
+    else if (widget.currentBatch != null && 
+             oldWidget.currentBatch?.isActive == true && 
+             !widget.currentBatch!.isActive) {
+      debugPrint('⚠️ Batch completed');
       _stopTimer();
       _cycleTimer?.cancel();
       
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null) {
         _completeCycleInFirebase();
       }
       
@@ -74,13 +98,20 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   }
 
   Future<void> _loadExistingCycle() async {
-    if (widget.currentBatch == null) return;
+    if (widget.currentBatch == null) {
+      debugPrint('⚠️ No current batch to load');
+      return;
+    }
+
+    debugPrint('📥 Loading drum controller for batch: ${widget.currentBatch!.id}');
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       final cycle = await cycleRepository.getDrumController(
         batchId: widget.currentBatch!.id,
       );
+
+      debugPrint('📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
 
       if (mounted && cycle != null) {
         setState(() {
@@ -107,12 +138,23 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             }
           }
         });
+      } else if (mounted) {
+        // No existing cycle - reset to idle state
+        setState(() {
+          settings.reset();
+          status = SystemStatus.idle;
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _cycleDoc = null;
+        });
       }
     } catch (e) {
-      debugPrint('Error loading drum controller cycle: $e');
+      debugPrint('❌ Error loading drum controller cycle: $e');
     }
   }
 
+  // ...rest of the existing methods remain the same...
   @override
   void dispose() {
     _stopTimer();
@@ -169,7 +211,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       
-      // Start drum controller in Firebase
       await cycleRepository.startDrumController(
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
@@ -178,7 +219,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         duration: settings.period,
       );
 
-      // Reload the cycle to get the ID
       final cycle = await cycleRepository.getDrumController(
         batchId: widget.currentBatch!.id,
       );
@@ -213,7 +253,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           _completedCycles++;
         });
 
-        // Update progress in Firebase
         if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -231,7 +270,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           _stopTimer();
           timer.cancel();
           
-          // Complete cycle in Firebase
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
@@ -277,7 +315,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   String _getCyclesLabel(int cycles) {
     return '$cycles Cycles';
   }
-
   @override
   Widget build(BuildContext context) {
     final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;

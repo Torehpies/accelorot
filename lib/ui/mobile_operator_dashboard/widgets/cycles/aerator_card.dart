@@ -10,6 +10,7 @@ import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
+
 class AeratorCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
 
@@ -29,49 +30,70 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
+  
+  // Add this to track the last loaded batch ID
+  String? _lastLoadedBatchId;
 
   @override
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
+      _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
 
-  @override
-  void didUpdateWidget(AeratorCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
+@override
+void didUpdateWidget(AeratorCard oldWidget) {
+  super.didUpdateWidget(oldWidget);
+  
+  // Check if batch ID changed (new batch selected or created)
+  final currentBatchId = widget.currentBatch?.id;
+  final oldBatchId = oldWidget.currentBatch?.id;
+  
+  if (currentBatchId != oldBatchId) {
+    // Batch changed - reset and reload
+    _stopTimer();
+    _cycleTimer?.cancel();
     
-    if (oldWidget.currentBatch?.id != widget.currentBatch?.id) {
-      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-        _stopTimer();
-        _cycleTimer?.cancel();
-        setState(() {
-          settings.reset();
-          status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _completedCycles = 0;
-          _startTime = null;
-          _cycleDoc = null;
-        });
-      } else {
-        _loadExistingCycle();
-      }
-    } else if (widget.currentBatch != null && 
-               oldWidget.currentBatch?.isActive == true && 
-               !widget.currentBatch!.isActive) {
-      _stopTimer();
-      _cycleTimer?.cancel();
-      
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
-        _completeCycleInFirebase();
-      }
-      
+    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+      // No active batch - clear everything
       setState(() {
-        status = SystemStatus.stopped;
+        settings.reset();
+        status = SystemStatus.idle;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+        _cycleDoc = null;
+        _lastLoadedBatchId = null;
+      });
+    } else {
+      // New active batch - load its cycle
+      _lastLoadedBatchId = widget.currentBatch!.id;
+      // Use Future.delayed to ensure the widget is fully built
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _loadExistingCycle();
+        }
       });
     }
+  } else if (widget.currentBatch != null && 
+             oldWidget.currentBatch?.isActive == true && 
+             !widget.currentBatch!.isActive) {
+    // Same batch but became inactive
+    _stopTimer();
+    _cycleTimer?.cancel();
+    
+    if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      _completeCycleInFirebase();
+    }
+    
+    setState(() {
+      status = SystemStatus.stopped;
+    });
   }
+}
+
 
   Future<void> _loadExistingCycle() async {
     if (widget.currentBatch == null) return;
@@ -106,6 +128,16 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
               );
             }
           }
+        });
+      } else if (mounted) {
+        // No existing cycle - reset to idle state for new batch
+        setState(() {
+          settings.reset();
+          status = SystemStatus.idle;
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _cycleDoc = null;
         });
       }
     } catch (e) {

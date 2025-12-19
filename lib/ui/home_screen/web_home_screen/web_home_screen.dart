@@ -25,6 +25,7 @@ class WebHomeScreen extends StatefulWidget {
   State<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
+
 class _WebHomeScreenState extends State<WebHomeScreen> {
   final GlobalKey<ActivityLogsCardState> _activityLogsKey =
       GlobalKey<ActivityLogsCardState>();
@@ -32,6 +33,9 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
+  
+  // Add this to force widget rebuilds
+  int _rebuildKey = 0;
 
   @override
   void initState() {
@@ -40,26 +44,33 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   }
 
   void _updateActiveBatch(BatchModel? batch) {
-    setState(() {
-      _activeBatchModel = batch;
-      // Also update the old _currentBatch if needed for backward compatibility
-      if (batch != null) {
-        _currentBatch = CompostBatch(
-          batchName: batch.displayName,
-          batchNumber: batch.id,
-          startedBy: null,
-          batchStart: batch.createdAt,
-          startNotes: batch.startNotes,
-          status: batch.isActive ? 'active' : 'completed',
-        );
-      } else {
-        _currentBatch = null;
-      }
-    });
+    debugPrint('🔄 _updateActiveBatch called with batch: ${batch?.id}');
+    
+    if (mounted) {
+      setState(() {
+        _activeBatchModel = batch;
+        // Increment rebuild key to force cards to rebuild
+        _rebuildKey++;
+        
+        if (batch != null) {
+          _currentBatch = CompostBatch(
+            batchName: batch.displayName,
+            batchNumber: batch.id,
+            startedBy: null,
+            batchStart: batch.createdAt,
+            startNotes: batch.startNotes,
+            status: batch.isActive ? 'active' : 'completed',
+          );
+        } else {
+          _currentBatch = null;
+        }
+      });
+    }
+    
+    debugPrint('✅ _updateActiveBatch completed - rebuildKey: $_rebuildKey');
   }
 
   void _handleBatchStarted(CompostBatch batch) async {
-    // Show dialog and wait for result
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => BatchStartDialog(
@@ -70,14 +81,23 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
     if (result == true && mounted) {
       // Refresh the activity logs after batch is created
       await _activityLogsKey.currentState?.refresh();
-      setState(() {}); // Trigger rebuild to show new batch
+      
+      // Force rebuild by incrementing key
+      setState(() {
+        _rebuildKey++;
+      });
+      
+      debugPrint('🔄 Batch created, forced rebuild with key: $_rebuildKey');
     }
   }
 
-
   void _handleBatchCompleted() {
-    setState(() => _currentBatch = null);
+    setState(() {
+      _currentBatch = null;
+      _rebuildKey++;
+    });
   }
+
 
   void _handleFABPress() async {
     final action = await showDialog<String>(
@@ -182,7 +202,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 1024;
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
@@ -211,7 +230,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                               onBatchStarted: _handleBatchStarted,
                               onBatchCompleted: _handleBatchCompleted,
                               preSelectedMachineId: widget.focusedMachine?.machineId,
-                              onBatchChanged: _updateActiveBatch, // Add this callback
+                              onBatchChanged: _updateActiveBatch,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -232,13 +251,17 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
+                            // Use rebuild key to force recreation
                             child: DrumControlCard(
+                              key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
                               currentBatch: _activeBatchModel, 
                             ),
                           ),
                           const SizedBox(height: 16),
                           Expanded(
+                            // Use rebuild key to force recreation
                             child: AeratorCard(
+                              key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
                               currentBatch: _activeBatchModel, 
                             ),
                           ),

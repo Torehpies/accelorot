@@ -76,6 +76,8 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
               _selectedBatchId = latestBatch.id;
               _activeBatch = latestBatch;
             });
+            // Notify parent of batch change
+            widget.onBatchChanged?.call(latestBatch);
           }
         }
       }
