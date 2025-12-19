@@ -9,7 +9,7 @@ import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import 'base_detail_view.dart';
 
-/// Main unified activity view - replaces WebActivityLogsMainView
+/// Main unified activity view with enhanced stats
 class UnifiedActivityView extends ConsumerWidget {
   final String? focusedMachineId;
 
@@ -26,13 +26,11 @@ class UnifiedActivityView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F8FF), // Light blue page background
       body: SafeArea(
-        child: state.isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : state.hasError
-                ? _buildErrorState(state.errorMessage ?? 'An error occurred')
-                : !state.isLoggedIn
-                    ? const Center(child: Text('Please log in to view activities'))
-                    : _buildContent(context, ref, viewModel, state),
+        child: state.hasError
+            ? _buildErrorState(state.errorMessage ?? 'An error occurred')
+            : !state.isLoggedIn && !state.isLoading
+                ? const Center(child: Text('Please log in to view activities'))
+                : _buildContent(context, ref, viewModel, state),
       ),
     );
   }
@@ -43,51 +41,57 @@ class UnifiedActivityView extends ConsumerWidget {
     UnifiedActivityViewModel viewModel,
     state,
   ) {
-    final counts = viewModel.getCategoryCounts();
+    // Get enhanced counts with change data
+    final countsWithChange = viewModel.getCategoryCountsWithChange();
 
     return Column(
       children: [
-        // Stats Cards Row
+        // Stats Cards Row - Shows immediately with loading state
         Padding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: StatsCardRow(counts: counts),
+          child: StatsCardRow(
+            countsWithChange: countsWithChange,
+            isLoading: state.isLoading,
+          ),
         ),
 
         // Unified Table Container
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xxl,
-              0,
-              AppSpacing.xxl,
-              AppSpacing.xxl,
-            ),
-            child: UnifiedTableContainer(
-              items: state.paginatedItems,
-              selectedMachineId: state.selectedMachineId,
-              selectedBatchId: state.selectedBatchId,
-              dateFilter: state.dateFilter,
-              searchQuery: state.searchQuery,
-              selectedCategory: state.selectedCategory,
-              selectedType: state.selectedType,
-              sortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onMachineChanged: viewModel.onMachineChanged,
-              onBatchChanged: viewModel.onBatchChanged,
-              onDateFilterChanged: viewModel.onDateFilterChanged,
-              onSearchChanged: viewModel.onSearchChanged,
-              onCategoryChanged: viewModel.onCategoryChanged,
-              onTypeChanged: viewModel.onTypeChanged,
-              onSort: viewModel.onSort,
-              onViewDetails: (item) => _showDetailSheet(context, item),
-              currentPage: state.currentPage,
-              totalPages: state.totalPages,
-              itemsPerPage: state.itemsPerPage,
-              totalItems: state.filteredActivities.length,
-              onPageChanged: viewModel.onPageChanged,
-              onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
-            ),
-          ),
+          child: state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.xxl,
+                    0,
+                    AppSpacing.xxl,
+                    AppSpacing.xxl,
+                  ),
+                  child: UnifiedTableContainer(
+                    items: state.paginatedItems,
+                    selectedMachineId: state.selectedMachineId,
+                    selectedBatchId: state.selectedBatchId,
+                    dateFilter: state.dateFilter,
+                    searchQuery: state.searchQuery,
+                    selectedCategory: state.selectedCategory,
+                    selectedType: state.selectedType,
+                    sortColumn: state.sortColumn,
+                    sortAscending: state.sortAscending,
+                    onMachineChanged: viewModel.onMachineChanged,
+                    onBatchChanged: viewModel.onBatchChanged,
+                    onDateFilterChanged: viewModel.onDateFilterChanged,
+                    onSearchChanged: viewModel.onSearchChanged,
+                    onCategoryChanged: viewModel.onCategoryChanged,
+                    onTypeChanged: viewModel.onTypeChanged,
+                    onSort: viewModel.onSort,
+                    onViewDetails: (item) => _showDetailSheet(context, item),
+                    currentPage: state.currentPage,
+                    totalPages: state.totalPages,
+                    itemsPerPage: state.itemsPerPage,
+                    totalItems: state.filteredActivities.length,
+                    onPageChanged: viewModel.onPageChanged,
+                    onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
+                  ),
+                ),
         ),
       ],
     );

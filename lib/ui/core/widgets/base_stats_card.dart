@@ -1,18 +1,17 @@
 // lib/ui/core/widgets/base_stats_card.dart
 
 import 'package:flutter/material.dart';
-import '../constants/spacing.dart';
-import '../themes/web_text_styles.dart';
 
-/// Reusable stats card with icon in top-right corner
+/// Enhanced stats card with change tracking and new UI design
 class BaseStatsCard extends StatelessWidget {
   final String title;
   final int value;
   final IconData icon;
   final Color iconColor;
-  final Color? backgroundColor;
+  final Color backgroundColor;
   final String? changeText;
-  final bool showIconBackground;
+  final bool? isPositive;
+  final bool isLoading;
 
   const BaseStatsCard({
     super.key,
@@ -20,86 +19,158 @@ class BaseStatsCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.iconColor,
-    this.backgroundColor,
+    required this.backgroundColor,
     this.changeText,
-    this.showIconBackground = false,
+    this.isPositive,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 130,
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Title on left, Icon on right
+          // Header Row: Title and Icon
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
               Expanded(
                 child: Text(
                   title,
-                  style: WebTextStyles.label.copyWith(fontSize: 14),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF6B7280),
+                  ),
                 ),
               ),
-              // Icon (top-right)
-              _buildIcon(),
+              // Icon with colored background
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: 16,
+                  color: iconColor,
+                ),
+              ),
             ],
           ),
-          
-          const Spacer(),
-          
+
+          const SizedBox(height: 16),
+
           // Value
-          Text(
-            '$value',
-            style: WebTextStyles.body.copyWith(
-              fontSize: 40,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF374151),
-              height: 1.0,
+          if (isLoading)
+            Container(
+              height: 36,
+              width: 60,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            )
+          else
+            Text(
+              '$value',
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1F2937),
+                height: 1,
+              ),
             ),
-          ),
-          
-          const SizedBox(height: 4),
-          
-          // Change/Percentage (placeholder)
-          Text(
-            changeText ?? '—',
-            style: WebTextStyles.bodyMediumGray.copyWith(fontSize: 12, fontWeight: FontWeight.w400),
-          ),
+
+          const SizedBox(height: 12),
+
+          // Change Badge + Subtext Row
+          if (isLoading)
+            Container(
+              height: 20,
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(6),
+              ),
+            )
+          else if (changeText != null)
+            Row(
+              children: [
+                // Change Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getChangeBadgeColor(),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    changeText!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _getChangeTextColor(),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Subtext
+                const Expanded(
+                  child: Text(
+                    'from last month',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            )
+          else
+            const Text(
+              '—',
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildIcon() {
-    if (showIconBackground && backgroundColor != null) {
-      return Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      );
+  /// Get badge background color based on change direction
+  Color _getChangeBadgeColor() {
+    if (changeText == 'New' || changeText == 'No log yet') {
+      return const Color(0xFFE0E7FF); // Neutral blue
     }
-    
-    return Icon(icon, color: iconColor, size: 26);
+    return isPositive == true
+        ? const Color(0xFFD1FAE5) // Green
+        : const Color(0xFFFEE2E2); // Red
+  }
+
+  /// Get text color based on change direction
+  Color _getChangeTextColor() {
+    if (changeText == 'New' || changeText == 'No log yet') {
+      return const Color(0xFF4338CA); // Neutral blue text
+    }
+    return isPositive == true
+        ? const Color(0xFF065F46) // Dark green
+        : const Color(0xFF991B1B); // Dark red
   }
 }

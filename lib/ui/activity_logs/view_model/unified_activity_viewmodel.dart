@@ -268,4 +268,107 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
           .length,
     };
   }
+
+  /// Get category counts with month-over-month change percentage
+  /// Count = total all-time, Change = this month vs last month comparison
+  Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
+    final now = DateTime.now();
+    
+    // Current month: from start of this month to now
+    final currentMonthStart = DateTime(now.year, now.month, 1);
+    final currentMonthEnd = now;
+    
+    // Previous month: full month
+    final previousMonthStart = DateTime(now.year, now.month - 1, 1);
+    final previousMonthEnd = DateTime(now.year, now.month, 1).subtract(const Duration(microseconds: 1));
+
+    // Get ALL-TIME counts (for display)
+    final allTimeCounts = getCategoryCounts();
+    
+    // Get counts for current month (for comparison)
+    final currentCounts = _getCountsForDateRange(currentMonthStart, currentMonthEnd);
+    
+    // Get counts for previous month (for comparison)
+    final previousCounts = _getCountsForDateRange(previousMonthStart, previousMonthEnd);
+
+    return {
+      'substrates': _buildChangeData(
+        allTimeCounts['substrates']!,
+        currentCounts['substrates']!,
+        previousCounts['substrates']!,
+      ),
+      'alerts': _buildChangeData(
+        allTimeCounts['alerts']!,
+        currentCounts['alerts']!,
+        previousCounts['alerts']!,
+      ),
+      'operations': _buildChangeData(
+        allTimeCounts['operations']!,
+        currentCounts['operations']!,
+        previousCounts['operations']!,
+      ),
+      'reports': _buildChangeData(
+        allTimeCounts['reports']!,
+        currentCounts['reports']!,
+        previousCounts['reports']!,
+      ),
+    };
+  }
+
+  /// Helper: Get counts for a specific date range
+  Map<String, int> _getCountsForDateRange(DateTime start, DateTime end) {
+    final activitiesInRange = state.allActivities.where((item) {
+      return item.timestamp.isAfter(start) && item.timestamp.isBefore(end);
+    }).toList();
+
+    return {
+      'substrates': activitiesInRange
+          .where((item) => item.type == ActivityType.substrate)
+          .length,
+      'alerts': activitiesInRange
+          .where((item) => item.type == ActivityType.alert)
+          .length,
+      'operations': activitiesInRange
+          .where((item) => item.type == ActivityType.cycle)
+          .length,
+      'reports': activitiesInRange
+          .where((item) => item.type == ActivityType.report)
+          .length,
+    };
+  }
+
+  /// Helper: Build change data with percentage and positive/negative indicator
+  /// allTimeCount = total count to display
+  /// currentMonthCount = this month's count for comparison
+  /// previousMonthCount = last month's count for comparison
+  Map<String, dynamic> _buildChangeData(
+    int allTimeCount,
+    int currentMonthCount,
+    int previousMonthCount,
+  ) {
+    String changeText;
+    bool isPositive = true;
+
+    if (previousMonthCount == 0 && currentMonthCount > 0) {
+      // New this month
+      changeText = 'New';
+      isPositive = true;
+    } else if (previousMonthCount == 0 && currentMonthCount == 0) {
+      // No data yet
+      changeText = 'No log yet';
+      isPositive = true; // Neutral
+    } else {
+      // Calculate percentage change (current month vs previous month)
+      final percentageChange = ((currentMonthCount - previousMonthCount) / previousMonthCount * 100).round();
+      isPositive = percentageChange >= 0;
+      final sign = isPositive ? '+' : '';
+      changeText = '$sign$percentageChange%';
+    }
+
+    return {
+      'count': allTimeCount, // Show total all-time count
+      'change': changeText,
+      'isPositive': isPositive,
+    };
+  }
 }
