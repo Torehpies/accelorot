@@ -44,56 +44,59 @@ class UnifiedActivityView extends ConsumerWidget {
     // Get enhanced counts with change data
     final countsWithChange = viewModel.getCategoryCountsWithChange();
 
-    return Column(
-      children: [
-        // Stats Cards Row - Shows immediately with loading state
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
-          child: StatsCardRow(
-            countsWithChange: countsWithChange,
-            isLoading: state.isLoading,
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFBAE6FD), width: 1.5),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              // Stats Cards Row
+              StatsCardRow(
+                countsWithChange: countsWithChange,
+                isLoading: state.isLoading,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Unified Table Container
+              Expanded(
+                child: state.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : UnifiedTableContainer(
+                        items: state.paginatedItems,
+                        selectedMachineId: state.selectedMachineId,
+                        selectedBatchId: state.selectedBatchId,
+                        dateFilter: state.dateFilter,
+                        searchQuery: state.searchQuery,
+                        selectedCategory: state.selectedCategory,
+                        selectedType: state.selectedType,
+                        sortColumn: state.sortColumn,
+                        sortAscending: state.sortAscending,
+                        onMachineChanged: viewModel.onMachineChanged,
+                        onBatchChanged: viewModel.onBatchChanged,
+                        onDateFilterChanged: viewModel.onDateFilterChanged,
+                        onSearchChanged: viewModel.onSearchChanged,
+                        onCategoryChanged: viewModel.onCategoryChanged,
+                        onTypeChanged: viewModel.onTypeChanged,
+                        onSort: viewModel.onSort,
+                        onViewDetails: (item) => _showDetailSheet(context, item),
+                        currentPage: state.currentPage,
+                        totalPages: state.totalPages,
+                        itemsPerPage: state.itemsPerPage,
+                        totalItems: state.filteredActivities.length,
+                        onPageChanged: viewModel.onPageChanged,
+                        onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
+                      ),
+              ),
+            ],
           ),
         ),
-
-        // Unified Table Container
-        Expanded(
-          child: state.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xxl,
-                    0,
-                    AppSpacing.xxl,
-                    AppSpacing.xxl,
-                  ),
-                  child: UnifiedTableContainer(
-                    items: state.paginatedItems,
-                    selectedMachineId: state.selectedMachineId,
-                    selectedBatchId: state.selectedBatchId,
-                    dateFilter: state.dateFilter,
-                    searchQuery: state.searchQuery,
-                    selectedCategory: state.selectedCategory,
-                    selectedType: state.selectedType,
-                    sortColumn: state.sortColumn,
-                    sortAscending: state.sortAscending,
-                    onMachineChanged: viewModel.onMachineChanged,
-                    onBatchChanged: viewModel.onBatchChanged,
-                    onDateFilterChanged: viewModel.onDateFilterChanged,
-                    onSearchChanged: viewModel.onSearchChanged,
-                    onCategoryChanged: viewModel.onCategoryChanged,
-                    onTypeChanged: viewModel.onTypeChanged,
-                    onSort: viewModel.onSort,
-                    onViewDetails: (item) => _showDetailSheet(context, item),
-                    currentPage: state.currentPage,
-                    totalPages: state.totalPages,
-                    itemsPerPage: state.itemsPerPage,
-                    totalItems: state.filteredActivities.length,
-                    onPageChanged: viewModel.onPageChanged,
-                    onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
-                  ),
-                ),
-        ),
-      ],
+      ),
     );
   }
 

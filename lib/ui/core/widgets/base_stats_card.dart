@@ -10,6 +10,7 @@ class BaseStatsCard extends StatelessWidget {
   final Color iconColor;
   final Color backgroundColor;
   final String? changeText;
+  final String? subtext;
   final bool? isPositive;
   final bool isLoading;
 
@@ -21,6 +22,7 @@ class BaseStatsCard extends StatelessWidget {
     required this.iconColor,
     required this.backgroundColor,
     this.changeText,
+    this.subtext,
     this.isPositive,
     this.isLoading = false,
   });
@@ -28,15 +30,16 @@ class BaseStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -46,42 +49,43 @@ class BaseStatsCard extends StatelessWidget {
           // Header Row: Title and Icon
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xFF6B7280),
                   ),
                 ),
               ),
               // Icon with colored background
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: backgroundColor,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  size: 16,
+                  size: 20,
                   color: iconColor,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
 
           // Value
           if (isLoading)
             Container(
-              height: 36,
-              width: 60,
+              height: 48,
+              width: 80,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(8),
               ),
             )
@@ -89,52 +93,51 @@ class BaseStatsCard extends StatelessWidget {
             Text(
               '$value',
               style: const TextStyle(
-                fontSize: 36,
+                fontSize: 48,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1F2937),
-                height: 1,
+                height: 1.1,
               ),
             ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 5),
+
+          // Divider
+          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+
+          const SizedBox(height: 5),
 
           // Change Badge + Subtext Row
           if (isLoading)
             Container(
               height: 20,
-              width: 100,
+              width: 140,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(6),
               ),
             )
           else if (changeText != null)
             Row(
               children: [
-                // Change Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getChangeBadgeColor(),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    changeText!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: _getChangeTextColor(),
-                    ),
+                // Change Text (Simplified - no badge background)
+                Text(
+                  changeText!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _getChangeTextColor(),
                   ),
                 ),
                 const SizedBox(width: 8),
                 // Subtext
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'from last month',
-                    style: TextStyle(
-                      fontSize: 12,
+                    subtext ?? 'from last month',
+                    style: const TextStyle(
+                      fontSize: 11,
                       color: Color(0xFF9CA3AF),
+                      fontWeight: FontWeight.w500,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -154,23 +157,13 @@ class BaseStatsCard extends StatelessWidget {
     );
   }
 
-  /// Get badge background color based on change direction
-  Color _getChangeBadgeColor() {
-    if (changeText == 'New' || changeText == 'No log yet') {
-      return const Color(0xFFE0E7FF); // Neutral blue
-    }
-    return isPositive == true
-        ? const Color(0xFFD1FAE5) // Green
-        : const Color(0xFFFEE2E2); // Red
-  }
-
   /// Get text color based on change direction
   Color _getChangeTextColor() {
     if (changeText == 'New' || changeText == 'No log yet') {
       return const Color(0xFF4338CA); // Neutral blue text
     }
     return isPositive == true
-        ? const Color(0xFF065F46) // Dark green
-        : const Color(0xFF991B1B); // Dark red
+        ? const Color(0xFF10B981) // Consistent green
+        : const Color(0xFFEF4444); // Consistent red
   }
 }
