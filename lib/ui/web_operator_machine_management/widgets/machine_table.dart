@@ -88,7 +88,7 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withAlpha((0.03 * 255).toInt()),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
