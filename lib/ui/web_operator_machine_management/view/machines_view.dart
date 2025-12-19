@@ -7,7 +7,7 @@ import '../widgets/stat_card.dart';
 import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
-import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart'; // Add this import
+import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart';
 
 /// Main machines view connected to real data
 class MachinesView extends ConsumerStatefulWidget {
@@ -125,7 +125,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
       StatCardData(
         label: 'Active Machines',
         count: state.activeMachinesCount.toString(),
-        change: '+0', // You can calculate this based on historical data
+        change: '+0',
         subtext: 'currently active',
         color: const Color(0xFF10B981),
         lightColor: const Color(0xFFD1FAE5),
@@ -236,18 +236,24 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                           onMachineAction: _handleMachineAction,
                         )),
             ),
-            if (state.hasMoreToLoad)
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ref.read(operatorMachineProvider.notifier).loadMore();
-                  },
-                  icon: const Icon(Icons.expand_more),
-                  label: Text(
-                    'Load More (${state.remainingCount} remaining)',
-                  ),
-                ),
+            
+            // Pagination - Always show if there are any machines
+            if (state.filteredMachines.isNotEmpty)
+              PaginationWidget(
+                currentPage: state.currentPage,
+                totalPages: state.totalPages,
+                isDesktop: isDesktop,
+                canGoNext: state.currentPage < state.totalPages,
+                canGoPrevious: state.currentPage > 1,
+                onNext: () => ref
+                    .read(operatorMachineProvider.notifier)
+                    .goToNextPage(),
+                onPrevious: () => ref
+                    .read(operatorMachineProvider.notifier)
+                    .goToPreviousPage(),
+                onPageChanged: (page) => ref
+                    .read(operatorMachineProvider.notifier)
+                    .goToPage(page),
               ),
           ],
         ),
@@ -422,14 +428,12 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
   }
 
   void _handleMachineAction(String machineId) {
-    // Find the machine from the state
     final state = ref.read(operatorMachineProvider);
     final machine = state.machines.firstWhere(
       (m) => m.machineId == machineId,
       orElse: () => throw Exception('Machine not found'),
     );
 
-    // Show the MachineViewDialog with machine details
     showDialog(
       context: context,
       builder: (context) => MachineViewDialog(
