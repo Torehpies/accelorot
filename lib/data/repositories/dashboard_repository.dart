@@ -85,7 +85,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     // Format date as "Dec 18"
-    final date = report.createdAt.toLocal();
+    final date = report.createdAt.toLocal(); // Safe because we checked for null above
     final formattedDate = '${_monthAbbrev(date.month)} ${date.day}';
 
     // Determine category from report type
@@ -118,7 +118,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     // Get last 7 days (including today)
     final now = DateTime.now().toLocal();
     final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    
+
     // Initialize counts for the last 7 days
     final counts = <String, int>{};
     for (int i = 6; i >= 0; i--) {
@@ -130,8 +130,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
     // Count reports per day
     for (final report in reports) {
       if (report.createdAt == null) continue;
-      final reportDate = report.createdAt.toLocal();
-      
+      final reportDate = report.createdAt.toLocal(); // Safe because of continue above
+
       // Only include reports from last 7 days
       final difference = now.difference(reportDate).inDays;
       if (difference >= 0 && difference < 7) {
