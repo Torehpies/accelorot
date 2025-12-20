@@ -54,9 +54,9 @@ class WebAdminDashboardViewModel extends ChangeNotifier {
 
       // Calculate growth rates (placeholder - you can implement actual logic)
       // For now, we'll use mock values or calculate based on historical data
-      operatorGrowthRate = 0.0; // TODO: Calculate from historical data
-      machineGrowthRate = 0.0; // TODO: Calculate from historical data
-      reportGrowthRate = 0.0; // TODO: Calculate from historical data
+      operatorGrowthRate = 0.0;
+      machineGrowthRate = 0.0; 
+      reportGrowthRate = 0.0; 
 
       _isLoading = false;
       notifyListeners();
