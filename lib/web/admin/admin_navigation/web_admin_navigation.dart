@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-// ✅ ADD THESE TWO IMPORTS (keep all your existing imports too)
 import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
+import 'package:flutter_application_1/data/providers/dashboard_providers.dart';
 
 // Keep your existing imports below (no deletion)
 //import '../screens/web_admin_home_screen.dart';
@@ -12,14 +13,14 @@ import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 import '../../../ui/web_operator/view/web_operator_management_view.dart';
 
-class WebAdminNavigation extends StatefulWidget {
+class WebAdminNavigation extends ConsumerStatefulWidget {
   const WebAdminNavigation({super.key});
 
   @override
-  State<WebAdminNavigation> createState() => _WebAdminNavigationState();
+  ConsumerState<WebAdminNavigation> createState() => _WebAdminNavigationState();
 }
 
-class _WebAdminNavigationState extends State<WebAdminNavigation> {
+class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
   int _selectedIndex = 0;
 
   late final List<Widget> _screens;
@@ -34,15 +35,18 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
   @override
   void initState() {
     super.initState();
+    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final repository = ref.read(dashboardRepositoryProvider);
+    
     _screens = [
-      // ✅ REPLACED THIS LINE ONLY:
+      // Dashboard with repository injection
       ChangeNotifierProvider(
-        create: (context) => WebAdminDashboardViewModel(),
+        create: (context) => WebAdminDashboardViewModel(repository, teamId),
         child: const DashboardView(),
       ),
 
       // Rest unchanged
-      OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
+      OperatorManagementScreen(teamId: teamId),
       const WebAdminMachineView(),
       const WebProfileView(),
     ];

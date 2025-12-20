@@ -16,6 +16,36 @@ class DashboardView extends StatelessWidget {
       backgroundColor: const Color(0xFFDFF2FF),
       body: Consumer<WebAdminDashboardViewModel>(
         builder: (context, vm, _) {
+          // Show loading indicator
+          if (vm.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          // Show error message
+          if (vm.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    vm.errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: vm.refresh,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return LayoutBuilder(
             builder: (context, constraints) {
               // Responsive breakpoints

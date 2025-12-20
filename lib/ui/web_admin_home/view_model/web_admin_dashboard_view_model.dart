@@ -1,96 +1,74 @@
 // lib/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart
 import 'package:flutter/foundation.dart';
+import '../../../data/repositories/dashboard_repository.dart';
 
 class WebAdminDashboardViewModel extends ChangeNotifier {
-  int totalOperators = 36;
-  int totalMachines = 14;
-  int totalReports = 158;
-  double operatorGrowthRate = 29.0;
-  double machineGrowthRate = 23.0;
-  double reportGrowthRate = -10.0;
+  final DashboardRepository _repository;
+  final String teamId;
 
-  List<Map<String, dynamic>> activities = [
-    {'day': 'Monday', 'count': 55},
-    {'day': 'Tuesday', 'count': 65},
-    {'day': 'Wednesday', 'count': 80},
-    {'day': 'Thursday', 'count': 75},
-    {'day': 'Friday', 'count': 70},
-    {'day': 'Saturday', 'count': 35},
-  ];
+  // State variables
+  bool _isLoading = true;
+  String? _errorMessage;
+  
+  int totalOperators = 0;
+  int totalMachines = 0;
+  int totalReports = 0;
+  double operatorGrowthRate = 0.0;
+  double machineGrowthRate = 0.0;
+  double reportGrowthRate = 0.0;
 
+  List<Map<String, dynamic>> activities = [];
   Map<String, int> reportStatus = {
-    'Open': 8,
-    'In Progress': 10,
-    'Closed': 7,
-    'Pending': 5,
+    'Open': 0,
+    'In Progress': 0,
+    'Closed': 0,
+    'Pending': 0,
   };
+  List<Map<String, String>> recentActivities = [];
 
-  List<Map<String, String>> recentActivities = [
-    {
-      'icon': 'alert',
-      'description': 'Critical system alert detected',
-      'username': 'john_doe',
-      'category': 'System',
-      'status': 'Open',
-      'date': 'Dec 18'
-    },
-    {
-      'icon': 'check',
-      'description': 'Machine maintenance completed',
-      'username': 'jane_smith',
-      'category': 'Maintenance',
-      'status': 'Closed',
-      'date': 'Dec 17'
-    },
-    {
-      'icon': 'clipboard',
-      'description': 'New report submitted for review',
-      'username': 'admin_user',
-      'category': 'Reporting',
-      'status': 'In Progress',
-      'date': 'Dec 16'
-    },
-    {
-      'icon': 'alert',
-      'description': 'Equipment malfunction reported',
-      'username': 'operator_5',
-      'category': 'Equipment',
-      'status': 'Open',
-      'date': 'Dec 15'
-    },
-    {
-      'icon': 'check',
-      'description': 'Safety inspection passed',
-      'username': 'inspector_1',
-      'category': 'Safety',
-      'status': 'Closed',
-      'date': 'Dec 14'
-    },
-    {
-      'icon': 'clipboard',
-      'description': 'Monthly report generated',
-      'username': 'system',
-      'category': 'Reporting',
-      'status': 'Closed',
-      'date': 'Dec 13'
-    },
-    {
-      'icon': 'alert',
-      'description': 'Low inventory warning',
-      'username': 'inventory_bot',
-      'category': 'Inventory',
-      'status': 'Open',
-      'date': 'Dec 12'
-    },
-    {
-      'icon': 'check',
-      'description': 'User training completed',
-      'username': 'trainer_2',
-      'category': 'Training',
-      'status': 'Closed',
-      'date': 'Dec 11'
-    },
-  ];
-
+  // Getters
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
   List<String> get reportLegends => reportStatus.keys.toList();
+
+  WebAdminDashboardViewModel(this._repository, this.teamId) {
+    _loadDashboardData();
+  }
+
+  /// Load dashboard data from repository
+  Future<void> _loadDashboardData() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final data = await _repository.fetchDashboardData(teamId);
+
+      // Update state with fetched data
+      totalOperators = data.totalOperators;
+      totalMachines = data.totalMachines;
+      totalReports = data.reportStatus.values.fold(0, (sum, count) => sum + count);
+      reportStatus = data.reportStatus;
+      activities = data.activities;
+      recentActivities = data.recentActivities;
+
+      // Calculate growth rates (placeholder - you can implement actual logic)
+      // For now, we'll use mock values or calculate based on historical data
+      operatorGrowthRate = 0.0; // TODO: Calculate from historical data
+      machineGrowthRate = 0.0; // TODO: Calculate from historical data
+      reportGrowthRate = 0.0; // TODO: Calculate from historical data
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to load dashboard data: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Refresh dashboard data
+  Future<void> refresh() async {
+    await _loadDashboardData();
+  }
 }
