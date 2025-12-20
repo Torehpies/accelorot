@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../../../core/widgets/base_stats_card.dart';
-import '../../../core/constants/spacing.dart';
 
 /// Stats card row with month-over-month change tracking
 class StatsCardRow extends StatelessWidget {

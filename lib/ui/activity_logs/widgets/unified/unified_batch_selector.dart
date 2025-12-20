@@ -64,7 +64,7 @@ class UnifiedBatchSelector extends ConsumerWidget {
         icon: Icons.inventory_2,
         isLoading: true,
       ),
-      error: (_, __) => UnifiedDropdown<String>(
+      error: (_, _) => UnifiedDropdown<String>(
         value: null,
         label: 'Batch',
         hintText: 'All Batches',
