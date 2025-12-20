@@ -1,26 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
-import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
-import 'package:flutter_application_1/data/providers/dashboard_providers.dart';
-
-// Keep your existing imports below (no deletion)
-//import '../screens/web_admin_home_screen.dart';
+import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart' show OperatorManagementScreen;
+import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
-import '../../../ui/web_operator/view/web_operator_management_view.dart';
 
-class WebAdminNavigation extends ConsumerStatefulWidget {
+class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
 
   @override
-  ConsumerState<WebAdminNavigation> createState() => _WebAdminNavigationState();
+  State<WebAdminNavigation> createState() => _WebAdminNavigationState();
 }
 
-class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
+class _WebAdminNavigationState extends State<WebAdminNavigation> {
   int _selectedIndex = 0;
 
   late final List<Widget> _screens;
@@ -35,19 +28,15 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
   @override
   void initState() {
     super.initState();
-    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final repository = ref.read(dashboardRepositoryProvider);
-    
     _screens = [
-      // Dashboard with repository injection
-      ChangeNotifierProvider(
-        create: (context) => WebAdminDashboardViewModel(repository, teamId),
-        child: const DashboardView(),
+      WebAdminHomeScreen(
+        onManageOperators: () => setState(() => _selectedIndex = 1),
+        onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
 
-      // Rest unchanged
-      OperatorManagementScreen(teamId: teamId),
+      OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
       const WebAdminMachineView(),
+
       const WebProfileView(),
     ];
   }
@@ -88,7 +77,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
     return Scaffold(
       body: Row(
         children: [
-          // Sidebar (100% unchanged)
+          // Sidebar
           Container(
             width: 250,
             decoration: BoxDecoration(
@@ -102,6 +91,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
               child: Column(
                 children: [
                   const SizedBox(height: 24),
+                  // Logo & Title
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -128,6 +118,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  // User Info
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(12),
@@ -162,6 +153,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
                   ),
                   const Divider(color: Colors.white30, height: 32),
 
+                  // Navigation Items
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -209,6 +201,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
                     ),
                   ),
 
+                  // Logout Button
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: Material(
@@ -238,7 +231,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
             ),
           ),
 
-          // Main Content (unchanged structure)
+          // Main Content Area
           Expanded(
             child: Container(
               color: Colors.grey[50],
@@ -256,3 +249,4 @@ class _NavItem {
   final String label;
   const _NavItem(this.icon, this.label);
 }
+
