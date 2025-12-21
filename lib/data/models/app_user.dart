@@ -20,5 +20,6 @@ abstract class AppUser with _$AppUser {
     @TimestampConverter() required DateTime createdAt,
   }) = _AppUser;
 
-  factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
+  factory AppUser.fromJson(Map<String, dynamic> json) =>
+      _$AppUserFromJson(json);
 }
