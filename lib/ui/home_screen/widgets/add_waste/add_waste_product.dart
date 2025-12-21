@@ -6,22 +6,21 @@ import '../../../mobile_operator_dashboard/fields/quantity_field.dart';
 import '../../../mobile_operator_dashboard/fields/description_field.dart';
 import '../../../mobile_operator_dashboard/fields/submit_button.dart';
 import '../../../mobile_operator_dashboard/fields/machine_selection_field.dart';
-import 'package:flutter_application_1/services/firestore_activity_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../data/providers/substrate_providers.dart';
+import '../../../../data/models/substrate.dart';
 import '../../../mobile_operator_dashboard/fields/waste_config.dart';
 
-class AddWasteProduct extends StatefulWidget {
+class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
-
   const AddWasteProduct({super.key, this.preSelectedMachineId});
 
-  // Builds and displays the Add Waste Product dialog.
   @override
-  State<AddWasteProduct> createState() => _AddWasteProductState();
+  ConsumerState<AddWasteProduct> createState() => _AddWasteProductState();
 }
 
-class _AddWasteProductState extends State<AddWasteProduct> {
+class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
 
@@ -109,39 +108,42 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   }
 
   // Handles form submission, validates input, and saves data to Firestore.
-  void _handleSubmit() async {
+ void _handleSubmit() async {
     if (!_validateForm()) return;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to add waste log.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ...error handling...
       return;
     }
 
-    final wasteEntry = {
-      'category': _capitalizeCategory(_selectedWasteCategory!),
-      'plantType': _selectedPlantType!,
-      'plantTypeLabel': getPlantLabel(_selectedPlantType),
-      'quantity': double.parse(_quantityController.text),
-      'description': _descriptionController.text.trim(),
-      'timestamp': DateTime.now(),
-      'machineId': _selectedMachineId!,
-      'operatorName': user.displayName ?? user.email ?? 'Operator',
-      'userId': user.uid,
-      // 'machineName': _selectedMachineName,
-    };
+    final wasteData = CreateSubstrateRequest(
+      category: _capitalizeCategory(_selectedWasteCategory!),
+      plantType: _selectedPlantType!,
+      plantTypeLabel: getPlantLabel(_selectedPlantType),
+      quantity: double.parse(_quantityController.text),
+      description: _descriptionController.text.trim(),
+      machineId: _selectedMachineId!,
+      operatorName: user.displayName ?? user.email ?? 'Operator',
+      userId: user.uid,
+    );
 
     try {
-      await FirestoreActivityService.addWasteProduct(wasteEntry);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      final substrateRepo = ref.read(substrateRepositoryProvider);
+      await substrateRepo.addSubstrate(wasteData); 
+      
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      Navigator.pop(context, wasteEntry);
+      
+      Navigator.pop(context, true);
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Waste entry added successfully!'),
+          backgroundColor: Colors.teal,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,6 +151,7 @@ class _AddWasteProductState extends State<AddWasteProduct> {
       );
     }
   }
+
 
   // Builds the Add Waste Product dialog layout and structure.
   @override

@@ -18,10 +18,11 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     int? cycles,
     String? duration,
     int? completedCycles,
-    String? status, // 'idle', 'running', 'stopped', 'completed'
+    String? status,
     DateTime? startedAt,
     DateTime? completedAt,
     int? totalRuntimeSeconds,
+    DateTime? timestamp,
   }) = _CycleRecommendation;
 
   const CycleRecommendation._();
@@ -29,25 +30,26 @@ abstract class CycleRecommendation with _$CycleRecommendation {
   // ===== FIRESTORE CONVERSION =====
 
   /// Create from Firestore document
-  static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
-    return CycleRecommendation(
-      id: doc.id,
-      category: data['category'] ?? 'cycles',
-      controllerType: data['controllerType'] ?? '',
-      machineId: data['machineId'],
-      userId: data['userId'],
-      batchId: data['batchId'],
-      cycles: data['cycles'],
-      duration: data['duration'],
-      completedCycles: data['completedCycles'],
-      status: data['status'],
-      startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
-      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
-      totalRuntimeSeconds: data['totalRuntimeSeconds'],
-    );
-  }
+static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
+  final data = doc.data() as Map<String, dynamic>;
+  
+  return CycleRecommendation(
+    id: doc.id,
+    category: data['category'] ?? 'cycles',
+    controllerType: data['controllerType'] ?? '',
+    machineId: data['machineId'],
+    userId: data['userId'],
+    batchId: data['batchId'],
+    cycles: data['cycles'],
+    duration: data['duration'],
+    completedCycles: data['completedCycles'],
+    status: data['status'],
+    startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
+    completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+    totalRuntimeSeconds: data['totalRuntimeSeconds'],
+    timestamp: (data['timestamp'] as Timestamp?)?.toDate(), 
+  );
+}
 
   /// Convert to Firestore map
   Map<String, dynamic> toFirestore() {
@@ -104,7 +106,4 @@ abstract class CycleRecommendation with _$CycleRecommendation {
   /// Get description (formatted duration and cycles)
   String get description => 
       'Duration: ${duration ?? "N/A"}, Cycles: ${cycles ?? 0}';
-  
-  /// Get timestamp for sorting/display (use startedAt or completedAt)
-  DateTime get timestamp => completedAt ?? startedAt ?? DateTime.now();
 }

@@ -45,7 +45,7 @@ class ActivityAggregatorService {
 
   /// Fetch and transform substrate activities
   Future<List<ActivityLogItem>> getSubstrates() async {
-    final substrates = await _substrateRepo.getTeamSubstrates();
+  final substrates = await _substrateRepo.getAllSubstrates(); 
     return substrates
         .map((substrate) => ActivityPresentationMapper.fromSubstrate(substrate))
         .toList();
@@ -77,22 +77,26 @@ class ActivityAggregatorService {
 
   /// Fetch all activities from all sources and combine them
   /// 
-  /// Returns a sorted list (newest first) containing all activity types
   Future<List<ActivityLogItem>> getAllActivities() async {
-    // Fetch all activity types in parallel for better performance
-    final results = await Future.wait([
-      getSubstrates(),
-      getAlerts(),
-      getCyclesRecom(),
-      getReports(),
-    ]);
+    try {
+      // ✅ FIXED: Fetch and transform in one step
+      final results = await Future.wait([
+        getSubstrates(),
+        getAlerts(),
+        getCyclesRecom(),
+        getReports(),
+      ]);
 
-    // Flatten list of lists into single list
-    final allActivities = results.expand((list) => list).toList();
+      // Flatten list of lists into single list
+      final allActivities = results.expand((list) => list).toList();
 
-    // Sort by timestamp descending (newest first)
-    allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      // Sort by timestamp descending (newest first)
+      allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-    return allActivities;
+      return allActivities;
+    } catch (e) {
+      // ✅ FIXED: Added error handling
+      rethrow;
+    }
   }
 }

@@ -3,6 +3,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/submit_report.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/composting_progress_card.dart';
@@ -13,22 +14,23 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_w
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
+import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 
 
-class WebHomeScreen extends StatefulWidget {
+class WebHomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine; 
 
   const WebHomeScreen({super.key, this.focusedMachine}); 
 
   @override
-  State<WebHomeScreen> createState() => _WebHomeScreenState();
+  ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
 
-class _WebHomeScreenState extends State<WebHomeScreen> {
-  final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-      GlobalKey<ActivityLogsCardState>();
+class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
+  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
+  //  GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
@@ -80,7 +82,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
 
     if (result == true && mounted) {
       // Refresh the activity logs after batch is created
-      await _activityLogsKey.currentState?.refresh();
+      ref.invalidate(allActivitiesProvider);
       
       // Force rebuild by incrementing key
       setState(() {
@@ -176,7 +178,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             backgroundColor: Colors.teal,
           ),
         );
-        await _activityLogsKey.currentState?.refresh();
+        ref.invalidate(allActivitiesProvider);
       }
     } else if (action == 'submit_report') {
       final result = await showDialog<Map<String, dynamic>>(
@@ -193,7 +195,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        await _activityLogsKey.currentState?.refresh();
+        ref.invalidate(allActivitiesProvider);
       }
     }
   }
@@ -236,7 +238,6 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           const SizedBox(height: 16),
                           Expanded(
                             child: ActivityLogsCard(
-                              key: _activityLogsKey,
                               focusedMachineId: widget.focusedMachine?.machineId,
                             ),
                           ),

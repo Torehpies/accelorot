@@ -1,5 +1,5 @@
 // lib/services/firestore/firestore_fetch.dart
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_application_1/data/models/activity_log_item.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firestore_collections.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +26,7 @@ class FirestoreFetch {
   }
 
   // Fetch Substrates - filtered by userId or teamId (using machine->team relationship)
-  static Future<List<ActivityItem>> getSubstrates([
+  static Future<List<ActivityLogItem>> getSubstrates([
     String? targetUserId,
   ]) async {
     try {
@@ -47,7 +47,7 @@ class FirestoreFetch {
         debugPrint('Error fetching user teamId: $e');
       }
 
-      List<ActivityItem> allSubstrates = [];
+      List<ActivityLogItem> allSubstrates = [];
 
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
@@ -85,7 +85,7 @@ class FirestoreFetch {
 
                 final substrates = substratesSnapshot.docs.map((doc) {
                   final data = doc.data() as Map<String, dynamic>;
-                  return ActivityItem.fromMap(data);
+                  return ActivityLogItem.fromFirestore(doc.id, data);
                 }).toList();
 
                 allSubstrates.addAll(substrates);
@@ -113,7 +113,7 @@ class FirestoreFetch {
 
           final substrates = substratesSnapshot.docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return ActivityItem.fromMap(data);
+            return ActivityLogItem.fromFirestore(doc.id, data);
           }).toList();
 
           allSubstrates.addAll(substrates);
@@ -135,7 +135,7 @@ class FirestoreFetch {
   }
 
   // Fetch Alerts - filtered by userId or teamId (from batch subcollection)
-  static Future<List<ActivityItem>> getAlerts([String? targetUserId]) async {
+  static Future<List<ActivityLogItem>> getAlerts([String? targetUserId]) async {
     try {
       final userId = _resolveUserId(targetUserId);
 
@@ -154,7 +154,7 @@ class FirestoreFetch {
         debugPrint('Error fetching user teamId: $e');
       }
 
-      List<ActivityItem> allAlerts = [];
+      List<ActivityLogItem> allAlerts = [];
 
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
@@ -188,7 +188,7 @@ class FirestoreFetch {
 
               final alerts = alertsSnapshot.docs.map((doc) {
                 final data = doc.data();
-                return ActivityItem.fromMap(data);
+                return ActivityLogItem.fromFirestore(doc.id, data);
               }).toList();
 
               allAlerts.addAll(alerts);
@@ -214,7 +214,7 @@ class FirestoreFetch {
 
             final alerts = alertsSnapshot.docs.map((doc) {
               final data = doc.data();
-              return ActivityItem.fromMap(data);
+              return ActivityLogItem.fromFirestore(doc.id, data);
             }).toList();
 
             allAlerts.addAll(alerts);
@@ -239,7 +239,7 @@ class FirestoreFetch {
   }
 
   // Fetch Cycles and Recommendations - filtered by userId or teamId (from batch subcollection)
-  static Future<List<ActivityItem>> getCyclesRecom([
+  static Future<List<ActivityLogItem>> getCyclesRecom([
     String? targetUserId,
   ]) async {
     try {
@@ -260,7 +260,7 @@ class FirestoreFetch {
         debugPrint('Error fetching user teamId: $e');
       }
 
-      List<ActivityItem> allCycles = [];
+      List<ActivityLogItem> allCycles = [];
 
       if (teamId != null && teamId.isNotEmpty) {
         // ⭐ Fetch team machines first, then get batches for those machines
@@ -294,7 +294,7 @@ class FirestoreFetch {
 
               final cycles = cyclesSnapshot.docs.map((doc) {
                 final data = doc.data();
-                return ActivityItem.fromMap(data);
+                return ActivityLogItem.fromFirestore(doc.id, data);
               }).toList();
 
               allCycles.addAll(cycles);
@@ -320,7 +320,7 @@ class FirestoreFetch {
 
             final cycles = cyclesSnapshot.docs.map((doc) {
               final data = doc.data();
-              return ActivityItem.fromMap(data);
+              return ActivityLogItem.fromFirestore(doc.id, data);
             }).toList();
 
             allCycles.addAll(cycles);
@@ -345,14 +345,14 @@ class FirestoreFetch {
   }
 
   /// Fetch all reports from all machines the user can access
-  static Future<List<ActivityItem>> getReports([String? targetUserId]) async {
+  static Future<List<ActivityLogItem>> getReports([String? targetUserId]) async {
     try {
       // Fetch all machines (reports are stored per machine)
       final machinesSnapshot = await FirebaseFirestore.instance
           .collection('machines')
           .get();
 
-      List<ActivityItem> allReports = [];
+      List<ActivityLogItem> allReports = [];
 
       // Fetch reports from each machine
       for (var machineDoc in machinesSnapshot.docs) {
@@ -368,19 +368,19 @@ class FirestoreFetch {
             final data = doc.data();
 
             // Map report fields to ActivityItem
-            return ActivityItem(
+            return ActivityLogItem(
+              id: doc.id,
               title: FirestoreHelpers.getReportTypeLabel(
                 data['reportType'],
               ), // "Maintenance Issue", "Safety Concern"
               value: _capitalizeFirst(
                 data['status'] ?? 'unknown',
               ), // "Open" or "Resolved"
-              statusColor: FirestoreHelpers.colorIntToString(
-                data['statusColor'] ?? 0xFF9E9E9E,
-              ),
+              statusColor: Color(data['statusColor'] ?? 0xFF9E9E9E),
               icon: FirestoreHelpers.getIconFromCodePoint(data['icon'] ?? 0),
               category: FirestoreHelpers.getReportTypeLabel(data['reportType']),
               timestamp: (data['createdAt'] as Timestamp).toDate(),
+              type: ActivityType.report,
               machineId: data['machineId'],
               description: _buildReportDescription(data),
             );
@@ -434,7 +434,7 @@ class FirestoreFetch {
   }
 
   // Fetch All Activities Combined (substrates + alerts + cycles only, excluding reports)
-  static Future<List<ActivityItem>> getAllActivities([
+  static Future<List<ActivityLogItem>> getAllActivities([
     String? targetUserId,
   ]) async {
     try {
@@ -448,7 +448,7 @@ class FirestoreFetch {
       ]);
 
       // Combine all lists
-      final allActivities = <ActivityItem>[
+      final allActivities = <ActivityLogItem>[
         ...results[0], // substrates
         ...results[1], // alerts
         ...results[2], // cycles

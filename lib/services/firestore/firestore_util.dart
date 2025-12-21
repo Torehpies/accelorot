@@ -2,26 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../frontend/operator/activity_logs/models/activity_item.dart';
+import '../../../../data/models/activity_log_item.dart';
 
 class FirestoreUtil {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static String? getCurrentUserId() => _auth.currentUser?.uid;
 
-  static ActivityItem toActivityItem(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    final timestamp = (data['timestamp'] as Timestamp).toDate();
-
-    return ActivityItem(
-      title: data['title'] ?? '',
-      value: data['value'] ?? '',
-      statusColor: data['statusColor'] ?? 'grey',
-      icon: getIconFromCodePoint(data['icon'] ?? 0),
-      description: data['description'] ?? '',
-      category: data['category'] ?? '',
-      timestamp: timestamp,
-    );
+  static ActivityLogItem toActivityLogItem(DocumentSnapshot doc) {
+    return ActivityLogItem.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
   }
 
   static IconData getIconFromCodePoint(int codePoint) {

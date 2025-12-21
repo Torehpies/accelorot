@@ -1,12 +1,11 @@
-// lib/frontend/operator/dashboard/add_waste/widgets/activity_log_item.dart
 import 'package:flutter/material.dart';
-import '../../../../frontend/operator/activity_logs/models/activity_item.dart';
-import '../../../../services/firestore/firestore_helpers.dart';
+import '../../../../data/models/activity_log_item.dart';
 
-class ActivityLogItem extends StatelessWidget {
-  final ActivityItem log;
+/// Widget to display a single activity log item
+class ActivityLogItemWidget extends StatelessWidget {
+  final ActivityLogItem log;
 
-  const ActivityLogItem({super.key, required this.log});
+  const ActivityLogItemWidget({super.key, required this.log});
 
   @override
   Widget build(BuildContext context) {
@@ -15,19 +14,31 @@ class ActivityLogItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: Colors.grey.shade300),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Status Indicator
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 6),
+            decoration: BoxDecoration(
+              color: log.statusColor, 
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+
           // Icon
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: log.statusColorValue.withValues(alpha: 0.1),
+              color: log.statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(log.icon, color: log.statusColorValue, size: 20),
+            child: Icon(log.icon, color: log.statusColor, size: 20),
           ),
           const SizedBox(width: 12),
 
@@ -54,13 +65,25 @@ class ActivityLogItem extends StatelessWidget {
                       log.value,
                       style: TextStyle(
                         fontSize: 12,
-                        color: log.statusColorValue,
+                        color: log.statusColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
+
+                // Description
+                if (log.description.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      log.description,
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
 
                 // Machine Info
                 if (log.machineName != null || log.machineId != null)
@@ -85,42 +108,13 @@ class ActivityLogItem extends StatelessWidget {
                     ],
                   ),
 
-                // Report Type OR Batch Info
-                if (log.isReport && log.reportType != null)
+                // Batch Info
+                if (log.batchId != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Row(
                       children: [
-                        Icon(
-                          _getReportTypeIcon(log.reportType),
-                          size: 12,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            FirestoreHelpers.getReportTypeLabel(log.reportType),
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (!log.isReport && log.batchId != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.inventory_2,
-                          size: 12,
-                          color: Colors.grey[600],
-                        ),
+                        Icon(Icons.inventory_2, size: 12, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -159,6 +153,38 @@ class ActivityLogItem extends StatelessWidget {
                     ),
                   ),
 
+                // ✅ Cycle Progress (if cycle type)
+                if (log.isCycle && log.cycles != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.sync, size: 14, color: Colors.blue.shade700),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Progress: ${log.completedCycles ?? 0}/${log.cycles} cycles',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 const SizedBox(height: 2),
 
                 // Timestamp
@@ -172,19 +198,5 @@ class ActivityLogItem extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// Helper to get icon for report type
-  IconData _getReportTypeIcon(String? reportType) {
-    switch (reportType?.toLowerCase()) {
-      case 'maintenance_issue':
-        return Icons.build;
-      case 'observation':
-        return Icons.visibility;
-      case 'safety_concern':
-        return Icons.warning;
-      default:
-        return Icons.report;
-    }
   }
 }

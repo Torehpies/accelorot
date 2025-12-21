@@ -13,6 +13,7 @@ import 'report_config.dart';
 import 'cycle_config.dart';
 import 'all_activity_config.dart';
 
+
 part 'activity_viewmodel.g.dart';
 
 /// Enum for different activity screen types

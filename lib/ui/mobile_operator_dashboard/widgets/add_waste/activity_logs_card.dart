@@ -1,425 +1,114 @@
-// lib/frontend/operator/dashboard/add_waste/activity_logs_card.dart
-
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../../services/firestore_activity_service.dart';
-import '../../../../frontend/operator/activity_logs/models/activity_item.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+//import '../../../../data/models/activity_log_item.dart';
+import '../../../../data/providers/activity_providers.dart';
+import '../activity_log/activity_log_item_widget.dart';
 
-class ActivityLogsCard extends StatefulWidget {
+class ActivityLogsCard extends ConsumerStatefulWidget {
   final String? focusedMachineId;
+  final double? maxHeight;
 
-  const ActivityLogsCard({super.key, this.focusedMachineId});
+  const ActivityLogsCard({super.key, this.focusedMachineId, this.maxHeight});
 
   @override
-  State<ActivityLogsCard> createState() => ActivityLogsCardState();
+  ConsumerState<ActivityLogsCard> createState() => ActivityLogsCardState();
 }
 
-class ActivityLogsCardState extends State<ActivityLogsCard> {
-  bool _loading = true;
-  bool _logsFetchError = false;
-  List<ActivityItem> _allLogs = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchAllLogs();
-  }
-
-  Future<void> refresh() async {
-    await _fetchAllLogs();
-  }
-
-  Future<void> _fetchAllLogs() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _logsFetchError = true;
-          _allLogs.clear();
-        });
-      }
-      return;
-    }
-
-    try {
-      setState(() => _loading = true);
-
-      final logs = await FirestoreActivityService.getAllActivities();
-
-      if (mounted) {
-        setState(() {
-          _allLogs = logs;
-          _loading = false;
-          _logsFetchError = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _logsFetchError = true;
-          _allLogs.clear();
-        });
-      }
-    }
-  }
-
-  Color _getActivityColor(ActivityItem log) {
-    // Use the statusColor from the log itself
-    return log.statusColorValue;
-  }
-
-  IconData _getActivityIcon(ActivityItem log) {
-    // Use the icon from the log itself
-    return log.icon;
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        if (difference.inMinutes == 0) {
-          return 'Just now';
-        }
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      final monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      return '${monthNames[date.month - 1]} ${date.day}';
-    }
-  }
-
-  String _getStatusText(ActivityItem log) {
-    if (log.isReport) {
-      return log.status ?? 'Open';
-    } else {
-      return 'Completed';
-    }
-  }
-
-  String _getCategoryText(ActivityItem log) {
-    if (log.isReport) {
-      switch (log.reportType?.toLowerCase()) {
-        case 'maintenance_issue':
-          return 'Maintenance';
-        case 'observation':
-          return 'Observation';
-        case 'safety_concern':
-          return 'Safety';
-        default:
-          return 'Report';
-      }
-    } else {
-      return log.category;
-    }
-  }
-
+class ActivityLogsCardState extends ConsumerState<ActivityLogsCard> {
+  
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            spreadRadius: 0,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: const Text(
-              'Recent Activities',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1a1a1a),
-                letterSpacing: -0.5,
-              ),
-            ),
-          ),
+    final activitiesAsync = ref.watch(allActivitiesProvider);
 
-          // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              border: Border(
-                top: BorderSide(color: Colors.grey.shade200, width: 1),
-                bottom: BorderSide(color: Colors.grey.shade200, width: 1),
-              ),
-            ),
-            child: Row(
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
               children: [
-                const Expanded(
-                  flex: 4,
-                  child: Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                const Icon(Icons.history, color: Colors.teal),
+                const SizedBox(width: 8),
+                const Text(
+                  'Activity Logs',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Category',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                const Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Status',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                const Expanded(
-                  flex: 2,
-                  child: Text(
-                    'Date',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
-                      letterSpacing: 0.5,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 20),
+                  onPressed: () {
+                    ref.invalidate(allActivitiesProvider);
+                  },
+                  tooltip: 'Refresh',
                 ),
               ],
             ),
-          ),
+            const Divider(),
+            
+            // Body
+            Expanded(
+              child: activitiesAsync.when(
+                data: (allLogs) {
+                  // Filter by machine if needed
+                  final filteredLogs = widget.focusedMachineId != null
+                      ? allLogs.where((log) => log.machineId == widget.focusedMachineId).toList()
+                      : allLogs;
 
-          // Content
-          Expanded(
-            child: _buildContent(),
-          ),
-        ],
+                  if (filteredLogs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No activities found',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: filteredLogs.length,
+                    physics: const ClampingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ActivityLogItemWidget(log: filteredLogs[index]),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 8),
+                      Text('Error: ${error.toString()}'),
+                      const SizedBox(height: 8),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ref.invalidate(allActivitiesProvider);
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  Widget _buildContent() {
-    if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
-        ),
-      );
-    } else if (_logsFetchError || _allLogs.isEmpty) {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              'Please log in to view recent logs.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF9CA3AF),
-                fontSize: 14,
-              ),
-            ),
-          ),
-        );
-      } else {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.inbox_outlined,
-                  size: 48,
-                  color: Colors.grey.shade300,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.focusedMachineId != null
-                      ? 'No activity logs for this machine yet.'
-                      : 'No logs yet. Add waste or submit a report to get started!',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF9CA3AF),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    } else {
-      final filteredLogs = widget.focusedMachineId != null
-          ? _allLogs
-              .where((log) => log.machineId == widget.focusedMachineId)
-              .toList()
-          : _allLogs;
-
-      if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              'No activity logs for this machine yet.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF9CA3AF),
-                fontSize: 14,
-              ),
-            ),
-          ),
-        );
-      }
-
-      return ListView.builder(
-        itemCount: filteredLogs.length,
-        padding: EdgeInsets.zero,
-        physics: const ClampingScrollPhysics(),
-        itemBuilder: (context, index) {
-          final log = filteredLogs[index];
-          final color = _getActivityColor(log);
-          final icon = _getActivityIcon(log);
-
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade100,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: [
-                  // Icon
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  // Description
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          log.description.isNotEmpty 
-                              ? log.description 
-                              : log.title,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF1a1a1a),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          log.operatorName ?? 'Unknown',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF9CA3AF),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Category
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      _getCategoryText(log),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6B7280),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  // Status
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      _getStatusText(log),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                  ),
-
-                  // Date
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      _formatDate(log.timestamp),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF6B7280),
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
   }
 }

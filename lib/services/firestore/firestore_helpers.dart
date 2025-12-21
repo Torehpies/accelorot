@@ -1,24 +1,12 @@
 // lib/services/firestore/firestore_helpers.dart
 import 'package:flutter/material.dart' show Icons, IconData;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_application_1/frontend/operator/activity_logs/models/activity_item.dart';
+import '../../../../data/models/activity_log_item.dart';
 
 class FirestoreHelpers {
-  // Convert Firestore document to ActivityItem
-  static ActivityItem documentToActivityItem(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    final timestamp = (data['timestamp'] as Timestamp).toDate();
-
-    return ActivityItem(
-      title: data['title'] ?? '',
-      value: data['value'] ?? '',
-      statusColor: data['statusColor'] ?? 'grey',
-      icon: getIconFromCodePoint(data['icon'] ?? 0),
-      description: data['description'] ?? '',
-      category: data['category'] ?? '',
-      timestamp: timestamp,
-    );
-    // Note: userId is stored in Firestore but not needed in the model
+  // Convert Firestore document to ActivityLogItem
+  static ActivityLogItem documentToActivityLogItem(DocumentSnapshot doc) {
+    return ActivityLogItem.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
   }
 
   // Helper to map codePoint → IconData

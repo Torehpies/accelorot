@@ -72,7 +72,8 @@ class FirestoreCycleService implements CycleService {
       }
 
       final allCycles = await _fetchTeamCycles(teamId);
-      allCycles.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      allCycles.sort((a, b) => 
+        (b.timestamp ?? DateTime.now()).compareTo(a.timestamp ?? DateTime.now()));
 
       debugPrint('✅ Fetched ${allCycles.length} cycles');
       return allCycles;
@@ -105,7 +106,6 @@ class FirestoreCycleService implements CycleService {
             .collection('batches')
             .doc(batchDoc.id)
             .collection('cyclesRecom')
-            .orderBy('timestamp', descending: true)
             .get();
 
         final cycles = <CycleRecommendation>[];
@@ -240,56 +240,35 @@ Future<String> startDrumController({
   required String duration,
 }) async {
   try {
-    // Get existing OR create new main cycle document
     String cycleDocId = await _getExistingMainCycleDocId(batchId) ?? 
                         await _createMainCycleDocId(batchId);
 
-    // Check if drum_controller already exists
-    final existingDrumSnapshot = await _firestore
-        .collection('batches')
-        .doc(batchId)
-        .collection('cyclesRecom')
-        .doc(cycleDocId)
-        .collection('drum_controller')
-        .limit(1)
-        .get();
-
-    // If drum controller already exists, delete it first
-    if (existingDrumSnapshot.docs.isNotEmpty) {
-      await existingDrumSnapshot.docs.first.reference.delete();
-      debugPrint('🗑️ Deleted existing drum controller');
-    }
-
-    // Create drum controller data (CLEANED - no redundant fields)
-    final drumData = CycleRecommendation(
-      id: '',
-      category: 'cycles',
-      controllerType: 'drum_controller',
-      machineId: machineId,
-      userId: userId,
-      batchId: batchId,
-      cycles: cycles,
-      duration: duration,
-      completedCycles: 0,
-      status: 'running',
-      startedAt: DateTime.now(),
-      totalRuntimeSeconds: 0,
-    );
-
-    // Create drum controller subcollection document
     final drumRef = await _firestore
         .collection('batches')
         .doc(batchId)
         .collection('cyclesRecom')
         .doc(cycleDocId)
         .collection('drum_controller')
-        .add(drumData.toFirestore());
+        .add({
+      'category': 'cycles',
+      'controllerType': 'drum_controller',
+      'machineId': machineId,
+      'userId': userId,
+      'batchId': batchId,
+      'cycles': cycles,
+      'duration': duration,
+      'completedCycles': 0,
+      'status': 'running',
+      'startedAt': FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(), // ✅ ADD THIS
+      'totalRuntimeSeconds': 0,
+    });
 
     debugPrint('✅ Started drum controller: ${drumRef.id}');
     return drumRef.id;
   } catch (e) {
     debugPrint('❌ Error starting drum controller: $e');
-    throw Exception('Failed to start drum controller: $e');
+    rethrow;
   }
 }
 
@@ -371,6 +350,7 @@ Future<void> completeDrumController({
 
   // ===== START AERATOR =====
 
+
 @override
 Future<String> startAerator({
   required String batchId,
@@ -380,56 +360,35 @@ Future<String> startAerator({
   required String duration,
 }) async {
   try {
-    // Get existing OR create new main cycle document
     String cycleDocId = await _getExistingMainCycleDocId(batchId) ?? 
                         await _createMainCycleDocId(batchId);
 
-    // Check if aerator already exists
-    final existingAeratorSnapshot = await _firestore
-        .collection('batches')
-        .doc(batchId)
-        .collection('cyclesRecom')
-        .doc(cycleDocId)
-        .collection('aerator')
-        .limit(1)
-        .get();
-
-    // If aerator already exists, delete it first
-    if (existingAeratorSnapshot.docs.isNotEmpty) {
-      await existingAeratorSnapshot.docs.first.reference.delete();
-      debugPrint('🗑️ Deleted existing aerator');
-    }
-
-    // Create aerator data (CLEANED - no redundant fields)
-    final aeratorData = CycleRecommendation(
-      id: '',
-      category: 'cycles',
-      controllerType: 'aerator',
-      machineId: machineId,
-      userId: userId,
-      batchId: batchId,
-      cycles: cycles,
-      duration: duration,
-      completedCycles: 0,
-      status: 'running',
-      startedAt: DateTime.now(),
-      totalRuntimeSeconds: 0,
-    );
-
-    // Create aerator subcollection document
     final aeratorRef = await _firestore
         .collection('batches')
         .doc(batchId)
         .collection('cyclesRecom')
         .doc(cycleDocId)
         .collection('aerator')
-        .add(aeratorData.toFirestore());
+        .add({
+      'category': 'cycles',
+      'controllerType': 'aerator',
+      'machineId': machineId,
+      'userId': userId,
+      'batchId': batchId,
+      'cycles': cycles,
+      'duration': duration,
+      'completedCycles': 0,
+      'status': 'running',
+      'startedAt': FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(), // ✅ ADD THIS
+      'totalRuntimeSeconds': 0,
+    });
 
     debugPrint('✅ Started aerator: ${aeratorRef.id}');
     return aeratorRef.id;
   } catch (e) {
     debugPrint('❌ Error starting aerator: $e');
-    throw Exception('Failed to start aerator: $e');
+    rethrow;
   }
 }
 
