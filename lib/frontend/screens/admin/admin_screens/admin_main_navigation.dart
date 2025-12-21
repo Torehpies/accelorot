@@ -37,7 +37,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
   List<Widget> _buildScreens() {
     return [
       AdminHomeScreen(onNavigateToTab: _navigateToTab),
-      const OperatorManagementScreen(),
+      const OperatorManagementScreen(teamId: '',),
       const AdminMachineView(), 
       const ProfileView(),
     ];
