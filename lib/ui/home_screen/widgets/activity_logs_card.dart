@@ -1,183 +1,109 @@
-// lib/frontend/operator/dashboard/add_waste/activity_logs_card.dart
-
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../services/firestore_activity_service.dart';
-import '../../../frontend/operator/activity_logs/models/activity_item.dart';
-import '../../mobile_operator_dashboard/widgets/activity_log/activity_log_item.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/providers/activity_providers.dart';
+import '../../mobile_operator_dashboard/widgets/activity_log/activity_log_item_widget.dart';
 
-class ActivityLogsCard extends StatefulWidget {
+class ActivityLogsCard extends ConsumerWidget {
   final String? focusedMachineId;
-  final double?
-  maxHeight; // 👈 Optional: constrain height (mobile), or leave infinite (web)
+  final double? maxHeight;
 
   const ActivityLogsCard({super.key, this.focusedMachineId, this.maxHeight});
 
   @override
-  State<ActivityLogsCard> createState() => ActivityLogsCardState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activitiesAsync = ref.watch(allActivitiesProvider);
 
-class ActivityLogsCardState extends State<ActivityLogsCard> {
-  bool _loading = true;
-  bool _logsFetchError = false;
-  List<ActivityItem> _allLogs = [];
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                const Icon(Icons.history, color: Colors.teal),
+                const SizedBox(width: 8),
+                const Text(
+                  'Recent Activities',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 20),
+                  onPressed: () => ref.invalidate(allActivitiesProvider),
+                  tooltip: 'Refresh',
+                ),
+              ],
+            ),
+            const Divider(),
+            
+            // Body
+            Expanded(
+              child: activitiesAsync.when(
+                data: (allLogs) {
+                  final filteredLogs = focusedMachineId != null
+                      ? allLogs.where((log) => log.machineId == focusedMachineId).toList()
+                      : allLogs;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchAllLogs();
-  }
+                  if (filteredLogs.isEmpty) {
+                    return _buildEmptyState();
+                  }
 
-  /// Public method to refresh the activity logs from parent widget
-  Future<void> refresh() async {
-    await _fetchAllLogs();
-  }
-
-  /// Fetches activity logs from Firestore (substrates + reports)
-  Future<void> _fetchAllLogs() async {
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _logsFetchError = true;
-          _allLogs.clear();
-        });
-      }
-      return;
-    }
-
-    try {
-      setState(() => _loading = true);
-
-      final logs = await FirestoreActivityService.getAllActivities();
-
-      if (mounted) {
-        setState(() {
-          _allLogs = logs;
-          _loading = false;
-          _logsFetchError = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _logsFetchError = true;
-          _allLogs.clear();
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // On web, we don't want the outer Card — it's already inside a white container
-    // But we keep it for mobile compatibility
-    final isWeb = widget.maxHeight == null;
-
-    if (isWeb) {
-      // Web: just return the body directly (no Card, no padding)
-      return _buildCardBody();
-    } else {
-      // Mobile: original styled card
-      return Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: Colors.white,
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.focusedMachineId != null
-                        ? 'Machine Activity Logs'
-                        : 'Recent Activity',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.teal,
-                    ),
-                  ),
-                  const Icon(Icons.history, size: 20, color: Colors.teal),
-                ],
+                  return ListView.builder(
+                    itemCount: filteredLogs.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ActivityLogItemWidget(log: filteredLogs[index]),
+                      );
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => _buildErrorState(context, ref, error),
               ),
-              const SizedBox(height: 12),
-              _buildCardBody(),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    );
   }
 
-  Widget _buildCardBody() {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    } else if (_logsFetchError || _allLogs.isEmpty) {
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null) {
-        return const Center(
-          child: Text(
-            'Please log in to view recent logs.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 13),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox, size: 64, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          Text(
+            'No activities yet',
+            style: TextStyle(color: Colors.grey[600]),
           ),
-        );
-      } else {
-        return Center(
-          child: Text(
-            widget.focusedMachineId != null
-                ? 'No activity logs for this machine yet.'
-                : 'No logs yet. Add waste or submit a report to get started!',
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.grey, fontSize: 13),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const SizedBox(height: 8),
+          Text('Error loading activities'),
+          const SizedBox(height: 8),
+          ElevatedButton.icon(
+            onPressed: () => ref.invalidate(allActivitiesProvider),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
           ),
-        );
-      }
-    } else {
-      final filteredLogs = widget.focusedMachineId != null
-          ? _allLogs
-                .where((log) => log.machineId == widget.focusedMachineId)
-                .toList()
-          : _allLogs;
-
-      if (filteredLogs.isEmpty && widget.focusedMachineId != null) {
-        return const Center(
-          child: Text(
-            'No activity logs for this machine yet.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey, fontSize: 13),
-          ),
-        );
-      }
-
-      // ✅ Web: no height constraint → fills available space
-      // ✅ Mobile: constrained by maxHeight (e.g., 140)
-      Widget listView = ListView.builder(
-        itemCount: filteredLogs.length,
-        physics: const ClampingScrollPhysics(), // Better for web
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ActivityLogItem(log: filteredLogs[index]),
-          );
-        },
-      );
-
-      if (widget.maxHeight != null) {
-        return SizedBox(height: widget.maxHeight, child: listView);
-      } else {
-        // Web: let it expand naturally inside a scrollable parent
-        return listView;
-      }
-    }
+        ],
+      ),
+    );
   }
 }

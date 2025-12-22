@@ -4,17 +4,18 @@ import '../models/substrate.dart';
 import '../services/contracts/substrate_service.dart';
 
 /// Repository for substrate-related operations
-/// Wraps SubstrateService to provide data access layer
 class SubstrateRepository {
-  final SubstrateService _substrateService;
+  final SubstrateService _service;
 
-  SubstrateRepository(this._substrateService);
+  SubstrateRepository(this._service);
 
-  /// Fetch all substrates for the current user's team
-  Future<List<Substrate>> getTeamSubstrates() =>
-      _substrateService.fetchTeamSubstrates();
+  /// Add new substrate entry
+  Future<void> addSubstrate(CreateSubstrateRequest request) async {
+    await _service.addSubstrate(request.toFirestore());
+  }
 
-  /// Add a new substrate entry
-  Future<void> addSubstrate(Map<String, dynamic> data) =>
-      _substrateService.addSubstrate(data);
+  /// Get substrates for current team
+  Future<List<Substrate>> getAllSubstrates() async {
+    return await _service.fetchTeamSubstrates(); 
+  }
 }

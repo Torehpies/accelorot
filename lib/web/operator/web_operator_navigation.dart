@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-import '../../ui/web_operator_dashboard/view/web_home_screen.dart';
+import '../../ui/home_screen/web_home_screen/web_home_screen.dart';
 import '../../ui/web_statistics/web_statistics_screen.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/web_activity_logs_main_nav.dart';
@@ -17,7 +17,7 @@ class WebOperatorNavigation extends StatefulWidget {
 
 class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
   int _selectedIndex = 0;
-  String? _teamId;
+  //String? _teamId;
   bool _isLoadingTeam = true;
 
   late List<Widget> _screens;
@@ -52,7 +52,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
       final teamId = userDoc.data()?['teamId'] as String?;
 
       setState(() {
-        _teamId = teamId;
+        //_teamId = teamId;
         _isLoadingTeam = false;
         _screens = [
           WebHomeScreen(focusedMachine: null),

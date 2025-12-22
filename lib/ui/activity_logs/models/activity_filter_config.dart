@@ -99,4 +99,6 @@ class CategoryHighlighters {
       return result;
     };
   }
+
+  
 }

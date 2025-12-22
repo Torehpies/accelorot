@@ -9,18 +9,19 @@ import '../../../mobile_operator_dashboard/fields/report_type_field.dart';
 import '../../../mobile_operator_dashboard/fields/report_title_field.dart';
 import '../../../mobile_operator_dashboard/fields/priority_field.dart';
 // waste_config.dart & info_box.dart are imported internally — no need to import here
-import 'package:flutter_application_1/services/firestore_activity_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../data/providers/report_providers.dart';
+import '../../../../data/models/report.dart';
 
-class SubmitReport extends StatefulWidget {
+class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
-
   const SubmitReport({super.key, this.preSelectedMachineId});
 
   @override
-  State<SubmitReport> createState() => _SubmitReportState();
+  ConsumerState<SubmitReport> createState() => _SubmitReportState();
 }
 
-class _SubmitReportState extends State<SubmitReport> {
+class _SubmitReportState extends ConsumerState<SubmitReport> {
   String? _selectedReportType;
   String? _selectedMachineId;
   String? _selectedPriority;
@@ -84,36 +85,34 @@ class _SubmitReportState extends State<SubmitReport> {
         _titleError == null;
   }
 
-  void _handleSubmit() async {
+void _handleSubmit() async {
     if (!_validateForm()) return;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to submit a report.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      // ...error handling...
       return;
     }
 
-    final report = {
-      'reportType': _selectedReportType!,
-      'title': _titleController.text.trim(),
-      'machineId': _selectedMachineId!,
-      'priority': _selectedPriority!,
-      'description': _descriptionController.text.trim(),
-      'timestamp': DateTime.now(),
-      'userId': user.uid,
-    };
-
     try {
-      await FirestoreActivityService.submitReport(report);
+
+      final reportRepo = ref.read(reportRepositoryProvider);
+      
+      final request = CreateReportRequest(
+        machineId: _selectedMachineId!,
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
+        reportType: _selectedReportType!,
+        priority: _selectedPriority!,
+        userName: user.displayName ?? user.email ?? 'Unknown',
+        userId: user.uid,
+      );
+
+      await reportRepo.createReport(_selectedMachineId!, request);
+      
       await Future.delayed(const Duration(milliseconds: 1000));
       if (!mounted) return;
-      Navigator.pop(context, report);
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
