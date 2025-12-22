@@ -1,6 +1,6 @@
 // lib/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart
 import 'package:flutter/foundation.dart';
-import '../../../data/repositories/dashboard_repository.dart';
+import '../../../data/repositories/admin_dashboard_repository.dart';
 
 class WebAdminDashboardViewModel extends ChangeNotifier {
   final DashboardRepository _repository;

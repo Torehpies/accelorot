@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
-import 'package:flutter_application_1/data/providers/dashboard_providers.dart';
+import 'package:flutter_application_1/data/providers/admin_dashboard_providers.dart';
 import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart' show OperatorManagementScreen;
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
