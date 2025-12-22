@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/models/activity_log_item.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../../mobile_operator_dashboard/widgets/activity_log/activity_log_item_widget.dart';
 

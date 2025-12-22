@@ -153,38 +153,6 @@ class ActivityLogItemWidget extends StatelessWidget {
                     ),
                   ),
 
-                // ✅ Cycle Progress (if cycle type)
-                if (log.isCycle && log.cycles != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.blue.shade200),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.sync, size: 14, color: Colors.blue.shade700),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Progress: ${log.completedCycles ?? 0}/${log.cycles} cycles',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue.shade700,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
                 const SizedBox(height: 2),
 
                 // Timestamp
