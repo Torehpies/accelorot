@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
-import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';

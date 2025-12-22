@@ -6,7 +6,6 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.da
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
 import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/operator_management/operator_management_screen.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/admin_web_shell.dart';
@@ -28,6 +27,7 @@ import 'package:flutter_application_1/ui/reports/widgets/reports_view.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
+import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -181,6 +181,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminOperators.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
+              // child: const OperatorManagementScreen(),
               child: const OperatorManagementScreen(),
             ),
           ),

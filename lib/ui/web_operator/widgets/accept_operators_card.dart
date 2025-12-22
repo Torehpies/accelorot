@@ -1,7 +1,7 @@
 // lib/ui/web_operator/widgets/accept_operators_card.dart
 
 import 'package:flutter/material.dart';
-import '../view_modal/pending_members_view_model.dart';
+import '../view_model/pending_members_view_model.dart';
 import '../../../data/services/firebase/firebase_operator_service.dart';
 import '../../../data/repositories/operator_repository.dart';
 import '../../core/ui/theme_constants.dart';
