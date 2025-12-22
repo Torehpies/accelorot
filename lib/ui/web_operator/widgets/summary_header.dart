@@ -17,10 +17,34 @@ class SummaryHeader extends ConsumerWidget {
         if (teamUser?.teamId == null) {
           return const Row(
             children: [
-              _SummaryCard(title: 'Active Operators', value: '—'),
-              _SummaryCard(title: 'Archived Operators', value: '—'),
-              _SummaryCard(title: 'Former Operators', value: '—'),
-              _SummaryCard(title: 'New Operators', value: '—'),
+              _SummaryCard(
+                title: 'Active Operators',
+                value: '—',
+                icon: Icons.person_outline,
+                iconBackgroundColor: AppColors.greenBackground,
+                iconForegroundColor: AppColors.greenForeground,
+              ),
+              _SummaryCard(
+                title: 'Archived Operators',
+                value: '—',
+                icon: Icons.person_outline,
+                iconBackgroundColor: AppColors.yellowBackground,
+                iconForegroundColor: AppColors.yellowForeground,
+              ),
+              _SummaryCard(
+                title: 'Former Operators',
+                value: '—',
+                icon: Icons.person_outline,
+                iconBackgroundColor: AppColors.redBackground,
+                iconForegroundColor: AppColors.redForeground,
+              ),
+              _SummaryCard(
+                title: 'New Operators',
+                value: '—',
+                icon: Icons.person_outline,
+                iconBackgroundColor: AppColors.blueBackground,
+                iconForegroundColor: AppColors.blueForeground,
+              ),
             ],
           );
         }
@@ -52,16 +76,37 @@ class _TeamSummaryRow extends ConsumerWidget {
 
     return Row(
       children: [
-        _SummaryCard(title: 'Active Operators', value: '$activeOperators'),
+        _SummaryCard(
+          title: 'Active Operators',
+          value: '$activeOperators',
+          icon: Icons.person_outline,
+          iconBackgroundColor: AppColors.greenBackground,
+          iconForegroundColor: AppColors.greenForeground,
+        ),
         const SizedBox(width: 12),
-        _SummaryCard(title: 'Archived Operators', value: '$archivedOperators'),
+        _SummaryCard(
+          title: 'Archived Operators',
+          value: '$archivedOperators',
+          icon: Icons.person_outline,
+          iconBackgroundColor: AppColors.yellowBackground,
+          iconForegroundColor: AppColors.yellowForeground,
+        ),
         const SizedBox(width: 12),
         _SummaryCard(
           title: 'Former Operators',
           value: '${team.formerOperators}',
+          icon: Icons.person_outline,
+          iconBackgroundColor: AppColors.redBackground,
+          iconForegroundColor: AppColors.redForeground,
         ),
         const SizedBox(width: 12),
-        _SummaryCard(title: 'New Operators', value: '${team.newOperators}'),
+        _SummaryCard(
+          title: 'New Operators',
+          value: '${team.newOperators}',
+          icon: Icons.person_outline,
+          iconBackgroundColor: AppColors.blueBackground,
+          iconForegroundColor: AppColors.blueForeground,
+        ),
       ],
     );
   }
@@ -70,8 +115,17 @@ class _TeamSummaryRow extends ConsumerWidget {
 class _SummaryCard extends StatelessWidget {
   final String title;
   final String value;
+  final IconData icon;
+  final Color iconBackgroundColor;
+  final Color iconForegroundColor;
 
-  const _SummaryCard({required this.title, required this.value});
+  const _SummaryCard({
+    required this.title,
+    required this.value,
+    required this.iconBackgroundColor,
+    required this.iconForegroundColor,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,21 +136,34 @@ class _SummaryCard extends StatelessWidget {
           color: AppColors.background2,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold),
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: iconBackgroundColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 30, color: iconForegroundColor),
             ),
           ],
         ),
