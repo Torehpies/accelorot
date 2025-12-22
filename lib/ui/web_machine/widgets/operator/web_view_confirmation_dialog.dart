@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/machine_model.dart';
-import 'web_machine_view_screen.dart'; 
+
 
 class WebViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
@@ -134,28 +134,6 @@ class WebViewConfirmationDialog extends StatelessWidget {
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Close'),
                 ),
-                if (isActive) ...[
-                  const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context); // Close dialog
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WebMachineViewScreen(
-                            machine: machine, 
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.dashboard),
-                    label: const Text('Open Dashboard'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
               ],
             ),
           ],

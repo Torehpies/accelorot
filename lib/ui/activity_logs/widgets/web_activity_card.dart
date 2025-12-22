@@ -39,7 +39,14 @@ class WebActivityCard extends StatelessWidget {
                 color: Color(0xFF302F2F),
               ),
             ),
-          ),
+          ),          
+          //  Show cycle progress if it's a cycle
+          if (item.isCycle && item.cycles != null)
+            Text(
+              '${item.completedCycles ?? 0}/${item.cycles} cycles',
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
+            )
+          else
           Text(
             item.value,
             style: const TextStyle(

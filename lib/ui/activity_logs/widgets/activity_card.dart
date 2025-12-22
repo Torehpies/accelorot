@@ -46,6 +46,17 @@ class ActivityCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6),
+                    // Show cycle progress
+                    if (item.isCycle && item.cycles != null)
+                      Text(
+                        '${item.completedCycles ?? 0}/${item.cycles}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      )
+                    else
                     Text(
                       item.value,
                       style: const TextStyle(
