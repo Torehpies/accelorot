@@ -80,7 +80,9 @@ class OperatorMachineState {
 
   // Display only up to itemsPerPage from current page's machines
   List<MachineModel> get displayedMachines {
-    return currentPageMachines.take(itemsPerPage - ((currentPage - 1) * baseItemsPerPage)).toList();
+    // Calculate how many items to show from the current page
+    final displayCount = itemsPerPage.clamp(0, currentPageMachines.length);
+    return currentPageMachines.take(displayCount).toList();
   }
 
   // Check if there are more items to load on the current page
@@ -102,8 +104,8 @@ class OperatorMachineState {
 
 @riverpod
 class OperatorMachineNotifier extends _$OperatorMachineNotifier {
-  static const int _basePageSize = 9;
-  static const int _loadMoreIncrement = 9;
+  static const int _basePageSize = 10;
+  static const int _loadMoreIncrement = 10;
   
   MachineRepository get _repository => ref.read(machineRepositoryProvider);
 
@@ -145,7 +147,7 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     state = state.copyWith(
       searchQuery: query,
       currentPage: 1,
-      itemsPerPage: _basePageSize, // Reset to base page size
+      itemsPerPage: state.baseItemsPerPage, // Reset to base page size
     );
   }
 
@@ -153,7 +155,7 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     state = state.copyWith(
       searchQuery: '',
       currentPage: 1,
-      itemsPerPage: _basePageSize, // Reset to base page size
+      itemsPerPage: state.baseItemsPerPage, // Reset to base page size
     );
   }
 
@@ -166,11 +168,20 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     }
   }
 
+  // Set the page size from the dropdown selector
+  void setItemsPerPage(int count) {
+    state = state.copyWith(
+      itemsPerPage: count,
+      baseItemsPerPage: count,
+      currentPage: 1, // Reset to first page when changing page size
+    );
+  }
+
   void goToNextPage() {
     if (state.currentPage < state.totalPages) {
       state = state.copyWith(
         currentPage: state.currentPage + 1,
-        itemsPerPage: _basePageSize, // Reset to base page size on page change
+        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }
@@ -179,7 +190,7 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     if (state.currentPage > 1) {
       state = state.copyWith(
         currentPage: state.currentPage - 1,
-        itemsPerPage: _basePageSize, // Reset to base page size on page change
+        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }
@@ -188,7 +199,7 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     if (page >= 1 && page <= state.totalPages) {
       state = state.copyWith(
         currentPage: page,
-        itemsPerPage: _basePageSize, // Reset to base page size on page change
+        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }

@@ -5,7 +5,6 @@ import '../widgets/stat_card.dart';
 import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
-import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart';
 
 /// Main machines view connected to real data
 class MachinesView extends ConsumerStatefulWidget {
@@ -227,11 +226,15 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                   : (isMobile
                       ? MachineMobileCardWidget(
                           machines: state.displayedMachines,
-                          onMachineAction: _handleMachineAction,
+                          onMachineAction: (machineId) {
+                            // No action - view disabled
+                          },
                         )
                       : MachineTableWidget(
                           machines: state.displayedMachines,
-                          onMachineAction: _handleMachineAction,
+                          onMachineAction: (machineId) {
+                            // No action - view disabled
+                          },
                         )),
             ),
             
@@ -240,6 +243,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
               PaginationWidget(
                 currentPage: state.currentPage,
                 totalPages: state.totalPages,
+                itemsPerPage: state.itemsPerPage,
                 isDesktop: isDesktop,
                 canGoNext: state.currentPage < state.totalPages,
                 canGoPrevious: state.currentPage > 1,
@@ -252,6 +256,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                 onPageChanged: (page) => ref
                     .read(operatorMachineProvider.notifier)
                     .goToPage(page),
+                onItemsPerPageChanged: (count) => ref
+                    .read(operatorMachineProvider.notifier)
+                    .setItemsPerPage(count),
               ),
           ],
         ),
@@ -421,21 +428,6 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
             ],
           ],
         ),
-      ),
-    );
-  }
-
-  void _handleMachineAction(String machineId) {
-    final state = ref.read(operatorMachineProvider);
-    final machine = state.machines.firstWhere(
-      (m) => m.machineId == machineId,
-      orElse: () => throw Exception('Machine not found'),
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => MachineViewDialog(
-        machine: machine,
       ),
     );
   }
