@@ -1,116 +1,255 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TeamMembersTab extends ConsumerWidget {
+class TeamMembersTab extends ConsumerStatefulWidget {
   const TeamMembersTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(teamMembersProvider);
+  ConsumerState<TeamMembersTab> createState() => _TeamMembersTabState();
+}
+
+class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final state = ref.watch(teamMembersProvider.select((s) => s));
     final notifier = ref.read(teamMembersProvider.notifier);
 
     return Column(
       children: [
         Expanded(
-          child: state.isLoading && state.members.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 30),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(width: 1, color: Colors.grey),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: LayoutBuilder(
-                      builder:
-                          (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                          ) => SingleChildScrollView(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minWidth: constraints.maxWidth,
-                                maxWidth: constraints.maxWidth,
-                              ),
-                              child: DataTable(
-                                headingRowColor: WidgetStateProperty.all(
-                                  const Color(0xFFEFF7FF),
-                                ),
-                                columns: const [
-                                  DataColumn(label: Text('First Name')),
-                                  DataColumn(label: Text('Last Name')),
-                                  DataColumn(label: Text('Email')),
-                                  DataColumn(label: Text('Status')),
-                                  DataColumn(label: Text('Date Added')),
-                                  DataColumn(label: Text('Actions')),
-                                ],
-                                rows: state.members.map((m) {
-                                  return DataRow(
-                                    cells: [
-                                      DataCell(Text(m.firstName)),
-                                      DataCell(Text(m.lastName)),
-                                      DataCell(Text(m.email)),
-                                      DataCell(Text(m.status.value)),
-                                      DataCell(Text(_formatDate(m.addedAt))),
-                                      DataCell(
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.visibility_outlined,
-                                              ),
-                                              onPressed: () {
-                                                // TODO: view dialog / route
-                                              },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.edit_outlined,
-                                              ),
-                                              onPressed: () {
-                                                // TODO: edit form
-                                              },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.archive_outlined,
-                                              ),
-                                              onPressed: () {
-                                                // notifier.archiveTeamMemberForRow(m);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                    ),
-                  ),
-                ),
+          child: _TableContent(state: state, notifier: notifier),
         ),
         const SizedBox(height: 12),
-        PaginationBar(
+        _PaginationSection(
           currentPage: state.currentPage,
-          canGoNext: state.hasNextPage,
-          onBack: notifier.previousPage,
-          onNext: notifier.nextPage,
-          onPageSelected: notifier.goToPage,
+          hasNextPage: state.hasNextPage,
+          notifier: notifier,
         ),
+        const SizedBox(height: 12),
       ],
     );
   }
+}
 
-  String _formatDate(DateTime value) {
-    // Replace with intl if you like
-    return '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
+class _TableContent extends StatelessWidget {
+  final TeamMembersState state;
+  final TeamMembersNotifier notifier;
+
+  const _TableContent({required this.state, required this.notifier});
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.isLoading && state.members.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(width: 1, color: AppColors.grey),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: [
+            _StickyHeader(),
+            Expanded(
+              child: _MembersList(state: state, notifier: notifier),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StickyHeader extends StatelessWidget {
+  const _StickyHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(color: Color(0xFFEFF7FF)),
+      child: const Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text(
+                'First Name',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Center(
+              child: Text(
+                'Last Name',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: SizedBox(
+              width: 220,
+              child: Center(
+                child: Text(
+                  'Email',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: Text(
+                'Status',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: Text(
+                'Actions',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MembersList extends StatelessWidget {
+  final TeamMembersState state;
+  final TeamMembersNotifier notifier;
+
+  const _MembersList({required this.state, required this.notifier});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: state.members.length,
+      itemBuilder: (context, index) =>
+          _MemberRow(member: state.members[index], notifier: notifier),
+    );
+  }
+}
+
+class _MemberRow extends StatelessWidget {
+  final dynamic member;
+  final TeamMembersNotifier notifier;
+
+  const _MemberRow({required this.member, required this.notifier});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
+      ),
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: Center(child: Text(member.firstName))),
+          Expanded(flex: 2, child: Center(child: Text(member.lastName))),
+          Expanded(
+            flex: 3,
+            child: SizedBox(
+              width: 220,
+              child: Center(
+                child: Text(
+                  member.email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: false,
+                ),
+              ),
+            ),
+          ),
+          Expanded(flex: 1, child: Center(child: Text(member.status.value))),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: _ActionButtons(notifier: notifier, member: member),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButtons extends StatelessWidget {
+  final TeamMembersNotifier notifier;
+  final dynamic member;
+
+  const _ActionButtons({required this.notifier, required this.member});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: const [
+        IconButton(icon: Icon(Icons.edit_outlined), onPressed: null),
+        IconButton(icon: Icon(Icons.visibility_outlined), onPressed: null),
+      ],
+    );
+  }
+}
+
+class _PaginationSection extends ConsumerWidget {
+  final int currentPage;
+  final bool hasNextPage;
+  final TeamMembersNotifier notifier;
+
+  const _PaginationSection({
+    required this.currentPage,
+    required this.hasNextPage,
+    required this.notifier,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return PaginationBar(
+      currentPage: currentPage,
+      canGoNext: hasNextPage,
+      onBack: notifier.previousPage,
+      onNext: notifier.nextPage,
+      onPageSelected: notifier.goToPage,
+    );
   }
 }

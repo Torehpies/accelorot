@@ -1,7 +1,7 @@
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'team_members_state.dart';
 
 part 'team_members_notifier.g.dart';
@@ -15,13 +15,19 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     return state;
   }
 
+  static const _cacheTtl = Duration(minutes: 1);
+
+  bool _isCacheFresh(DateTime? lastFetchedAt) {
+    if (lastFetchedAt == null) return false;
+    return DateTime.now().difference(lastFetchedAt) < _cacheTtl;
+  }
+
   Future<void> _loadPage(int pageIndex) async {
     if (state.isLoading) return;
 
     final teamUser = ref.watch(appUserProvider).value;
     final teamId = teamUser?.teamId;
     if (teamId == null || teamId.isEmpty) {
-
       state = state.copyWith(
         members: const [],
         currentPage: 0,
@@ -31,6 +37,15 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       return;
     }
 
+    final cachedPage = state.pagesByIndex[pageIndex];
+    if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
+      state = state.copyWith(
+        currentPage: pageIndex,
+        members: cachedPage,
+        isLoading: false,
+      );
+      return;
+    }
     state = state.copyWith(isLoading: true);
 
     final service = ref.read(teamMemberServiceProvider);
@@ -41,11 +56,16 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       pageIndex: pageIndex,
     );
 
+    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
+      ..[pageIndex] = members;
+
     state = state.copyWith(
       members: members,
       currentPage: pageIndex,
       isLoading: false,
       hasNextPage: members.length == state.pageSize,
+      pagesByIndex: updatedPages,
+      lastFetchedAt: DateTime.now(),
     );
   }
 
@@ -61,5 +81,10 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     await _loadPage(state.currentPage - 1);
   }
 
-  Future<void> refresh() => _loadPage(state.currentPage);
+  Future<void> refresh() async {
+    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
+      ..remove(state.currentPage);
+    state = state.copyWith(pagesByIndex: updatedPages, lastFetchedAt: null);
+    await _loadPage(state.currentPage);
+  }
 }

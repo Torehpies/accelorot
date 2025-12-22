@@ -1,39 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class TabsRow extends StatelessWidget {
-  const TabsRow({super.key});
+  final TabController? controller;
+
+  const TabsRow({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 36,
-      child: TabBar(
-        isScrollable: true, // so they don’t stretch
-        labelPadding: const EdgeInsets.only(right: 8),
-        indicator: BoxDecoration(
-          color: const Color(0xFFE0F2FF),
-          borderRadius: BorderRadius.circular(18),
+      height: 40,
+      child: Theme(
+        data: theme.copyWith(
+          tabBarTheme: theme.tabBarTheme.copyWith(dividerHeight: 0),
         ),
-        labelColor: theme.colorScheme.primary,
-        unselectedLabelColor: Colors.grey[600],
-        overlayColor:
-            WidgetStateProperty.all(Colors.transparent),
-        tabs: const [
-          Tab(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Active'),
-            ),
+        child: TabBar(
+          controller: controller,
+          isScrollable: true,
+          labelPadding: const EdgeInsets.only(right: 16),
+          indicator: const UnderlineTabIndicator(
+            borderSide: BorderSide(width: 3, color: AppColors.green100),
+            insets: EdgeInsets.symmetric(horizontal: 16),
           ),
-          Tab(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('For Approval'),
-            ),
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+          splashFactory: NoSplash.splashFactory,
+          labelColor: theme.colorScheme.onSurface,
+          unselectedLabelColor: Colors.grey,
+          labelStyle: theme.textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.w700,
           ),
-        ],
+          unselectedLabelStyle: theme.textTheme.titleMedium!.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+          tabs: const [
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Text('Active'),
+              ),
+            ),
+            Tab(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Text('For Approval'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

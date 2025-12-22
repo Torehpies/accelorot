@@ -8,10 +8,12 @@ part 'team_members_state.g.dart';
 abstract class TeamMembersState with _$TeamMembersState {
   const factory TeamMembersState({
     @Default(<TeamMember>[]) List<TeamMember> members,
-    @Default(0) int currentPage, // 0-based
+    @Default({}) Map<int, List<TeamMember>> pagesByIndex,
+    @Default(0) int currentPage,
     @Default(10) int pageSize,
     @Default(false) bool isLoading,
     @Default(true) bool hasNextPage,
+		DateTime? lastFetchedAt,
   }) = _TeamMembersState;
 
   factory TeamMembersState.fromJson(Map<String, dynamic> json) =>

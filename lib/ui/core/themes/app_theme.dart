@@ -9,18 +9,14 @@ final ThemeData appTheme = ThemeData(
   colorScheme: ColorScheme.fromSeed(seedColor: AppColors.green100),
 
   textTheme: const TextTheme(
-    // Used for main headings (e.g., "Welcome Back!")
     headlineLarge: TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.bold,
       color: AppColors.textPrimary,
     ),
-    titleMedium: TextStyle(
-      fontSize: 16,
-      color: AppColors.textPrimary, // Use the dark text color
-    ),
-    // Used for secondary text (e.g., "Sign in to continue")
+    titleMedium: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+    bodyMedium: TextStyle(color: AppColors.textPrimary),
   ),
 
   // --- Input Field Styling (Applies to all TextFormFields) ---
@@ -71,6 +67,7 @@ class AppColors {
   static const Color green300 = Color(0xFF059669);
   static const Color green400 = Color(0xFF047857);
   static const Color green500 = Color(0xFF065F46);
+  static const Color grey = Color(0xFFD1DBE0);
   static const Color background = Color(0xFFE0F2FE);
   static const Color background1 = Color(0xFFE0F2FE);
   static const Color background2 = Colors.white;

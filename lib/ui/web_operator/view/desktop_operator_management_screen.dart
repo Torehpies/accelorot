@@ -6,50 +6,69 @@ import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_t
 import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DesktopOperatorManagementScreen extends ConsumerWidget {
+class DesktopOperatorManagementScreen extends ConsumerStatefulWidget {
   const DesktopOperatorManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 2,
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey),
-        ),
-        child: Column(
-          children: [
-            const SummaryHeader(),
-            SizedBox(height: 10),
+  ConsumerState<DesktopOperatorManagementScreen> createState() =>
+      _DesktopOperatorManagementScreenState();
+}
 
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: AppColors.background2,
-                ),
-                child: Column(
-                  children: [
-                    // header row with tabs + search/buttons
-                    const TeamHeaderWithTabs(),
+class _DesktopOperatorManagementScreenState
+    extends ConsumerState<DesktopOperatorManagementScreen>
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  late TabController _tabController;
 
-                    const SizedBox(height: 8),
+  @override
+  bool get wantKeepAlive => true;
 
-                    // Tab contents fill the rest
-                    const Expanded(
-                      child: TabBarView(
-                        children: [TeamMembersTab(), PendingMembersTab()],
-                      ),
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.grey),
+      ),
+      child: Column(
+        children: [
+          const SummaryHeader(),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: AppColors.background2,
+              ),
+              child: Column(
+                children: [
+                  TeamHeaderWithTabs(controller: _tabController),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: const [TeamMembersTab(), PendingMembersTab()],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
