@@ -10,10 +10,10 @@ part 'team_member.g.dart';
 abstract class TeamMember with _$TeamMember {
   const factory TeamMember({
     required String email,
-    required String firstName,
-    required String lastName,
-    required TeamRole teamRole,
-		required UserStatus status,
+    @Default('') String firstName,
+    @Default('') String lastName,
+    @Default(TeamRole.operator) TeamRole teamRole,
+		@Default(UserStatus.active) UserStatus status,
     @TimestampConverter() required DateTime addedAt,
   }) = _TeamMember;
 

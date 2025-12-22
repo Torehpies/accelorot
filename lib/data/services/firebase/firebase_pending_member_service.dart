@@ -139,6 +139,7 @@ class FirebasePendingMemberService implements PendingMemberService {
 
       batch.set(teamMemberRef, {
         'teamRole': 'Operator',
+				'status': UserStatus.active.value,
         'addedAt': FieldValue.serverTimestamp(),
         'email': member.user?.email,
         'firstName': member.user?.firstName,

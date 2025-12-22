@@ -1,9 +1,9 @@
-import 'package:flutter_application_1/data/services/contracts/pagination_result.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 
 abstract class TeamMemberService {
-  Future<Map<String, dynamic>?> fetchRawTeamMemberData(String id);
-  Future<PaginationResult<Map<String, dynamic>?>> fetchRawTeamMembers({
-    required int limit,
-    String? startCursor,
-  });
+	Future<List<TeamMember>> fetchTeamMembersPage({
+		required String teamId,
+		required int pageSize,
+		required int pageIndex,
+	});
 }
