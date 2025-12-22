@@ -1,10 +1,20 @@
+// lib/ui/machine_management/widgets/admin/web_admin_machine_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../machine_management/view_model/admin_machine_notifier.dart';
 import '../../../../services/sess_service.dart';
+import '../../../../data/models/machine_model.dart';
+import '../../../machine_management/view_model/admin_machine_notifier.dart';
 import 'web_add_machine_modal.dart';
 import 'web_edit_machine_modal.dart';
-import '../../../../data/models/machine_model.dart';
+import 'web_machine_date_filter_widget.dart';
+import 'web_machine_details_view.dart';
+import '../admin/web_machine_stat_card.dart';
+import '../admin/web_machine_pagination_button.dart';
+import '../admin/web_machine_table_row.dart';
+import '../admin/web_machine_empty_state.dart';
+
+
+
 
 class WebAdminMachineView extends ConsumerStatefulWidget {
   const WebAdminMachineView({super.key});
@@ -20,6 +30,11 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
   String _statusFilter = 'All';
   String _sortColumn = 'ID';
   bool _ascending = true;
+  DateTime? _selectedDateFilter;
+
+  // Pagination
+  int _currentPage = 1;
+  final int _itemsPerPage = 10;
 
   @override
   void initState() {
@@ -60,6 +75,29 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     );
   }
 
+  void _showCalendar() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        insetPadding: const EdgeInsets.all(14),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 700),
+          child: MachineDateFilterWidget(
+            initialSelectedDate: _selectedDateFilter,
+            onDateSelected: (selectedDate) {
+              setState(() {
+                _selectedDateFilter = selectedDate;
+                _currentPage = 1;
+              });
+            },
+            onClose: () {},
+          ),
+        ),
+      ),
+    );
+  }
+
   int _getActiveCount(List<MachineModel> machines) {
     return machines.where((m) => !m.isArchived).length;
   }
@@ -89,21 +127,29 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
         });
       }
     }
+    setState(() => _currentPage = 1);
   }
 
   List<MachineModel> _getFilteredMachines(List<MachineModel> machines) {
     var filtered = machines.where((m) {
       final matchesSearch = m.machineName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           m.machineId.toLowerCase().contains(_searchQuery.toLowerCase());
-      
+
       final matchesStatus = _statusFilter == 'All' ||
           (_statusFilter == 'Active' && !m.isArchived) ||
-          (_statusFilter == 'Inactive' && m.isArchived);
+          (_statusFilter == 'Inactive' && m.isArchived) ||
+          (_statusFilter == 'Archived' && m.isArchived);
 
-      return matchesSearch && matchesStatus;
+      bool matchesDate = true;
+      if (_selectedDateFilter != null) {
+        final machineDate = DateTime(m.dateCreated.year, m.dateCreated.month, m.dateCreated.day);
+        final filterDate = DateTime(_selectedDateFilter!.year, _selectedDateFilter!.month, _selectedDateFilter!.day);
+        matchesDate = machineDate.isAtSameMomentAs(filterDate);
+      }
+
+      return matchesSearch && matchesStatus && matchesDate;
     }).toList();
 
-    // Apply sorting
     filtered.sort((a, b) {
       int cmp;
       switch (_sortColumn) {
@@ -112,6 +158,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
           break;
         case 'Name':
           cmp = a.machineName.compareTo(b.machineName);
+          break;
+        case 'Created':
+          cmp = a.dateCreated.compareTo(b.dateCreated);
           break;
         default:
           cmp = 0;
@@ -122,14 +171,233 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     return filtered;
   }
 
+  List<MachineModel> _getPaginatedMachines(List<MachineModel> machines) {
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = startIndex + _itemsPerPage;
+
+    if (startIndex >= machines.length) return [];
+    if (endIndex > machines.length) return machines.sublist(startIndex);
+
+    return machines.sublist(startIndex, endIndex);
+  }
+
+  int _getTotalPages(int totalItems) {
+    return (totalItems / _itemsPerPage).ceil();
+  }
+
+  List<Widget> _buildPageNumbers(int totalPages) {
+    final List<Widget> pages = [];
+
+    for (int i = 1; i <= 5 && i <= totalPages; i++) {
+      pages.add(MachinePaginationButton(
+        label: i.toString(),
+        isActive: i == _currentPage,
+        onPressed: () {
+          setState(() => _currentPage = i);
+        },
+        enabled: true,
+      ));
+    }
+
+    return pages;
+  }
+
+  Widget _buildColumnHeader(String text, {bool sortable = false}) {
+    final isCurrentSort = _sortColumn == text ||
+        (_sortColumn == 'ID' && text == 'Machine ID') ||
+        (_sortColumn == 'Created' && text == 'Created');
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isCurrentSort ? const Color(0xFF3B82F6) : const Color(0xFF6B7280),
+            letterSpacing: 0.5,
+          ),
+        ),
+        if (sortable) ...[
+          const SizedBox(width: 4),
+          Icon(
+            isCurrentSort
+                ? (_ascending ? Icons.arrow_upward : Icons.arrow_downward)
+                : Icons.unfold_more,
+            size: 16,
+            color: isCurrentSort ? const Color(0xFF3B82F6) : const Color(0xFF9CA3AF),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStatusFilterHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Status',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: _statusFilter != 'All'
+                ? const Color(0xFF3B82F6)
+                : const Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(width: 4),
+        PopupMenuButton<String>(
+          icon: Icon(
+            Icons.filter_alt,
+            size: 16,
+            color: _statusFilter != 'All'
+                ? const Color(0xFF3B82F6)
+                : const Color(0xFF6B7280),
+          ),
+          onSelected: (value) {
+            setState(() {
+              _statusFilter = value;
+              _currentPage = 1;
+            });
+          },
+          itemBuilder: (context) {
+            return ['All', 'Active', 'Inactive', 'Archived']
+                .map((status) => PopupMenuItem(
+                      value: status,
+                      child: Row(
+                        children: [
+                          if (_statusFilter == status)
+                            const Icon(
+                              Icons.check,
+                              size: 16,
+                              color: Color(0xFF3B82F6),
+                            ),
+                          if (_statusFilter == status) const SizedBox(width: 8),
+                          Text(status),
+                        ],
+                      ),
+                    ))
+                .toList();
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showEditDialog(MachineModel machine) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+          child: WebEditMachineModal(machine: machine, teamId: _teamId!),
+        ),
+      ),
+    );
+  }
+
+  void _handleViewMachine(MachineModel machine) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800, maxHeight: 600),
+          child: WebMachineDetailsView(
+            machine: machine,
+            teamId: _teamId!,
+            onArchive: () {
+              Navigator.pop(context);
+              _showArchiveConfirmation(machine);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showArchiveConfirmation(MachineModel machine) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Archive Machine',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF111827),
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to archive this machine?',
+          style: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF6B7280),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF6B7280)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(adminMachineProvider.notifier).archiveMachine(
+              _teamId!,
+              machine.machineId,
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${machine.machineName} archived successfully'),
+              backgroundColor: const Color(0xFF10B981),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to archive: $e'),
+              backgroundColor: const Color(0xFFEF4444),
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminMachineProvider);
 
     if (_isInitializing || _teamId == null) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: const Center(
+      return const Scaffold(
+        backgroundColor: Color(0xFFF8FAFC),
+        body: Center(
           child: CircularProgressIndicator(color: Color(0xFF14B8A6)),
         ),
       );
@@ -141,6 +409,8 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     final suspendedCount = _getSuspendedCount(allMachines);
     final newCount = _getNewCount(allMachines);
     final filteredMachines = _getFilteredMachines(allMachines);
+    final paginatedMachines = _getPaginatedMachines(filteredMachines);
+    final totalPages = _getTotalPages(filteredMachines.length);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -153,7 +423,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
               Row(
                 children: [
                   Expanded(
-                    child: _StatCard(
+                    child: MachineStatCard(
                       title: 'Active Machines',
                       count: activeCount,
                       percentage: '+25%',
@@ -166,7 +436,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _StatCard(
+                    child: MachineStatCard(
                       title: 'Inactive Machines',
                       count: inactiveCount,
                       percentage: '+25%',
@@ -179,7 +449,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _StatCard(
+                    child: MachineStatCard(
                       title: 'Suspended Machines',
                       count: suspendedCount,
                       percentage: '-10%',
@@ -192,7 +462,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _StatCard(
+                    child: MachineStatCard(
                       title: 'New Machines',
                       count: newCount,
                       percentage: '-10%',
@@ -212,8 +482,14 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha((0.03 * 255).toInt()),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -231,18 +507,25 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                               ),
                             ),
                             const Spacer(),
-                            // Calendar Icon
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: const Color(0xFFE5E7EB)),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
+                            // Calendar Button
+                            IconButton(
+                              onPressed: _showCalendar,
+                              icon: Icon(
                                 Icons.calendar_today_outlined,
                                 size: 20,
-                                color: Color(0xFF6B7280),
+                                color: _selectedDateFilter != null
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFF6B7280),
+                              ),
+                              style: IconButton.styleFrom(
+                                side: BorderSide(
+                                  color: _selectedDateFilter != null
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFFE5E7EB),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -256,7 +539,10 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                               ),
                               child: TextField(
                                 onChanged: (value) {
-                                  setState(() => _searchQuery = value);
+                                  setState(() {
+                                    _searchQuery = value;
+                                    _currentPage = 1;
+                                  });
                                 },
                                 decoration: const InputDecoration(
                                   hintText: 'Search...',
@@ -305,29 +591,39 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
 
                       // Table Header
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF9FAFB),
                         ),
-                        color: const Color(0xFFF9FAFB),
                         child: Row(
                           children: [
                             Expanded(
+                              flex: 2,
                               child: GestureDetector(
                                 onTap: () => _applySortAndFilter(column: 'ID'),
-                                child: _buildColumnHeader('ID', sortable: true),
+                                child: _buildColumnHeader('Machine ID', sortable: true),
                               ),
                             ),
                             Expanded(
+                              flex: 3,
                               child: GestureDetector(
                                 onTap: () => _applySortAndFilter(column: 'Name'),
                                 child: _buildColumnHeader('Name', sortable: true),
                               ),
                             ),
                             Expanded(
+                              flex: 2,
+                              child: GestureDetector(
+                                onTap: () => _applySortAndFilter(column: 'Created'),
+                                child: _buildColumnHeader('Created', sortable: true),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
                               child: _buildStatusFilterHeader(),
                             ),
                             Expanded(
+                              flex: 2,
                               child: Center(
                                 child: _buildColumnHeader('Actions', sortable: false),
                               ),
@@ -338,91 +634,74 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
 
                       // Table Body
                       Expanded(
-                        child: filteredMachines.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.precision_manufacturing_outlined,
-                                      size: 64,
-                                      color: Colors.grey[400],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      'No machines found',
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      'Try adjusting your search or filters',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[400],
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
+                        child: paginatedMachines.isEmpty
+                            ? const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: MachineEmptyState(),
                               )
                             : Scrollbar(
                                 thumbVisibility: true,
-                                child: ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  itemCount: filteredMachines.length,
-                                  itemBuilder: (context, index) {
-                                    final machine = filteredMachines[index];
-                                    return _MachineRow(
-                                      machine: machine,
-                                      teamId: _teamId!,
-                                      onEdit: () => _showEditDialog(machine),
-                                      onView: () => _handleViewMachine(machine),
-                                    );
-                                  },
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: paginatedMachines
+                                        .map((machine) => Column(
+                                              children: [
+                                                MachineTableRow(
+                                                  machine: machine,
+                                                  onEdit: () => _showEditDialog(machine),
+                                                  onView: () => _handleViewMachine(machine),
+                                                ),
+                                                const Divider(
+                                                  height: 1,
+                                                  color: Color(0xFFE5E7EB),
+                                                ),
+                                              ],
+                                            ))
+                                        .toList(),
+                                  ),
                                 ),
                               ),
                       ),
 
                       // Pagination
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: Color(0xFFE5E7EB)),
+                      if (filteredMachines.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Color(0xFFE5E7EB)),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              MachinePaginationButton(
+                                label: 'Back',
+                                icon: Icons.chevron_left,
+                                onPressed: () {
+                                  if (_currentPage > 1) {
+                                    setState(() => _currentPage--);
+                                  }
+                                },
+                                enabled: _currentPage > 1,
+                              ),
+                              const SizedBox(width: 8),
+                              ..._buildPageNumbers(totalPages),
+                              const SizedBox(width: 8),
+                              MachinePaginationButton(
+                                label: 'Next',
+                                icon: Icons.chevron_right,
+                                iconRight: true,
+                                onPressed: () {
+                                  if (_currentPage < totalPages) {
+                                    setState(() => _currentPage++);
+                                  }
+                                },
+                                enabled: _currentPage < totalPages,
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _PaginationButton(
-                              label: 'Back',
-                              icon: Icons.chevron_left,
-                              onPressed: () {},
-                            ),
-                            const SizedBox(width: 8),
-                            _PaginationButton(
-                              label: '1',
-                              isActive: true,
-                              onPressed: () {},
-                            ),
-                            _PaginationButton(label: '2', onPressed: () {}),
-                            _PaginationButton(label: '3', onPressed: () {}),
-                            _PaginationButton(label: '4', onPressed: () {}),
-                            _PaginationButton(label: '5', onPressed: () {}),
-                            const SizedBox(width: 8),
-                            _PaginationButton(
-                              label: 'Next',
-                              icon: Icons.chevron_right,
-                              iconRight: true,
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -430,329 +709,6 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildColumnHeader(String text, {bool sortable = false}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
-            letterSpacing: 0.5,
-          ),
-        ),
-        if (sortable) ...[
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.unfold_more,
-            size: 16,
-            color: Color(0xFF9CA3AF),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStatusFilterHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Status',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(width: 4),
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.filter_alt, size: 16, color: Color(0xFF6B7280)),
-          onSelected: (value) {
-            setState(() {
-              _statusFilter = value;
-            });
-          },
-          itemBuilder: (context) {
-            return ['All', 'Active', 'Inactive', 'Suspended']
-                .map((status) => PopupMenuItem(
-                      value: status,
-                      child: Text(status),
-                    ))
-                .toList();
-          },
-        ),
-      ],
-    );
-  }
-
-  void _showEditDialog(MachineModel machine) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
-          child: WebEditMachineModal(machine: machine, teamId: _teamId!),
-        ),
-      ),
-    );
-  }
-
-  void _handleViewMachine(MachineModel machine) {
-    // TODO: Implement view machine functionality
-    debugPrint('View machine: ${machine.machineId}');
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final int count;
-  final String percentage;
-  final String subtitle;
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBgColor;
-  final bool isPositive;
-
-  const _StatCard({
-    required this.title,
-    required this.count,
-    required this.percentage,
-    required this.subtitle,
-    required this.icon,
-    required this.iconColor,
-    required this.iconBgColor,
-    required this.isPositive,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            count.toString().padLeft(2, '0'),
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111827),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                percentage,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isPositive ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MachineRow extends StatelessWidget {
-  final MachineModel machine;
-  final String teamId;
-  final VoidCallback onEdit;
-  final VoidCallback onView;
-
-  const _MachineRow({
-    required this.machine,
-    required this.teamId,
-    required this.onEdit,
-    required this.onView,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final status = machine.isArchived ? 'Inactive' : 'Active';
-    final statusColor = machine.isArchived
-        ? const Color(0xFFFEF3C7)
-        : const Color(0xFFD1FAE5);
-    final statusTextColor = machine.isArchived
-        ? const Color(0xFF92400E)
-        : const Color(0xFF065F46);
-
-    return InkWell(
-      onTap: onView,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Center(
-                child: Text(
-                  machine.machineId,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Text(
-                  machine.machineName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF111827),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    status,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: statusTextColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      onPressed: onEdit,
-                      color: const Color(0xFF6B7280),
-                      tooltip: 'Edit Machine',
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: const Icon(Icons.open_in_new, size: 18),
-                      onPressed: onView,
-                      color: const Color(0xFF6B7280),
-                      tooltip: 'View Machine',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PaginationButton extends StatelessWidget {
-  final String label;
-  final IconData? icon;
-  final bool iconRight;
-  final bool isActive;
-  final VoidCallback onPressed;
-
-  const _PaginationButton({
-    required this.label,
-    this.icon,
-    this.iconRight = false,
-    this.isActive = false,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: isActive ? const Color(0xFF10B981) : Colors.transparent,
-        foregroundColor: isActive ? Colors.white : const Color(0xFF6B7280),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        minimumSize: const Size(40, 36),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null && !iconRight) Icon(icon, size: 16),
-          if (icon != null && !iconRight) const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          if (icon != null && iconRight) const SizedBox(width: 4),
-          if (icon != null && iconRight) Icon(icon, size: 16),
-        ],
       ),
     );
   }

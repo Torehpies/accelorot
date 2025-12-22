@@ -9,7 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
-  const OperatorManagementScreen({super.key});
+  const OperatorManagementScreen({super.key, required String teamId});
 
   @override
   State<OperatorManagementScreen> createState() =>

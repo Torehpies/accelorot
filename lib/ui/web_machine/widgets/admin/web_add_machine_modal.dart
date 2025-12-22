@@ -18,7 +18,7 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
   final _formKey = GlobalKey<FormState>();
   final _machineNameController = TextEditingController();
   final _machineIdController = TextEditingController();
-  final _usersController = TextEditingController();
+  final _usersController = TextEditingController(text: 'All Team Members');
   bool _isSubmitting = false;
 
   @override
@@ -27,6 +27,44 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
     _machineIdController.dispose();
     _usersController.dispose();
     super.dispose();
+  }
+
+  InputDecoration _buildInputDecoration(
+    String labelText, {
+    bool readOnly = false,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: TextStyle(
+        color: readOnly ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+      ),
+      floatingLabelStyle: TextStyle(
+        color: readOnly ? const Color(0xFF9CA3AF) : const Color(0xFF10B981),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: readOnly ? const Color(0xFFE5E7EB) : const Color(0xFF10B981),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: readOnly ? const Color(0xFFE5E7EB) : const Color(0xFFD1D5DB),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: Color(0xFFE5E7EB),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      filled: readOnly,
+      fillColor: readOnly ? const Color(0xFFF9FAFB) : null,
+    );
   }
 
   Future<void> _handleSubmit() async {
@@ -55,7 +93,7 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: const Color(0xFFEF4444),
           ),
         );
       }
@@ -69,227 +107,166 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxHeight: 600),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: SingleChildScrollView(
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Add Machine',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF3C7),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Color(0xFF92400E),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Add Machine',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF111827),
+                              ),
+                            ),
+                            Text(
+                              'Add a new machine to your collection',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Add a new machine procured from the manufacturer and add to collection.',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Machine Name
-                const Text(
-                  'Machine Name',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF475569),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: _machineNameController,
-                  decoration: InputDecoration(
-                    hintText: 'Sample text...',
-                    hintStyle: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 14,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF4ADE80), width: 2),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFEF4444)),
-                    ),
-                  ),
+                  style: const TextStyle(color: Color(0xFF111827)),
+                  cursorColor: const Color(0xFF10B981),
+                  decoration: _buildInputDecoration('Machine Name *'),
+                  enabled: !_isSubmitting,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a machine name';
+                      return 'Machine Name is required';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // Machine ID
-                const Text(
-                  'Machine ID',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF475569),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: _machineIdController,
-                  decoration: InputDecoration(
-                    hintText: 'Sample text...',
-                    hintStyle: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 14,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF4ADE80), width: 2),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFEF4444)),
-                    ),
-                  ),
+                  style: const TextStyle(color: Color(0xFF111827)),
+                  cursorColor: const Color(0xFF10B981),
+                  decoration: _buildInputDecoration('Machine ID *'),
+                  enabled: !_isSubmitting,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a machine ID';
+                      return 'Machine ID is required';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Users
-                const Text(
-                  'Users',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF475569),
-                  ),
-                ),
-                const SizedBox(height: 8),
+                // Assigned Users
                 TextFormField(
                   controller: _usersController,
-                  decoration: InputDecoration(
-                    hintText: 'Sample text...',
-                    hintStyle: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 14,
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Color(0xFF4ADE80), width: 2),
-                    ),
-                  ),
+                  decoration: _buildInputDecoration('Assigned Users', readOnly: true),
                   enabled: false,
+                  readOnly: true,
+                  style: const TextStyle(color: Color(0xFF6B7280)),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Buttons
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF64748B),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF6B7280),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: _isSubmitting ? null : _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4ADE80),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _handleSubmit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                            : const Text(
+                                'Add Machine',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
                       ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text(
-                              'Add',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
                     ),
                   ],
                 ),
@@ -324,7 +301,7 @@ class _SuccessDialog extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.check,
-                color: Color(0xFF4ADE80),
+                color: Color(0xFF10B981),
                 size: 32,
               ),
             ),
@@ -334,7 +311,7 @@ class _SuccessDialog extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: Color(0xFF111827),
               ),
             ),
             const SizedBox(height: 8),
@@ -342,7 +319,7 @@ class _SuccessDialog extends StatelessWidget {
               'Your changes has been made successfully.',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF64748B),
+                color: Color(0xFF6B7280),
               ),
               textAlign: TextAlign.center,
             ),
@@ -352,7 +329,7 @@ class _SuccessDialog extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4ADE80),
+                  backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
