@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../ui/machine_management/view_model/operator_machine_notifier.dart';
+import '../../../ui/machine_management/view_model/operator_machine_notifier.dart' 
+    as operatorMachineNotifier;
+import '../../../ui/machine_management/view_model/operator_machine_notifier.dart'
+    show OperatorMachineState, operatorMachineProvider;
 import '../widgets/stat_card.dart';
 import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
+import '../widgets/date_filter.dart';
+import '../widgets/date_range_modal.dart';
 
 /// Main machines view connected to real data
 class MachinesView extends ConsumerStatefulWidget {
@@ -287,7 +292,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
               if (isDesktop)
                 Row(
                   children: [
-                    _buildRefreshButton(),
+                    _buildDateFilterDropdown(),
                     const SizedBox(width: 12),
                     _buildSearchField(),
                   ],
@@ -300,7 +305,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
               children: [
                 Expanded(child: _buildSearchField()),
                 const SizedBox(width: 8),
-                _buildRefreshButton(),
+                _buildDateFilterDropdown(),
               ],
             ),
           ],
@@ -309,36 +314,77 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     );
   }
 
-  Widget _buildRefreshButton() {
+  Widget _buildDateFilterDropdown() {
     final state = ref.watch(operatorMachineProvider);
-    return InkWell(
-      onTap: state.isLoading
-          ? null
-          : () {
-              ref
-                  .read(operatorMachineProvider.notifier)
-                  .refresh(widget.teamId);
-            },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: state.isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(
-                Icons.refresh,
-                size: 20,
-                color: Color(0xFF6B7280),
-              ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth > 1200;
+
+    return DateFilterDropdown(
+      selectedFilter: _mapStateFilterToWidgetFilter(state.dateFilter),
+      isDesktop: isDesktop,
+      onFilterChanged: (filter) {
+        ref
+            .read(operatorMachineProvider.notifier)
+            .setDateFilter(_mapWidgetFilterToStateFilter(filter));
+      },
+      onCustomRangePressed: () {
+        _showCustomDateRangePicker();
+      },
+    );
+  }
+
+  // Helper method to map state DateFilter to widget DateFilter
+  DateFilter _mapStateFilterToWidgetFilter(operatorMachineNotifier.DateFilter stateFilter) {
+    switch (stateFilter) {
+      case operatorMachineNotifier.DateFilter.all:
+        return DateFilter.all;
+      case operatorMachineNotifier.DateFilter.today:
+        return DateFilter.today;
+      case operatorMachineNotifier.DateFilter.last3Days:
+        return DateFilter.last3Days;
+      case operatorMachineNotifier.DateFilter.last7Days:
+        return DateFilter.last7Days;
+      case operatorMachineNotifier.DateFilter.last30Days:
+        return DateFilter.last30Days;
+      case operatorMachineNotifier.DateFilter.custom:
+        return DateFilter.custom;
+    }
+  }
+
+  // Helper method to map widget DateFilter to state DateFilter
+  operatorMachineNotifier.DateFilter _mapWidgetFilterToStateFilter(DateFilter widgetFilter) {
+    switch (widgetFilter) {
+      case DateFilter.all:
+        return operatorMachineNotifier.DateFilter.all;
+      case DateFilter.today:
+        return operatorMachineNotifier.DateFilter.today;
+      case DateFilter.last3Days:
+        return operatorMachineNotifier.DateFilter.last3Days;
+      case DateFilter.last7Days:
+        return operatorMachineNotifier.DateFilter.last7Days;
+      case DateFilter.last30Days:
+        return operatorMachineNotifier.DateFilter.last30Days;
+      case DateFilter.custom:
+        return operatorMachineNotifier.DateFilter.custom;
+    }
+  }
+
+  Future<void> _showCustomDateRangePicker() async {
+    final state = ref.read(operatorMachineProvider);
+    
+    final result = await showDialog<Map<String, DateTime>>(
+      context: context,
+      builder: (context) => CustomDateRangeModal(
+        initialStartDate: state.customStartDate,
+        initialEndDate: state.customEndDate,
       ),
     );
+
+    if (result != null) {
+      ref
+          .read(operatorMachineProvider.notifier)
+          .setCustomDateRange(result['startDate'], result['endDate']);
+    }
   }
 
   Widget _buildSearchField() {

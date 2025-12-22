@@ -3,8 +3,16 @@ import '../../../data/models/machine_model.dart';
 import '../../../data/repositories/machine_repository/machine_repository.dart';
 import '../../../data/providers/machine_providers.dart';
 
-
 part 'operator_machine_notifier.g.dart';
+
+enum DateFilter {
+  all,
+  today,
+  last3Days,
+  last7Days,
+  last30Days,
+  custom,
+}
 
 class OperatorMachineState {
   final List<MachineModel> machines;
@@ -14,6 +22,9 @@ class OperatorMachineState {
   final int currentPage;
   final int itemsPerPage;
   final int baseItemsPerPage; // Base page size for pagination
+  final DateFilter dateFilter;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
 
   const OperatorMachineState({
     this.machines = const [],
@@ -23,6 +34,9 @@ class OperatorMachineState {
     this.currentPage = 1,
     this.itemsPerPage = 10,
     this.baseItemsPerPage = 10,
+    this.dateFilter = DateFilter.all,
+    this.customStartDate,
+    this.customEndDate,
   });
 
   OperatorMachineState copyWith({
@@ -33,6 +47,9 @@ class OperatorMachineState {
     int? currentPage,
     int? itemsPerPage,
     int? baseItemsPerPage,
+    DateFilter? dateFilter,
+    DateTime? customStartDate,
+    DateTime? customEndDate,
   }) {
     return OperatorMachineState(
       machines: machines ?? this.machines,
@@ -42,15 +59,57 @@ class OperatorMachineState {
       currentPage: currentPage ?? this.currentPage,
       itemsPerPage: itemsPerPage ?? this.itemsPerPage,
       baseItemsPerPage: baseItemsPerPage ?? this.baseItemsPerPage,
+      dateFilter: dateFilter ?? this.dateFilter,
+      customStartDate: customStartDate ?? this.customStartDate,
+      customEndDate: customEndDate ?? this.customEndDate,
     );
   }
 
   List<MachineModel> get filteredMachines {
-    if (searchQuery.isEmpty) {
-      return machines;
+    var filtered = machines;
+
+    // Apply date filter (skip if 'all' is selected)
+    if (dateFilter != DateFilter.all) {
+      final now = DateTime.now();
+      DateTime? startDate;
+      DateTime? endDate = now;
+
+      switch (dateFilter) {
+        case DateFilter.today:
+          startDate = DateTime(now.year, now.month, now.day);
+          break;
+        case DateFilter.last3Days:
+          startDate = now.subtract(const Duration(days: 3));
+          break;
+        case DateFilter.last7Days:
+          startDate = now.subtract(const Duration(days: 7));
+          break;
+        case DateFilter.last30Days:
+          startDate = now.subtract(const Duration(days: 30));
+          break;
+        case DateFilter.custom:
+          startDate = customStartDate;
+          endDate = customEndDate ?? now;
+          break;
+        case DateFilter.all:
+          break;
+      }
+
+      if (startDate != null) {
+        filtered = filtered.where((m) {
+          final machineDate = m.dateCreated;
+          return machineDate.isAfter(startDate!) && 
+                 (endDate == null || machineDate.isBefore(endDate));
+        }).toList();
+      }
     }
 
-    return machines.where((m) {
+    // Apply search filter
+    if (searchQuery.isEmpty) {
+      return filtered;
+    }
+
+    return filtered.where((m) {
       final query = searchQuery.toLowerCase();
       return m.machineName.toLowerCase().contains(query) ||
           m.machineId.toLowerCase().contains(query);
@@ -156,6 +215,24 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
       searchQuery: '',
       currentPage: 1,
       itemsPerPage: state.baseItemsPerPage, // Reset to base page size
+    );
+  }
+
+  void setDateFilter(DateFilter filter) {
+    state = state.copyWith(
+      dateFilter: filter,
+      currentPage: 1, // Reset to first page when changing filter
+      itemsPerPage: state.baseItemsPerPage,
+    );
+  }
+
+  void setCustomDateRange(DateTime? startDate, DateTime? endDate) {
+    state = state.copyWith(
+      dateFilter: DateFilter.custom,
+      customStartDate: startDate,
+      customEndDate: endDate,
+      currentPage: 1,
+      itemsPerPage: state.baseItemsPerPage,
     );
   }
 
