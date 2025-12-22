@@ -75,6 +75,7 @@ class ActivityLogsCard extends ConsumerWidget {
   }
 
   /// Get status color based on type
+ /*
   Color _getStatusColor(ActivityLogItem log) {
     if (log.isCycle) {
       if (log.isRunning) return Colors.blue;
@@ -100,6 +101,7 @@ class ActivityLogsCard extends ConsumerWidget {
     
     return Colors.green;
   }
+  */
 
     String? _getBatchDisplayName(WidgetRef ref, String? batchId) {
     if (batchId == null || batchId.isEmpty) return null;
@@ -129,7 +131,7 @@ class ActivityLogsCard extends ConsumerWidget {
         border: Border.all(color: Colors.grey.shade200, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             spreadRadius: 0,
             blurRadius: 8,
             offset: const Offset(0, 2),
@@ -304,7 +306,7 @@ class ActivityLogsCard extends ConsumerWidget {
       physics: const ClampingScrollPhysics(),
       itemBuilder: (context, index) {
         final log = filteredLogs[index];
-        final statusColor = _getStatusColor(log);
+        //final statusColor = _getStatusColor(log);
         final batchDisplayName = _getBatchDisplayName(ref, log.batchId);
 
 

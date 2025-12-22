@@ -17,7 +17,7 @@ class WebOperatorNavigation extends StatefulWidget {
 
 class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
   int _selectedIndex = 0;
-  String? _teamId;
+  //String? _teamId;
   bool _isLoadingTeam = true;
 
   late List<Widget> _screens;
@@ -52,7 +52,7 @@ class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
       final teamId = userDoc.data()?['teamId'] as String?;
 
       setState(() {
-        _teamId = teamId;
+        //_teamId = teamId;
         _isLoadingTeam = false;
         _screens = [
           WebHomeScreen(focusedMachine: null),

@@ -13,7 +13,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycle
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
-import 'package:flutter_application_1/data/providers/batch_providers.dart';
+
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 
@@ -32,8 +32,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
   //  GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
-  String? _selectedMachineId;
-  String? _selectedBatchId;
+  //String? _selectedMachineId;
+  //String? _selectedBatchId;
   BatchModel? _activeBatchModel;
   
   // Add this to force widget rebuilds
@@ -42,7 +42,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedMachineId = widget.focusedMachine?.machineId;
+   // _selectedMachineId = widget.focusedMachine?.machineId;
   }
 
   void _updateActiveBatch(BatchModel? batch) {
@@ -164,14 +164,14 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     if (action == null || !mounted) return;
 
     if (action == 'add_waste') {
-      final result = await showDialog<Map<String, dynamic>>(
+      final result = await showDialog<bool>(
         context: context,
         builder: (context) => AddWasteProduct(
           preSelectedMachineId: widget.focusedMachine?.machineId,
         ),
       );
 
-      if (result != null && mounted) {
+      if (result == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Waste entry added successfully!'),
@@ -181,14 +181,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
         ref.invalidate(allActivitiesProvider);
       }
     } else if (action == 'submit_report') {
-      final result = await showDialog<Map<String, dynamic>>(
+
+      final result = await showDialog<bool>(
         context: context,
         builder: (context) => SubmitReport(
           preSelectedMachineId: widget.focusedMachine?.machineId, 
         ),
       );
 
-      if (result != null && mounted) {
+
+      if (result == true && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Report submitted successfully!'),

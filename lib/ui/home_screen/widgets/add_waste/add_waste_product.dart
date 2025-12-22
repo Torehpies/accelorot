@@ -113,11 +113,17 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // ...error handling...
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to add waste log.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return;
     }
 
-    final wasteData = CreateSubstrateRequest(
+    final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
       plantType: _selectedPlantType!,
       plantTypeLabel: getPlantLabel(_selectedPlantType),
@@ -130,10 +136,10 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
 
     try {
       final substrateRepo = ref.read(substrateRepositoryProvider);
-      await substrateRepo.addSubstrate(wasteData); 
+      await substrateRepo.addSubstrate(substrateData); 
       
-      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
+      
       
       Navigator.pop(context, true);
       
@@ -147,10 +153,14 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add waste: ${e.toString()}')),
+        SnackBar(
+          content: Text('Failed to add waste: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
+
 
 
   // Builds the Add Waste Product dialog layout and structure.

@@ -93,17 +93,17 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     // Check if there's an active batch for this machine
     if (_selectedMachineId != null) {
       final batchesAsync = ref.read(userTeamBatchesProvider);
-      final hasActiveBatch = await batchesAsync.when(
+      final hasActiveBatch = batchesAsync.when( 
         data: (batches) {
           return batches.any((b) => 
             b.machineId == _selectedMachineId && b.isActive
           );
         },
         loading: () => false,
-        error: (_, __) => false,
+        error: (_, _) => false,
       );
 
-      if (hasActiveBatch && mounted) {
+      if (hasActiveBatch) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Cannot start new batch: An active batch already exists for this machine'),

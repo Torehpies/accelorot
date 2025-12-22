@@ -29,7 +29,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  String? _lastLoadedBatchId;
+  //String? _lastLoadedBatchId;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   void _initializeFromBatch() {
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      _lastLoadedBatchId = widget.currentBatch!.id;
+      //_lastLoadedBatchId = widget.currentBatch!.id;
       // Schedule load after build completes
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -61,7 +61,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       _completedCycles = 0;
       _startTime = null;
       _cycleDoc = null;
-      _lastLoadedBatchId = null;
+      //_lastLoadedBatchId = null;
     });
   }
 

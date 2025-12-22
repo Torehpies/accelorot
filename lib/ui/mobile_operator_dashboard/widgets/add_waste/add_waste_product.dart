@@ -114,7 +114,6 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       return;
     }
 
-    // ✅ FIXED: Now CreateSubstrateRequest exists and is properly typed
     final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
       plantType: _selectedPlantType!,
@@ -130,9 +129,9 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       final substrateRepo = ref.read(substrateRepositoryProvider);
       await substrateRepo.addSubstrate(substrateData); 
       
-      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
       
+   
       Navigator.pop(context, true);
       
       if (!mounted) return;
@@ -152,6 +151,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

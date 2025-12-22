@@ -32,13 +32,13 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   CycleRecommendation? _cycleDoc;
   
   // Add this to track the last loaded batch ID
-  String? _lastLoadedBatchId;
+  //String? _lastLoadedBatchId;
 
   @override
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      _lastLoadedBatchId = widget.currentBatch!.id;
+     // _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
@@ -65,11 +65,11 @@ void didUpdateWidget(AeratorCard oldWidget) {
         _completedCycles = 0;
         _startTime = null;
         _cycleDoc = null;
-        _lastLoadedBatchId = null;
+        //_lastLoadedBatchId = null;
       });
     } else {
       // New active batch - load its cycle
-      _lastLoadedBatchId = widget.currentBatch!.id;
+      //_lastLoadedBatchId = widget.currentBatch!.id;
       // Use Future.delayed to ensure the widget is fully built
       Future.delayed(const Duration(milliseconds: 100), () {
         if (mounted) {

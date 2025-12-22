@@ -35,7 +35,7 @@ class ActivityLogItemWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: log.statusColor.withOpacity(0.1),
+              color: log.statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(log.icon, color: log.statusColor, size: 20),
