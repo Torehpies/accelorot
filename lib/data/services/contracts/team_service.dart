@@ -3,7 +3,7 @@ import 'package:flutter_application_1/data/services/contracts/data_layer_error.d
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 
 abstract class TeamService {
-  Future<Result<Team, DataLayerError>> getTeam(String id);
+  Future<Team> getTeam(String id);
   Future<Result<List<Team>, DataLayerError>> getTeams();
   Future<Result<Team, DataLayerError>> addTeam(Team team);
 }

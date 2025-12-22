@@ -19,6 +19,7 @@ class FirebaseTeamMemberService extends TeamMemberService {
     required int pageIndex,
   }) async {
     try {
+			debugPrint("QUEUEING");
       final query = _membersRef(
         teamId,
       ).orderBy('addedAt', descending: true).limit(pageSize * (pageIndex + 1));

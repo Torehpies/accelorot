@@ -46,7 +46,7 @@ class _DesktopOperatorManagementScreenState
       ),
       child: Column(
         children: [
-          const SummaryHeader(),
+          SummaryHeader(),
           const SizedBox(height: 10),
           Expanded(
             child: Container(

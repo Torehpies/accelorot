@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
@@ -11,24 +10,20 @@ class FirebaseTeamService implements TeamService {
   FirebaseTeamService(this._firestore);
 
   @override
-  Future<Result<Team, DataLayerError>> getTeam(String teamId) async {
+  Future<Team> getTeam(String teamId) async {
     try {
       final doc = await _firestore.collection('teams').doc(teamId).get();
-      final raw = doc.data();
-      if (raw == null) {
-        return Result.failure(DataLayerError.dataEmptyError());
+
+      if (!doc.exists) {
+        throw Exception('Team $teamId not found');
       }
-			debugPrint(raw.toString());
-      final team = Team.fromJson(raw);
-      return Result.success(team);
+
+      final raw = doc.data()!;
+      return Team.fromJson(raw);
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseAuthException(e));
-    } on TypeError catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } on FormatException catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
+      throw Exception('Failed to fetch team: ${e.message}');
     } catch (e) {
-      return Result.failure(DataLayerError.unknownError(e));
+      throw Exception('Unexpected error fetching team: $e');
     }
   }
 
@@ -54,11 +49,10 @@ class FirebaseTeamService implements TeamService {
   @override
   Future<Result<Team, DataLayerError>> addTeam(Team team) async {
     try {
-			final docRef = _firestore.collection('teams').doc();
-			final updatedTeam = team.copyWith(teamId: docRef.id);
+      final docRef = _firestore.collection('teams').doc();
+      final updatedTeam = team.copyWith(teamId: docRef.id);
       await docRef.set(updatedTeam.toJson());
-			return Result.success(updatedTeam);
-
+      return Result.success(updatedTeam);
     } on FirebaseException catch (e) {
       return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {

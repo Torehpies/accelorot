@@ -10,6 +10,10 @@ abstract class Team with _$Team {
 		required String teamName,
 		required String address,
 		String? createdBy,
+		@Default(0) int activeOperators,
+		@Default(0) int archivedOperators,
+		@Default(0) int formerOperators,
+		@Default(0) int newOperators,
   }) = _Team;
 
   factory Team.fromJson(Map<String, dynamic> json) =>
