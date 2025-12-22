@@ -7,7 +7,6 @@ import '../../fields/machine_selection_field.dart';
 import '../../fields/priority_field.dart';
 import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
-import '../../../activity_logs/widgets/batch_selector.dart';
 import '../../../../data/providers/report_providers.dart'; 
 import '../../../../data/models/report.dart'; 
 import '../../fields/batch_selection_field.dart'; 

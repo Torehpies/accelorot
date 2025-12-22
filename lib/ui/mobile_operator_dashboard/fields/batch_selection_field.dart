@@ -3,7 +3,7 @@ import '../../../data/models/batch_model.dart';
 import '../../../data/services/firebase/firebase_batch_service.dart'; 
 import '../../../data/repositories/batch_repository/batch_repository.dart'; 
 import '../../../data/repositories/batch_repository/batch_repository_remote.dart';
-import '../../../services/sess_service.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BatchSelectionField extends StatefulWidget {
@@ -148,7 +148,7 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
         }
 
         return DropdownButtonFormField<String>(
-          value: widget.selectedBatchId,
+          initialValue: widget.selectedBatchId,
           decoration: InputDecoration(
             labelText: 'Select Batch',
             prefixIcon: const Icon(Icons.inventory_2, size: 18),
