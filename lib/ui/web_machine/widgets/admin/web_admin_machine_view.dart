@@ -106,8 +106,8 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     return machines.where((m) => m.isArchived).length;
   }
 
-  int _getSuspendedCount(List<MachineModel> machines) {
-    return 0;
+  int _getArcCount(List<MachineModel> machines) {
+    return machines.where((m) => m.isArchived).length;
   }
 
   int _getNewCount(List<MachineModel> machines) {
@@ -406,7 +406,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     final allMachines = state.filteredMachines;
     final activeCount = _getActiveCount(allMachines);
     final inactiveCount = _getInactiveCount(allMachines);
-    final suspendedCount = _getSuspendedCount(allMachines);
+    final archivedCount = _getArcCount(allMachines);
     final newCount = _getNewCount(allMachines);
     final filteredMachines = _getFilteredMachines(allMachines);
     final paginatedMachines = _getPaginatedMachines(filteredMachines);
@@ -450,10 +450,10 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: MachineStatCard(
-                      title: 'Suspended Machines',
-                      count: suspendedCount,
+                      title: 'Archived Machines',
+                      count: archivedCount,
                       percentage: '-10%',
-                      subtitle: 'suspended machines this month',
+                      subtitle: 'archived machines this month',
                       icon: Icons.settings,
                       iconColor: const Color(0xFFEF4444),
                       iconBgColor: const Color(0xFFFEE2E2),

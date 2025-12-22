@@ -8,7 +8,7 @@ import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
-
+    
   @override
   State<WebAdminNavigation> createState() => _WebAdminNavigationState();
 }
