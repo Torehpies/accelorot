@@ -13,7 +13,7 @@ class RecentActivitiesTable extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class RecentActivitiesTable extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item['description']!, 
+                        item['description']!,
                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Color(0xFF374151)),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -98,18 +98,25 @@ class RecentActivitiesTable extends StatelessWidget {
 
   Color _getIconColor(String type) {
     switch (type) {
-      case 'alert': return const Color(0xFFF59E0B); // Orange
-      case 'check': return const Color(0xFF10B981); // Green
-      case 'clipboard': return const Color(0xFFEC4899); // Pink/Red
-      default: return const Color(0xFFF59E0B);
+      case 'alert':
+        return const Color(0xFFF59E0B); // Orange
+      case 'check':
+        return const Color(0xFF10B981); // Green
+      case 'clipboard':
+        return const Color(0xFFEC4899); // Pink/Red
+      default:
+        return const Color(0xFFF59E0B);
     }
   }
 
   IconData _getIcon(String type) {
     switch (type) {
-      case 'alert': return Icons.error;
-      case 'check': return Icons.check;
-      default: return Icons.assignment;
+      case 'alert':
+        return Icons.error;
+      case 'check':
+        return Icons.check;
+      default:
+        return Icons.assignment;
     }
   }
 }

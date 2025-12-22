@@ -1,6 +1,5 @@
 // lib/ui/web_admin_home/widgets/activity_chart.dart
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class ActivityChart extends StatelessWidget {
   final List<Map<String, dynamic>> activities;
@@ -17,7 +16,7 @@ class ActivityChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

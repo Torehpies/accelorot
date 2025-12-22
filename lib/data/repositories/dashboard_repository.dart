@@ -72,9 +72,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
   }
 
   Map<String, String>? _mapReportToActivity(Report report) {
-    // Skip if missing critical fields
-    if (report.createdAt == null) return null;
-
     String icon;
     if (report.status.toLowerCase() == 'open' || report.status.toLowerCase() == 'pending') {
       icon = 'alert';
@@ -85,7 +82,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
     }
 
     // Format date as "Dec 18"
-    final date = report.createdAt.toLocal(); // Safe because we checked for null above
+    final date = report.createdAt.toLocal();
     final formattedDate = '${_monthAbbrev(date.month)} ${date.day}';
 
     // Determine category from report type
@@ -129,8 +126,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
 
     // Count reports per day
     for (final report in reports) {
-      if (report.createdAt == null) continue;
-      final reportDate = report.createdAt.toLocal(); // Safe because of continue above
+      final reportDate = report.createdAt.toLocal();
 
       // Only include reports from last 7 days
       final difference = now.difference(reportDate).inDays;

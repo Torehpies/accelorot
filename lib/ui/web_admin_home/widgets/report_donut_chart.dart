@@ -22,12 +22,23 @@ class ReportDonutChart extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Report Status', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+          const Text('Report Status',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF374151),
+              )),
           const SizedBox(height: 16),
           Expanded(
             child: Center(
@@ -35,8 +46,8 @@ class ReportDonutChart extends StatelessWidget {
                 aspectRatio: 1,
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final size = constraints.maxWidth < constraints.maxHeight 
-                        ? constraints.maxWidth 
+                    final size = constraints.maxWidth < constraints.maxHeight
+                        ? constraints.maxWidth
                         : constraints.maxHeight;
                     return SizedBox(
                       width: size,
@@ -44,14 +55,24 @@ class ReportDonutChart extends StatelessWidget {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          if (total > 0) 
+                          if (total > 0)
                             CustomPaint(
-                              painter: DonutPainter(reportStatus, colors), 
+                              painter: DonutPainter(reportStatus, colors),
                               size: Size(size, size),
                             )
-                          else 
-                            const Center(child: Text("No data", style: TextStyle(color: Color(0xFF9CA3AF)))),
-                          Text('$total', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF111827))),
+                          else
+                            const Center(
+                                child: Text("No data",
+                                    style: TextStyle(
+                                        color: Color(0xFF9CA3AF)))),
+                          Text(
+                            '$total',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF111827),
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -61,7 +82,12 @@ class ReportDonutChart extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text('Legend:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B7280))),
+          const Text('Legend:',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF6B7280),
+              )),
           const SizedBox(height: 8),
           Wrap(
             spacing: 16,
@@ -71,9 +97,22 @@ class ReportDonutChart extends StatelessWidget {
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(width: 14, height: 14, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   const SizedBox(width: 6),
-                  Text(e.key, style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
+                  Text(
+                    e.key,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
@@ -94,7 +133,7 @@ class DonutPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2 - 20;
-    final strokeWidth = radius * 0.50; // Make stroke width 35% of radius for thicker donut
+    final strokeWidth = radius * 0.50;
     final paint = Paint()
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
@@ -107,10 +146,10 @@ class DonutPainter extends CustomPainter {
       final sweepAngle = (value / total) * 2 * math.pi;
       paint.color = colors[i];
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius), 
-        startAngle, 
-        sweepAngle, 
-        false, 
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
         paint,
       );
       startAngle += sweepAngle;
