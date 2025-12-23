@@ -6,7 +6,7 @@ import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
 import '../widgets/search_bar.dart';
-import '../widgets/date_filter.dart'; // Import the widget
+import '../widgets/date_filter.dart';
 import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart';
 
 /// Main machines view connected to real data - Fully Responsive with Custom Search
@@ -24,9 +24,6 @@ class MachinesView extends ConsumerStatefulWidget {
 
 class _MachinesViewState extends ConsumerState<MachinesView> {
   final _searchFocusNode = FocusNode();
-  DateFilterType _selectedDateFilter = DateFilterType.none;
-  DateTime? _customStartDate;
-  DateTime? _customEndDate;
 
   @override
   void initState() {
@@ -52,27 +49,49 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
   }
 
   void _onDateFilterChanged(DateFilterType filterType) {
-    setState(() {
-      _selectedDateFilter = filterType;
-      if (filterType != DateFilterType.custom) {
-        _customStartDate = null;
-        _customEndDate = null;
-      }
-    });
-    // TODO: Apply date filter to machine data
-    print('Date filter changed to: $filterType');
+    // Convert from DateFilterType to DateFilter
+    final backendFilter = _convertToBackendFilter(filterType);
+    ref.read(operatorMachineProvider.notifier).setDateFilter(backendFilter);
   }
 
   void _onCustomDateRangeSelected(DateTime? start, DateTime? end) {
-    setState(() {
-      _customStartDate = start;
-      _customEndDate = end;
-      if (start != null && end != null) {
-        _selectedDateFilter = DateFilterType.custom;
-      }
-    });
-    // TODO: Apply custom date range filter
-    print('Custom date range selected: $start to $end');
+    ref.read(operatorMachineProvider.notifier).setCustomDateRange(start, end);
+  }
+
+  // Helper function to convert from widget enum to backend enum
+  DateFilter _convertToBackendFilter(DateFilterType filterType) {
+    switch (filterType) {
+      case DateFilterType.none:
+        return DateFilter.none;
+      case DateFilterType.today:
+        return DateFilter.today;
+      case DateFilterType.last3Days:
+        return DateFilter.last3Days;
+      case DateFilterType.last7Days:
+        return DateFilter.last7Days;
+      case DateFilterType.last30Days:
+        return DateFilter.last30Days;
+      case DateFilterType.custom:
+        return DateFilter.custom;
+    }
+  }
+
+  // Helper function to convert from backend enum to widget enum
+  DateFilterType _convertToWidgetFilter(DateFilter filter) {
+    switch (filter) {
+      case DateFilter.none:
+        return DateFilterType.none;
+      case DateFilter.today:
+        return DateFilterType.today;
+      case DateFilter.last3Days:
+        return DateFilterType.last3Days;
+      case DateFilter.last7Days:
+        return DateFilterType.last7Days;
+      case DateFilter.last30Days:
+        return DateFilterType.last30Days;
+      case DateFilter.custom:
+        return DateFilterType.custom;
+    }
   }
 
   @override
@@ -111,20 +130,111 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
           }
 
           return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Stats Cards - Always in same row
-                _buildStatsSection(state, isDesktop, isTablet, isMobile, screenWidth),
-
-                // Machine List Card
-                _buildMachineListCard(
-                  state,
-                  isDesktop,
-                  isTablet,
-                  isMobile,
-                  screenWidth,
+            child: Padding(
+              padding: EdgeInsets.all(isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0)),
+              child: Container(
+                // Blue outlined box wrapping everything - Made lighter
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height * 0.9, // Increased by 10%
                 ),
-              ],
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(isDesktop ? 12 : (isTablet ? 10 : 8)),
+                  border: Border.all(
+                    color: Colors.blue.shade200, // Lighter blue
+                    width: 1.5, // Slightly thinner
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.shade50, // Much lighter shadow
+                      blurRadius: 6,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Stats Cards - Always in same row
+                    _buildStatsSection(state, isDesktop, isTablet, isMobile, screenWidth),
+
+                    // Inner box wrapping machine list section
+                    Container(
+                      margin: EdgeInsets.all(isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(isDesktop ? 10 : (isTablet ? 8 : 6)),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.shade100,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Machine List Header with Search & Date Filter
+                          _buildListHeader(state, isDesktop, isTablet, isMobile),
+                          
+                          // Machine list content - Increased height by 10%
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.4, // Changed from 0.5 to 0.6 (+10%)
+                            child: state.displayedMachines.isEmpty
+                                ? _buildEmptyState(isMobile, state)
+                                : (isMobile
+                                    ? MachineMobileCardWidget(
+                                        machines: state.displayedMachines,
+                                        onMachineAction: _handleMachineAction,
+                                      )
+                                    : MachineTableWidget(
+                                        machines: state.displayedMachines,
+                                        onMachineAction: _handleMachineAction,
+                                      )),
+                          ),
+                          
+                          // Pagination - Always show if there are any machines
+                          if (state.filteredMachines.isNotEmpty)
+                            Container(
+                              padding: EdgeInsets.all(isDesktop ? 16.0 : (isTablet ? 12.0 : 8.0)),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: PaginationWidget(
+                                currentPage: state.currentPage,
+                                totalPages: state.totalPages,
+                                itemsPerPage: state.itemsPerPage,
+                                isDesktop: isDesktop,
+                                canGoNext: state.currentPage < state.totalPages,
+                                canGoPrevious: state.currentPage > 1,
+                                onNext: () => ref
+                                    .read(operatorMachineProvider.notifier)
+                                    .goToNextPage(),
+                                onPrevious: () => ref
+                                    .read(operatorMachineProvider.notifier)
+                                    .goToPreviousPage(),
+                                onPageChanged: (page) => ref
+                                    .read(operatorMachineProvider.notifier)
+                                    .goToPage(page),
+                                onItemsPerPageChanged: (value) => ref
+                                    .read(operatorMachineProvider.notifier)
+                                    .setItemsPerPage(value),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -209,88 +319,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     );
   }
 
-  Widget _buildMachineListCard(
-    OperatorMachineState state,
-    bool isDesktop,
-    bool isTablet,
-    bool isMobile,
-    double screenWidth,
-  ) {
-    final horizontalPadding = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
-    final bottomPadding = isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0);
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        horizontalPadding,
-        0,
-        horizontalPadding,
-        bottomPadding,
-      ),
-      child: Container(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height * 0.5,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(isDesktop ? 16 : (isTablet ? 14 : 12)),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0x0A000000),
-              blurRadius: isDesktop ? 12 : 8,
-              offset: Offset(0, isDesktop ? 4 : 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            _buildListHeader(isDesktop, isTablet, isMobile),
-            
-            // Machine list content
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: state.displayedMachines.isEmpty
-                  ? _buildEmptyState(isMobile)
-                  : (isMobile
-                      ? MachineMobileCardWidget(
-                          machines: state.displayedMachines,
-                          onMachineAction: _handleMachineAction,
-                        )
-                      : MachineTableWidget(
-                          machines: state.displayedMachines,
-                          onMachineAction: _handleMachineAction,
-                        )),
-            ),
-            
-            // Pagination - Always show if there are any machines
-            if (state.filteredMachines.isNotEmpty)
-              PaginationWidget(
-                currentPage: state.currentPage,
-                totalPages: state.totalPages,
-                itemsPerPage: state.itemsPerPage,
-                isDesktop: isDesktop,
-                canGoNext: state.currentPage < state.totalPages,
-                canGoPrevious: state.currentPage > 1,
-                onNext: () => ref
-                    .read(operatorMachineProvider.notifier)
-                    .goToNextPage(),
-                onPrevious: () => ref
-                    .read(operatorMachineProvider.notifier)
-                    .goToPreviousPage(),
-                onPageChanged: (page) => ref
-                    .read(operatorMachineProvider.notifier)
-                    .goToPage(page),
-                onItemsPerPageChanged: (value) => ref
-                    .read(operatorMachineProvider.notifier)
-                    .setItemsPerPage(value),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildListHeader(bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildListHeader(OperatorMachineState state, bool isDesktop, bool isTablet, bool isMobile) {
     final headerPadding = isDesktop ? 24.0 : (isTablet ? 20.0 : 16.0);
     final titleFontSize = isDesktop ? 24.0 : (isTablet ? 22.0 : 20.0);
 
@@ -321,9 +350,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                 Row(
                   children: [
                     DateFilterWidget(
-                      selectedFilter: _selectedDateFilter,
-                      customStartDate: _customStartDate,
-                      customEndDate: _customEndDate,
+                      selectedFilter: _convertToWidgetFilter(state.dateFilter),
+                      customStartDate: state.customStartDate,
+                      customEndDate: state.customEndDate,
                       onFilterChanged: _onDateFilterChanged,
                       onCustomRangeSelected: _onCustomDateRangeSelected,
                       isDesktop: isDesktop,
@@ -347,9 +376,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                   child: Row(
                     children: [
                       DateFilterWidget(
-                        selectedFilter: _selectedDateFilter,
-                        customStartDate: _customStartDate,
-                        customEndDate: _customEndDate,
+                        selectedFilter: _convertToWidgetFilter(state.dateFilter),
+                        customStartDate: state.customStartDate,
+                        customEndDate: state.customEndDate,
                         onFilterChanged: _onDateFilterChanged,
                         onCustomRangeSelected: _onCustomDateRangeSelected,
                         isDesktop: isDesktop,
@@ -374,12 +403,30 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     );
   }
 
-  Widget _buildEmptyState(bool isMobile) {
-    final state = ref.watch(operatorMachineProvider);
+  Widget _buildEmptyState(bool isMobile, OperatorMachineState state) {
     final hasSearch = state.searchQuery.isNotEmpty;
+    final hasDateFilter = state.dateFilter != DateFilter.none;
     final iconSize = isMobile ? 56.0 : 64.0;
     final titleSize = isMobile ? 15.0 : 16.0;
     final subtextSize = isMobile ? 13.0 : 14.0;
+
+    // Determine the reason for empty state
+    String title = 'No machines found';
+    String subtext = 'Try adjusting your filters or search query';
+    
+    if (!hasSearch && !hasDateFilter && state.machines.isEmpty) {
+      title = 'No machines yet';
+      subtext = 'Add your first machine to get started';
+    } else if (hasSearch && !hasDateFilter) {
+      title = 'No machines found';
+      subtext = 'Try adjusting your search query';
+    } else if (!hasSearch && hasDateFilter) {
+      title = 'No machines in selected date range';
+      subtext = 'Try a different date range';
+    } else if (hasSearch && hasDateFilter) {
+      title = 'No machines match your criteria';
+      subtext = 'Try adjusting your search or date filter';
+    }
 
     return Center(
       child: Padding(
@@ -388,13 +435,13 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              hasSearch ? Icons.search_off : Icons.precision_manufacturing_outlined,
+              hasSearch || hasDateFilter ? Icons.search_off : Icons.precision_manufacturing_outlined,
               size: iconSize,
               color: const Color(0xFF9CA3AF),
             ),
             const SizedBox(height: 16),
             Text(
-              hasSearch ? 'No machines found' : 'No machines yet',
+              title,
               style: TextStyle(
                 fontSize: titleSize,
                 fontWeight: FontWeight.w500,
@@ -403,22 +450,26 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
             ),
             const SizedBox(height: 8),
             Text(
-              hasSearch
-                  ? 'Try adjusting your search query'
-                  : 'Add your first machine to get started',
+              subtext,
               style: TextStyle(
                 fontSize: subtextSize,
                 color: const Color(0xFF9CA3AF),
               ),
               textAlign: TextAlign.center,
             ),
-            if (hasSearch) ...[
+            if (hasSearch || hasDateFilter) ...[
               const SizedBox(height: 16),
               OutlinedButton.icon(
-                onPressed: _onSearchCleared,
+                onPressed: () {
+                  if (hasSearch) {
+                    _onSearchCleared();
+                  }
+                  // Clear date filter
+                  _onDateFilterChanged(DateFilterType.none);
+                },
                 icon: Icon(Icons.clear, size: isMobile ? 16 : 18),
                 label: Text(
-                  'Clear Search',
+                  'Clear Filters',
                   style: TextStyle(fontSize: subtextSize),
                 ),
               ),

@@ -5,8 +5,9 @@ import '../../../data/providers/machine_providers.dart';
 
 part 'operator_machine_notifier.g.dart';
 
+// Update this to match the enum from the widget
 enum DateFilter {
-  all,
+  none,      // Changed from 'all' to 'none'
   today,
   last3Days,
   last7Days,
@@ -34,7 +35,7 @@ class OperatorMachineState {
     this.currentPage = 1,
     this.itemsPerPage = 10,
     this.baseItemsPerPage = 10,
-    this.dateFilter = DateFilter.all,
+    this.dateFilter = DateFilter.none, // Changed default to 'none'
     this.customStartDate,
     this.customEndDate,
   });
@@ -68,8 +69,8 @@ class OperatorMachineState {
   List<MachineModel> get filteredMachines {
     var filtered = machines;
 
-    // Apply date filter (skip if 'all' is selected)
-    if (dateFilter != DateFilter.all) {
+    // Apply date filter (skip if 'none' is selected)
+    if (dateFilter != DateFilter.none) { // Changed from 'all' to 'none'
       final now = DateTime.now();
       DateTime? startDate;
       DateTime? endDate = now;
@@ -91,15 +92,15 @@ class OperatorMachineState {
           startDate = customStartDate;
           endDate = customEndDate ?? now;
           break;
-        case DateFilter.all:
+        case DateFilter.none: // Added none case
           break;
       }
 
       if (startDate != null) {
         filtered = filtered.where((m) {
           final machineDate = m.dateCreated;
-          return machineDate.isAfter(startDate!) && 
-                 (endDate == null || machineDate.isBefore(endDate));
+          return machineDate.isAfter(startDate!.subtract(const Duration(days: 1))) && 
+                 (endDate == null || machineDate.isBefore(endDate.add(const Duration(days: 1))));
         }).toList();
       }
     }
