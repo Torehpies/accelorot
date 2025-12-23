@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
+import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart' show OperatorManagementScreen;
 import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
