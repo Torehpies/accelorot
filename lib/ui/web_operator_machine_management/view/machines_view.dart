@@ -5,9 +5,11 @@ import '../widgets/stat_card.dart';
 import '../widgets/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
+import '../widgets/search_bar.dart';
+import '../widgets/date_filter.dart'; // Import the widget
 import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart';
 
-/// Main machines view connected to real data - Fully Responsive
+/// Main machines view connected to real data - Fully Responsive with Custom Search
 class MachinesView extends ConsumerStatefulWidget {
   final String teamId;
 
@@ -21,28 +23,56 @@ class MachinesView extends ConsumerStatefulWidget {
 }
 
 class _MachinesViewState extends ConsumerState<MachinesView> {
-  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+  DateFilterType _selectedDateFilter = DateFilterType.none;
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
     // Initialize the notifier with teamId
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(operatorMachineProvider.notifier).initialize(widget.teamId);
     });
   }
 
-  void _onSearchChanged() {
-    ref.read(operatorMachineProvider.notifier)
-        .setSearchQuery(_searchController.text);
-  }
-
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    ref.read(operatorMachineProvider.notifier).setSearchQuery(query);
+  }
+
+  void _onSearchCleared() {
+    ref.read(operatorMachineProvider.notifier).clearSearch();
+  }
+
+  void _onDateFilterChanged(DateFilterType filterType) {
+    setState(() {
+      _selectedDateFilter = filterType;
+      if (filterType != DateFilterType.custom) {
+        _customStartDate = null;
+        _customEndDate = null;
+      }
+    });
+    // TODO: Apply date filter to machine data
+    print('Date filter changed to: $filterType');
+  }
+
+  void _onCustomDateRangeSelected(DateTime? start, DateTime? end) {
+    setState(() {
+      _customStartDate = start;
+      _customEndDate = end;
+      if (start != null && end != null) {
+        _selectedDateFilter = DateFilterType.custom;
+      }
+    });
+    // TODO: Apply custom date range filter
+    print('Custom date range selected: $start to $end');
   }
 
   @override
@@ -269,9 +299,11 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title and search bar in the same row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Title
               Expanded(
                 child: Text(
                   'Machine List',
@@ -283,110 +315,61 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                   ),
                 ),
               ),
+              
+              // Search bar with date filter (desktop/tablet)
               if (isDesktop || isTablet)
                 Row(
                   children: [
-                    _buildRefreshButton(isDesktop, isTablet, isMobile),
-                    SizedBox(width: isDesktop ? 12 : 8),
-                    _buildSearchField(isDesktop, isTablet, isMobile),
+                    DateFilterWidget(
+                      selectedFilter: _selectedDateFilter,
+                      customStartDate: _customStartDate,
+                      customEndDate: _customEndDate,
+                      onFilterChanged: _onDateFilterChanged,
+                      onCustomRangeSelected: _onCustomDateRangeSelected,
+                      isDesktop: isDesktop,
+                      isTablet: isTablet,
+                      isMobile: isMobile,
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: isDesktop ? 400 : 350,
+                      child: SearchBarWidget(
+                        onSearchChanged: _onSearchChanged,
+                        onClear: _onSearchCleared,
+                        focusNode: _searchFocusNode,
+                      ),
+                    ),
                   ],
+                )
+              else
+                // Mobile layout
+                Expanded(
+                  child: Row(
+                    children: [
+                      DateFilterWidget(
+                        selectedFilter: _selectedDateFilter,
+                        customStartDate: _customStartDate,
+                        customEndDate: _customEndDate,
+                        onFilterChanged: _onDateFilterChanged,
+                        onCustomRangeSelected: _onCustomDateRangeSelected,
+                        isDesktop: isDesktop,
+                        isTablet: isTablet,
+                        isMobile: isMobile,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SearchBarWidget(
+                          onSearchChanged: _onSearchChanged,
+                          onClear: _onSearchCleared,
+                          focusNode: _searchFocusNode,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           ),
-          if (isMobile) ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: _buildSearchField(isDesktop, isTablet, isMobile)),
-                const SizedBox(width: 8),
-                _buildRefreshButton(isDesktop, isTablet, isMobile),
-              ],
-            ),
-          ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildRefreshButton(bool isDesktop, bool isTablet, bool isMobile) {
-    final state = ref.watch(operatorMachineProvider);
-    final buttonSize = isDesktop ? 42.0 : (isTablet ? 40.0 : 38.0);
-    final iconSize = isDesktop ? 20.0 : (isTablet ? 19.0 : 18.0);
-
-    return InkWell(
-      onTap: state.isLoading
-          ? null
-          : () {
-              ref
-                  .read(operatorMachineProvider.notifier)
-                  .refresh(widget.teamId);
-            },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: buttonSize,
-        height: buttonSize,
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: state.isLoading
-              ? SizedBox(
-                  width: iconSize - 2,
-                  height: iconSize - 2,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Icon(
-                  Icons.refresh,
-                  size: iconSize,
-                  color: const Color(0xFF6B7280),
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchField(bool isDesktop, bool isTablet, bool isMobile) {
-    final searchWidth = isDesktop ? 280.0 : (isTablet ? 240.0 : double.infinity);
-    final searchHeight = isDesktop ? 42.0 : (isTablet ? 40.0 : 38.0);
-    final fontSize = isDesktop ? 14.0 : (isTablet ? 13.0 : 12.0);
-    final iconSize = isDesktop ? 20.0 : (isTablet ? 19.0 : 18.0);
-
-    return Container(
-      width: isMobile ? null : searchWidth,
-      height: searchHeight,
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: _searchController,
-        style: TextStyle(fontSize: fontSize),
-        decoration: InputDecoration(
-          hintText: 'Search by name or ID...',
-          hintStyle: TextStyle(
-            color: const Color(0xFF9CA3AF),
-            fontSize: fontSize,
-          ),
-          prefixIcon: Icon(
-            Icons.search,
-            size: iconSize,
-            color: const Color(0xFF9CA3AF),
-          ),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(Icons.clear, size: iconSize - 2),
-                  onPressed: () {
-                    _searchController.clear();
-                    ref
-                        .read(operatorMachineProvider.notifier)
-                        .clearSearch();
-                  },
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: searchHeight / 3.5),
-        ),
       ),
     );
   }
@@ -432,10 +415,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
             if (hasSearch) ...[
               const SizedBox(height: 16),
               OutlinedButton.icon(
-                onPressed: () {
-                  _searchController.clear();
-                  ref.read(operatorMachineProvider.notifier).clearSearch();
-                },
+                onPressed: _onSearchCleared,
                 icon: Icon(Icons.clear, size: isMobile ? 16 : 18),
                 label: Text(
                   'Clear Search',
