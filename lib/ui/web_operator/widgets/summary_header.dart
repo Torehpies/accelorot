@@ -52,7 +52,7 @@ class SummaryHeader extends ConsumerWidget {
         final teamAsync = ref.watch(currentTeamProvider);
 
         return teamAsync.when(
-          data: (team) => _TeamSummaryRow(team: team), // Use team data
+          data: (team) => _TeamSummaryRow(team: team),
           loading: () => const CircularProgressIndicator(),
           error: (error, stack) => Text('Team Error: $error'),
         );
@@ -69,10 +69,8 @@ class _TeamSummaryRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch operator stats from team or service
     final activeOperators = team.activeOperators;
     final archivedOperators = team.archivedOperators;
-    // Add providers for dynamic counts if needed
 
     return Row(
       children: [
@@ -144,9 +142,10 @@ class _SummaryCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
