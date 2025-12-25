@@ -29,7 +29,7 @@ class TeamManagementScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Team Management", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.yellow.shade800,
+        backgroundColor: AppColors.background,
         actions: [
           IconButton(
             onPressed: (teams.isLoading || isSaving)
