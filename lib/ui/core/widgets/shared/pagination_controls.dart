@@ -5,8 +5,8 @@ import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
 
-/// Reusable pagination controls with numbered page buttons
-class PaginationControls extends StatelessWidget {
+/// Reusable pagination controls with numbered page buttons and enhanced loading state
+class PaginationControls extends StatefulWidget {
   final int currentPage;
   final int totalPages;
   final int itemsPerPage;
@@ -24,32 +24,63 @@ class PaginationControls extends StatelessWidget {
     this.isLoading = false,
   });
 
+  @override
+  State<PaginationControls> createState() => _PaginationControlsState();
+}
+
+class _PaginationControlsState extends State<PaginationControls>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = CurvedAnimation(
+      parent: _shimmerController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
   List<int> _getVisiblePages() {
-    if (totalPages <= 7) {
-      return List.generate(totalPages, (i) => i + 1);
+    if (widget.totalPages <= 7) {
+      return List.generate(widget.totalPages, (i) => i + 1);
     }
 
     // Show current page with 2 pages on each side
-    int start = (currentPage - 2).clamp(1, totalPages - 4);
-    int end = (start + 4).clamp(5, totalPages);
-    
+    int start = (widget.currentPage - 2).clamp(1, widget.totalPages - 4);
+    int end = (start + 4).clamp(5, widget.totalPages);
+
     // Adjust start if we're near the end
-    if (end == totalPages) {
-      start = (totalPages - 4).clamp(1, totalPages);
+    if (end == widget.totalPages) {
+      start = (widget.totalPages - 4).clamp(1, widget.totalPages);
     }
 
     return List.generate(5, (i) => start + i);
   }
 
   void _showItemsPerPageMenu(BuildContext context) async {
-    if (isLoading || onItemsPerPageChanged == null) return;
+    if (widget.isLoading || widget.onItemsPerPageChanged == null) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+            button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
@@ -71,8 +102,8 @@ class PaginationControls extends StatelessWidget {
       }).toList(),
     );
 
-    if (selected != null && selected != itemsPerPage) {
-      onItemsPerPageChanged!(selected);
+    if (selected != null && selected != widget.itemsPerPage) {
+      widget.onItemsPerPageChanged!(selected);
     }
   }
 
@@ -80,14 +111,15 @@ class PaginationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final visiblePages = _getVisiblePages();
     final showLeftEllipsis = visiblePages.first > 1;
-    final showRightEllipsis = visiblePages.last < totalPages;
+    final showRightEllipsis = visiblePages.last < widget.totalPages;
 
-    return Opacity(
-      opacity: isLoading ? 0.6 : 1.0,
+    return AnimatedOpacity(
+      opacity: widget.isLoading ? 0.5 : 1.0,
+      duration: const Duration(milliseconds: 200),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Items per page selector with filter chip styling
+          // Items per page selector with enhanced loading state
           Row(
             children: [
               const Text(
@@ -97,33 +129,49 @@ class PaginationControls extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Builder(
                 builder: (context) => MouseRegion(
-                  cursor: (isLoading || onItemsPerPageChanged == null) 
-                      ? SystemMouseCursors.basic 
+                  cursor: (widget.isLoading ||
+                          widget.onItemsPerPageChanged == null)
+                      ? SystemMouseCursors.basic
                       : SystemMouseCursors.click,
                   child: InkWell(
-                    onTap: (isLoading || onItemsPerPageChanged == null) 
-                        ? null 
+                    onTap: (widget.isLoading ||
+                            widget.onItemsPerPageChanged == null)
+                        ? null
                         : () => _showItemsPerPageMenu(context),
                     borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: WebColors.inputBackground,
+                        color: widget.isLoading
+                            ? WebColors.inputBackground.withValues(alpha: 0.5)
+                            : WebColors.inputBackground,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: WebColors.cardBorder),
+                        border: Border.all(
+                          color: widget.isLoading
+                              ? WebColors.tableBorder
+                              : WebColors.cardBorder,
+                          width: widget.isLoading ? 2 : 1,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '$itemsPerPage',
-                            style: WebTextStyles.bodyMedium,
-                          ),
+                          if (widget.isLoading)
+                            _buildSkeletonBox(width: 24, height: 16)
+                          else
+                            Text(
+                              '${widget.itemsPerPage}',
+                              style: WebTextStyles.bodyMedium,
+                            ),
                           const SizedBox(width: 4),
-                          const Icon(
+                          Icon(
                             Icons.arrow_drop_down,
                             size: 20,
-                            color: WebColors.textLabel,
+                            color: widget.isLoading
+                                ? WebColors.textMuted
+                                : WebColors.textLabel,
                           ),
                         ],
                       ),
@@ -140,26 +188,14 @@ class PaginationControls extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Back button
-                TextButton(
-                  onPressed: (currentPage > 1 && onPageChanged != null && !isLoading)
-                      ? () => onPageChanged!(currentPage - 1)
-                      : null,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    foregroundColor: WebColors.textSecondary,
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.chevron_left, size: 16),
-                      SizedBox(width: 4),
-                      Text(
-                        'Back',
-                        style: WebTextStyles.bodyMedium,
-                      ),
-                    ],
-                  ),
+                _buildNavButton(
+                  icon: Icons.chevron_left,
+                  label: 'Back',
+                  isEnabled: widget.currentPage > 1 && 
+                             widget.onPageChanged != null && 
+                             !widget.isLoading,
+                  onTap: () => widget.onPageChanged!(widget.currentPage - 1),
+                  isNext: false,
                 ),
 
                 const SizedBox(width: AppSpacing.sm),
@@ -188,37 +224,25 @@ class PaginationControls extends StatelessWidget {
                       style: WebTextStyles.bodyMediumGray,
                     ),
                   ),
-                  _buildPageButton(totalPages),
+                  _buildPageButton(widget.totalPages),
                 ],
 
                 const SizedBox(width: AppSpacing.sm),
 
                 // Next button
-                TextButton(
-                  onPressed: (currentPage < totalPages && onPageChanged != null && !isLoading)
-                      ? () => onPageChanged!(currentPage + 1)
-                      : null,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    foregroundColor: WebColors.textSecondary,
-                  ),
-                  child: Row(
-                    children: const [
-                      Text(
-                        'Next',
-                        style: WebTextStyles.bodyMedium,
-                      ),
-                      SizedBox(width: 4),
-                      Icon(Icons.chevron_right, size: 16),
-                    ],
-                  ),
+                _buildNavButton(
+                  icon: Icons.chevron_right,
+                  label: 'Next',
+                  isEnabled: widget.currentPage < widget.totalPages && 
+                             widget.onPageChanged != null && 
+                             !widget.isLoading,
+                  onTap: () => widget.onPageChanged!(widget.currentPage + 1),
+                  isNext: true,
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(width: 150),
         ],
       ),
@@ -226,27 +250,122 @@ class PaginationControls extends StatelessWidget {
   }
 
   Widget _buildPageButton(int page) {
-    final isActive = page == currentPage;
+    final isActive = page == widget.currentPage;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkWell(
-        onTap: (onPageChanged != null && !isLoading) ? () => onPageChanged!(page) : null,
+        onTap: (widget.onPageChanged != null && !widget.isLoading)
+            ? () => widget.onPageChanged!(page)
+            : null,
         borderRadius: BorderRadius.circular(6),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isActive ? WebColors.success : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
+            border: widget.isLoading
+                ? Border.all(
+                    color: WebColors.tableBorder.withValues(alpha: 0.5),
+                    width: 1,
+                  )
+                : null,
           ),
-          child: Text(
-            '$page',
-            style: isActive 
-              ? WebTextStyles.bodyMedium.copyWith(color: WebColors.cardBackground) 
-              : WebTextStyles.bodyMedium,
+          child: widget.isLoading && isActive
+              ? _buildSkeletonBox(width: 12, height: 16)
+              : Text(
+                  '$page',
+                  style: isActive
+                      ? WebTextStyles.bodyMedium
+                          .copyWith(color: WebColors.cardBackground)
+                      : WebTextStyles.bodyMedium,
+                ),
+        ),
+      ),
+    );
+  }
+
+  /// Navigation button (Back/Next) with hover effect
+  Widget _buildNavButton({
+    required IconData icon,
+    required String label,
+    required bool isEnabled,
+    required VoidCallback onTap,
+    required bool isNext,
+  }) {
+    return MouseRegion(
+      cursor: isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isEnabled ? onTap : null,
+          borderRadius: BorderRadius.circular(8),
+          hoverColor: isEnabled 
+              ? WebColors.inputBackground
+              : Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isNext) ...[
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: isEnabled 
+                        ? WebColors.textSecondary 
+                        : WebColors.textMuted,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  label,
+                  style: WebTextStyles.bodyMedium.copyWith(
+                    color: isEnabled 
+                        ? WebColors.textSecondary 
+                        : WebColors.textMuted,
+                  ),
+                ),
+                if (isNext) ...[
+                  const SizedBox(width: 6),
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: isEnabled 
+                        ? WebColors.textSecondary 
+                        : WebColors.textMuted,
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Animated skeleton box with pulsing effect
+  Widget _buildSkeletonBox({
+    required double width,
+    required double height,
+  }) {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              WebColors.skeletonLoader,
+              WebColors.tableBorder,
+              _pulseAnimation.value,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+      },
     );
   }
 }

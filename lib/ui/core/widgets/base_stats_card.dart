@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import '../themes/web_colors.dart';
 
-/// Enhanced stats card with change tracking and new UI design
-class BaseStatsCard extends StatelessWidget {
+/// Enhanced stats card with change tracking and animated skeleton loader
+class BaseStatsCard extends StatefulWidget {
   final String title;
   final int value;
   final IconData icon;
@@ -27,6 +27,35 @@ class BaseStatsCard extends StatelessWidget {
     this.isPositive,
     this.isLoading = false,
   });
+
+  @override
+  State<BaseStatsCard> createState() => _BaseStatsCardState();
+}
+
+class _BaseStatsCardState extends State<BaseStatsCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = CurvedAnimation(
+      parent: _shimmerController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +83,7 @@ class BaseStatsCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  title,
+                  widget.title,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -66,13 +95,13 @@ class BaseStatsCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: backgroundColor,
+                  color: widget.backgroundColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
-                  icon,
+                  widget.icon,
                   size: 20,
-                  color: iconColor,
+                  color: widget.iconColor,
                 ),
               ),
             ],
@@ -81,18 +110,11 @@ class BaseStatsCard extends StatelessWidget {
           const SizedBox(height: 4),
 
           // Value
-          if (isLoading)
-            Container(
-              height: 48,
-              width: 80,
-              decoration: BoxDecoration(
-                color: WebColors.skeletonLoader,
-                borderRadius: BorderRadius.circular(8),
-              ),
-            )
+          if (widget.isLoading)
+            _buildSkeletonBox(height: 53, width: 100)
           else
             Text(
-              '$value',
+              '${widget.value}',
               style: const TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
@@ -109,21 +131,14 @@ class BaseStatsCard extends StatelessWidget {
           const SizedBox(height: 5),
 
           // Change Badge + Subtext Row
-          if (isLoading)
-            Container(
-              height: 20,
-              width: 140,
-              decoration: BoxDecoration(
-                color: WebColors.skeletonLoader,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            )
-          else if (changeText != null)
+          if (widget.isLoading)
+            _buildSkeletonBox(height: 18, width: 180)
+          else if (widget.changeText != null)
             Row(
               children: [
                 // Change Text
                 Text(
-                  changeText!,
+                  widget.changeText!,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -134,7 +149,7 @@ class BaseStatsCard extends StatelessWidget {
                 // Subtext
                 Expanded(
                   child: Text(
-                    subtext ?? 'from last month',
+                    widget.subtext ?? 'from last month',
                     style: const TextStyle(
                       fontSize: 11,
                       color: WebColors.textMuted,
@@ -158,11 +173,35 @@ class BaseStatsCard extends StatelessWidget {
     );
   }
 
+  /// Animated skeleton box with pulsing effect
+  Widget _buildSkeletonBox({
+    required double height,
+    required double width,
+  }) {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              WebColors.skeletonLoader,
+              WebColors.tableBorder,
+              _pulseAnimation.value,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        );
+      },
+    );
+  }
+
   /// Get text color based on change direction
   Color _getChangeTextColor() {
-    if (changeText == 'New' || changeText == 'No log yet') {
+    if (widget.changeText == 'New' || widget.changeText == 'No log yet') {
       return WebColors.neutralStatus;
     }
-    return isPositive == true ? WebColors.success : WebColors.error;
+    return widget.isPositive == true ? WebColors.success : WebColors.error;
   }
 }

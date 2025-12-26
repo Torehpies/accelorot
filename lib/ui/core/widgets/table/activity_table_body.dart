@@ -1,4 +1,5 @@
 // lib/ui/core/widgets/table/activity_table_body.dart
+
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../shared/empty_state.dart';
@@ -7,7 +8,7 @@ import '../../constants/spacing.dart';
 import '../../themes/web_colors.dart';
 
 /// Table body with ListView and empty state handling
-class ActivityTableBody extends StatelessWidget {
+class ActivityTableBody extends StatefulWidget {
   final List<ActivityLogItem> items;
   final ValueChanged<ActivityLogItem> onViewDetails;
   final bool isLoading;
@@ -20,18 +21,46 @@ class ActivityTableBody extends StatelessWidget {
   });
 
   @override
+  State<ActivityTableBody> createState() => _ActivityTableBodyState();
+}
+
+class _ActivityTableBodyState extends State<ActivityTableBody>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = CurvedAnimation(
+      parent: _shimmerController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return _buildSkeletonRows();
     }
 
-    if (items.isEmpty) {
+    if (widget.items.isEmpty) {
       return const EmptyState();
     }
 
-    // Priority 3: Show actual data
     return ListView.separated(
-      itemCount: items.length,
+      itemCount: widget.items.length,
       separatorBuilder: (context, index) => const Divider(
         height: 1,
         thickness: 1,
@@ -39,8 +68,8 @@ class ActivityTableBody extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         return ActivityTableRow(
-          item: items[index],
-          onViewDetails: onViewDetails,
+          item: widget.items[index],
+          onViewDetails: widget.onViewDetails,
         );
       },
     );
@@ -73,7 +102,7 @@ class ActivityTableBody extends StatelessWidget {
             child: _buildSkeletonBox(width: 180, height: 16),
           ),
         ),
-        
+
         // Category Badge
         TableCellWidget(
           flex: 2,
@@ -81,7 +110,7 @@ class ActivityTableBody extends StatelessWidget {
             child: _buildSkeletonBox(width: 80, height: 24, borderRadius: 4),
           ),
         ),
-        
+
         // Type Chip
         TableCellWidget(
           flex: 2,
@@ -89,7 +118,7 @@ class ActivityTableBody extends StatelessWidget {
             child: _buildSkeletonBox(width: 100, height: 24, borderRadius: 4),
           ),
         ),
-        
+
         // Value Column
         TableCellWidget(
           flex: 2,
@@ -97,7 +126,7 @@ class ActivityTableBody extends StatelessWidget {
             child: _buildSkeletonBox(width: 120, height: 16),
           ),
         ),
-        
+
         // Date Column
         TableCellWidget(
           flex: 2,
@@ -105,7 +134,7 @@ class ActivityTableBody extends StatelessWidget {
             child: _buildSkeletonBox(width: 90, height: 16),
           ),
         ),
-        
+
         // Actions Column
         TableCellWidget(
           flex: 1,
@@ -121,31 +150,30 @@ class ActivityTableBody extends StatelessWidget {
     );
   }
 
-  /// Reusable skeleton box with subtle pulsing animation
+  /// Reusable skeleton box with smooth pulsing animation and optional shimmer
   Widget _buildSkeletonBox({
     required double width,
     required double height,
     double borderRadius = 6,
   }) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.3, end: 0.7),
-      duration: const Duration(milliseconds: 1500),
-      curve: Curves.easeInOut,
-      builder: (context, value, child) {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
         return Container(
           width: width,
           height: height,
           decoration: BoxDecoration(
+            // Phase 1 & 2: Better color contrast + looping animation
             color: Color.lerp(
-              WebColors.tableBorder,
-              WebColors.dividerLight,
-              value,
+              WebColors.skeletonLoader, // #F5F5F5 (light gray)
+              WebColors.tableBorder,    // #CBD5E1 (darker slate)
+              _pulseAnimation.value,
             ),
             borderRadius: BorderRadius.circular(borderRadius),
           ),
         );
       },
-      onEnd: () {},
     );
   }
+
 }
