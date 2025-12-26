@@ -15,6 +15,7 @@ import '../../../core/widgets/filters/date_filter_dropdown.dart';
 /// Unified container for activity logs using BaseTableContainer
 class UnifiedTableContainer extends StatelessWidget {
   final List<ActivityLogItem> items;
+  final bool isLoading; // NEW: Loading state
   
   // Filter states
   final String? selectedMachineId;
@@ -49,6 +50,7 @@ class UnifiedTableContainer extends StatelessWidget {
   const UnifiedTableContainer({
     super.key,
     required this.items,
+    required this.isLoading, // NEW: Required loading state
     required this.selectedMachineId,
     required this.selectedBatchId,
     required this.dateFilter,
@@ -128,10 +130,11 @@ class UnifiedTableContainer extends StatelessWidget {
         onSort: onSort,
       ),
       
-      // Table body
+      // Table body - NOW WITH LOADING STATE
       tableBody: ActivityTableBody(
         items: items,
         onViewDetails: onViewDetails,
+        isLoading: isLoading, // NEW: Pass loading state
       ),
       
       // Pagination (if provided)

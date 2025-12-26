@@ -5,7 +5,7 @@ import '../../../activity_logs/models/unified_activity_config.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
 import '../filters/filter_dropdown.dart';
-import 'table_header_cell.dart';
+import 'activity_table_row.dart'; // UPDATED: Now imports TableHeaderCell from here
 
 /// Table header row with sortable columns and filter dropdowns
 class ActivityTableHeader extends StatelessWidget {
