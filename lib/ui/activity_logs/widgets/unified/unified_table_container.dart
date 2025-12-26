@@ -141,7 +141,7 @@ class UnifiedTableContainer extends StatelessWidget {
         isLoading: isLoading,
       ),
       
-      // Pagination (if provided)
+      // Pagination
       paginationWidget: (currentPage != null && totalPages != null && itemsPerPage != null)
           ? PaginationControls(
               currentPage: currentPage!,

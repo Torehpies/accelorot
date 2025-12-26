@@ -41,6 +41,41 @@ class PaginationControls extends StatelessWidget {
     return List.generate(5, (i) => start + i);
   }
 
+  void _showItemsPerPageMenu(BuildContext context) async {
+    if (isLoading || onItemsPerPageChanged == null) return;
+
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final int? selected = await showMenu<int>(
+      context: context,
+      position: position,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 8,
+      color: WebColors.cardBackground,
+      constraints: const BoxConstraints(
+        maxHeight: 300,
+      ),
+      items: [10, 25, 50, 100].map((value) {
+        return PopupMenuItem<int>(
+          value: value,
+          child: Text('$value'),
+        );
+      }).toList(),
+    );
+
+    if (selected != null && selected != itemsPerPage) {
+      onItemsPerPageChanged!(selected);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final visiblePages = _getVisiblePages();
@@ -52,7 +87,7 @@ class PaginationControls extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Items per page selector
+          // Items per page selector with filter chip styling
           Row(
             children: [
               const Text(
@@ -60,36 +95,39 @@ class PaginationControls extends StatelessWidget {
                 style: WebTextStyles.bodyMediumGray,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: WebColors.inputBackground,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: WebColors.cardBorder),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<int>(
-                    value: itemsPerPage,
-                    isDense: true,
-                    icon: const Icon(
-                      Icons.arrow_drop_down,
-                      size: 20,
-                      color: WebColors.textLabel,
+              Builder(
+                builder: (context) => MouseRegion(
+                  cursor: (isLoading || onItemsPerPageChanged == null) 
+                      ? SystemMouseCursors.basic 
+                      : SystemMouseCursors.click,
+                  child: InkWell(
+                    onTap: (isLoading || onItemsPerPageChanged == null) 
+                        ? null 
+                        : () => _showItemsPerPageMenu(context),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: WebColors.inputBackground,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: WebColors.cardBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$itemsPerPage',
+                            style: WebTextStyles.bodyMedium,
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            size: 20,
+                            color: WebColors.textLabel,
+                          ),
+                        ],
+                      ),
                     ),
-                    style: WebTextStyles.bodyMedium,
-                    items: [10, 25, 50, 100].map((value) {
-                      return DropdownMenuItem(
-                        value: value,
-                        child: Text('$value'),
-                      );
-                    }).toList(),
-                    onChanged: (onItemsPerPageChanged != null && !isLoading)
-                        ? (value) {
-                            if (value != null) {
-                              onItemsPerPageChanged!(value);
-                            }
-                          }
-                        : null,
                   ),
                 ),
               ),
@@ -110,6 +148,7 @@ class PaginationControls extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: WebColors.textSecondary,
                   ),
                   child: Row(
                     children: const [
@@ -163,6 +202,7 @@ class PaginationControls extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    foregroundColor: WebColors.textSecondary,
                   ),
                   child: Row(
                     children: const [

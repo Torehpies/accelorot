@@ -49,6 +49,9 @@ class FilterDropdown<T> extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       color: WebColors.cardBackground,
+      constraints: const BoxConstraints(
+        maxHeight: 300,
+      ),
       items: items.map((item) {
         return PopupMenuItem<T>(
           value: item,

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../core/themes/web_text_styles.dart';
+import '../../../core/themes/web_colors.dart';
 
 /// Reusable web-optimized dropdown that uses showMenu for a premium feel
 class UnifiedDropdown<T> extends StatelessWidget {
@@ -13,7 +14,6 @@ class UnifiedDropdown<T> extends StatelessWidget {
   final IconData icon;
   final bool isLoading;
   final String? disabledHint;
-
   final String? displayText;
 
   const UnifiedDropdown({
@@ -47,11 +47,16 @@ class UnifiedDropdown<T> extends StatelessWidget {
       position: position,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
-      color: Colors.white,
+      color: WebColors.cardBackground,
+      constraints: const BoxConstraints(
+        maxHeight: 300,
+      ),
       items: items,
     );
 
-    onChanged(selected);
+    if (selected != null) {
+      onChanged(selected);
+    }
   }
 
   void _clearValue() {
@@ -69,9 +74,9 @@ class UnifiedDropdown<T> extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
+            color: WebColors.inputBackground,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: WebColors.cardBorder),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -79,7 +84,7 @@ class UnifiedDropdown<T> extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: hasValue ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+                color: hasValue ? WebColors.tealAccent : WebColors.textLabel,
               ),
               const SizedBox(width: 8),
               Flexible(
@@ -97,7 +102,7 @@ class UnifiedDropdown<T> extends StatelessWidget {
               Icon(
                 Icons.arrow_drop_down,
                 size: 20,
-                color: hasValue ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+                color: hasValue ? WebColors.tealAccent : WebColors.textLabel,
               ),
               if (hasValue) ...[
                 const SizedBox(width: 4),
@@ -106,7 +111,7 @@ class UnifiedDropdown<T> extends StatelessWidget {
                   child: const Icon(
                     Icons.clear,
                     size: 16,
-                    color: Color(0xFF6B7280),
+                    color: WebColors.textLabel,
                   ),
                 ),
               ],
