@@ -25,7 +25,7 @@ class BaseTableContainer extends StatelessWidget {
   /// Custom container padding (default: symmetric horizontal:16, vertical:0)
   final EdgeInsets? tablePadding;
   
-  /// Custom border color (default: cardBorder)
+  /// Custom border color
   final Color? borderColor;
 
   const BaseTableContainer({
@@ -61,7 +61,7 @@ class BaseTableContainer extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: borderColor ?? WebColors.cardBorder,
+                    color: borderColor ?? WebColors.tableBorder,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -72,7 +72,7 @@ class BaseTableContainer extends StatelessWidget {
                       decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: WebColors.cardBorder,
+                            color: WebColors.tableBorder,
                             width: 1,
                           ),
                         ),

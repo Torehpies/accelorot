@@ -18,7 +18,6 @@ class GenericTableRow extends StatelessWidget {
   final EdgeInsets? padding;
   final Color? hoverColor;
   final double? height;
-  final bool showDivider;
   final double cellSpacing;
 
   const GenericTableRow({
@@ -28,7 +27,6 @@ class GenericTableRow extends StatelessWidget {
     this.padding,
     this.hoverColor,
     this.height,
-    this.showDivider = true,
     this.cellSpacing = 0,
   });
 
@@ -43,11 +41,7 @@ class GenericTableRow extends StatelessWidget {
           horizontal: AppSpacing.tableCellHorizontal,
           vertical: 8,
         ),
-        decoration: BoxDecoration(
-          border: showDivider 
-            ? const Border(bottom: BorderSide(color: WebColors.divider, width: 1))
-            : null,
-        ),
+        // Removed the border decoration entirely - separator handles dividers
         child: Row(
           children: _buildCellsWithSpacing(),
         ),

@@ -1,5 +1,4 @@
 // lib/ui/core/widgets/table/activity_table_body.dart
-
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../shared/empty_state.dart';
@@ -25,6 +24,7 @@ class ActivityTableBody extends StatelessWidget {
     if (isLoading) {
       return _buildSkeletonRows();
     }
+
     if (items.isEmpty) {
       return const EmptyState();
     }
@@ -34,7 +34,8 @@ class ActivityTableBody extends StatelessWidget {
       itemCount: items.length,
       separatorBuilder: (context, index) => const Divider(
         height: 1,
-        color: WebColors.divider,
+        thickness: 1,
+        color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
         return ActivityTableRow(
@@ -51,7 +52,8 @@ class ActivityTableBody extends StatelessWidget {
       itemCount: 8,
       separatorBuilder: (context, index) => const Divider(
         height: 1,
-        color: WebColors.divider,
+        thickness: 1,
+        color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
         return _buildSkeletonRow();
@@ -135,7 +137,7 @@ class ActivityTableBody extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: Color.lerp(
-              WebColors.cardBorder,
+              WebColors.tableBorder,
               WebColors.dividerLight,
               value,
             ),
@@ -143,8 +145,7 @@ class ActivityTableBody extends StatelessWidget {
           ),
         );
       },
-      onEnd: () {
-      },
+      onEnd: () {},
     );
   }
 }
