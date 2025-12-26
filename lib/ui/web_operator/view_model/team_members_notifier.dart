@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'team_members_state.dart';
 
@@ -86,5 +87,29 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       ..remove(state.currentPage);
     state = state.copyWith(pagesByIndex: updatedPages, lastFetchedAt: null);
     await _loadPage(state.currentPage);
+  }
+
+  Future<void> updateOperator(EditOperatorForm form) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      TeamMember member = TeamMember(
+        email: form.email,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        addedAt: DateTime.now(),
+        id: form.id,
+      );
+
+      final teamUser = ref.watch(appUserProvider).value;
+      final teamId = teamUser?.teamId;
+      await ref
+          .read(teamMemberServiceProvider)
+          .updateTeamMember(member: member, teamId: teamId);
+      refresh();
+    } catch (e) {
+      // Handle error
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
   }
 }
