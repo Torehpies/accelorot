@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../../activity_logs/models/unified_activity_config.dart';
+import '../../../activity_logs/models/activity_enums.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
 
-// ============================================================================
 // TABLE MICRO COMPONENTS
 
 /// Generic table row wrapper with hover effect and optional tap handler
@@ -229,7 +229,10 @@ class ActivityTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryName = UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
-    final typeColor = UnifiedActivityConfig.getColorForType(item.category);
+    
+    // Parse the category string to enum, then get color
+    final subType = ActivitySubType.fromString(item.category);
+    final typeColor = UnifiedActivityConfig.getColorForSubType(subType);
 
     return GenericTableRow(
       onTap: () => onViewDetails(item),

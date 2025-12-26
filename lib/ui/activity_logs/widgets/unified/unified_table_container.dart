@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../models/activity_common.dart';
+import '../../models/activity_enums.dart';
 import '../../../core/widgets/shared/pagination_controls.dart';
 import '../../../core/widgets/table/base_table_container.dart';
 import '../../../core/widgets/filters/search_field.dart';
@@ -15,15 +16,15 @@ import '../../../core/widgets/filters/date_filter_dropdown.dart';
 /// Unified container for activity logs using BaseTableContainer
 class UnifiedTableContainer extends StatelessWidget {
   final List<ActivityLogItem> items;
-  final bool isLoading; // NEW: Loading state
+  final bool isLoading;
   
   // Filter states
   final String? selectedMachineId;
   final String? selectedBatchId;
   final DateFilterRange dateFilter;
   final String searchQuery;
-  final String selectedCategory;
-  final String selectedType;
+  final ActivityCategory selectedCategory; // NOW ENUM
+  final ActivitySubType selectedType; // NOW ENUM
   
   // Sort states
   final String? sortColumn;
@@ -40,8 +41,8 @@ class UnifiedTableContainer extends StatelessWidget {
   final ValueChanged<String?> onBatchChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
   final ValueChanged<String> onSearchChanged;
-  final ValueChanged<String> onCategoryChanged;
-  final ValueChanged<String> onTypeChanged;
+  final ValueChanged<ActivityCategory> onCategoryChanged; // NOW ENUM
+  final ValueChanged<ActivitySubType> onTypeChanged; // NOW ENUM
   final ValueChanged<String> onSort;
   final ValueChanged<ActivityLogItem> onViewDetails;
   final ValueChanged<int>? onPageChanged;
@@ -50,7 +51,7 @@ class UnifiedTableContainer extends StatelessWidget {
   const UnifiedTableContainer({
     super.key,
     required this.items,
-    required this.isLoading, // NEW: Required loading state
+    required this.isLoading,
     required this.selectedMachineId,
     required this.selectedBatchId,
     required this.dateFilter,
@@ -112,10 +113,12 @@ class UnifiedTableContainer extends StatelessWidget {
           height: 32,
           child: DateFilterDropdown(
             onFilterChanged: onDateFilterChanged,
+            isLoading: isLoading,
           ),
         ),
         SearchField(
           onChanged: onSearchChanged,
+          isLoading: isLoading,
         ),
       ],
       
@@ -128,13 +131,14 @@ class UnifiedTableContainer extends StatelessWidget {
         onCategoryChanged: onCategoryChanged,
         onTypeChanged: onTypeChanged,
         onSort: onSort,
+        isLoading: isLoading,
       ),
       
-      // Table body - NOW WITH LOADING STATE
+      // Table body
       tableBody: ActivityTableBody(
         items: items,
         onViewDetails: onViewDetails,
-        isLoading: isLoading, // NEW: Pass loading state
+        isLoading: isLoading,
       ),
       
       // Pagination (if provided)
@@ -145,6 +149,7 @@ class UnifiedTableContainer extends StatelessWidget {
               itemsPerPage: itemsPerPage!,
               onPageChanged: onPageChanged,
               onItemsPerPageChanged: onItemsPerPageChanged,
+              isLoading: isLoading,
             )
           : null,
     );

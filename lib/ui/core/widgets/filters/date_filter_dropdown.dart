@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/widgets/date_filter_dropdown.dart
+// lib/ui/core/widgets/filters/date_filter_dropdown.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,8 +8,13 @@ import '../../../activity_logs/models/activity_common.dart';
 /// Web-optimized date filter dropdown that matches Machine/Batch selector style
 class DateFilterDropdown extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
+  final bool isLoading;
 
-  const DateFilterDropdown({super.key, required this.onFilterChanged});
+  const DateFilterDropdown({
+    super.key,
+    required this.onFilterChanged,
+    this.isLoading = false,
+  });
 
   @override
   State<DateFilterDropdown> createState() => _DateFilterDropdownState();
@@ -19,6 +24,8 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
   DateFilterRange _currentFilter = const DateFilterRange(type: DateFilterType.none);
 
   void _showFilterMenu() {
+    if (widget.isLoading) return;
+
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
@@ -32,7 +39,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
     showMenu<DateFilterType>(
       context: context,
       position: position,
-      color: Colors.white, // White background for popup menu
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       items: [
@@ -121,6 +128,8 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
   }
 
   void _clearFilter() {
+    if (widget.isLoading) return;
+    
     setState(() {
       _currentFilter = const DateFilterRange(type: DateFilterType.none);
     });
@@ -151,48 +160,54 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
   Widget build(BuildContext context) {
     final isActive = _currentFilter.isActive;
 
-    return InkWell(
-      onTap: _showFilterMenu,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
+    return MouseRegion(
+      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      child: Opacity(
+        opacity: widget.isLoading ? 0.5 : 1.0,
+        child: InkWell(
+          onTap: widget.isLoading ? null : _showFilterMenu,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: isActive ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
             ),
-            if (isActive) ...[
-              const SizedBox(width: 8),
-              Text(
-                _getDisplayText(),
-                style: WebTextStyles.bodyMedium,
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.arrow_drop_down,
-                size: 20,
-                color: const Color(0xFF0D9488),
-              ),
-              const SizedBox(width: 4),
-              InkWell(
-                onTap: _clearFilter,
-                borderRadius: BorderRadius.circular(4),
-                child: const Icon(
-                  Icons.clear,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today,
                   size: 16,
-                  color: Color(0xFF6B7280),
+                  color: isActive ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
                 ),
-              ),
-            ],
-          ],
+                if (isActive) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    _getDisplayText(),
+                    style: WebTextStyles.bodyMedium,
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 20,
+                    color: const Color(0xFF0D9488),
+                  ),
+                  const SizedBox(width: 4),
+                  InkWell(
+                    onTap: widget.isLoading ? null : _clearFilter,
+                    borderRadius: BorderRadius.circular(4),
+                    child: const Icon(
+                      Icons.clear,
+                      size: 16,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

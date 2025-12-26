@@ -11,6 +11,7 @@ class PaginationControls extends StatelessWidget {
   final int itemsPerPage;
   final ValueChanged<int>? onPageChanged;
   final ValueChanged<int>? onItemsPerPageChanged;
+  final bool isLoading;
 
   const PaginationControls({
     super.key,
@@ -19,6 +20,7 @@ class PaginationControls extends StatelessWidget {
     required this.itemsPerPage,
     this.onPageChanged,
     this.onItemsPerPageChanged,
+    this.isLoading = false,
   });
 
   List<int> _getVisiblePages() {
@@ -44,139 +46,142 @@ class PaginationControls extends StatelessWidget {
     final showLeftEllipsis = visiblePages.first > 1;
     final showRightEllipsis = visiblePages.last < totalPages;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Items per page selector
-        Row(
-          children: [
-            const Text(
-              'Items per page:',
-              style: WebTextStyles.bodyMediumGray,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  value: itemsPerPage,
-                  isDense: true,
-                  icon: const Icon(
-                    Icons.arrow_drop_down,
-                    size: 20,
-                    color: Color(0xFF6B7280),
-                  ),
-                  style: WebTextStyles.bodyMedium,
-                  items: [10, 25, 50, 100].map((value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text('$value'),
-                    );
-                  }).toList(),
-                  onChanged: onItemsPerPageChanged != null
-                      ? (value) {
-                          if (value != null) {
-                            onItemsPerPageChanged!(value);
-                          }
-                        }
-                      : null,
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        // Centered page navigation with numbered buttons
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    return Opacity(
+      opacity: isLoading ? 0.6 : 1.0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Items per page selector
+          Row(
             children: [
-              // Back button
-              TextButton(
-                onPressed: (currentPage > 1 && onPageChanged != null)
-                    ? () => onPageChanged!(currentPage - 1)
-                    : null,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Row(
-                  children: const [
-                    Icon(Icons.chevron_left, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'Back',
-                      style: WebTextStyles.bodyMedium,
-                    ),
-                  ],
-                ),
+              const Text(
+                'Items per page:',
+                style: WebTextStyles.bodyMediumGray,
               ),
-
               const SizedBox(width: AppSpacing.sm),
-
-              // First page if not visible
-              if (showLeftEllipsis) ...[
-                _buildPageButton(1),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    '...',
-                    style: WebTextStyles.bodyMediumGray,
-                  ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF9FAFB),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
                 ),
-              ],
-
-              // Visible page numbers
-              ...visiblePages.map((page) => _buildPageButton(page)),
-
-              // Last page if not visible
-              if (showRightEllipsis) ...[
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    '...',
-                    style: WebTextStyles.bodyMediumGray,
-                  ),
-                ),
-                _buildPageButton(totalPages),
-              ],
-
-              const SizedBox(width: AppSpacing.sm),
-
-              // Next button
-              TextButton(
-                onPressed: (currentPage < totalPages && onPageChanged != null)
-                    ? () => onPageChanged!(currentPage + 1)
-                    : null,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Row(
-                  children: const [
-                    Text(
-                      'Next',
-                      style: WebTextStyles.bodyMedium,
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<int>(
+                    value: itemsPerPage,
+                    isDense: true,
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      size: 20,
+                      color: Color(0xFF6B7280),
                     ),
-                    SizedBox(width: 4),
-                    Icon(Icons.chevron_right, size: 16),
-                  ],
+                    style: WebTextStyles.bodyMedium,
+                    items: [10, 25, 50, 100].map((value) {
+                      return DropdownMenuItem(
+                        value: value,
+                        child: Text('$value'),
+                      );
+                    }).toList(),
+                    onChanged: (onItemsPerPageChanged != null && !isLoading)
+                        ? (value) {
+                            if (value != null) {
+                              onItemsPerPageChanged!(value);
+                            }
+                          }
+                        : null,
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-        
-        // Empty spacer to keep items-per-page on the left
-        const SizedBox(width: 150),
-      ],
+
+          // Centered page navigation with numbered buttons
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Back button
+                TextButton(
+                  onPressed: (currentPage > 1 && onPageChanged != null && !isLoading)
+                      ? () => onPageChanged!(currentPage - 1)
+                      : null,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.chevron_left, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'Back',
+                        style: WebTextStyles.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: AppSpacing.sm),
+
+                // First page if not visible
+                if (showLeftEllipsis) ...[
+                  _buildPageButton(1),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      '...',
+                      style: WebTextStyles.bodyMediumGray,
+                    ),
+                  ),
+                ],
+
+                // Visible page numbers
+                ...visiblePages.map((page) => _buildPageButton(page)),
+
+                // Last page if not visible
+                if (showRightEllipsis) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      '...',
+                      style: WebTextStyles.bodyMediumGray,
+                    ),
+                  ),
+                  _buildPageButton(totalPages),
+                ],
+
+                const SizedBox(width: AppSpacing.sm),
+
+                // Next button
+                TextButton(
+                  onPressed: (currentPage < totalPages && onPageChanged != null && !isLoading)
+                      ? () => onPageChanged!(currentPage + 1)
+                      : null,
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    children: const [
+                      Text(
+                        'Next',
+                        style: WebTextStyles.bodyMedium,
+                      ),
+                      SizedBox(width: 4),
+                      Icon(Icons.chevron_right, size: 16),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Empty spacer to keep items-per-page on the left
+          const SizedBox(width: 150),
+        ],
+      ),
     );
   }
 
@@ -186,7 +191,7 @@ class PaginationControls extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: InkWell(
-        onTap: onPageChanged != null ? () => onPageChanged!(page) : null,
+        onTap: (onPageChanged != null && !isLoading) ? () => onPageChanged!(page) : null,
         borderRadius: BorderRadius.circular(6),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

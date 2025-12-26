@@ -3,6 +3,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import 'activity_common.dart';
+import 'activity_enums.dart';
 
 part 'unified_activity_state.freezed.dart';
 
@@ -16,9 +17,9 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
     @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
     @Default('') String searchQuery,
     
-    // Table filters
-    @Default('All') String selectedCategory,
-    @Default('All') String selectedType,
+    // Table filters - NOW USING ENUMS
+    @Default(ActivityCategory.all) ActivityCategory selectedCategory,
+    @Default(ActivitySubType.all) ActivitySubType selectedType,
     
     // Sorting
     String? sortColumn,
@@ -73,7 +74,7 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
         selectedBatchId != null ||
         dateFilter.isActive ||
         searchQuery.isNotEmpty ||
-        selectedCategory != 'All' ||
-        selectedType != 'All';
+        selectedCategory != ActivityCategory.all ||
+        selectedType != ActivitySubType.all;
   }
 }

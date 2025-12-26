@@ -3,7 +3,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/unified_activity_state.dart';
-import '../models/unified_activity_config.dart';
+import '../models/activity_enums.dart';
 import '../services/activity_aggregator_service.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../models/activity_common.dart';
@@ -82,7 +82,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     await loadActivities();
   }
 
-  // ===== FILTER HANDLERS =====
+  // ===== FILTER HANDLERS - NOW WITH ENUMS =====
 
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
@@ -117,17 +117,17 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     _applyFilters();
   }
 
-  void onCategoryChanged(String category) {
+  void onCategoryChanged(ActivityCategory category) {
     // When category changes, reset type to 'All'
     state = state.copyWith(
       selectedCategory: category,
-      selectedType: 'All',
+      selectedType: ActivitySubType.all,
       currentPage: 1,
     );
     _applyFilters();
   }
 
-  void onTypeChanged(String type) {
+  void onTypeChanged(ActivitySubType type) {
     state = state.copyWith(
       selectedType: type,
       currentPage: 1,
@@ -161,7 +161,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     );
   }
 
-  // ===== FILTERING LOGIC =====
+  // ===== FILTERING LOGIC - UPDATED FOR ENUMS =====
 
   void _applyFilters() {
     var filtered = state.allActivities;
@@ -197,20 +197,18 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       ).toList();
     }
 
-    // 5. Filter by Category (maps to ActivityType)
-    if (state.selectedCategory != 'All') {
-      final typeFilter = UnifiedActivityConfig.getActivityTypeFromCategory(
-        state.selectedCategory
-      );
+    // 5. Filter by Category (maps to ActivityType) - UPDATED
+    if (state.selectedCategory != ActivityCategory.all) {
+      final typeFilter = state.selectedCategory.toActivityType();
       if (typeFilter != null) {
         filtered = filtered.where((item) => item.type == typeFilter).toList();
       }
     }
 
-    // 6. Filter by Type (granular category)
-    if (state.selectedType != 'All') {
+    // 6. Filter by Type (granular category) - UPDATED
+    if (state.selectedType != ActivitySubType.all) {
       filtered = filtered.where((item) => 
-        item.category.toLowerCase() == state.selectedType.toLowerCase()
+        item.category.toLowerCase() == state.selectedType.displayName.toLowerCase()
       ).toList();
     }
 
