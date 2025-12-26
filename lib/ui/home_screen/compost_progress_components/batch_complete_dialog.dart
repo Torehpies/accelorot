@@ -1,23 +1,27 @@
 // lib/frontend/operator/dashboard/compost_progress/components/batch_complete_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
+import '../../../data/providers/batch_providers.dart';
 
-class BatchCompleteDialog extends StatefulWidget {
+
+class BatchCompleteDialog extends ConsumerStatefulWidget {
   final CompostBatch batch;
   final VoidCallback? onComplete;
 
   const BatchCompleteDialog({required this.batch, this.onComplete, super.key});
 
   @override
-  State<BatchCompleteDialog> createState() => _BatchCompleteDialogState();
+  ConsumerState<BatchCompleteDialog> createState() => _BatchCompleteDialogState();
 }
 
-class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
+class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
   final _finalWeightController = TextEditingController();
   final _completionNotesController = TextEditingController();
 
   String? _weightError;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -32,7 +36,7 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
     }
     final weight = double.tryParse(value);
     if (weight == null) {
-      return 'Enter a valid number';
+      return 'Please enter a valid number';
     }
     if (weight <= 0) {
       return 'Weight must be greater than 0';
@@ -40,7 +44,7 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
     return null;
   }
 
-  void _handleComplete() {
+  Future<void> _handleComplete() async {
     final weightError = _validateWeight(_finalWeightController.text);
 
     if (weightError != null) {
@@ -48,37 +52,55 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
       return;
     }
 
-    // Update batch with completion data
-    final updatedBatch = widget.batch.copyWith(
-      status: 'completed',
-      completedAt: DateTime.now(),
-      finalWeight: double.parse(_finalWeightController.text),
-      completionNotes: _completionNotesController.text.trim().isEmpty
-          ? null
-          : _completionNotesController.text.trim(),
-    );
+    setState(() => _isLoading = true);
 
-    Navigator.of(context).pop(updatedBatch);
-    if (widget.onComplete != null) widget.onComplete!();
+    try {
+      final finalWeight = double.parse(_finalWeightController.text);
+      final completionNotes = _completionNotesController.text.trim();
+
+      // Get batch repository
+      final batchRepo = ref.read(batchRepositoryProvider);
+
+      // Complete the batch in Firestore
+      await batchRepo.completeBatch(
+        widget.batch.batchNumber, // This is actually the batchId
+        finalWeight: finalWeight,
+        completionNotes: completionNotes.isEmpty ? null : completionNotes,
+      );
+
+      if (!mounted) return;
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Batch completed successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Callback and close
+      widget.onComplete?.call();
+      Navigator.of(context).pop(true);
+
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to complete batch: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   String _formatDate(DateTime? date) {
-    if (date == null) return '-';
-    final monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+    if (date == null) return 'N/A';
+    return '${date.month}/${date.day}/${date.year}';
   }
 
   int _getDaysPassed() {
@@ -88,27 +110,26 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_getDaysPassed() / 12).clamp(0.0, 1.0);
+    final daysPassed = _getDaysPassed();
 
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(20),
-      child: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(maxWidth: 400),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(25),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(50),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,126 +138,43 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.compost, color: Colors.teal[700]),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Batch Details',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    'Complete Batch',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.close),
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Progress Bar Section (at top)
+              // Batch details
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.teal.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Decomposition Progress',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.teal.shade900,
-                          ),
-                        ),
-                        Text(
-                          '${(progress * 100).toInt()}%',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.white,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.teal.shade600,
-                        ),
-                        minHeight: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Day ${_getDaysPassed()} of 12',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.teal.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Batch Information Card
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Batch Information',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
                     _buildDetailRow('Batch Name', widget.batch.batchName),
-                    _buildDetailRow('Batch Number', widget.batch.batchNumber),
-                    _buildDetailRow(
-                      'Started By',
-                      widget.batch.startedBy ?? 'null',
-                    ),
-                    _buildDetailRow(
-                      'Start Date',
-                      _formatDate(widget.batch.batchStart),
-                    ),
-                    if (widget.batch.startNotes != null)
-                      _buildDetailRow('Start Notes', widget.batch.startNotes!),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Batch ID', widget.batch.batchNumber),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Started', _formatDate(widget.batch.batchStart)),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Days Elapsed', '$daysPassed days'),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Final Weight Field
+              // Final weight input
               Text(
                 'Final Weight (kg)',
                 style: TextStyle(
@@ -248,24 +186,21 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _finalWeightController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                enabled: !_isLoading,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
                 decoration: InputDecoration(
-                  hintText: 'Enter final weight',
-                  prefixIcon: Icon(Icons.scale, color: Colors.teal[600]),
-                  suffixText: 'kg',
+                  hintText: 'Enter weight in kg',
+                  prefixIcon: const Icon(Icons.scale),
+                  errorText: _weightError,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  errorText: _weightError,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.teal.shade600,
-                      width: 2,
-                    ),
+                    borderSide: const BorderSide(color: Colors.teal, width: 2),
                   ),
                 ),
                 onChanged: (value) {
@@ -276,7 +211,7 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Completion Notes Field
+              // Completion notes
               Text(
                 'Completion Notes (Optional)',
                 style: TextStyle(
@@ -288,50 +223,53 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
               const SizedBox(height: 8),
               TextField(
                 controller: _completionNotesController,
+                enabled: !_isLoading,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Quality, observations, issues...',
+                  hintText: 'Add any final observations...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Colors.teal.shade600,
-                      width: 2,
-                    ),
+                    borderSide: const BorderSide(color: Colors.teal, width: 2),
                   ),
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Action Buttons
+              // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
+                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton.icon(
-                    onPressed: _handleComplete,
-                    icon: const Icon(Icons.check_circle, size: 18),
-                    label: const Text('Complete Batch'),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _handleComplete,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal[700],
+                      backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text('Complete Batch'),
                   ),
                 ],
               ),
@@ -343,34 +281,24 @@ class _BatchCompleteDialogState extends State<BatchCompleteDialog> {
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label:',
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Colors.black54,
-              fontSize: 13,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey[600],
           ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                fontSize: 13,
-              ),
-              textAlign: TextAlign.right,
-            ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ class BatchSelector extends ConsumerWidget {
   final ValueChanged<String?> onChanged;
   final bool isCompact;
   final bool showLabel;
+  final bool showAllOption;
 
   const BatchSelector({
     super.key,
@@ -17,10 +18,12 @@ class BatchSelector extends ConsumerWidget {
     this.selectedMachineId,
     this.isCompact = false,
     this.showLabel = true,
+    this.showAllOption = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the AsyncNotifierProvider properly
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
     return batchesAsync.when(
@@ -29,6 +32,7 @@ class BatchSelector extends ConsumerWidget {
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
 
+        filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final hasNoBatches = filteredBatches.isEmpty;
 
         return Container(
@@ -75,7 +79,11 @@ class BatchSelector extends ConsumerWidget {
                 child: DropdownButton<String>(
                   value: selectedBatchId,
                   hint: Text(
-                    'All Batches',
+                    hasNoBatches
+                        ? (selectedMachineId != null
+                              ? 'No batches for this machine'
+                              : 'No batches available')
+                        : (showAllOption ? 'All Batches' : 'Select Batch'),
                     style: TextStyle(
                       fontSize: isCompact ? 13 : 14,
                       fontWeight: FontWeight.w600,
@@ -90,28 +98,48 @@ class BatchSelector extends ConsumerWidget {
                         ? Colors.grey[400]
                         : (isCompact ? Colors.teal.shade700 : Colors.teal),
                   ),
-                  disabledHint: Text(
-                    selectedMachineId != null
-                        ? 'No batches for this machine'
-                        : 'No batches available',
-                    style: TextStyle(
-                      fontSize: isCompact ? 13 : 14,
-                      color: Colors.grey[400],
-                    ),
-                  ),
                   items: hasNoBatches
                       ? null
                       : [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text('All Batches'),
-                          ),
+                          // Only show "All Batches" if showAllOption is true
+                          if (showAllOption)
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text('All Batches'),
+                            ),
                           ...filteredBatches.map((batch) {
                             return DropdownMenuItem<String>(
                               value: batch.id,
-                              child: Text(
-                                batch.id,
-                                style: TextStyle(fontSize: isCompact ? 13 : 14),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      batch.displayName,
+                                      style: TextStyle(
+                                        fontSize: isCompact ? 13 : 14,
+                                      ),
+                                    ),
+                                  ),
+                                  if (!batch.isActive)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        'Completed',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
                             );
                           }),
@@ -135,10 +163,15 @@ class BatchSelector extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.inventory_2,
-              color: Colors.grey[400],
-              size: isCompact ? 18 : 20,
+            SizedBox(
+              width: isCompact ? 18 : 20,
+              height: isCompact ? 18 : 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isCompact ? Colors.teal.shade700 : Colors.teal,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             if (showLabel) ...[
@@ -165,7 +198,36 @@ class BatchSelector extends ConsumerWidget {
           ],
         ),
       ),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (error, stack) => Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8 : 12,
+          vertical: isCompact ? 6 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: isCompact ? Colors.grey[50] : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.red[400],
+              size: isCompact ? 18 : 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Failed to load batches',
+                style: TextStyle(
+                  fontSize: isCompact ? 13 : 14,
+                  color: Colors.red[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
