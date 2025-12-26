@@ -132,7 +132,6 @@ class OperatorMachineController extends ChangeNotifier {
 
   Future<void> _fetchUsers() async {
     try {
-      // TODO: Move this to a UserRepository when created
       _users = []; // For now, empty - implement when UserRepository exists
       notifyListeners();
     } catch (e) {
