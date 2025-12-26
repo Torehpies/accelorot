@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 /// Reusable search field with icon and consistent styling
 class SearchField extends StatelessWidget {
@@ -31,15 +32,15 @@ class SearchField extends StatelessWidget {
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
+            color: WebColors.inputBackground,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: WebColors.cardBorder),
           ),
           child: Row(
             children: [
               const Icon(
                 Icons.search,
-                color: Color(0xFF6B7280),
+                color: WebColors.textLabel,
                 size: 16,
               ),
               const SizedBox(width: 8),

@@ -82,7 +82,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     await loadActivities();
   }
 
-  // ===== FILTER HANDLERS - NOW WITH ENUMS =====
+  // ===== FILTER HANDLERS =====
 
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
@@ -145,7 +145,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       sortAscending: isAscending,
     );
     
-    _applyFilters(); // Reapply filters with new sort
+    _applyFilters();
   }
 
   // ===== PAGINATION HANDLERS =====
@@ -161,7 +161,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     );
   }
 
-  // ===== FILTERING LOGIC - UPDATED FOR ENUMS =====
+  // ===== FILTERING LOGIC =====
 
   void _applyFilters() {
     var filtered = state.allActivities;
@@ -197,7 +197,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       ).toList();
     }
 
-    // 5. Filter by Category (maps to ActivityType) - UPDATED
+    // 5. Filter by Category
     if (state.selectedCategory != ActivityCategory.all) {
       final typeFilter = state.selectedCategory.toActivityType();
       if (typeFilter != null) {
@@ -205,7 +205,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       }
     }
 
-    // 6. Filter by Type (granular category) - UPDATED
+    // 6. Filter by Type
     if (state.selectedType != ActivitySubType.all) {
       filtered = filtered.where((item) => 
         item.category.toLowerCase() == state.selectedType.displayName.toLowerCase()
@@ -248,8 +248,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   // ===== STATS CALCULATIONS =====
 
-  /// Get count for each category (ALWAYS from ALL activities, not filtered)
-  /// This ensures stats remain constant regardless of filters
+  /// Get count for each category
   Map<String, int> getCategoryCounts() {
     return {
       'substrates': state.allActivities
@@ -268,7 +267,6 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Get category counts with month-over-month change percentage
-  /// Count = total all-time, Change = this month vs last month comparison
   Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
     final now = DateTime.now();
     
@@ -336,9 +334,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Helper: Build change data with percentage and positive/negative indicator
-  /// allTimeCount = total count to display
-  /// currentMonthCount = this month's count for comparison
-  /// previousMonthCount = last month's count for comparison
+
   Map<String, dynamic> _buildChangeData(
     int allTimeCount,
     int currentMonthCount,
@@ -364,7 +360,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     }
 
     return {
-      'count': allTimeCount, // Show total all-time count
+      'count': allTimeCount,
       'change': changeText,
       'isPositive': isPositive,
     };

@@ -47,7 +47,7 @@ class UnifiedDropdown<T> extends StatelessWidget {
       position: position,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
-      color: Colors.white, // Set dropdown background to white
+      color: Colors.white,
       items: items,
     );
 

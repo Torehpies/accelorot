@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../constants/spacing.dart';
+import '../../themes/web_colors.dart';
 
 /// Reusable base table container with consistent styling
 /// Provides: filter header, bordered table wrapper, pagination footer
@@ -24,7 +25,7 @@ class BaseTableContainer extends StatelessWidget {
   /// Custom container padding (default: symmetric horizontal:16, vertical:0)
   final EdgeInsets? tablePadding;
   
-  /// Custom border color (default: #E5E7EB)
+  /// Custom border color (default: cardBorder)
   final Color? borderColor;
 
   const BaseTableContainer({
@@ -42,9 +43,9 @@ class BaseTableContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: WebColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: WebColors.cardBorder),
       ),
       child: Column(
         children: [
@@ -60,7 +61,7 @@ class BaseTableContainer extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: borderColor ?? const Color(0xFFE5E7EB),
+                    color: borderColor ?? WebColors.cardBorder,
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -71,7 +72,7 @@ class BaseTableContainer extends StatelessWidget {
                       decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
-                            color: Color(0xFFE5E7EB),
+                            color: WebColors.cardBorder,
                             width: 1,
                           ),
                         ),

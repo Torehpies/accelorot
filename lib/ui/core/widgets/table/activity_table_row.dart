@@ -7,11 +7,11 @@ import '../../../activity_logs/models/unified_activity_config.dart';
 import '../../../activity_logs/models/activity_enums.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 // TABLE MICRO COMPONENTS
 
 /// Generic table row wrapper with hover effect and optional tap handler
-/// Provides consistent row styling and interaction across all table views
 class GenericTableRow extends StatelessWidget {
   final List<Widget> cells;
   final VoidCallback? onTap;
@@ -36,7 +36,7 @@ class GenericTableRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      hoverColor: hoverColor ?? const Color(0xFFF9FAFB),
+      hoverColor: hoverColor ?? WebColors.hoverBackground,
       child: Container(
         constraints: BoxConstraints(minHeight: height ?? 52),
         padding: padding ?? const EdgeInsets.symmetric(
@@ -45,7 +45,7 @@ class GenericTableRow extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           border: showDivider 
-            ? const Border(bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1))
+            ? const Border(bottom: BorderSide(color: WebColors.divider, width: 1))
             : null,
         ),
         child: Row(
@@ -70,7 +70,6 @@ class GenericTableRow extends StatelessWidget {
 }
 
 /// Table cell widget with flex-based sizing
-/// Wraps content in Expanded widget for proper column distribution
 class TableCellWidget extends StatelessWidget {
   final int flex;
   final Widget child;
@@ -91,7 +90,6 @@ class TableCellWidget extends StatelessWidget {
 }
 
 /// Gray badge component for category display in tables
-/// Used for categorical information with neutral styling
 class TableBadge extends StatelessWidget {
   final String text;
 
@@ -105,7 +103,7 @@ class TableBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: WebColors.badgeBackground,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
@@ -119,7 +117,6 @@ class TableBadge extends StatelessWidget {
 }
 
 /// Colored chip component for type/status display in tables
-/// Uses custom colors to represent different types or states
 class TableChip extends StatelessWidget {
   final String text;
   final Color color;
@@ -150,7 +147,6 @@ class TableChip extends StatelessWidget {
 }
 
 /// Table header cell with optional sorting functionality
-/// Displays column labels and handles sort state visualization
 class TableHeaderCell extends StatelessWidget {
   final String label;
   final bool sortable;
@@ -192,7 +188,7 @@ class TableHeaderCell extends StatelessWidget {
             Text(
               label,
               style: isActive 
-                ? WebTextStyles.label.copyWith(color: const Color(0xFF374151)) 
+                ? WebTextStyles.label.copyWith(color: WebColors.textSecondary) 
                 : WebTextStyles.label,
             ),
             const SizedBox(width: 4),
@@ -201,7 +197,7 @@ class TableHeaderCell extends StatelessWidget {
                   ? (sortAscending ? Icons.arrow_upward : Icons.arrow_downward)
                   : Icons.unfold_more,
               size: 16,
-              color: isActive ? const Color(0xFF374151) : const Color(0xFF9CA3AF),
+              color: isActive ? WebColors.textSecondary : WebColors.neutral,
             ),
           ],
         ),
@@ -214,7 +210,6 @@ class TableHeaderCell extends StatelessWidget {
 // MAIN ACTIVITY TABLE ROW COMPONENT
 // ============================================================================
 
-/// Single table row component for activity log items
 /// Displays: Title, Category Badge, Type Chip, Value, Date, and Actions
 class ActivityTableRow extends StatelessWidget {
   final ActivityLogItem item;
@@ -292,7 +287,7 @@ class ActivityTableRow extends StatelessWidget {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.open_in_new, size: 18),
-              color: const Color(0xFF6B7280),
+              color: WebColors.textLabel,
               onPressed: () => onViewDetails(item),
               tooltip: 'View Details',
             ),

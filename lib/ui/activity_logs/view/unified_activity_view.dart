@@ -6,6 +6,7 @@ import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/unified/stats_card_row.dart';
 import '../widgets/unified/unified_table_container.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/themes/web_colors.dart';
 import 'base_detail_view.dart';
 
 /// Main unified activity view with enhanced stats
@@ -23,7 +24,7 @@ class UnifiedActivityView extends ConsumerWidget {
     final state = ref.watch(unifiedActivityViewModelProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F8FF), // Light blue page background
+      backgroundColor: WebColors.pageBackground,
       body: SafeArea(
         child: state.hasError
             ? _buildErrorState(state.errorMessage ?? 'An error occurred')
@@ -48,7 +49,7 @@ class UnifiedActivityView extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFBAE6FD), width: 1.5),
+          border: Border.all(color: WebColors.primaryBorder, width: 1.5),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -66,7 +67,7 @@ class UnifiedActivityView extends ConsumerWidget {
               Expanded(
                 child: UnifiedTableContainer(
                   items: state.paginatedItems,
-                  isLoading: state.isLoading, // NEW: Pass loading state
+                  isLoading: state.isLoading,
                   selectedMachineId: state.selectedMachineId,
                   selectedBatchId: state.selectedBatchId,
                   dateFilter: state.dateFilter,
@@ -106,7 +107,7 @@ class UnifiedActivityView extends ConsumerWidget {
           const Icon(
             Icons.error_outline,
             size: 64,
-            color: Color(0xFFEF4444),
+            color: WebColors.error,
           ),
           const SizedBox(height: 16),
           const Text(
@@ -115,7 +116,7 @@ class UnifiedActivityView extends ConsumerWidget {
               fontFamily: 'dm-sans',
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF374151),
+              color: WebColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -132,10 +133,10 @@ class UnifiedActivityView extends ConsumerWidget {
   void _showDetailSheet(BuildContext context, item) {
     showDialog(
       context: context,
-      barrierColor: Colors.black54,
+      barrierColor: WebColors.dialogBarrier,
       builder: (context) {
         return Dialog(
-          backgroundColor: Colors.transparent,
+          backgroundColor: WebColors.dialogBackground,
           insetPadding: const EdgeInsets.all(40),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),

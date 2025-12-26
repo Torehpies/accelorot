@@ -4,7 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'activity_common.freezed.dart';
 
-/// Loading status enum - shared across mobile and web
+/// Loading status enum
 enum LoadingStatus {
   initial,
   loading,
@@ -22,7 +22,7 @@ enum DateFilterType {
   custom,
 }
 
-/// Date filter configuration - shared across mobile and web
+/// Date filter configuration
 @freezed
 abstract class DateFilterRange with _$DateFilterRange {
   const factory DateFilterRange({

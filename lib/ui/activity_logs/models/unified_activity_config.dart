@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../data/models/activity_log_item.dart';
 import 'activity_enums.dart';
 
-/// Handles category-type relationships, colors, and filtering
-/// NOW USING ENUMS instead of string constants
+/// Centralized config for unified activity log handling
 class UnifiedActivityConfig {
   // ===== ENUM-BASED HELPERS =====
   
@@ -41,7 +40,6 @@ class UnifiedActivityConfig {
   }
 
   // ===== BACKWARD COMPATIBILITY HELPERS =====
-  // These help during migration from string-based code
   
   /// Parse category from string (for legacy code)
   static ActivityCategory parseCategoryFromString(String category) {
@@ -64,44 +62,4 @@ class UnifiedActivityConfig {
     return ActivitySubType.fromString(type);
   }
 
-  // ===== DEPRECATED - Will be removed after full migration =====
-  // Keeping these temporarily to avoid breaking existing code
-  
-  @Deprecated('Use ActivityCategory enum instead')
-  static const categories = [
-    'All',
-    'Substrates',
-    'Alerts',
-    'Reports',
-    'Cycles',
-  ];
-
-  @Deprecated('Use ActivitySubType enum instead')
-  static const allTypes = [
-    'All',
-    'Greens', 'Browns', 'Compost',
-    'Temperature', 'Moisture', 'Air Quality',
-    'Maintenance', 'Observation', 'Safety',
-    'Recoms', 'Cycles',
-  ];
-
-  @Deprecated('Use getSubTypesForCategory with enums instead')
-  static List<String> getTypesForCategory(String category) {
-    final categoryEnum = parseCategoryFromString(category);
-    return getSubTypesForCategory(categoryEnum)
-        .map((subType) => subType.displayName)
-        .toList();
-  }
-
-  @Deprecated('Use ActivitySubType.fromString instead')
-  static String? detectCategoryFromType(String type) {
-    final subType = ActivitySubType.fromString(type);
-    return subType.parentCategory.displayName;
-  }
-
-  @Deprecated('Use getColorForSubType with enum instead')
-  static Color getColorForType(String type) {
-    final subType = ActivitySubType.fromString(type);
-    return getColorForSubType(subType);
-  }
 }

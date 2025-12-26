@@ -1,6 +1,7 @@
 // lib/ui/core/widgets/base_stats_card.dart
 
 import 'package:flutter/material.dart';
+import '../themes/web_colors.dart';
 
 /// Enhanced stats card with change tracking and new UI design
 class BaseStatsCard extends StatelessWidget {
@@ -32,12 +33,12 @@ class BaseStatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: WebColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        border: Border.all(color: WebColors.cardBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: WebColors.cardShadow,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -57,7 +58,7 @@ class BaseStatsCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B7280),
+                    color: WebColors.textLabel,
                   ),
                 ),
               ),
@@ -85,7 +86,7 @@ class BaseStatsCard extends StatelessWidget {
               height: 48,
               width: 80,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: WebColors.skeletonLoader,
                 borderRadius: BorderRadius.circular(8),
               ),
             )
@@ -95,7 +96,7 @@ class BaseStatsCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 48,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1F2937),
+                color: WebColors.textHeading,
                 height: 1.1,
               ),
             ),
@@ -103,7 +104,7 @@ class BaseStatsCard extends StatelessWidget {
           const SizedBox(height: 5),
 
           // Divider
-          const Divider(height: 1, color: Color(0xFFF3F4F6)),
+          const Divider(height: 1, color: WebColors.dividerLight),
 
           const SizedBox(height: 5),
 
@@ -113,14 +114,14 @@ class BaseStatsCard extends StatelessWidget {
               height: 20,
               width: 140,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: WebColors.skeletonLoader,
                 borderRadius: BorderRadius.circular(6),
               ),
             )
           else if (changeText != null)
             Row(
               children: [
-                // Change Text (Simplified - no badge background)
+                // Change Text
                 Text(
                   changeText!,
                   style: TextStyle(
@@ -136,7 +137,7 @@ class BaseStatsCard extends StatelessWidget {
                     subtext ?? 'from last month',
                     style: const TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF9CA3AF),
+                      color: WebColors.textMuted,
                       fontWeight: FontWeight.w500,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -149,7 +150,7 @@ class BaseStatsCard extends StatelessWidget {
               '—',
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF9CA3AF),
+                color: WebColors.textMuted,
               ),
             ),
         ],
@@ -160,10 +161,8 @@ class BaseStatsCard extends StatelessWidget {
   /// Get text color based on change direction
   Color _getChangeTextColor() {
     if (changeText == 'New' || changeText == 'No log yet') {
-      return const Color(0xFF4338CA); // Neutral blue text
+      return WebColors.neutralStatus;
     }
-    return isPositive == true
-        ? const Color(0xFF10B981) // Consistent green
-        : const Color(0xFFEF4444); // Consistent red
+    return isPositive == true ? WebColors.success : WebColors.error;
   }
 }

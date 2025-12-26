@@ -5,11 +5,11 @@ import '../../../activity_logs/models/unified_activity_config.dart';
 import '../../../activity_logs/models/activity_enums.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 import '../filters/filter_dropdown.dart';
 import 'activity_table_row.dart';
 
 /// Table header row with sortable columns and filter dropdowns
-/// NOW USES ENUMS instead of strings
 class ActivityTableHeader extends StatelessWidget {
   final ActivityCategory selectedCategory;
   final ActivitySubType selectedType;
@@ -45,7 +45,7 @@ class ActivityTableHeader extends StatelessWidget {
       opacity: isLoading ? 0.7 : 1.0,
       child: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFF0F8FF), // Light blue header background
+          color: WebColors.pageBackground,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(8),
             topRight: Radius.circular(8),

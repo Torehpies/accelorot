@@ -23,8 +23,8 @@ class UnifiedTableContainer extends StatelessWidget {
   final String? selectedBatchId;
   final DateFilterRange dateFilter;
   final String searchQuery;
-  final ActivityCategory selectedCategory; // NOW ENUM
-  final ActivitySubType selectedType; // NOW ENUM
+  final ActivityCategory selectedCategory;
+  final ActivitySubType selectedType;
   
   // Sort states
   final String? sortColumn;
@@ -41,8 +41,8 @@ class UnifiedTableContainer extends StatelessWidget {
   final ValueChanged<String?> onBatchChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
   final ValueChanged<String> onSearchChanged;
-  final ValueChanged<ActivityCategory> onCategoryChanged; // NOW ENUM
-  final ValueChanged<ActivitySubType> onTypeChanged; // NOW ENUM
+  final ValueChanged<ActivityCategory> onCategoryChanged;
+  final ValueChanged<ActivitySubType> onTypeChanged;
   final ValueChanged<String> onSort;
   final ValueChanged<ActivityLogItem> onViewDetails;
   final ValueChanged<int>? onPageChanged;

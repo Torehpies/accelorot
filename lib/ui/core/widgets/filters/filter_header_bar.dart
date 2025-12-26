@@ -11,7 +11,7 @@ class FilterHeaderBar extends StatelessWidget {
   /// Right section widgets (search bar, date filter, etc.)
   final List<Widget>? rightWidgets;
   
-  /// Spacing between right widgets (default: 12px)
+  /// Spacing between right widgets
   final double rightWidgetSpacing;
 
   const FilterHeaderBar({

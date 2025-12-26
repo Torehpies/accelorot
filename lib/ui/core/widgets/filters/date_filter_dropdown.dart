@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 import '../../../activity_logs/models/activity_common.dart';
 
 /// Web-optimized date filter dropdown that matches Machine/Batch selector style
@@ -39,7 +40,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
     showMenu<DateFilterType>(
       context: context,
       position: position,
-      color: Colors.white,
+      color: WebColors.cardBackground,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       items: [
@@ -170,9 +171,9 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: WebColors.inputBackground,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: WebColors.cardBorder),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -180,7 +181,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                 Icon(
                   Icons.calendar_today,
                   size: 16,
-                  color: isActive ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+                  color: isActive ? WebColors.tealAccent : WebColors.textLabel,
                 ),
                 if (isActive) ...[
                   const SizedBox(width: 8),
@@ -192,7 +193,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                   Icon(
                     Icons.arrow_drop_down,
                     size: 20,
-                    color: const Color(0xFF0D9488),
+                    color: WebColors.tealAccent,
                   ),
                   const SizedBox(width: 4),
                   InkWell(
@@ -201,7 +202,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                     child: const Icon(
                       Icons.clear,
                       size: 16,
-                      color: Color(0xFF6B7280),
+                      color: WebColors.textLabel,
                     ),
                   ),
                 ],

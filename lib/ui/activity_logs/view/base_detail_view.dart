@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/themes/web_colors.dart';
 import '../../core/widgets/shared/detail_field.dart';
 import 'detail_view_config.dart';
 
 /// Universal detail view for all activity types
-/// Replaces ReportDetailView, AlertDetailView, SubstrateDetailView, CycleDetailView
 class BaseDetailView extends StatelessWidget {
   final ActivityLogItem item;
 
@@ -24,7 +24,7 @@ class BaseDetailView extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * config.heightRatio,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: WebColors.cardBackground,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -52,7 +52,7 @@ class BaseDetailView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E7EB)),
+          bottom: BorderSide(color: WebColors.cardBorder),
         ),
       ),
       child: Row(
@@ -63,7 +63,11 @@ class BaseDetailView extends StatelessWidget {
               children: [
                 Text(
                   config.title,
-                  style: WebTextStyles.label.copyWith(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
+                  style: WebTextStyles.label.copyWith(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: WebColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -129,7 +133,7 @@ class BaseDetailView extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(color: Color(0xFFE5E7EB)),
+          top: BorderSide(color: WebColors.cardBorder),
         ),
       ),
       child: Row(
@@ -138,8 +142,8 @@ class BaseDetailView extends StatelessWidget {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6B7280),
-              foregroundColor: Colors.white,
+              backgroundColor: WebColors.buttonSecondary,
+              foregroundColor: WebColors.cardBackground,
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,
                 vertical: 10,

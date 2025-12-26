@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../../core/themes/web_colors.dart';
 
 /// High-level activity categories for filtering
-/// Maps to the main filter dropdown in the UI
 enum ActivityCategory {
   all,
   substrates,
@@ -29,7 +29,6 @@ enum ActivityCategory {
   }
 
   /// Convert to ActivityType for data filtering
-  /// Returns null for 'all' (no filter)
   ActivityType? toActivityType() {
     switch (this) {
       case ActivityCategory.substrates:
@@ -61,7 +60,6 @@ enum ActivityCategory {
 }
 
 /// Granular activity sub-types for detailed filtering
-/// Each sub-type belongs to a parent category
 enum ActivitySubType {
   all,
   // Substrates
@@ -133,39 +131,8 @@ enum ActivitySubType {
     }
   }
 
-  /// Get color for type chip display
-  Color get chipColor {
-    switch (this) {
-      case ActivitySubType.all:
-        return const Color(0xFF9CA3AF); // gray-400
-      // Substrates
-      case ActivitySubType.greens:
-        return const Color(0xFF10B981); // emerald-500
-      case ActivitySubType.browns:
-        return const Color(0xFFF59E0B); // amber-500
-      case ActivitySubType.compost:
-        return const Color(0xFF84CC16); // lime-500
-      // Alerts
-      case ActivitySubType.temperature:
-        return const Color(0xFFF97316); // orange-500
-      case ActivitySubType.moisture:
-        return const Color(0xFF3B82F6); // blue-500
-      case ActivitySubType.airQuality:
-        return const Color(0xFF8B5CF6); // violet-500
-      // Reports
-      case ActivitySubType.maintenance:
-        return const Color(0xFFFBBF24); // amber-400
-      case ActivitySubType.observation:
-        return const Color(0xFF06B6D4); // cyan-500
-      case ActivitySubType.safety:
-        return const Color(0xFFEF4444); // red-500
-      // Cycles
-      case ActivitySubType.recoms:
-        return const Color(0xFF22C55E); // green-500
-      case ActivitySubType.cycles:
-        return const Color(0xFF14B8A6); // teal-500
-    }
-  }
+  /// Get color for type chip display using centralized WebColors
+  Color get chipColor => WebColors.getActivityTypeColor(this);
 
   /// Parse from string category (for backward compatibility)
   static ActivitySubType fromString(String category) {
@@ -246,6 +213,6 @@ class ActivityEnumHelpers {
     return subType.parentCategory == category;
   }
 
-  /// Get the neutral gray color for category badges
-  static const categoryBadgeColor = Color(0xFF9CA3AF); // gray-400
+  /// Get the neutral gray color for category badges using centralized WebColors
+  static const categoryBadgeColor = WebColors.neutral;
 }

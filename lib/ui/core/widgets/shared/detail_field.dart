@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 /// Reusable field widget for detail views
 /// Replaces all _buildField methods across detail views
@@ -24,16 +25,16 @@ class DetailField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: WebTextStyles.label.copyWith(color: const Color(0xFF374151)),
+          style: WebTextStyles.label.copyWith(color: WebColors.textSecondary),
         ),
         const SizedBox(height: 6),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF9FAFB),
+            color: WebColors.inputBackground,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: WebColors.cardBorder),
           ),
           child: Text(
             value,

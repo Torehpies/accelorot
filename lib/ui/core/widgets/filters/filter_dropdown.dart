@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 /// Reusable styled dropdown for filters that matches DateFilterDropdown styling
-/// works with enums and other types
 class FilterDropdown<T> extends StatelessWidget {
   final String label;
   final T value;
@@ -48,7 +48,7 @@ class FilterDropdown<T> extends StatelessWidget {
       position: position,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
-      color: Colors.white,
+      color: WebColors.cardBackground,
       items: items.map((item) {
         return PopupMenuItem<T>(
           value: item,
@@ -77,22 +77,24 @@ class FilterDropdown<T> extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: WebColors.inputBackground,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: WebColors.cardBorder),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   _getDisplayText(value),
-                  style: isActive ? WebTextStyles.bodyMedium : WebTextStyles.bodyMediumGray,
+                  style: isActive 
+                    ? WebTextStyles.bodyMedium 
+                    : WebTextStyles.bodyMediumGray,
                 ),
                 const SizedBox(width: 4),
                 Icon(
                   Icons.arrow_drop_down,
                   size: 20,
-                  color: isActive ? const Color(0xFF0D9488) : const Color(0xFF6B7280),
+                  color: isActive ? WebColors.tealAccent : WebColors.textLabel,
                 ),
               ],
             ),

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 /// Reusable pagination controls with numbered page buttons
 class PaginationControls extends StatelessWidget {
@@ -62,9 +63,9 @@ class PaginationControls extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
+                  color: WebColors.inputBackground,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: WebColors.cardBorder),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
@@ -73,7 +74,7 @@ class PaginationControls extends StatelessWidget {
                     icon: const Icon(
                       Icons.arrow_drop_down,
                       size: 20,
-                      color: Color(0xFF6B7280),
+                      color: WebColors.textLabel,
                     ),
                     style: WebTextStyles.bodyMedium,
                     items: [10, 25, 50, 100].map((value) {
@@ -178,7 +179,6 @@ class PaginationControls extends StatelessWidget {
             ),
           ),
           
-          // Empty spacer to keep items-per-page on the left
           const SizedBox(width: 150),
         ],
       ),
@@ -196,12 +196,14 @@ class PaginationControls extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF10B981) : Colors.transparent,
+            color: isActive ? WebColors.success : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             '$page',
-            style: isActive ? WebTextStyles.bodyMedium.copyWith(color: Colors.white) : WebTextStyles.bodyMedium,
+            style: isActive 
+              ? WebTextStyles.bodyMedium.copyWith(color: WebColors.cardBackground) 
+              : WebTextStyles.bodyMedium,
           ),
         ),
       ),
