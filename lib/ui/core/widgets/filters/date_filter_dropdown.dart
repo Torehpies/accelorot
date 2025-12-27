@@ -1,31 +1,38 @@
-// lib/ui/activity_logs/widgets/date_filter_button.dart
+// lib/ui/core/widgets/filters/date_filter_dropdown.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/activity_common.dart';
+import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../../activity_logs/models/activity_common.dart';
 
-class DateFilterButton extends StatefulWidget {
+/// Web-optimized date filter dropdown that matches Machine/Batch selector style
+class DateFilterDropdown extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
+  final bool isLoading;
 
-  const DateFilterButton({super.key, required this.onFilterChanged});
+  const DateFilterDropdown({
+    super.key,
+    required this.onFilterChanged,
+    this.isLoading = false,
+  });
 
   @override
-  State<DateFilterButton> createState() => _DateFilterButtonState();
+  State<DateFilterDropdown> createState() => _DateFilterDropdownState();
 }
 
-class _DateFilterButtonState extends State<DateFilterButton> {
+class _DateFilterDropdownState extends State<DateFilterDropdown> {
   DateFilterRange _currentFilter = const DateFilterRange(type: DateFilterType.none);
 
   void _showFilterMenu() {
+    if (widget.isLoading) return;
+
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero),
-          ancestor: overlay,
-        ),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
     );
@@ -33,24 +40,15 @@ class _DateFilterButtonState extends State<DateFilterButton> {
     showMenu<DateFilterType>(
       context: context,
       position: position,
+      color: WebColors.cardBackground,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 8,
       items: [
         const PopupMenuItem(value: DateFilterType.today, child: Text('Today')),
-        const PopupMenuItem(
-          value: DateFilterType.yesterday,
-          child: Text('Yesterday'),
-        ),
-        const PopupMenuItem(
-          value: DateFilterType.last7Days,
-          child: Text('Last 7 Days'),
-        ),
-        const PopupMenuItem(
-          value: DateFilterType.last30Days,
-          child: Text('Last 30 Days'),
-        ),
-        const PopupMenuItem(
-          value: DateFilterType.custom,
-          child: Text('Custom Date'),
-        ),
+        const PopupMenuItem(value: DateFilterType.yesterday, child: Text('Yesterday')),
+        const PopupMenuItem(value: DateFilterType.last7Days, child: Text('Last 7 Days')),
+        const PopupMenuItem(value: DateFilterType.last30Days, child: Text('Last 30 Days')),
+        const PopupMenuItem(value: DateFilterType.custom, child: Text('Custom Date')),
       ],
     ).then((selected) {
       if (selected != null) {
@@ -108,11 +106,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
         );
 
         if (pickedDate != null) {
-          final selectedDay = DateTime(
-            pickedDate.year,
-            pickedDate.month,
-            pickedDate.day,
-          );
+          final selectedDay = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
           newFilter = DateFilterRange(
             type: DateFilterType.custom,
             startDate: selectedDay,
@@ -135,6 +129,8 @@ class _DateFilterButtonState extends State<DateFilterButton> {
   }
 
   void _clearFilter() {
+    if (widget.isLoading) return;
+    
     setState(() {
       _currentFilter = const DateFilterRange(type: DateFilterType.none);
     });
@@ -163,67 +159,58 @@ class _DateFilterButtonState extends State<DateFilterButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          onTap: _showFilterMenu,
+    final isActive = _currentFilter.isActive;
+
+    return MouseRegion(
+      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      child: Opacity(
+        opacity: widget.isLoading ? 0.5 : 1.0,
+        child: InkWell(
+          onTap: widget.isLoading ? null : _showFilterMenu,
           borderRadius: BorderRadius.circular(8),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: _currentFilter.isActive
-                  ? Colors.teal.shade100
-                  : Colors.transparent,
+              color: WebColors.inputBackground,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: WebColors.cardBorder),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.calendar_today,
-                  size: 18,
-                  color: _currentFilter.isActive
-                      ? Colors.teal.shade700
-                      : const Color(0xFF6B7280),
+                  size: 16,
+                  color: isActive ? WebColors.tealAccent : WebColors.textLabel,
                 ),
-                if (_currentFilter.isActive) ...[
-                  const SizedBox(width: 6),
+                if (isActive) ...[
+                  const SizedBox(width: 8),
                   Text(
                     _getDisplayText(),
-                    style: TextStyle(
-                      color: Colors.teal.shade700,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: WebTextStyles.bodyMedium,
                   ),
-                  const SizedBox(width: 2),
+                  const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_drop_down,
                     size: 20,
-                    color: Colors.teal.shade700,
+                    color: WebColors.tealAccent,
+                  ),
+                  const SizedBox(width: 4),
+                  InkWell(
+                    onTap: widget.isLoading ? null : _clearFilter,
+                    borderRadius: BorderRadius.circular(4),
+                    child: const Icon(
+                      Icons.clear,
+                      size: 16,
+                      color: WebColors.textLabel,
+                    ),
                   ),
                 ],
               ],
             ),
           ),
         ),
-        if (_currentFilter.isActive) ...[
-          const SizedBox(width: 4),
-          InkWell(
-            onTap: _clearFilter,
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              child: Icon(
-                Icons.clear,
-                size: 20,
-                color: Colors.black.withValues(alpha: 0.9),
-              ),
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
