@@ -89,6 +89,7 @@ static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
   // ===== COMPUTED/DERIVED PROPERTIES =====
   
   /// Get display title
+  @override
   String get title {
     switch (controllerType) {
       case 'drum_controller':
@@ -101,9 +102,11 @@ static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
   }
   
   /// Get display value (formatted cycles)
+  @override
   String get value => cycles != null ? '$cycles cycles' : '0 cycles';
   
   /// Get description (formatted duration and cycles)
+  @override
   String get description => 
       'Duration: ${duration ?? "N/A"}, Cycles: ${cycles ?? 0}';
 }
