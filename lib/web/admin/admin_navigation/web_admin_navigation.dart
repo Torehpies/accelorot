@@ -1,8 +1,9 @@
+// lib/web/admin/admin_navigation/web_admin_navigation.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as prov;
 import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
 import 'package:flutter_application_1/data/providers/admin_dashboard_providers.dart';
@@ -19,7 +20,10 @@ class WebAdminNavigation extends ConsumerStatefulWidget {
 
 class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
   int _selectedIndex = 0;
-
+  
+  // Keep dashboard view model alive
+  late WebAdminDashboardViewModel _dashboardViewModel;
+  
   late final List<Widget> _screens;
 
   final List<_NavItem> _navItems = const [
@@ -35,14 +39,15 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
     final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
     final repository = ref.read(dashboardRepositoryProvider);
     
-    _screens = [
-      // Dashboard with repository injection
-      ChangeNotifierProvider(
-        create: (context) => WebAdminDashboardViewModel(repository, teamId),
-        child: const DashboardView(),
-      ),
+    // Initialize view model ONCE - it loads data automatically in constructor
+    _dashboardViewModel = WebAdminDashboardViewModel(repository, teamId);
 
-      // Rest unchanged
+    _screens = [
+      // Dashboard with pre-loaded view model
+      prov.ChangeNotifierProvider.value(
+        value: _dashboardViewModel,
+        child: _DashboardWithSkeleton(viewModel: _dashboardViewModel),
+      ),
       OperatorManagementScreen(teamId: teamId),
       const WebAdminMachineView(),
       const WebProfileView(),
@@ -50,7 +55,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
   }
 
   Future<void> _handleLogout() async {
-    final shouldLogout = await showDialog<bool>(
+    final shouldLogout = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Logout'),
@@ -85,7 +90,7 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
     return Scaffold(
       body: Row(
         children: [
-          // Sidebar (100% unchanged)
+          // Sidebar (unchanged)
           Container(
             width: 250,
             decoration: BoxDecoration(
@@ -173,39 +178,29 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
                             child: ListTile(
                               leading: Icon(
                                 item.icon,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.white70,
+                                color: isSelected ? Colors.white : Colors.white70,
                                 size: 22,
                               ),
                               title: Text(
                                 item.label,
                                 style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.white70,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: isSelected ? Colors.white : Colors.white70,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   fontSize: 14,
                                 ),
                               ),
                               selected: isSelected,
-                              selectedTileColor: Colors.white.withValues(
-                                alpha: 0.15,
-                              ),
+                              selectedTileColor: Colors.white.withValues(alpha: 0.15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              onTap: () =>
-                                  setState(() => _selectedIndex = index),
+                              onTap: () => setState(() => _selectedIndex = index),
                             ),
                           ),
                         );
                       },
                     ),
                   ),
-
                   Container(
                     margin: const EdgeInsets.all(16),
                     child: Material(
@@ -234,15 +229,77 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
               ),
             ),
           ),
-
-          // Main Content (unchanged structure)
+          
+          // Main Content - Key fix: IndexedStack keeps all screens in memory
           Expanded(
             child: Container(
               color: Colors.grey[50],
-              child: _screens[_selectedIndex],
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _screens,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Separate widget for dashboard with skeleton
+class _DashboardWithSkeleton extends StatefulWidget {
+  final WebAdminDashboardViewModel viewModel;
+
+  const _DashboardWithSkeleton({required this.viewModel});
+
+  @override
+  State<_DashboardWithSkeleton> createState() => _DashboardWithSkeletonState();
+}
+
+class _DashboardWithSkeletonState extends State<_DashboardWithSkeleton> {
+  bool _initialLoadComplete = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen for when loading completes
+    widget.viewModel.addListener(() {
+      if (!widget.viewModel.isLoading && !_initialLoadComplete) {
+        setState(() {
+          _initialLoadComplete = true;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Show skeleton only on initial load
+    if (!_initialLoadComplete && widget.viewModel.isLoading) {
+      return _buildSkeletonLoader();
+    }
+    
+    return const DashboardView();
+  }
+
+  Widget _buildSkeletonLoader() {
+    return Scaffold(
+      backgroundColor: const Color(0xFFDFF2FF),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'Loading Dashboard...',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
