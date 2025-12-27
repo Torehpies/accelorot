@@ -1,4 +1,7 @@
+// ui/core/ui/primary_button.dart
+
 import 'package:flutter/material.dart';
+import '../themes/app_theme.dart'; // Make sure this exports AppColors
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -17,21 +20,21 @@ class PrimaryButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.green100,     // ✅ Main green from your palette
+        foregroundColor: AppColors.background,   // ✅ White text on green
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       ),
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: AppColors.background, // ✅ White spinner
                 strokeWidth: 2,
               ),
             )
-          : Text(text, style: const TextStyle(fontSize: 16)),
+          : Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
     );
   }
 }

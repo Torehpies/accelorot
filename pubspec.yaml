@@ -51,6 +51,3 @@ flutter:
         - asset: assets/fonts/dm-sans.ttf
         - asset: assets/fonts/dm-sans-italic.ttf
           style: italic
-
-
-

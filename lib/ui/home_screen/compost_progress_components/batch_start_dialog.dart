@@ -70,23 +70,9 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
       // Get existing active batch ID or create new one
       String? batchId = await batchRepo.getBatchId(userId, _selectedMachineId!);
       
-      if (batchId == null) {
-        // Generate batch number
-        final batchNumber = DateTime.now().millisecondsSinceEpoch % 1000000;
-        batchId = await batchRepo.createBatch(
-          userId,
-          _selectedMachineId!,
-          batchNumber,
-          batchName: _batchNameController.text.trim(),
-          startNotes: _startNotesController.text.trim().isEmpty 
-              ? null 
-              : _startNotesController.text.trim(),
-        );
-      } else {
-        // Update existing batch timestamp
-        await batchRepo.updateBatchTimestamp(batchId);
-      }
-
+      // Update existing batch timestamp
+      await batchRepo.updateBatchTimestamp(batchId!);
+    
       if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(

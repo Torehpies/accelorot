@@ -67,35 +67,26 @@ class _DateFilterButtonState extends State<DateFilterButton> {
 
     switch (type) {
       case DateFilterType.today:
-        newFilter = DateFilterRange(
+        newFilter = const DateFilterRange(
           type: DateFilterType.today,
-          startDate: today,
-          endDate: today.add(const Duration(days: 1)),
         );
         break;
 
       case DateFilterType.yesterday:
-        final yesterday = today.subtract(const Duration(days: 1));
-        newFilter = DateFilterRange(
+        newFilter = const DateFilterRange(
           type: DateFilterType.yesterday,
-          startDate: yesterday,
-          endDate: today,
         );
         break;
 
       case DateFilterType.last7Days:
-        newFilter = DateFilterRange(
+        newFilter = const DateFilterRange(
           type: DateFilterType.last7Days,
-          startDate: today.subtract(const Duration(days: 6)),
-          endDate: today.add(const Duration(days: 1)),
         );
         break;
 
       case DateFilterType.last30Days:
-        newFilter = DateFilterRange(
+        newFilter = const DateFilterRange(
           type: DateFilterType.last30Days,
-          startDate: today.subtract(const Duration(days: 29)),
-          endDate: today.add(const Duration(days: 1)),
         );
         break;
 
@@ -115,8 +106,6 @@ class _DateFilterButtonState extends State<DateFilterButton> {
           );
           newFilter = DateFilterRange(
             type: DateFilterType.custom,
-            startDate: selectedDay,
-            endDate: selectedDay.add(const Duration(days: 1)),
             customDate: selectedDay,
           );
         } else {
