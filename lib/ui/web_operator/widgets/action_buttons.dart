@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 
 class ActionButtons extends StatelessWidget {
   final TeamMembersNotifier notifier;
@@ -18,7 +19,7 @@ class ActionButtons extends StatelessWidget {
       children: [
         IconButton(
           icon: Icon(Icons.edit_outlined),
-          onPressed: null,
+          onPressed: () => _showEditDialog(context, notifier, member),
           tooltip: 'Edit Member',
         ),
         IconButton(
@@ -27,6 +28,20 @@ class ActionButtons extends StatelessWidget {
           tooltip: 'View Member',
         ),
       ],
+    );
+  }
+
+  void _showEditDialog(
+    BuildContext context,
+    TeamMembersNotifier notifier,
+    dynamic member,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => EditOperatorDialog(
+        operator: member,
+        onSave: (updatedOperator) => notifier.updateOperator(updatedOperator),
+      ),
     );
   }
 }

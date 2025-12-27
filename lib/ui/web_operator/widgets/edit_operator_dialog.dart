@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'edit_operator_dialog.freezed.dart';
@@ -10,21 +12,27 @@ abstract class EditOperatorForm with _$EditOperatorForm {
     required String firstName,
     required String lastName,
     required String email,
-    @Default('active') String status,
+    @Default(UserStatus.active) UserStatus status,
   }) = _EditOperatorForm;
 
   factory EditOperatorForm.fromOperator(dynamic operator) => EditOperatorForm(
     firstName: operator.firstName,
     lastName: operator.lastName,
     email: operator.email,
-    status: operator.status.value,
+    // If operator.status is already a UserStatus:
+    status: operator.status as UserStatus,
+    // If it's a string instead, use:
+    // status: UserStatus.values.firstWhere(
+    //   (s) => s.value == operator.status,
+    //   orElse: () => UserStatus.active,
+    // ),
     id: operator.id,
   );
 }
 
 class EditOperatorDialog extends StatefulWidget {
   final dynamic operator;
-  final Function(dynamic) onSave;
+  final Function(EditOperatorForm) onSave;
 
   const EditOperatorDialog({
     super.key,
@@ -37,37 +45,103 @@ class EditOperatorDialog extends StatefulWidget {
 }
 
 class _EditOperatorDialogState extends State<EditOperatorDialog> {
-  late final form = EditOperatorForm.fromOperator(widget.operator);
+  late EditOperatorForm form = EditOperatorForm.fromOperator(widget.operator);
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Operator'),
-      content: Form(
-        key: _formKey,
+      backgroundColor: AppColors.background2,
+      title: const Text(
+        'Edit Operator',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+      content: SizedBox(
+        width: 400,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              initialValue: form.firstName,
-              decoration: const InputDecoration(labelText: 'First Name'),
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-              onChanged: (value) =>
-                  setState(() => form.copyWith(firstName: value)),
+            const Text(
+              'Update the operator account that manages machine operations and maintenance.',
             ),
-            TextFormField(
-              initialValue: form.lastName,
-              decoration: const InputDecoration(labelText: 'Last Name'),
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-              onChanged: (value) =>
-                  setState(() => form.copyWith(lastName: value)),
-            ),
-            TextFormField(
-              initialValue: form.email,
-              decoration: const InputDecoration(labelText: 'Email'),
-              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-              onChanged: (value) => setState(() => form.copyWith(email: value)),
+
+            const Divider(thickness: 1, height: 24),
+            const SizedBox(height: 5),
+
+            Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: form.firstName,
+                    decoration: const InputDecoration(labelText: 'First Name'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Required' : null,
+                    onChanged: (value) {
+                      setState(() {
+                        form = form.copyWith(firstName: value);
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    initialValue: form.lastName,
+                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    validator: (value) =>
+                        value?.isEmpty ?? true ? 'Required' : null,
+                    onChanged: (value) {
+                      setState(() {
+                        form = form.copyWith(lastName: value);
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Email: visible, but not editable
+                  TextFormField(
+                    initialValue: form.email,
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      filled: true,
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 20),
+
+                  DropdownButtonFormField<UserStatus>(
+                    value: form.status,
+                    decoration: const InputDecoration(labelText: 'Status'),
+                    items:
+                        const [
+                              UserStatus.active,
+                              UserStatus.archived,
+                              UserStatus.removed,
+                            ]
+                            .map(
+                              (status) => DropdownMenuItem<UserStatus>(
+                                value: status,
+                                child: Text(switch (status) {
+                                  UserStatus.active => 'Active',
+                                  UserStatus.archived => 'Archive',
+                                  UserStatus.removed => 'Remove',
+                                  _ =>
+                                    status.value, // fallback, should not be hit
+                                }),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        form = form.copyWith(status: value);
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -77,7 +151,7 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: _save, child: const Text('Save')),
+        ElevatedButton(onPressed: _save, child: const Text('Confirm')),
       ],
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/action_buttons.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
 
 class MemberRow extends StatelessWidget {
   final dynamic member;
