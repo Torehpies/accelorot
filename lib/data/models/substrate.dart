@@ -63,3 +63,37 @@ abstract class Substrate with _$Substrate {
     };
   }
 }
+
+/// Request model for creating new substrate entries
+/// Contains only the data needed from the UI
+@freezed
+abstract class CreateSubstrateRequest with _$CreateSubstrateRequest {
+  const factory CreateSubstrateRequest({
+    required String category,
+    required String plantType,
+    required String plantTypeLabel,
+    required double quantity,
+    required String description,
+    required String machineId,
+    required String operatorName,
+    required String userId,
+  }) = _CreateSubstrateRequest;
+
+  const CreateSubstrateRequest._();
+
+  /// Convert to Firestore map
+  Map<String, dynamic> toFirestore() {
+    return {
+      'category': category,
+      'plantType': plantType,
+      'title': plantTypeLabel, // Map to title field
+      'value': '${quantity}kg',
+      'quantity': quantity,
+      'description': description,
+      'machineId': machineId,
+      'operatorName': operatorName,
+      'userId': userId,
+      'timestamp': Timestamp.fromDate(DateTime.now()),
+    };
+  }
+}

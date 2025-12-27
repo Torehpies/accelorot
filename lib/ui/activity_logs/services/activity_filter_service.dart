@@ -1,8 +1,8 @@
 // lib/ui/activity_logs/services/activity_filter_service.dart
 
 import '../../../data/models/activity_log_item.dart';
-import '../models/activity_list_state.dart';
 import '../models/activity_filter_config.dart';
+import '../models/activity_common.dart';
 
 class ActivityFilterService {
   /// Apply all filters: date, search, category
