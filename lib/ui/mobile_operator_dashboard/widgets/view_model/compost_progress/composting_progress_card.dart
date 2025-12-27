@@ -28,10 +28,12 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<CompostingProgressCard> createState() => _CompostingProgressCardState();
+  ConsumerState<CompostingProgressCard> createState() =>
+      _CompostingProgressCardState();
 }
 
-class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard> {
+class _CompostingProgressCardState
+    extends ConsumerState<CompostingProgressCard> {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatch;
@@ -58,29 +60,27 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
       }
     }
   }
-    void _autoSelectLatestBatch() {
+
+  void _autoSelectLatestBatch() {
     final batchesAsync = ref.read(userTeamBatchesProvider);
     batchesAsync.whenData((batches) {
       if (_selectedMachineId != null) {
         final machineBatches = batches
             .where((b) => b.machineId == _selectedMachineId)
             .toList();
-        
+
         if (machineBatches.isNotEmpty) {
-          // Sort by createdAt to get the newest
           machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           final latestBatch = machineBatches.first;
-          
+
           if (mounted) {
             setState(() {
               _selectedBatchId = latestBatch.id;
               _activeBatch = latestBatch;
             });
-            // Notify parent of batch change
             widget.onBatchChanged?.call(latestBatch);
           }
         } else {
-          // No batches for this machine - notify parent
           if (mounted) {
             widget.onBatchChanged?.call(null);
           }
@@ -89,14 +89,14 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
     });
   }
 
- void _startBatch(BuildContext context) async {
+  void _startBatch(BuildContext context) async {
     // Check if there's an active batch for this machine
     if (_selectedMachineId != null) {
       final batchesAsync = ref.read(userTeamBatchesProvider);
-      final hasActiveBatch = batchesAsync.when( 
+      final hasActiveBatch = batchesAsync.when(
         data: (batches) {
-          return batches.any((b) => 
-            b.machineId == _selectedMachineId && b.isActive
+          return batches.any(
+            (b) => b.machineId == _selectedMachineId && b.isActive,
           );
         },
         loading: () => false,
@@ -106,7 +106,9 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
       if (hasActiveBatch) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Cannot start new batch: An active batch already exists for this machine'),
+            content: Text(
+              'Cannot start new batch: An active batch already exists for this machine',
+            ),
             backgroundColor: Colors.orange,
             duration: Duration(seconds: 3),
           ),
@@ -117,15 +119,14 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => BatchStartDialog(
-        preSelectedMachineId: _selectedMachineId,
-      ),
+      builder: (ctx) =>
+          BatchStartDialog(preSelectedMachineId: _selectedMachineId),
     );
 
     if (result == true && mounted) {
       // Refresh the batches using the new notifier method
       await ref.read(userTeamBatchesProvider.notifier).refresh();
-      
+
       // Auto-select the newly created batch for the current machine
       if (_selectedMachineId != null) {
         // Wait a bit for the refresh to complete
@@ -138,17 +139,17 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
   void _completeBatch(BuildContext context) {
     if (_activeBatch == null) return;
 
-      showDialog(
+    showDialog(
       context: context,
       builder: (ctx) => BatchCompleteDialog(
         batch: _convertToCompostBatch(_activeBatch!),
         onComplete: () async {
           // Refresh the provider first
           await ref.read(userTeamBatchesProvider.notifier).refresh();
-          
+
           // Wait a bit for the refresh to complete
           await Future.delayed(const Duration(milliseconds: 300));
-          
+
           // Update local state to reflect the completed batch
           if (mounted) {
             final batchesAsync = ref.read(userTeamBatchesProvider);
@@ -157,7 +158,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
                 (b) => b.id == _selectedBatchId,
                 orElse: () => batches.first,
               );
-              
+
               if (mounted) {
                 setState(() {
                   _activeBatch = updatedBatch;
@@ -165,7 +166,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
               }
             });
           }
-          
+
           // Call parent callback
           widget.onBatchCompleted();
         },
@@ -188,21 +189,38 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
   int _getDaysPassed() {
     if (_activeBatch == null) return 0;
     final now = DateTime.now();
-    return now.difference(_activeBatch!.createdAt).inDays.clamp(0, CompostingProgressCard.totalDays);
+    return now
+        .difference(_activeBatch!.createdAt)
+        .inDays
+        .clamp(0, CompostingProgressCard.totalDays);
   }
 
   double _getProgress() {
-    return (_getDaysPassed() / CompostingProgressCard.totalDays).clamp(0.0, 1.0);
+    return (_getDaysPassed() / CompostingProgressCard.totalDays).clamp(
+      0.0,
+      1.0,
+    );
   }
 
   String _formatDate(DateTime date) {
     final monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
   }
-@override
+
+  @override
   Widget build(BuildContext context) {
     //  auto-update when selected batch changes
     final batchesAsync = ref.watch(userTeamBatchesProvider);
@@ -214,7 +232,7 @@ class _CompostingProgressCardState extends ConsumerState<CompostingProgressCard>
             .where((b) => b.machineId == _selectedMachineId)
             .toList();
         
-if (machineBatches.isNotEmpty) {
+        if (machineBatches.isNotEmpty) {
           Future.microtask(() {
             if (mounted) {
               machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -223,15 +241,7 @@ if (machineBatches.isNotEmpty) {
                 _selectedBatchId = latestBatch.id;
                 _activeBatch = latestBatch;
               });
-              // Notify parent of batch change
               widget.onBatchChanged?.call(latestBatch);
-            }
-          });
-        } else {
-          // No batches for this machine
-          Future.microtask(() {
-            if (mounted) {
-              widget.onBatchChanged?.call(null);
             }
           });
         }
@@ -244,7 +254,6 @@ if (machineBatches.isNotEmpty) {
           Future.microtask(() {
             if (mounted) {
               setState(() => _activeBatch = batch);
-              // Notify parent of batch change
               widget.onBatchChanged?.call(batch);
             }
           });
@@ -300,23 +309,23 @@ if (machineBatches.isNotEmpty) {
                     decoration: BoxDecoration(
                       color: batchIsCompleted
                           ? const Color(0xFFF3F4F6)
-                          : (isActive 
-                              ? const Color(0xFFD1FAE5) 
-                              : const Color(0xFFFEF3C7)),
+                          : (isActive
+                                ? const Color(0xFFD1FAE5)
+                                : const Color(0xFFFEF3C7)),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      batchIsCompleted 
-                          ? 'Completed' 
+                      batchIsCompleted
+                          ? 'Completed'
                           : (isActive ? 'Active' : 'Inactive'),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: batchIsCompleted
                             ? const Color(0xFF6B7280)
-                            : (isActive 
-                                ? const Color(0xFF065F46) 
-                                : const Color(0xFF92400E)),
+                            : (isActive
+                                  ? const Color(0xFF065F46)
+                                  : const Color(0xFF92400E)),
                       ),
                     ),
                   ),
@@ -361,7 +370,7 @@ if (machineBatches.isNotEmpty) {
                     },
                     isCompact: true,
                     showLabel: false,
-                    showAllOption: false, 
+                    showAllOption: false,
                   ),
                 ),
               ],
@@ -409,7 +418,7 @@ if (machineBatches.isNotEmpty) {
                     child: Container(
                       height: 10,
                       decoration: BoxDecoration(
-                        color: batchIsCompleted 
+                        color: batchIsCompleted
                             ? const Color(0xFF6B7280)
                             : const Color(0xFF10B981),
                         borderRadius: BorderRadius.circular(8),
@@ -432,19 +441,16 @@ if (machineBatches.isNotEmpty) {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    hasMachineSelected 
+                    hasMachineSelected
                         ? 'No batch selected, select or start a batch!'
                         : 'Select a machine to get started',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: hasMachineSelected 
+                      onPressed: hasMachineSelected
                           ? () => _startBatch(context)
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -459,7 +465,7 @@ if (machineBatches.isNotEmpty) {
                         disabledForegroundColor: Colors.grey.shade600,
                       ),
                       child: Text(
-                        hasMachineSelected 
+                        hasMachineSelected
                             ? 'Start New Batch'
                             : 'Select a Machine First',
                         style: const TextStyle(
@@ -520,21 +526,23 @@ if (machineBatches.isNotEmpty) {
                       Expanded(
                         child: _buildDetailItem(
                           batchIsCompleted ? 'Completed' : 'Status',
-                          batchIsCompleted 
+                          batchIsCompleted
                               ? _formatDate(_activeBatch!.completedAt!)
-                              : (_activeBatch!.isActive ? 'Active' : 'Inactive'),
+                              : (_activeBatch!.isActive
+                                    ? 'Active'
+                                    : 'Inactive'),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Complete Batch / Start New Batch / Select Machine button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: (!hasMachineSelected && batchIsCompleted)
-                          ? null  // Disabled when machine not selected and batch completed
+                          ? null // Disabled when machine not selected and batch completed
                           : () {
                               // If machine is not selected and batch is active, allow complete
                               if (!hasMachineSelected && !batchIsCompleted) {
@@ -562,7 +570,9 @@ if (machineBatches.isNotEmpty) {
                       child: Text(
                         !hasMachineSelected && batchIsCompleted
                             ? 'Select a Machine First'
-                            : (batchIsCompleted ? 'Start New Batch' : 'Complete Batch'),
+                            : (batchIsCompleted
+                                  ? 'Start New Batch'
+                                  : 'Complete Batch'),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -577,7 +587,6 @@ if (machineBatches.isNotEmpty) {
       ),
     );
   }
-
 
   Widget _buildDetailItem(String label, String value) {
     return Column(
