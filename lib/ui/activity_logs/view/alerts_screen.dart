@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/activity_list_state.dart';
 import '../view_model/activity_viewmodel.dart';
+import '../models/activity_common.dart';
 import 'base_activity_screen.dart';
 
 class AlertsScreen extends BaseActivityScreen {

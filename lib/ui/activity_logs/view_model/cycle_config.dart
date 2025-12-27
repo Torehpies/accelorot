@@ -4,12 +4,15 @@ import '../models/activity_filter_config.dart';
 
 class CyclesConfig {
   static ActivityFilterConfig get config => ActivityFilterConfig(
-    screenTitle: 'Cycles & Recommendations',
-    filters: const ['All', 'Recoms', 'Cycles'],
-    categoryMapper: CategoryMappers.simple(),
-    categoryHighlighter: CategoryHighlighters.simple([
-      'Recoms',
-      'Cycles',
-    ]),
+    screenTitle: 'Cycles & Controllers',
+    filters: const ['All', 'Drum Controller', 'Aerator'], 
+    categoryMapper: CategoryMappers.grouped({
+      'Drum Controller': ['drum_controller'],
+      'Aerator': ['aerator'],
+    }),
+    categoryHighlighter: CategoryHighlighters.grouped({
+      'Drum Controller': ['drum_controller'],
+      'Aerator': ['aerator'],
+    }),
   );
 }

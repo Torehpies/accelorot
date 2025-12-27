@@ -1,6 +1,5 @@
-// lib/frontend/operator/dashboard/add_waste/submit_report.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // ✅ Add Riverpod
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../fields/report_type_field.dart';
 import '../../fields/report_title_field.dart';
@@ -8,25 +7,27 @@ import '../../fields/machine_selection_field.dart';
 import '../../fields/priority_field.dart';
 import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
-import 'package:flutter_application_1/services/firestore_activity_service.dart';
+import '../../../../data/providers/report_providers.dart'; // ✅ Use repository provider
+import '../../../../data/models/report.dart'; // ✅ Use domain model
 
-class SubmitReport extends StatefulWidget {
+// ✅ Convert to ConsumerStatefulWidget
+class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
 
   const SubmitReport({super.key, this.preSelectedMachineId});
 
   @override
-  State<SubmitReport> createState() => _SubmitReportState();
+  ConsumerState<SubmitReport> createState() => _SubmitReportState();
 }
 
-class _SubmitReportState extends State<SubmitReport> {
+// ✅ Change to ConsumerState
+class _SubmitReportState extends ConsumerState<SubmitReport> {
   String? _selectedReportType;
   String? _selectedMachineId;
   String? _selectedPriority;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  // Error state variables for each field
   String? _titleError;
   String? _reportTypeError;
   String? _machineError;
@@ -57,13 +58,11 @@ class _SubmitReportState extends State<SubmitReport> {
 
   bool _validateForm() {
     setState(() {
-      // Clear all errors first
       _reportTypeError = null;
       _machineError = null;
       _priorityError = null;
       _titleError = null;
 
-      // Validate each field and set error messages
       if (_selectedReportType == null) {
         _reportTypeError = 'Please select a report type';
       }
@@ -76,7 +75,6 @@ class _SubmitReportState extends State<SubmitReport> {
       _titleError = _validateTitle(_titleController.text);
     });
 
-    // Return true only if all errors are null
     return _reportTypeError == null &&
         _machineError == null &&
         _priorityError == null &&
@@ -98,25 +96,33 @@ class _SubmitReportState extends State<SubmitReport> {
       return;
     }
 
-    final report = {
-      'reportType': _selectedReportType!,
-      'title': _titleController.text.trim(),
-      'machineId': _selectedMachineId!,
-      'priority': _selectedPriority!,
-      'description': _descriptionController.text.trim(),
-      'timestamp': DateTime.now(),
-      'userId': user.uid,
-    };
+    // ✅ NEW: Create domain model request
+    final reportRequest = CreateReportRequest(
+      machineId: _selectedMachineId!,
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      reportType: _selectedReportType!,
+      priority: _selectedPriority!,
+      userName: user.displayName ?? user.email ?? 'Unknown',
+      userId: user.uid,
+    );
 
     try {
-      await FirestoreActivityService.submitReport(report);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      // ✅ NEW: Use repository via provider
+      final reportRepo = ref.read(reportRepositoryProvider);
+      await reportRepo.createReport(_selectedMachineId!, reportRequest);
+      
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      Navigator.pop(context, report);
+      
+      Navigator.pop(context, true); // Return true to indicate success
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit report: ${e.toString()}')),
+        SnackBar(
+          content: Text('Failed to submit report: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -146,7 +152,6 @@ class _SubmitReportState extends State<SubmitReport> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -167,8 +172,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Report Type
               ReportTypeField(
                 selectedReportType: _selectedReportType,
                 onChanged: (value) => setState(() {
@@ -178,8 +181,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 errorText: _reportTypeError,
               ),
               const SizedBox(height: 16),
-
-              // Title
               ReportTitleField(
                 controller: _titleController,
                 errorText: _titleError,
@@ -190,8 +191,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 },
               ),
               const SizedBox(height: 16),
-
-              // Machine Selection
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
                 onChanged: widget.preSelectedMachineId == null
@@ -204,8 +203,6 @@ class _SubmitReportState extends State<SubmitReport> {
                 errorText: _machineError,
               ),
               const SizedBox(height: 16),
-
-              // Priority
               PriorityField(
                 selectedPriority: _selectedPriority,
                 onChanged: (value) => setState(() {
@@ -215,12 +212,8 @@ class _SubmitReportState extends State<SubmitReport> {
                 errorText: _priorityError,
               ),
               const SizedBox(height: 16),
-
-              // Description
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
-
-              // Submit Button
               SubmitButton(
                 onPressed: _handleSubmit,
                 style: ElevatedButton.styleFrom(),

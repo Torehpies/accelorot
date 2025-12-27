@@ -46,7 +46,7 @@ class MachineSelector extends ConsumerWidget {
             return Container(
               padding: EdgeInsets.symmetric(
                 horizontal: isCompact ? 8 : 12,
-                vertical: isCompact ? 6 : 8,
+                vertical: isCompact ? 4 : 8,
               ),
               decoration: BoxDecoration(
                 color: isCompact ? Colors.grey[50] : Colors.white,

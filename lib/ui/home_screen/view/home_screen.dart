@@ -9,20 +9,22 @@ import '../widgets/add_waste/add_waste_product.dart';
 import '../widgets/add_waste/submit_report.dart';
 import '../widgets/add_waste/quick_actions_sheet.dart';
 import '../widgets/activity_logs_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/data/providers/activity_providers.dart'; 
 
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine;
 
   const HomeScreen({super.key, this.focusedMachine});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-      GlobalKey<ActivityLogsCardState>();
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
+  //  GlobalKey<ActivityLogsCardState>();
 
   CompostBatch? _currentBatch;
 
@@ -53,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
         if (result != null && mounted) {
-          await _activityLogsKey.currentState?.refresh();
+          ref.invalidate(allActivitiesProvider);
         }
         break;
 
@@ -72,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          await _activityLogsKey.currentState?.refresh();
+          ref.invalidate(allActivitiesProvider);
         }
         break;
     }
@@ -147,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   // ✅ Activity Logs — placed AFTER System Card, as requested
                   ActivityLogsCard(
-                    key: _activityLogsKey,
+
                     focusedMachineId: widget.focusedMachine?.machineId,
                     maxHeight: isWeb ? null : 160, // Web: full scroll; Mobile: capped
                   ),

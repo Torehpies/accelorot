@@ -1,7 +1,6 @@
 import '../../models/report.dart';
 import '../contracts/report_service.dart';
 
-/// TODO: Future local database for offline use
 class LocalReportService implements ReportService {
   @override
   Future<List<Report>> fetchTeamReports() {
