@@ -8,27 +8,29 @@ import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
 import '../../fields/waste_config.dart';
 import '../../fields/machine_selection_field.dart';
+//import '../../../activity_logs/widgets/batch_selector.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart'; 
+import '../../fields/batch_selection_field.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
+  final String? preSelectedBatchId;
 
-  const AddWasteProduct({super.key, this.preSelectedMachineId});
+  const AddWasteProduct({super.key, this.preSelectedMachineId,    this.preSelectedBatchId, });
 
   @override
   ConsumerState<AddWasteProduct> createState() => _AddWasteProductState();
 }
 
 class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
-  // ...existing state variables...
-
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
 
   String? _selectedWasteCategory;
   String? _selectedPlantType;
   String? _selectedMachineId;
+  String? _selectedBatchId;
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -40,7 +42,9 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
   @override
   void initState() {
     super.initState();
+ 
     _selectedMachineId = widget.preSelectedMachineId;
+    _selectedBatchId = widget.preSelectedBatchId;
   }
 
   @override
@@ -131,7 +135,6 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       
       if (!mounted) return;
       
-   
       Navigator.pop(context, true);
       
       if (!mounted) return;
@@ -152,7 +155,6 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -168,7 +170,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(25),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -178,15 +180,15 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Add Waste Product',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   IconButton(
@@ -198,52 +200,84 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
                 ],
               ),
               const SizedBox(height: 16),
-              WasteCategorySection(
-                selectedWasteCategory: _selectedWasteCategory,
-                onCategoryChanged: (value) => setState(() {
-                  _selectedWasteCategory = value;
-                  _selectedPlantType = null;
-                  _wasteCategoryError = null;
-                }),
-                errorText: _wasteCategoryError,
-              ),
-              const SizedBox(height: 16),
-              PlantTypeSection(
-                selectedWasteCategory: _selectedWasteCategory,
-                selectedPlantType: _selectedPlantType,
-                onPlantTypeChanged: (value) => setState(() {
-                  _selectedPlantType = value;
-                  _plantTypeError = null;
-                }),
-                errorText: _plantTypeError,
-              ),
-              const SizedBox(height: 16),
+
+              // Machine Selection 
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
-                onChanged: widget.preSelectedMachineId == null
-                    ? (value) => setState(() {
-                        _selectedMachineId = value;
-                        _machineError = null;
-                      })
-                    : null,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMachineId = value;
+                    if (widget.preSelectedMachineId == null) {
+                      _selectedBatchId = null;
+                    }
+                    _machineError = null;
+                  });
+                },
                 isLocked: widget.preSelectedMachineId != null,
                 errorText: _machineError,
               ),
               const SizedBox(height: 16),
+
+              // Batch Selection
+              BatchSelectionField(
+                selectedBatchId: _selectedBatchId,
+                selectedMachineId: _selectedMachineId,
+                onChanged: (value) {
+                  setState(() => _selectedBatchId = value);
+                },
+                isLocked: widget.preSelectedBatchId != null,
+              ),
+              const SizedBox(height: 16),
+
+              // Waste Category
+              WasteCategorySection(
+                selectedWasteCategory: _selectedWasteCategory,
+                onCategoryChanged: (value) {
+                  setState(() {
+                    _selectedWasteCategory = value;
+                    _selectedPlantType = null;
+                    _wasteCategoryError = null;
+                  });
+                },
+                errorText: _wasteCategoryError,
+              ),
+              const SizedBox(height: 16),
+
+              // Plant Type
+              PlantTypeSection(
+                selectedWasteCategory: _selectedWasteCategory,
+                selectedPlantType: _selectedPlantType,
+                onPlantTypeChanged: (value) {
+                  setState(() {
+                    _selectedPlantType = value;
+                    _plantTypeError = null;
+                  });
+                },
+                errorText: _plantTypeError,
+              ),
+              const SizedBox(height: 16),
+
+              // Quantity
               QuantityField(
                 controller: _quantityController,
                 minQuantity: _minQuantity,
                 maxQuantity: _maxQuantity,
                 errorText: _quantityError,
-                onChanged: (value) =>
-                    setState(() => _quantityError = _validateQuantity(value)),
+                onChanged: (value) => setState(() => _quantityError = null),
               ),
               const SizedBox(height: 16),
+
+              // Description
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
+
+              // Submit Button
               SubmitButton(
                 onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),

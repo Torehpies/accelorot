@@ -13,7 +13,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycle
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
-
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 
@@ -32,17 +32,19 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
   //  GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
-  //String? _selectedMachineId;
-  //String? _selectedBatchId;
+  String? _selectedMachineId;
+  String? _selectedBatchId;
   BatchModel? _activeBatchModel;
   
   // Add this to force widget rebuilds
   int _rebuildKey = 0;
 
+
+
   @override
   void initState() {
     super.initState();
-   // _selectedMachineId = widget.focusedMachine?.machineId;
+   _selectedMachineId = widget.focusedMachine?.machineId;
   }
 
   void _updateActiveBatch(BatchModel? batch) {
@@ -51,10 +53,12 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     if (mounted) {
       setState(() {
         _activeBatchModel = batch;
+        _selectedBatchId = batch?.id;
         // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
         
         if (batch != null) {
+          _selectedMachineId = batch.machineId;
           _currentBatch = CompostBatch(
             batchName: batch.displayName,
             batchNumber: batch.id,
@@ -70,6 +74,40 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     }
     
     debugPrint('✅ _updateActiveBatch completed - rebuildKey: $_rebuildKey');
+  }
+
+    Future<void> _autoSelectBatchForMachine(String machineId) async {
+    // Wait for provider to refresh
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    final batchesAsync = ref.read(userTeamBatchesProvider);
+    batchesAsync.whenData((batches) {
+      final machineBatches = batches
+          .where((b) => b.machineId == machineId)
+          .toList();
+      
+      if (machineBatches.isNotEmpty) {
+        // Sort by createdAt to get newest
+        machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final latestBatch = machineBatches.first;
+        
+        if (mounted) {
+          setState(() {
+            _selectedBatchId = latestBatch.id;
+            _activeBatchModel = latestBatch;
+            _currentBatch = CompostBatch(
+              batchName: latestBatch.displayName,
+              batchNumber: latestBatch.id,
+              startedBy: null,
+              batchStart: latestBatch.createdAt,
+              startNotes: latestBatch.startNotes,
+              status: latestBatch.isActive ? 'active' : 'completed',
+            );
+            _rebuildKey++;
+          });
+        }
+      }
+    });
   }
 
   void _handleBatchStarted(CompostBatch batch) async {
@@ -167,11 +205,19 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => AddWasteProduct(
-          preSelectedMachineId: widget.focusedMachine?.machineId,
+          preSelectedMachineId: _selectedMachineId,
+          preSelectedBatchId: _selectedBatchId,
         ),
       );
 
       if (result == true && mounted) {
+
+        ref.invalidate(allActivitiesProvider);
+        ref.invalidate(userTeamBatchesProvider);
+        
+        if (_selectedMachineId != null) {
+          await _autoSelectBatchForMachine(_selectedMachineId!);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Waste entry added successfully!'),
@@ -185,12 +231,22 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => SubmitReport(
-          preSelectedMachineId: widget.focusedMachine?.machineId, 
+          preSelectedMachineId: _selectedMachineId, 
+          preSelectedBatchId: _selectedBatchId,  
         ),
       );
 
+      
+
 
       if (result == true && mounted) {
+
+        ref.invalidate(allActivitiesProvider);
+        ref.invalidate(userTeamBatchesProvider);
+        
+        if (_selectedMachineId != null) {
+          await _autoSelectBatchForMachine(_selectedMachineId!);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Report submitted successfully!'),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // ✅ Add Riverpod
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../fields/report_type_field.dart';
 import '../../fields/report_title_field.dart';
@@ -7,23 +7,24 @@ import '../../fields/machine_selection_field.dart';
 import '../../fields/priority_field.dart';
 import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
-import '../../../../data/providers/report_providers.dart'; // ✅ Use repository provider
-import '../../../../data/models/report.dart'; // ✅ Use domain model
+import '../../../../data/providers/report_providers.dart'; 
+import '../../../../data/models/report.dart'; 
+import '../../fields/batch_selection_field.dart'; 
 
-// ✅ Convert to ConsumerStatefulWidget
 class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
+  final String? preSelectedBatchId; 
 
-  const SubmitReport({super.key, this.preSelectedMachineId});
+  const SubmitReport({super.key, this.preSelectedMachineId, this.preSelectedBatchId});
 
   @override
   ConsumerState<SubmitReport> createState() => _SubmitReportState();
 }
 
-// ✅ Change to ConsumerState
 class _SubmitReportState extends ConsumerState<SubmitReport> {
   String? _selectedReportType;
   String? _selectedMachineId;
+  String? _selectedBatchId;
   String? _selectedPriority;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -37,6 +38,7 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
   void initState() {
     super.initState();
     _selectedMachineId = widget.preSelectedMachineId;
+    _selectedBatchId = widget.preSelectedBatchId; 
   }
 
   @override
@@ -96,7 +98,6 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
       return;
     }
 
-    // ✅ NEW: Create domain model request
     final reportRequest = CreateReportRequest(
       machineId: _selectedMachineId!,
       title: _titleController.text.trim(),
@@ -108,14 +109,13 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
     );
 
     try {
-      // ✅ NEW: Use repository via provider
       final reportRepo = ref.read(reportRepositoryProvider);
       await reportRepo.createReport(_selectedMachineId!, reportRequest);
       
       await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
       
-      Navigator.pop(context, true); // Return true to indicate success
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +142,7 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(25),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -155,12 +155,11 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Submit Report',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   IconButton(
@@ -172,51 +171,81 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
                 ],
               ),
               const SizedBox(height: 16),
-              ReportTypeField(
-                selectedReportType: _selectedReportType,
-                onChanged: (value) => setState(() {
-                  _selectedReportType = value;
-                  _reportTypeError = null;
-                }),
-                errorText: _reportTypeError,
-              ),
-              const SizedBox(height: 16),
-              ReportTitleField(
-                controller: _titleController,
-                errorText: _titleError,
-                onChanged: (value) {
-                  setState(() {
-                    _titleError = null;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
+
+     
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
-                onChanged: widget.preSelectedMachineId == null
-                    ? (value) => setState(() {
-                        _selectedMachineId = value;
-                        _machineError = null;
-                      })
-                    : null,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMachineId = value;
+                    
+                    if (widget.preSelectedMachineId == null) {
+                      _selectedBatchId = null;
+                    }
+                    _machineError = null;
+                  });
+                },
                 isLocked: widget.preSelectedMachineId != null,
                 errorText: _machineError,
               ),
               const SizedBox(height: 16),
+
+              BatchSelectionField(
+                selectedBatchId: _selectedBatchId,
+                selectedMachineId: _selectedMachineId,
+                onChanged: (value) {
+                  setState(() => _selectedBatchId = value);
+                },
+                isLocked: widget.preSelectedBatchId != null, 
+              ),
+              const SizedBox(height: 16),
+
+
+              // Report Type
+              ReportTypeField(
+                selectedReportType: _selectedReportType,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedReportType = value;
+                    _reportTypeError = null;
+                  });
+                },
+                errorText: _reportTypeError,
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              ReportTitleField(
+                controller: _titleController,
+                errorText: _titleError,
+                onChanged: (value) => setState(() => _titleError = null),
+              ),
+              const SizedBox(height: 16),
+
+              // Priority
               PriorityField(
                 selectedPriority: _selectedPriority,
-                onChanged: (value) => setState(() {
-                  _selectedPriority = value;
-                  _priorityError = null;
-                }),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPriority = value;
+                    _priorityError = null;
+                  });
+                },
                 errorText: _priorityError,
               ),
               const SizedBox(height: 16),
+
+              // Description
               DescriptionField(controller: _descriptionController),
               const SizedBox(height: 24),
+
+              // Submit Button
               SubmitButton(
                 onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),
