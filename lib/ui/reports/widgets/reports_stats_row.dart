@@ -73,7 +73,7 @@ class ReportsStatsRow extends StatelessWidget {
             value: statsWithChange['onHold']?['count'] ?? 0,
             icon: Icons.pause_circle_outline,
             iconColor: WebColors.error,
-            backgroundColor: const Color(0xFFFEE2E2), // red-100 
+            backgroundColor: const Color(0xFFFEE2E2), // red-100  
             changeText: statsWithChange['onHold']?['change'],
             subtext: 'closed reports this month',
             isPositive: statsWithChange['onHold']?['isPositive'],
