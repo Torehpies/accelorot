@@ -379,7 +379,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
             const SizedBox(height: 24),
 
             if (!hasActiveBatch && !batchCompleted)
-              const Expanded(child: EmptyState())
+              const EmptyState()
             else
               _buildActiveState(batchCompleted),
           ],

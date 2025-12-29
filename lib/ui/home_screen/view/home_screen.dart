@@ -301,33 +301,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                  SizedBox(
-                    height: 520, // Increased to accommodate selectors and progress
-                    child: CompostingProgressCard(
-                      currentBatch: _currentBatch,
-                      onBatchStarted: _handleBatchStarted,
-                      onBatchCompleted: _handleBatchCompleted,
-                      preSelectedMachineId: widget.focusedMachine?.machineId,
-                      onBatchChanged: _updateActiveBatch,
-                    ),
+                  CompostingProgressCard(
+                    currentBatch: _currentBatch,
+                    onBatchStarted: _handleBatchStarted,
+                    onBatchCompleted: _handleBatchCompleted,
+                    preSelectedMachineId: widget.focusedMachine?.machineId,
+                    onBatchChanged: _updateActiveBatch,
                   ),
                   const SizedBox(height: 16),
 
-                  SizedBox(
-                    height: 540, // Increased for controls and active state
-                    child: DrumControlCard(
-                      key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                      currentBatch: _activeBatchModel, 
-                    ),
+                  DrumControlCard(
+                    key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                    currentBatch: _activeBatchModel, 
                   ),
                   const SizedBox(height: 16),
 
-                  SizedBox(
-                    height: 540, // Consistent with drum control
-                    child: AeratorCard(
-                      key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                      currentBatch: _activeBatchModel, 
-                    ),
+                  AeratorCard(
+                    key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                    currentBatch: _activeBatchModel, 
                   ),
                   const SizedBox(height: 16),
 
