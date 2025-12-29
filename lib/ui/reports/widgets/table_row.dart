@@ -6,7 +6,7 @@ import '../../core/widgets/table/activity_table_row.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
-import 'reports_priority_badge.dart';
+import 'priority_badge.dart';
 
 class ReportsTableRow extends StatelessWidget {
   final Report report;

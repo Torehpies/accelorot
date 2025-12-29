@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/reports_notifier.dart';
 import '../../../services/sess_service.dart';
-import 'reports_search_bar.dart';
+import 'search_bar.dart';
 import 'filter_dropdown.dart';
 import 'sort_dropdown.dart';
 import 'report_card.dart';

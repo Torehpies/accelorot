@@ -9,7 +9,7 @@ import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../../ui/activity_logs/models/activity_common.dart';
-import 'reports_table_header.dart';
+import 'table_header.dart';
 import 'reports_table_body.dart';
 
 class ReportsTableContainer extends StatelessWidget {

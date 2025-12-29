@@ -6,7 +6,7 @@ import '../../core/widgets/shared/empty_state.dart';
 import '../../core/widgets/table/activity_table_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
-import 'reports_table_row.dart';
+import 'table_row.dart';
 
 class ReportsTableBody extends StatefulWidget {
   final List<Report> reports;

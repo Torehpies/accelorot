@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/reports_viewmodel.dart';
-import '../widgets/reports_stats_row.dart';
+import '../widgets/stats_row.dart';
 import '../widgets/reports_table_container.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
