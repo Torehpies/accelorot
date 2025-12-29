@@ -100,7 +100,7 @@ class _CompostingProgressCardState
           );
         },
         loading: () => false,
-        error: (_, _) => false,
+        error: (_,__) => false,
       );
 
       if (hasActiveBatch) {

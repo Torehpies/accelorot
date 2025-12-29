@@ -89,7 +89,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
             icon: Icons.precision_manufacturing,
             isLoading: true,
           ),
-          error: (_, _) => UnifiedDropdown<String>(
+          error: (_, __) => UnifiedDropdown<String>(
             value: null,
             label: 'Machine',
             hintText: 'All Machines',

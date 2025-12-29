@@ -6,7 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
-//import 'package:flutter_application_1/data/providers/admin_dashboard_providers.dart';
+// Import the dashboard providers - use relative path
+import '../../../data/providers/admin_dashboard_providers.dart';
 import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart' show OperatorManagementScreen;
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
@@ -38,7 +39,9 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
   void initState() {
     super.initState();
     final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    final repository = ref.read(dashboardRepository);
+    
+    // Now this should work since we have the repository and provider
+    final repository = ref.read(dashboardRepositoryProvider);
     
     // Initialize view model ONCE - it loads data automatically in constructor
     _dashboardViewModel = WebAdminDashboardViewModel(repository, teamId);

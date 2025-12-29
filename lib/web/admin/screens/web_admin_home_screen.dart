@@ -269,7 +269,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 // === TABLE BODY ===
                                 Expanded(
                                   child: ListView.separated(
-                                    separatorBuilder: (_, _) =>
+                                    separatorBuilder: (_, __) =>
                                         const Divider(height: 16, color: Colors.grey),
                                     itemCount: _operators.length,
                                     itemBuilder: (context, index) {
@@ -419,7 +419,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 const Divider(height: 16, color: Colors.grey),
                                 Expanded(
                                   child: ListView.separated(
-                                    separatorBuilder: (_, _) =>
+                                    separatorBuilder: (_, __) =>
                                         const Divider(height: 16, color: Colors.grey),
                                     itemCount: _machines.length,
                                     itemBuilder: (context, index) {
