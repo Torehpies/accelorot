@@ -31,10 +31,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-v2-
 
-      - name: Clear corrupted packages
+      - name: Clear corrupted packages and generated files
         run: |
           rm -rf ~/.pub-cache/hosted/pub.dev/custom_lint*
           rm -rf ~/.pub-cache/hosted/pub.dev/riverpod_lint*
+          rm -f lib/custom_lint_client.dart
           flutter clean
 
       - name: Inject Firebase Options (Dart)
@@ -101,10 +102,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-v2-
 
-      - name: Clear corrupted packages
+      - name: Clear corrupted packages and generated files
         run: |
           rm -rf ~/.pub-cache/hosted/pub.dev/custom_lint*
           rm -rf ~/.pub-cache/hosted/pub.dev/riverpod_lint*
+          rm -f lib/custom_lint_client.dart
           flutter clean
 
       - name: Inject Firebase Options (Dart)
