@@ -27,7 +27,15 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-v2-${{ hashFiles('**/pubspec.lock') }}  # Changed v2 to bust cache
+          restore-keys: |
+            ${{ runner.os }}-pub-v2-
+
+      - name: Clear corrupted packages
+        run: |
+          rm -rf ~/.pub-cache/hosted/pub.dev/custom_lint*
+          rm -rf ~/.pub-cache/hosted/pub.dev/riverpod_lint*
+          flutter clean
 
       - name: Inject Firebase Options (Dart)
         env:
@@ -89,7 +97,15 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          key: ${{ runner.os }}-pub-v2-${{ hashFiles('**/pubspec.lock') }}  # Changed v2 to bust cache
+          restore-keys: |
+            ${{ runner.os }}-pub-v2-
+
+      - name: Clear corrupted packages
+        run: |
+          rm -rf ~/.pub-cache/hosted/pub.dev/custom_lint*
+          rm -rf ~/.pub-cache/hosted/pub.dev/riverpod_lint*
+          flutter clean
 
       - name: Inject Firebase Options (Dart)
         env:
