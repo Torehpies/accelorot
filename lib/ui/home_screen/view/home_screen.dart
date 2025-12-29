@@ -310,16 +310,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  DrumControlCard(
-                    key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                    currentBatch: _activeBatchModel, 
-                  ),
-                  const SizedBox(height: 16),
-
-                  AeratorCard(
-                    key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                    currentBatch: _activeBatchModel, 
-                  ),
+                  // Controller cards - responsive layout
+                  // Stack vertically on mobile (< 600px), side by side on larger screens
+                  constraints.maxWidth < 600
+                      ? Column(
+                          children: [
+                            DrumControlCard(
+                              key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                              currentBatch: _activeBatchModel, 
+                            ),
+                            const SizedBox(height: 16),
+                            AeratorCard(
+                              key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                              currentBatch: _activeBatchModel, 
+                            ),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: DrumControlCard(
+                                key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                                currentBatch: _activeBatchModel, 
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: AeratorCard(
+                                key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                                currentBatch: _activeBatchModel, 
+                              ),
+                            ),
+                          ],
+                        ),
                   const SizedBox(height: 16),
 
                   // ✅ Activity Logs

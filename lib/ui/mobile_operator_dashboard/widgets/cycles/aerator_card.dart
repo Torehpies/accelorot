@@ -330,7 +330,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -340,7 +340,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                 const Text(
                   'Aerator',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1a1a1a),
                     letterSpacing: -0.5,
@@ -348,8 +348,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                    horizontal: 8,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: batchCompleted
@@ -364,7 +364,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                         ? 'Completed'
                         : (hasActiveBatch ? 'Active' : 'Inactive'),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: batchCompleted
                           ? const Color(0xFF6B7280)
@@ -376,7 +376,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
 
             if (!hasActiveBatch && !batchCompleted)
               const EmptyState()
@@ -394,24 +394,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: InfoItem(
-                label: 'Machine Name',
-                value: widget.currentBatch!.machineId,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: InfoItem(
-                label: 'Batch Name',
-                value: widget.currentBatch!.displayName,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
 
         Row(
           children: [
@@ -430,17 +412,17 @@ void didUpdateWidget(AeratorCard oldWidget) {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
 
         const Text(
           'Set Controller',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1a1a1a),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
 
         Row(
           children: [
@@ -460,7 +442,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                     : null,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildDropdown(
                 label: 'Select No. of Cycles',
@@ -480,7 +462,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 12),
 
         SizedBox(
           width: double.infinity,
@@ -491,7 +473,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -503,7 +485,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? 'Completed'
                   : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -520,7 +502,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
     required Function(String?)? onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: onChanged == null ? Colors.grey.shade100 : Colors.white,
         borderRadius: BorderRadius.circular(8),
