@@ -249,19 +249,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isMachineView = widget.focusedMachine != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        automaticallyImplyLeading: isMachineView,
-      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
