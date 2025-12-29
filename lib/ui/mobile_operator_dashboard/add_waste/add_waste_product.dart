@@ -9,7 +9,7 @@ import '../fields/submit_button.dart';
 import '../fields/waste_config.dart';
 import '../fields/machine_selection_field.dart';
 import '../../../../data/providers/substrate_providers.dart';
-import '../../../../data/models/substrate.dart'; // ✅ Now includes CreateSubstrateRequest
+import '../../../../data/models/substrate.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
@@ -21,7 +21,7 @@ class AddWasteProduct extends ConsumerStatefulWidget {
 }
 
 class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
-  // ...existing state variables...
+
 
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
