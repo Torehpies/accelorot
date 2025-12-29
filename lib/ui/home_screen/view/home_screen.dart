@@ -1,16 +1,17 @@
-// lib/frontend/operator/dashboard/home_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
-import '../widgets/system_card.dart';
-import '../widgets/composting_progress_card.dart';
-import '../widgets/add_waste/add_waste_product.dart';
-import '../widgets/add_waste/submit_report.dart';
-import '../widgets/add_waste/quick_actions_sheet.dart';
-import '../widgets/activity_logs_card.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/data/providers/activity_providers.dart'; 
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/submit_report.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/composting_progress_card.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
+import 'package:flutter_application_1/data/providers/activity_providers.dart';
+import 'package:flutter_application_1/data/models/batch_model.dart';
 
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -23,60 +24,223 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-  //  GlobalKey<ActivityLogsCardState>();
-
   CompostBatch? _currentBatch;
+  String? _selectedMachineId;
+  String? _selectedBatchId;
+  BatchModel? _activeBatchModel;
+  
+  // Add this to force widget rebuilds
+  int _rebuildKey = 0;
 
-  void _handleBatchStarted(CompostBatch batch) {
-    if (mounted) setState(() => _currentBatch = batch);
+  @override
+  void initState() {
+    super.initState();
+    _selectedMachineId = widget.focusedMachine?.machineId;
+  }
+
+  void _updateActiveBatch(BatchModel? batch) {
+    debugPrint('🔄 _updateActiveBatch called with batch: ${batch?.id}');
+    
+    if (mounted) {
+      setState(() {
+        _activeBatchModel = batch;
+        _selectedBatchId = batch?.id;
+        // Increment rebuild key to force cards to rebuild
+        _rebuildKey++;
+        
+        if (batch != null) {
+          _selectedMachineId = batch.machineId;
+          _currentBatch = CompostBatch(
+            batchName: batch.displayName,
+            batchNumber: batch.id,
+            startedBy: null,
+            batchStart: batch.createdAt,
+            startNotes: batch.startNotes,
+            status: batch.isActive ? 'active' : 'completed',
+          );
+        } else {
+          _currentBatch = null;
+        }
+      });
+    }
+    
+    debugPrint('✅ _updateActiveBatch completed - rebuildKey: $_rebuildKey');
+  }
+
+    Future<void> _autoSelectBatchForMachine(String machineId) async {
+    // Wait for provider to refresh
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    final batchesAsync = ref.read(userTeamBatchesProvider);
+    batchesAsync.whenData((batches) {
+      final machineBatches = batches
+          .where((b) => b.machineId == machineId)
+          .toList();
+      
+      if (machineBatches.isNotEmpty) {
+        // Sort by createdAt to get newest
+        machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final latestBatch = machineBatches.first;
+        
+        if (mounted) {
+          setState(() {
+            _selectedBatchId = latestBatch.id;
+            _activeBatchModel = latestBatch;
+            _currentBatch = CompostBatch(
+              batchName: latestBatch.displayName,
+              batchNumber: latestBatch.id,
+              startedBy: null,
+              batchStart: latestBatch.createdAt,
+              startNotes: latestBatch.startNotes,
+              status: latestBatch.isActive ? 'active' : 'completed',
+            );
+            _rebuildKey++;
+          });
+        }
+      }
+    });
+  }
+
+  void _handleBatchStarted(CompostBatch batch) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => BatchStartDialog(
+        preSelectedMachineId: widget.focusedMachine?.machineId,
+      ),
+    );
+
+    if (result == true && mounted) {
+      // Refresh the activity logs after batch is created
+      ref.invalidate(allActivitiesProvider);
+      
+      // Force rebuild by incrementing key
+      setState(() {
+        _rebuildKey++;
+      });
+      
+      debugPrint('🔄 Batch created, forced rebuild with key: $_rebuildKey');
+    }
   }
 
   void _handleBatchCompleted() {
-    if (mounted) setState(() => _currentBatch = null);
+    setState(() {
+      _currentBatch = null;
+      _rebuildKey++;
+    });
   }
 
   Future<void> _handleFABPress() async {
-    final action = await showModalBottomSheet<String>(
+    final action = await showDialog<String>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const QuickActionsSheet(),
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          titlePadding: const EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: 12,
+          ),
+          contentPadding: EdgeInsets.zero,
+          title: const Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          content: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.add_circle_outline,
+                    color: Colors.teal.shade700,
+                    size: 24,
+                  ),
+                  title: const Text(
+                    'Add Waste',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () => Navigator.of(context).pop('add_waste'),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.note_add_outlined,
+                    color: Colors.teal.shade700,
+                    size: 24,
+                  ),
+                  title: const Text(
+                    'Submit Report',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () => Navigator.of(context).pop('submit_report'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
 
     if (action == null || !mounted) return;
 
-    switch (action) {
-      case 'add_waste':
-        final result = await showDialog<Map<String, dynamic>>(
-          context: context,
-          builder: (context) => AddWasteProduct(
-            preSelectedMachineId: widget.focusedMachine?.machineId,
-          ),
-        );
-        if (result != null && mounted) {
-          ref.invalidate(allActivitiesProvider);
-        }
-        break;
+    if (action == 'add_waste') {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => AddWasteProduct(
+          preSelectedMachineId: _selectedMachineId,
+          preSelectedBatchId: _selectedBatchId,
+        ),
+      );
 
-      case 'submit_report':
-        final result = await showDialog<Map<String, dynamic>>(
-          context: context,
-          builder: (context) => SubmitReport(
-            preSelectedMachineId: widget.focusedMachine?.machineId,
-          ),
-        );
-        if (result != null && mounted) {
+      if (result == true && mounted) {
+        ref.invalidate(allActivitiesProvider);
+        ref.invalidate(userTeamBatchesProvider);
+        
+        if (_selectedMachineId != null) {
+          await _autoSelectBatchForMachine(_selectedMachineId!);
+        }
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Report submitted successfully'),
-              duration: Duration(seconds: 2),
+              content: Text('Waste entry added successfully!'),
+              backgroundColor: Colors.teal,
+            ),
+          );
+        }
+      }
+    } else if (action == 'submit_report') {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (context) => SubmitReport(
+          preSelectedMachineId: _selectedMachineId, 
+          preSelectedBatchId: _selectedBatchId,  
+        ),
+      );
+
+      if (result == true && mounted) {
+        ref.invalidate(allActivitiesProvider);
+        ref.invalidate(userTeamBatchesProvider);
+        
+        if (_selectedMachineId != null) {
+          await _autoSelectBatchForMachine(_selectedMachineId!);
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Report submitted successfully!'),
               backgroundColor: Colors.green,
             ),
           );
-          ref.invalidate(allActivitiesProvider);
         }
-        break;
+      }
     }
   }
 
@@ -101,7 +265,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isWeb = constraints.maxWidth > 800; // heuristic for desktop/web
+            // final isWeb = constraints.maxWidth > 800; // heuristic for desktop/web
 
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
@@ -137,21 +301,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                  CompostingProgressCard(
-                    currentBatch: _currentBatch,
-                    onBatchStarted: _handleBatchStarted,
-                    onBatchCompleted: _handleBatchCompleted,
+                  SizedBox(
+                    height: 520, // Increased to accommodate selectors and progress
+                    child: CompostingProgressCard(
+                      currentBatch: _currentBatch,
+                      onBatchStarted: _handleBatchStarted,
+                      onBatchCompleted: _handleBatchCompleted,
+                      preSelectedMachineId: widget.focusedMachine?.machineId,
+                      onBatchChanged: _updateActiveBatch,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
-                  SystemCard(currentBatch: _currentBatch),
+                  SizedBox(
+                    height: 540, // Increased for controls and active state
+                    child: DrumControlCard(
+                      key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                      currentBatch: _activeBatchModel, 
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
-                  // ✅ Activity Logs — placed AFTER System Card, as requested
-                  ActivityLogsCard(
+                  SizedBox(
+                    height: 540, // Consistent with drum control
+                    child: AeratorCard(
+                      key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
+                      currentBatch: _activeBatchModel, 
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                    focusedMachineId: widget.focusedMachine?.machineId,
-                    maxHeight: isWeb ? null : 160, // Web: full scroll; Mobile: capped
+                  // ✅ Activity Logs
+                  SizedBox(
+                    height: 350,
+                    child: ActivityLogsCard(
+                      focusedMachineId: widget.focusedMachine?.machineId,
+                    ),
                   ),
 
                   const SizedBox(height: 16),
