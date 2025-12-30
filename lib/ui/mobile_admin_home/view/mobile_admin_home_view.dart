@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
+import '../widgets/analytics_widget.dart';
 import '../../home_screen/widgets/activity_logs_card.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
@@ -64,16 +65,22 @@ class MobileAdminHomeView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // Overview Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                     Text('Overview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                     SizedBox.shrink(),
+                      Text('Overview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      SizedBox.shrink(),
                     ],
-                ),
+                  ),
                   const SizedBox(height: 12),
                   SwipeableStatCards(cards: statCards),
                   const SizedBox(height: 24),
+                  
+                  // Analytics Section
+                  const AnalyticsWidget(),
+                  const SizedBox(height: 24),
+                  
                   // Activity Logs Section
                   ActivityLogsCard(
                     focusedMachineId: null, // Show all machines for admin
