@@ -10,7 +10,7 @@ import '../../../ui/reports/view/web_reports_view.dart';
 
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
-
+    
   @override
   State<WebAdminNavigation> createState() => _WebAdminNavigationState();
 }
