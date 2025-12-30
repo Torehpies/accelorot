@@ -11,11 +11,12 @@ import '../../../data/providers/admin_dashboard_providers.dart';
 import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart' show OperatorManagementScreen;
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
+import '../../../ui/reports/view/web_reports_view.dart';
 
 
 class WebAdminNavigation extends ConsumerStatefulWidget {
   const WebAdminNavigation({super.key});
-
+    
   @override
   ConsumerState<WebAdminNavigation> createState() => _WebAdminNavigationState();
 }
@@ -30,8 +31,9 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
 
   final List<_NavItem> _navItems = const [
     _NavItem(Icons.dashboard, 'Dashboard'),
-    _NavItem(Icons.history, 'Operators'),
+    _NavItem(Icons.supervisor_account, 'Operators'),
     _NavItem(Icons.settings, 'Machines'),
+    _NavItem(Icons.report, 'Reports'),
     _NavItem(Icons.person, 'Profile'),
   ];
 
@@ -54,6 +56,8 @@ class _WebAdminNavigationState extends ConsumerState<WebAdminNavigation> {
       ),
       OperatorManagementScreen(teamId: teamId),
       const WebAdminMachineView(),
+      // OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
+      const WebReportsView(),
       const WebProfileView(),
     ];
   }

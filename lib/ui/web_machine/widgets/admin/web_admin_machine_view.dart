@@ -1,23 +1,43 @@
+// lib/ui/machine_management/widgets/admin/web_admin_machine_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../machine_management/view_model/admin_machine_notifier.dart';
 import '../../../../services/sess_service.dart';
-import '../../../core/ui/admin_search_bar.dart';
-import '../../../core/ui/admin_app_bar.dart';
-import 'web_admin_machine_list.dart';
+import '../../../../data/models/machine_model.dart';
+import '../../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../core/widgets/filters/search_field.dart';
+import '../../shared/pagination_table.dart';
+import '../../../core/widgets/table/base_table_container.dart';
+import '../../../core/themes/web_colors.dart';
+import '../../../../ui/web_machine/filters/web_machine_date_filter_widget.dart';
 import 'web_add_machine_modal.dart';
+import 'web_edit_machine_modal.dart';
+import 'web_machine_details_view.dart';
+import '../../table/web_machine_table_header.dart';
+import '../../table/machine_table_body.dart';
+import '../admin/archive_confirmation_dialog.dart';
+import '../admin/machine_stats_row.dart';
 
 class WebAdminMachineView extends ConsumerStatefulWidget {
   const WebAdminMachineView({super.key});
 
   @override
-  ConsumerState<WebAdminMachineView> createState() => _WebAdminMachineViewState();
+  ConsumerState<WebAdminMachineView> createState() =>
+      _WebAdminMachineViewState();
 }
 
 class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
-  final _searchFocusNode = FocusNode();
   String? _teamId;
-  bool _isInitializing = true; //  loading state
+  bool _isInitializing = true;
+  String _searchQuery = '';
+  String _statusFilter = 'All';
+  String _sortColumn = 'ID';
+  bool _ascending = true;
+  DateTime? _selectedDateFilter;
+
+  // Pagination
+  int _currentPage = 1;
+  int _itemsPerPage = 10;
 
   @override
   void initState() {
@@ -38,275 +58,314 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       debugPrint('Error loading team ID: $e');
     } finally {
       if (mounted) {
-        setState(() => _isInitializing = false); 
+        setState(() => _isInitializing = false);
       }
     }
   }
 
-  @override
-  void dispose() {
-    _searchFocusNode.dispose();
-    super.dispose();
-  }
-
   void _showAddMachineModal() {
-    if (_teamId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Team ID not available. Please try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    if (_teamId == null) return;
 
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+          constraints: const BoxConstraints(maxWidth: 500),
           child: WebAddMachineModal(teamId: _teamId!),
         ),
       ),
     );
   }
 
-  Future<void> _handleRefresh() async {
-    if (_teamId != null) {
-      await ref.read(adminMachineProvider.notifier).refresh(_teamId!);
+  int _getActiveCount(List<MachineModel> machines) {
+    return machines.where((m) => !m.isArchived).length;
+  }
+
+  int _getArchivedCount(List<MachineModel> machines) {
+    return machines.where((m) => m.isArchived).length;
+  }
+
+  int _getNewCount(List<MachineModel> machines) {
+    final now = DateTime.now();
+    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    return machines.where((m) => m.dateCreated.isAfter(thirtyDaysAgo)).length;
+  }
+
+  void _applySortAndFilter({String? column}) {
+    if (column != null) {
+      if (_sortColumn == column) {
+        setState(() => _ascending = !_ascending);
+      } else {
+        setState(() {
+          _sortColumn = column;
+          _ascending = true;
+        });
+      }
+    }
+    setState(() => _currentPage = 1);
+  }
+
+  List<MachineModel> _getFilteredMachines(List<MachineModel> machines) {
+    var filtered = machines.where((m) {
+      final matchesSearch = m.machineName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          m.machineId.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      final matchesStatus = _statusFilter == 'All' ||
+          (_statusFilter == 'Active' && !m.isArchived) ||
+          (_statusFilter == 'Archived' && m.isArchived);
+
+      bool matchesDate = true;
+      if (_selectedDateFilter != null) {
+        final machineDate = DateTime(m.dateCreated.year, m.dateCreated.month, m.dateCreated.day);
+        final filterDate = DateTime(_selectedDateFilter!.year, _selectedDateFilter!.month, _selectedDateFilter!.day);
+        matchesDate = machineDate.isAtSameMomentAs(filterDate);
+      }
+
+      return matchesSearch && matchesStatus && matchesDate;
+    }).toList();
+
+    filtered.sort((a, b) {
+      int cmp;
+      switch (_sortColumn) {
+        case 'ID':
+          cmp = a.machineId.compareTo(b.machineId);
+          break;
+        case 'Name':
+          cmp = a.machineName.compareTo(b.machineName);
+          break;
+        case 'Created':
+          cmp = a.dateCreated.compareTo(b.dateCreated);
+          break;
+        default:
+          cmp = 0;
+      }
+      return _ascending ? cmp : -cmp;
+    });
+
+    return filtered;
+  }
+
+  List<MachineModel> _getPaginatedMachines(List<MachineModel> machines) {
+    if (machines.isEmpty) return [];
+    final startIndex = (_currentPage - 1) * _itemsPerPage;
+    final endIndex = startIndex + _itemsPerPage;
+
+    if (startIndex >= machines.length) return [];
+    if (endIndex > machines.length) return machines.sublist(startIndex);
+
+    return machines.sublist(startIndex, endIndex);
+  }
+
+  int _getTotalPages(int totalItems) {
+    if (totalItems == 0) return 1;
+    return (totalItems / _itemsPerPage).ceil();
+  }
+
+  void _showEditDialog(MachineModel machine) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+          child: WebEditMachineModal(machine: machine, teamId: _teamId!),
+        ),
+      ),
+    );
+  }
+
+  void _handleViewMachine(MachineModel machine) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800, maxHeight: 600),
+          child: WebMachineDetailsView(
+            machine: machine,
+            teamId: _teamId!,
+            onArchive: () {
+              Navigator.pop(context);
+              _showArchiveConfirmation(machine);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showArchiveConfirmation(MachineModel machine) async {
+    final confirmed = await ArchiveConfirmationDialog.show(context);
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(adminMachineProvider.notifier).archiveMachine(
+              _teamId!,
+              machine.machineId,
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${machine.machineName} archived successfully'),
+              backgroundColor: const Color(0xFF10B981),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to archive: $e'),
+              backgroundColor: const Color(0xFFEF4444),
+            ),
+          );
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminMachineProvider);
-    final notifier = ref.read(adminMachineProvider.notifier);
 
-    // ✅ Show loading while initializing
     if (_isInitializing || _teamId == null) {
-      return Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: const AdminAppBar(title: 'Machine Management'),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.teal),
-              SizedBox(height: 16),
-              Text(
-                'Loading machine data...',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ],
-          ),
+      return const Scaffold(
+        backgroundColor: Color(0xFFF8FAFC),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF10B981)),
         ),
       );
     }
 
+    final allMachines = state.filteredMachines;
+    final activeCount = _getActiveCount(allMachines);
+    final archivedCount = _getArchivedCount(allMachines);
+    final newCount = _getNewCount(allMachines);
+    final filteredMachines = _getFilteredMachines(allMachines);
+    final paginatedMachines = _getPaginatedMachines(filteredMachines);
+    final totalPages = _getTotalPages(filteredMachines.length);
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: const AdminAppBar(title: 'Machine Management'),
+      backgroundColor: WebColors.pageBackground,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              // Action Cards Row
-              SizedBox(
-                height: 100,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionCard(
-                        icon: Icons.archive,
-                        label: 'Archive',
-                        count: null,
-                        onPressed: () => notifier.setShowArchived(true),
-                        iconBackgroundColor: Colors.orange[50]!,
-                        iconColor: Colors.orange.shade700,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionCard(
-                        icon: Icons.add_circle_outline,
-                        label: 'Add Machine',
-                        count: null,
-                        onPressed: _showAddMachineModal,
-                        iconBackgroundColor: Colors.blue[50]!,
-                        iconColor: Colors.blue.shade700,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionCard(
-                        icon: Icons.devices,
-                        label: 'Total Machines',
-                        count: state.filteredMachines.length,
-                        onPressed: () => notifier.setShowArchived(false),
-                        iconBackgroundColor: Colors.teal[50]!,
-                        iconColor: Colors.teal.shade700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Main Container
               Expanded(
                 child: Container(
-                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade300),
+                    color: WebColors.primaryBorder.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: WebColors.primaryBorder,
+                      width: 1,
+                    ),
                   ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header with Title and Search
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            Text(
-                              state.showArchived ? 'Archived Machines' : 'Active Machines',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.teal,
-                              ),
+                      MachineStatsRow(
+                        activeCount: activeCount,
+                        archivedCount: archivedCount,
+                        newCount: newCount,
+                      ),
+                      const SizedBox(height: 24),
+                      Expanded(
+                        child: BaseTableContainer(
+                          leftHeaderWidget: const Text(
+                            'Machine List',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF111827),
                             ),
-                            const Spacer(),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 500),
-                              child: AdminSearchBar(
-                                searchQuery: state.searchQuery,
-                                onSearchChanged: notifier.setSearchQuery,
-                                onRefresh: _handleRefresh,
+                          ),
+                          rightHeaderWidgets: [
+                            WebMachineDateFilter(
+                              onDateSelected: (date) {
+                                setState(() {
+                                  _selectedDateFilter = date;
+                                  _currentPage = 1;
+                                });
+                              },
+                              isLoading: state.isLoading,
+                            ),
+                            SearchField(
+                              hintText: 'Search machines...',
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value;
+                                  _currentPage = 1;
+                                });
+                              },
+                              width: 300,
+                              isLoading: state.isLoading,
+                            ),
+                            ElevatedButton(
+                              onPressed: state.isLoading ? null : _showAddMachineModal,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF10B981),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Add Machine',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ],
+                          tableHeader: MachineTableHeader(
+                            sortColumn: _sortColumn,
+                            ascending: _ascending,
+                            statusFilter: _statusFilter,
+                            onSort: (column) => _applySortAndFilter(column: column),
+                            onStatusChanged: (status) {
+                              setState(() {
+                                _statusFilter = status;
+                                _currentPage = 1;
+                              });
+                            },
+                            isLoading: state.isLoading,
+                          ),
+                          tableBody: MachineTableBody(
+                            items: paginatedMachines,
+                            onViewDetails: _handleViewMachine,
+                            onEdit: _showEditDialog,
+                            isLoading: state.isLoading,
+                            isEmpty: filteredMachines.isEmpty,
+                          ),
+                          paginationWidget: PaginationTable(
+                            currentPage: _currentPage,
+                            totalPages: totalPages,
+                            itemsPerPage: _itemsPerPage,
+                            onPageChanged: (page) {
+                              setState(() => _currentPage = page);
+                            },
+                            onItemsPerPageChanged: (value) {
+                              setState(() {
+                                _itemsPerPage = value;
+                                _currentPage = 1;
+                              });
+                            },
+                            isLoading: state.isLoading,
+                          ),
                         ),
                       ),
-                      const Divider(height: 1),
-                      Expanded(child: _buildContent(state)),
                     ],
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContent(AdminMachineState state) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                ref.read(adminMachineProvider.notifier).clearError();
-                if (_teamId != null) {
-                  ref.read(adminMachineProvider.notifier).initialize(_teamId!);
-                }
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // ✅ Pass non-null teamId
-    return WebAdminMachineList(
-      machines: state.displayedMachines,
-      hasMoreToLoad: state.hasMoreToLoad,
-      remainingCount: state.remainingCount,
-      onLoadMore: ref.read(adminMachineProvider.notifier).loadMore,
-      teamId: _teamId!, 
-    );
-  }
-
-  Widget _buildActionCard({
-    required IconData icon,
-    required String label,
-    required int? count,
-    required VoidCallback onPressed,
-    required Color iconBackgroundColor,
-    required Color iconColor,
-  }) {
-    return Card(
-      color: Colors.white,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade300, width: 1.0),
-      ),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: iconBackgroundColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 22, color: iconColor),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    if (count != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        count.toString(),
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: iconColor,
-                        ),
-                      ),
-                    ],
-                  ],
                 ),
               ),
             ],
