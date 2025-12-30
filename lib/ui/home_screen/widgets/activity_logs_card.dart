@@ -68,6 +68,7 @@ class ActivityLogsCard extends ConsumerWidget {
     );
 
     return Card(
+      color: const Color(0xFFF5F7FA),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: maxHeight != null
