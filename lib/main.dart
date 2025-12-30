@@ -15,6 +15,8 @@ import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navig
 import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart'
     show WebRegistrationScreen;
 import 'package:flutter_application_1/services/auth_wrapper.dart';
+// 🆕 Import the landing page - CORRECTED PATH
+import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,11 +53,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Accel-o-Rot',
+      title: 'Accel-O-Rot - Smart IoT Composting System',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-      home: const AuthGate(),
+      // 🔧 FIXED: Use initialRoute instead of home to avoid conflict
+      initialRoute: '/',
       routes: {
+        '/': (context) => const AuthGate(), // Home route
+        '/landing': (context) => const LandingPageView(), // Landing page route
         '/login': (context) =>
             kIsWeb ? const LoginScreen() : const LoginScreen(),
         '/signup': (context) =>
@@ -73,6 +78,32 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasData) {
+          // ✅ User is signed in - use AuthWrapper to determine navigation
+          return const AuthWrapper();
+        } else {
+          // 🚪 User is NOT signed in
+          // 🆕 Show landing page for web, login screen for mobile
+          return kIsWeb ? const LandingPageView() : const LoginScreen();
+        }
+      },
+    );
+  }
+
 
 // 🔐 AuthGate: Checks if user is signed in
 class AuthGate extends StatelessWidget {
@@ -94,7 +125,8 @@ class AuthGate extends StatelessWidget {
           return const AuthWrapper();
         } else {
           // 🚪 User is NOT signed in
-          return kIsWeb ? const LoginScreen() : const LoginScreen();
+          // 🆕 Show landing page for web, login screen for mobile
+          return kIsWeb ? const LandingPageView() : const LoginScreen();
         }
       },
     );
