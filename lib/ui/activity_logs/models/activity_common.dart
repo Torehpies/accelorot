@@ -1,10 +1,8 @@
-// lib/ui/activity_logs/models/activity_common.dart
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'activity_common.freezed.dart';
 
-/// Loading status enum
+/// Loading status used by Activity Logs
 enum LoadingStatus {
   initial,
   loading,
@@ -12,7 +10,7 @@ enum LoadingStatus {
   error,
 }
 
-/// Date filter type enum
+/// Supported date filter types
 enum DateFilterType {
   none,
   today,
@@ -22,7 +20,7 @@ enum DateFilterType {
   custom,
 }
 
-/// Date filter configuration
+/// Common date filter model
 @freezed
 abstract class DateFilterRange with _$DateFilterRange {
   const factory DateFilterRange({
@@ -34,5 +32,9 @@ abstract class DateFilterRange with _$DateFilterRange {
 
   const DateFilterRange._();
 
-  bool get isActive => type != DateFilterType.none && startDate != null && endDate != null;
+  /// True when a valid date range is selected
+  bool get isActive =>
+      type != DateFilterType.none &&
+      startDate != null &&
+      endDate != null;
 }
