@@ -82,7 +82,6 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
 
   Future<void> loadData() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    print('🔄 AdminDashboard loadData - userId: $userId');
     
     if (userId == null) {
       state = const AsyncValue.data(AdminDashboardState());
