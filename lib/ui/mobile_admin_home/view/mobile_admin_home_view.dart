@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
+import '../../home_screen/widgets/activity_logs_card.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
   const MobileAdminHomeView({super.key});
@@ -72,6 +73,12 @@ class MobileAdminHomeView extends ConsumerWidget {
                 ),
                   const SizedBox(height: 12),
                   SwipeableStatCards(cards: statCards),
+                  const SizedBox(height: 24),
+                  // Activity Logs Section
+                  ActivityLogsCard(
+                    focusedMachineId: null, // Show all machines for admin
+                    maxHeight: 400,
+                  ),
                 ],
               ),
             );
