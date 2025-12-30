@@ -104,17 +104,19 @@ class CustomDateRangeModal extends StatelessWidget {
                                 lastDate: _tempEndDate ?? DateTime.now(),
                                 builder: (context, child) {
                                   return Theme(
-                                    data: ThemeData.light().copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: Colors.blue,
-                                        onPrimary: Colors.white,
-                                        surface: Colors.white,
-                                        onSurface: Colors.black,
-                                      ),
-                                      dialogBackgroundColor: Colors.white,
+                                  data: ThemeData.light().copyWith(
+                                    colorScheme: const ColorScheme.light(
+                                      primary: Colors.blue,
+                                      onPrimary: Colors.white,
+                                      surface: Colors.white,
+                                      onSurface: Colors.black,
                                     ),
-                                    child: child!,
-                                  );
+                                    dialogTheme: const DialogThemeData(
+                                      backgroundColor: Colors.white,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
                                 },
                               );
                               if (picked != null) {
@@ -180,14 +182,15 @@ class CustomDateRangeModal extends StatelessWidget {
                                 lastDate: DateTime.now(),
                                 builder: (context, child) {
                                   return Theme(
-                                    data: ThemeData.light().copyWith(
+                                    data: ThemeData(
+                                      useMaterial3: true,
                                       colorScheme: const ColorScheme.light(
                                         primary: Colors.blue,
-                                        onPrimary: Colors.white,
                                         surface: Colors.white,
-                                        onSurface: Colors.black,
                                       ),
-                                      dialogBackgroundColor: Colors.white,
+                                      dialogTheme: const DialogThemeData(
+                                        backgroundColor: Colors.white,
+                                      ),
                                     ),
                                     child: child!,
                                   );
