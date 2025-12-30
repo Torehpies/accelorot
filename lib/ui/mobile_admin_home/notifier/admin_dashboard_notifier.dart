@@ -48,36 +48,26 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
   @override
   Future<AdminDashboardState> build() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    print('🔍 AdminDashboard build - userId: $userId');
     
     if (userId == null) {
-      print('❌ AdminDashboard - No user logged in');
       return const AdminDashboardState();
     }
 
     try {
       // Fetch user profile to get teamId
       final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-      print('👤 AdminDashboard - Profile fetched: ${profile?.email}, teamId: ${profile?.teamId}');
-      
+    
       final teamId = profile?.teamId;
       
       if (teamId == null) {
-        // User not assigned to a team yet
-        print('⚠️ AdminDashboard - User has no teamId');
         return const AdminDashboardState();
       }
 
-      // Fetch team data using teamId
-      print('📡 AdminDashboard - Fetching data for teamId: $teamId');
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
       
-      print('✅ AdminDashboard - Fetched ${operators.length} operators, ${machines.length} machines');
       return AdminDashboardState(operators: operators, machines: machines);
     } catch (e) {
-      // Return empty state on error, error will be handled by AsyncValue
-      print('❌ AdminDashboard - Error: $e');
       rethrow;
     }
   }
@@ -95,26 +85,21 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
     try {
       // Fetch user profile to get teamId
       final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-      print('👤 AdminDashboard loadData - Profile: ${profile?.email}, teamId: ${profile?.teamId}');
-      
       final teamId = profile?.teamId;
       
       if (teamId == null) {
         // User not assigned to a team yet
-        print('⚠️ AdminDashboard loadData - User has no teamId');
         state = const AsyncValue.data(AdminDashboardState());
         return;
       }
 
-      // Fetch team data using teamId
-      print('📡 AdminDashboard loadData - Fetching for teamId: $teamId');
+
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
       
-      print('✅ AdminDashboard loadData - Got ${operators.length} operators, ${machines.length} machines');
+
       state = AsyncValue.data(AdminDashboardState(operators: operators, machines: machines));
     } catch (e) {
-      print('❌ AdminDashboard loadData - Error: $e');
       state = AsyncValue.error(e, StackTrace.current);
     }
   }
