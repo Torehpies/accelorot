@@ -45,7 +45,7 @@ class AppHeader extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Text(
                 'Accel-O-Rot',
-                style: WebTextStyles.h3.copyWith(
+                style: WebTextStyles.h2.copyWith(
                   color: WebColors.tealAccent,
                 ),
               ),

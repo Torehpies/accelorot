@@ -12,28 +12,20 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/registration_s
     show RegistrationScreen;
 import 'package:flutter_application_1/frontend/operator/main_navigation.dart';
 import 'package:flutter_application_1/web/admin/admin_navigation/web_admin_navigation.dart';
-import 'package:flutter_application_1/web/admin/screens/web_registration_screen.dart'
-    show WebRegistrationScreen;
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-// 🆕 Import the landing page - CORRECTED PATH
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🌐 Global error handler (safe for web)
   FlutterError.onError = (details) {
     // Consider using a logging service here in production
-    // e.g., Sentry.captureException(details.exception, stackTrace: details.stack);
   };
 
-  // 🧵 Async error handler
   PlatformDispatcher.instance.onError = (error, stack) {
-    // Consider using a logging service here in production
     return true;
   };
 
-  // 🔥 Initialize Firebase
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -56,15 +48,12 @@ class MyApp extends StatelessWidget {
       title: 'Accel-O-Rot - Smart IoT Composting System',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-      // 🔧 FIXED: Use initialRoute instead of home to avoid conflict
       initialRoute: '/',
       routes: {
-        '/': (context) => const AuthGate(), // Home route
-        '/landing': (context) => const LandingPageView(), // Landing page route
-        '/login': (context) =>
-            kIsWeb ? const LoginScreen() : const LoginScreen(),
-        '/signup': (context) =>
-            kIsWeb ? const WebRegistrationScreen() : const RegistrationScreen(),
+        '/': (context) => const AuthGate(),
+        '/landing': (context) => const LandingPageView(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const RegistrationScreen(), // ✅ Use same screen for both web and mobile
         '/main': (context) => const MainNavigation(),
         '/statistics': (context) => const StatisticsScreen(),
         '/web': (context) => const WebAdminNavigation(),
@@ -79,33 +68,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasData) {
-          // ✅ User is signed in - use AuthWrapper to determine navigation
-          return const AuthWrapper();
-        } else {
-          // 🚪 User is NOT signed in
-          // 🆕 Show landing page for web, login screen for mobile
-          return kIsWeb ? const LandingPageView() : const LoginScreen();
-        }
-      },
-    );
-  }
-
-
-// 🔐 AuthGate: Checks if user is signed in
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -121,11 +83,8 @@ class AuthGate extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          // ✅ User is signed in - use AuthWrapper to determine navigation
           return const AuthWrapper();
         } else {
-          // 🚪 User is NOT signed in
-          // 🆕 Show landing page for web, login screen for mobile
           return kIsWeb ? const LandingPageView() : const LoginScreen();
         }
       },

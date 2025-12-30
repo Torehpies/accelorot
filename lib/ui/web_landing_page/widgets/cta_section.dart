@@ -122,7 +122,7 @@ class CtaSection extends StatelessWidget {
                     const SizedBox(width: AppSpacing.md),
                     Text(
                       'Accel-O-Rot',
-                      style: WebTextStyles.bodyMedium.copyWith(
+                      style: WebTextStyles.h2.copyWith(
                         color: WebColors.tealAccent,
                         fontWeight: FontWeight.bold,
                       ),

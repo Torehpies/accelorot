@@ -19,7 +19,7 @@ class ImpactStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xxxl),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFCCFBF1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: WebColors.divider),
       ),
