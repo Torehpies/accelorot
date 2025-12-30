@@ -1,6 +1,9 @@
 // lib/ui/machine_management/widgets/admin/web_machine_stat_card.dart
 import 'package:flutter/material.dart';
+import '../../../core/themes/web_colors.dart';
 
+/// A styled stats card for machine management dashboard,
+/// aligned with BaseStatsCard design language.
 class MachineStatCard extends StatelessWidget {
   final String title;
   final int count;
@@ -25,102 +28,103 @@ class MachineStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine percentage text color based on direction
+    final percentageColor = isPositive ? WebColors.success : WebColors.error;
+
     return Container(
-      height: 148, // Increased from 140 to 148 to fix overflow
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        color: WebColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: WebColors.cardBorder, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.03 * 255).toInt()),
-            blurRadius: 4,
+            color: WebColors.cardShadow,
+            blurRadius: 10,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon and Title Row
+          // Header Row: Title and Icon
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
                     fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: WebColors.textLabel,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: iconColor,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // Count (as main value)
+          Text(
+            count.toString(),
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.w700,
+              color: WebColors.textHeading,
+              height: 1.1,
+            ),
+          ),
+
+          const SizedBox(height: 5),
+
+          // Divider
+          const Divider(height: 1, color: WebColors.dividerLight),
+
+          const SizedBox(height: 5),
+
+          // Percentage + Subtitle Row 
+          Row(
+            children: [
+              Text(
+                percentage,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: percentageColor, // Green or Red
+                ),
+              ),
+              const SizedBox(width: 4), // Small gap
+              Expanded(
+                child: Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: WebColors.textMuted,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF6B7280),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          
-          // Count
-          Text(
-            count.toString(),
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111827),
-            ),
-          ),
-          const Spacer(),
-          
-          // Percentage and Subtitle Row - Fixed height container
-          SizedBox(
-            height: 18,
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isPositive
-                        ? const Color(0xFFD1FAE5)
-                        : const Color(0xFFFEE2E2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    percentage,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF6B7280),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

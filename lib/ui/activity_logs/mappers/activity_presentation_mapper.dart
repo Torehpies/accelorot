@@ -1,5 +1,7 @@
 // lib/ui/activity_logs/mappers/activity_presentation_mapper.dart
 
+import 'package:flutter/material.dart';
+
 import '../../../data/models/substrate.dart';
 import '../../../data/models/alert.dart';
 import '../../../data/models/report.dart';
@@ -96,21 +98,73 @@ class ActivityPresentationMapper {
   // ===== CYCLE RECOMMENDATION → ActivityLogItem =====
 
   static ActivityLogItem fromCycleRecommendation(CycleRecommendation cycle) {
+    // Determine title based on controller type
+    final title = cycle.controllerType == 'drum_controller' 
+        ? 'Drum Controller' 
+        : 'Aerator';
+        // Build description
+    final parts = <String>[];
+    parts.add('Duration: ${cycle.duration ?? "N/A"}');
+    parts.add('Cycles: ${cycle.completedCycles ?? 0}/${cycle.cycles ?? 0}');
+    
+
+    if (cycle.totalRuntimeSeconds != null) {
+    final runtime = Duration(seconds: cycle.totalRuntimeSeconds!);
+    final hours = runtime.inHours;
+    final minutes = runtime.inMinutes.remainder(60);
+    parts.add('Runtime: ${hours}h ${minutes}m');
+    }
+
+
+    
     return ActivityLogItem(
       id: cycle.id,
-      title: cycle.title,
-      value: cycle.value,
-      statusColor: ActivityColorMapper.getColorForCycle(cycle.category),
-      icon: ActivityIconMapper.getIconForCycle(cycle.category),
-      description: cycle.description,
-      category: cycle.category,
-      timestamp: cycle.timestamp,
+      title: title,
+      value: cycle.status ?? 'unknown',
+      statusColor: _getCycleStatusColor(cycle.status),
+      icon: _getCycleIcon(cycle.controllerType),
+      description: parts.join('\n'),
+      category: cycle.controllerType, // ?? 'cycles', 
+      timestamp: cycle.timestamp ?? cycle.startedAt ?? DateTime.now(),
       type: ActivityType.cycle,
       machineId: cycle.machineId,
+      batchId: cycle.batchId,
+      status: cycle.status,
+      controllerType: cycle.controllerType,
+      cycles: cycle.cycles,
+      duration: cycle.duration,
+      completedCycles: cycle.completedCycles,
+      totalRuntimeSeconds: cycle.totalRuntimeSeconds,
     );
   }
 
   // ===== PRIVATE HELPERS (Moved from models) =====
+
+  static Color _getCycleStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'running':
+        return Colors.green;
+      case 'completed':
+        return Colors.blue;
+      case 'stopped':
+        return Colors.red;
+      case 'idle':
+      default:
+        return Colors.grey;
+    }
+  }
+
+  static IconData _getCycleIcon(String? controllerType) {
+    switch (controllerType) {
+      case 'drum_controller':
+        return Icons.sync; // or Icons.rotate_right
+      case 'aerator':
+        return Icons.air;
+      default:
+        return Icons.settings;
+    }
+  }
+
 
   /// Get display category for alerts (moved from Alert model)
   static String _getAlertDisplayCategory(String sensorType) {
