@@ -28,5 +28,5 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 analyzer:
   
-  plugins:
-    - custom_lint
+  # plugins:
+  #   - custom_lint

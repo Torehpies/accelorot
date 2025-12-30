@@ -5,6 +5,7 @@ import '../../../frontend/screens/admin/operator_management/operator_management_
 import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
+import '../../../ui/reports/view/web_reports_view.dart';
 
 
 class WebAdminNavigation extends StatefulWidget {
@@ -21,8 +22,9 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
 
   final List<_NavItem> _navItems = const [
     _NavItem(Icons.dashboard, 'Dashboard'),
-    _NavItem(Icons.history, 'Operators'),
+    _NavItem(Icons.supervisor_account, 'Operators'),
     _NavItem(Icons.settings, 'Machines'),
+    _NavItem(Icons.report, 'Reports'),
     _NavItem(Icons.person, 'Profile'),
   ];
 
@@ -34,10 +36,9 @@ class _WebAdminNavigationState extends State<WebAdminNavigation> {
         onManageOperators: () => setState(() => _selectedIndex = 1),
         onManageMachines: () => setState(() => _selectedIndex = 2),
       ),
-
       OperatorManagementScreen(teamId: FirebaseAuth.instance.currentUser?.uid ?? ''),
       const WebAdminMachineView(),
-
+      const WebReportsView(),
       const WebProfileView(),
     ];
   }
