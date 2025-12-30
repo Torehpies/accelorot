@@ -1,9 +1,7 @@
-// lib/ui/mobile_admin_home/view/mobile_admin_home_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
-import '../widgets/stat_card.dart';
+import '../widgets/swipeable_stat_cards.dart';
 import '../widgets/operator_management_section.dart';
 import '../widgets/machine_management_section.dart';
 
@@ -41,25 +39,40 @@ class MobileAdminHomeView extends ConsumerWidget {
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
           error: (err, _) => Center(child: Text('Error: $err')),
-          data: (state) => SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: StatCard(count: state.totalOperators, label: 'Operators')),
-                    const SizedBox(width: 16),
-                    Expanded(child: StatCard(count: state.totalMachines, label: 'Machines')),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                OperatorManagementSection(operators: state.operators, onManageTap: onManageOperators),
-                const SizedBox(height: 20),
-                MachineManagementSection(machines: state.machines, onManageTap: onManageMachines),
-              ],
-            ),
-          ),
+          data: (state) {
+            final statCards = [
+              StatCardData(
+                count: state.totalOperators,
+                label: 'Total Operators',
+                subtitle: '+25% activated operators this month',
+                icon: Icons.people,
+                iconColor: Colors.teal,
+                iconBackgroundColor: Colors.teal.shade50,
+              ),
+              StatCardData(
+                count: state.totalMachines,
+                label: 'Total Machines',
+                subtitle: '+25% new machines this month',
+                icon: Icons.precision_manufacturing,
+                iconColor: Colors.blue,
+                iconBackgroundColor: Colors.blue.shade50,
+              ),
+            ];
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SwipeableStatCards(cards: statCards),
+                  const SizedBox(height: 20),
+                  OperatorManagementSection(operators: state.operators, onManageTap: onManageOperators),
+                  const SizedBox(height: 20),
+                  MachineManagementSection(machines: state.machines, onManageTap: onManageMachines),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
