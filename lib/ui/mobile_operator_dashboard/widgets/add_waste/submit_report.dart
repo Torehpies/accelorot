@@ -1,6 +1,5 @@
-// lib/frontend/operator/dashboard/add_waste/submit_report.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../fields/report_type_field.dart';
 import '../../fields/report_title_field.dart';
@@ -8,25 +7,28 @@ import '../../fields/machine_selection_field.dart';
 import '../../fields/priority_field.dart';
 import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
-import 'package:flutter_application_1/services/firestore_activity_service.dart';
+import '../../../../data/providers/report_providers.dart'; 
+import '../../../../data/models/report.dart'; 
+import '../../fields/batch_selection_field.dart'; 
 
-class SubmitReport extends StatefulWidget {
+class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
+  final String? preSelectedBatchId; 
 
-  const SubmitReport({super.key, this.preSelectedMachineId});
+  const SubmitReport({super.key, this.preSelectedMachineId, this.preSelectedBatchId});
 
   @override
-  State<SubmitReport> createState() => _SubmitReportState();
+  ConsumerState<SubmitReport> createState() => _SubmitReportState();
 }
 
-class _SubmitReportState extends State<SubmitReport> {
+class _SubmitReportState extends ConsumerState<SubmitReport> {
   String? _selectedReportType;
   String? _selectedMachineId;
+  String? _selectedBatchId;
   String? _selectedPriority;
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  // Error state variables for each field
   String? _titleError;
   String? _reportTypeError;
   String? _machineError;
@@ -36,6 +38,7 @@ class _SubmitReportState extends State<SubmitReport> {
   void initState() {
     super.initState();
     _selectedMachineId = widget.preSelectedMachineId;
+    _selectedBatchId = widget.preSelectedBatchId; 
   }
 
   @override
@@ -57,13 +60,11 @@ class _SubmitReportState extends State<SubmitReport> {
 
   bool _validateForm() {
     setState(() {
-      // Clear all errors first
       _reportTypeError = null;
       _machineError = null;
       _priorityError = null;
       _titleError = null;
 
-      // Validate each field and set error messages
       if (_selectedReportType == null) {
         _reportTypeError = 'Please select a report type';
       }
@@ -76,7 +77,6 @@ class _SubmitReportState extends State<SubmitReport> {
       _titleError = _validateTitle(_titleController.text);
     });
 
-    // Return true only if all errors are null
     return _reportTypeError == null &&
         _machineError == null &&
         _priorityError == null &&
@@ -98,25 +98,31 @@ class _SubmitReportState extends State<SubmitReport> {
       return;
     }
 
-    final report = {
-      'reportType': _selectedReportType!,
-      'title': _titleController.text.trim(),
-      'machineId': _selectedMachineId!,
-      'priority': _selectedPriority!,
-      'description': _descriptionController.text.trim(),
-      'timestamp': DateTime.now(),
-      'userId': user.uid,
-    };
+    final reportRequest = CreateReportRequest(
+      machineId: _selectedMachineId!,
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      reportType: _selectedReportType!,
+      priority: _selectedPriority!,
+      userName: user.displayName ?? user.email ?? 'Unknown',
+      userId: user.uid,
+    );
 
     try {
-      await FirestoreActivityService.submitReport(report);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      final reportRepo = ref.read(reportRepositoryProvider);
+      await reportRepo.createReport(_selectedMachineId!, reportRequest);
+      
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      Navigator.pop(context, report);
+      
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit report: ${e.toString()}')),
+        SnackBar(
+          content: Text('Failed to submit report: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -136,7 +142,7 @@ class _SubmitReportState extends State<SubmitReport> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(25),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -146,16 +152,14 @@ class _SubmitReportState extends State<SubmitReport> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Submit Report',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   IconButton(
@@ -168,13 +172,44 @@ class _SubmitReportState extends State<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
+     
+              MachineSelectionField(
+                selectedMachineId: _selectedMachineId,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMachineId = value;
+                    
+                    if (widget.preSelectedMachineId == null) {
+                      _selectedBatchId = null;
+                    }
+                    _machineError = null;
+                  });
+                },
+                isLocked: widget.preSelectedMachineId != null,
+                errorText: _machineError,
+              ),
+              const SizedBox(height: 16),
+
+              BatchSelectionField(
+                selectedBatchId: _selectedBatchId,
+                selectedMachineId: _selectedMachineId,
+                onChanged: (value) {
+                  setState(() => _selectedBatchId = value);
+                },
+                isLocked: widget.preSelectedBatchId != null, 
+              ),
+              const SizedBox(height: 16),
+
+
               // Report Type
               ReportTypeField(
                 selectedReportType: _selectedReportType,
-                onChanged: (value) => setState(() {
-                  _selectedReportType = value;
-                  _reportTypeError = null;
-                }),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedReportType = value;
+                    _reportTypeError = null;
+                  });
+                },
                 errorText: _reportTypeError,
               ),
               const SizedBox(height: 16),
@@ -183,35 +218,19 @@ class _SubmitReportState extends State<SubmitReport> {
               ReportTitleField(
                 controller: _titleController,
                 errorText: _titleError,
-                onChanged: (value) {
-                  setState(() {
-                    _titleError = null;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Machine Selection
-              MachineSelectionField(
-                selectedMachineId: _selectedMachineId,
-                onChanged: widget.preSelectedMachineId == null
-                    ? (value) => setState(() {
-                        _selectedMachineId = value;
-                        _machineError = null;
-                      })
-                    : null,
-                isLocked: widget.preSelectedMachineId != null,
-                errorText: _machineError,
+                onChanged: (value) => setState(() => _titleError = null),
               ),
               const SizedBox(height: 16),
 
               // Priority
               PriorityField(
                 selectedPriority: _selectedPriority,
-                onChanged: (value) => setState(() {
-                  _selectedPriority = value;
-                  _priorityError = null;
-                }),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPriority = value;
+                    _priorityError = null;
+                  });
+                },
                 errorText: _priorityError,
               ),
               const SizedBox(height: 16),
@@ -223,7 +242,10 @@ class _SubmitReportState extends State<SubmitReport> {
               // Submit Button
               SubmitButton(
                 onPressed: _handleSubmit,
-                style: ElevatedButton.styleFrom(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),

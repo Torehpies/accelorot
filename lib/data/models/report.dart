@@ -20,8 +20,8 @@ abstract class Report with _$Report {
     required String userName,
     required String userRole,
     required String description,
-    required String priority, // 'low', 'medium', 'high', 'critical'
-    required String status, // 'open', 'in_progress', 'closed'
+    required String priority, // 'low', 'medium', 'high'
+    required String status, // 'open', 'in_progress', 'completed', 'on_hold'
     required DateTime createdAt,
     DateTime? updatedAt,
     DateTime? resolvedAt,
@@ -38,27 +38,27 @@ abstract class Report with _$Report {
   // ===== FIRESTORE CONVERSION (for report.dart compatibility) =====
 
   /// Create from Firestore document
-static Report fromFirestore(DocumentSnapshot doc) {
-  final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
-  
-  return Report(
-    id: doc.id, 
-    reportType: data['reportType'] ?? 'observation',  
-    title: data['title'] ?? '',
-    machineId: data['machineId'] ?? '',
-    machineName: data['machineName'] ?? 'Unknown Machine',
-    userId: data['userId'] ?? '',
-    userName: data['userName'] ?? 'Unknown',
-    userRole: data['userRole'] ?? 'operator',  // Add sensible default
-    description: data['description'] ?? '',
-    priority: data['priority'] ?? 'medium',  //  default
-    status: data['status'] ?? 'open',
-    createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
-    resolvedAt: (data['resolvedAt'] as Timestamp?)?.toDate(),
-    resolvedBy: data['resolvedBy'],
-    metadata: data['metadata'] as Map<String, dynamic>?,
-  );
+  static Report fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
+    
+    return Report(
+      id: doc.id, 
+      reportType: data['reportType'] ?? 'observation',  
+      title: data['title'] ?? '',
+      machineId: data['machineId'] ?? '',
+      machineName: data['machineName'] ?? 'Unknown Machine',
+      userId: data['userId'] ?? '',
+      userName: data['userName'] ?? 'Unknown',
+      userRole: data['userRole'] ?? 'operator',
+      description: data['description'] ?? '',
+      priority: data['priority'] ?? 'medium',
+      status: data['status'] ?? 'open',
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      resolvedAt: (data['resolvedAt'] as Timestamp?)?.toDate(),
+      resolvedBy: data['resolvedBy'],
+      metadata: data['metadata'] as Map<String, dynamic>?,
+    );
   }
 
   /// Convert to Firestore map
@@ -85,7 +85,7 @@ static Report fromFirestore(DocumentSnapshot doc) {
   // ===== DISPLAY HELPERS (for UI compatibility) =====
 
   /// Check if report is resolved
-  bool get isResolved => status.toLowerCase() == 'resolved' || status.toLowerCase() == 'closed';
+  bool get isResolved => status.toLowerCase() == 'completed' || status.toLowerCase() == 'on_hold';
 
   /// Get formatted report type label
   String get reportTypeLabel {
@@ -108,8 +108,10 @@ static Report fromFirestore(DocumentSnapshot doc) {
         return 'Open';
       case 'in_progress':
         return 'In Progress';
-      case 'closed':
-        return 'Closed';
+      case 'completed':
+        return 'Completed';
+      case 'on_hold':
+        return 'On Hold';
       default:
         return status;
     }

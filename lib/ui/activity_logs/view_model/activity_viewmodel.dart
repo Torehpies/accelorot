@@ -12,6 +12,8 @@ import 'alert_config.dart';
 import 'report_config.dart';
 import 'cycle_config.dart';
 import 'all_activity_config.dart';
+import '../models/activity_common.dart';
+
 
 part 'activity_viewmodel.g.dart';
 

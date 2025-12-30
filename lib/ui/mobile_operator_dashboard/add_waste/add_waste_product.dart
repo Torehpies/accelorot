@@ -1,5 +1,6 @@
-//add_waste_product.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
 import '../fields/waste_category_section.dart';
 import '../fields/plant_type_section.dart';
 import '../fields/quantity_field.dart';
@@ -7,20 +8,21 @@ import '../fields/description_field.dart';
 import '../fields/submit_button.dart';
 import '../fields/waste_config.dart';
 import '../fields/machine_selection_field.dart';
-import 'package:flutter_application_1/services/firestore_activity_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../data/providers/substrate_providers.dart';
+import '../../../../data/models/substrate.dart';
 
-class AddWasteProduct extends StatefulWidget {
+class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
 
   const AddWasteProduct({super.key, this.preSelectedMachineId});
 
-  // Builds and displays the Add Waste Product dialog.
   @override
-  State<AddWasteProduct> createState() => _AddWasteProductState();
+  ConsumerState<AddWasteProduct> createState() => _AddWasteProductState();
 }
 
-class _AddWasteProductState extends State<AddWasteProduct> {
+class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
+
+
   static const double _minQuantity = 5.0;
   static const double _maxQuantity = 25.0;
 
@@ -30,13 +32,17 @@ class _AddWasteProductState extends State<AddWasteProduct> {
   final _quantityController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  // Error state variables
   String? _quantityError;
   String? _wasteCategoryError;
   String? _plantTypeError;
   String? _machineError;
 
-  // Disposes controllers to free memory when widget is removed.
+  @override
+  void initState() {
+    super.initState();
+    _selectedMachineId = widget.preSelectedMachineId;
+  }
+
   @override
   void dispose() {
     _quantityController.dispose();
@@ -44,20 +50,11 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    _selectedMachineId = widget.preSelectedMachineId;
-  }
-
-  // Capitalizes the first letter of a given category name.
   String _capitalizeCategory(String category) {
     if (category.isEmpty) return category;
     return category[0].toUpperCase() + category.substring(1);
   }
 
-  // Validates the entered quantity and ensures it's within defined limits.
   String? _validateQuantity(String? value) {
     if (value == null || value.isEmpty) return 'Enter quantity';
     final num = double.tryParse(value);
@@ -67,16 +64,13 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return null;
   }
 
-  // Ensures required fields are selected and valid before submission.
   bool _validateForm() {
     setState(() {
-      // Clear all errors first
       _wasteCategoryError = null;
       _plantTypeError = null;
       _machineError = null;
       _quantityError = null;
 
-      // Validate each field and set error messages
       if (_selectedWasteCategory == null) {
         _wasteCategoryError = 'Please select waste category';
       }
@@ -89,14 +83,12 @@ class _AddWasteProductState extends State<AddWasteProduct> {
       _quantityError = _validateQuantity(_quantityController.text);
     });
 
-    // Return true only if all errors are null
     return _wasteCategoryError == null &&
         _plantTypeError == null &&
         _machineError == null &&
         _quantityError == null;
   }
 
-  // Retrieves the display label for a given plant type value.
   String getPlantLabel(String? value) {
     if (value == null) return '';
     for (var options in plantTypeOptions.values) {
@@ -107,7 +99,6 @@ class _AddWasteProductState extends State<AddWasteProduct> {
     return '';
   }
 
-  // Handles form submission, validates input, and saves data to Firestore.
   void _handleSubmit() async {
     if (!_validateForm()) return;
 
@@ -123,33 +114,45 @@ class _AddWasteProductState extends State<AddWasteProduct> {
       return;
     }
 
-    final wasteEntry = {
-      'category': _capitalizeCategory(_selectedWasteCategory!),
-      'plantType': _selectedPlantType!,
-      'plantTypeLabel': getPlantLabel(_selectedPlantType),
-      'quantity': double.parse(_quantityController.text),
-      'description': _descriptionController.text.trim(),
-      'timestamp': DateTime.now(),
-      'machineId': _selectedMachineId!,
-      'operatorName': user.displayName ?? user.email ?? 'Operator',
-      'userId': user.uid,
-      // 'machineName': _selectedMachineName,
-    };
+    // ✅ FIXED: Now CreateSubstrateRequest exists and is properly typed
+    final substrateData = CreateSubstrateRequest(
+      category: _capitalizeCategory(_selectedWasteCategory!),
+      plantType: _selectedPlantType!,
+      plantTypeLabel: getPlantLabel(_selectedPlantType),
+      quantity: double.parse(_quantityController.text),
+      description: _descriptionController.text.trim(),
+      machineId: _selectedMachineId!,
+      operatorName: user.displayName ?? user.email ?? 'Operator',
+      userId: user.uid,
+    );
 
     try {
-      await FirestoreActivityService.addWasteProduct(wasteEntry);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      final substrateRepo = ref.read(substrateRepositoryProvider);
+      await substrateRepo.addSubstrate(substrateData); // ✅ Passes typed object
+      
+      await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      Navigator.pop(context, wasteEntry);
+      
+      Navigator.pop(context, true);
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Waste entry added successfully!'),
+          backgroundColor: Colors.teal,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add waste: ${e.toString()}')),
+        SnackBar(
+          content: Text('Failed to add waste: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  // Builds the Add Waste Product dialog layout and structure.
   @override
   Widget build(BuildContext context) {
     return Dialog(

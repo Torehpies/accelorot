@@ -138,7 +138,7 @@ class FirestoreSubstrateService implements SubstrateService {
       final teamId = await _batchService.getUserTeamId(currentUserId!);
 
       // Create document
-      final DateTime timestamp = data['timestamp'] as DateTime? ?? DateTime.now();
+      final Timestamp timestamp = data['timestamp'] as Timestamp? ?? Timestamp.now();
       final docId = '${timestamp.millisecondsSinceEpoch}_$currentUserId';
 
       // PATH: batches/{batchId}/substrates
@@ -153,7 +153,7 @@ class FirestoreSubstrateService implements SubstrateService {
         'batchId': batchId,
         'teamId': teamId,
         'createdBy': currentUserId, // Only store creator, not batch owner
-        'timestamp': Timestamp.fromDate(timestamp),
+        'timestamp': timestamp,
       });
 
       // Update batch timestamp

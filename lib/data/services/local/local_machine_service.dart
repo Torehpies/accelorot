@@ -1,7 +1,6 @@
 import '../../models/machine_model.dart';
 import '../contracts/machine_service.dart';
 
-/// TODO future local db for offline use
 class LocalMachineService implements MachineService {
   @override
   Future<List<MachineModel>> fetchMachinesByTeam(String teamId) {

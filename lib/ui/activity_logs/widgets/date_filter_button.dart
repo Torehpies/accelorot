@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/date_filter_button.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/activity_list_state.dart';
+import '../models/activity_common.dart';
 
 class DateFilterButton extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
@@ -182,10 +182,10 @@ class _DateFilterButtonState extends State<DateFilterButton> {
               children: [
                 Icon(
                   Icons.calendar_today,
-                  size: 20,
+                  size: 18,
                   color: _currentFilter.isActive
                       ? Colors.teal.shade700
-                      : Colors.white,
+                      : const Color(0xFF6B7280),
                 ),
                 if (_currentFilter.isActive) ...[
                   const SizedBox(width: 6),
@@ -218,7 +218,7 @@ class _DateFilterButtonState extends State<DateFilterButton> {
               child: Icon(
                 Icons.clear,
                 size: 20,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: Colors.black.withValues(alpha: 0.9),
               ),
             ),
           ),
