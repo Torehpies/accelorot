@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'activity_chart.dart';
 import 'status_chart.dart';
+import '../../../data/providers/activity_providers.dart';
+import '../../../data/models/report.dart';
 
-class AnalyticsWidget extends StatefulWidget {
-  const AnalyticsWidget({super.key});
+class AnalyticsWidget extends ConsumerStatefulWidget {
+  final List<Report> reports;
+  const AnalyticsWidget({super.key, required this.reports});
 
   @override
-  State<AnalyticsWidget> createState() => _AnalyticsWidgetState();
+  ConsumerState<AnalyticsWidget> createState() => _AnalyticsWidgetState();
 }
 
-class _AnalyticsWidgetState extends State<AnalyticsWidget> {
-  int _selectedTab = 0; // 0 for Activity, 1 for Report Status
+class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
+  int _selectedTab = 0; // 0 for Activity, 1 for Status
 
   @override
   Widget build(BuildContext context) {
+    final allActivitiesAsync = ref.watch(allActivitiesProvider);
+
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -55,8 +61,12 @@ class _AnalyticsWidgetState extends State<AnalyticsWidget> {
             SizedBox(
               height: 280,
               child: _selectedTab == 0
-                  ? const ActivityChart()
-                  : const StatusChart(),
+                  ? allActivitiesAsync.when(
+                      data: (activities) => ActivityChart(activities: activities),
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (err, _) => Center(child: Text('Error: $err')),
+                    )
+                  : StatusChart(reports: widget.reports),
             ),
           ],
         ),

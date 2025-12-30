@@ -78,7 +78,7 @@ class MobileAdminHomeView extends ConsumerWidget {
                   const SizedBox(height: 24),
                   
                   // Analytics Section
-                  const AnalyticsWidget(),
+                  AnalyticsWidget(reports: state.reports),
                   const SizedBox(height: 24),
                   
                   // Activity Logs Section

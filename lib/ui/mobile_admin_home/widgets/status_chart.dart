@@ -1,47 +1,88 @@
-
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'package:fl_chart/fl_chart.dart';
+import '../../../data/models/report.dart';
 
 class StatusChart extends StatelessWidget {
-  const StatusChart({super.key});
+  final List<Report> reports;
+  const StatusChart({super.key, required this.reports});
 
   @override
   Widget build(BuildContext context) {
+    if (reports.isEmpty) {
+      return const Center(
+        child: Text(
+          'No reports available',
+          style: TextStyle(color: Color(0xFF6B7280)),
+        ),
+      );
+    }
+
+    final openCount = reports.where((r) => r.status.toLowerCase() == 'open').length;
+    final inProgressCount = reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
+    final closedCount = reports.where((r) => r.status.toLowerCase() == 'closed' || r.status.toLowerCase() == 'resolved').length;
+    final total = reports.length;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Donut Chart
+        // Pie Chart
         SizedBox(
-          width: 200,
-          height: 200,
-          child: CustomPaint(
-            painter: DonutChartPainter(),
+          width: 180,
+          height: 180,
+          child: PieChart(
+            PieChartData(
+              sectionsSpace: 2,
+              centerSpaceRadius: 50,
+              startDegreeOffset: -90,
+              sections: [
+                if (openCount > 0)
+                  PieChartSectionData(
+                    color: const Color(0xFFEF4444), // Red for Open
+                    value: openCount.toDouble(),
+                    title: '',
+                    radius: 20,
+                  ),
+                if (inProgressCount > 0)
+                  PieChartSectionData(
+                    color: const Color(0xFFF59E0B), // Amber for In Progress
+                    value: inProgressCount.toDouble(),
+                    title: '',
+                    radius: 20,
+                  ),
+                if (closedCount > 0)
+                  PieChartSectionData(
+                    color: const Color(0xFF10B981), // Green for Closed
+                    value: closedCount.toDouble(),
+                    title: '',
+                    radius: 20,
+                  ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         // Legend
         Wrap(
           spacing: 16,
-          runSpacing: 12,
+          runSpacing: 8,
           alignment: WrapAlignment.center,
           children: [
-            _buildLegendItem('Open', const Color(0xFF059669)),
-            _buildLegendItem('Closed', const Color(0xFF34D399)),
-            _buildLegendItem('In Progress', const Color(0xFF065F46)),
-            _buildLegendItem('Pending', const Color(0xFF6EE7B7)),
+            _buildLegendItem('Open', const Color(0xFFEF4444), openCount),
+            _buildLegendItem('In Progress', const Color(0xFFF59E0B), inProgressCount),
+            _buildLegendItem('Closed', const Color(0xFF10B981), closedCount),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildLegendItem(String label, Color color) {
+  Widget _buildLegendItem(String label, Color color, int count) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -49,9 +90,9 @@ class StatusChart extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          label,
+          '$label ($count)',
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             color: Color(0xFF6B7280),
             fontWeight: FontWeight.w500,
           ),
@@ -59,47 +100,4 @@ class StatusChart extends StatelessWidget {
       ],
     );
   }
-}
-
-// Custom Painter for Donut Chart
-class DonutChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.min(size.width, size.height) / 2;
-    final strokeWidth = 30.0;
-
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    // Sample data percentages (total should be close to 360 degrees)
-    final segments = [
-      {'color': const Color(0xFF059669), 'percentage': 0.25}, // Open
-      {'color': const Color(0xFF34D399), 'percentage': 0.30}, // Closed
-      {'color': const Color(0xFF065F46), 'percentage': 0.25}, // In Progress
-      {'color': const Color(0xFF6EE7B7), 'percentage': 0.20}, // Pending
-    ];
-
-    double startAngle = -math.pi / 2; // Start from top
-
-    for (var segment in segments) {
-      paint.color = segment['color'] as Color;
-      final sweepAngle = 2 * math.pi * (segment['percentage'] as double);
-
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-        startAngle,
-        sweepAngle,
-        false,
-        paint,
-      );
-
-      startAngle += sweepAngle;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
