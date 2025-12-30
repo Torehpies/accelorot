@@ -15,6 +15,7 @@ import 'all_activity_config.dart';
 import '../models/activity_common.dart';
 
 
+
 part 'activity_viewmodel.g.dart';
 
 /// Enum for different activity screen types

@@ -6,6 +6,7 @@ import '../screens/web_admin_home_screen.dart';
 import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 
+
 class WebAdminNavigation extends StatefulWidget {
   const WebAdminNavigation({super.key});
     
