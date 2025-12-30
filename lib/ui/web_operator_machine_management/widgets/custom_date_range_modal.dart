@@ -31,8 +31,8 @@ class CustomDateRangeModal extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    DateTime? _tempStartDate = initialStartDate ?? DateTime.now().subtract(const Duration(days: 7));
-    DateTime? _tempEndDate = initialEndDate ?? DateTime.now();
+    DateTime? tempStartDate = initialStartDate ?? DateTime.now().subtract(const Duration(days: 7));
+    DateTime? tempEndDate = initialEndDate ?? DateTime.now();
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -46,7 +46,7 @@ class CustomDateRangeModal extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha((0.1 * 255).round()),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -99,9 +99,9 @@ class CustomDateRangeModal extends StatelessWidget {
                             onTap: () async {
                               final DateTime? picked = await showDatePicker(
                                 context: context,
-                                initialDate: _tempStartDate ?? DateTime.now(),
+                                initialDate: tempStartDate ?? DateTime.now(),
                                 firstDate: DateTime(2020),
-                                lastDate: _tempEndDate ?? DateTime.now(),
+                                lastDate: tempEndDate ?? DateTime.now(),
                                 builder: (context, child) {
                                   return Theme(
                                   data: ThemeData.light().copyWith(
@@ -121,7 +121,7 @@ class CustomDateRangeModal extends StatelessWidget {
                               );
                               if (picked != null) {
                                 setState(() {
-                                  _tempStartDate = picked;
+                                  tempStartDate = picked;
                                 });
                               }
                             },
@@ -141,12 +141,12 @@ class CustomDateRangeModal extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _tempStartDate != null
-                                        ? '${_tempStartDate!.day}/${_tempStartDate!.month}/${_tempStartDate!.year}'
+                                    tempStartDate != null
+                                        ? '${tempStartDate!.day}/${tempStartDate!.month}/${tempStartDate!.year}'
                                         : 'Select Start Date',
                                     style: TextStyle(
                                       fontSize: isDesktop ? 14 : 13,
-                                      color: _tempStartDate != null
+                                      color: tempStartDate != null
                                           ? Colors.black
                                           : Colors.grey.shade500,
                                     ),
@@ -177,8 +177,8 @@ class CustomDateRangeModal extends StatelessWidget {
                             onTap: () async {
                               final DateTime? picked = await showDatePicker(
                                 context: context,
-                                initialDate: _tempEndDate ?? DateTime.now(),
-                                firstDate: _tempStartDate ?? DateTime(2020),
+                                initialDate: tempEndDate ?? DateTime.now(),
+                                firstDate: tempStartDate ?? DateTime(2020),
                                 lastDate: DateTime.now(),
                                 builder: (context, child) {
                                   return Theme(
@@ -198,7 +198,7 @@ class CustomDateRangeModal extends StatelessWidget {
                               );
                               if (picked != null) {
                                 setState(() {
-                                  _tempEndDate = picked;
+                                  tempEndDate = picked;
                                 });
                               }
                             },
@@ -218,12 +218,12 @@ class CustomDateRangeModal extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _tempEndDate != null
-                                        ? '${_tempEndDate!.day}/${_tempEndDate!.month}/${_tempEndDate!.year}'
+                                    tempEndDate != null
+                                        ? '${tempEndDate!.day}/${tempEndDate!.month}/${tempEndDate!.year}'
                                         : 'Select End Date',
                                     style: TextStyle(
                                       fontSize: isDesktop ? 14 : 13,
-                                      color: _tempEndDate != null
+                                      color: tempEndDate != null
                                           ? Colors.black
                                           : Colors.grey.shade500,
                                     ),
@@ -258,8 +258,8 @@ class CustomDateRangeModal extends StatelessWidget {
                         'Last 7 Days',
                         () {
                           setState(() {
-                            _tempEndDate = DateTime.now();
-                            _tempStartDate = DateTime.now().subtract(const Duration(days: 7));
+                            tempEndDate = DateTime.now();
+                            tempStartDate = DateTime.now().subtract(const Duration(days: 7));
                           });
                         },
                       ),
@@ -269,8 +269,8 @@ class CustomDateRangeModal extends StatelessWidget {
                         () {
                           final now = DateTime.now();
                           setState(() {
-                            _tempStartDate = DateTime(now.year, now.month, 1);
-                            _tempEndDate = now;
+                            tempStartDate = DateTime(now.year, now.month, 1);
+                            tempEndDate = now;
                           });
                         },
                       ),
@@ -281,8 +281,8 @@ class CustomDateRangeModal extends StatelessWidget {
                           final now = DateTime.now();
                           final lastMonth = DateTime(now.year, now.month - 1, 1);
                           setState(() {
-                            _tempStartDate = lastMonth;
-                            _tempEndDate = DateTime(now.year, now.month, 0);
+                            tempStartDate = lastMonth;
+                            tempEndDate = DateTime(now.year, now.month, 0);
                           });
                         },
                       ),
@@ -292,8 +292,8 @@ class CustomDateRangeModal extends StatelessWidget {
                         () {
                           final now = DateTime.now();
                           setState(() {
-                            _tempStartDate = DateTime(now.year, 1, 1);
-                            _tempEndDate = now;
+                            tempStartDate = DateTime(now.year, 1, 1);
+                            tempEndDate = now;
                           });
                         },
                       ),
@@ -326,9 +326,9 @@ class CustomDateRangeModal extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _tempStartDate != null && _tempEndDate != null
+                          onPressed: tempStartDate != null && tempEndDate != null
                               ? () {
-                                  onDateRangeSelected(_tempStartDate, _tempEndDate);
+                                  onDateRangeSelected(tempStartDate, tempEndDate);
                                   Navigator.pop(context);
                                 }
                               : null,
