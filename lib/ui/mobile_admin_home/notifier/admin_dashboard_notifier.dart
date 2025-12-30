@@ -6,18 +6,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../data/providers/operator_providers.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/profile_providers.dart';
+import '../../../data/providers/report_providers.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/models/operator_model.dart';
+import '../../../data/models/report.dart';
 
 class AdminDashboardState {
   final List<OperatorModel> operators;
   final List<MachineModel> machines;
+  final List<Report> reports;
   final bool isLoading;
   final Object? error;
 
   const AdminDashboardState({
     this.operators = const [],
     this.machines = const [],
+    this.reports = const [],
     this.isLoading = false,
     this.error,
   });
@@ -25,12 +29,14 @@ class AdminDashboardState {
   AdminDashboardState copyWith({
     List<OperatorModel>? operators,
     List<MachineModel>? machines,
+    List<Report>? reports,
     bool? isLoading,
     Object? error,
   }) {
     return AdminDashboardState(
       operators: operators ?? this.operators,
       machines: machines ?? this.machines,
+      reports: reports ?? this.reports,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );
@@ -38,6 +44,7 @@ class AdminDashboardState {
 
   int get totalOperators => operators.length;
   int get totalMachines => machines.length;
+  int get totalReports => reports.length;
 }
 
 final adminDashboardProvider = AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
@@ -65,8 +72,9 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
 
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
+      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
       
-      return AdminDashboardState(operators: operators, machines: machines);
+      return AdminDashboardState(operators: operators, machines: machines, reports: reports);
     } catch (e) {
       rethrow;
     }
@@ -96,9 +104,10 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
 
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
+      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
       
 
-      state = AsyncValue.data(AdminDashboardState(operators: operators, machines: machines));
+      state = AsyncValue.data(AdminDashboardState(operators: operators, machines: machines, reports: reports));
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }

@@ -57,6 +57,14 @@ class MobileAdminHomeView extends ConsumerWidget {
                 iconColor: Colors.blue,
                 iconBackgroundColor: Colors.blue.shade50,
               ),
+              StatCardData(
+                count: state.totalReports,
+                label: 'Total Reports',
+                subtitle: 'Reports submitted this month',
+                icon: Icons.description,
+                iconColor: Colors.amber.shade800,
+                iconBackgroundColor: Colors.amber.shade50,
+              ),
             ];
 
             return SingleChildScrollView(
