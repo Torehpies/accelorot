@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ui/machine_management/view_model/operator_machine_notifier.dart';
 import '../widgets/stat_card.dart';
-import '../widgets/machine_table.dart';
+import '../widgets/machine_table/machine_table.dart';
 import '../widgets/machine_mobile_card.dart';
 import '../widgets/pagination.dart';
 import '../widgets/search_bar.dart';
