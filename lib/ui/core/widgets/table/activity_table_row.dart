@@ -224,7 +224,8 @@ class ActivityTableRow extends StatelessWidget {
     final typeColor = UnifiedActivityConfig.getColorForSubType(subType);
 
     return GenericTableRow(
-      onTap: () => onViewDetails(item),
+      onTap: null,
+      hoverColor: WebColors.hoverBackground,
       cellSpacing: AppSpacing.md,
       cells: [
         // Title Column
