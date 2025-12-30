@@ -105,7 +105,7 @@ class _AcceptOperatorsScreenState
     return ListView.separated(
       padding: const EdgeInsets.all(ThemeConstants.spacing20),
       itemCount: _controller.pendingMembers.length,
-      separatorBuilder: (_, __) =>
+      separatorBuilder: (_, _) =>
           const SizedBox(height: ThemeConstants.spacing12),
       itemBuilder: (_, index) =>
           _buildPendingMemberCard(_controller.pendingMembers[index], index),
