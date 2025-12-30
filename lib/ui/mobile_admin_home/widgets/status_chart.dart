@@ -20,11 +20,12 @@ class StatusChart extends StatelessWidget {
     final openCount = reports.where((r) => r.status.toLowerCase() == 'open').length;
     final inProgressCount = reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
     final closedCount = reports.where((r) => r.status.toLowerCase() == 'closed' || r.status.toLowerCase() == 'resolved').length;
-    final total = reports.length;
+    //final total = reports.length;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         // Pie Chart
         SizedBox(
           width: 180,
@@ -73,6 +74,7 @@ class StatusChart extends StatelessWidget {
           ],
         ),
       ],
+      ),
     );
   }
 

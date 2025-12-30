@@ -26,14 +26,6 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
     });
   }
 
-  void _navigateToTab(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   List<Widget> _buildScreens() {
     return [
       MobileAdminHomeView(),
