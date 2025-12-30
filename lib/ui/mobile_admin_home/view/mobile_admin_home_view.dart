@@ -1,21 +1,12 @@
-// lib/ui/mobile_admin_home/view/mobile_admin_home_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
-import '../widgets/stat_card.dart';
-import '../widgets/operator_management_section.dart';
-import '../widgets/machine_management_section.dart';
+import '../widgets/swipeable_stat_cards.dart';
+import '../widgets/analytics_widget.dart';
+import '../../home_screen/widgets/activity_logs_card.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const MobileAdminHomeView({
-    super.key,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const MobileAdminHomeView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,25 +32,64 @@ class MobileAdminHomeView extends ConsumerWidget {
         child: asyncState.when(
           loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
           error: (err, _) => Center(child: Text('Error: $err')),
-          data: (state) => SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: StatCard(count: state.totalOperators, label: 'Operators')),
-                    const SizedBox(width: 16),
-                    Expanded(child: StatCard(count: state.totalMachines, label: 'Machines')),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                OperatorManagementSection(operators: state.operators, onManageTap: onManageOperators),
-                const SizedBox(height: 20),
-                MachineManagementSection(machines: state.machines, onManageTap: onManageMachines),
-              ],
-            ),
-          ),
+          data: (state) {
+            final statCards = [
+              StatCardData(
+                count: state.totalOperators,
+                label: 'Total Operators',
+                subtitle: '+25% activated operators this month',
+                icon: Icons.people,
+                iconColor: Colors.teal,
+                iconBackgroundColor: Colors.teal.shade50,
+              ),
+              StatCardData(
+                count: state.totalMachines,
+                label: 'Total Machines',
+                subtitle: '+25% new machines this month',
+                icon: Icons.precision_manufacturing,
+                iconColor: Colors.blue,
+                iconBackgroundColor: Colors.blue.shade50,
+              ),
+              StatCardData(
+                count: state.totalReports,
+                label: 'Total Reports',
+                subtitle: 'Reports submitted this month',
+                icon: Icons.description,
+                iconColor: Colors.amber.shade800,
+                iconBackgroundColor: Colors.amber.shade50,
+              ),
+            ];
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Overview Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Overview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      SizedBox.shrink(),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SwipeableStatCards(cards: statCards),
+                  const SizedBox(height: 24),
+                  
+                  // Analytics Section
+                  AnalyticsWidget(reports: state.reports),
+                  const SizedBox(height: 24),
+                  
+                  // Activity Logs Section
+                  ActivityLogsCard(
+                    focusedMachineId: null, // Show all machines for admin
+                    maxHeight: 400,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
