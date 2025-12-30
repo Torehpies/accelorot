@@ -28,6 +28,7 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 analyzer:
   plugins:
-    - custom_lint
-  errors:
-    invalid_annotations_target: ignore
+    - riverpod_lint
+
+plugins:
+  riverpod_lint: ^3.1.0
