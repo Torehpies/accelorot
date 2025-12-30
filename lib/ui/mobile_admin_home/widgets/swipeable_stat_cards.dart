@@ -13,7 +13,9 @@ class SwipeableStatCards extends StatefulWidget {
 }
 
 class _SwipeableStatCardsState extends State<SwipeableStatCards> {
-  final PageController _pageController = PageController();
+  final PageController _pageController = PageController(
+    viewportFraction: 0.92, // Shows partial view of next/previous cards
+  );
   int _currentPage = 0;
 
   @override
@@ -27,9 +29,10 @@ class _SwipeableStatCardsState extends State<SwipeableStatCards> {
     return Column(
       children: [
         SizedBox(
-          height: 140,
+          height: 160,
           child: PageView.builder(
             controller: _pageController,
+            padEnds: false,
             onPageChanged: (index) {
               setState(() {
                 _currentPage = index;
@@ -39,7 +42,7 @@ class _SwipeableStatCardsState extends State<SwipeableStatCards> {
             itemBuilder: (context, index) {
               final card = widget.cards[index];
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.only(right: 12),
                 child: StatCard(
                   count: card.count,
                   label: card.label,

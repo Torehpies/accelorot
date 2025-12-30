@@ -2,18 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
-import '../widgets/operator_management_section.dart';
-import '../widgets/machine_management_section.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const MobileAdminHomeView({
-    super.key,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const MobileAdminHomeView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,11 +63,15 @@ class MobileAdminHomeView extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                     Text('Overview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                     SizedBox.shrink(),
+                    ],
+                ),
+                  const SizedBox(height: 12),
                   SwipeableStatCards(cards: statCards),
-                  const SizedBox(height: 20),
-                  OperatorManagementSection(operators: state.operators, onManageTap: onManageOperators),
-                  const SizedBox(height: 20),
-                  MachineManagementSection(machines: state.machines, onManageTap: onManageMachines),
                 ],
               ),
             );

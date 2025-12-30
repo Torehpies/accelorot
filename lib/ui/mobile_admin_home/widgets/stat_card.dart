@@ -23,8 +23,11 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      // changed: light gray/blue background
+      color: const Color(0xFFF5F7FA),
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      // changed: increased border radius
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
@@ -70,16 +73,17 @@ class StatCard extends StatelessWidget {
             ),
             if (icon != null) ...[
               const SizedBox(width: 16),
+              // changed: smaller icon container (48x48) with rounded corners (radius 12) and smaller icon (24)
               Container(
-                width: 60,
-                height: 60,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: iconBackgroundColor ?? Colors.teal.shade50,
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  size: 30,
+                  size: 24,
                   color: iconColor ?? Colors.teal,
                 ),
               ),
