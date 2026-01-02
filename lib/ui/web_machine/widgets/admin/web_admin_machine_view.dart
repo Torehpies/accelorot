@@ -207,7 +207,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
             Icon(Icons.group_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No team assigned.\nPlease contact support.',
+              'No team assigned.',
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
