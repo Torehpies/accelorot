@@ -279,7 +279,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
                             ),
                           )
                         : const Text(
-                            'Add Operator',
+                            'Add Machine',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
