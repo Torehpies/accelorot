@@ -110,7 +110,7 @@ class AdminMachineCard extends ConsumerWidget {
                           machine.machineName,
                           style: const TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 17,
+                            fontSize: 15,
                             color: Color(0xFF1F2937),
                           ),
                         ),
@@ -159,7 +159,7 @@ class AdminMachineCard extends ConsumerWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             color: Color(0xFF6B7280),
             fontWeight: FontWeight.w500,
           ),
@@ -169,7 +169,7 @@ class AdminMachineCard extends ConsumerWidget {
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               color: Color(0xFF374151),
               fontWeight: FontWeight.w500,
             ),

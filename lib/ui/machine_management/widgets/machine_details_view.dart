@@ -187,7 +187,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   Text(
                     widget.machine.machineName,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -198,7 +198,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   Text(
                     'ID: ${widget.machine.machineId}',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -228,7 +228,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   const Text(
                     'Assigned User',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -247,7 +247,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                         'All Team Members',
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                       ),
                     )
@@ -274,7 +274,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                                 child: Text(
                                   user.name,
                                   style: const TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -308,7 +308,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   const Text(
                     'Status',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -347,7 +347,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                               ? 'Archived'
                               : _getStatusLabel(widget.machine.status),
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: isArchived
                                 ? const Color(0xFFEF5350)
@@ -383,7 +383,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   const Text(
                     'Date Created',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -391,7 +391,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   Text(
                     dateStr,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: Colors.grey[700],
                     ),
                   ),

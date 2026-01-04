@@ -5,7 +5,6 @@ import '../../../services/sess_service.dart';
 import 'add_machine_modal.dart';
 import 'admin_machine_card.dart';
 import 'machine_tab_filter.dart';
-import '../../reports/widgets/reports_view.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -54,14 +53,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     );
   }
 
-    void _navigateToReports() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ReportsView(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,29 +76,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           backgroundColor: Colors.white,
           elevation: 0,
           actions: [
-            // Reports Button
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: ElevatedButton.icon(
-                onPressed: _navigateToReports,
-                icon: const Icon(Icons.bar_chart, size: 18),
-                label: const Text('Reports'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2196F3),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-
-            // New Machine Button
             Container(
               margin: const EdgeInsets.only(right: 12),
               child: ElevatedButton.icon(
