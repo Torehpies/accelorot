@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import 'search_bar_widget.dart';
-import 'machine_action_card.dart';
 import 'add_machine_modal.dart';
 import 'admin_machine_card.dart';
-
-import '../../reports/widgets/reports_view.dart'; 
+import 'machine_tab_filter.dart';
+import '../../reports/widgets/reports_view.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -56,12 +54,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     );
   }
 
-  Future<void> _handleRefresh() async {
-    if (_teamId != null) {
-      await ref.read(adminMachineProvider.notifier).refresh(_teamId!);
-    }
-  }
-
     void _navigateToReports() {
     Navigator.push(
       context,
@@ -79,135 +71,117 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     return GestureDetector(
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: const Color(0xFFE3F2FD),
         appBar: AppBar(
-          leading: state.showArchived
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () {
-
-                    _searchFocusNode.unfocus();
-                    notifier.clearSearch();
-                    notifier.setShowArchived(false);
-                  },
-                )
-              : null,
           automaticallyImplyLeading: false,
-          title: Text(
-            state.showArchived ? 'Archived Machines' : 'Machine Management',
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
+          title: const Text(
+            'Machine List',
+            style: TextStyle(
+              color: Color(0xFF1F2937),
+              fontWeight: FontWeight.w600,
+              fontSize: 20,
             ),
           ),
-          backgroundColor: Colors.teal,
+          backgroundColor: Colors.white,
           elevation: 0,
-          centerTitle: false,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              onPressed: _handleRefresh,
-              tooltip: 'Refresh',
+            // Reports Button
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: ElevatedButton.icon(
+                onPressed: _navigateToReports,
+                icon: const Icon(Icons.bar_chart, size: 18),
+                label: const Text('Reports'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2196F3),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+
+            // New Machine Button
+            Container(
+              margin: const EdgeInsets.only(right: 12),
+              child: ElevatedButton.icon(
+                onPressed: _showAddMachineModal,
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('New Machine'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Action Cards Row - Only show when not in archived view
-              if (!state.showArchived)
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: MachineActionCard(
-                            icon: Icons.archive,
-                            label: 'Archive',
-                            onPressed: () {
-
-                              _searchFocusNode.unfocus();
-                              notifier.clearSearch();
-                              notifier.setShowArchived(true);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: MachineActionCard(
-                            icon: Icons.report,
-                            label: 'Reports',
-                            onPressed: _navigateToReports,
-
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: MachineActionCard(
-                            icon: Icons.add_circle_outline,
-                            label: 'Add Machine',
-                            onPressed: _showAddMachineModal,
-                          ),
-                        ),
-                      ],
+              // Search Bar
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x0D000000),
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
                     ),
-                    const SizedBox(height: 16),
                   ],
                 ),
-
-              // Main Container
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: SearchBarWidget(
-                          onSearchChanged: notifier.setSearchQuery,
-                          onClear: () {
-
-                            notifier.clearSearch();
-                          },
-                          focusNode: _searchFocusNode,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          children: [
-                            Text(
-                              state.showArchived
-                                  ? 'Archived Machines'
-                                  : 'List of Machines',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.teal,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(child: _buildMachineContent(state, notifier)),
-                    ],
+                child: TextField(
+                  focusNode: _searchFocusNode,
+                  onChanged: notifier.setSearchQuery,
+                  decoration: InputDecoration(
+                    hintText: 'Search..',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 15,
+                    ),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // Tab Filters
+              MachineTabFilter(
+                selectedTab: state.selectedTab,
+                onTabSelected: notifier.setFilterTab,
+              ),
+              const SizedBox(height: 24),
+
+              // Machine List
+              Expanded(child: _buildMachineContent(state, notifier)),
             ],
           ),
         ),
@@ -261,6 +235,21 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     }
 
     if (state.filteredMachines.isEmpty) {
+      String emptyMessage;
+      switch (state.selectedTab) {
+        case MachineFilterTab.archived:
+          emptyMessage = 'No archived machines';
+          break;
+        case MachineFilterTab.active:
+          emptyMessage = 'No active machines';
+          break;
+        case MachineFilterTab.inactive:
+          emptyMessage = 'No inactive machines';
+          break;
+        default:
+          emptyMessage = 'No machines available';
+      }
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -268,17 +257,13 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                state.showArchived ? Icons.archive : Icons.inbox_outlined,
+                Icons.inbox_outlined,
                 size: 64,
                 color: Colors.grey[400],
               ),
               const SizedBox(height: 16),
               Text(
-                state.searchQuery.isNotEmpty
-                    ? 'No machines found'
-                    : state.showArchived
-                        ? 'No archived machines'
-                        : 'No machines available. Add one to get started!',
+                state.searchQuery.isNotEmpty ? 'No machines found' : emptyMessage,
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
                 textAlign: TextAlign.center,
               ),
@@ -289,26 +274,28 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: EdgeInsets.zero,
       itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.displayedMachines.length) {
           return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.only(top: 8, bottom: 16),
             child: ElevatedButton.icon(
               onPressed: notifier.loadMore,
               icon: const Icon(Icons.expand_more),
               label: Text(
                 'Load More (${state.remainingCount} remaining)',
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                minimumSize: const Size(double.infinity, 48),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                elevation: 0,
               ),
             ),
           );

@@ -7,9 +7,16 @@ import '../../../data/providers/machine_providers.dart';
 part 'admin_machine_notifier.g.dart';
 
 // State class remains the same
+enum MachineFilterTab {
+  all,
+  active,
+  inactive,
+  archived,
+}
+
 class AdminMachineState {
   final List<MachineModel> machines;
-  final bool showArchived;
+  final MachineFilterTab selectedTab;
   final bool isLoading;
   final String? errorMessage;
   final String searchQuery;
@@ -17,7 +24,7 @@ class AdminMachineState {
 
   const AdminMachineState({
     this.machines = const [],
-    this.showArchived = false,
+    this.selectedTab = MachineFilterTab.all,
     this.isLoading = false,
     this.errorMessage,
     this.searchQuery = '',
@@ -26,7 +33,7 @@ class AdminMachineState {
 
   AdminMachineState copyWith({
     List<MachineModel>? machines,
-    bool? showArchived,
+    MachineFilterTab? selectedTab,
     bool? isLoading,
     String? errorMessage,
     String? searchQuery,
@@ -34,7 +41,7 @@ class AdminMachineState {
   }) {
     return AdminMachineState(
       machines: machines ?? this.machines,
-      showArchived: showArchived ?? this.showArchived,
+      selectedTab: selectedTab ?? this.selectedTab,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -43,10 +50,29 @@ class AdminMachineState {
   }
 
   List<MachineModel> get filteredMachines {
-    var filtered = showArchived
-        ? machines.where((m) => m.isArchived).toList()
-        : machines.where((m) => !m.isArchived).toList();
+    var filtered = machines;
 
+    // Filter by tab
+    switch (selectedTab) {
+      case MachineFilterTab.all:
+        filtered = machines.where((m) => !m.isArchived).toList();
+        break;
+      case MachineFilterTab.active:
+        filtered = machines
+            .where((m) => !m.isArchived && m.status == MachineStatus.active)
+            .toList();
+        break;
+      case MachineFilterTab.inactive:
+        filtered = machines
+            .where((m) => !m.isArchived && m.status == MachineStatus.inactive)
+            .toList();
+        break;
+      case MachineFilterTab.archived:
+        filtered = machines.where((m) => m.isArchived).toList();
+        break;
+    }
+
+    // Filter by search query
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((m) {
         final query = searchQuery.toLowerCase();
@@ -106,9 +132,9 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     }
   }
 
-  void setShowArchived(bool value) {
+  void setFilterTab(MachineFilterTab tab) {
     state = state.copyWith(
-      showArchived: value,
+      selectedTab: tab,
       searchQuery: '',
       displayLimit: _pageSize,
     );
@@ -130,6 +156,7 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     required String teamId,
     required String machineName,
     required String machineId,
+    required List<String> assignedUserIds,
   }) async {
     try {
       final exists = await _repository.checkMachineExists(machineId);
@@ -141,6 +168,8 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
         machineId: machineId,
         machineName: machineName,
         teamId: teamId,
+        assignedUserIds: assignedUserIds,
+        status: MachineStatus.active,
       );
 
       await _repository.createMachine(request);
@@ -155,12 +184,16 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
   Future<void> updateMachine({
     required String teamId,
     required String machineId,
-    required String machineName,
+    String? machineName,
+    MachineStatus? status,
+    List<String>? assignedUserIds,
   }) async {
     try {
       final request = UpdateMachineRequest(
         machineId: machineId,
         machineName: machineName,
+        status: status,
+        assignedUserIds: assignedUserIds,
       );
 
       await _repository.updateMachine(request);

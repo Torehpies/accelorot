@@ -44,7 +44,10 @@ class LoginNotifier extends _$LoginNotifier {
     required String email,
     required String password,
   }) async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    // Set loading state if still mounted
+    if (ref.mounted) {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+    }
 
     final authService = ref.read(authServiceProvider);
     final userRepository = ref.read(userRepositoryProvider);
@@ -60,7 +63,9 @@ class LoginNotifier extends _$LoginNotifier {
           final userEntity = await userRepository.fetchUserStatus(uid);
 
           if (userEntity == null) {
-            state = state.copyWith(errorMessage: 'User data not found');
+            if (ref.mounted) {
+              state = state.copyWith(errorMessage: 'User data not found');
+            }
             return LoginFlowError('User data not found');
           }
 
@@ -73,19 +78,27 @@ class LoginNotifier extends _$LoginNotifier {
           if (needsVerification) {
             return LoginFlowNeedsVerification(email);
           }
-          state = state.copyWith(errorMessage: message);
+          if (ref.mounted) {
+            state = state.copyWith(errorMessage: message);
+          }
           return LoginFlowError(message);
       }
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Unexpected error occurred');
+      if (ref.mounted) {
+        state = state.copyWith(errorMessage: 'Unexpected error occurred');
+      }
       return LoginFlowError('Unexpected error occurred');
     } finally {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted) {
+        state = state.copyWith(isLoading: false);
+      }
     }
   }
 
   Future<LoginFlowResult> signInWithGoogleAndCheckStatus() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    if (ref.mounted) {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+    }
 
     final authService = ref.read(authServiceProvider);
     final userRepository = ref.read(userRepositoryProvider);
@@ -97,18 +110,30 @@ class LoginNotifier extends _$LoginNotifier {
         case GoogleLoginSuccess(uid: final uid):
           final userEntity = await userRepository.fetchUserStatus(uid);
 
-          if (userEntity == null) return LoginFlowError('User data not found');
+          if (userEntity == null) {
+            if (ref.mounted) {
+              state = state.copyWith(errorMessage: 'User data not found');
+            }
+            return LoginFlowError('User data not found');
+          }
 
           return _mapEntityToFlowResult(userEntity);
 
         case GoogleLoginFailure(message: final message):
+          if (ref.mounted) {
+            state = state.copyWith(errorMessage: message);
+          }
           return LoginFlowError(message);
       }
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Unexpected Google sign-in');
+      if (ref.mounted) {
+        state = state.copyWith(errorMessage: 'Unexpected Google sign-in');
+      }
       return LoginFlowError('Unexpected Google sign-in');
     } finally {
-      state = state.copyWith(isLoading: false);
+      if (ref.mounted) {
+        state = state.copyWith(isLoading: false);
+      }
     }
   }
 
