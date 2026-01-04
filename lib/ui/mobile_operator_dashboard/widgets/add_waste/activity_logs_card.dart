@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../../../../data/providers/activity_providers.dart';
-import '../../../../data/providers/batch_providers.dart'; 
+import '../../../../data/providers/batch_providers.dart';
 
 /// Modern table-style activity logs card with proper field mapping
 class ActivityLogsCard extends ConsumerWidget {
   final String? focusedMachineId;
+  final double? maxHeight;
 
-  const ActivityLogsCard({super.key, this.focusedMachineId});
+  const ActivityLogsCard({super.key, this.focusedMachineId, this.maxHeight});
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -30,8 +31,18 @@ class ActivityLogsCard extends ConsumerWidget {
       return '${difference.inDays}d ago';
     } else {
       final monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       return '${monthNames[date.month - 1]} ${date.day}';
     }
@@ -43,17 +54,17 @@ class ActivityLogsCard extends ConsumerWidget {
     if (log.isCycle && log.status != null) {
       return log.status!.toUpperCase();
     }
-    
+
     // For reports, show priority or status
     if (log.type == ActivityType.report) {
       return log.priority?.toUpperCase() ?? log.status?.toUpperCase() ?? 'OPEN';
     }
-    
+
     // For alerts, show status
     if (log.type == ActivityType.alert) {
       return log.status?.toUpperCase() ?? 'ACTIVE';
     }
-    
+
     // For substrates, default to completed
     return 'COMPLETED';
   }
@@ -68,14 +79,14 @@ class ActivityLogsCard extends ConsumerWidget {
       case ActivityType.report:
         return log.reportType ?? 'Report';
       case ActivityType.cycle:
-        return log.controllerType == 'drum_controller' 
-            ? 'Drum Controller' 
+        return log.controllerType == 'drum_controller'
+            ? 'Drum Controller'
             : 'Aerator';
     }
   }
 
   /// Get status color based on type
- /*
+  /*
   Color _getStatusColor(ActivityLogItem log) {
     if (log.isCycle) {
       if (log.isRunning) return Colors.blue;
@@ -103,9 +114,9 @@ class ActivityLogsCard extends ConsumerWidget {
   }
   */
 
-    String? _getBatchDisplayName(WidgetRef ref, String? batchId) {
+  String? _getBatchDisplayName(WidgetRef ref, String? batchId) {
     if (batchId == null || batchId.isEmpty) return null;
-    
+
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     return batchesAsync.maybeWhen(
       data: (batches) {
@@ -119,28 +130,13 @@ class ActivityLogsCard extends ConsumerWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activitiesAsync = ref.watch(allActivitiesProvider);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.08),
-            spreadRadius: 0,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    final cardContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
           // Header
           Padding(
             padding: const EdgeInsets.all(24.0),
@@ -235,7 +231,7 @@ class ActivityLogsCard extends ConsumerWidget {
           // Content
           Expanded(
             child: activitiesAsync.when(
-              data: (allLogs) => _buildContent(context, ref, allLogs), 
+              data: (allLogs) => _buildContent(context, ref, allLogs),
               loading: () => const Center(
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
@@ -245,11 +241,33 @@ class ActivityLogsCard extends ConsumerWidget {
             ),
           ),
         ],
+      );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.08),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
+      child: maxHeight != null
+          ? SizedBox(height: maxHeight, child: cardContent)
+          : cardContent,
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, List<ActivityLogItem> allLogs) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    List<ActivityLogItem> allLogs,
+  ) {
     if (allLogs.isEmpty) {
       return Center(
         child: Padding(
@@ -257,21 +275,14 @@ class ActivityLogsCard extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 48,
-                color: Colors.grey.shade300,
-              ),
+              Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
               const SizedBox(height: 12),
               Text(
                 focusedMachineId != null
                     ? 'No activity logs for this machine yet.'
                     : 'No logs yet. Add waste or submit a report to get started!',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF9CA3AF),
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
               ),
             ],
           ),
@@ -291,10 +302,7 @@ class ActivityLogsCard extends ConsumerWidget {
           child: Text(
             'No activity logs for this machine yet.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF9CA3AF),
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
           ),
         ),
       );
@@ -309,14 +317,10 @@ class ActivityLogsCard extends ConsumerWidget {
         //final statusColor = _getStatusColor(log);
         final batchDisplayName = _getBatchDisplayName(ref, log.batchId);
 
-
         return Container(
           decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(
-                color: Colors.grey.shade100,
-                width: 1,
-              ),
+              bottom: BorderSide(color: Colors.grey.shade100, width: 1),
             ),
           ),
           child: Padding(
@@ -331,16 +335,12 @@ class ActivityLogsCard extends ConsumerWidget {
                     color: log.statusColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    log.icon,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(log.icon, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 16),
 
                 // Description Column
-   Expanded(
+                Expanded(
                   flex: 4,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,7 +357,7 @@ class ActivityLogsCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      
+
                       // ✅ UPDATED: Show cycles count (not status) + operator
                       Row(
                         children: [
@@ -372,10 +372,17 @@ class ActivityLogsCard extends ConsumerWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          
+
                           // ✅ Show operator name
-                          if (log.operatorName != null && log.operatorName!.isNotEmpty) ...[
-                            const Text(' • ', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
+                          if (log.operatorName != null &&
+                              log.operatorName!.isNotEmpty) ...[
+                            const Text(
+                              ' • ',
+                              style: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 12,
+                              ),
+                            ),
                             Flexible(
                               child: Text(
                                 log.operatorName!,
@@ -390,14 +397,19 @@ class ActivityLogsCard extends ConsumerWidget {
                           ],
                         ],
                       ),
-                      
+
                       // Show machine + batch info
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           // Machine name/ID
-                          if (log.machineName != null || log.machineId != null) ...[
-                            Icon(Icons.precision_manufacturing, size: 12, color: Colors.grey[600]),
+                          if (log.machineName != null ||
+                              log.machineId != null) ...[
+                            Icon(
+                              Icons.precision_manufacturing,
+                              size: 12,
+                              color: Colors.grey[600],
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
@@ -411,11 +423,22 @@ class ActivityLogsCard extends ConsumerWidget {
                               ),
                             ),
                           ],
-                          
+
                           // ✅ UPDATED: Batch display name (not ID)
-                          if (batchDisplayName != null && batchDisplayName.isNotEmpty) ...[
-                            const Text(' • ', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 11)),
-                            Icon(Icons.inventory_2, size: 12, color: Colors.grey[600]),
+                          if (batchDisplayName != null &&
+                              batchDisplayName.isNotEmpty) ...[
+                            const Text(
+                              ' • ',
+                              style: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 11,
+                              ),
+                            ),
+                            Icon(
+                              Icons.inventory_2,
+                              size: 12,
+                              color: Colors.grey[600],
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
@@ -436,7 +459,6 @@ class ActivityLogsCard extends ConsumerWidget {
                   ),
                 ),
 
-
                 // Category
                 Expanded(
                   flex: 2,
@@ -453,7 +475,7 @@ class ActivityLogsCard extends ConsumerWidget {
                 ),
 
                 // Status Badge
-                 Expanded(
+                Expanded(
                   flex: 2,
                   child: Text(
                     _getStatusText(log),
@@ -494,19 +516,12 @@ class ActivityLogsCard extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.grey.shade300,
-            ),
+            Icon(Icons.error_outline, size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 12),
             const Text(
               'Failed to load activities',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF9CA3AF),
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
             ),
           ],
         ),

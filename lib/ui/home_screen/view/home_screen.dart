@@ -7,6 +7,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_w
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/composting_progress_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/swipeable_cycle_cards.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
@@ -244,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     final isMachineView = widget.focusedMachine != null;
 
@@ -252,96 +253,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // final isWeb = constraints.maxWidth > 800; // heuristic for desktop/web
-
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (isMachineView)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFE0F7FA), Color(0xFFB2DFDB)],
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Machine: ${widget.focusedMachine!.machineName}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.teal.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.filter_alt, color: Colors.teal.shade700, size: 20),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Filtered view • All data shown for this machine only',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.teal.shade900,
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ),
 
                   CompostingProgressCard(
+                    key: ValueKey(_rebuildKey),
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
-                    preSelectedMachineId: widget.focusedMachine?.machineId,
+                    preSelectedMachineId: _selectedMachineId,
                     onBatchChanged: _updateActiveBatch,
                   ),
                   const SizedBox(height: 16),
 
-                  // Controller cards - responsive layout
-                  // Stack vertically on mobile (< 600px), side by side on larger screens
-                  constraints.maxWidth < 600
-                      ? Column(
-                          children: [
-                            DrumControlCard(
-                              key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                              currentBatch: _activeBatchModel, 
-                            ),
-                            const SizedBox(height: 16),
-                            AeratorCard(
-                              key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                              currentBatch: _activeBatchModel, 
-                            ),
-                          ],
-                        )
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: DrumControlCard(
-                                key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                                currentBatch: _activeBatchModel, 
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: AeratorCard(
-                                key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
-                                currentBatch: _activeBatchModel, 
-                              ),
-                            ),
-                          ],
-                        ),
+                  // Swipeable cycle cards
+                  SwipeableCycleCards(
+                    currentBatch: _activeBatchModel,
+                  ),
                   const SizedBox(height: 16),
 
-                  // ✅ Activity Logs
+                  // Activity logs
                   SizedBox(
-                    height: 350,
+                    height: 400,
                     child: ActivityLogsCard(
-                      focusedMachineId: widget.focusedMachine?.machineId,
+                      focusedMachineId: _selectedMachineId,
+                      maxHeight: 400,
                     ),
                   ),
-
-                  const SizedBox(height: 16),
                 ],
               ),
             );
