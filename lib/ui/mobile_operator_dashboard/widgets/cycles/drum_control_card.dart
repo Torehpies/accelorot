@@ -335,7 +335,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -345,7 +345,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                 const Text(
                   'Drum Controller',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1a1a1a),
                     letterSpacing: -0.5,
@@ -353,8 +353,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 12,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: batchCompleted
@@ -369,7 +369,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                         ? 'Completed'
                         : (hasActiveBatch ? 'Active' : 'Inactive'),
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: batchCompleted
                           ? const Color(0xFF6B7280)
@@ -381,7 +381,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 24),
 
             if (!hasActiveBatch && !batchCompleted)
               const EmptyState()
@@ -399,6 +399,24 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: InfoItem(
+                label: 'Machine Name',
+                value: widget.currentBatch!.machineId,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: InfoItem(
+                label: 'Batch Name',
+                value: widget.currentBatch!.displayName,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
         Row(
           children: [
@@ -417,17 +435,17 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
 
         const Text(
           'Set Controller',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1a1a1a),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         Row(
           children: [
@@ -447,7 +465,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                     : null,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildDropdown(
                 label: 'Select No. of Cycles',
@@ -467,7 +485,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
 
         SizedBox(
           width: double.infinity,
@@ -478,7 +496,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -490,7 +508,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                   ? 'Completed'
                   : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -507,7 +525,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     required Function(String?)? onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: onChanged == null ? Colors.grey.shade100 : Colors.white,
         borderRadius: BorderRadius.circular(8),
