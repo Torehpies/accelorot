@@ -33,12 +33,12 @@ class SortableColumnHeader extends StatelessWidget {
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 2),
           Icon(
             isCurrentSort
                 ? (ascending ? Icons.arrow_upward : Icons.arrow_downward)
                 : Icons.unfold_more,
-            size: 16,
+            size: 12,
             color: isCurrentSort 
                 ? const Color(0xFF3B82F6) 
                 : const Color(0xFF9CA3AF),

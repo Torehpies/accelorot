@@ -30,10 +30,9 @@ class PaginationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(8),
       decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(color: Color(0xFFF3F4F6), width: 1),
         ),
       ),
       child: isDesktop ? _buildDesktopPagination() : _buildMobilePagination(),

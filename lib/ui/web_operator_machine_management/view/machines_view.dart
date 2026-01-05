@@ -117,7 +117,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color.fromARGB(255, 202, 231, 255),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenWidth = constraints.maxWidth;
@@ -131,14 +131,14 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
 
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0)),
+              padding: EdgeInsets.all(isDesktop ? 8.0 : (isTablet ? 6.0 : 4.0)),
               child: Container(
                 // Blue outlined box wrapping everything - Made lighter
                 constraints: BoxConstraints(
                   minHeight: MediaQuery.of(context).size.height * 0.9, // Increased by 10%
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color.fromARGB(255, 202, 231, 255),
                   borderRadius: BorderRadius.circular(isDesktop ? 12 : (isTablet ? 10 : 8)),
                   border: Border.all(
                     color: Colors.blue.shade200, // Lighter blue
@@ -159,8 +159,12 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
 
                     // Inner box wrapping machine list section
                     Container(
-                      margin: EdgeInsets.all(isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0)),
-                      decoration: BoxDecoration(
+                        margin: EdgeInsets.only(
+                          left: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                          right: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                          bottom: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                        ),
+                        decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(isDesktop ? 10 : (isTablet ? 8 : 6)),
                         border: Border.all(
@@ -170,7 +174,6 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.shade100,
-                            blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),
                         ],
@@ -182,7 +185,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                           
                           // Machine list content - Increased height by 10%
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.4, // Changed from 0.5 to 0.6 (+10%)
+                            height: MediaQuery.of(context).size.height * 0.55, // Changed from 0.5 to 0.6 (+10%)
                             child: state.displayedMachines.isEmpty
                                 ? _buildEmptyState(isMobile, state)
                                 : (isMobile
@@ -199,7 +202,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                           // Pagination - Always show if there are any machines
                           if (state.filteredMachines.isNotEmpty)
                             Container(
-                              padding: EdgeInsets.all(isDesktop ? 16.0 : (isTablet ? 12.0 : 8.0)),
+                              padding: EdgeInsets.all(isDesktop ? 8.0 : (isTablet ?6.0 : 4.0)),
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -250,7 +253,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     double screenWidth,
   ) {
     return Padding(
-      padding: EdgeInsets.all(isDesktop ? 32.0 : (isTablet ? 24.0 : 16.0)),
+      padding: EdgeInsets.all(isDesktop ? 16.0 : (isTablet ? 12.0 : 8.0)),
       child: _buildStatsCards(state, isDesktop, isTablet, isMobile, screenWidth),
     );
   }

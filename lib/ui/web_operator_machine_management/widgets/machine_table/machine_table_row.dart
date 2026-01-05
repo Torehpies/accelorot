@@ -18,7 +18,7 @@ class MachineTableRow extends StatelessWidget {
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: Row(
         children: [
           // Machine ID
