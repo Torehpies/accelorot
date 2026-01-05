@@ -80,4 +80,8 @@ class CycleRepository {
     required String batchId,
   }) =>
       _cycleService.completeAerator(batchId: batchId);
+
+  /// Get a single cycle by ID
+  Future<CycleRecommendation?> getCycle(String id) =>
+      _cycleService.fetchCycleById(id);
 }

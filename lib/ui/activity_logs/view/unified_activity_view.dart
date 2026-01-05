@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/unified/stats_card_row.dart';
 import '../widgets/unified/unified_table_container.dart';
+import '../dialogs/activity_dialog_helper.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-import 'base_detail_view.dart';
 
 /// Main unified activity view with enhanced stats
 class UnifiedActivityView extends ConsumerWidget {
@@ -63,7 +63,7 @@ class UnifiedActivityView extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              // Unified Table Container - ALWAYS RENDERED
+              // Unified Table Container
               Expanded(
                 child: UnifiedTableContainer(
                   items: state.paginatedItems,
@@ -83,7 +83,7 @@ class UnifiedActivityView extends ConsumerWidget {
                   onCategoryChanged: viewModel.onCategoryChanged,
                   onTypeChanged: viewModel.onTypeChanged,
                   onSort: viewModel.onSort,
-                  onViewDetails: (item) => _showDetailSheet(context, item),
+                  onViewDetails: (item) => ActivityDialogHelper.show(context, ref, item),
                   currentPage: state.currentPage,
                   totalPages: state.totalPages,
                   itemsPerPage: state.itemsPerPage,
@@ -127,23 +127,6 @@ class UnifiedActivityView extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showDetailSheet(BuildContext context, item) {
-    showDialog(
-      context: context,
-      barrierColor: WebColors.dialogBarrier,
-      builder: (context) {
-        return Dialog(
-          backgroundColor: WebColors.dialogBackground,
-          insetPadding: const EdgeInsets.all(40),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: BaseDetailView(item: item),
-          ),
-        );
-      },
     );
   }
 }
