@@ -29,7 +29,7 @@ class MemberListContainer extends StatelessWidget {
         child: ListView.separated(
           padding: const EdgeInsets.all(16),
           itemCount: members.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (_, index) {
             final member = members[index];
             return MemberListTile(
