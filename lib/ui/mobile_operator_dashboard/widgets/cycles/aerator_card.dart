@@ -379,7 +379,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
             const SizedBox(height: 24),
 
             if (!hasActiveBatch && !batchCompleted)
-              const Expanded(child: EmptyState())
+              const EmptyState()
             else
               _buildActiveState(batchCompleted),
           ],
@@ -390,7 +390,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
   Widget _buildActiveState(bool batchCompleted) {
     final canInteract = !batchCompleted && status == SystemStatus.idle;
-
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -491,7 +491,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -503,7 +503,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? 'Completed'
                   : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),

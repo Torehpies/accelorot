@@ -178,7 +178,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final machines = await _repository.getMachinesByTeam(teamId);
+      final machines = await _repository.getMachinesByTeam(teamId)
+          .timeout(const Duration(seconds: 10));
       state = state.copyWith(
         machines: machines,
         isLoading: false,
@@ -188,7 +189,7 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
       );
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Failed to load machines: ${e.toString()}',
+        errorMessage: 'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
         isLoading: false,
       );
     }
@@ -196,10 +197,11 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
 
   Future<void> refresh(String teamId) async {
     try {
-      final machines = await _repository.getMachinesByTeam(teamId);
+      final machines = await _repository.getMachinesByTeam(teamId)
+          .timeout(const Duration(seconds: 10));
       state = state.copyWith(machines: machines);
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Failed to refresh: $e');
+      state = state.copyWith(errorMessage: 'Failed to refresh: ${e.toString().replaceAll('Exception:', '').trim()}');
     }
   }
 

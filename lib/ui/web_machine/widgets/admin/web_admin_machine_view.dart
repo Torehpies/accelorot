@@ -224,12 +224,11 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminMachineProvider);
 
-    if (_isInitializing || _teamId == null) {
+    if (_isInitializing) {
       return const Scaffold(
         backgroundColor: Color(0xFFF8FAFC),
         body: Center(
@@ -346,6 +345,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                             onEdit: _showEditDialog,
                             isLoading: state.isLoading,
                             isEmpty: filteredMachines.isEmpty,
+                            hasNoTeam: _teamId == null,
                           ),
                           paginationWidget: PaginationTable(
                             currentPage: _currentPage,
