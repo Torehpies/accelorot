@@ -9,7 +9,6 @@ import 'impact_stat_card.dart';
 
 class ImpactSection extends StatelessWidget {
   final List<ImpactStatModel> stats;
-
   const ImpactSection({
     super.key,
     required this.stats,
@@ -19,76 +18,151 @@ class ImpactSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
+      padding: const EdgeInsets.all(AppSpacing.xxxl), // Reduced padding
       color: Colors.white,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left side - Content
-          Expanded(
-            flex: 4,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: WebTextStyles.h2,
-                    children: [
-                      const TextSpan(text: 'Making a '),
-                      TextSpan(
-                        text: 'Sustainable\nImpact',
-                        style: TextStyle(color: WebColors.tealAccent),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'In the Philippines, over 50% of municipal solid waste is\norganic. Accel-O-Rot helps communities and institutions\nmanage waste responsibly while producing valuable\ncompost for agriculture.',
-                  style: WebTextStyles.subtitle.copyWith(
-                    fontSize: 15,
-                    height: 1.8,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                _buildImpactItem(
-                  Icons.recycling_outlined,
-                  'Reduces landfill waste and methane emissions',
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _buildImpactItem(
-                  Icons.eco_outlined,
-                  'Produces nutrient-rich compost for sustainable farming',
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _buildImpactItem(
-                  Icons.people_outline,
-                  'Empowers households and communities with accessible\ntechnology',
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xxxl * 2),
-          // Right side - Stats
-          Expanded(
-            flex: 3,
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppSpacing.lg,
-                mainAxisSpacing: AppSpacing.lg,
-                childAspectRatio: 1.2,
-              ),
-              itemCount: stats.length,
-              itemBuilder: (context, index) {
-                return ImpactStatCard(stat: stats[index]);
-              },
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isMobile = constraints.maxWidth < 900;
+
+          return isMobile
+              ? _buildMobileLayout(context)
+              : _buildDesktopLayout(context);
+        },
       ),
+    );
+  }
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return Column(
+      children: [
+        RichText(
+          text: TextSpan(
+            style: WebTextStyles.h2.copyWith(fontSize: 28), // Smaller title
+            children: const [
+              TextSpan(text: 'Making a '),
+              TextSpan(
+                text: 'Sustainable\nImpact',
+                style: TextStyle(color: WebColors.tealAccent),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md), // Reduced space
+        
+        Text(
+          'In the Philippines, over 50% of municipal solid waste is\n'
+          'organic. Accel-O-Rot helps manage waste responsibly.',
+          textAlign: TextAlign.center,
+          style: WebTextStyles.subtitle.copyWith(
+            fontSize: 14, // Smaller text
+            height: 1.6,  // Tighter line spacing
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl), // Reduced space
+        
+        _buildImpactItem(
+          Icons.recycling_outlined,
+          'Reduces landfill waste',
+        ),
+        const SizedBox(height: AppSpacing.md), // Reduced space
+        _buildImpactItem(
+          Icons.eco_outlined,
+          'Produces nutrient-rich compost',
+        ),
+        const SizedBox(height: AppSpacing.md), // Reduced space
+        _buildImpactItem(
+          Icons.people_outline,
+          'Empowers communities',
+        ),
+        
+        const SizedBox(height: AppSpacing.xl), // Reduced space
+        
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppSpacing.md, // Reduced spacing
+            mainAxisSpacing: AppSpacing.md,  // Reduced spacing
+            childAspectRatio: 1, // Square cards
+          ),
+          itemCount: stats.length,
+          itemBuilder: (context, index) {
+            return ImpactStatCard(stat: stats[index]);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(
+                  style: WebTextStyles.h2.copyWith(fontSize: 28), // Smaller title
+                  children: const [
+                    TextSpan(text: 'Making a '),
+                    TextSpan(
+                      text: 'Sustainable\nImpact',
+                      style: TextStyle(color: WebColors.tealAccent),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md), // Reduced space
+              Text(
+                'In the Philippines, over 50% of municipal solid waste is\n'
+                'organic. Accel-O-Rot helps manage waste responsibly.',
+                style: WebTextStyles.subtitle.copyWith(
+                  fontSize: 14, // Smaller text
+                  height: 1.6,  // Tighter line spacing
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl), // Reduced space
+              _buildImpactItem(
+                Icons.recycling_outlined,
+                'Reduces landfill waste',
+              ),
+              const SizedBox(height: AppSpacing.md), // Reduced space
+              _buildImpactItem(
+                Icons.eco_outlined,
+                'Produces nutrient-rich compost',
+              ),
+              const SizedBox(height: AppSpacing.md), // Reduced space
+              _buildImpactItem(
+                Icons.people_outline,
+                'Empowers communities',
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xl), // Reduced space
+        
+        Expanded(
+          flex: 3,
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: AppSpacing.md, // Reduced spacing
+              mainAxisSpacing: AppSpacing.md,  // Reduced spacing
+              childAspectRatio: 1, // Square cards
+            ),
+            itemCount: stats.length,
+            itemBuilder: (context, index) {
+              return ImpactStatCard(stat: stats[index]);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -97,27 +171,27 @@ class ImpactSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 28, // Smaller icon container
+          height: 28,
           decoration: BoxDecoration(
             color: const Color(0xFFCCFBF1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(
             icon,
-            size: 18,
+            size: 16, // Smaller icon
             color: WebColors.tealAccent,
           ),
         ),
-        const SizedBox(width: AppSpacing.md),
+        const SizedBox(width: AppSpacing.sm), // Reduced space
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.only(top: 2), // Reduced space
             child: Text(
               text,
               style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 15,
-                height: 1.6,
+                fontSize: 14, // Smaller text
+                height: 1.4,  // Tighter line spacing
               ),
             ),
           ),

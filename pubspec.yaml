@@ -25,6 +25,7 @@ dependencies:
   provider: ^6.1.1 
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
+  flutter_svg: ^2.0.0+1 
 
 
 dev_dependencies:
@@ -44,7 +45,6 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
-    - assets/images/Accel-O-Rot Logo.png
 
   fonts:
     - family: dm-sans

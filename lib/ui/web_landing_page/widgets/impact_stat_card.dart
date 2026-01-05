@@ -8,7 +8,6 @@ import '../models/impact_stat_model.dart';
 
 class ImpactStatCard extends StatelessWidget {
   final ImpactStatModel stat;
-
   const ImpactStatCard({
     super.key,
     required this.stat,
@@ -36,11 +35,16 @@ class ImpactStatCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            stat.label,
-            textAlign: TextAlign.center,
-            style: WebTextStyles.bodyMediumGray.copyWith(
-              fontSize: 15,
+          Flexible(
+            child: Text(
+              stat.label,
+              textAlign: TextAlign.center,
+              maxLines: 2, 
+              overflow: TextOverflow.ellipsis,
+              style: WebTextStyles.bodyMediumGray.copyWith(
+                fontSize: 12,
+                height: 1.4,
+              ),
             ),
           ),
         ],

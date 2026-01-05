@@ -9,7 +9,6 @@ import 'step_card.dart';
 
 class HowItWorksSection extends StatelessWidget {
   final List<StepModel> steps;
-
   const HowItWorksSection({
     super.key,
     required this.steps,
@@ -19,7 +18,7 @@ class HowItWorksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
+      padding: const EdgeInsets.all(AppSpacing.xxxl), // Reduced padding
       color: const Color(0xFFFAFAFA),
       child: Column(
         children: [
@@ -37,25 +36,37 @@ class HowItWorksSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md), // Reduced space
           Text(
             'Simple, automated, and effective composting in 4 easy steps',
             textAlign: TextAlign.center,
-            style: WebTextStyles.subtitle,
+            style: WebTextStyles.subtitle.copyWith(fontSize: 14), // Smaller text
           ),
-          const SizedBox(height: AppSpacing.xxxl * 2),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: AppSpacing.xl,
-              mainAxisSpacing: AppSpacing.xl,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: steps.length,
-            itemBuilder: (context, index) {
-              return StepCard(step: steps[index]);
+          const SizedBox(height: AppSpacing.xl), // Reduced space
+          LayoutBuilder(
+            builder: (context, constraints) {
+              int crossAxisCount = constraints.maxWidth > 1200 
+                  ? 4 
+                  : constraints.maxWidth > 900 
+                      ? 3 
+                      : constraints.maxWidth > 600 
+                          ? 2 
+                          : 1;
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: AppSpacing.lg, // Reduced spacing
+                  mainAxisSpacing: AppSpacing.lg,  // Reduced spacing
+                  childAspectRatio: 0.9, // More compact cards
+                ),
+                itemCount: steps.length,
+                itemBuilder: (context, index) {
+                  return StepCard(step: steps[index]);
+                },
+              );
             },
           ),
         ],

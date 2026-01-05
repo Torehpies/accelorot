@@ -9,7 +9,6 @@ import 'feature_card.dart';
 
 class FeaturesSection extends StatelessWidget {
   final List<FeatureModel> features;
-
   const FeaturesSection({
     super.key,
     required this.features,
@@ -38,7 +37,7 @@ class FeaturesSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Our IoT-enabled system combines automation, real-time monitoring, and AI\nrecommendations',
+            'Our IoT-enabled system combines automation, real-time monitoring, and AI recommendations',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle,
           ),
@@ -50,7 +49,7 @@ class FeaturesSection extends StatelessWidget {
               crossAxisCount: 3,
               crossAxisSpacing: AppSpacing.xl,
               mainAxisSpacing: AppSpacing.xl,
-              childAspectRatio: 1.3,
+              mainAxisExtent: 250, 
             ),
             itemCount: features.length,
             itemBuilder: (context, index) {

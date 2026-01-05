@@ -1,12 +1,13 @@
 // lib/ui/landing_page/widgets/cta_section.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
+
 class CtaSection extends StatelessWidget {
   final VoidCallback onGetStarted;
-
   const CtaSection({
     super.key,
     required this.onGetStarted,
@@ -97,7 +98,7 @@ class CtaSection extends StatelessWidget {
               ],
             ),
           ),
-          // Footer
+          // Footer with SVG logo
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.xxxl),
@@ -105,19 +106,14 @@ class CtaSection extends StatelessWidget {
             child: Row(
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: WebColors.tealAccent,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(
-                        Icons.eco,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                    SvgPicture.asset(
+                      'assets/images/Accel-O-Rot Logo.svg',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.contain,
+                      semanticsLabel: 'Accel-O-Rot Logo',
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Text(
@@ -130,9 +126,13 @@ class CtaSection extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
-                Text(
-                  '© 2025 Accel-O-Rot. Accelerating sustainable composting through innovation.',
-                  style: WebTextStyles.caption,
+                // Wrap the copyright text in a Flexible widget
+                Flexible(
+                  child: Text(
+                    '© 2026 Accel-O-Rot. Accelerating sustainable composting through innovation.',
+                    style: WebTextStyles.caption,
+                    textAlign: TextAlign.right, // Align text to the right
+                  ),
                 ),
               ],
             ),

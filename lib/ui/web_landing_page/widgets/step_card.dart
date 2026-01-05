@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-
 import '../models/step_model.dart';
 
 class StepCard extends StatelessWidget {
   final StepModel step;
-
   const StepCard({
     super.key,
     required this.step,
@@ -40,10 +38,15 @@ class StepCard extends StatelessWidget {
             style: WebTextStyles.h3.copyWith(fontSize: 18),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            step.description,
-            style: WebTextStyles.bodyMediumGray.copyWith(
-              height: 1.5,
+          Flexible(
+            child: Text(
+              step.description,
+              softWrap: true,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis, // Or fade if you prefer
+              style: WebTextStyles.bodyMediumGray.copyWith(
+                height: 1.4,
+              ),
             ),
           ),
         ],

@@ -7,7 +7,6 @@ import '../models/feature_model.dart';
 
 class FeatureCard extends StatelessWidget {
   final FeatureModel feature;
-
   const FeatureCard({
     super.key,
     required this.feature,
@@ -56,6 +55,8 @@ class FeatureCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             feature.description,
+            maxLines: 3, 
+            overflow: TextOverflow.ellipsis, 
             style: WebTextStyles.bodyMediumGray.copyWith(
               fontSize: 14,
               height: 1.5,

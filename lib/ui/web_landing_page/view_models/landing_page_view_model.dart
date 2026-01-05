@@ -12,7 +12,7 @@ class LandingPageViewModel extends ChangeNotifier {
         FeatureModel(
           title: 'Mobile Dashboard',
           description:
-              'Monitor your composting process anywhere with our intuitive mobile app',
+              'Monitor composting anytime, anywhere via our mobile app',
           icon: Icons.smartphone_outlined,
           iconColor: WebColors.tealAccent,
           backgroundColor: const Color(0xFFCCFBF1),
@@ -20,7 +20,7 @@ class LandingPageViewModel extends ChangeNotifier {
         FeatureModel(
           title: 'AI Recommendations',
           description:
-              'Get smart suggestions based on real-time data for optimal composting conditions',
+              'Get AI-powered tips for ideal composting conditions.',
           icon: Icons.psychology_outlined,
           iconColor: WebColors.tealAccent,
           backgroundColor: const Color(0xFFCCFBF1),
@@ -28,7 +28,7 @@ class LandingPageViewModel extends ChangeNotifier {
         FeatureModel(
           title: 'Auto-Regulation',
           description:
-              'Automated aeration and moisture control maintain perfect conditions',
+              'Auto aeration & moisture control for perfect compost',
           icon: Icons.bolt_outlined,
           iconColor: WebColors.tealAccent,
           backgroundColor: const Color(0xFFCCFBF1),

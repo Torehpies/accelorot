@@ -1,12 +1,12 @@
 // lib/ui/landing_page/widgets/app_header.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import '../../core/ui/second_button.dart';
-
 
 class AppHeader extends StatelessWidget {
   final VoidCallback onLogin;
@@ -23,7 +23,7 @@ class AppHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.lg,
+        vertical: AppSpacing.md, // Reduced from lg to md
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -33,14 +33,16 @@ class AppHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Logo
+          // Logo + Text (vertically aligned)
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/images/Accel-O-Rot Logo.png',
-                width: 80,
-                height: 80,
+              SvgPicture.asset(
+                'assets/images/Accel-O-Rot Logo.svg',
+                width: 60, // Reduced from 80 to 60
+                height: 60, // Reduced from 80 to 60
                 fit: BoxFit.contain,
+                semanticsLabel: 'Accel-O-Rot Logo',
               ),
               const SizedBox(width: AppSpacing.md),
               Text(
