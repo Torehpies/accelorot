@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../ui/profile_screen/widgets/profile_view.dart';
 import '../../../../ui/machine_management/widgets/admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
-import '../home_screen/admin_home_screen.dart';
+import '../../../../ui/mobile_admin_home/view/mobile_admin_home_view.dart';
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});
@@ -26,18 +26,10 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
     });
   }
 
-  void _navigateToTab(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   List<Widget> _buildScreens() {
     return [
-      AdminHomeScreen(onNavigateToTab: _navigateToTab),
-      const OperatorManagementScreen(),
+      MobileAdminHomeView(),
+      const OperatorManagementScreen(teamId: '',),
       const AdminMachineView(), 
       const ProfileView(),
     ];

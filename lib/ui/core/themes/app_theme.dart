@@ -72,6 +72,7 @@ class AppColors {
   static const Color background = Color(0xFFE0F2FE);
   static const Color background1 = Color(0xFFE0F2FE);
   static const Color background2 = Colors.white;
+  static const Color backgroundBorder = Color(0xFFABD1EA);
 
   static const Color greenBackground = Color(0xFFCCFFD9);
   static const Color greenForeground = Color(0xFF09632C);

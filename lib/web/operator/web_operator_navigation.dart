@@ -1,11 +1,12 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
-// import 'package:flutter_application_1/screens/login/login_screen.dart';
-// import '../operator/screens/web_home_screen.dart';
-// import 'screens/web_activity_logs_screen.dart';
-// import 'screens/web_statistics_screen.dart';
-// import 'screens/web_operator_machine_screen.dart';
-// import 'screens/operator_web_profile_screen.dart';
+// import 'package:flutter_application_1/services/auth_wrapper.dart';
+// import '../../ui/home_screen/web_home_screen/web_home_screen.dart';
+// import '../../ui/web_statistics/web_statistics_screen.dart';
+// import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
+// import 'package:flutter_application_1/ui/activity_logs/view/unified_activity_view.dart';
+// import '../../ui/web_operator_machine_management/view/machines_view.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 //
 // class WebOperatorNavigation extends StatefulWidget {
 //   const WebOperatorNavigation({super.key});
@@ -16,8 +17,10 @@
 //
 // class _WebOperatorNavigationState extends State<WebOperatorNavigation> {
 //   int _selectedIndex = 0;
+//   //String? _teamId;
+//   bool _isLoadingTeam = true;
 //
-//   late final List<Widget> _screens;
+//   late List<Widget> _screens;
 //
 //   final List<_NavItem> _navItems = const [
 //     _NavItem(Icons.dashboard, 'Dashboard'),
@@ -30,13 +33,41 @@
 //   @override
 //   void initState() {
 //     super.initState();
-//     _screens = [
-//       const WebHomeScreen(),
-//       const WebActivityLogsScreen(),
-//       const WebStatisticsScreen(),
-//       const WebOperatorMachineScreen(),
-//       const WebProfileScreen(),
-//     ];
+//     _loadTeamId();
+//   }
+//
+//   Future<void> _loadTeamId() async {
+//     try {
+//       final userId = FirebaseAuth.instance.currentUser?.uid;
+//       if (userId == null) {
+//         setState(() => _isLoadingTeam = false);
+//         return;
+//       }
+//
+//       final userDoc = await FirebaseFirestore.instance
+//           .collection('users')
+//           .doc(userId)
+//           .get();
+//
+//       final teamId = userDoc.data()?['teamId'] as String?;
+//
+//       setState(() {
+//         //_teamId = teamId;
+//         _isLoadingTeam = false;
+//         _screens = [
+//           WebHomeScreen(focusedMachine: null),
+//           const UnifiedActivityView(),
+//           const WebStatisticsScreen(),
+//           teamId != null
+//               ? MachinesView(teamId: teamId)
+//               : const _NoTeamWidget(),
+//           const WebProfileView(),
+//         ];
+//       });
+//     } catch (e) {
+//       debugPrint('Error loading teamId: $e');
+//       setState(() => _isLoadingTeam = false);
+//     }
 //   }
 //
 //   Future<void> _handleLogout() async {
@@ -64,7 +95,7 @@
 //       if (!mounted) return;
 //       Navigator.pushAndRemoveUntil(
 //         context,
-//         MaterialPageRoute(builder: (_) => const LoginScreen()),
+//         MaterialPageRoute(builder: (_) => const AuthWrapper()),
 //         (route) => false,
 //       );
 //     }
@@ -72,6 +103,12 @@
 //
 //   @override
 //   Widget build(BuildContext context) {
+//     if (_isLoadingTeam) {
+//       return const Scaffold(
+//         body: Center(child: CircularProgressIndicator()),
+//       );
+//     }
+//
 //     return Scaffold(
 //       body: Row(
 //         children: [
@@ -246,4 +283,42 @@
 //   final IconData icon;
 //   final String label;
 //   const _NavItem(this.icon, this.label);
+// }
+//
+// // Widget to show when user has no team
+// class _NoTeamWidget extends StatelessWidget {
+//   const _NoTeamWidget();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           Icon(
+//             Icons.group_off,
+//             size: 64,
+//             color: Colors.grey[400],
+//           ),
+//           const SizedBox(height: 16),
+//           Text(
+//             'No Team Assigned',
+//             style: TextStyle(
+//               fontSize: 20,
+//               fontWeight: FontWeight.bold,
+//               color: Colors.grey[700],
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           Text(
+//             'Please contact your administrator',
+//             style: TextStyle(
+//               fontSize: 14,
+//               color: Colors.grey[600],
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 // }

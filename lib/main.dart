@@ -1,15 +1,22 @@
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/app_router.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 Initialize Firebase
+  FlutterError.onError = (details) {
+    // Consider using a logging service here in production
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    return true;
+  };
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

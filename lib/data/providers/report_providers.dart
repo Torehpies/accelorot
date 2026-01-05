@@ -2,6 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/firebase/firebase_report_service.dart';
+import '../../ui/reports/services/report_aggregator_service.dart';
 import '../repositories/report_repository.dart';
 import '../models/report.dart';
 
@@ -53,3 +54,9 @@ final machineReportsFutureProvider = FutureProvider.family<List<Report>, String>
     return repository.getReportsForMachine(machineId);
   },
 );
+
+/// Provider for ReportAggregatorService
+final reportAggregatorProvider = Provider<ReportAggregatorService>((ref) {
+  final reportRepo = ref.read(reportRepositoryProvider);
+  return ReportAggregatorService(reportRepo: reportRepo);
+});
