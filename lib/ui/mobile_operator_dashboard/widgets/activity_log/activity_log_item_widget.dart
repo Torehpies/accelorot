@@ -31,7 +31,7 @@ class ActivityLogItemWidget extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: .05),
             offset: const Offset(0, 2),
             blurRadius: 8,
           ),
@@ -45,7 +45,7 @@ class ActivityLogItemWidget extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: log.statusColor.withOpacity(0.15),
+              color: log.statusColor.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(log.icon, color: log.statusColor, size: 24),
