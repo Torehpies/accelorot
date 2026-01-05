@@ -9,11 +9,12 @@ part 'team_member.g.dart';
 @freezed
 abstract class TeamMember with _$TeamMember {
   const factory TeamMember({
+    required String id,
     required String email,
     @Default('') String firstName,
     @Default('') String lastName,
     @Default(TeamRole.operator) TeamRole teamRole,
-		@Default(UserStatus.active) UserStatus status,
+    @Default(UserStatus.active) UserStatus status,
     @TimestampConverter() required DateTime addedAt,
   }) = _TeamMember;
 

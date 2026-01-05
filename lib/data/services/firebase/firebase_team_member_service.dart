@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/data/services/contracts/team_member_service.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class FirebaseTeamMemberService extends TeamMemberService {
   final FirebaseFirestore _firestore;
@@ -19,7 +19,6 @@ class FirebaseTeamMemberService extends TeamMemberService {
     required int pageIndex,
   }) async {
     try {
-			debugPrint("QUEUEING");
       final query = _membersRef(
         teamId,
       ).orderBy('addedAt', descending: true).limit(pageSize * (pageIndex + 1));
@@ -35,5 +34,24 @@ class FirebaseTeamMemberService extends TeamMemberService {
       debugPrint(e.toString());
     }
     return [];
+  }
+
+  @override
+  Future<void> updateTeamMember({
+    required TeamMember member,
+    required String teamId,
+  }) async {
+    try {
+      await _membersRef(teamId).doc(member.id).update({
+        'firstName': member.firstName,
+        'lastName': member.lastName,
+        'status': member.status.value,
+        'updatedAt': DateTime.now(),
+      });
+    } on FirebaseException catch (e) {
+      debugPrint(e.toString());
+    } catch (e) {
+      debugPrint(e.toString());
+		}
   }
 }
