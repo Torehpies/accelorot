@@ -29,20 +29,20 @@ class CycleDetailDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReadOnlyField(label: 'Title:', value: cycle.title),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Category:', value: cycle.category),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Controller Type:', 
             value: _formatControllerType(cycle.controllerType),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           if (cycle.machineId != null) ...[
             ReadOnlyField(label: 'Machine ID:', value: cycle.machineId!),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           if (cycle.cycles != null) ...[
@@ -50,12 +50,12 @@ class CycleDetailDialog extends StatelessWidget {
               label: 'Cycles:', 
               value: '${cycle.cycles} cycles',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           if (cycle.duration != null) ...[
             ReadOnlyField(label: 'Duration:', value: cycle.duration!),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           if (cycle.completedCycles != null) ...[
@@ -63,7 +63,7 @@ class CycleDetailDialog extends StatelessWidget {
               label: 'Completed Cycles:', 
               value: '${cycle.completedCycles}',
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           if (cycle.status != null) ...[
@@ -71,7 +71,7 @@ class CycleDetailDialog extends StatelessWidget {
               label: 'Status:', 
               value: cycle.status!.toUpperCase(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           if (cycle.totalRuntimeSeconds != null) ...[
@@ -79,7 +79,7 @@ class CycleDetailDialog extends StatelessWidget {
               label: 'Total Runtime:', 
               value: _formatRuntime(cycle.totalRuntimeSeconds!),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
           ],
           
           ReadOnlyMultilineField(
@@ -88,7 +88,7 @@ class CycleDetailDialog extends StatelessWidget {
           ),
           
           if (cycle.startedAt != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(
               label: 'Started At:',
               value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.startedAt!),
@@ -96,7 +96,7 @@ class CycleDetailDialog extends StatelessWidget {
           ],
           
           if (cycle.completedAt != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(
               label: 'Completed At:',
               value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.completedAt!),
@@ -104,7 +104,7 @@ class CycleDetailDialog extends StatelessWidget {
           ],
           
           if (cycle.timestamp != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(
               label: 'Date Added:',
               value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.timestamp!),
@@ -112,7 +112,7 @@ class CycleDetailDialog extends StatelessWidget {
           ],
           
           if (cycle.batchId != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(label: 'Batch ID:', value: cycle.batchId!),
           ],
         ],

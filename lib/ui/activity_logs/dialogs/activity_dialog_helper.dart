@@ -159,7 +159,7 @@ class _ErrorDialog extends StatelessWidget {
       title: 'Error Loading Details',
       subtitle: 'Unable to fetch information',
       content: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: WebColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),

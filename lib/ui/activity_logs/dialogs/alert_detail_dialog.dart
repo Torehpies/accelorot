@@ -29,28 +29,28 @@ class AlertDetailDialog extends StatelessWidget {
             label: 'Sensor Type:', 
             value: _formatSensorType(alert.sensorType),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Machine ID:', value: alert.machineId),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Reading Value:',
             value: alert.readingValue.toStringAsFixed(2),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Threshold:',
             value: alert.threshold.toStringAsFixed(2),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Status:',
             value: alert.status.toUpperCase(),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyMultilineField(
             label: 'Message:',
@@ -61,7 +61,7 @@ class AlertDetailDialog extends StatelessWidget {
           if (alert.readings != null && alert.readings!.isNotEmpty) ...[
             const SizedBox(height: 24),
             const Divider(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
               'Additional Readings:',
               style: WebTextStyles.bodyMediumGray.copyWith(
@@ -78,7 +78,7 @@ class AlertDetailDialog extends StatelessWidget {
             )),
           ],
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           ReadOnlyField(
             label: 'Timestamp:',
             value: DateFormat('MM/dd/yyyy, hh:mm a').format(alert.timestamp),

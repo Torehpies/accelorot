@@ -25,34 +25,34 @@ class SubstrateDetailDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReadOnlyField(label: 'Title:', value: substrate.title),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Category:', value: substrate.category),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Quantity:', 
             value: '${substrate.quantity.toStringAsFixed(2)} kg',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Machine Name:', 
             value: substrate.machineName ?? 'N/A',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyMultilineField(
             label: 'Description:',
             value: substrate.description,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Submitted By:', 
             value: substrate.operatorName ?? 'Unknown',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Date Added:',
@@ -60,7 +60,7 @@ class SubstrateDetailDialog extends StatelessWidget {
           ),
           
           if (substrate.batchId != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(label: 'Batch ID:', value: substrate.batchId!),
           ],
         ],

@@ -25,31 +25,31 @@ class ReportDetailDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReadOnlyField(label: 'Title:', value: report.title),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Report Type:', value: report.reportTypeLabel),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Priority Level:', value: report.priorityLabel),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Status:', value: report.statusLabel),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Submitted By:', 
             value: '${report.userName} (${report.userRole})',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(label: 'Machine Name:', value: report.machineName),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyMultilineField(
             label: 'Description:',
             value: report.description,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           
           ReadOnlyField(
             label: 'Date Created:',
@@ -58,7 +58,7 @@ class ReportDetailDialog extends StatelessWidget {
           
           // Show resolution info if resolved
           if (report.resolvedAt != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(
               label: 'Resolved At:',
               value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.resolvedAt!),
@@ -66,7 +66,7 @@ class ReportDetailDialog extends StatelessWidget {
           ],
           
           if (report.resolvedBy != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ReadOnlyField(label: 'Resolved By:', value: report.resolvedBy!),
           ],
         ],
