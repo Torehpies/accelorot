@@ -91,7 +91,7 @@ class ViewOperatorDialog extends StatelessWidget {
         _buildReadOnlyField(
           context: context,
           label: 'Added At',
-          value: _formatDate(operator.addedAt),
+          value: formatDateAndTime(operator.addedAt),
         ),
       ],
     );
@@ -130,18 +130,5 @@ class ViewOperatorDialog extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _statusLabel(UserStatus status) {
-    return switch (status) {
-      UserStatus.active => 'Active',
-      UserStatus.archived => 'Archived',
-      UserStatus.removed => 'Removed',
-      _ => status.value,
-    };
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

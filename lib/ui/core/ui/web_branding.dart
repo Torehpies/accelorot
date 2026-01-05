@@ -20,33 +20,58 @@ class WebBranding extends ConsumerWidget {
         final String name = '$firstName $lastName';
         return Column(
           children: [
-            const Icon(Icons.security, size: 50, color: AppColors.green400),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.green100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.energy_savings_leaf_rounded,
+                size: 50,
+                color: Colors.white,
+              ),
+            ),
             const SizedBox(height: 8),
+            const Text(
+              'Accel-O-Rot',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.green400,
+                fontSize: 22,
+              ),
+            ),
             Text(
               '$roleString Portal',
               style: const TextStyle(
-                color: AppColors.green400,
-                fontSize: 22,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
+                color: AppColors.background2,
                 borderRadius: BorderRadius.circular(8),
-                border: BoxBorder.all(color: Colors.grey, width: 2),
                 // color: AppColors.textPrimary.withValues(alpha: .25),
               ),
-              child: Text(
-                name,
-                style: TextStyle(
-                  letterSpacing: 1.0,
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  Icon(Icons.person_rounded, color: AppColors.green300),
+                  Text(
+                    name,
+                    style: TextStyle(
+                      letterSpacing: 1.0,
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
