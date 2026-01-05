@@ -16,41 +16,51 @@ class SwipeableCycleCards extends StatefulWidget {
 }
 
 class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
-  final PageController _pageController = PageController(
-    viewportFraction: 0.92, // Shows partial view of next card
-  );
+
+
   int _currentPage = 0;
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth * 0.92;
+
     return Column(
       children: [
-        SizedBox(
-          height: 340, // Adjusted height for cycle cards
-          child: PageView(
-            controller: _pageController,
-            padEnds: false,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: DrumControlCard(currentBatch: widget.currentBatch),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: AeratorCard(currentBatch: widget.currentBatch),
-              ),
-            ],
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification is ScrollUpdateNotification) {
+              final page = (notification.metrics.pixels / cardWidth).round();
+              if (page != _currentPage && page >= 0 && page <= 1) {
+                setState(() {
+                  _currentPage = page;
+                });
+              }
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: DrumControlCard(currentBatch: widget.currentBatch),
+                  ),
+                ),
+                SizedBox(
+                  width: cardWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: AeratorCard(currentBatch: widget.currentBatch),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),

@@ -8,6 +8,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/swipeable_cycle_cards.dart';
+
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
@@ -271,7 +272,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
 
                   CompostingProgressCard(
-                    key: ValueKey(_rebuildKey),
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
@@ -280,6 +280,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Swipeable cycle cards
                   // Swipeable cycle cards
                   SwipeableCycleCards(
                     currentBatch: _activeBatchModel,
