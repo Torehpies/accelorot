@@ -4,6 +4,14 @@ import 'web_colors.dart';
 
 /// Reusable text styles for web UI
 class WebTextStyles {
+  // Section / table titles
+  static const sectionTitle = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 18,
+    fontWeight: FontWeight.w900,
+    color: WebColors.textHeading,
+  );
+
   static const label = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 13,
