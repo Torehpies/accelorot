@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
@@ -92,22 +94,55 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   Future<void> updateOperator(EditOperatorForm form) async {
     state = state.copyWith(isLoading: true);
     try {
-      TeamMember member = TeamMember(
+      final teamUser = ref.read(appUserProvider).value;
+      final teamId = teamUser?.teamId;
+      if (teamId == null) return;
+
+      final currentMembers = state.pagesByIndex[state.currentPage] ?? [];
+      final updatedMembers = currentMembers.map((m) {
+        if (m.id == form.id) {
+          return m.copyWith(
+            email: form.email,
+            firstName: form.firstName,
+            lastName: form.lastName,
+            status: form.status,
+          );
+        }
+        return m;
+      }).toList();
+
+      final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
+        ..[state.currentPage] = updatedMembers;
+
+      state = state.copyWith(
+        pagesByIndex: updatedPages,
+        members: updatedMembers,
+        lastFetchedAt: DateTime.now(),
+      );
+
+      final member = TeamMember(
+        id: form.id,
         email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
+        status: form.status,
         addedAt: DateTime.now(),
-        id: form.id,
       );
 
-      final teamUser = ref.watch(appUserProvider).value;
-      final teamId = teamUser?.teamId;
       await ref
           .read(teamMemberServiceProvider)
           .updateTeamMember(member: member, teamId: teamId);
-      refresh();
+
+      await ref.read(appUserServiceProvider).updateUserField(form.id, {
+        'status': form.status.value,
+      });
+
+      // debugPrint(
+      //   'update success: ${updatedMembers.map((m) => '${m.id} -> ${m.status}').toList()}',
+      // );
     } catch (e) {
-      // Handle error
+      // debugPrint('update error: $e');
+      await refresh();
     } finally {
       state = state.copyWith(isLoading: false);
     }

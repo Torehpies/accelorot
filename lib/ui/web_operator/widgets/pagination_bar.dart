@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class PaginationBar extends StatelessWidget {
   const PaginationBar({
@@ -18,9 +19,6 @@ class PaginationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const green = Color(0xFF22C55E);
-    const lightGreen = Color(0xFFE9FEEB);
-
     final start = (currentPage - 2).clamp(0, currentPage);
     final pages = List<int>.generate(5, (i) => start + i);
 
@@ -31,7 +29,7 @@ class PaginationBar extends StatelessWidget {
         child: OutlinedButton(
           onPressed: () => onPageSelected(index),
           style: OutlinedButton.styleFrom(
-            backgroundColor: isActive ? green : Colors.white,
+            backgroundColor: isActive ? AppColors.green100 : Colors.white,
             foregroundColor: isActive ? Colors.white : Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             minimumSize: const Size(40, 36),
@@ -49,10 +47,12 @@ class PaginationBar extends StatelessWidget {
       return OutlinedButton.icon(
         onPressed: enabled ? (back ? onBack : onNext) : null,
         style: OutlinedButton.styleFrom(
-          backgroundColor: enabled ? lightGreen : Colors.grey.shade200,
-          foregroundColor: Colors.green.shade700,
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: AppColors.green100,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          side: BorderSide(color: enabled ? green : Colors.grey.shade300),
+          side: BorderSide(
+            color: enabled ? AppColors.green100 : Colors.grey.shade300,
+          ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
         icon: Icon(back ? Icons.chevron_left : Icons.chevron_right, size: 18),

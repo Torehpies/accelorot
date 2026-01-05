@@ -21,7 +21,7 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final state = ref.watch(teamMembersProvider.select((s) => s));
+    final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
 
     return Column(
@@ -169,7 +169,6 @@ class _MembersList extends StatelessWidget {
     );
   }
 }
-
 
 class _PaginationSection extends ConsumerWidget {
   final int currentPage;

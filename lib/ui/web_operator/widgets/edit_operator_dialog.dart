@@ -19,13 +19,7 @@ abstract class EditOperatorForm with _$EditOperatorForm {
     firstName: operator.firstName,
     lastName: operator.lastName,
     email: operator.email,
-    // If operator.status is already a UserStatus:
     status: operator.status as UserStatus,
-    // If it's a string instead, use:
-    // status: UserStatus.values.firstWhere(
-    //   (s) => s.value == operator.status,
-    //   orElse: () => UserStatus.active,
-    // ),
     id: operator.id,
   );
 }
@@ -112,7 +106,7 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
                   const SizedBox(height: 20),
 
                   DropdownButtonFormField<UserStatus>(
-                    value: form.status,
+                    initialValue: form.status,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items:
                         const [
@@ -127,8 +121,7 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
                                   UserStatus.active => 'Active',
                                   UserStatus.archived => 'Archive',
                                   UserStatus.removed => 'Remove',
-                                  _ =>
-                                    status.value, // fallback, should not be hit
+                                  _ => status.value,
                                 }),
                               ),
                             )

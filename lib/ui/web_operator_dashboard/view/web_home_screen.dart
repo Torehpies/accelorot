@@ -8,9 +8,9 @@ import 'package:flutter_application_1/frontend/operator/dashboard/add_waste/acti
 import 'package:flutter_application_1/data/models/machine_model.dart';
 
 class WebHomeScreen extends StatefulWidget {
-  final MachineModel? focusedMachine; 
+  final MachineModel? focusedMachine;
 
-  const WebHomeScreen({super.key, this.focusedMachine}); 
+  const WebHomeScreen({super.key, this.focusedMachine});
 
   @override
   State<WebHomeScreen> createState() => _WebHomeScreenState();
@@ -112,7 +112,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
       final result = await showDialog<Map<String, dynamic>>(
         context: context,
         builder: (context) => SubmitReport(
-          preSelectedMachineId: widget.focusedMachine?.machineId, 
+          preSelectedMachineId: widget.focusedMachine?.machineId,
         ),
       );
 
@@ -208,7 +208,7 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                           border: Border.all(color: Colors.grey.shade200),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.grey.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 2),
@@ -269,7 +269,8 @@ class _WebHomeScreenState extends State<WebHomeScreen> {
                                 children: [
                                   ActivityLogsCard(
                                     key: _activityLogsKey,
-                                    focusedMachineId: widget.focusedMachine?.machineId,
+                                    focusedMachineId:
+                                        widget.focusedMachine?.machineId,
                                   ),
                                   Positioned(
                                     bottom: 16,
