@@ -310,17 +310,13 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            // Use rebuild key to force recreation
                             child: DrumControlCard(
-                              key: ValueKey('drum-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
                               currentBatch: _activeBatchModel, 
                             ),
                           ),
                           const SizedBox(height: 16),
                           Expanded(
-                            // Use rebuild key to force recreation
                             child: AeratorCard(
-                              key: ValueKey('aerator-$_rebuildKey-${_activeBatchModel?.id ?? "no-batch"}'),
                               currentBatch: _activeBatchModel, 
                             ),
                           ),
