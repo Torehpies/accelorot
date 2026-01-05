@@ -90,7 +90,12 @@ class _MachineTableWidgetState extends State<MachineTableWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 0,
+        bottom: 8,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

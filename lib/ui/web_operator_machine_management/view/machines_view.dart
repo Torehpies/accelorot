@@ -185,7 +185,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                           
                           // Machine list content - Increased height by 10%
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.55, // Changed from 0.5 to 0.6 (+10%)
+                            height: MediaQuery.of(context).size.height * 0.61, // Changed from 0.5 to 0.6 (+10%)
                             child: state.displayedMachines.isEmpty
                                 ? _buildEmptyState(isMobile, state)
                                 : (isMobile
@@ -323,7 +323,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
   }
 
   Widget _buildListHeader(OperatorMachineState state, bool isDesktop, bool isTablet, bool isMobile) {
-    final headerPadding = isDesktop ? 24.0 : (isTablet ? 20.0 : 16.0);
+    final headerPadding = isDesktop ? 12.0 : (isTablet ? 10.0 : 8.0);
     final titleFontSize = isDesktop ? 24.0 : (isTablet ? 22.0 : 20.0);
 
     return Padding(
@@ -364,7 +364,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                     ),
                     const SizedBox(width: 12),
                     SizedBox(
-                      width: isDesktop ? 400 : 350,
+                      width: isDesktop ? 300 : 250,
                       child: SearchBarWidget(
                         onSearchChanged: _onSearchChanged,
                         onClear: _onSearchCleared,
@@ -388,7 +388,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                         isTablet: isTablet,
                         isMobile: isMobile,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: SearchBarWidget(
                           onSearchChanged: _onSearchChanged,
