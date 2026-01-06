@@ -27,7 +27,6 @@ class WebHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
-
 class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
   //  GlobalKey<ActivityLogsCardState>();

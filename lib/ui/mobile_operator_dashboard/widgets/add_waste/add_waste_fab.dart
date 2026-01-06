@@ -1,6 +1,6 @@
 // lib/frontend/operator/dashboard/add_waste/widgets/add_waste_fab.dart
 import 'package:flutter/material.dart';
-import '../../../home_screen/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/add_waste_product.dart';
 
 class AddWasteFAB extends StatelessWidget {
   final VoidCallback? onAddHandled;

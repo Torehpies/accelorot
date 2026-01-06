@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
 import '../widgets/analytics_widget.dart';
-import '../../home_screen/widgets/activity_logs_card.dart';
+import '../../mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
   const MobileAdminHomeView({super.key});
