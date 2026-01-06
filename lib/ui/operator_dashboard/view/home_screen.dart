@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/view_model/compost_progress/compost_batch_model.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/submit_report.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/view_model/compost_progress/composting_progress_card.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
 
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycles/swipeable_cycle_cards.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/swipeable_cycle_cards.dart';
 
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/activity_logs_card.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';

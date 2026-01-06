@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../view_model/compost_progress/compost_batch_model.dart';
+import '../../models/compost_batch_model.dart';
 import '../../../../data/providers/batch_providers.dart';
 
 

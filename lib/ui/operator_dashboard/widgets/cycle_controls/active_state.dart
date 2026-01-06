@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../view_model/cycles/drum_rotation_settings.dart';
-import '../../view_model/cycles/system_status.dart';
+import '../../models/drum_rotation_settings.dart';
+import '../../models/system_status.dart';
 import 'drum_input_fields.dart';
 import 'system_action_buttons.dart';
 import 'info_item.dart';
