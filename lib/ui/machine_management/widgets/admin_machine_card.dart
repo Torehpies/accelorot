@@ -6,12 +6,10 @@ import 'machine_details_view.dart';
 
 class AdminMachineCard extends ConsumerWidget {
   final MachineModel machine;
-  final String teamId;
 
   const AdminMachineCard({
     super.key,
     required this.machine,
-    required this.teamId,
   });
 
   void _navigateToDetails(BuildContext context) {
@@ -20,7 +18,7 @@ class AdminMachineCard extends ConsumerWidget {
       MaterialPageRoute(
         builder: (context) => MachineDetailsView(
           machine: machine,
-          teamId: teamId,
+          teamId: machine.teamId,
         ),
       ),
     );

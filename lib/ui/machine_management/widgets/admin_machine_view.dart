@@ -270,7 +270,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         }
 
         final machine = state.displayedMachines[index];
-        return AdminMachineCard(machine: machine, teamId: _teamId!);
+        return AdminMachineCard(machine: machine);
       },
     );
   }
