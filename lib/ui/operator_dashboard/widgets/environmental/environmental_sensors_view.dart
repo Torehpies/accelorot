@@ -1,7 +1,7 @@
 // lib/frontend/operator/views/environmental_sensors_view.dart
 import 'package:flutter/material.dart';
 import '../../../../services/firestore_statistics_service.dart';
-import '../../widgets/environmental/environmental_sensors_card.dart';
+import 'environmental_sensors_card.dart';
 
 class EnvironmentalSensorsView extends StatefulWidget {
   const EnvironmentalSensorsView({super.key});

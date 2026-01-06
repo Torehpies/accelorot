@@ -11,7 +11,7 @@ import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
 import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
-import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/compost_progress_components/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';

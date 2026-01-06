@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/services/auth_wrapper.dart';
-import '../../ui/home_screen/web_home_screen/web_home_screen.dart';
+import '../../ui/operator_dashboard/view/web_home_screen.dart';
 import '../../ui/web_statistics/web_statistics_screen.dart';
 import '../../../ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/unified_activity_view.dart';

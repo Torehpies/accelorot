@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../mobile_operator_dashboard/widgets/view_model/cycles/drum_rotation_settings.dart';
 import '../../mobile_operator_dashboard/widgets/view_model/cycles/system_status.dart';
-import '../widgets/cycles/drum_input_fields.dart';
-import '../widgets/cycles/system_action_buttons.dart';
+import '../widgets/cycle_controls/drum_input_fields.dart';
+import '../widgets/cycle_controls/system_action_buttons.dart';
 import 'info_item.dart';
 
 class ActiveState extends StatefulWidget {
