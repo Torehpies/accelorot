@@ -6,6 +6,7 @@ class CustomTabbedContainer extends StatefulWidget {
   const CustomTabbedContainer({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomTabbedContainerState createState() => _CustomTabbedContainerState();
 }
 
