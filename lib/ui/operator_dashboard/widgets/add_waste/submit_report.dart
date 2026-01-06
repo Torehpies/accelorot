@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../fields/report_type_field.dart';
-import '../../fields/report_title_field.dart';
-import '../../fields/machine_selection_field.dart';
-import '../../fields/priority_field.dart';
-import '../../fields/description_field.dart';
-import '../../fields/submit_button.dart';
+import '../../../operator_dashboard/fields/report_type_field.dart';
+import '../../../operator_dashboard/fields/report_title_field.dart';
+import '../../../operator_dashboard/fields/machine_selection_field.dart';
+import '../../../operator_dashboard/fields/priority_field.dart';
+import '../../../operator_dashboard/fields/description_field.dart';
+import '../../../operator_dashboard/fields/submit_button.dart';
 import '../../../../data/providers/report_providers.dart'; 
 import '../../../../data/models/report.dart'; 
-import '../../fields/batch_selection_field.dart'; 
+import '../../../operator_dashboard/fields/batch_selection_field.dart'; 
 
 class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;

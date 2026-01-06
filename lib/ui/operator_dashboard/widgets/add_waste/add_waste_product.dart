@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../fields/waste_category_section.dart';
-import '../../fields/plant_type_section.dart';
-import '../../fields/quantity_field.dart';
-import '../../fields/description_field.dart';
-import '../../fields/submit_button.dart';
-import '../../fields/waste_config.dart';
-import '../../fields/machine_selection_field.dart';
+import '../../../operator_dashboard/fields/waste_category_section.dart';
+import '../../../operator_dashboard/fields/plant_type_section.dart';
+import '../../../operator_dashboard/fields/quantity_field.dart';
+import '../../../operator_dashboard/fields/description_field.dart';
+import '../../../operator_dashboard/fields/submit_button.dart';
+import '../../../operator_dashboard/fields/waste_config.dart';
+import '../../../operator_dashboard/fields/machine_selection_field.dart';
 //import '../../../activity_logs/widgets/batch_selector.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart'; 
-import '../../fields/batch_selection_field.dart';
+import '../../../operator_dashboard/fields/batch_selection_field.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;

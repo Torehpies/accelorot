@@ -2,25 +2,24 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/cycles/drum_rotation_settings.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/cycles/system_status.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/cycles/empty_state.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/cycles/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/view_model/cycles/drum_rotation_settings.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/view_model/cycles/system_status.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
-
-class AeratorCard extends ConsumerStatefulWidget {
+class DrumControlCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
 
-  const AeratorCard({super.key, this.currentBatch});
+  const DrumControlCard({super.key, this.currentBatch});
 
   @override
-  ConsumerState<AeratorCard> createState() => _AeratorCardState();
+  ConsumerState<DrumControlCard> createState() => _DrumControlCardState();
 }
 
-class _AeratorCardState extends ConsumerState<AeratorCard> {
+class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
@@ -30,79 +29,89 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  
-  // Add this to track the last loaded batch ID
   //String? _lastLoadedBatchId;
 
   @override
   void initState() {
     super.initState();
-    if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-     // _lastLoadedBatchId = widget.currentBatch!.id;
-      _loadExistingCycle();
-    }
+    _initializeFromBatch();
   }
 
-@override
-void didUpdateWidget(AeratorCard oldWidget) {
-  super.didUpdateWidget(oldWidget);
-  
-  // Check if batch ID changed (new batch selected or created)
-  final currentBatchId = widget.currentBatch?.id;
-  final oldBatchId = oldWidget.currentBatch?.id;
-  
-  if (currentBatchId != oldBatchId) {
-    // Batch changed - reset and reload
-    _stopTimer();
-    _cycleTimer?.cancel();
-    
-    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-      // No active batch - clear everything
-      setState(() {
-        settings.reset();
-        status = SystemStatus.idle;
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _cycleDoc = null;
-        //_lastLoadedBatchId = null;
-      });
-    } else {
-      // New active batch - load its cycle
+  void _initializeFromBatch() {
+    if (widget.currentBatch != null && widget.currentBatch!.isActive) {
       //_lastLoadedBatchId = widget.currentBatch!.id;
-      // Use Future.delayed to ensure the widget is fully built
-      Future.delayed(const Duration(milliseconds: 100), () {
+      // Schedule load after build completes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadExistingCycle();
         }
       });
+    } else {
+      _resetState();
     }
-  } else if (widget.currentBatch != null && 
-             oldWidget.currentBatch?.isActive == true && 
-             !widget.currentBatch!.isActive) {
-    // Same batch but became inactive
+  }
+
+  void _resetState() {
     _stopTimer();
     _cycleTimer?.cancel();
-    
-    if (_cycleDoc != null && widget.currentBatch?.id != null) {
-      _completeCycleInFirebase();
-    }
-    
     setState(() {
-      status = SystemStatus.stopped;
+      settings.reset();
+      status = SystemStatus.idle;
+      _uptime = '00:00:00';
+      _completedCycles = 0;
+      _startTime = null;
+      _cycleDoc = null;
+      //_lastLoadedBatchId = null;
     });
   }
-}
 
+  @override
+  void didUpdateWidget(DrumControlCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    final currentBatchId = widget.currentBatch?.id;
+    final oldBatchId = oldWidget.currentBatch?.id;
+    
+    debugPrint('🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId');
+    
+    // Batch changed
+    if (currentBatchId != oldBatchId) {
+      debugPrint('✅ Batch ID changed - reinitializing');
+      _initializeFromBatch();
+    }
+    // Same batch became inactive
+    else if (widget.currentBatch != null && 
+             oldWidget.currentBatch?.isActive == true && 
+             !widget.currentBatch!.isActive) {
+      debugPrint('⚠️ Batch completed');
+      _stopTimer();
+      _cycleTimer?.cancel();
+      
+      if (_cycleDoc != null) {
+        _completeCycleInFirebase();
+      }
+      
+      setState(() {
+        status = SystemStatus.stopped;
+      });
+    }
+  }
 
   Future<void> _loadExistingCycle() async {
-    if (widget.currentBatch == null) return;
+    if (widget.currentBatch == null) {
+      debugPrint('⚠️ No current batch to load');
+      return;
+    }
+
+    debugPrint('📥 Loading drum controller for batch: ${widget.currentBatch!.id}');
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycle = await cycleRepository.getAerator(
+      final cycle = await cycleRepository.getDrumController(
         batchId: widget.currentBatch!.id,
       );
+
+      debugPrint('📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
 
       if (mounted && cycle != null) {
         setState(() {
@@ -130,7 +139,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
           }
         });
       } else if (mounted) {
-        // No existing cycle - reset to idle state for new batch
+        // No existing cycle - reset to idle state
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -141,10 +150,11 @@ void didUpdateWidget(AeratorCard oldWidget) {
         });
       }
     } catch (e) {
-      debugPrint('Error loading aerator cycle: $e');
+      debugPrint('❌ Error loading drum controller cycle: $e');
     }
   }
 
+  // ...rest of the existing methods remain the same...
   @override
   void dispose() {
     _stopTimer();
@@ -191,7 +201,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please log in to start the aerator'),
+          content: Text('Please log in to start the drum controller'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -201,8 +211,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       
-      // Start aerator in Firebase
-      await cycleRepository.startAerator(
+      await cycleRepository.startDrumController(
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
         userId: user.uid,
@@ -210,8 +219,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
         duration: settings.period,
       );
 
-      // Reload the cycle to get the ID
-      final cycle = await cycleRepository.getAerator(
+      final cycle = await cycleRepository.getDrumController(
         batchId: widget.currentBatch!.id,
       );
 
@@ -245,17 +253,16 @@ void didUpdateWidget(AeratorCard oldWidget) {
           _completedCycles++;
         });
 
-        // Update progress in Firebase
         if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
-            await cycleRepository.updateAeratorProgress(
+            await cycleRepository.updateDrumProgress(
               batchId: widget.currentBatch!.id,
               completedCycles: _completedCycles,
               totalRuntime: DateTime.now().difference(_startTime!),
             );
           } catch (e) {
-            debugPrint('Failed to update aerator progress: $e');
+            debugPrint('Failed to update drum progress: $e');
           }
         }
 
@@ -263,7 +270,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
           _stopTimer();
           timer.cancel();
           
-          // Complete cycle in Firebase
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
@@ -283,11 +289,11 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      await cycleRepository.completeAerator(
+      await cycleRepository.completeDrumController(
         batchId: widget.currentBatch!.id,
       );
     } catch (e) {
-      debugPrint('Failed to complete aerator: $e');
+      debugPrint('Failed to complete drum controller: $e');
     }
   }
 
@@ -309,7 +315,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
   String _getCyclesLabel(int cycles) {
     return '$cycles Cycles';
   }
-
   @override
   Widget build(BuildContext context) {
     final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;
@@ -338,7 +343,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Aerator',
+                  'Drum Controller',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -390,7 +395,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
   Widget _buildActiveState(bool batchCompleted) {
     final canInteract = !batchCompleted && status == SystemStatus.idle;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -491,7 +496,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -503,7 +508,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? 'Completed'
                   : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
