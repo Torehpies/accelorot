@@ -19,7 +19,6 @@ import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/home_screen/web_home_screen/web_home_screen.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
-import 'package:flutter_application_1/ui/machine_management/widgets/operator_machine_view.dart';
 import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/web_reports_view.dart';

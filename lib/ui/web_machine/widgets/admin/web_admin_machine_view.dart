@@ -7,7 +7,6 @@ import '../../../machine_management/view_model/admin_machine_notifier.dart';
 import '../../../core/widgets/filters/search_field.dart';
 import '../../shared/pagination_table.dart';
 import '../../../core/widgets/table/base_table_container.dart';
-import '../../../core/themes/web_colors.dart';
 import '../../../../ui/web_machine/filters/web_machine_date_filter_widget.dart';
 import 'web_add_machine_modal.dart';
 import 'web_edit_machine_modal.dart';

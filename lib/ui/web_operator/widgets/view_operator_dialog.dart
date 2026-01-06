@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/utils/format.dart';
-import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 
 class ViewOperatorDialog extends StatelessWidget {

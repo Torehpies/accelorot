@@ -410,7 +410,7 @@ class AuthService {
 			await user.reload();
 			} 
 		} catch (e) {
-			print('Error refreshing user: $e');
+			debugPrint('Error refreshing user: $e');
 		}
 	}
 }
