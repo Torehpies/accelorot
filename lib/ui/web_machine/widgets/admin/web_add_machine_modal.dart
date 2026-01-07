@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../machine_management/view_model/admin_machine_notifier.dart';
+import '../../../../data/models/operator_model.dart';
+import '../../../../data/providers/operator_providers.dart';
+import '../../../machine_management/widgets/user_selector_dropdown.dart';
 
 class WebAddMachineModal extends ConsumerStatefulWidget {
   final String teamId;
@@ -18,14 +21,36 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
   final _formKey = GlobalKey<FormState>();
   final _machineNameController = TextEditingController();
   final _machineIdController = TextEditingController();
-  final _usersController = TextEditingController(text: 'All Team Members');
+  List<String> _selectedUserIds = [];
+  List<OperatorModel> _users = [];
   bool _isSubmitting = false;
+  bool _isLoadingUsers = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final operators = await ref.read(operatorRepositoryProvider).getOperators(widget.teamId);
+      if (mounted) {
+        setState(() {
+          _users = operators.where((o) => !o.isArchived).toList();
+          _selectedUserIds = _users.map((u) => u.id).toList();
+          _isLoadingUsers = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingUsers = false);
+    }
+  }
 
   @override
   void dispose() {
     _machineNameController.dispose();
     _machineIdController.dispose();
-    _usersController.dispose();
     super.dispose();
   }
 
@@ -77,6 +102,7 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
             teamId: widget.teamId,
             machineId: _machineIdController.text.trim(),
             machineName: _machineNameController.text.trim(),
+            assignedUserIds: _selectedUserIds,
           );
 
       if (mounted) {
@@ -207,13 +233,20 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
                 const SizedBox(height: 16),
 
                 // Assigned Users
-                TextFormField(
-                  controller: _usersController,
-                  decoration: _buildInputDecoration('Assigned Users', readOnly: true),
-                  enabled: false,
-                  readOnly: true,
-                  style: const TextStyle(color: Color(0xFF6B7280)),
-                ),
+                if (_isLoadingUsers)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else
+                  UserSelectorDropdown(
+                    users: _users,
+                    selectedUserIds: _selectedUserIds,
+                    onSelectionChanged: (selected) {
+                      setState(() => _selectedUserIds = selected);
+                    },
+                    enabled: !_isSubmitting,
+                  ),
                 const SizedBox(height: 24),
 
                 // Buttons
