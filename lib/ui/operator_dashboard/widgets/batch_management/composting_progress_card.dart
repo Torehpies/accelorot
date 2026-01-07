@@ -1,13 +1,13 @@
 // lib/frontend/operator/dashboard/compost_progress/composting_progress_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../home_screen/compost_progress_components/batch_start_dialog.dart';
-import '../../../../home_screen/compost_progress_components/batch_complete_dialog.dart';
-import 'compost_batch_model.dart';
-import '../../../../activity_logs/widgets/machine_selector.dart';
-import '../../../../activity_logs/widgets/batch_selector.dart';
-import '../../../../../data/providers/batch_providers.dart';
-import '../../../../../data/models/batch_model.dart';
+import 'batch_start_dialog.dart';
+import 'batch_complete_dialog.dart';
+import '../../models/compost_batch_model.dart';
+import '../../../activity_logs/widgets/machine_selector.dart';
+import '../../../activity_logs/widgets/batch_selector.dart';
+import '../../../../data/providers/batch_providers.dart';
+import '../../../../data/models/batch_model.dart';
 
 class CompostingProgressCard extends ConsumerStatefulWidget {
   static const int totalDays = 12; // Fixed 12-day cycle

@@ -1,35 +1,30 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/submit_report.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/composting_progress_card.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/view_model/compost_progress/compost_batch_model.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/drum_control_card.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/cycles/aerator_card.dart';
-import 'package:flutter_application_1/ui/mobile_operator_dashboard/widgets/add_waste/activity_logs_card.dart';
-import 'package:flutter_application_1/ui/home_screen/compost_progress_components/batch_start_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
+
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/swipeable_cycle_cards.dart';
+
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 
 
-class WebHomeScreen extends ConsumerStatefulWidget {
-  final MachineModel? focusedMachine; 
+class HomeScreen extends ConsumerStatefulWidget {
+  final MachineModel? focusedMachine;
 
-  const WebHomeScreen({super.key, this.focusedMachine}); 
+  const HomeScreen({super.key, this.focusedMachine});
 
   @override
-  ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-
-class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
-  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-  //  GlobalKey<ActivityLogsCardState>();
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
@@ -38,12 +33,10 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   // Add this to force widget rebuilds
   int _rebuildKey = 0;
 
-
-
   @override
   void initState() {
     super.initState();
-   _selectedMachineId = widget.focusedMachine?.machineId;
+    _selectedMachineId = widget.focusedMachine?.machineId;
   }
 
   void _updateActiveBatch(BatchModel? batch) {
@@ -137,8 +130,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     });
   }
 
-
-  void _handleFABPress() async {
+  Future<void> _handleFABPress() async {
     final action = await showDialog<String>(
       context: context,
       builder: (context) {
@@ -210,23 +202,22 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       );
 
       if (result == true && mounted) {
-
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
         
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Waste entry added successfully!'),
-            backgroundColor: Colors.teal,
-          ),
-        );
-        ref.invalidate(allActivitiesProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Waste entry added successfully!'),
+              backgroundColor: Colors.teal,
+            ),
+          );
+        }
       }
     } else if (action == 'submit_report') {
-
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => SubmitReport(
@@ -235,113 +226,97 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
         ),
       );
 
-      
-
-
       if (result == true && mounted) {
-
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
         
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Report submitted successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        ref.invalidate(allActivitiesProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Report submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     }
   }
 
-
-  @override
+ @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 1024;
+    final isMachineView = widget.focusedMachine != null;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 32 : 24,
-                  vertical: 24,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Left side - Batch Tracker and Recent Activity
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 360,
-                            child: CompostingProgressCard(
-                              currentBatch: _currentBatch,
-                              onBatchStarted: _handleBatchStarted,
-                              onBatchCompleted: _handleBatchCompleted,
-                              preSelectedMachineId: widget.focusedMachine?.machineId,
-                              onBatchChanged: _updateActiveBatch,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: ActivityLogsCard(
-                              focusedMachineId: widget.focusedMachine?.machineId,
-                            ),
-                          ),
-                        ],
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (isMachineView)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        'Machine: ${widget.focusedMachine!.machineName}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Right side - Drum Controller and Aerator Cards
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: DrumControlCard(
-                              currentBatch: _activeBatchModel, 
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: AeratorCard(
-                              currentBatch: _activeBatchModel, 
-                            ),
-                          ),
-                        ],
-                      ),
+
+                  CompostingProgressCard(
+                    currentBatch: _currentBatch,
+                    onBatchStarted: _handleBatchStarted,
+                    onBatchCompleted: _handleBatchCompleted,
+                    preSelectedMachineId: _selectedMachineId,
+                    onBatchChanged: _updateActiveBatch,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Swipeable cycle cards
+                  // Swipeable cycle cards
+                  SwipeableCycleCards(
+                    currentBatch: _activeBatchModel,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Activity logs
+                  SizedBox(
+                    height: 400,
+                    child: ActivityLogsCard(
+                      focusedMachineId: _selectedMachineId,
+                      maxHeight: 400,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _handleFABPress,
-        backgroundColor: Colors.teal[800],
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.add,
-          size: 32,
-          color: Colors.white,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16, right: 16),
+        child: SizedBox(
+          width: 58,
+          height: 58,
+          child: FloatingActionButton(
+            onPressed: _handleFABPress,
+            backgroundColor: Colors.teal,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.add, size: 28, color: Colors.white),
+          ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
