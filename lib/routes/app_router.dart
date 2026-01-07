@@ -16,7 +16,7 @@ import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/unified_activity_view.dart';
 import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/view/web_home_screen.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
 import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
@@ -122,7 +122,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.dashboard.path,
             name: RoutePath.dashboard.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const WebHomeScreen(),
+              child: const ResponsiveDashboard(),
               key: state.pageKey,
             ),
           ),
