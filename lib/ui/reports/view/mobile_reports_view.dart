@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../view_model/reports_viewmodel.dart';
 import '../models/reports_state.dart'; // For filters
 import '../widgets/mobile_report_card.dart';
+import '../widgets/edit_report_modal.dart';
 import '../widgets/reports_stats_row.dart'; // We'll adapt this or use BaseStatsCard directly if row doesn't fit
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/base_stats_card.dart';
@@ -192,7 +193,12 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                           return MobileReportCard(
                             report: report,
                             onTap: () {
-                              // Navigate to detail view
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => EditReportModal(report: report),
+                              );
                             },
                           );
                         },
