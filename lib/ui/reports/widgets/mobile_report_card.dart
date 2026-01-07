@@ -70,7 +70,7 @@ class MobileReportCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row 1: Title and Actions
+              // Title and Actions
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -95,7 +95,7 @@ class MobileReportCard extends StatelessWidget {
               
               const SizedBox(height: 4),
               
-              // Row 2: Category
+              // Category
               Text(
                 report.reportTypeLabel,
                 style: TextStyle(
@@ -106,7 +106,7 @@ class MobileReportCard extends StatelessWidget {
               
               const SizedBox(height: 12),
               
-              // Row 3: Status and Priority
+              // Status and Priority
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -114,7 +114,7 @@ class MobileReportCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor, // e.g., Light blue
+                      color: statusColor,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -122,7 +122,7 @@ class MobileReportCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: statusTextColor, // e.g., Blue
+                        color: statusTextColor, 
                       ),
                     ),
                   ),

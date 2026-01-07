@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+
 import '../view_model/reports_viewmodel.dart';
-import '../models/reports_state.dart'; // For filters
+//import '../models/reports_state.dart'; 
 import '../widgets/mobile_report_card.dart';
 import '../widgets/edit_report_modal.dart';
-import '../widgets/reports_stats_row.dart'; // We'll adapt this or use BaseStatsCard directly if row doesn't fit
+//import '../widgets/reports_stats_row.dart'; 
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/base_stats_card.dart';
 import '../../core/widgets/filters/search_field.dart';
-import '../../core/widgets/shared/pagination_controls.dart';
+//import '../../core/widgets/shared/pagination_controls.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
   const MobileReportsView({super.key});
@@ -29,11 +29,11 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Watch the state
+
     final reportsState = ref.watch(reportsViewModelProvider);
     final viewModel = ref.read(reportsViewModelProvider.notifier);
 
-    // 2. Prepare Stats Data
+
     final stats = viewModel.getStatsWithChange();
     final statCards = _buildStatCards(stats, reportsState.isLoading);
 
@@ -48,7 +48,7 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
         elevation: 0,
         centerTitle: false,
         actions: [
-          // Optional: Add a refresh button or other actions
+
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black54),
             onPressed: () => viewModel.refresh(),
@@ -61,12 +61,12 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
           children: [
             const SizedBox(height: 16),
             
-            // 3. Swipable Stats Cards
+
             SizedBox(
-              height: 160, // Adjust height as needed
+              height: 160, 
               child: PageView.builder(
                 controller: _statsController,
-                padEnds: false, // Align first card to start if we want, or true for center
+                padEnds: false, 
                 itemCount: statCards.length,
                 itemBuilder: (context, index) {
                   return Padding(
@@ -79,7 +79,7 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
             const SizedBox(height: 24),
 
-            // 4. Header & Filter Section
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Container(
