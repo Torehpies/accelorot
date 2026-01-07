@@ -16,7 +16,7 @@ import 'package:flutter_application_1/routes/router_notifier.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/unified_activity_view.dart';
 import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
-import 'package:flutter_application_1/ui/home_screen/web_home_screen/web_home_screen.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/view/web_home_screen.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
 import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
@@ -27,7 +27,7 @@ import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_s
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
-import 'package:flutter_application_1/ui/web_operator_dashboard/view/web_statistics_screen.dart';
+import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
 import 'package:flutter_application_1/ui/web_operator_machine_management/view/machines_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
