@@ -5,6 +5,7 @@ import '../../../../ui/profile_screen/widgets/profile_view.dart';
 import '../../../../ui/machine_management/widgets/admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
 import '../../../../ui/mobile_admin_home/view/mobile_admin_home_view.dart';
+import '../../../../ui/reports/view/mobile_reports_view.dart';
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});
@@ -31,6 +32,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
       MobileAdminHomeView(),
       const OperatorManagementScreen(teamId: '',),
       const AdminMachineView(), 
+      const MobileReportsView(),
       const ProfileView(),
     ];
   }
@@ -85,6 +87,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
             label: "Operator",
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machine"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Reports"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
