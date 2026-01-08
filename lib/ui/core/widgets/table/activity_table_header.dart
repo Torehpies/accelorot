@@ -32,6 +32,10 @@ class ActivityTableHeader extends StatelessWidget {
     this.isLoading = false,
   });
 
+  bool _isFilterActive(String filterValue) {
+    return !filterValue.toLowerCase().contains('all');
+  }
+
   @override
   Widget build(BuildContext context) {
     final availableTypes = UnifiedActivityConfig.getSubTypesForCategory(selectedCategory);
@@ -40,6 +44,10 @@ class ActivityTableHeader extends StatelessWidget {
     final validType = availableTypes.contains(selectedType) 
         ? selectedType 
         : ActivitySubType.all;
+
+    final isCategoryActive = _isFilterActive(selectedCategory.displayName);
+    final isTypeActive = _isFilterActive(validType.displayName);
+    final isTitleActive = sortColumn == 'title';
 
     return Opacity(
       opacity: isLoading ? 0.7 : 1.0,
@@ -60,13 +68,27 @@ class ActivityTableHeader extends StatelessWidget {
             // Title Column (sortable)
             Expanded(
               flex: 2,
-              child: TableHeaderCell(
-                label: 'Title',
-                sortable: true,
-                sortColumn: 'title',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('title'),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Title',
+                      style: WebTextStyles.label.copyWith(
+                        color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    TableHeaderCell(
+                      label: '',
+                      sortable: true,
+                      sortColumn: 'title',
+                      currentSortColumn: sortColumn,
+                      sortAscending: sortAscending,
+                      onSort: isLoading ? null : () => onSort('title'),
+                    ),
+                  ],
+                ),
               ),
             ),
             
@@ -79,9 +101,11 @@ class ActivityTableHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Category:',
-                      style: WebTextStyles.label,
+                    Text(
+                      'Category',
+                      style: WebTextStyles.label.copyWith(
+                        color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilterDropdown<ActivityCategory>(
@@ -106,9 +130,11 @@ class ActivityTableHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Type:',
-                      style: WebTextStyles.label,
+                    Text(
+                      'Type',
+                      style: WebTextStyles.label.copyWith(
+                        color: isTypeActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilterDropdown<ActivitySubType>(

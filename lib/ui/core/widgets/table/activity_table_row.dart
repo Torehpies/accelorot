@@ -37,10 +37,11 @@ class GenericTableRow extends StatelessWidget {
       hoverColor: hoverColor ?? WebColors.hoverBackground,
       child: Container(
         constraints: BoxConstraints(minHeight: height ?? 52),
-        padding: padding ?? const EdgeInsets.symmetric(
-          horizontal: AppSpacing.tableCellHorizontal,
-          vertical: 8,
-        ),
+        padding: padding ??
+            const EdgeInsets.symmetric(
+              horizontal: AppSpacing.tableCellHorizontal,
+              vertical: 8,
+            ),
         // Removed the border decoration entirely - separator handles dividers
         child: Row(
           children: _buildCellsWithSpacing(),
@@ -51,7 +52,7 @@ class GenericTableRow extends StatelessWidget {
 
   List<Widget> _buildCellsWithSpacing() {
     if (cellSpacing == 0) return cells;
-    
+
     final List<Widget> spacedCells = [];
     for (int i = 0; i < cells.length; i++) {
       spacedCells.add(cells[i]);
@@ -181,9 +182,9 @@ class TableHeaderCell extends StatelessWidget {
           children: [
             Text(
               label,
-              style: isActive 
-                ? WebTextStyles.label.copyWith(color: WebColors.textSecondary) 
-                : WebTextStyles.label,
+              style: isActive
+                  ? WebTextStyles.label.copyWith(color: WebColors.tealAccent)
+                  : WebTextStyles.label,
             ),
             const SizedBox(width: 4),
             Icon(
@@ -191,7 +192,7 @@ class TableHeaderCell extends StatelessWidget {
                   ? (sortAscending ? Icons.arrow_upward : Icons.arrow_downward)
                   : Icons.unfold_more,
               size: 16,
-              color: isActive ? WebColors.textSecondary : WebColors.neutral,
+              color: isActive ? WebColors.tealAccent : WebColors.neutral,
             ),
           ],
         ),
@@ -217,8 +218,9 @@ class ActivityTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryName = UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
-    
+    final categoryName =
+        UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
+
     // Parse the category string to enum, then get color
     final subType = ActivitySubType.fromString(item.category);
     final typeColor = UnifiedActivityConfig.getColorForSubType(subType);
@@ -239,7 +241,7 @@ class ActivityTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Category Badge
         TableCellWidget(
           flex: 2,
@@ -247,7 +249,7 @@ class ActivityTableRow extends StatelessWidget {
             child: TableBadge(text: categoryName),
           ),
         ),
-        
+
         // Type Chip
         TableCellWidget(
           flex: 2,
@@ -255,7 +257,7 @@ class ActivityTableRow extends StatelessWidget {
             child: TableChip(text: item.category, color: typeColor),
           ),
         ),
-        
+
         // Value Column
         TableCellWidget(
           flex: 2,
@@ -265,7 +267,7 @@ class ActivityTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Date Added Column
         TableCellWidget(
           flex: 2,
@@ -275,7 +277,7 @@ class ActivityTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Actions Column
         TableCellWidget(
           flex: 1,
