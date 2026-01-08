@@ -5,8 +5,10 @@ import 'package:flutter_application_1/data/providers/pending_member_providers.da
 import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
 import 'package:flutter_application_1/data/repositories/team_management/team_repository_remote.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
+import 'package:flutter_application_1/data/services/contracts/pending_members_service.dart';
 import 'package:flutter_application_1/data/services/contracts/team_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
+import 'package:flutter_application_1/data/services/firebase/firebase_pending_members_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_team_member_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_team_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -31,6 +33,11 @@ TeamRepository teamRepository(Ref ref) {
 @Riverpod(keepAlive: true)
 TeamMemberService teamMemberService(Ref ref) {
   return FirebaseTeamMemberService(ref.read(firebaseFirestoreProvider));
+}
+
+@Riverpod(keepAlive: true)
+PendingMembersService pendingMembersService(Ref ref) {
+  return FirebasePendingMembersService(ref.read(firebaseFirestoreProvider));
 }
 
 @riverpod

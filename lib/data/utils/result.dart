@@ -1,9 +1,25 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+sealed class Result<T> {
+  const Result();
 
-part 'result.freezed.dart';
+  /// Creates an instance of Result containing a value
+  factory Result.ok(T value) => Ok(value);
 
-@freezed
-sealed class Result<T> with _$Result<T> {
-  const factory Result.ok(T value) = Ok<T>;
-  const factory Result.error(Exception error) = _Error<T>;
+  /// Create an instance of Result containing an error
+  factory Result.error(Exception error) => Error(error);
+}
+
+/// Subclass of Result for values
+final class Ok<T> extends Result<T> {
+  const Ok(this.value);
+
+  /// Returned value in result
+  final T value;
+}
+
+/// Subclass of Result for errors
+final class Error<T> extends Result<T> {
+  const Error(this.error);
+
+  /// Returned error in result
+  final Exception error;
 }

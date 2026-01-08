@@ -59,7 +59,13 @@ class FirebasePendingMembersService implements PendingMembersService {
 
       return Result.ok(
         docs
-            .map((doc) => PendingMember.fromJson({...doc.data(), 'id': doc.id}))
+            .map(
+              (doc) => PendingMember.fromJson({
+                ...doc.data(),
+                'id': doc.id,
+                'email': doc.data()['requestorEmail'] ?? doc.data()['email'],
+              }),
+            )
             .toList(),
       );
     } on FirebaseException catch (e) {

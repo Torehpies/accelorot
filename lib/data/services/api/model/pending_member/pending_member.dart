@@ -8,7 +8,7 @@ part 'pending_member.g.dart';
 abstract class PendingMember with _$PendingMember {
   const factory PendingMember({
 		required String id,
-    required String requestorEmail,
+    required String email,
     @Default('') String firstName,
     @Default('') String lastName,
     @TimestampConverter() required DateTime requestedAt,
