@@ -23,6 +23,7 @@ class ActivityLogItem {
   final String? machineId;
   final String? machineName;
   final String? batchId;
+  final String? batchName;
   final String? operatorName;
   final String? priority;
   final String? status;
@@ -96,6 +97,7 @@ class ActivityLogItem {
       machineId: data['machineId'],
       machineName: data['machineName'],
       batchId: data['batchId'],
+      batchName: data['batchName'],
       operatorName: data['operatorName'] ?? data['userName'],
       priority: data['priority'],
       status: data['status'],
@@ -142,6 +144,7 @@ class ActivityLogItem {
     this.machineId,
     this.machineName,
     this.batchId,
+    this.batchName,
     this.operatorName,
     this.reportType,
     this.priority,
@@ -182,6 +185,7 @@ class ActivityLogItem {
         (machineName?.toLowerCase().contains(lowerQuery) ?? false) ||
         (machineId?.toLowerCase().contains(lowerQuery) ?? false) ||
         (operatorName?.toLowerCase().contains(lowerQuery) ?? false) ||
+        (batchName?.toLowerCase().contains(lowerQuery) ?? false) ||
         (batchId?.toLowerCase().contains(lowerQuery) ?? false) ||
         (status?.toLowerCase().contains(lowerQuery) ?? false) ||
         (controllerType?.toLowerCase().contains(lowerQuery) ?? false); 

@@ -59,26 +59,6 @@ class _WebOperatorMachineViewState extends ConsumerState<WebOperatorMachineView>
     final state = ref.watch(operatorMachineProvider);
     final notifier = ref.read(operatorMachineProvider.notifier);
 
-    if (_isInitializing || _teamId == null) {
-      return Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: const AdminAppBar(title: 'My Machines'),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.teal),
-              SizedBox(height: 16),
-              Text(
-                'Loading machine data...',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: const AdminAppBar(title: 'My Machines'),
@@ -176,6 +156,27 @@ class _WebOperatorMachineViewState extends ConsumerState<WebOperatorMachineView>
   }
 
   Widget _buildContent(OperatorMachineState state) {
+    if (_isInitializing) {
+      return const Center(child: CircularProgressIndicator(color: Colors.teal));
+    }
+
+    if (_teamId == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.group_off, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No team assigned.\nPlease contact support.',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
