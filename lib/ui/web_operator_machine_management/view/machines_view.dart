@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ui/machine_management/view_model/operator_machine_notifier.dart';
 import '../widgets/stat_card.dart';
@@ -11,12 +13,7 @@ import '../../../../../ui/machine_management/widgets/machine_view_dialog.dart';
 
 /// Main machines view connected to real data - Fully Responsive with Custom Search
 class MachinesView extends ConsumerStatefulWidget {
-  final String teamId;
-
-  const MachinesView({
-    super.key,
-    required this.teamId,
-  });
+  const MachinesView({super.key});
 
   @override
   ConsumerState<MachinesView> createState() => _MachinesViewState();
@@ -30,7 +27,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     super.initState();
     // Initialize the notifier with teamId
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(operatorMachineProvider.notifier).initialize(widget.teamId);
+      final teamUser = ref.watch(appUserProvider).value;
+      final teamId = teamUser?.teamId;
+      ref.read(operatorMachineProvider.notifier).initialize(teamId!);
     });
   }
 
@@ -117,7 +116,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 202, 231, 255),
+      backgroundColor: AppColors.background,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final screenWidth = constraints.maxWidth;
@@ -135,13 +134,16 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
               child: Container(
                 // Blue outlined box wrapping everything - Made lighter
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height * 0.9, // Increased by 10%
+                  minHeight:
+                      MediaQuery.of(context).size.height *
+                      0.9, // Increased by 10%
                 ),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 202, 231, 255),
-                  borderRadius: BorderRadius.circular(isDesktop ? 12 : (isTablet ? 10 : 8)),
+                  borderRadius: BorderRadius.circular(
+                    isDesktop ? 12 : (isTablet ? 10 : 8),
+                  ),
                   border: Border.all(
-                    color: Colors.blue.shade200, // Lighter blue
+                    color: AppColors.backgroundBorder, // Lighter blue
                     width: 1.5, // Slightly thinner
                   ),
                   boxShadow: [
@@ -155,18 +157,26 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                 child: Column(
                   children: [
                     // Stats Cards - Always in same row
-                    _buildStatsSection(state, isDesktop, isTablet, isMobile, screenWidth),
+                    _buildStatsSection(
+                      state,
+                      isDesktop,
+                      isTablet,
+                      isMobile,
+                      screenWidth,
+                    ),
 
                     // Inner box wrapping machine list section
                     Container(
-                        margin: EdgeInsets.only(
-                          left: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
-                          right: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
-                          bottom: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
-                        ),
-                        decoration: BoxDecoration(
+                      margin: EdgeInsets.only(
+                        left: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                        right: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                        bottom: isDesktop ? 24.0 : (isTablet ? 16.0 : 12.0),
+                      ),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(isDesktop ? 10 : (isTablet ? 8 : 6)),
+                        borderRadius: BorderRadius.circular(
+                          isDesktop ? 10 : (isTablet ? 8 : 6),
+                        ),
                         border: Border.all(
                           color: Colors.grey.shade200,
                           width: 1,
@@ -181,28 +191,37 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                       child: Column(
                         children: [
                           // Machine List Header with Search & Date Filter
-                          _buildListHeader(state, isDesktop, isTablet, isMobile),
-                          
+                          _buildListHeader(
+                            state,
+                            isDesktop,
+                            isTablet,
+                            isMobile,
+                          ),
+
                           // Machine list content - Increased height by 10%
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.61, // Changed from 0.5 to 0.6 (+10%)
+                            height:
+                                MediaQuery.of(context).size.height *
+                                0.61, // Changed from 0.5 to 0.6 (+10%)
                             child: state.displayedMachines.isEmpty
                                 ? _buildEmptyState(isMobile, state)
                                 : (isMobile
-                                    ? MachineMobileCardWidget(
-                                        machines: state.displayedMachines,
-                                        onMachineAction: _handleMachineAction,
-                                      )
-                                    : MachineTableWidget(
-                                        machines: state.displayedMachines,
-                                        onMachineAction: _handleMachineAction,
-                                      )),
+                                      ? MachineMobileCardWidget(
+                                          machines: state.displayedMachines,
+                                          onMachineAction: _handleMachineAction,
+                                        )
+                                      : MachineTableWidget(
+                                          machines: state.displayedMachines,
+                                          onMachineAction: _handleMachineAction,
+                                        )),
                           ),
-                          
+
                           // Pagination - Always show if there are any machines
                           if (state.filteredMachines.isNotEmpty)
                             Container(
-                              padding: EdgeInsets.all(isDesktop ? 8.0 : (isTablet ?6.0 : 4.0)),
+                              padding: EdgeInsets.all(
+                                isDesktop ? 8.0 : (isTablet ? 6.0 : 4.0),
+                              ),
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -254,7 +273,13 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
   ) {
     return Padding(
       padding: EdgeInsets.all(isDesktop ? 16.0 : (isTablet ? 12.0 : 8.0)),
-      child: _buildStatsCards(state, isDesktop, isTablet, isMobile, screenWidth),
+      child: _buildStatsCards(
+        state,
+        isDesktop,
+        isTablet,
+        isMobile,
+        screenWidth,
+      ),
     );
   }
 
@@ -311,18 +336,22 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
       children: stats
           .asMap()
           .entries
-          .expand((entry) => [
-                Expanded(
-                  child: StatCardWidget(data: entry.value),
-                ),
-                if (entry.key < stats.length - 1)
-                  SizedBox(width: cardSpacing),
-              ])
+          .expand(
+            (entry) => [
+              Expanded(child: StatCardWidget(data: entry.value)),
+              if (entry.key < stats.length - 1) SizedBox(width: cardSpacing),
+            ],
+          )
           .toList(),
     );
   }
 
-  Widget _buildListHeader(OperatorMachineState state, bool isDesktop, bool isTablet, bool isMobile) {
+  Widget _buildListHeader(
+    OperatorMachineState state,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+  ) {
     final headerPadding = isDesktop ? 12.0 : (isTablet ? 10.0 : 8.0);
     final titleFontSize = isDesktop ? 24.0 : (isTablet ? 22.0 : 20.0);
 
@@ -347,7 +376,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                   ),
                 ),
               ),
-              
+
               // Search bar with date filter (desktop/tablet)
               if (isDesktop || isTablet)
                 Row(
@@ -379,7 +408,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
                   child: Row(
                     children: [
                       DateFilterWidget(
-                        selectedFilter: _convertToWidgetFilter(state.dateFilter),
+                        selectedFilter: _convertToWidgetFilter(
+                          state.dateFilter,
+                        ),
                         customStartDate: state.customStartDate,
                         customEndDate: state.customEndDate,
                         onFilterChanged: _onDateFilterChanged,
@@ -416,7 +447,7 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
     // Determine the reason for empty state
     String title = 'No machines found';
     String subtext = 'Try adjusting your filters or search query';
-    
+
     if (!hasSearch && !hasDateFilter && state.machines.isEmpty) {
       title = 'No machines yet';
       subtext = 'Add your first machine to get started';
@@ -438,7 +469,9 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              hasSearch || hasDateFilter ? Icons.search_off : Icons.precision_manufacturing_outlined,
+              hasSearch || hasDateFilter
+                  ? Icons.search_off
+                  : Icons.precision_manufacturing_outlined,
               size: iconSize,
               color: const Color(0xFF9CA3AF),
             ),
@@ -492,9 +525,8 @@ class _MachinesViewState extends ConsumerState<MachinesView> {
 
     showDialog(
       context: context,
-      builder: (context) => MachineViewDialog(
-        machine: machine,
-      ),
+      builder: (context) => MachineViewDialog(machine: machine),
     );
   }
 }
+

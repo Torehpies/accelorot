@@ -1,5 +1,3 @@
-// lib/ui/core/themes/web_colors.dart
-
 import 'package:flutter/material.dart';
 import '../../../ui/activity_logs/models/activity_enums.dart';
 

@@ -9,7 +9,7 @@ void showSnackbar(
     SnackBar(
       content: Text(message),
       behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 100),
       backgroundColor: isError ? Colors.red : Colors.teal,
       duration: const Duration(seconds: 2),
     ),
