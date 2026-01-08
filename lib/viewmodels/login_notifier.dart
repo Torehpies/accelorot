@@ -93,6 +93,7 @@ class LoginNotifier extends _$LoginNotifier {
         state = state.copyWith(isLoading: false);
       }
     }
+    return LoginFlowError('Unexpected error occurred');
   }
 
   Future<LoginFlowResult> signInWithGoogleAndCheckStatus() async {

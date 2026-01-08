@@ -368,6 +368,22 @@ class AuthService {
     }
   }
 
+  /// Signs in a user with email and password and returns the Firebase User.
+  Future<User?> signInUser({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return credential.user;
+    } on FirebaseAuthException {
+      rethrow;
+    }
+  }
+
   // Sign out
   Future<void> signOut() async {
     await _googleSignIn.signOut();
