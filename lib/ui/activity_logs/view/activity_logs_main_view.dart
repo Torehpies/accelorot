@@ -1,4 +1,3 @@
-// lib/ui/activity_logs/view/activity_logs_main_view.dart
 import 'package:flutter/material.dart';
 import '../widgets/activity_section_card.dart';
 import '../widgets/navigation_section_card.dart';

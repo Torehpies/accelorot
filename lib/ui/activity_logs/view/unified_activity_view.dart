@@ -1,6 +1,7 @@
 // lib/ui/activity_logs/view/unified_activity_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/unified/stats_card_row.dart';
@@ -24,7 +25,7 @@ class UnifiedActivityView extends ConsumerWidget {
     final state = ref.watch(unifiedActivityViewModelProvider);
 
     return Scaffold(
-      backgroundColor: WebColors.pageBackground,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: state.hasError
             ? _buildErrorState(state.errorMessage ?? 'An error occurred')

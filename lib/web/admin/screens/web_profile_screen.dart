@@ -2,11 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_application_1/frontend/screens/Onboarding/login_screen.dart';
-import '../../../services/auth_wrapper.dart';
 import '../../../services/sess_service.dart';
-import '../../../ui/core/ui/change_password_dialog.dart';
+import 'package:flutter_application_1/ui/change_password_dialog/widgets/change_password_dialog.dart';
 import '../../../ui/core/ui/admin_app_bar.dart';
 
 class WebProfileScreen extends StatefulWidget {
@@ -29,16 +26,6 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
   // ignore: unused_element
   Future<void> _signOut() async {
     await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              kIsWeb ? const LoginScreen() : const AuthWrapper(),
-        ),
-        (route) => false,
-      );
-    }
   }
 
   @override
