@@ -136,11 +136,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         'status': form.status.value,
       });
 
-      // debugPrint(
-      //   'update success: ${updatedMembers.map((m) => '${m.id} -> ${m.status}').toList()}',
-      // );
     } catch (e) {
-      // debugPrint('update error: $e');
       await refresh();
     } finally {
       state = state.copyWith(isLoading: false);

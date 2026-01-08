@@ -1,3 +1,6 @@
+// Initial Pending Member Service
+// Can't be deleted or merge with new pending_members_service.dart
+// as many reference this old service.
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
@@ -9,11 +12,6 @@ abstract class PendingMemberService {
 		required String memberEmail
 	});
 	Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id);
-	//Future<PaginationResult<Map<String, dynamic>>> fetchRawPendingMembers({
-	//	required String teamId,
-	//	required int limit,
-	//	String? startCursor,
-	//});
 	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers(String teamId);
 	Future<void> deletePendingMember({
 		required String teamId,
