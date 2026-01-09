@@ -211,7 +211,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         case MachineFilterTab.active:
           emptyMessage = 'No active machines';
           break;
-        case MachineFilterTab.inactive:
+        case MachineFilterTab.suspended:
           emptyMessage = 'No inactive machines';
           break;
         default:

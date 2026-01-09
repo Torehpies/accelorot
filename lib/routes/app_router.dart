@@ -19,13 +19,13 @@ import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
+import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/web_reports_view.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
-import 'package:flutter_application_1/ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
 import 'package:flutter_application_1/ui/web_operator_machine_management/view/machines_view.dart';
@@ -191,10 +191,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.adminMachines.path,
             name: RoutePath.adminMachines.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const WebAdminMachineView(),
-            ),
+            pageBuilder: (context, state) {
+              final teamId = state.extra as String? ?? '';
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: AdminMachineScreen(teamId: teamId),
+              );
+            },
           ),
           GoRoute(
             path: RoutePath.adminReports.path,
