@@ -17,20 +17,20 @@ class MachineStatsRow extends StatelessWidget {
   });
 
   Map<String, int> get _stats {
-    // Total = all non-archived machines
+    // Total = all machines (including archived)
     final total = machines.length;
     
-    // Active = status is active AND not archived
+    // Active = status is active only (regardless of archived flag)
     final active = machines.where((m) => 
-      !m.isArchived && m.status == MachineStatus.active
+      m.status == MachineStatus.active
     ).length;
     
     // Archived = isArchived flag is true (regardless of status)
     final archived = machines.where((m) => m.isArchived).length;
     
-    // Suspended = status is underMaintenance AND not archived
+    // Suspended = status is underMaintenance only (regardless of archived flag)
     final suspended = machines.where((m) => 
-      !m.isArchived && m.status == MachineStatus.underMaintenance
+      m.status == MachineStatus.underMaintenance
     ).length;
 
     return {

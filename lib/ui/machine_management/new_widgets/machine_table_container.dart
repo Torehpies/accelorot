@@ -17,7 +17,7 @@ class MachineTableContainer extends StatelessWidget {
   final bool isLoading;
   
   // Filter states
-  final MachineStatus? selectedStatus;
+  final MachineStatusFilter selectedStatusFilter;
   final String searchQuery;
   
   // Sort states
@@ -31,11 +31,12 @@ class MachineTableContainer extends StatelessWidget {
   final int totalItems;
   
   // Callbacks
-  final ValueChanged<MachineStatus?> onStatusChanged;
+  final ValueChanged<MachineStatusFilter> onStatusFilterChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String> onSort;
   final ValueChanged<MachineModel> onEdit;
+  final ValueChanged<MachineModel> onView;
   final ValueChanged<int> onPageChanged;
   final ValueChanged<int> onItemsPerPageChanged;
 
@@ -46,7 +47,7 @@ class MachineTableContainer extends StatelessWidget {
     super.key,
     required this.machines,
     required this.isLoading,
-    required this.selectedStatus,
+    required this.selectedStatusFilter,
     required this.searchQuery,
     required this.sortColumn,
     required this.sortAscending,
@@ -54,11 +55,12 @@ class MachineTableContainer extends StatelessWidget {
     required this.totalPages,
     required this.itemsPerPage,
     required this.totalItems,
-    required this.onStatusChanged,
+    required this.onStatusFilterChanged,
     required this.onDateFilterChanged,
     required this.onSearchChanged,
     required this.onSort,
     required this.onEdit,
+    required this.onView,
     required this.onPageChanged,
     required this.onItemsPerPageChanged,
     required this.onAddMachine,
@@ -122,10 +124,10 @@ class MachineTableContainer extends StatelessWidget {
       
       // Table header with filters
       tableHeader: MachineTableHeader(
-        selectedStatus: selectedStatus,
+        selectedStatusFilter: selectedStatusFilter,
         sortColumn: sortColumn,
         sortAscending: sortAscending,
-        onStatusChanged: onStatusChanged,
+        onStatusFilterChanged: onStatusFilterChanged,
         onSort: onSort,
         isLoading: isLoading,
       ),
@@ -134,6 +136,7 @@ class MachineTableContainer extends StatelessWidget {
       tableBody: MachineTableBody(
         machines: machines,
         onEdit: onEdit,
+        onView: onView,
         isLoading: isLoading,
       ),
       

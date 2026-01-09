@@ -202,7 +202,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
       );
     }
 
-    if (state.filteredMachines.isEmpty) {
+    if (state.filteredMachinesByTab.isEmpty) {
       String emptyMessage;
       switch (state.selectedTab) {
         case MachineFilterTab.archived:

@@ -8,17 +8,23 @@ import '../../../data/providers/machine_providers.dart';
 
 part 'admin_machine_notifier.g.dart';
 
-// Updated enum: inactive → suspended
+// Mobile filter system (temporary - will be removed after mobile refactor)
 enum MachineFilterTab {
   all,
   active,
-  suspended,  // Changed from 'inactive'
+  suspended,
   archived,
 }
 
 class AdminMachineState {
   final List<MachineModel> machines;
+  
+  // Mobile filtering (uses tabs + isArchived)
   final MachineFilterTab selectedTab;
+  
+  // Web filtering (uses status only)
+  final MachineStatusFilter selectedStatusFilter;
+  
   final bool isLoading;
   final String? errorMessage;
   final String searchQuery;
@@ -35,6 +41,7 @@ class AdminMachineState {
   const AdminMachineState({
     this.machines = const [],
     this.selectedTab = MachineFilterTab.all,
+    this.selectedStatusFilter = MachineStatusFilter.all,
     this.isLoading = false,
     this.errorMessage,
     this.searchQuery = '',
@@ -48,6 +55,7 @@ class AdminMachineState {
   AdminMachineState copyWith({
     List<MachineModel>? machines,
     MachineFilterTab? selectedTab,
+    MachineStatusFilter? selectedStatusFilter,
     bool? isLoading,
     String? errorMessage,
     String? searchQuery,
@@ -60,6 +68,7 @@ class AdminMachineState {
     return AdminMachineState(
       machines: machines ?? this.machines,
       selectedTab: selectedTab ?? this.selectedTab,
+      selectedStatusFilter: selectedStatusFilter ?? this.selectedStatusFilter,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -71,7 +80,8 @@ class AdminMachineState {
     );
   }
 
-  List<MachineModel> get filteredMachines {
+  // MOBILE filtering logic: uses tabs + checks isArchived flag
+  List<MachineModel> get filteredMachinesByTab {
     var filtered = machines;
 
     // Filter by tab
@@ -85,7 +95,6 @@ class AdminMachineState {
             .toList();
         break;
       case MachineFilterTab.suspended:
-        // Suspended = underMaintenance status
         filtered = machines
             .where((m) => !m.isArchived && m.status == MachineStatus.underMaintenance)
             .toList();
@@ -112,35 +121,64 @@ class AdminMachineState {
     return filtered;
   }
 
-  // For load-more pattern (keep for now)
+  // WEB filtering logic: uses status only, ignores isArchived
+  List<MachineModel> get filteredMachinesByStatus {
+    var filtered = machines;
+
+    // Apply status filter from dropdown
+    final status = selectedStatusFilter.toStatus();
+    if (status != null) {
+      filtered = filtered.where((m) => m.status == status).toList();
+    }
+    // If 'All', show everything (including archived)
+
+    // Filter by search query
+    if (searchQuery.isNotEmpty) {
+      filtered = filtered.where((m) {
+        final query = searchQuery.toLowerCase();
+        return m.machineName.toLowerCase().contains(query) ||
+            m.machineId.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    // Apply sorting
+    if (sortColumn != null) {
+      filtered = _sortMachines(filtered, sortColumn!, sortAscending);
+    }
+
+    return filtered;
+  }
+
+  // MOBILE: Load-more pattern
   List<MachineModel> get displayedMachines {
-    return filteredMachines.take(displayLimit).toList();
+    return filteredMachinesByTab.take(displayLimit).toList();
   }
 
   bool get hasMoreToLoad {
-    return displayedMachines.length < filteredMachines.length;
+    return displayedMachines.length < filteredMachinesByTab.length;
   }
 
   int get remainingCount {
-    return filteredMachines.length - displayedMachines.length;
+    return filteredMachinesByTab.length - displayedMachines.length;
   }
 
-  // For true pagination
+  // WEB: True pagination
   List<MachineModel> get paginatedMachines {
+    final filtered = filteredMachinesByStatus;
     final startIndex = (currentPage - 1) * itemsPerPage;
     final endIndex = startIndex + itemsPerPage;
     
-    if (startIndex >= filteredMachines.length) return [];
+    if (startIndex >= filtered.length) return [];
     
-    return filteredMachines.sublist(
+    return filtered.sublist(
       startIndex,
-      endIndex > filteredMachines.length ? filteredMachines.length : endIndex,
+      endIndex > filtered.length ? filtered.length : endIndex,
     );
   }
 
   int get totalPages {
-    if (filteredMachines.isEmpty) return 1;
-    return (filteredMachines.length / itemsPerPage).ceil();
+    if (filteredMachinesByStatus.isEmpty) return 1;
+    return (filteredMachinesByStatus.length / itemsPerPage).ceil();
   }
 
   // Sort machines based on column
@@ -201,12 +239,21 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     }
   }
 
+  // MOBILE: Filter by tab
   void setFilterTab(MachineFilterTab tab) {
     state = state.copyWith(
       selectedTab: tab,
       searchQuery: '',
       displayLimit: _pageSize,
-      currentPage: 1,  // Reset to page 1
+      currentPage: 1,
+    );
+  }
+
+  // WEB: Filter by status
+  void setStatusFilter(MachineStatusFilter filter) {
+    state = state.copyWith(
+      selectedStatusFilter: filter,
+      currentPage: 1,
     );
   }
 
@@ -214,7 +261,7 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     state = state.copyWith(
       searchQuery: query,
       displayLimit: _pageSize,
-      currentPage: 1,  // Reset to page 1
+      currentPage: 1,
     );
   }
 
@@ -238,17 +285,15 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
   void onItemsPerPageChanged(int itemsPerPage) {
     state = state.copyWith(
       itemsPerPage: itemsPerPage,
-      currentPage: 1,  // Reset to page 1
+      currentPage: 1,
     );
   }
 
   // Sorting method
   void onSort(String column) {
     if (state.sortColumn == column) {
-      // Toggle sort direction
       state = state.copyWith(sortAscending: !state.sortAscending);
     } else {
-      // New column, default ascending
       state = state.copyWith(
         sortColumn: column,
         sortAscending: true,

@@ -3,38 +3,36 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/filters/filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 
 class MachineTableHeader extends StatelessWidget {
-  final MachineStatus? selectedStatus;
+  final MachineStatusFilter selectedStatusFilter;
   final String? sortColumn;
   final bool sortAscending;
-  final ValueChanged<MachineStatus?> onStatusChanged;
+  final ValueChanged<MachineStatusFilter> onStatusFilterChanged;
   final ValueChanged<String> onSort;
   final bool isLoading;
 
   const MachineTableHeader({
     super.key,
-    required this.selectedStatus,
+    required this.selectedStatusFilter,
     required this.sortColumn,
     required this.sortAscending,
-    required this.onStatusChanged,
+    required this.onStatusFilterChanged,
     required this.onSort,
     this.isLoading = false,
   });
 
   bool _isStatusFilterActive() {
-    return selectedStatus != null;
+    return selectedStatusFilter != MachineStatusFilter.all;
   }
 
   @override
   Widget build(BuildContext context) {
     final isStatusActive = _isStatusFilterActive();
-    final isMachineIdActive = sortColumn == 'machineId';
-    final isNameActive = sortColumn == 'name';
-    final isDateActive = sortColumn == 'date';
 
     return Opacity(
       opacity: isLoading ? 0.7 : 1.0,
@@ -111,9 +109,12 @@ class MachineTableHeader extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _StatusDropdown(
-                      selectedStatus: selectedStatus,
-                      onChanged: onStatusChanged,
+                    FilterDropdown<MachineStatusFilter>(
+                      label: 'Status',
+                      value: selectedStatusFilter,
+                      items: MachineStatusFilter.values,
+                      displayName: (filter) => filter.displayName,
+                      onChanged: onStatusFilterChanged,
                       isLoading: isLoading,
                     ),
                   ],
@@ -134,105 +135,6 @@ class MachineTableHeader extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusDropdown extends StatefulWidget {
-  final MachineStatus? selectedStatus;
-  final ValueChanged<MachineStatus?> onChanged;
-  final bool isLoading;
-
-  const _StatusDropdown({
-    required this.selectedStatus,
-    required this.onChanged,
-    this.isLoading = false,
-  });
-
-  @override
-  State<_StatusDropdown> createState() => _StatusDropdownState();
-}
-
-class _StatusDropdownState extends State<_StatusDropdown> {
-  bool _isHovered = false;
-
-  String _getDisplayText(MachineStatus? status) {
-    if (status == null) return 'All';
-    switch (status) {
-      case MachineStatus.active:
-        return 'Active';
-      case MachineStatus.inactive:
-        return 'Inactive';
-      case MachineStatus.underMaintenance:
-        return 'Suspended';
-    }
-  }
-
-  void _showFilterMenu(BuildContext context) async {
-    if (widget.isLoading) return;
-
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
-
-    final MachineStatus? selected = await showMenu<MachineStatus?>(
-      context: context,
-      position: position,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      elevation: 8,
-      color: WebColors.cardBackground,
-      items: [
-        const PopupMenuItem<MachineStatus?>(
-          value: null,
-          child: Text('All'),
-        ),
-        ...MachineStatus.values.map((status) {
-          return PopupMenuItem<MachineStatus?>(
-            value: status,
-            child: Text(_getDisplayText(status)),
-          );
-        }),
-      ],
-    );
-
-    if (selected != widget.selectedStatus) {
-      widget.onChanged(selected);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isActive = widget.selectedStatus != null;
-    final iconColor = isActive ? WebColors.tealAccent : WebColors.textLabel;
-
-    return MouseRegion(
-      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: Opacity(
-        opacity: widget.isLoading ? 0.5 : 1.0,
-        child: InkWell(
-          onTap: widget.isLoading ? null : () => _showFilterMenu(context),
-          borderRadius: BorderRadius.circular(4),
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Icon(
-              Icons.filter_alt,
-              size: 18,
-              color: _isHovered 
-                ? (isActive ? WebColors.tealAccent.withValues(alpha: 0.8) : WebColors.textSecondary)
-                : iconColor,
-            ),
-          ),
         ),
       ),
     );

@@ -79,23 +79,22 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
                 child: MachineTableContainer(
                   machines: state.paginatedMachines,
                   isLoading: state.isLoading,
-                  selectedStatus: null, // Status filter (not using tabs for now)
+                  selectedStatusFilter: state.selectedStatusFilter,
                   searchQuery: state.searchQuery,
                   sortColumn: state.sortColumn,
                   sortAscending: state.sortAscending,
                   currentPage: state.currentPage,
                   totalPages: state.totalPages,
                   itemsPerPage: state.itemsPerPage,
-                  totalItems: state.filteredMachines.length,
-                  onStatusChanged: (status) {
-                    // TODO: Implement status filter if needed
-                  },
+                  totalItems: state.filteredMachinesByStatus.length,
+                  onStatusFilterChanged: notifier.setStatusFilter,
                   onDateFilterChanged: (dateFilter) {
                     // TODO: Implement date filter if needed
                   },
                   onSearchChanged: notifier.setSearchQuery,
                   onSort: notifier.onSort,
                   onEdit: (machine) => _showEditDialog(machine, notifier),
+                  onView: (machine) => _showViewDetailsDialog(machine, notifier),
                   onPageChanged: notifier.onPageChanged,
                   onItemsPerPageChanged: notifier.onItemsPerPageChanged,
                   onAddMachine: () => _showAddMachineDialog(notifier),
@@ -267,6 +266,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
       try {
         await notifier.archiveMachine(widget.teamId, machine.machineId);
         if (mounted) {
+          Navigator.of(context).pop(); // Close the details modal
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Machine archived successfully'),

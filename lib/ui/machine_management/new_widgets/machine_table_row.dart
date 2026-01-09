@@ -12,11 +12,13 @@ import '../../core/widgets/table/activity_table_row.dart';
 class MachineTableRow extends StatelessWidget {
   final MachineModel machine;
   final VoidCallback onEdit;
+  final VoidCallback onView;
 
   const MachineTableRow({
     super.key,
     required this.machine,
     required this.onEdit,
+    required this.onView,
   });
 
   Color get statusColor {
@@ -103,15 +105,27 @@ class MachineTableRow extends StatelessWidget {
           ),
         ),
         
-        // Actions Column (Edit icon only)
+        // Actions Column (View and Edit icons)
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: IconButton(
-              icon: const Icon(Icons.edit, size: 18),
-              color: WebColors.textLabel,
-              onPressed: onEdit,
-              tooltip: 'Edit Machine',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  color: WebColors.textLabel,
+                  onPressed: onView,
+                  tooltip: 'View Details',
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  color: WebColors.textLabel,
+                  onPressed: onEdit,
+                  tooltip: 'Edit Machine',
+                ),
+              ],
             ),
           ),
         ),
