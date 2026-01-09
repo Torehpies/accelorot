@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_view_details_modal.dart
+// lib/ui/machine_management/new_widgets/web_view_details_modal.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

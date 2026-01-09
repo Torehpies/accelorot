@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_table_row.dart
+// lib/ui/machine_management/new_widgets/web_table_row.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

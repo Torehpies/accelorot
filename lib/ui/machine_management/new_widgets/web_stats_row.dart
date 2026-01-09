@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_stats_row.dart
+// lib/ui/machine_management/new_widgets/web_stats_row.dart
 
 import 'package:flutter/material.dart';
 import '../../core/widgets/base_stats_card.dart';

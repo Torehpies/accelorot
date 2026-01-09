@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_edit_dialog.dart
+// lib/ui/machine_management/new_widgets/web_edit_dialog.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';

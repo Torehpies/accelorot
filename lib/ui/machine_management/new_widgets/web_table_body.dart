@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_table_body.dart
+// lib/ui/machine_management/new_widgets/web_table_body.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
@@ -6,7 +6,7 @@ import '../../core/widgets/shared/empty_state.dart';
 import '../../core/widgets/table/activity_table_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
-import 'machine_table_row.dart';
+import 'web_table_row.dart';
 
 class MachineTableBody extends StatefulWidget {
   final List<MachineModel> machines;

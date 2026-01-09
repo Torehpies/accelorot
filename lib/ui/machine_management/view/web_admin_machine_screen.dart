@@ -1,4 +1,4 @@
-// lib/ui/machine_management/view/admin_machine_screen.dart
+// lib/ui/machine_management/view/web_admin_machine_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,11 +6,11 @@ import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../view_model/admin_machine_notifier.dart';
-import '../new_widgets/machine_stats_row.dart';
-import '../new_widgets/machine_table_container.dart';
-import '../new_widgets/machine_view_details_modal.dart';
-import '../new_widgets/machine_edit_dialog.dart';
-import '../new_widgets/machine_add_dialog.dart';
+import '../new_widgets/web_stats_row.dart';
+import '../new_widgets/web_table_container.dart';
+import '../new_widgets/web_view_details_modal.dart';
+import '../new_widgets/web_edit_dialog.dart';
+import '../new_widgets/web_add_dialog.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class AdminMachineScreen extends ConsumerStatefulWidget {

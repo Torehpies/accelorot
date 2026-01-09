@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_table_header.dart
+// lib/ui/machine_management/new_widgets/web_table_header.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';

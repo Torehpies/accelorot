@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_table_container.dart
+// lib/ui/machine_management/new_widgets/web_table_container.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
@@ -9,8 +9,8 @@ import '../../core/widgets/filters/date_filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../../ui/activity_logs/models/activity_common.dart';
-import 'machine_table_header.dart';
-import 'machine_table_body.dart';
+import 'web_table_header.dart';
+import 'web_table_body.dart';
 
 class MachineTableContainer extends StatelessWidget {
   final List<MachineModel> machines;

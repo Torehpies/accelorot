@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/machine_add_dialog.dart
+// lib/ui/machine_management/new_widgets/web_add_dialog.dart
 
 import 'package:flutter/material.dart';
 import '../../core/themes/web_text_styles.dart';
