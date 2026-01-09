@@ -67,6 +67,8 @@ class FirebasePendingMemberService implements PendingMemberService {
     required String teamId,
     required String memberId,
     required String memberEmail,
+    required String firstName,
+    required String lastName,
   }) async {
     try {
       final docRef = _firestore
@@ -79,6 +81,8 @@ class FirebasePendingMemberService implements PendingMemberService {
         'requestedAt': FieldValue.serverTimestamp(),
         'requestorId': memberId,
         'requestorEmail': memberEmail,
+				'firstName': firstName,
+				'lastName': lastName,
       };
 
       await docRef.set(rawData);

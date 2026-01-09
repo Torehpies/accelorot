@@ -9,7 +9,9 @@ abstract class PendingMemberService {
 	Future<Result<void, DataLayerError>> addPendingMember({
 		required String teamId,
 		required String memberId,
-		required String memberEmail
+		required String memberEmail,
+    required String firstName,
+    required String lastName,
 	});
 	Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id);
 	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers(String teamId);
