@@ -13,9 +13,9 @@ abstract class PendingMembersService {
   });
   Future<Result> acceptPendingMember({
     required String teamId,
-    required String docId,
+    required PendingMember member,
   });
-  Future<Result> declinePendingMember({
+  Future<Result> deletePendingMember({
     required String teamId,
     required String docId,
   });

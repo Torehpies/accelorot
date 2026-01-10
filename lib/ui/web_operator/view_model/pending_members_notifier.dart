@@ -11,7 +11,7 @@ part 'pending_members_notifier.g.dart';
 class PendingMembersNotifier extends _$PendingMembersNotifier {
   @override
   PendingMembersState build() {
-		state = const PendingMembersState();
+    state = const PendingMembersState();
     Future.microtask(() => _loadPage(0));
     return state;
   }
@@ -84,7 +84,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       isLoading: false,
       isError: true,
       error: error,
-      members: [], // Or keep previous members
+      members: [],
     );
   }
 
@@ -107,56 +107,101 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     await _loadPage(state.currentPage);
   }
 
-  // Future<void> updateOperator(EditOperatorForm form) async {
-  //   state = state.copyWith(isLoading: true);
-  //   try {
-  //     final teamUser = ref.read(appUserProvider).value;
-  //     final teamId = teamUser?.teamId;
-  //     if (teamId == null) return;
-  //
-  //     final currentMembers = state.pagesByIndex[state.currentPage] ?? [];
-  //     final updatedMembers = currentMembers.map((m) {
-  //       if (m.id == form.id) {
-  //         return m.copyWith(
-  //           email: form.email,
-  //           firstName: form.firstName,
-  //           lastName: form.lastName,
-  //           status: form.status,
-  //         );
-  //       }
-  //       return m;
-  //     }).toList();
-  //
-  //     final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-  //       ..[state.currentPage] = updatedMembers;
-  //
-  //     state = state.copyWith(
-  //       pagesByIndex: updatedPages,
-  //       members: updatedMembers,
-  //       lastFetchedAt: DateTime.now(),
-  //     );
-  //
-  //     final member = TeamMember(
-  //       id: form.id,
-  //       email: form.email,
-  //       firstName: form.firstName,
-  //       lastName: form.lastName,
-  //       status: form.status,
-  //       addedAt: DateTime.now(),
-  //     );
-  //
-  //     await ref
-  //         .read(teamMemberServiceProvider)
-  //         .updateTeamMember(member: member, teamId: teamId);
-  //
-  //     await ref.read(appUserServiceProvider).updateUserField(form.id, {
-  //       'status': form.status.value,
-  //     });
-  //
-  //   } catch (e) {
-  //     await refresh();
-  //   } finally {
-  //     state = state.copyWith(isLoading: false);
-  //   }
-  // }
+  Future<void> acceptRequest(PendingMember member) async {
+    state = state.copyWith(isLoading: true, isError: false, error: null);
+
+    final service = ref.read(pendingMembersServiceProvider);
+    final appUser = ref.watch(appUserProvider).value;
+    final teamId = appUser?.teamId;
+
+    if (teamId == null) {
+      state = state.copyWith(
+        isLoading: false,
+        isError: true,
+        error: Exception('No team ID available'),
+      );
+      return;
+    }
+
+    final result = await service.acceptPendingMember(
+      teamId: teamId,
+      member: member,
+    );
+
+    return switch (result) {
+      Ok() => _handleAcceptSuccess(member),
+      Error() => _handleAcceptError(result.error),
+    };
+  }
+
+  void _handleAcceptSuccess(PendingMember member) {
+    final currentMembers = List<PendingMember>.from(state.members)
+      ..removeWhere((m) => m.id == member.id);
+
+    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
+    updatedPages[state.currentPage] = currentMembers;
+
+    state = state.copyWith(
+      members: currentMembers,
+      pagesByIndex: updatedPages,
+      isLoading: false,
+      hasNextPage: currentMembers.length == state.pageSize,
+      lastFetchedAt: DateTime.now(),
+    );
+
+    Future.microtask(() => _loadPage(state.currentPage));
+  }
+
+  void _handleAcceptError(Exception error) {
+    state = state.copyWith(isLoading: false, isError: true, error: error);
+  }
+
+  Future<void> declineRequest(PendingMember member) async {
+    state = state.copyWith(isLoading: true, isError: false, error: null);
+
+    final service = ref.read(pendingMembersServiceProvider);
+    final appUser = ref.watch(appUserProvider).value;
+    final teamId = appUser?.teamId;
+
+    if (teamId == null) {
+      state = state.copyWith(
+        isLoading: false,
+        isError: true,
+        error: Exception('No team ID available'),
+      );
+      return;
+    }
+
+    final result = await service.deletePendingMember(
+      teamId: teamId,
+      docId: member.id, // Use member.id as docId
+    );
+
+    return switch (result) {
+      Ok() => _handleDeclineSuccess(member),
+      Error() => _handleDeclineError(result.error),
+    };
+  }
+
+  void _handleDeclineSuccess(PendingMember member) {
+    final currentMembers = List<PendingMember>.from(state.members)
+      ..removeWhere((m) => m.id == member.id);
+
+    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
+    updatedPages[state.currentPage] = currentMembers;
+
+    state = state.copyWith(
+      members: currentMembers,
+      pagesByIndex: updatedPages,
+      isLoading: false,
+      hasNextPage: currentMembers.length == state.pageSize,
+      lastFetchedAt: DateTime.now(),
+    );
+
+    Future.microtask(() => _loadPage(state.currentPage));
+  }
+
+  void _handleDeclineError(Exception error) {
+    state = state.copyWith(isLoading: false, isError: true, error: error);
+  }
 }
