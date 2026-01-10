@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
@@ -17,7 +17,7 @@ class TeamSelectionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(teamSelectionProvider);
     final notifier = ref.read(teamSelectionProvider.notifier);
-    final user = FirebaseAuth.instance.currentUser;
+    final appUser =  ref.watch(appUserProvider).value;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 
@@ -124,7 +124,7 @@ class TeamSelectionScreen extends ConsumerWidget {
                         );
 
                         if (confirmed == true) {
-                          notifier.submitTeamRequest(user!);
+                          notifier.submitTeamRequest(appUser!);
                         }
                       },
                       enabled: state.selectedTeam != null,

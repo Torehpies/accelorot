@@ -6,11 +6,11 @@ String formatDateAndTime(DateTime date) {
   final diff = now.difference(date);
 
   if (diff.inDays == 0) {
-    return DateFormat('HH:mm').format(date);
+    return DateFormat('h:mm a').format(date);
   } else if (diff.inDays == 1) {
-    return 'Yesterday ${DateFormat('HH:mm').format(date)}';
+    return 'Yesterday ${DateFormat('h:mm a').format(date)}';
   } else if (diff.inDays < 7) {
-    return '${DateFormat('EEE').format(date)} ${DateFormat('HH:mm').format(date)}';
+    return '${DateFormat('EEE').format(date)} ${DateFormat('h:mm a').format(date)}';
   }
   return DateFormat('MMM dd, yyyy h:mm a').format(date);
 }
