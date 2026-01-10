@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
@@ -52,11 +51,4 @@ class PendingMemberRow extends StatelessWidget {
       ),
     );
   }
-}
-
-DateTime _parseDate(dynamic date) {
-  if (date is Timestamp) return date.toDate();
-  if (date is String) return DateTime.parse(date);
-  if (date is DateTime) return date;
-  return DateTime.now();
 }

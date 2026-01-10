@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_members_service.dart';
-import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
