@@ -3,11 +3,11 @@ import 'package:flutter_application_1/ui/web_operator/view_model/team_members_no
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/view_operator_dialog.dart';
 
-class ActionButtons extends StatelessWidget {
+class TeamMemberActionButtons extends StatelessWidget {
   final TeamMembersNotifier notifier;
   final dynamic member;
 
-  const ActionButtons({
+  const TeamMemberActionButtons({
     super.key,
     required this.notifier,
     required this.member,

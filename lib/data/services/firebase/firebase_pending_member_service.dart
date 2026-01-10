@@ -15,13 +15,6 @@ class FirebasePendingMemberService implements PendingMemberService {
   final AppUserService _userService;
   FirebasePendingMemberService(this._firestore, this._userService);
 
-  @override
-  Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id) {
-    // TODO: implement fetchRawPendingMemberData
-    throw UnimplementedError();
-  }
-
-  //@override
   Future<PaginationResult<Map<String, dynamic>>> fetchRawPendingMembers({
     required String teamId,
     required int limit,
@@ -67,6 +60,8 @@ class FirebasePendingMemberService implements PendingMemberService {
     required String teamId,
     required String memberId,
     required String memberEmail,
+    required String firstName,
+    required String lastName,
   }) async {
     try {
       final docRef = _firestore
@@ -79,6 +74,8 @@ class FirebasePendingMemberService implements PendingMemberService {
         'requestedAt': FieldValue.serverTimestamp(),
         'requestorId': memberId,
         'requestorEmail': memberEmail,
+        'firstName': firstName,
+        'lastName': lastName,
       };
 
       await docRef.set(rawData);
@@ -105,8 +102,8 @@ class FirebasePendingMemberService implements PendingMemberService {
 
       await docRef.delete();
     } catch (e) {
-			throw Exception("Failed to delete pending member. $e");
-		}
+      throw Exception("Failed to delete pending member. $e");
+    }
   }
 
   @override
@@ -139,7 +136,7 @@ class FirebasePendingMemberService implements PendingMemberService {
 
       batch.set(teamMemberRef, {
         'teamRole': 'Operator',
-				'status': UserStatus.active.value,
+        'status': UserStatus.active.value,
         'addedAt': FieldValue.serverTimestamp(),
         'email': member.user?.email,
         'firstName': member.user?.firstName,

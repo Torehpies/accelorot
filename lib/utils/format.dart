@@ -1,7 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 String formatDateAndTime(DateTime date) {
-  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  final now = DateTime.now();
+  final diff = now.difference(date);
+
+  if (diff.inDays == 0) {
+    return DateFormat('h:mm a').format(date);
+  } else if (diff.inDays == 1) {
+    return 'Yesterday ${DateFormat('h:mm a').format(date)}';
+  } else if (diff.inDays < 7) {
+    return '${DateFormat('EEE').format(date)} ${DateFormat('h:mm a').format(date)}';
+  }
+  return DateFormat('MMM dd, yyyy h:mm a').format(date);
 }
 
 String formatDate(DateTime? date) {
