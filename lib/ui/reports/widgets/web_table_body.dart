@@ -1,4 +1,4 @@
-// lib/ui/reports/widgets/reports_table_body.dart
+// lib/ui/reports/widgets/web_table_body.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
@@ -6,14 +6,14 @@ import '../../core/widgets/shared/empty_state.dart';
 import '../../core/widgets/table/activity_table_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
-import 'reports_table_row.dart';
+import 'web_table_row.dart';
 
-class ReportsTableBody extends StatefulWidget {
+class WebTableBody extends StatefulWidget {
   final List<Report> reports;
   final ValueChanged<Report> onViewDetails;
   final bool isLoading;
 
-  const ReportsTableBody({
+  const WebTableBody({
     super.key,
     required this.reports,
     required this.onViewDetails,
@@ -21,10 +21,10 @@ class ReportsTableBody extends StatefulWidget {
   });
 
   @override
-  State<ReportsTableBody> createState() => _ReportsTableBodyState();
+  State<WebTableBody> createState() => _ReportsTableBodyState();
 }
 
-class _ReportsTableBodyState extends State<ReportsTableBody>
+class _ReportsTableBodyState extends State<WebTableBody>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _pulseAnimation;
@@ -71,7 +71,7 @@ class _ReportsTableBodyState extends State<ReportsTableBody>
         color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
-        return ReportsTableRow(
+        return WebTableRow(
           report: widget.reports[index],
           onTap: () => widget.onViewDetails(widget.reports[index]),
         );

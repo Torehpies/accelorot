@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/repositories/machine_repository/machine_repository.dart';
 import '../../../data/providers/machine_providers.dart';
+import '../../activity_logs/models/activity_common.dart';
 
 part 'admin_machine_notifier.g.dart';
 
@@ -25,6 +26,9 @@ class AdminMachineState {
   // Web filtering (uses status only)
   final MachineStatusFilter selectedStatusFilter;
   
+  // Date filtering (using Activity Logs model)
+  final DateFilterRange dateFilter;
+  
   final bool isLoading;
   final String? errorMessage;
   final String searchQuery;
@@ -42,6 +46,7 @@ class AdminMachineState {
     this.machines = const [],
     this.selectedTab = MachineFilterTab.all,
     this.selectedStatusFilter = MachineStatusFilter.all,
+    this.dateFilter = const DateFilterRange(type: DateFilterType.none),
     this.isLoading = false,
     this.errorMessage,
     this.searchQuery = '',
@@ -56,6 +61,7 @@ class AdminMachineState {
     List<MachineModel>? machines,
     MachineFilterTab? selectedTab,
     MachineStatusFilter? selectedStatusFilter,
+    DateFilterRange? dateFilter,
     bool? isLoading,
     String? errorMessage,
     String? searchQuery,
@@ -69,6 +75,7 @@ class AdminMachineState {
       machines: machines ?? this.machines,
       selectedTab: selectedTab ?? this.selectedTab,
       selectedStatusFilter: selectedStatusFilter ?? this.selectedStatusFilter,
+      dateFilter: dateFilter ?? this.dateFilter,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -121,18 +128,25 @@ class AdminMachineState {
     return filtered;
   }
 
-  // WEB filtering logic: uses status only, ignores isArchived
+  // WEB filtering logic: uses status + date range
   List<MachineModel> get filteredMachinesByStatus {
     var filtered = machines;
 
-    // Apply status filter from dropdown
+    // 1. Apply status filter from dropdown
     final status = selectedStatusFilter.toStatus();
     if (status != null) {
       filtered = filtered.where((m) => m.status == status).toList();
     }
-    // If 'All', show everything (including archived)
 
-    // Filter by search query
+    // 2. Apply date range filter
+    if (dateFilter.isActive) {
+      filtered = filtered.where((m) {
+        return m.dateCreated.isAfter(dateFilter.startDate!) &&
+               m.dateCreated.isBefore(dateFilter.endDate!);
+      }).toList();
+    }
+
+    // 3. Filter by search query
     if (searchQuery.isNotEmpty) {
       filtered = filtered.where((m) {
         final query = searchQuery.toLowerCase();
@@ -141,7 +155,7 @@ class AdminMachineState {
       }).toList();
     }
 
-    // Apply sorting
+    // 4. Apply sorting
     if (sortColumn != null) {
       filtered = _sortMachines(filtered, sortColumn!, sortAscending);
     }
@@ -253,6 +267,21 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
   void setStatusFilter(MachineStatusFilter filter) {
     state = state.copyWith(
       selectedStatusFilter: filter,
+      currentPage: 1,
+    );
+  }
+
+  // WEB: Filter by date range
+  void setDateFilter(DateFilterRange dateFilter) {
+    state = state.copyWith(
+      dateFilter: dateFilter,
+      currentPage: 1,
+    );
+  }
+
+  void clearDateFilter() {
+    state = state.copyWith(
+      dateFilter: const DateFilterRange(type: DateFilterType.none),
       currentPage: 1,
     );
   }

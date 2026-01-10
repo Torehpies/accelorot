@@ -88,9 +88,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
                   itemsPerPage: state.itemsPerPage,
                   totalItems: state.filteredMachinesByStatus.length,
                   onStatusFilterChanged: notifier.setStatusFilter,
-                  onDateFilterChanged: (dateFilter) {
-                    // TODO: Implement date filter if needed
-                  },
+                  onDateFilterChanged: notifier.setDateFilter,
                   onSearchChanged: notifier.setSearchQuery,
                   onSort: notifier.onSort,
                   onEdit: (machine) => _showEditDialog(machine, notifier),
@@ -164,7 +162,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
                 teamId: widget.teamId,
                 machineId: machineId,
                 machineName: machineName,
-                assignedUserIds: [], // All team members
+                assignedUserIds: [],
               );
             },
           ),
@@ -266,7 +264,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
       try {
         await notifier.archiveMachine(widget.teamId, machine.machineId);
         if (mounted) {
-          Navigator.of(context).pop(); // Close the details modal
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Machine archived successfully'),

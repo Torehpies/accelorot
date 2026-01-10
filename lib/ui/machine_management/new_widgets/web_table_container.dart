@@ -95,7 +95,7 @@ class MachineTableContainer extends StatelessWidget {
                   maxWidth: 320,
                 ),
                 child: SearchField(
-                  hintText: 'Search machines',
+                  hintText: 'Search...',
                   onChanged: onSearchChanged,
                   isLoading: isLoading,
                 ),

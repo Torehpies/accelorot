@@ -1,4 +1,4 @@
-// lib/ui/reports/widgets/reports_table_row.dart
+// lib/ui/reports/widgets/web_table_row.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
@@ -8,11 +8,11 @@ import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 import 'reports_priority_badge.dart';
 
-class ReportsTableRow extends StatelessWidget {
+class WebTableRow extends StatelessWidget {
   final Report report;
   final VoidCallback onTap;
 
-  const ReportsTableRow({
+  const WebTableRow({
     super.key,
     required this.report,
     required this.onTap,

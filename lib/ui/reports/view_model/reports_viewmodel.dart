@@ -2,18 +2,23 @@
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/providers/report_providers.dart';
+import '../../../data/models/report.dart';
 import '../services/report_aggregator_service.dart';
+import '../services/report_filter_service.dart';
 import '../models/reports_state.dart';
+import '../../activity_logs/models/activity_common.dart';
 
 part 'reports_viewmodel.g.dart';
 
 @riverpod
 class ReportsViewModel extends _$ReportsViewModel {
   late final ReportAggregatorService _aggregator;
+  late final ReportFilterService _filterService;
 
   @override
   ReportsState build() {
     _aggregator = ref.read(reportAggregatorProvider);
+    _filterService = ReportFilterService();
     
     Future.microtask(() => _initialize());
     
@@ -61,6 +66,9 @@ class ReportsViewModel extends _$ReportsViewModel {
         allReports: reports,
         status: LoadingStatus.success,
       );
+
+      // Apply filters to the newly loaded data
+      _applyFilters();
     } catch (e) {
       state = state.copyWith(
         status: LoadingStatus.error,
@@ -80,6 +88,7 @@ class ReportsViewModel extends _$ReportsViewModel {
       selectedStatus: status,
       currentPage: 1,
     );
+    _applyFilters();
   }
 
   void onCategoryChanged(ReportCategoryFilter category) {
@@ -87,6 +96,7 @@ class ReportsViewModel extends _$ReportsViewModel {
       selectedCategory: category,
       currentPage: 1,
     );
+    _applyFilters();
   }
 
   void onPriorityChanged(ReportPriorityFilter priority) {
@@ -94,14 +104,15 @@ class ReportsViewModel extends _$ReportsViewModel {
       selectedPriority: priority,
       currentPage: 1,
     );
+    _applyFilters();
   }
 
-  void onDateFilterChanged(DateTime? start, DateTime? end) {
+  void onDateFilterChanged(DateFilterRange dateFilter) {
     state = state.copyWith(
-      dateFilterStart: start,
-      dateFilterEnd: end,
+      dateFilter: dateFilter,
       currentPage: 1,
     );
+    _applyFilters();
   }
 
   void onSearchChanged(String query) {
@@ -109,6 +120,7 @@ class ReportsViewModel extends _$ReportsViewModel {
       searchQuery: query.toLowerCase(),
       currentPage: 1,
     );
+    _applyFilters();
   }
 
   // ===== SORTING HANDLERS =====
@@ -120,6 +132,8 @@ class ReportsViewModel extends _$ReportsViewModel {
       sortColumn: column,
       sortAscending: isAscending,
     );
+    
+    _applyFilters();
   }
 
   // ===== PAGINATION HANDLERS =====
@@ -132,6 +146,26 @@ class ReportsViewModel extends _$ReportsViewModel {
     state = state.copyWith(
       itemsPerPage: itemsPerPage,
       currentPage: 1,
+    );
+  }
+
+  // ===== FILTERING LOGIC =====
+
+  /// Apply all filters using the filter service
+  void _applyFilters() {
+    final result = _filterService.applyAllFilters(
+      reports: state.allReports,
+      dateFilter: state.dateFilter,
+      searchQuery: state.searchQuery,
+      selectedStatus: state.selectedStatus,
+      selectedCategory: state.selectedCategory,
+      selectedPriority: state.selectedPriority,
+      sortColumn: state.sortColumn,
+      sortAscending: state.sortAscending,
+    );
+
+    state = state.copyWith(
+      filteredReports: result.filteredReports,
     );
   }
 
@@ -254,13 +288,18 @@ class ReportsViewModel extends _$ReportsViewModel {
     String? priority,
   }) async {
     try {
-      await _aggregator.updateReport(
-        machineId: machineId,
+      // Create request object
+      final request = UpdateReportRequest(
         reportId: reportId,
         title: title,
         description: description,
         status: status,
         priority: priority,
+      );
+
+      await _aggregator.updateReport(
+        machineId: machineId,
+        request: request,
       );
       
       // Refresh after update

@@ -1,10 +1,11 @@
-//TODO - Issue with detecting the logged in user
+// lib/ui/reports/view/web_reports_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/reports_viewmodel.dart';
-import '../widgets/reports_stats_row.dart';
-import '../widgets/reports_table_container.dart';
+import '../widgets/web_stats_row.dart';
+import '../widgets/web_table_container.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import 'report_detail_view.dart';
@@ -49,7 +50,7 @@ class WebReportsView extends ConsumerWidget {
           child: Column(
             children: [
               // Stats Cards Row
-              ReportsStatsRow(
+              WebStatsRow(
                 statsWithChange: statsWithChange,
                 isLoading: state.isLoading,
               ),
@@ -74,12 +75,7 @@ class WebReportsView extends ConsumerWidget {
                   onStatusChanged: viewModel.onStatusChanged,
                   onCategoryChanged: viewModel.onCategoryChanged,
                   onPriorityChanged: viewModel.onPriorityChanged,
-                  onDateFilterChanged: (dateFilter) {
-                    viewModel.onDateFilterChanged(
-                      dateFilter.startDate,
-                      dateFilter.endDate,
-                    );
-                  },
+                  onDateFilterChanged: viewModel.onDateFilterChanged,
                   onSearchChanged: viewModel.onSearchChanged,
                   onSort: viewModel.onSort,
                   onViewDetails: (report) => _showDetailDialog(context, report, viewModel),

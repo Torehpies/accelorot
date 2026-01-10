@@ -1,4 +1,4 @@
-// lib/ui/reports/widgets/reports_table_header.dart
+// lib/ui/reports/widgets/web_table_header.dart
 
 import 'package:flutter/material.dart';
 import '../models/reports_state.dart';
@@ -8,7 +8,7 @@ import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 
-class ReportsTableHeader extends StatelessWidget {
+class WebTableHeader extends StatelessWidget {
   final ReportStatusFilter selectedStatus;
   final ReportCategoryFilter selectedCategory;
   final ReportPriorityFilter selectedPriority;
@@ -20,7 +20,7 @@ class ReportsTableHeader extends StatelessWidget {
   final ValueChanged<String> onSort;
   final bool isLoading;
 
-  const ReportsTableHeader({
+  const WebTableHeader({
     super.key,
     required this.selectedStatus,
     required this.selectedCategory,

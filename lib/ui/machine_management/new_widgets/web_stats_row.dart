@@ -5,7 +5,7 @@ import '../../core/widgets/base_stats_card.dart';
 import '../../core/themes/web_colors.dart';
 import '../../../data/models/machine_model.dart';
 
-// Stats row showing: Total, Active, Archived, Suspended
+/// Stats row showing: Total, Active, Archived, Suspended
 class MachineStatsRow extends StatelessWidget {
   final List<MachineModel> machines;
   final bool isLoading;
@@ -17,18 +17,17 @@ class MachineStatsRow extends StatelessWidget {
   });
 
   Map<String, int> get _stats {
-    // Total = all machines (including archived)
     final total = machines.length;
     
-    // Active = status is active only (regardless of archived flag)
+    // Active = status is active only
     final active = machines.where((m) => 
       m.status == MachineStatus.active
     ).length;
     
-    // Archived = isArchived flag is true (regardless of status)
+    // Archived = isArchived flag is true
     final archived = machines.where((m) => m.isArchived).length;
     
-    // Suspended = status is underMaintenance only (regardless of archived flag)
+    // Suspended = status is underMaintenance only
     final suspended = machines.where((m) => 
       m.status == MachineStatus.underMaintenance
     ).length;
