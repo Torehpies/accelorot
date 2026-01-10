@@ -1,6 +1,5 @@
-// lib/ui/machine_management/widgets/admin/web_admin_machine_view.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../services/sess_service.dart';
 import '../../../../data/models/machine_model.dart';
@@ -8,7 +7,6 @@ import '../../../machine_management/view_model/admin_machine_notifier.dart';
 import '../../../core/widgets/filters/search_field.dart';
 import '../../shared/pagination_table.dart';
 import '../../../core/widgets/table/base_table_container.dart';
-import '../../../core/themes/web_colors.dart';
 import '../../../../ui/web_machine/filters/web_machine_date_filter_widget.dart';
 import 'web_add_machine_modal.dart';
 import 'web_edit_machine_modal.dart';
@@ -108,17 +106,27 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
 
   List<MachineModel> _getFilteredMachines(List<MachineModel> machines) {
     var filtered = machines.where((m) {
-      final matchesSearch = m.machineName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch =
+          m.machineName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           m.machineId.toLowerCase().contains(_searchQuery.toLowerCase());
 
-      final matchesStatus = _statusFilter == 'All' ||
+      final matchesStatus =
+          _statusFilter == 'All' ||
           (_statusFilter == 'Active' && !m.isArchived) ||
           (_statusFilter == 'Archived' && m.isArchived);
 
       bool matchesDate = true;
       if (_selectedDateFilter != null) {
-        final machineDate = DateTime(m.dateCreated.year, m.dateCreated.month, m.dateCreated.day);
-        final filterDate = DateTime(_selectedDateFilter!.year, _selectedDateFilter!.month, _selectedDateFilter!.day);
+        final machineDate = DateTime(
+          m.dateCreated.year,
+          m.dateCreated.month,
+          m.dateCreated.day,
+        );
+        final filterDate = DateTime(
+          _selectedDateFilter!.year,
+          _selectedDateFilter!.month,
+          _selectedDateFilter!.day,
+        );
         matchesDate = machineDate.isAtSameMomentAs(filterDate);
       }
 
@@ -200,10 +208,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
 
     if (confirmed == true && mounted) {
       try {
-        await ref.read(adminMachineProvider.notifier).archiveMachine(
-              _teamId!,
-              machine.machineId,
-            );
+        await ref
+            .read(adminMachineProvider.notifier)
+            .archiveMachine(_teamId!, machine.machineId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -224,13 +231,14 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(adminMachineProvider);
 
     if (_isInitializing) {
       return const Scaffold(
-        backgroundColor: Color(0xFFF8FAFC),
+        backgroundColor: AppColors.background,
         body: Center(
           child: CircularProgressIndicator(color: Color(0xFF10B981)),
         ),
@@ -246,7 +254,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
     final totalPages = _getTotalPages(filteredMachines.length);
 
     return Scaffold(
-      backgroundColor: WebColors.pageBackground,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -255,10 +263,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: WebColors.primaryBorder.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: WebColors.primaryBorder,
+                      color: AppColors.backgroundBorder,
                       width: 1,
                     ),
                   ),
@@ -304,7 +311,9 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                               isLoading: state.isLoading,
                             ),
                             ElevatedButton(
-                              onPressed: state.isLoading ? null : _showAddMachineModal,
+                              onPressed: state.isLoading
+                                  ? null
+                                  : _showAddMachineModal,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF10B981),
                                 foregroundColor: Colors.white,
@@ -330,7 +339,8 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
                             sortColumn: _sortColumn,
                             ascending: _ascending,
                             statusFilter: _statusFilter,
-                            onSort: (column) => _applySortAndFilter(column: column),
+                            onSort: (column) =>
+                                _applySortAndFilter(column: column),
                             onStatusChanged: (status) {
                               setState(() {
                                 _statusFilter = status;

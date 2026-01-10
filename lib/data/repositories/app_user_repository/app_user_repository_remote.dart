@@ -1,0 +1,84 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
+import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
+import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
+
+class AppUserRepositoryRemote implements AppUserRepository {
+  final AppUserService userService;
+  final AuthService authService;
+  final FirebaseFirestore firestore;
+
+  AppUserRepositoryRemote(this.userService, this.authService, this.firestore);
+
+  @override
+  AppUser mapRawDataToDomain(Map<String, dynamic> rawData) {
+    final Timestamp timestamp = rawData['createdAt'] as Timestamp;
+    final cleanMap = Map<String, dynamic>.from(rawData);
+    cleanMap['createdAt'] = timestamp.toDate();
+    return AppUser.fromJson(cleanMap);
+  }
+
+  @override
+  Future<Result<AppUser, DataLayerError>> getUser(String id) async {
+    try {
+      final rawData = await userService.fetchRawUserData(id);
+      if (rawData == null) {
+        return Result.failure(DataLayerError.userExistsError());
+      }
+
+      return Result.success(mapRawDataToDomain(rawData));
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseAuthException(e));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e.toString()));
+    }
+  }
+
+  Future<AppUser?> getUserModel(String id) async {
+    try {
+      final rawData = await userService.fetchRawUserData(id);
+      if (rawData == null) {
+        return null;
+      }
+
+      return mapRawDataToDomain(rawData);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> createUserProfile({
+    required String uid,
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String globalRole,
+    required String status,
+    String? requestTeamId,
+  }) async {
+    try {
+      await firestore.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'globalRole': globalRole,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': status,
+        'requestTeamId': requestTeamId,
+      });
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseAuthException(e));
+    } catch (e) {
+      debugPrint('Unexpected error on creating user profile: $e');
+      return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
+}

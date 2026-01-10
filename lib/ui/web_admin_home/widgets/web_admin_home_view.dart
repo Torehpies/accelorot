@@ -6,6 +6,8 @@ import '../../../../ui/core/ui/admin_app_bar.dart';
 import '../../../../data/models/operator_model.dart';
 import '../../../../data/models/machine_model.dart';
 
+// TODO - Issue with callbacks, no need for callbacks and parameters for the screen
+// Handle the logic internally or in the notifier/view model
 class WebAdminHomeView extends ConsumerStatefulWidget {
   final VoidCallback onManageOperators;
   final VoidCallback onManageMachines;

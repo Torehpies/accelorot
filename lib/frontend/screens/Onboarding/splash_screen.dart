@@ -1,6 +1,6 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
-import 'registration_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -113,13 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const RegistrationScreen(),
-                              ),
-                            );
+                            context.go('/signin');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,

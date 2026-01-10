@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/profile_model.dart';
 import '../view_model/profile_notifier.dart';
-import '../../../ui/core/ui/change_password_dialog.dart';
+import 'package:flutter_application_1/ui/change_password_dialog/widgets/change_password_dialog.dart';
 
 class WebProfileView extends ConsumerStatefulWidget {
   const WebProfileView({super.key});
