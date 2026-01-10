@@ -5,13 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../view_model/admin_machine_notifier.dart';
+import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_table_container.dart';
 import '../new_widgets/web_view_details_modal.dart';
 import '../new_widgets/web_edit_dialog.dart';
 import '../new_widgets/web_add_dialog.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import '../models/machine_state.dart';
 
 class AdminMachineScreen extends ConsumerStatefulWidget {
   final String teamId;
@@ -30,14 +31,14 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(adminMachineProvider.notifier).initialize(widget.teamId);
+      ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(adminMachineProvider);
-    final notifier = ref.read(adminMachineProvider.notifier);
+    final state = ref.watch(machineViewModelProvider);
+    final notifier = ref.read(machineViewModelProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -51,8 +52,8 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
 
   Widget _buildContent(
     BuildContext context,
-    AdminMachineState state,
-    AdminMachineNotifier notifier,
+    MachineState state,
+    MachineViewModel notifier,
   ) {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -86,10 +87,10 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
                   currentPage: state.currentPage,
                   totalPages: state.totalPages,
                   itemsPerPage: state.itemsPerPage,
-                  totalItems: state.filteredMachinesByStatus.length,
-                  onStatusFilterChanged: notifier.setStatusFilter,
-                  onDateFilterChanged: notifier.setDateFilter,
-                  onSearchChanged: notifier.setSearchQuery,
+                  totalItems: state.filteredMachines.length,
+                  onStatusFilterChanged: notifier.onStatusFilterChanged,
+                  onDateFilterChanged: notifier.onDateFilterChanged,
+                  onSearchChanged: notifier.onSearchChanged,
                   onSort: notifier.onSort,
                   onEdit: (machine) => _showEditDialog(machine, notifier),
                   onView: (machine) => _showViewDetailsDialog(machine, notifier),
@@ -133,7 +134,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              ref.read(adminMachineProvider.notifier).initialize(widget.teamId);
+              ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: WebColors.tealAccent,
@@ -146,7 +147,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showAddMachineDialog(AdminMachineNotifier notifier) {
+  void _showAddMachineDialog(MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -171,7 +172,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showEditDialog(MachineModel machine, AdminMachineNotifier notifier) {
+  void _showEditDialog(MachineModel machine, MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -196,7 +197,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showViewDetailsDialog(MachineModel machine, AdminMachineNotifier notifier) {
+  void _showViewDetailsDialog(MachineModel machine, MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -216,7 +217,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  Future<void> _handleArchive(MachineModel machine, AdminMachineNotifier notifier) async {
+  Future<void> _handleArchive(MachineModel machine, MachineViewModel notifier) async {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,

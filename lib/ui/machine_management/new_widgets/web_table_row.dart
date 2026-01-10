@@ -76,7 +76,7 @@ class MachineTableRow extends StatelessWidget {
         TableCellWidget(
           flex: 2,
           child: Text(
-            DateFormat('MMM dd, yyyy').format(machine.dateCreated),
+            DateFormat('MM/dd/yyyy').format(machine.dateCreated),
             style: WebTextStyles.body,
             textAlign: TextAlign.center,
           ),

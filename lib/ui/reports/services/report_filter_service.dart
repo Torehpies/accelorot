@@ -50,16 +50,32 @@ class ReportFilterService {
     if (!dateFilter.isActive) return reports;
 
     return reports.where((report) {
-      return report.createdAt.isAfter(dateFilter.startDate!) &&
-          report.createdAt.isBefore(dateFilter.endDate!);
+      final reportDate = DateTime(
+        report.createdAt.year,
+        report.createdAt.month,
+        report.createdAt.day,
+      );
+
+      final filterStartDate = DateTime(
+        dateFilter.startDate!.year,
+        dateFilter.startDate!.month,
+        dateFilter.startDate!.day,
+      );
+
+      final filterEndDate = DateTime(
+        dateFilter.endDate!.year,
+        dateFilter.endDate!.month,
+        dateFilter.endDate!.day,
+      );
+
+      // Inclusive start, exclusive end: [startDate, endDate)
+      return !reportDate.isBefore(filterStartDate) &&
+          reportDate.isBefore(filterEndDate);
     }).toList();
   }
 
   /// Filter reports by search query
-  List<Report> applySearchFilter(
-    List<Report> reports,
-    String searchQuery,
-  ) {
+  List<Report> applySearchFilter(List<Report> reports, String searchQuery) {
     if (searchQuery.isEmpty) return reports;
 
     final query = searchQuery.toLowerCase();
