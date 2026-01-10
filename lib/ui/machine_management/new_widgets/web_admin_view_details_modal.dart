@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/web_view_details_modal.dart
+// lib/ui/machine_management/new_widgets/web_admin_view_details_modal.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,11 +8,11 @@ import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 
-class MachineViewDetailsModal extends StatelessWidget {
+class WebAdminViewDetailsModal extends StatelessWidget {
   final MachineModel machine;
   final VoidCallback onArchive;
 
-  const MachineViewDetailsModal({
+  const WebAdminViewDetailsModal({
     super.key,
     required this.machine,
     required this.onArchive,

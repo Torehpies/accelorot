@@ -10,14 +10,14 @@ import 'web_table_row.dart';
 
 class MachineTableBody extends StatefulWidget {
   final List<MachineModel> machines;
-  final Function(MachineModel) onEdit;
+  final Function(MachineModel)? onEdit; // Nullable - for operator view
   final Function(MachineModel) onView;
   final bool isLoading;
 
   const MachineTableBody({
     super.key,
     required this.machines,
-    required this.onEdit,
+    this.onEdit, // Optional
     required this.onView,
     this.isLoading = false,
   });
@@ -76,8 +76,10 @@ class _MachineTableBodyState extends State<MachineTableBody>
         final machine = widget.machines[index];
         return MachineTableRow(
           machine: machine,
-          onEdit: () => widget.onEdit(machine),
           onView: () => widget.onView(machine),
+          onEdit: widget.onEdit != null 
+              ? () => widget.onEdit!(machine) 
+              : null, // Pass null if no edit callback provided
         );
       },
     );
@@ -133,7 +135,7 @@ class _MachineTableBodyState extends State<MachineTableBody>
           ),
         ),
 
-        // Actions (2 icons)
+        // Actions (2 icons for admin, 1 for operator)
         TableCellWidget(
           flex: 1,
           child: Center(
@@ -141,8 +143,10 @@ class _MachineTableBodyState extends State<MachineTableBody>
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
-                const SizedBox(width: 8),
-                _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+                if (widget.onEdit != null) ...[
+                  const SizedBox(width: 8),
+                  _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+                ],
               ],
             ),
           ),

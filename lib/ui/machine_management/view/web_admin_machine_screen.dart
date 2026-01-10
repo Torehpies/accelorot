@@ -7,10 +7,10 @@ import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
-import '../new_widgets/web_table_container.dart';
-import '../new_widgets/web_view_details_modal.dart';
-import '../new_widgets/web_edit_dialog.dart';
-import '../new_widgets/web_add_dialog.dart';
+import '../new_widgets/web_admin_table_container.dart';
+import '../new_widgets/web_admin_view_details_modal.dart';
+import '../new_widgets/web_admin_edit_dialog.dart';
+import '../new_widgets/web_admin_add_dialog.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../models/machine_state.dart';
 
@@ -77,7 +77,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
 
               // Machine Table Container
               Expanded(
-                child: MachineTableContainer(
+                child: WebAdminTableContainer(
                   machines: state.paginatedMachines,
                   isLoading: state.isLoading,
                   selectedStatusFilter: state.selectedStatusFilter,
@@ -154,7 +154,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
       builder: (context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: MachineAddDialog(
+          child: WebAdminAddDialog(
             onCreate: ({
               required String machineId,
               required String machineName,
@@ -179,7 +179,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
       builder: (context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: MachineEditDialog(
+          child: WebAdminEditDialog(
             machine: machine,
             onUpdate: ({
               required String machineId,
@@ -207,7 +207,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
           insetPadding: const EdgeInsets.all(40),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
-            child: MachineViewDetailsModal(
+            child: WebAdminViewDetailsModal(
               machine: machine,
               onArchive: () => _handleArchive(machine, notifier),
             ),

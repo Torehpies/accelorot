@@ -8,17 +8,18 @@ import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/table/activity_table_row.dart';
 
-// Single machine row in table
+/// Single machine row in table
+/// Supports both admin and operator views via nullable onEdit callback
 class MachineTableRow extends StatelessWidget {
   final MachineModel machine;
-  final VoidCallback onEdit;
   final VoidCallback onView;
+  final VoidCallback? onEdit; // Nullable - if null, edit button won't show
 
   const MachineTableRow({
     super.key,
     required this.machine,
-    required this.onEdit,
     required this.onView,
+    this.onEdit, // Optional
   });
 
   Color get statusColor {
@@ -118,13 +119,16 @@ class MachineTableRow extends StatelessWidget {
                   onPressed: onView,
                   tooltip: 'View Details',
                 ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(Icons.edit, size: 18),
-                  color: WebColors.textLabel,
-                  onPressed: onEdit,
-                  tooltip: 'Edit Machine',
-                ),
+                // Only show edit button if callback is provided
+                if (onEdit != null) ...[
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18),
+                    color: WebColors.textLabel,
+                    onPressed: onEdit,
+                    tooltip: 'Edit Machine',
+                  ),
+                ],
               ],
             ),
           ),

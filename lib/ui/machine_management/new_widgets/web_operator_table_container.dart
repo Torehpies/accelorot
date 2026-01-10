@@ -1,4 +1,4 @@
-// lib/ui/machine_management/new_widgets/web_table_container.dart
+// lib/ui/machine_management/new_widgets/web_operator_table_container.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
@@ -7,12 +7,11 @@ import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../../../ui/activity_logs/models/activity_common.dart';
 import 'web_table_header.dart';
 import 'web_table_body.dart';
 
-class MachineTableContainer extends StatelessWidget {
+class WebOperatorTableContainer extends StatelessWidget {
   final List<MachineModel> machines;
   final bool isLoading;
   
@@ -30,20 +29,16 @@ class MachineTableContainer extends StatelessWidget {
   final int itemsPerPage;
   final int totalItems;
   
-  // Callbacks
+  // Callbacks (no onEdit, no onAddMachine)
   final ValueChanged<MachineStatusFilter> onStatusFilterChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String> onSort;
-  final ValueChanged<MachineModel> onEdit;
   final ValueChanged<MachineModel> onView;
   final ValueChanged<int> onPageChanged;
   final ValueChanged<int> onItemsPerPageChanged;
 
-  // New callback: Add Machine
-  final VoidCallback onAddMachine;
-
-  const MachineTableContainer({
+  const WebOperatorTableContainer({
     super.key,
     required this.machines,
     required this.isLoading,
@@ -59,11 +54,9 @@ class MachineTableContainer extends StatelessWidget {
     required this.onDateFilterChanged,
     required this.onSearchChanged,
     required this.onSort,
-    required this.onEdit,
     required this.onView,
     required this.onPageChanged,
     required this.onItemsPerPageChanged,
-    required this.onAddMachine,
   });
 
   @override
@@ -75,7 +68,7 @@ class MachineTableContainer extends StatelessWidget {
         style: WebTextStyles.sectionTitle,
       ),
       
-      // Right header: Date filter, Search, Add button
+      // Right header: Date filter and Search only (no Add button)
       rightHeaderWidgets: [
         SizedBox(
           height: 32,
@@ -86,38 +79,16 @@ class MachineTableContainer extends StatelessWidget {
         ),
         SizedBox(
           height: 32,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: 220,
-                  maxWidth: 320,
-                ),
-                child: SearchField(
-                  hintText: 'Search...',
-                  onChanged: onSearchChanged,
-                  isLoading: isLoading,
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: isLoading ? null : onAddMachine,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Machine'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: WebColors.tealAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 220,
+              maxWidth: 320,
+            ),
+            child: SearchField(
+              hintText: 'Search...',
+              onChanged: onSearchChanged,
+              isLoading: isLoading,
+            ),
           ),
         ),
       ],
@@ -132,10 +103,10 @@ class MachineTableContainer extends StatelessWidget {
         isLoading: isLoading,
       ),
       
-      // Table body
+      // Table body (no onEdit callback - will be null)
       tableBody: MachineTableBody(
         machines: machines,
-        onEdit: onEdit,
+        onEdit: null,
         onView: onView,
         isLoading: isLoading,
       ),

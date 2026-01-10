@@ -28,7 +28,7 @@ import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_s
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
-import 'package:flutter_application_1/ui/web_operator_machine_management/view/machines_view.dart';
+import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -145,10 +145,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const MachinesView(),
-              key: state.pageKey,
-            ),
+            pageBuilder: (context, state) {
+              final teamId =
+                  state.extra as String? ?? '';
+              return NoTransitionPage(
+                child: OperatorMachineScreen(teamId: teamId),
+                key: state.pageKey,
+              );
+            },
           ),
           GoRoute(
             path: RoutePath.profile.path,

@@ -1,87 +1,109 @@
-// lib/ui/machine_management/new_widgets/web_add_dialog.dart
+// lib/ui/machine_management/new_widgets/web_admin_edit_dialog.dart
 
 import 'package:flutter/material.dart';
+import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 
-class MachineAddDialog extends StatefulWidget {
+class WebAdminEditDialog extends StatefulWidget {
+  final MachineModel machine;
   final Future<void> Function({
     required String machineId,
     required String machineName,
-  }) onCreate;
+  }) onUpdate;
 
-  const MachineAddDialog({
+  const WebAdminEditDialog({
     super.key,
-    required this.onCreate,
+    required this.machine,
+    required this.onUpdate,
   });
 
   @override
-  State<MachineAddDialog> createState() => _MachineAddDialogState();
+  State<WebAdminEditDialog> createState() => _WebAdminEditDialogState();
 }
 
-class _MachineAddDialogState extends State<MachineAddDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _idController = TextEditingController();
+class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
+  late final TextEditingController _nameController;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.machine.machineName);
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _idController.dispose();
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText) {
+  InputDecoration _buildInputDecoration(String labelText, {bool readOnly = false}) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: WebColors.textLabel),
-      floatingLabelStyle: const TextStyle(color: WebColors.tealAccent),
+      labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : WebColors.textLabel),
+      floatingLabelStyle: TextStyle(
+        color: readOnly ? Colors.grey[400] : WebColors.tealAccent,
+      ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: WebColors.tealAccent, width: 2),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : WebColors.tealAccent,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: WebColors.cardBorder, width: 1),
+        borderSide: BorderSide(
+          color: readOnly ? Colors.grey[300]! : WebColors.cardBorder,
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
+      filled: readOnly,
+      fillColor: readOnly ? Colors.grey[100] : null,
     );
   }
 
   Future<void> _handleSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
+      _showSnackBar('Machine Name is required', WebColors.warning);
+      return;
+    }
+
+    if (name == widget.machine.machineName) {
+      _showSnackBar('No changes detected', WebColors.info);
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.onCreate(
-        machineId: _idController.text.trim(),
-        machineName: _nameController.text.trim(),
+      await widget.onUpdate(
+        machineId: widget.machine.machineId,
+        machineName: name,
       );
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Machine added successfully'),
-          backgroundColor: WebColors.success,
-        ),
-      );
+      _showSnackBar('Machine updated successfully', WebColors.success);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: WebColors.error,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      _showSnackBar('Failed to update machine: $e', WebColors.error);
+      setState(() => _isSubmitting = false);
     }
+  }
+
+  void _showSnackBar(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -92,59 +114,42 @@ class _MachineAddDialogState extends State<MachineAddDialog> {
         color: WebColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildHeader(context),
-            
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: _buildInputDecoration('Machine Name *'),
-                    enabled: !_isSubmitting,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Machine Name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  TextFormField(
-                    controller: _idController,
-                    decoration: _buildInputDecoration('Machine ID *'),
-                    enabled: !_isSubmitting,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Machine ID is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  TextField(
-                    controller: TextEditingController(text: 'All Team Members'),
-                    decoration: _buildInputDecoration('Assigned Users').copyWith(
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                    ),
-                    enabled: false,
-                    readOnly: true,
-                  ),
-                ],
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildHeader(context),
+          
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: _buildInputDecoration('Machine Name *'),
+                  enabled: !_isSubmitting,
+                ),
+                const SizedBox(height: 16),
+                
+                TextField(
+                  controller: TextEditingController(text: widget.machine.machineId),
+                  decoration: _buildInputDecoration('Machine ID (Cannot be changed)', readOnly: true),
+                  enabled: false,
+                  readOnly: true,
+                ),
+                const SizedBox(height: 16),
+                
+                TextField(
+                  controller: TextEditingController(text: 'All Team Members'),
+                  decoration: _buildInputDecoration('Assigned Users', readOnly: true),
+                  enabled: false,
+                  readOnly: true,
+                ),
+              ],
             ),
-            
-            _buildFooter(context),
-          ],
-        ),
+          ),
+          
+          _buildFooter(context),
+        ],
       ),
     );
   }
@@ -166,7 +171,7 @@ class _MachineAddDialogState extends State<MachineAddDialog> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
-              Icons.add,
+              Icons.edit,
               color: Color(0xFF92400E),
               size: 20,
             ),
@@ -177,7 +182,7 @@ class _MachineAddDialogState extends State<MachineAddDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Add Machine',
+                  'Edit Machine',
                   style: WebTextStyles.label.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -186,7 +191,7 @@ class _MachineAddDialogState extends State<MachineAddDialog> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Add a new machine to your collection',
+                  'Update machine details',
                   style: WebTextStyles.bodyMediumGray,
                 ),
               ],
@@ -248,7 +253,7 @@ class _MachineAddDialogState extends State<MachineAddDialog> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text('Add Machine'),
+                  : const Text('Update Machine'),
             ),
           ),
         ],
