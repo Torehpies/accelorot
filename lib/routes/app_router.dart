@@ -146,8 +146,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
             pageBuilder: (context, state) {
-              final teamId =
-                  state.extra as String? ?? '';
+              final teamId = state.extra as String? ?? '';
               return NoTransitionPage(
                 child: OperatorMachineScreen(teamId: teamId),
                 key: state.pageKey,
@@ -181,6 +180,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const AdminHomeScreen(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.adminActivity.path,
+            name: RoutePath.adminActivity.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const UnifiedActivityView(),
             ),
           ),
           GoRoute(
