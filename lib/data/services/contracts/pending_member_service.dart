@@ -13,7 +13,6 @@ abstract class PendingMemberService {
     required String firstName,
     required String lastName,
 	});
-	Future<Map<String, dynamic>?> fetchRawPendingMemberData(String id);
 	Future<Result<List<PendingMember>,DataLayerError>> fetchPendingMembers(String teamId);
 	Future<void> deletePendingMember({
 		required String teamId,
