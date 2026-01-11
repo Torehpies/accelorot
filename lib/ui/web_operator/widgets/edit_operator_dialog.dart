@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -144,14 +145,24 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
+        // ElevatedButton(onPressed: _save, child: const Text('Confirm')),
         ElevatedButton(onPressed: _save, child: const Text('Confirm')),
       ],
     );
   }
 
-  void _save() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pop(context);
+  void _save() async {
+    final navigator = Navigator.of(context);
+    final formKeyState = _formKey.currentState;
+
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Confirm Changes',
+      message: 'Are you sure with your changes?',
+    );
+
+    if (confirmed == true && formKeyState!.validate() && mounted) {
+      navigator.pop(context);
       widget.onSave(form);
     }
   }

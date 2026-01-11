@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
@@ -36,12 +37,14 @@ class FirebaseTeamService implements TeamService {
           .toList();
       return Result.success(teams);
     } on FirebaseException catch (e) {
+			debugPrint(e.toString());
       return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } on FormatException catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } catch (e) {
+			debugPrint(e.toString());
       return Result.failure(DataLayerError.unknownError(e));
     }
   }

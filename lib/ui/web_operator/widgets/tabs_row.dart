@@ -38,7 +38,7 @@ class TabsRow extends StatelessWidget {
             Tab(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('Active'),
+                child: Text('Members'),
               ),
             ),
             Tab(

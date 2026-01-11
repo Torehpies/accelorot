@@ -131,6 +131,8 @@ class AuthRepositoryRemote implements AuthRepository {
         teamId: teamId,
         memberId: user.uid,
         memberEmail: email,
+        firstName: firstName,
+        lastName: lastName,
       );
 
       if (pendingAdd.isFailure) return Result.failure(pendingAdd.asFailure);
@@ -304,7 +306,7 @@ class AuthRepositoryRemote implements AuthRepository {
     return Result.success(null);
   }
 
-	@override
+  @override
   Future<Map<String, dynamic>> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);

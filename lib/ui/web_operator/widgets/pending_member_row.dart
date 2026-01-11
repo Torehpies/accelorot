@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_member_action_buttons.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
+import 'package:flutter_application_1/utils/format.dart';
 
-class TeamMemberRow extends StatelessWidget {
+class PendingMemberRow extends StatelessWidget {
   final dynamic member;
-  final TeamMembersNotifier notifier;
+  final PendingMembersNotifier notifier;
 
-  const TeamMemberRow({super.key, this.member, required this.notifier});
+  const PendingMemberRow({super.key, this.member, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +35,16 @@ class TeamMemberRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 1,
-            child: Center(child: StatusBadge(status: member.status.value)),
+            flex: 2,
+            child: Center(child: Text(formatDateAndTime((member.requestedAt)))),
           ),
           Expanded(
             flex: 1,
             child: Center(
-              child: TeamMemberActionButtons(notifier: notifier, member: member),
+              child: PendingMemberActionButtons(
+                notifier: notifier,
+                member: member,
+              ),
             ),
           ),
         ],
