@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../view_model/web_admin_home_provider.dart';
 import '../../../../ui/core/ui/admin_app_bar.dart';
 import '../../../../data/models/operator_model.dart';
 import '../../../../data/models/machine_model.dart';
+import '../../../../routes/route_path.dart';
 
-// TODO - Issue with callbacks, no need for callbacks and parameters for the screen
-// Handle the logic internally or in the notifier/view model
 class WebAdminHomeView extends ConsumerStatefulWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const WebAdminHomeView({
-    super.key,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const WebAdminHomeView({super.key});
 
   @override
   ConsumerState<WebAdminHomeView> createState() =>
@@ -53,25 +46,15 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
       ),
       body: state.loading
           ? const Center(child: CircularProgressIndicator())
-          : _WebAdminHomeContent(
-              state: state,
-              onManageOperators: widget.onManageOperators,
-              onManageMachines: widget.onManageMachines,
-            ),
+          : _WebAdminHomeContent(state: state),
     );
   }
 }
 
 class _WebAdminHomeContent extends StatelessWidget {
   final WebAdminHomeState state;
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
 
-  const _WebAdminHomeContent({
-    required this.state,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const _WebAdminHomeContent({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +76,12 @@ class _WebAdminHomeContent extends StatelessWidget {
               children: [
                 _operatorTable(
                   state.recentOperators,
-                  onManageOperators,
+                  context,
                 ),
                 const SizedBox(width: 12),
                 _machineTable(
                   state.recentMachines,
-                  onManageMachines,
+                  context,
                 ),
               ],
             ),
@@ -133,13 +116,16 @@ class _WebAdminHomeContent extends StatelessWidget {
 
   Widget _operatorTable(
     List<OperatorModel> operators,
-    VoidCallback onManage,
+    BuildContext context,
   ) {
     return Expanded(
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Operator Management', onManage),
+            _sectionHeader(
+              'Operator Management',
+              () => context.go(RoutePath.adminOperators.path),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: operators.length,
@@ -163,13 +149,16 @@ class _WebAdminHomeContent extends StatelessWidget {
 
   Widget _machineTable(
     List<MachineModel> machines,
-    VoidCallback onManage,
+    BuildContext context,
   ) {
     return Expanded(
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Machine Management', onManage),
+            _sectionHeader(
+              'Machine Management',
+              () => context.go(RoutePath.adminMachines.path),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: machines.length,
