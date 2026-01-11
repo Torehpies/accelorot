@@ -17,8 +17,7 @@ class WebAdminHomeScreen extends StatelessWidget {
 }
 
 class _WebAdminHomeScreenContent extends StatefulWidget {
-  _WebAdminHomeScreenContent();
-
+  const _WebAdminHomeScreenContent();
   @override
   State<_WebAdminHomeScreenContent> createState() =>
       _WebAdminHomeScreenState();
