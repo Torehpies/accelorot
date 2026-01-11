@@ -30,7 +30,7 @@ class FeaturesSection extends StatelessWidget {
                 const TextSpan(text: 'Smart Features for '),
                 TextSpan(
                   text: 'Efficient Composting',
-                  style: TextStyle(color: WebColors.tealAccent),
+                  style: TextStyle(color: WebColors.textTitle),
                 ),
               ],
             ),
