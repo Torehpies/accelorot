@@ -5,16 +5,12 @@ import '../view_model/web_admin_home_provider.dart';
 import '../../../../ui/core/ui/admin_app_bar.dart';
 import '../../../../data/models/operator_model.dart';
 import '../../../../data/models/machine_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart';
+import '../../web_machine/widgets/admin/web_admin_machine_view.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const WebAdminHomeView({
-    super.key,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const WebAdminHomeView({super.key});
 
   @override
   ConsumerState<WebAdminHomeView> createState() =>
@@ -51,24 +47,16 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
       ),
       body: state.loading
           ? const Center(child: CircularProgressIndicator())
-          : _WebAdminHomeContent(
-              state: state,
-              onManageOperators: widget.onManageOperators,
-              onManageMachines: widget.onManageMachines,
-            ),
+          : _WebAdminHomeContent(state: state),
     );
   }
 }
 
 class _WebAdminHomeContent extends StatelessWidget {
   final WebAdminHomeState state;
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
 
   const _WebAdminHomeContent({
     required this.state,
-    required this.onManageOperators,
-    required this.onManageMachines,
   });
 
   @override
@@ -89,15 +77,9 @@ class _WebAdminHomeContent extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                _operatorTable(
-                  state.recentOperators,
-                  onManageOperators,
-                ),
+                _operatorTable(context, state.recentOperators),
                 const SizedBox(width: 12),
-                _machineTable(
-                  state.recentMachines,
-                  onManageMachines,
-                ),
+                _machineTable(context, state.recentMachines),
               ],
             ),
           ),
@@ -129,15 +111,20 @@ class _WebAdminHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _operatorTable(
-    List<OperatorModel> operators,
-    VoidCallback onManage,
-  ) {
+  Widget _operatorTable(BuildContext context, List<OperatorModel> operators) {
     return Expanded(
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Operator Management', onManage),
+            _sectionHeader('Operator Management', () {
+              final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OperatorManagementScreen(teamId: teamId),
+                ),
+              );
+            }),
             Expanded(
               child: ListView.builder(
                 itemCount: operators.length,
@@ -147,8 +134,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                   trailing: Icon(
                     Icons.circle,
                     size: 10,
-                    color:
-                        operators[i].isArchived ? Colors.red : Colors.green,
+                    color: operators[i].isArchived ? Colors.red : Colors.green,
                   ),
                 ),
               ),
@@ -159,15 +145,17 @@ class _WebAdminHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _machineTable(
-    List<MachineModel> machines,
-    VoidCallback onManage,
-  ) {
+  Widget _machineTable(BuildContext context, List<MachineModel> machines) {
     return Expanded(
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Machine Management', onManage),
+            _sectionHeader('Machine Management', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WebAdminMachineView()),
+              );
+            }),
             Expanded(
               child: ListView.builder(
                 itemCount: machines.length,
