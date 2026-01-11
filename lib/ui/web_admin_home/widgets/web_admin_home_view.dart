@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../view_model/web_admin_home_provider.dart';
 import '../../../../ui/core/ui/admin_app_bar.dart';
 import '../../../../data/models/operator_model.dart';
 import '../../../../data/models/machine_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart';
-import '../../web_machine/widgets/admin/web_admin_machine_view.dart';
+import '../../../../routes/route_path.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});
@@ -55,9 +54,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
 class _WebAdminHomeContent extends StatelessWidget {
   final WebAdminHomeState state;
 
-  const _WebAdminHomeContent({
-    required this.state,
-  });
+  const _WebAdminHomeContent({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -116,15 +113,10 @@ class _WebAdminHomeContent extends StatelessWidget {
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Operator Management', () {
-              final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OperatorManagementScreen(teamId: teamId),
-                ),
-              );
-            }),
+            _sectionHeader(
+              'Operator Management',
+              () => context.go(RoutePath.adminOperators.path),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: operators.length,
@@ -150,12 +142,10 @@ class _WebAdminHomeContent extends StatelessWidget {
       child: Card(
         child: Column(
           children: [
-            _sectionHeader('Machine Management', () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WebAdminMachineView()),
-              );
-            }),
+            _sectionHeader(
+              'Machine Management',
+              () => context.go(RoutePath.adminMachines.path),
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: machines.length,
