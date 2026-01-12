@@ -1,6 +1,6 @@
-// lib/ui/reports/view/web_reports_view.dart
-
+//TODO - Issue with detecting the logged in user
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/reports_viewmodel.dart';
 import '../widgets/reports_stats_row.dart';
@@ -18,7 +18,7 @@ class WebReportsView extends ConsumerWidget {
     final state = ref.watch(reportsViewModelProvider);
 
     return Scaffold(
-      backgroundColor: WebColors.pageBackground,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: state.hasError
             ? _buildErrorState(state.errorMessage ?? 'An error occurred')

@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/reports_viewmodel.dart';
@@ -39,22 +41,9 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Reports',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        actions: [
-
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black54),
-            onPressed: () => viewModel.refresh(),
-          ),
-        ],
-      ),
+      appBar: kIsWeb
+          ? null 
+          : MobileHeader(title: 'Reports'),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

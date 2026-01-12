@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import '../view_models/landing_page_view_model.dart';
+import 'package:go_router/go_router.dart';
 import 'app_header.dart';
-import 'hero_section.dart';
+import 'intro_section.dart';
 import 'features_section.dart';
 import 'how_it_works_section.dart';
 import 'impact_section.dart';
 import 'cta_section.dart';
+
 
 class LandingPageView extends StatefulWidget {
   const LandingPageView({super.key});
@@ -34,12 +36,13 @@ class _LandingPageViewState extends State<LandingPageView> {
   }
 
   // Navigation methods that use context
+  
   void _onLogin() {
-    Navigator.pushNamed(context, '/login');
+     context.go('/signin'); // or RoutePath.signin.path
   }
 
   void _onGetStarted() {
-    Navigator.pushNamed(context, '/signup');
+    context.go('/signup');
   }
 
   void _onLearnMore() {
@@ -63,9 +66,9 @@ class _LandingPageViewState extends State<LandingPageView> {
               onLogin: _onLogin,
               onGetStarted: _onGetStarted,
             ),
-            
-            // Hero Section
-            HeroSection(
+
+            // Intro Section
+            IntroSection(
               onGetStarted: _onGetStarted,
               onLearnMore: _onLearnMore,
             ),
