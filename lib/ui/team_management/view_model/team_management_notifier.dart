@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
@@ -13,21 +15,19 @@ part 'team_management_notifier.g.dart';
 class TeamManagementNotifier extends _$TeamManagementNotifier {
   @override
   TeamManagementState build() {
-    state = const TeamManagementState();
+    final initial = const TeamManagementState();
+    state = initial;
     Future.microtask(() => _loadPage(0));
     return const TeamManagementState();
   }
 
   Future<void> addTeam(String teamName, String address) async {
-    final user = ref.watch(appUserProvider).value;
+    final user = ref.read(appUserProvider).value;
 
     teamName = teamName.trim();
     address = address.trim();
 
     if (teamName.isEmpty || address.isEmpty) {
-      state = state.copyWith(
-        message: UiMessage.error("Please fill out fields."),
-      );
       return;
     }
 
@@ -39,23 +39,40 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       'createdBy': user?.uid,
     });
 
-    final result = await ref.read(teamRepositoryProvider).addTeam(team);
+    try {
+      final result = await ref
+          .read(teamRepositoryProvider)
+          .addTeam(team)
+          .timeout(const Duration(seconds: 30));
 
-    result.when(
-      success: (resultTeam) async {
-				await refresh();
-        state = state.copyWith(
-          isSavingTeams: false,
-          message: UiMessage.success('Team $teamName added successfully!'),
-        );
-      },
-      failure: (e) {
-        state = state.copyWith(
-          isSavingTeams: false,
-          message: UiMessage.error(e.userFriendlyMessage),
-        );
-      },
-    );
+      result.when(
+        success: (resultTeam) async {
+          await refresh();
+          state = state.copyWith(
+            isSavingTeams: false,
+            message: UiMessage.success('Team $teamName added successfully!'),
+          );
+        },
+        failure: (e) {
+          state = state.copyWith(
+            isSavingTeams: false,
+            message: UiMessage.error(e.userFriendlyMessage),
+          );
+        },
+      );
+    } on TimeoutException {
+      state = state.copyWith(
+        isSavingTeams: false,
+        message: const UiMessage.error(
+          'Request timed out. Please check your connection.',
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isSavingTeams: false,
+        message: UiMessage.error('Unexpected error: $e'),
+      );
+    }
   }
 
   static const _cacheTtl = Duration(minutes: 1);
