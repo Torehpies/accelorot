@@ -16,32 +16,35 @@ class ImpactStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xxxl),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFCCFBF1),
+        color: WebColors.featurecard.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: WebColors.divider),
+        border: Border.all(color: WebColors.featurecard,),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             stat.value,
             textAlign: TextAlign.center,
-            style: WebTextStyles.h1.copyWith(
-              fontSize: 48,
-              color: WebColors.tealAccent,
+            style: WebTextStyles.impactStatValue.copyWith(
+              fontSize: 36,
               height: 1.1,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           Flexible(
             child: Text(
               stat.label,
               textAlign: TextAlign.center,
-              maxLines: 2, 
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: WebTextStyles.bodyMediumGray.copyWith(
+              style: WebTextStyles.impactStatLabel.copyWith(
                 fontSize: 12,
                 height: 1.4,
               ),

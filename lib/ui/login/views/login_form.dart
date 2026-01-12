@@ -176,7 +176,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
                       child: const Text(
                         "Sign up",
                         style: TextStyle(
-                          color: Colors.teal,
+                          color: AppColors.green100,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
