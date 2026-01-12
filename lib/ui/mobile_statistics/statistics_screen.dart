@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'temperature_stats_view.dart';
 import 'moisture_stats_view.dart';
@@ -31,10 +33,10 @@ class StatisticsScreen extends ConsumerWidget {
 
         if (teamId == null) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Statistics'),
-              backgroundColor: Colors.teal,
-            ),
+             appBar: kIsWeb
+          ? null 
+          : MobileHeader(title: 'Statistics'),
+          
             body: const Center(
               child: Text('No team assigned. Please contact your administrator.'),
             ),
@@ -45,13 +47,6 @@ class StatisticsScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: Colors.grey[50],
-          appBar: AppBar(
-            title: const Text(
-              "Statistics",
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.teal,
-          ),
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
