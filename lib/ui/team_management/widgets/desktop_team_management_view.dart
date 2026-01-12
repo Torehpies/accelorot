@@ -3,14 +3,16 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/status_message.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/widgets/team_management_header.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_state.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_row.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+const int kDesktopBreakpoint = 800;
+
 class DesktopTeamManagementView extends ConsumerWidget {
   const DesktopTeamManagementView({super.key});
-
   void _showAddTeamDialog(BuildContext context) {
     showDialog(context: context, builder: (_) => AddTeamDialog());
   }
@@ -37,6 +39,7 @@ class DesktopTeamManagementView extends ConsumerWidget {
         ),
         child: Column(
           children: [
+            TeamManagementHeader(),
             Expanded(
               child: _TableContent(state: state, notifier: notifier),
             ),
