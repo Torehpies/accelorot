@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_action_buttons.dart';
-import 'package:flutter_application_1/utils/format.dart';
 
 class TeamRow extends StatelessWidget {
   final dynamic team;
