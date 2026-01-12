@@ -20,35 +20,40 @@ class AppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final h2Style = WebTextStyles.h2;
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.md, // Reduced from lg to md
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: WebColors.divider, width: 1),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE0F2FE),
+            Color(0xFFCCFBF1),
+          ],
         ),
       ),
       child: Row(
         children: [
-          // Logo + Text (vertically aligned)
+          // Logo + Text
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SvgPicture.asset(
                 'assets/images/Accel-O-Rot Logo.svg',
-                width: 60, // Reduced from 80 to 60
-                height: 60, // Reduced from 80 to 60
+                width: 60,
+                height: 60,
                 fit: BoxFit.contain,
                 semanticsLabel: 'Accel-O-Rot Logo',
               ),
-              const SizedBox(width: AppSpacing.md),
               Text(
                 'Accel-O-Rot',
-                style: WebTextStyles.h2.copyWith(
-                  color: WebColors.tealAccent,
+                style: h2Style.copyWith(
+                  color: WebColors.textTitle,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
                 ),
               ),
             ],
@@ -57,14 +62,20 @@ class AppHeader extends StatelessWidget {
           // Actions
           Row(
             children: [
-              SecondaryButton(
-                text: 'Login',
-                onPressed: onLogin,
+              SizedBox(
+                height: 50,
+                child: SecondaryButton(
+                  text: 'Login',
+                  onPressed: onLogin,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
-              PrimaryButton(
-                text: 'Get Started',
-                onPressed: onGetStarted,
+              SizedBox(
+                height: 50,
+                child: PrimaryButton(
+                  text: 'Get Started',
+                  onPressed: onGetStarted,
+                ),
               ),
             ],
           ),
