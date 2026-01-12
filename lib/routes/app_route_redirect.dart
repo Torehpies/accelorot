@@ -14,7 +14,8 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
   return auth.when(
     loading: () => RoutePath.loading.path,
     unauthenticated: () =>
-        currentPath == RoutePath.signin.path ||
+        currentPath == RoutePath.initial.path || 
+            currentPath == RoutePath.signin.path ||
             currentPath == RoutePath.signup.path ||
             currentPath == RoutePath.forgotPassword.path
         ? null
