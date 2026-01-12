@@ -5,10 +5,15 @@ import 'package:flutter_application_1/data/services/contracts/data_layer_error.d
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
+import 'package:flutter_application_1/data/utils/result.dart' as prefix;
 
 class FirebaseTeamService implements TeamService {
   final FirebaseFirestore _firestore;
   FirebaseTeamService(this._firestore);
+
+  CollectionReference<Map<String, dynamic>> _teamsRef() {
+    return _firestore.collection('teams');
+  }
 
   @override
   Future<Team> getTeam(String teamId) async {
@@ -37,14 +42,14 @@ class FirebaseTeamService implements TeamService {
           .toList();
       return Result.success(teams);
     } on FirebaseException catch (e) {
-			debugPrint(e.toString());
+      debugPrint(e.toString());
       return Result.failure(mapFirebaseAuthException(e));
     } on TypeError catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } on FormatException catch (_) {
       return const Result.failure(DataLayerError.mappingError());
     } catch (e) {
-			debugPrint(e.toString());
+      debugPrint(e.toString());
       return Result.failure(DataLayerError.unknownError(e));
     }
   }
@@ -65,5 +70,28 @@ class FirebaseTeamService implements TeamService {
     } catch (e) {
       return Result.failure(DataLayerError.unknownError(e));
     }
+  }
+
+  @override
+  Future<prefix.Result<List<Team>>> fetchTeamsPage({
+    required int pageSize,
+    required int pageIndex,
+  }) async {
+    try {
+      final query = _teamsRef().limit(pageSize * (pageIndex + 1));
+
+      final snapshot = await query.get();
+
+      final docs = snapshot.docs.skip(pageSize * pageIndex).take(pageSize);
+
+      final result = prefix.Result.ok(
+        docs
+            .map((doc) => Team.fromJson({...doc.data(), 'id': doc.id}))
+            .toList(),
+      );
+			return result;
+    } catch (e) {
+			return prefix.Result.error(Exception(e));
+		}
   }
 }
