@@ -2,7 +2,6 @@ import 'package:flutter_application_1/data/services/api/model/team_member/team_m
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'team_members_state.freezed.dart';
-part 'team_members_state.g.dart';
 
 @freezed
 abstract class TeamMembersState with _$TeamMembersState {
@@ -15,7 +14,4 @@ abstract class TeamMembersState with _$TeamMembersState {
     @Default(true) bool hasNextPage,
 		DateTime? lastFetchedAt,
   }) = _TeamMembersState;
-
-  factory TeamMembersState.fromJson(Map<String, dynamic> json) =>
-      _$TeamMembersStateFromJson(json);
 }

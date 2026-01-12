@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
@@ -38,7 +38,7 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
     state = state.copyWith(selectedTeam: team);
   }
 
-  Future<void> submitTeamRequest(User user) async {
+  Future<void> submitTeamRequest(AppUser user) async {
     state = state.copyWith(isSubmitting: true);
 
     final team = state.selectedTeam;
@@ -52,15 +52,21 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
     final userId = user.uid;
     final email = user.email;
 
-    if (email == null) {
-      _setError("Email is missing.");
-      return;
-    }
+    // if (email == null) {
+    //   _setError("Email is missing.");
+    //   return;
+    // }
 
     try {
       final result = await ref
           .read(teamRepositoryProvider)
-          .requestToJoinTeam(teamId!, userId, email);
+          .requestToJoinTeam(
+            teamId!,
+            userId,
+            email,
+            user.firstname,
+            user.lastname,
+          );
 
       result.when(
         success: (_) {

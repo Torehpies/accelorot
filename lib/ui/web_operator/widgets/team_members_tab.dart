@@ -165,7 +165,7 @@ class _MembersList extends StatelessWidget {
     return ListView.builder(
       itemCount: state.members.length,
       itemBuilder: (context, index) =>
-          MemberRow(member: state.members[index], notifier: notifier),
+          TeamMemberRow(member: state.members[index], notifier: notifier),
     );
   }
 }

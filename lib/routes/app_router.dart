@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/splash_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/home_screen/admin_home_screen.dart';
+import 'package:flutter_application_1/ui/web_admin_home/widgets/web_admin_home_view.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/admin_web_shell.dart';
@@ -179,7 +179,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminDashboard.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const AdminHomeScreen(),
+              child: const WebAdminHomeView(),
             ),
           ),
           GoRoute(

@@ -58,11 +58,15 @@ class TeamRepositoryRemote implements TeamRepository {
     String teamId,
     String userId,
     String email,
+    String firstName,
+    String lastName,
   ) async {
     final addRequestResult = await _pendingMemberService.addPendingMember(
       teamId: teamId,
       memberId: userId,
       memberEmail: email,
+      firstName: firstName,
+      lastName: lastName,
     );
 
     if (addRequestResult.isFailure) {

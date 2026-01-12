@@ -136,7 +136,11 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       padding: EdgeInsets.fromLTRB(
         20,
         20,
