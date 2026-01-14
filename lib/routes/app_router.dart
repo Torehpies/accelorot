@@ -30,6 +30,7 @@ import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.da
 import 'package:flutter_application_1/ui/web_operator_machine_management/view/machines_view.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 
 const int kDesktopBreakpoint = 1024;
@@ -193,7 +194,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminMachines.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const WebAdminMachineView(),
+              child: ResponsiveLayout(
+                mobileView: const AdminMachineView(),
+                desktopView: const WebAdminMachineView(),
+              ),
             ),
           ),
           GoRoute(
