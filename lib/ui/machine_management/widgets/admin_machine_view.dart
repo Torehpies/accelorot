@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart' show kIsWeb; 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import 'add_machine_modal.dart';
 import 'admin_machine_card.dart';
 import 'machine_tab_filter.dart';
 
@@ -40,18 +41,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     super.dispose();
   }
 
-  void _showAddMachineModal() {
-    if (_teamId == null) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => AddMachineModal(teamId: _teamId!),
-    );
-  }
 
 
   @override
@@ -63,41 +53,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: const Color(0xFFE3F2FD),
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text(
-            'Machine List',
-            style: TextStyle(
-              color: Color(0xFF1F2937),
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 12),
-              child: ElevatedButton.icon(
-                onPressed: _showAddMachineModal,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('New Machine'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        appBar: kIsWeb
+          ? null 
+          : MobileHeader(title: 'Machines'),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(

@@ -18,7 +18,10 @@ class ImpactSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl), // Reduced padding
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxxl,
+        vertical: AppSpacing.xxl,
+      ),
       color: Colors.white,
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -36,55 +39,48 @@ class ImpactSection extends StatelessWidget {
     return Column(
       children: [
         RichText(
+          textAlign: TextAlign.center,
           text: TextSpan(
-            style: WebTextStyles.h2.copyWith(fontSize: 28), // Smaller title
+            style: WebTextStyles.h2.copyWith(fontSize: 32),
             children: const [
               TextSpan(text: 'Making a '),
               TextSpan(
                 text: 'Sustainable\nImpact',
-                style: TextStyle(color: WebColors.tealAccent),
+                style: TextStyle(color: WebColors.textTitle),
               ),
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.md), // Reduced space
-        
+        const SizedBox(height: AppSpacing.md),
         Text(
-          'In the Philippines, over 50% of municipal solid waste is\n'
-          'organic. Accel-O-Rot helps manage waste responsibly.',
+          'In the Philippines, over 50% of municipal solid waste is organic. Accel-O-Rot helps manage waste responsibly.',
           textAlign: TextAlign.center,
-          style: WebTextStyles.subtitle.copyWith(
-            fontSize: 14, // Smaller text
-            height: 1.6,  // Tighter line spacing
-          ),
+          style: WebTextStyles.sectionSubtitle,
         ),
-        const SizedBox(height: AppSpacing.xl), // Reduced space
-        
+        const SizedBox(height: AppSpacing.xl),
         _buildImpactItem(
           Icons.recycling_outlined,
           'Reduces landfill waste',
         ),
-        const SizedBox(height: AppSpacing.md), // Reduced space
+        const SizedBox(height: AppSpacing.md),
         _buildImpactItem(
           Icons.eco_outlined,
           'Produces nutrient-rich compost',
         ),
-        const SizedBox(height: AppSpacing.md), // Reduced space
+        const SizedBox(height: AppSpacing.md),
         _buildImpactItem(
           Icons.people_outline,
           'Empowers communities',
         ),
-        
-        const SizedBox(height: AppSpacing.xl), // Reduced space
-        
+        const SizedBox(height: AppSpacing.xxl),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: AppSpacing.md, // Reduced spacing
-            mainAxisSpacing: AppSpacing.md,  // Reduced spacing
-            childAspectRatio: 1, // Square cards
+            crossAxisSpacing: AppSpacing.md,
+            mainAxisSpacing: AppSpacing.md,
+            childAspectRatio: 0.95,
           ),
           itemCount: stats.length,
           itemBuilder: (context, index) {
@@ -106,36 +102,32 @@ class ImpactSection extends StatelessWidget {
             children: [
               RichText(
                 text: TextSpan(
-                  style: WebTextStyles.h2.copyWith(fontSize: 28), // Smaller title
+                  style: WebTextStyles.h2.copyWith(fontSize: 36),
                   children: const [
                     TextSpan(text: 'Making a '),
                     TextSpan(
                       text: 'Sustainable\nImpact',
-                      style: TextStyle(color: WebColors.tealAccent),
+                      style: TextStyle(color: WebColors.textTitle),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.md), // Reduced space
+              const SizedBox(height: AppSpacing.md),
               Text(
-                'In the Philippines, over 50% of municipal solid waste is\n'
-                'organic. Accel-O-Rot helps manage waste responsibly.',
-                style: WebTextStyles.subtitle.copyWith(
-                  fontSize: 14, // Smaller text
-                  height: 1.6,  // Tighter line spacing
-                ),
+                'In the Philippines, over 50% of municipal solid waste is organic. Accel-O-Rot helps manage waste responsibly.',
+                style: WebTextStyles.sectionSubtitle,
               ),
-              const SizedBox(height: AppSpacing.xl), // Reduced space
+              const SizedBox(height: AppSpacing.xl),
               _buildImpactItem(
                 Icons.recycling_outlined,
                 'Reduces landfill waste',
               ),
-              const SizedBox(height: AppSpacing.md), // Reduced space
+              const SizedBox(height: AppSpacing.md),
               _buildImpactItem(
                 Icons.eco_outlined,
                 'Produces nutrient-rich compost',
               ),
-              const SizedBox(height: AppSpacing.md), // Reduced space
+              const SizedBox(height: AppSpacing.md),
               _buildImpactItem(
                 Icons.people_outline,
                 'Empowers communities',
@@ -143,18 +135,17 @@ class ImpactSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: AppSpacing.xl), // Reduced space
-        
+        const SizedBox(width: AppSpacing.xl),
         Expanded(
           flex: 3,
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: AppSpacing.md, // Reduced spacing
-              mainAxisSpacing: AppSpacing.md,  // Reduced spacing
-              childAspectRatio: 1, // Square cards
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
+              childAspectRatio: 0.95,
             ),
             itemCount: stats.length,
             itemBuilder: (context, index) {
@@ -171,27 +162,27 @@ class ImpactSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 28, // Smaller icon container
+          width: 28,
           height: 28,
           decoration: BoxDecoration(
-            color: const Color(0xFFCCFBF1),
+            color: const Color(0xFF28A85A).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(
             icon,
-            size: 16, // Smaller icon
-            color: WebColors.tealAccent,
+            size: 16,
+            color: const Color(0xFF28A85A),
           ),
         ),
-        const SizedBox(width: AppSpacing.sm), // Reduced space
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 2), // Reduced space
+            padding: const EdgeInsets.only(top: 2),
             child: Text(
               text,
               style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 14, // Smaller text
-                height: 1.4,  // Tighter line spacing
+                fontSize: 14,
+                height: 1.4,
               ),
             ),
           ),

@@ -1,4 +1,4 @@
-// lib/ui/landing_page/widgets/hero_section.dart
+// lib/ui/landing_page/widgets/intro_section.dart
 
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
@@ -6,13 +6,13 @@ import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import '../../core/ui/second_button.dart';
-import '../widgets/metric_card.dart';
+import '../widgets/tem_mois_oxy_card.dart';
 
-class HeroSection extends StatelessWidget {
+class IntroSection extends StatelessWidget {
   final VoidCallback onGetStarted;
   final VoidCallback onLearnMore;
 
-  const HeroSection({
+  const IntroSection({
     super.key,
     required this.onGetStarted,
     required this.onLearnMore,
@@ -22,7 +22,6 @@ class HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -33,6 +32,7 @@ class HeroSection extends StatelessWidget {
           ],
         ),
       ),
+      padding: const EdgeInsets.all(AppSpacing.xxxl * 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,35 +42,6 @@ class HeroSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: WebColors.divider),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.rocket_launch,
-                        size: 16,
-                        color: WebColors.tealAccent,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'Smart IoT Composting System',
-                        style: WebTextStyles.caption.copyWith(
-                          color: WebColors.tealAccent,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: AppSpacing.xl),
                 RichText(
                   text: TextSpan(
@@ -82,7 +53,7 @@ class HeroSection extends StatelessWidget {
                       const TextSpan(text: 'Transform Your\n'),
                       TextSpan(
                         text: 'Organic Waste\n',
-                        style: TextStyle(color: WebColors.tealAccent),
+                        style: TextStyle(color: WebColors.iconsPrimary),
                       ),
                       const TextSpan(text: 'into Rich\nCompost'),
                     ],
@@ -90,7 +61,7 @@ class HeroSection extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Accelerate decomposition with our IoT-enabled rotary\ndrum system. Monitor in real-time, automate\nprocesses, and produce quality compost in just 2\nweeks.',
+                  'Accelerate decomposition with our IoT-enabled rotary drum system.\nMonitor in real-time, automate processes, \nand produce quality compost in just 2 weeks.',
                   style: WebTextStyles.subtitle.copyWith(
                     fontSize: 16,
                     height: 1.6,
@@ -99,14 +70,20 @@ class HeroSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxxl),
                 Row(
                   children: [
-                    PrimaryButton(
-                      text: 'Start Composting →',
-                      onPressed: onGetStarted,
+                    SizedBox(
+                      height: 50,
+                      child: PrimaryButton(
+                        text: 'Start Composting →',
+                        onPressed: onGetStarted,
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.lg),
-                    SecondaryButton(
-                      text: 'Learn More',
-                      onPressed: onLearnMore,
+                    SizedBox(
+                      height: 50,
+                      child: SecondaryButton(
+                        text: 'Learn More',
+                        onPressed: onLearnMore,
+                      ),
                     ),
                   ],
                 ),
@@ -122,7 +99,7 @@ class HeroSection extends StatelessWidget {
                 Row(
                   children: [
                     const Expanded(
-                      child: MetricsCard(
+                      child: TemMoisOxyCard(
                         icon: Icons.thermostat_outlined,
                         value: '45°C',
                         label: 'Temperature',
@@ -130,7 +107,7 @@ class HeroSection extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     const Expanded(
-                      child: MetricsCard(
+                      child: TemMoisOxyCard(
                         icon: Icons.water_drop_outlined,
                         value: '58%',
                         label: 'Moisture',
@@ -142,7 +119,7 @@ class HeroSection extends StatelessWidget {
                 Row(
                   children: [
                     const Expanded(
-                      child: MetricsCard(
+                      child: TemMoisOxyCard(
                         icon: Icons.air_outlined,
                         value: '21%',
                         label: 'Oxygen',
@@ -150,7 +127,7 @@ class HeroSection extends StatelessWidget {
                     ),
                     const SizedBox(width: AppSpacing.lg),
                     const Expanded(
-                      child: MetricsCard(
+                      child: TemMoisOxyCard(
                         icon: Icons.trending_up_outlined,
                         value: 'Day 8',
                         label: 'Progress',

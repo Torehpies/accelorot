@@ -18,31 +18,40 @@ class HowItWorksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl), // Reduced padding
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxxl,
+        vertical: AppSpacing.xxl,
+      ),
       color: const Color(0xFFFAFAFA),
       child: Column(
         children: [
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: WebTextStyles.h2,
+              style: WebTextStyles.h2.copyWith(fontSize: 36),
               children: [
                 const TextSpan(text: 'How '),
                 TextSpan(
                   text: 'Accel-O-Rot',
-                  style: TextStyle(color: WebColors.tealAccent),
+                  style: WebTextStyles.h2.copyWith(
+                    fontSize: 36,
+                    color: WebColors.textTitle,
+                  ),
                 ),
                 const TextSpan(text: ' Works'),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md), // Reduced space
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Simple, automated, and effective composting in 4 easy steps',
             textAlign: TextAlign.center,
-            style: WebTextStyles.subtitle.copyWith(fontSize: 14), // Smaller text
+            style: WebTextStyles.subtitle.copyWith(
+              fontSize: 15,
+              color: const Color(0xFF6B7280),
+            ),
           ),
-          const SizedBox(height: AppSpacing.xl), // Reduced space
+          const SizedBox(height: AppSpacing.xxl),
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = constraints.maxWidth > 1200 
@@ -58,9 +67,9 @@ class HowItWorksSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: AppSpacing.lg, // Reduced spacing
-                  mainAxisSpacing: AppSpacing.lg,  // Reduced spacing
-                  childAspectRatio: 0.9, // More compact cards
+                  crossAxisSpacing: AppSpacing.md,
+                  mainAxisSpacing: AppSpacing.lg,
+                  childAspectRatio: 1.1,
                 ),
                 itemCount: steps.length,
                 itemBuilder: (context, index) {
