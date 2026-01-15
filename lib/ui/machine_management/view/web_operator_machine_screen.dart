@@ -66,10 +66,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
             children: [
               
               // Stats Cards Row (same as admin)
-              MachineStatsRow(
-                machines: state.machines,
-                isLoading: state.isLoading,
-              ),
+              const MachineStatsRow(),
 
               const SizedBox(height: 12),
 

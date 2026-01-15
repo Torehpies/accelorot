@@ -68,10 +68,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
             children: [
               
               // Stats Cards Row
-              MachineStatsRow(
-                machines: state.machines,
-                isLoading: state.isLoading,
-              ),
+              const MachineStatsRow(),
 
               const SizedBox(height: 12),
 
