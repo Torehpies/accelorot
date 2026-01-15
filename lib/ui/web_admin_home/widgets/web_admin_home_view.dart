@@ -74,15 +74,9 @@ class _WebAdminHomeContent extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                _operatorTable(
-                  state.recentOperators,
-                  context,
-                ),
+                _operatorTable(context, state.recentOperators),
                 const SizedBox(width: 12),
-                _machineTable(
-                  state.recentMachines,
-                  context,
-                ),
+                _machineTable(context, state.recentMachines),
               ],
             ),
           ),
@@ -114,10 +108,7 @@ class _WebAdminHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _operatorTable(
-    List<OperatorModel> operators,
-    BuildContext context,
-  ) {
+  Widget _operatorTable(BuildContext context, List<OperatorModel> operators) {
     return Expanded(
       child: Card(
         child: Column(
@@ -135,8 +126,7 @@ class _WebAdminHomeContent extends StatelessWidget {
                   trailing: Icon(
                     Icons.circle,
                     size: 10,
-                    color:
-                        operators[i].isArchived ? Colors.red : Colors.green,
+                    color: operators[i].isArchived ? Colors.red : Colors.green,
                   ),
                 ),
               ),
@@ -147,10 +137,7 @@ class _WebAdminHomeContent extends StatelessWidget {
     );
   }
 
-  Widget _machineTable(
-    List<MachineModel> machines,
-    BuildContext context,
-  ) {
+  Widget _machineTable(BuildContext context, List<MachineModel> machines) {
     return Expanded(
       child: Card(
         child: Column(

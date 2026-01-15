@@ -4,35 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../ui/core/ui/admin_app_bar.dart'; // ✅ ADD THIS IMPORT
+import '../../../frontend/screens/admin/operator_management/operator_management_screen.dart';
+import '../../../ui/web_machine/widgets/admin/web_admin_machine_view.dart';
 
 class WebAdminHomeScreen extends StatelessWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const WebAdminHomeScreen({
-    super.key,
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
+  const WebAdminHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return _WebAdminHomeScreenContent(
-      onManageOperators: onManageOperators,
-      onManageMachines: onManageMachines,
-    );
+    return _WebAdminHomeScreenContent();
   }
 }
 
 class _WebAdminHomeScreenContent extends StatefulWidget {
-  final VoidCallback onManageOperators;
-  final VoidCallback onManageMachines;
-
-  const _WebAdminHomeScreenContent({
-    required this.onManageOperators,
-    required this.onManageMachines,
-  });
-
+  const _WebAdminHomeScreenContent();
   @override
   State<_WebAdminHomeScreenContent> createState() =>
       _WebAdminHomeScreenState();
@@ -208,7 +193,15 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                               children: [
                                 _buildSectionHeader(
                                   'Operator Management',
-                                  onTapManage: widget.onManageOperators,
+                                  onTapManage: () {
+                                    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OperatorManagementScreen(teamId: teamId),
+                                      ),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 10),
                                 // === TABLE HEADER ===
@@ -372,7 +365,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                               children: [
                                 _buildSectionHeader(
                                   'Machine Management',
-                                  onTapManage: widget.onManageMachines,
+                                  onTapManage: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const WebAdminMachineView()),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 10),
                                 Padding(
