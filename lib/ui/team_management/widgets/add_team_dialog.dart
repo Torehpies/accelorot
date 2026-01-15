@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/widgets/custom_text_field.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
+import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
@@ -36,74 +38,83 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
     final isSaving = state.isSavingTeams;
     final errorMessage = state.message;
 
-    ref.listen<String?>(
-      teamManagementProvider.select((s) => s.message.toString()),
-      (previous, next) {
-        if (next != null) {
-          Navigator.of(context).pop();
+    ref.listen(teamManagementProvider, (previous, next) {
+      if (next.isSavingTeams == false &&
+          previous?.isSavingTeams == true &&
+          (next.message is SuccessMessage)) {
+        if (context.mounted) {
+          Navigator.pop(context);
         }
-      },
-    );
-
-    ref.listen<String?>(
-      teamManagementProvider.select((s) => s.message.toString()),
-      (previous, next) {
-        if (next != null) {
-          Future.delayed(Duration(seconds: 5), () {
-            ref.read(teamManagementProvider.notifier).clearError();
-          });
-        }
-      },
-    );
+      }
+    });
     return AlertDialog(
-      title: Text("Add Team"),
+      title: Text("Add Team", style: TextStyle(fontWeight: FontWeight.bold)),
       content: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: Text(
-                  errorMessage.toString(),
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
+        child: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (errorMessage != null && errorMessage is ErrorMessage)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, color: AppColors.error),
+                      SizedBox(width: 5),
+                      Text(
+                        errorMessage.text,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              CustomTextField(
+                enabled: !isSaving,
+                labelText: "Team Name",
+                prefixIcon: Icons.group,
+                controller: nameController,
+                autoFocus: true,
+                validator: (value) {
+                  final trimmed = value?.trim();
+                  if (trimmed == null || trimmed.isEmpty) {
+                    return "Please enter a team name.";
+                  }
+                  if (trimmed.length < 3) {
+                    return "Team name must be at least 3 characters.";
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.next,
               ),
-
-            CustomTextField(
-              labelText: "Team Name",
-              prefixIcon: Icons.group,
-              controller: nameController,
-              autoFocus: true,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return "Please enter a team name.";
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-            ),
-            SizedBox(height: 10),
-            CustomTextField(
-              onFieldSubmitted: (value) => isSaving ? null : _addTeam(),
-              autoFocus: true,
-              labelText: "Address",
-              prefixIcon: Icons.location_on,
-              controller: addressController,
-              keyboardType: TextInputType.streetAddress,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return "Please enter a team name.";
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.done,
-            ),
-          ],
+              SizedBox(height: 10),
+              CustomTextField(
+                enabled: !isSaving,
+                onFieldSubmitted: (value) => isSaving ? null : _addTeam(),
+                autoFocus: true,
+                labelText: "Address",
+                prefixIcon: Icons.location_on,
+                controller: addressController,
+                keyboardType: TextInputType.streetAddress,
+                validator: (value) {
+                  final trimmed = value?.trim();
+                  if (trimmed == null || trimmed.isEmpty) {
+                    return "Please enter an address.";
+                  }
+                  if (trimmed.length < 20) {
+                    return "Address name must be at least 20 characters.";
+                  }
+                  return null;
+                },
+                textInputAction: TextInputAction.done,
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
