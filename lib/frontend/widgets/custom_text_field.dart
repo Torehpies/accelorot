@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class CustomTextField extends StatelessWidget {
+  final bool? enabled;
   final String? hintText;
   final IconData prefixIcon;
   final bool obscureText;
@@ -10,7 +11,7 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final String labelText;
   final bool autoFocus;
-	final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onFieldSubmitted;
   final TextInputAction? textInputAction;
 
   const CustomTextField({
@@ -23,13 +24,16 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     required this.labelText,
     this.autoFocus = false,
-    this.textInputAction, this.onFieldSubmitted,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.enabled,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-			onFieldSubmitted: onFieldSubmitted,
+      enabled: enabled ?? true,
+      onFieldSubmitted: onFieldSubmitted,
       textInputAction: textInputAction,
       autofocus: autoFocus,
       controller: controller,
@@ -45,7 +49,7 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(color: Colors.teal, width: 2),
+          borderSide: const BorderSide(color: AppColors.green100, width: 2),
         ),
       ),
       validator: validator,
