@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
-import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart';
+import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -160,7 +160,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.profile.path,
             name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const ProfileScreen(),
+              child: const ProfileScreenRoute(),
               key: state.pageKey,
             ),
           ),
@@ -233,7 +233,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileScreen(),
+              child: const ProfileScreenRoute(),
             ),
           ),
         ],
@@ -270,7 +270,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.superAdminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const ProfileScreen(),
+              child: const ProfileScreenRoute(),
             ),
           ),
         ],
