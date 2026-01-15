@@ -7,8 +7,8 @@ import '../../models/activity_enums.dart';
 import '../../../core/widgets/shared/pagination_controls.dart';
 import '../../../core/widgets/table/base_table_container.dart';
 import '../../../core/widgets/filters/search_field.dart';
-import '../../../core/widgets/table/activity_table_header.dart';
-import '../../../core/widgets/table/activity_table_body.dart';
+import '../../../core/widgets/table/table_header.dart';
+import '../../../core/widgets/table/table_body.dart';
 import '../../../core/themes/web_text_styles.dart';
 import 'web_machine_selector.dart';
 import 'web_batch_selector.dart';
@@ -128,7 +128,7 @@ class WebTableContainer extends StatelessWidget {
           ],
           
           // Table header
-          tableHeader: ActivityTableHeader(
+          tableHeader: TableHeader(
             selectedCategory: selectedCategory,
             selectedType: selectedType,
             sortColumn: sortColumn,
@@ -140,7 +140,7 @@ class WebTableContainer extends StatelessWidget {
           ),
           
           // Table body
-          tableBody: ActivityTableBody(
+          tableBody: TableBody(
             items: items,
             onViewDetails: onViewDetails,
             isLoading: isLoading,

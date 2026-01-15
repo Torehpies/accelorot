@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
 import '../../core/widgets/shared/empty_state.dart';
-import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/table/table_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 import 'web_table_row.dart';

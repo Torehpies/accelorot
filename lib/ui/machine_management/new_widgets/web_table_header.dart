@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/table/table_row.dart';
 import '../../core/widgets/filters/filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';

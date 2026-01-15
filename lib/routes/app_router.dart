@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/frontend/screens/admin/admin_screens/admin_profile_screen.dart';
 import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -18,7 +19,6 @@ import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dash
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
 import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
-import 'package:flutter_application_1/ui/profile_screen/web_widgets/web_profile_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
@@ -160,7 +160,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.profile.path,
             name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const WebProfileView(),
+              child: const ProfileScreen(),
               key: state.pageKey,
             ),
           ),
@@ -233,7 +233,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const WebProfileView(),
+              child: const ProfileScreen(),
             ),
           ),
         ],
@@ -270,7 +270,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.superAdminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const WebProfileView(),
+              child: const ProfileScreen(),
             ),
           ),
         ],
