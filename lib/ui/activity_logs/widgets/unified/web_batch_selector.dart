@@ -26,16 +26,24 @@ class WebBatchSelector extends ConsumerWidget {
 
     return batchesAsync.when(
       data: (batches) {
+        // Filter batches by selected machine if applicable
         final filteredBatches = selectedMachineId != null
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
-        final hasNoBatches = filteredBatches.isEmpty;
         
+        final hasNoBatches = filteredBatches.isEmpty;
+
+        // Look up the selected batch to get its proper display name
+        final selectedBatch = selectedBatchId != null && filteredBatches.any((b) => b.id == selectedBatchId)
+            ? filteredBatches.firstWhere((b) => b.id == selectedBatchId)
+            : null;
+
         return WebDropdown<String>(
           value: selectedBatchId,
           label: 'Batch',
           hintText: 'All Batches',
-          displayText: selectedBatchId ?? 'All Batches',
+          // Show batch ID if selected, otherwise "All Batches"
+          displayText: selectedBatch?.id ?? 'All Batches',
           icon: Icons.inventory_2,
           onChanged: hasNoBatches ? (_) {} : onChanged,
           displayMode: displayMode,
@@ -68,7 +76,7 @@ class WebBatchSelector extends ConsumerWidget {
         isLoading: true,
         displayMode: displayMode,
       ),
-      error: (_, _) => WebDropdown<String>(
+      error: (_, __) => WebDropdown<String>(
         value: null,
         label: 'Batch',
         hintText: 'All Batches',

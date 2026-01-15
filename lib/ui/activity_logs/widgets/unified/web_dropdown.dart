@@ -59,9 +59,14 @@ class WebDropdown<T> extends StatelessWidget {
       items: items,
     );
 
-    if (selected != null) {
+    // FIX: Only skip onChanged if menu was dismissed (no selection made)
+    // Check if the selected value exists in the items list (including null/"All")
+    final wasItemSelected = items.any((item) => item.value == selected);
+    
+    if (wasItemSelected) {
       onChanged(selected);
     }
+    // If wasItemSelected is false, user dismissed the menu - do nothing
   }
 
   void _clearValue() {
@@ -111,7 +116,7 @@ class WebDropdown<T> extends StatelessWidget {
           const SizedBox(width: 6),
           GestureDetector(
             onTap: _clearValue,
-            child: Icon(
+            child: const Icon(
               Icons.clear,
               size: 16,
               color: WebColors.textLabel,
