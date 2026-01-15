@@ -56,4 +56,6 @@ abstract class CycleService {
   Future<void> completeAerator({
     required String batchId,
   });
+
+  Future<CycleRecommendation?> fetchCycleById(String cycleId);
 }

@@ -21,7 +21,7 @@ class MachineTabFilter extends StatelessWidget {
           const SizedBox(width: 8),
           _buildTab('Active', MachineFilterTab.active),
           const SizedBox(width: 8),
-          _buildTab('Inactive', MachineFilterTab.inactive),
+          _buildTab('Inactive', MachineFilterTab.suspended),
           const SizedBox(width: 8),
           _buildTab('Archived', MachineFilterTab.archived),
         ],
@@ -45,11 +45,11 @@ class MachineTabFilter extends StatelessWidget {
           backgroundColor = const Color(0xFF4CAF50);
           textColor = Colors.white;
           break;
-        case MachineFilterTab.inactive:
+        case MachineFilterTab.archived:
           backgroundColor = const Color(0xFFFFA726);
           textColor = Colors.white;
           break;
-        case MachineFilterTab.archived:
+        case MachineFilterTab.suspended:
           backgroundColor = const Color(0xFFEF5350);
           textColor = Colors.white;
           break;
@@ -73,7 +73,7 @@ class MachineTabFilter extends StatelessWidget {
                         ? const Color(0x4D6B7280)
                         : tab == MachineFilterTab.active
                             ? const Color(0x4D4CAF50)
-                            : tab == MachineFilterTab.inactive
+                            : tab == MachineFilterTab.archived
                                 ? const Color(0x4DFFA726)
                                 : const Color(0x4DEF5350),
                     blurRadius: 8,

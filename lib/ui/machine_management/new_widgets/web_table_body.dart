@@ -1,30 +1,32 @@
-// lib/ui/reports/widgets/reports_table_body.dart
+// lib/ui/machine_management/new_widgets/web_table_body.dart
 
 import 'package:flutter/material.dart';
-import '../../../data/models/report.dart';
+import '../../../data/models/machine_model.dart';
 import '../../core/widgets/shared/empty_state.dart';
 import '../../core/widgets/table/activity_table_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
-import 'reports_table_row.dart';
+import 'web_table_row.dart';
 
-class ReportsTableBody extends StatefulWidget {
-  final List<Report> reports;
-  final ValueChanged<Report> onViewDetails;
+class MachineTableBody extends StatefulWidget {
+  final List<MachineModel> machines;
+  final Function(MachineModel)? onEdit; // Nullable - for operator view
+  final Function(MachineModel) onView;
   final bool isLoading;
 
-  const ReportsTableBody({
+  const MachineTableBody({
     super.key,
-    required this.reports,
-    required this.onViewDetails,
+    required this.machines,
+    this.onEdit, // Optional
+    required this.onView,
     this.isLoading = false,
   });
 
   @override
-  State<ReportsTableBody> createState() => _ReportsTableBodyState();
+  State<MachineTableBody> createState() => _MachineTableBodyState();
 }
 
-class _ReportsTableBodyState extends State<ReportsTableBody>
+class _MachineTableBodyState extends State<MachineTableBody>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _pulseAnimation;
@@ -55,25 +57,29 @@ class _ReportsTableBodyState extends State<ReportsTableBody>
       return _buildSkeletonRows();
     }
 
-    if (widget.reports.isEmpty) {
+    if (widget.machines.isEmpty) {
       return const EmptyState(
-        title: 'No reports found',
-        subtitle: 'Try adjusting your filters',
-        icon: Icons.report_off,
+        title: 'No machines found',
+        subtitle: 'Try adjusting your filters or add a new machine',
+        icon: Icons.precision_manufacturing_outlined,
       );
     }
 
     return ListView.separated(
-      itemCount: widget.reports.length,
+      itemCount: widget.machines.length,
       separatorBuilder: (context, index) => const Divider(
         height: 1,
         thickness: 1,
         color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
-        return ReportsTableRow(
-          report: widget.reports[index],
-          onTap: () => widget.onViewDetails(widget.reports[index]),
+        final machine = widget.machines[index];
+        return MachineTableRow(
+          machine: machine,
+          onView: () => widget.onView(machine),
+          onEdit: widget.onEdit != null 
+              ? () => widget.onEdit!(machine) 
+              : null, // Pass null if no edit callback provided
         );
       },
     );
@@ -97,19 +103,27 @@ class _ReportsTableBodyState extends State<ReportsTableBody>
     return GenericTableRow(
       cellSpacing: AppSpacing.md,
       cells: [
-        // Title
+        // Machine ID
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _buildSkeletonBox(width: 180, height: 16),
+            child: _buildSkeletonBox(width: 100, height: 16),
           ),
         ),
 
-        // Category Badge
+        // Machine Name
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _buildSkeletonBox(width: 100, height: 24, borderRadius: 4),
+            child: _buildSkeletonBox(width: 140, height: 16),
+          ),
+        ),
+
+        // Date Added
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: _buildSkeletonBox(width: 100, height: 16),
           ),
         ),
 
@@ -117,23 +131,24 @@ class _ReportsTableBodyState extends State<ReportsTableBody>
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _buildSkeletonBox(width: 90, height: 24, borderRadius: 4),
+            child: _buildSkeletonBox(width: 80, height: 24, borderRadius: 4),
           ),
         ),
 
-        // Priority Badge
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 70, height: 24, borderRadius: 4),
-          ),
-        ),
-
-        // Actions
+        // Actions (2 icons for admin, 1 for operator)
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+                if (widget.onEdit != null) ...[
+                  const SizedBox(width: 8),
+                  _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+                ],
+              ],
+            ),
           ),
         ),
       ],

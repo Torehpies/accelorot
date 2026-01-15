@@ -245,7 +245,7 @@ class _WebAdminMachineViewState extends ConsumerState<WebAdminMachineView> {
       );
     }
 
-    final allMachines = state.filteredMachines;
+    final allMachines = state.filteredMachinesByStatus;
     final activeCount = _getActiveCount(allMachines);
     final archivedCount = _getArchivedCount(allMachines);
     final newCount = _getNewCount(allMachines);

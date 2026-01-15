@@ -15,4 +15,7 @@ abstract class AlertService {
   /// Stream alerts for real-time updates
   /// @param batchId - the batch identifier
   Stream<List<Alert>> streamAlerts(String batchId);
+
+  /// Fetch a single alert by ID
+  Future<Alert?> fetchAlertById(String alertId);
 }

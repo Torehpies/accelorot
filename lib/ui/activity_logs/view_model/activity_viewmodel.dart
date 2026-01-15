@@ -14,7 +14,6 @@ import 'cycle_config.dart';
 import 'all_activity_config.dart';
 import '../models/activity_common.dart';
 
-
 part 'activity_viewmodel.g.dart';
 
 /// Enum for different activity screen types
@@ -44,6 +43,9 @@ class ActivityViewModel extends _$ActivityViewModel {
   late final ActivityFilterConfig _config;
   late final ActivityScreenType _screenType;
 
+  // Store entity cache for this view model instance
+  Map<String, dynamic> _entityCache = {};
+
   // ===== BUILD METHOD - RIVERPOD ENTRY POINT =====
 
   @override
@@ -72,6 +74,14 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ignore: avoid_public_notifier_properties
   List<String> get filters => _config.filters;
 
+  // ===== ENTITY CACHE LOOKUP =====
+
+  /// Get full entity from cache for dialog display
+  dynamic getFullEntity(ActivityLogItem item) {
+    final key = '${item.type.name}_${item.id}';
+    return _entityCache[key];
+  }
+
   // ===== DATA FETCHING =====
 
   Future<List<ActivityLogItem>> _fetchData() async {
@@ -89,7 +99,10 @@ class ActivityViewModel extends _$ActivityViewModel {
         return await _aggregator.getCyclesRecom();
       
       case ActivityScreenType.allActivity:
-        return await _aggregator.getAllActivities();
+        // Use the new caching method for allActivity screen
+        final result = await _aggregator.getAllActivitiesWithCache();
+        _entityCache = result.entityCache; // Store cache
+        return result.items;
     }
   }
 
@@ -193,7 +206,7 @@ class ActivityViewModel extends _$ActivityViewModel {
     _applyFilters();
   }
 
-    void onMachineChanged(String? machineId) {
+  void onMachineChanged(String? machineId) {
     state = state.copyWith(
       selectedMachineId: machineId,
       selectedBatchId: null, 

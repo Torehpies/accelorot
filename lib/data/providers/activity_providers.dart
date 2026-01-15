@@ -1,3 +1,5 @@
+// lib/data/providers/activity_providers.dart
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../ui/activity_logs/services/activity_aggregator_service.dart';
@@ -33,7 +35,8 @@ final activityFilterServiceProvider = Provider<ActivityFilterService>((ref) {
 /// Provider for all activities (substrates + alerts + cycles + reports)
 final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getAllActivities();
+  final result = await aggregator.getAllActivitiesWithCache();
+  return result.items;
 });
 
 /// Provider for substrates only

@@ -1,4 +1,4 @@
-// lib/ui/reports/widgets/reports_table_container.dart
+// lib/ui/reports/widgets/web_table_container.dart
 
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
@@ -8,9 +8,9 @@ import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../../ui/activity_logs/models/activity_common.dart';
-import 'reports_table_header.dart';
-import 'reports_table_body.dart';
+import '../../activity_logs/models/activity_common.dart';
+import 'web_table_header.dart';
+import 'web_table_body.dart';
 
 class ReportsTableContainer extends StatelessWidget {
   final List<Report> reports;
@@ -93,7 +93,7 @@ class ReportsTableContainer extends StatelessWidget {
       ],
 
       // Table header with filters
-      tableHeader: ReportsTableHeader(
+      tableHeader: WebTableHeader(
         selectedStatus: selectedStatus,
         selectedCategory: selectedCategory,
         selectedPriority: selectedPriority,
@@ -107,7 +107,7 @@ class ReportsTableContainer extends StatelessWidget {
       ),
 
       // Table body
-      tableBody: ReportsTableBody(
+      tableBody: WebTableBody(
         reports: reports,
         onViewDetails: onViewDetails,
         isLoading: isLoading,

@@ -29,6 +29,9 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
     @Default([]) List<ActivityLogItem> allActivities,
     @Default([]) List<ActivityLogItem> filteredActivities,
     
+    // Entity cache
+    @Default({}) Map<String, dynamic> entityCache,
+    
     // Pagination
     @Default(1) int currentPage,
     @Default(10) int itemsPerPage,

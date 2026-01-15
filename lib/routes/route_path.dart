@@ -19,6 +19,7 @@ enum RoutePath {
 
   //admin paths
   adminDashboard(path: '/admin/dashboard'),
+  adminActivity(path: '/admin/activity'), 
   adminOperators(path: '/admin/operators'),
   adminMachines(path: '/admin/machines'),
   adminReports(path: '/admin/reports'),
