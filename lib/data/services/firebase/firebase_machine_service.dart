@@ -57,11 +57,26 @@ class FirebaseMachineService implements MachineService {
     }
 
     try {
+      // Convert status to Firestore string value
+      String statusValue;
+      switch (request.status) {
+        case MachineStatus.active:
+          statusValue = 'Active';
+          break;
+        case MachineStatus.inactive:
+          statusValue = 'Inactive';
+          break;
+        case MachineStatus.underMaintenance:
+          statusValue = 'Under Maintenance';
+          break;
+      }
+
       await _machinesCollection.doc(request.machineId).set({
         'machineName': request.machineName,
         'teamId': request.teamId,
         'dateCreated': FieldValue.serverTimestamp(),
         'isArchived': false,
+        'status': statusValue,
         'createdBy': currentUserId,
       });
     } catch (e) {
@@ -84,6 +99,28 @@ class FirebaseMachineService implements MachineService {
       if (request.machineName != null) {
         updates['machineName'] = request.machineName;
       }
+      
+      if (request.status != null) {
+        String statusValue;
+        switch (request.status!) {
+          case MachineStatus.active:
+            statusValue = 'Active';
+            updates['status'] = statusValue;
+            updates['isArchived'] = false;
+            break;
+          case MachineStatus.inactive:
+            statusValue = 'Inactive';
+            updates['status'] = statusValue;
+            updates['isArchived'] = true;
+            break;
+          case MachineStatus.underMaintenance:
+            statusValue = 'Under Maintenance';
+            updates['status'] = statusValue;
+            updates['isArchived'] = false;
+            break;
+        }
+      }
+      
       if (request.currentBatchId != null) {
         updates['currentBatchId'] = request.currentBatchId;
       }
@@ -105,7 +142,8 @@ class FirebaseMachineService implements MachineService {
 
     try {
       await _machinesCollection.doc(machineId).update({
-        'isArchived': true,
+        'isArchived': true, // KEEP: for mobile compatibility
+        'status': 'Inactive', // ADD: new status field
         'archivedAt': FieldValue.serverTimestamp(),
         'archivedBy': currentUserId,
       });
@@ -122,7 +160,8 @@ class FirebaseMachineService implements MachineService {
 
     try {
       await _machinesCollection.doc(machineId).update({
-        'isArchived': false,
+        'isArchived': false, // KEEP: for mobile compatibility
+        'status': 'Active', // ADD: new status field
         'restoredAt': FieldValue.serverTimestamp(),
         'restoredBy': currentUserId,
       });

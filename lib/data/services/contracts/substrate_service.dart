@@ -12,4 +12,7 @@ abstract class SubstrateService {
   /// Handles authentication, batch creation/retrieval, and timestamp updates internally
   /// @param data - substrate data including machineId
   Future<void> addSubstrate(Map<String, dynamic> data);
+
+  /// Fetch a single substrate by ID
+  Future<Substrate?> fetchSubstrateById(String substrateId);
 }

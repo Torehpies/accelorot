@@ -21,4 +21,8 @@ class AlertRepository {
   /// Stream alerts for real-time updates
   Stream<List<Alert>> streamAlerts(String batchId) =>
       _alertService.streamAlerts(batchId);
+      
+  ///Fetch a single alert by ID
+  Future<Alert?> getAlert(String id) =>
+      _alertService.fetchAlertById(id);
 }

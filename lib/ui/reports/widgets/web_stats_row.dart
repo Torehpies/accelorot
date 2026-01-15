@@ -1,14 +1,14 @@
-// lib/ui/reports/widgets/reports_stats_row.dart
+// lib/ui/reports/widgets/web_stats_row.dart
 
 import 'package:flutter/material.dart';
 import '../../core/widgets/base_stats_card.dart';
 import '../../core/themes/web_colors.dart';
 
-class ReportsStatsRow extends StatelessWidget {
+class WebStatsRow extends StatelessWidget {
   final Map<String, Map<String, dynamic>> statsWithChange;
   final bool isLoading;
 
-  const ReportsStatsRow({
+  const WebStatsRow({
     super.key,
     required this.statsWithChange,
     this.isLoading = false,

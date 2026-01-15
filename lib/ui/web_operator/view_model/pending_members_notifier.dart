@@ -174,7 +174,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final result = await service.deletePendingMember(
       teamId: teamId,
-      docId: member.id, // Use member.id as docId
+      docId: member.id,
     );
 
     return switch (result) {

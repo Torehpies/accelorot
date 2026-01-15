@@ -55,15 +55,17 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   // ===== DATA LOADING =====
 
-  /// Load all activities from aggregator service
+  /// Load all activities from aggregator service WITH entity cache
   Future<void> loadActivities() async {
     try {
       state = state.copyWith(status: LoadingStatus.loading);
 
-      final activities = await _aggregator.getAllActivities();
+      // Fetch activities and build entity cache
+      final result = await _aggregator.getAllActivitiesWithCache();
 
       state = state.copyWith(
-        allActivities: activities,
+        allActivities: result.items,
+        entityCache: result.entityCache, // Store cache for instant dialog loading
         status: LoadingStatus.success,
       );
 
@@ -82,13 +84,22 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     await loadActivities();
   }
 
+  // ===== ENTITY CACHE LOOKUP =====
+
+  /// Get full entity from cache for dialog display
+  /// Returns the full entity (Alert, Substrate, Report, or CycleRecommendation)
+  dynamic getFullEntity(ActivityLogItem item) {
+    final key = '${item.type.name}_${item.id}';
+    return state.entityCache[key];
+  }
+
   // ===== FILTER HANDLERS =====
 
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
       selectedMachineId: machineId,
-      selectedBatchId: null, // Reset batch when machine changes
-      currentPage: 1, // Reset to first page
+      selectedBatchId: null,
+      currentPage: 1,
     );
     _applyFilters();
   }
@@ -334,7 +345,6 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Helper: Build change data with percentage and positive/negative indicator
-
   Map<String, dynamic> _buildChangeData(
     int allTimeCount,
     int currentMonthCount,

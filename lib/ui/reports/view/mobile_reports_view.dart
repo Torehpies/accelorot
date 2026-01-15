@@ -4,13 +4,14 @@ import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/reports_viewmodel.dart';
-//import '../models/reports_state.dart'; 
+//import '../models/reports_state.dart';
 import '../widgets/mobile_report_card.dart';
 import '../widgets/edit_report_modal.dart';
-//import '../widgets/reports_stats_row.dart'; 
+//import '../widgets/reports_stats_row.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/base_stats_card.dart';
 import '../../core/widgets/filters/search_field.dart';
+import '../../core/widgets/filters/date_filter_dropdown.dart';
 //import '../../core/widgets/shared/pagination_controls.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
@@ -31,10 +32,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
   @override
   Widget build(BuildContext context) {
-
     final reportsState = ref.watch(reportsViewModelProvider);
     final viewModel = ref.read(reportsViewModelProvider.notifier);
-
 
     final stats = viewModel.getStatsWithChange();
     final statCards = _buildStatCards(stats, reportsState.isLoading);
@@ -49,13 +48,12 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            
 
             SizedBox(
-              height: 160, 
+              height: 160,
               child: PageView.builder(
                 controller: _statsController,
-                padEnds: false, 
+                padEnds: false,
                 itemCount: statCards.length,
                 itemBuilder: (context, index) {
                   return Padding(
@@ -67,7 +65,6 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
             ),
 
             const SizedBox(height: 24),
-
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -99,33 +96,13 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                     Row(
                       children: [
                         // Date Filter Button
-                        Container(
+                        SizedBox(
                           width: 42,
                           height: 42,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.black54),
-                            onPressed: () async {
-                              final picked = await showDateRangePicker(
-                                context: context,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime.now(),
-                                initialDateRange: reportsState.dateFilterActive
-                                    ? DateTimeRange(
-                                        start: reportsState.dateFilterStart!,
-                                        end: reportsState.dateFilterEnd!,
-                                      )
-                                    : null,
-                              );
-                              if (picked != null) {
-                                viewModel.onDateFilterChanged(picked.start, picked.end);
-                              }
-                            },
-                            padding: EdgeInsets.zero,
+                          child: DateFilterDropdown(
+                            onFilterChanged: (filter) => 
+                              viewModel.onDateFilterChanged(filter),
+                            isLoading: reportsState.isLoading, 
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -145,28 +122,30 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                     const Divider(height: 1),
 
                     // 5. Report List
-                    if (reportsState.isLoading && reportsState.allReports.isEmpty)
-                      const Center(child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: CircularProgressIndicator(),
-                      ))
+                    if (reportsState.isLoading &&
+                        reportsState.allReports.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
                     else if (reportsState.paginatedReports.isEmpty)
                       Center(
                         child: Padding(
                           padding: const EdgeInsets.all(32.0),
                           child: Column(
                             children: [
-                              const Icon(Icons.inbox, size: 48, color: Colors.grey),
+                              const Icon(
+                                Icons.inbox,
+                                size: 48,
+                                color: Colors.grey,
+                              ),
                               const SizedBox(height: 8),
                               Text(
                                 'No reports found',
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
-                              if (reportsState.dateFilterActive)
-                                TextButton(
-                                  onPressed: () => viewModel.onDateFilterChanged(null, null),
-                                  child: const Text('Clear Date Filter'),
-                                )
                             ],
                           ),
                         ),
@@ -186,7 +165,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                                 context: context,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
-                                builder: (context) => EditReportModal(report: report),
+                                builder: (context) =>
+                                    EditReportModal(report: report),
                               );
                             },
                           );
@@ -196,7 +176,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                     const SizedBox(height: 16),
 
                     // 6. Pagination Controls (Mobile Optimized)
-                    if (!reportsState.isLoading && reportsState.filteredReports.isNotEmpty)
+                    if (!reportsState.isLoading &&
+                        reportsState.filteredReports.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
                         child: Row(
@@ -205,7 +186,9 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
                             // Back Button
                             TextButton.icon(
                               onPressed: reportsState.currentPage > 1
-                                  ? () => viewModel.onPageChanged(reportsState.currentPage - 1)
+                                  ? () => viewModel.onPageChanged(
+                                      reportsState.currentPage - 1,
+                                    )
                                   : null,
                               icon: const Icon(Icons.chevron_left, size: 20),
                               label: const Text('Back'),
@@ -226,10 +209,14 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
                             // Next Button
                             TextButton.icon(
-                              onPressed: reportsState.currentPage < reportsState.totalPages
-                                  ? () => viewModel.onPageChanged(reportsState.currentPage + 1)
+                              onPressed:
+                                  reportsState.currentPage <
+                                      reportsState.totalPages
+                                  ? () => viewModel.onPageChanged(
+                                      reportsState.currentPage + 1,
+                                    )
                                   : null,
-                              // Swap icon and label for Next button naturally? 
+                              // Swap icon and label for Next button naturally?
                               // TextButton.icon puts icon left. Let's use Directionality or Row if needed.
                               // For simplicity, standard TextButton.icon is fine, or manual Row.
                               // Let's align icon to right for "Next >" feel.
@@ -253,7 +240,10 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     );
   }
 
-  List<Widget> _buildStatCards(Map<String, Map<String, dynamic>> stats, bool isLoading) {
+  List<Widget> _buildStatCards(
+    Map<String, Map<String, dynamic>> stats,
+    bool isLoading,
+  ) {
     return [
       BaseStatsCard(
         title: 'Completed Reports',

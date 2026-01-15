@@ -20,6 +20,7 @@ List<NavItem> operatorNavItems = [
 
 List<NavItem> adminNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.adminDashboard.path),
+  NavItem(Icons.history, "Activity", RoutePath.adminActivity.path),
   NavItem(Icons.group, "Operators", RoutePath.adminOperators.path),
   NavItem(Icons.settings, "Machines", RoutePath.adminMachines.path),
   NavItem(Icons.file_open, "Reports", RoutePath.adminReports.path),

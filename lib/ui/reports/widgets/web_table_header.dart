@@ -1,4 +1,4 @@
-// lib/ui/reports/widgets/reports_table_header.dart
+// lib/ui/reports/widgets/web_table_header.dart
 
 import 'package:flutter/material.dart';
 import '../models/reports_state.dart';
@@ -8,7 +8,7 @@ import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
 
-class ReportsTableHeader extends StatelessWidget {
+class WebTableHeader extends StatelessWidget {
   final ReportStatusFilter selectedStatus;
   final ReportCategoryFilter selectedCategory;
   final ReportPriorityFilter selectedPriority;
@@ -20,7 +20,7 @@ class ReportsTableHeader extends StatelessWidget {
   final ValueChanged<String> onSort;
   final bool isLoading;
 
-  const ReportsTableHeader({
+  const WebTableHeader({
     super.key,
     required this.selectedStatus,
     required this.selectedCategory,
@@ -34,8 +34,17 @@ class ReportsTableHeader extends StatelessWidget {
     this.isLoading = false,
   });
 
+  bool _isFilterActive(String filterValue) {
+    return !filterValue.toLowerCase().contains('all');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isCategoryActive = _isFilterActive(selectedCategory.displayName);
+    final isStatusActive = _isFilterActive(selectedStatus.displayName);
+    final isPriorityActive = _isFilterActive(selectedPriority.displayName);
+    final isTitleActive = sortColumn == 'title';
+
     return Opacity(
       opacity: isLoading ? 0.7 : 1.0,
       child: Container(
@@ -55,13 +64,27 @@ class ReportsTableHeader extends StatelessWidget {
             // Title Column (sortable, flex: 2)
             Expanded(
               flex: 2,
-              child: TableHeaderCell(
-                label: 'Title',
-                sortable: true,
-                sortColumn: 'title',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('title'),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Title',
+                      style: WebTextStyles.label.copyWith(
+                        color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    TableHeaderCell(
+                      label: '',
+                      sortable: true,
+                      sortColumn: 'title',
+                      currentSortColumn: sortColumn,
+                      sortAscending: sortAscending,
+                      onSort: isLoading ? null : () => onSort('title'),
+                    ),
+                  ],
+                ),
               ),
             ),
             
@@ -74,9 +97,11 @@ class ReportsTableHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Category:',
-                      style: WebTextStyles.label,
+                    Text(
+                      'Category',
+                      style: WebTextStyles.label.copyWith(
+                        color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilterDropdown<ReportCategoryFilter>(
@@ -101,9 +126,11 @@ class ReportsTableHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Status:',
-                      style: WebTextStyles.label,
+                    Text(
+                      'Status',
+                      style: WebTextStyles.label.copyWith(
+                        color: isStatusActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilterDropdown<ReportStatusFilter>(
@@ -128,9 +155,11 @@ class ReportsTableHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       'Priority:',
-                      style: WebTextStyles.label,
+                      style: WebTextStyles.label.copyWith(
+                        color: isPriorityActive ? WebColors.tealAccent : WebColors.textLabel,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     FilterDropdown<ReportPriorityFilter>(

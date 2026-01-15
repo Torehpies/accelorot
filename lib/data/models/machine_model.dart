@@ -1,3 +1,6 @@
+// lib/data/models/machine_model.dart
+// Keep your existing MachineModel - only add filter enum extension
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,9 +16,57 @@ enum MachineStatus {
   underMaintenance,
 }
 
+// Machine status filter enum for table header dropdown
+enum MachineStatusFilter {
+  all,
+  active,
+  inactive,
+  underMaintenance;
+
+  String get displayName {
+    switch (this) {
+      case MachineStatusFilter.all:
+        return 'All';
+      case MachineStatusFilter.active:
+        return 'Active';
+      case MachineStatusFilter.inactive:
+        return 'Archived';
+      case MachineStatusFilter.underMaintenance:
+        return 'Suspended';
+    }
+  }
+
+  // Convert filter to actual status (null if 'all')
+  MachineStatus? toStatus() {
+    switch (this) {
+      case MachineStatusFilter.all:
+        return null;
+      case MachineStatusFilter.active:
+        return MachineStatus.active;
+      case MachineStatusFilter.inactive:
+        return MachineStatus.inactive;
+      case MachineStatusFilter.underMaintenance:
+        return MachineStatus.underMaintenance;
+    }
+  }
+
+  // Create filter from status
+  static MachineStatusFilter fromStatus(MachineStatus? status) {
+    if (status == null) return MachineStatusFilter.all;
+    switch (status) {
+      case MachineStatus.active:
+        return MachineStatusFilter.active;
+      case MachineStatus.inactive:
+        return MachineStatusFilter.inactive;
+      case MachineStatus.underMaintenance:
+        return MachineStatusFilter.underMaintenance;
+    }
+  }
+}
+
 @freezed
 abstract class MachineModel with _$MachineModel {
-  const MachineModel._(); // Private constructor for custom methods
+  const MachineModel._();
   
   const factory MachineModel({
     String? id, 
@@ -35,13 +86,11 @@ abstract class MachineModel with _$MachineModel {
   factory MachineModel.fromJson(Map<String, dynamic> json) =>
       _$MachineModelFromJson(json);
 
-  // Factory for Firestore documents
   factory MachineModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
     final docId = doc.id;
     final machineIdFromData = (data['machineId'] as String?) ?? docId;
     
-    // Parse status
     MachineStatus status = MachineStatus.active;
     if (data['status'] != null) {
       final statusStr = data['status'] as String;
@@ -73,7 +122,6 @@ abstract class MachineModel with _$MachineModel {
     );
   }
   
-  // Helper to convert to Firestore
   Map<String, dynamic> toFirestore() {
     String statusValue;
     switch (status) {
@@ -104,7 +152,6 @@ abstract class MachineModel with _$MachineModel {
   }
 }
 
-// Request models for mutations
 @freezed
 abstract class CreateMachineRequest with _$CreateMachineRequest {
   const factory CreateMachineRequest({
