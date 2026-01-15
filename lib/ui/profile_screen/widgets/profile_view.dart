@@ -38,7 +38,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final state = ref.watch(profileProvider);
     final notifier = ref.read(profileProvider.notifier);
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 60;
+    final isSmallScreen = screenWidth < 800;
 
     debugPrint(screenWidth.toString());
     final cardPadding = isSmallScreen ? 16.0 : 24.0;
