@@ -1,8 +1,6 @@
 // lib/ui/activity_logs/view/activity_logs_route.dart
-
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
-import 'activity_logs_main_view.dart';
+import 'activity_logs_navigator.dart';
 import 'unified_activity_view.dart';
 
 class ActivityLogsRoute extends StatelessWidget {
@@ -10,9 +8,15 @@ class ActivityLogsRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      mobileView: const ActivityLogsScreen(),
-      desktopView: const UnifiedActivityView(),
+    return Builder(
+      builder: (context) {
+        final width = MediaQuery.sizeOf(context).width;
+        
+        if (width >= 900) {
+          return const UnifiedActivityView();
+        }
+        return const ActivityLogsNavigator();
+      },
     );
   }
 }
