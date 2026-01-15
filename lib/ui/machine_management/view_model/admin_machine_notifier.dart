@@ -7,7 +7,7 @@ import '../../../data/providers/machine_providers.dart';
 part 'admin_machine_notifier.g.dart';
 
 // State class remains the same
-enum MachineFilterTab {
+enum MachineFilterTab { 
   all,
   active,
   inactive,
