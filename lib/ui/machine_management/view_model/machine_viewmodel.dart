@@ -19,7 +19,6 @@ MachineAggregatorService machineAggregatorService(Ref ref) {
 
 @riverpod
 class MachineViewModel extends _$MachineViewModel {
-
   late final MachineAggregatorService _aggregator;
   late final MachineFilterService _filterService;
 
@@ -38,10 +37,7 @@ class MachineViewModel extends _$MachineViewModel {
   Future<void> initialize(String teamId) async {
     _currentTeamId = teamId;
 
-    state = state.copyWith(
-      status: LoadingStatus.loading,
-      errorMessage: null,
-    );
+    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
       final isLoggedIn = await _aggregator.isUserLoggedIn();
@@ -75,10 +71,7 @@ class MachineViewModel extends _$MachineViewModel {
 
       final machines = await _aggregator.getMachines(teamId);
 
-      state = state.copyWith(
-        machines: machines,
-        status: LoadingStatus.success,
-      );
+      state = state.copyWith(machines: machines, status: LoadingStatus.success);
 
       // Apply filters to the newly loaded data
       _applyFilters();
@@ -98,18 +91,12 @@ class MachineViewModel extends _$MachineViewModel {
   // ===== WEB FILTER HANDLERS =====
 
   void onStatusFilterChanged(MachineStatusFilter filter) {
-    state = state.copyWith(
-      selectedStatusFilter: filter,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedStatusFilter: filter, currentPage: 1);
     _applyFilters();
   }
 
   void onDateFilterChanged(DateFilterRange dateFilter) {
-    state = state.copyWith(
-      dateFilter: dateFilter,
-      currentPage: 1,
-    );
+    state = state.copyWith(dateFilter: dateFilter, currentPage: 1);
     _applyFilters();
   }
 
@@ -122,31 +109,23 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   void onSearchChanged(String query) {
-    state = state.copyWith(
-      searchQuery: query,
-      currentPage: 1,
-    );
+    state = state.copyWith(searchQuery: query, currentPage: 1);
     _applyFilters();
   }
 
   void clearSearch() {
-    state = state.copyWith(
-      searchQuery: '',
-      currentPage: 1,
-    );
+    state = state.copyWith(searchQuery: '', currentPage: 1);
     _applyFilters();
   }
 
   // ===== WEB SORTING HANDLERS =====
 
   void onSort(String column) {
-    final isAscending =
-        state.sortColumn == column ? !state.sortAscending : true;
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
 
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
 
     _applyFilters();
   }
@@ -158,10 +137,7 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   void onItemsPerPageChanged(int itemsPerPage) {
-    state = state.copyWith(
-      itemsPerPage: itemsPerPage,
-      currentPage: 1,
-    );
+    state = state.copyWith(itemsPerPage: itemsPerPage, currentPage: 1);
   }
 
   // ===== FILTERING LOGIC =====
@@ -177,9 +153,7 @@ class MachineViewModel extends _$MachineViewModel {
       sortAscending: state.sortAscending,
     );
 
-    state = state.copyWith(
-      filteredMachines: result.filteredMachines,
-    );
+    state = state.copyWith(filteredMachines: result.filteredMachines);
   }
 
   // ===== STATS CALCULATIONS =====
@@ -194,47 +168,53 @@ class MachineViewModel extends _$MachineViewModel {
 
     // Previous month: full month
     final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd =
-        DateTime(now.year, now.month, 1).subtract(const Duration(microseconds: 1));
+    final previousMonthEnd = DateTime(
+      now.year,
+      now.month,
+      1,
+    ).subtract(const Duration(microseconds: 1));
 
     // Get ALL-TIME counts (for display)
     final allTimeStats = _getAllTimeStats();
 
     // Get counts for current month (for comparison)
-    final currentStats =
-        _getStatsForDateRange(currentMonthStart, currentMonthEnd);
+    final currentStats = _getStatsForDateRange(
+      currentMonthStart,
+      currentMonthEnd,
+    );
 
     // Get counts for previous month (for comparison)
-    final previousStats =
-        _getStatsForDateRange(previousMonthStart, previousMonthEnd);
+    final previousStats = _getStatsForDateRange(
+      previousMonthStart,
+      previousMonthEnd,
+    );
 
     return {
-  'total': _buildChangeData(
-    allTimeStats['total']!,
-    currentStats['total']!,
-    previousStats['total']!,
-    'machines created',
-  ),
-  'active': _buildChangeData(
-    allTimeStats['active']!,
-    currentStats['active']!,
-    previousStats['active']!,
-    'activated',
-  ),
-  'archived': _buildChangeData(
-    allTimeStats['archived']!,
-    currentStats['archived']!,
-    previousStats['archived']!,
-    'archived',
-  ),
-  'suspended': _buildChangeData(
-    allTimeStats['suspended']!,
-    currentStats['suspended']!,
-    previousStats['suspended']!,
-    'suspended',
-  ),
-};
-
+      'total': _buildChangeData(
+        allTimeStats['total']!,
+        currentStats['total']!,
+        previousStats['total']!,
+        'machines created',
+      ),
+      'active': _buildChangeData(
+        allTimeStats['active']!,
+        currentStats['active']!,
+        previousStats['active']!,
+        'activated',
+      ),
+      'archived': _buildChangeData(
+        allTimeStats['archived']!,
+        currentStats['archived']!,
+        previousStats['archived']!,
+        'archived',
+      ),
+      'suspended': _buildChangeData(
+        allTimeStats['suspended']!,
+        currentStats['suspended']!,
+        previousStats['suspended']!,
+        'suspended',
+      ),
+    };
   }
 
   /// Helper: Get all-time stats (for display counts)
@@ -248,8 +228,9 @@ class MachineViewModel extends _$MachineViewModel {
     final archived = state.machines.where((m) => m.isArchived).length;
 
     final suspended = state.machines
-        .where((m) =>
-            m.status == MachineStatus.underMaintenance && !m.isArchived)
+        .where(
+          (m) => m.status == MachineStatus.underMaintenance && !m.isArchived,
+        )
         .length;
 
     return {
@@ -269,7 +250,8 @@ class MachineViewModel extends _$MachineViewModel {
 
     // Active: Count machines that are currently active AND were modified in range
     final activeChanged = state.machines.where((m) {
-      final wasModified = m.lastModified != null &&
+      final wasModified =
+          m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
       return m.status == MachineStatus.active && !m.isArchived && wasModified;
@@ -277,7 +259,8 @@ class MachineViewModel extends _$MachineViewModel {
 
     // Archived: Count machines that are archived AND were modified in range
     final archivedChanged = state.machines.where((m) {
-      final wasModified = m.lastModified != null &&
+      final wasModified =
+          m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
       return m.isArchived && wasModified;
@@ -285,7 +268,8 @@ class MachineViewModel extends _$MachineViewModel {
 
     // Suspended: Count machines under maintenance AND were modified in range
     final suspendedChanged = state.machines.where((m) {
-      final wasModified = m.lastModified != null &&
+      final wasModified =
+          m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
       return m.status == MachineStatus.underMaintenance &&
