@@ -1,3 +1,5 @@
+// lib/ui/activity_logs/view/activity_logs_main_view.dart
+
 import 'package:flutter/material.dart';
 import '../widgets/activity_section_card.dart';
 import '../widgets/navigation_section_card.dart';
@@ -5,9 +7,7 @@ import '../widgets/batch_filter_section.dart';
 import '../models/activity_filter_model.dart';
 
 class ActivityLogsScreen extends StatelessWidget {
-  final String? focusedMachineId;
-
-  const ActivityLogsScreen({super.key, this.focusedMachineId});
+  const ActivityLogsScreen({super.key}); // Removed focusedMachineId
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +15,9 @@ class ActivityLogsScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(
-          focusedMachineId != null ? "Machine Activity Logs" : "Activity Logs",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: const Text(
+          "Activity Logs", // Removed conditional title
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.teal,
       ),
@@ -27,39 +27,7 @@ class ActivityLogsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Machine filter banner - only shown when viewing specific machine
-              if (focusedMachineId != null)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.teal.shade50, Colors.teal.shade100],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.teal.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.filter_alt,
-                        color: Colors.teal.shade700,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Showing activities for this machine only',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.teal.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // Removed the machine filter banner
 
               // Main content container with white background
               Expanded(
@@ -90,21 +58,21 @@ class ActivityLogsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // All Activity Section
-                              NavigationSectionCard(
+                              const NavigationSectionCard(
                                 icon: Icons.history,
                                 title: 'View All Activity',
                                 route: '/all-activity',
-                                focusedMachineId: focusedMachineId,
+                                // Removed focusedMachineId
                               ),
                               const SizedBox(height: 16),
 
                               // Substrate Section
-                              ActivitySectionCard(
+                              const ActivitySectionCard(
                                 icon: Icons.eco_outlined,
                                 title: 'Substrate',
                                 viewAllRoute: '/substrates',
-                                focusedMachineId: focusedMachineId,
-                                filters: const [
+                                // Removed focusedMachineId
+                                filters: [
                                   FilterConfig(
                                     icon: Icons.eco,
                                     label: 'Green',
@@ -131,12 +99,12 @@ class ActivityLogsScreen extends StatelessWidget {
                               const SizedBox(height: 16),
 
                               // Alerts Section
-                              ActivitySectionCard(
+                              const ActivitySectionCard(
                                 icon: Icons.warning_amber_outlined,
                                 title: 'Alerts',
                                 viewAllRoute: '/alerts',
-                                focusedMachineId: focusedMachineId,
-                                filters: const [
+                                // Removed focusedMachineId
+                                filters: [
                                   FilterConfig(
                                     icon: Icons.thermostat,
                                     label: 'Temperature',
@@ -163,21 +131,21 @@ class ActivityLogsScreen extends StatelessWidget {
                               const SizedBox(height: 16),
 
                               // Cycles & Recommendations Section
-                              NavigationSectionCard(
+                              const NavigationSectionCard(
                                 icon: Icons.auto_awesome,
                                 title: 'Cycles & Recommendations',
                                 route: '/cycles-recom',
-                                focusedMachineId: focusedMachineId,
+                                // Removed focusedMachineId
                               ),
                               const SizedBox(height: 16),
 
                               // Reports Section
-                              ActivitySectionCard(
+                              const ActivitySectionCard(
                                 icon: Icons.report_outlined,
                                 title: 'Reports',
                                 viewAllRoute: '/reports',
-                                focusedMachineId: focusedMachineId,
-                                filters: const [
+                                // Removed focusedMachineId
+                                filters: [
                                   FilterConfig(
                                     icon: Icons.build,
                                     label: 'Maintenance',

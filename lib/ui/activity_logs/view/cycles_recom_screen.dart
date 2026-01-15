@@ -10,7 +10,6 @@ class CyclesRecomScreen extends BaseActivityScreen {
   const CyclesRecomScreen({
     super.key,
     super.initialFilter,
-    super.focusedMachineId,
   });
 
   @override
@@ -21,7 +20,6 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.cyclesRecom,
         initialFilter: widget.initialFilter,
-        focusedMachineId: widget.focusedMachineId,
       );
 
   @override
@@ -30,12 +28,7 @@ class _CyclesRecomScreenState extends BaseActivityScreenState<CyclesRecomScreen>
   }
 
   @override
-  String getScreenTitle() {
-    final state = getState();
-    return state.focusedMachineId != null
-        ? 'Machine Cycles & Recommendations'
-        : 'Cycles & Recommendations';
-  }
+  String getScreenTitle() => 'Cycles & Recommendations';
 
   @override
   List<String> getFilters() {

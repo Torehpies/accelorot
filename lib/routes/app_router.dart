@@ -13,7 +13,6 @@ import 'package:flutter_application_1/routes/navigations/super_admin_mobile_shel
 import 'package:flutter_application_1/routes/navigations/super_admin_web_shell.dart';
 import 'package:flutter_application_1/routes/route_path.dart';
 import 'package:flutter_application_1/routes/router_notifier.dart';
-import 'package:flutter_application_1/ui/activity_logs/view/unified_activity_view.dart';
 import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
@@ -30,6 +29,7 @@ import 'package:flutter_application_1/ui/web_operator/view/operator_management_s
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 
 const int kDesktopBreakpoint = 1024;
@@ -130,7 +130,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.activity.path,
             name: RoutePath.activity.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const UnifiedActivityView(),
+              child: const ActivityLogsRoute(),
               key: state.pageKey,
             ),
           ),
@@ -187,7 +187,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminActivity.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const UnifiedActivityView(),
+              child: const ActivityLogsRoute(),
             ),
           ),
           GoRoute(

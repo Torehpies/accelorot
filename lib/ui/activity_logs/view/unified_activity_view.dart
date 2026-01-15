@@ -12,11 +12,9 @@ import '../../core/themes/web_colors.dart';
 
 /// Main unified activity view with enhanced stats
 class UnifiedActivityView extends ConsumerWidget {
-  final String? focusedMachineId;
 
   const UnifiedActivityView({
     super.key,
-    this.focusedMachineId,
   });
 
   @override
