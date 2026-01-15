@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/operator_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import 'operator_machine_card.dart';
-import 'search_bar_widget.dart';
+import '../widgets/operator_machine_card.dart';
+import '../widgets/search_bar_widget.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
   const OperatorMachineView({super.key});
