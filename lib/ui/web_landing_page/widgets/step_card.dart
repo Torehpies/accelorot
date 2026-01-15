@@ -16,36 +16,47 @@ class StepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.xxxl),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0F2FE).withValues(alpha: 0.3),
+        color: const Color(0xFF28A85A).withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             '0${step.number}',
             style: WebTextStyles.h1.copyWith(
-              fontSize: 64,
-              color: WebColors.tealAccent.withValues(alpha: 0.3),
-              height: 1,
+              fontSize: 48,
+              color: WebColors.textTitle.withValues(alpha: 0.5),
+              height: 1.0,
+              fontWeight: FontWeight.w300,
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             step.title,
-            style: WebTextStyles.h3.copyWith(fontSize: 18),
+            style: WebTextStyles.h3.copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.xs),
           Flexible(
             child: Text(
               step.description,
               softWrap: true,
               maxLines: 3,
-              overflow: TextOverflow.ellipsis, // Or fade if you prefer
+              overflow: TextOverflow.ellipsis,
               style: WebTextStyles.bodyMediumGray.copyWith(
-                height: 1.4,
+                fontSize: 13,
+                height: 1.5,
+                color: const Color(0xFF6B7280),
               ),
             ),
           ),

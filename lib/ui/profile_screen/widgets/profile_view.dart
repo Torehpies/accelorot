@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../view_model/profile_notifier.dart';
 import 'profile_edit_form.dart';
@@ -48,24 +50,10 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.teal.shade700, Colors.teal.shade900],
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: state.isLoading
+      appBar: kIsWeb
+          ? null 
+          : MobileHeader(title: 'Profile'),
+            body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.profile == null
           ? Center(

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart' show kIsWeb; 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../notifier/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
 import '../widgets/analytics_widget.dart';
 import '../../operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
+import '../../core/widgets/shared/mobile_header.dart'; 
 
 class MobileAdminHomeView extends ConsumerWidget {
   const MobileAdminHomeView({super.key});
@@ -13,24 +15,18 @@ class MobileAdminHomeView extends ConsumerWidget {
     final asyncState = ref.watch(adminDashboardProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade600,
-        title: const Text('Admin Dashboard', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No new notifications')),
-            ),
-          ),
-        ],
-      ),
+      appBar: kIsWeb
+          ? null 
+          : MobileHeader(title: 'Dashboard'),
+
       body: RefreshIndicator(
         onRefresh: () async {
           await ref.read(adminDashboardProvider.notifier).loadData();
         },
         child: asyncState.when(
-          loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+          ),
           error: (err, _) => Center(child: Text('Error: $err')),
           data: (state) {
             final statCards = [
@@ -69,18 +65,21 @@ class MobileAdminHomeView extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('Overview', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(
+                        'Overview',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
                       SizedBox.shrink(),
                     ],
                   ),
                   const SizedBox(height: 12),
                   SwipeableStatCards(cards: statCards),
                   const SizedBox(height: 24),
-                  
+
                   // Analytics Section
                   AnalyticsWidget(reports: state.reports),
                   const SizedBox(height: 24),
-                  
+
                   // Activity Logs Section
                   ActivityLogsCard(
                     focusedMachineId: null, // Show all machines for admin
