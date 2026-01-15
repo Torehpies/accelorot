@@ -76,7 +76,7 @@ class WebBatchSelector extends ConsumerWidget {
         isLoading: true,
         displayMode: displayMode,
       ),
-      error: (_, __) => WebDropdown<String>(
+      error: (_, _) => WebDropdown<String>(
         value: null,
         label: 'Batch',
         hintText: 'All Batches',
