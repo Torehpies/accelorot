@@ -1,20 +1,23 @@
-// lib/ui/activity_logs/widgets/unified/unified_batch_selector.dart
+// lib/ui/activity_logs/widgets/unified/web_batch_selector.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/providers/batch_providers.dart';
-import 'unified_dropdown.dart';
+import 'web_dropdown.dart';
+import 'web_table_container.dart';
 
-class UnifiedBatchSelector extends ConsumerWidget {
+class WebBatchSelector extends ConsumerWidget {
   final String? selectedBatchId;
   final String? selectedMachineId;
   final ValueChanged<String?> onChanged;
+  final DropdownDisplayMode displayMode;
 
-  const UnifiedBatchSelector({
+  const WebBatchSelector({
     super.key,
     required this.selectedBatchId,
     required this.onChanged,
     this.selectedMachineId,
+    required this.displayMode,
   });
 
   @override
@@ -26,16 +29,16 @@ class UnifiedBatchSelector extends ConsumerWidget {
         final filteredBatches = selectedMachineId != null
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
-
         final hasNoBatches = filteredBatches.isEmpty;
         
-        return UnifiedDropdown<String>(
+        return WebDropdown<String>(
           value: selectedBatchId,
           label: 'Batch',
           hintText: 'All Batches',
           displayText: selectedBatchId ?? 'All Batches',
           icon: Icons.inventory_2,
           onChanged: hasNoBatches ? (_) {} : onChanged,
+          displayMode: displayMode,
           items: hasNoBatches
               ? const []
               : [
@@ -55,7 +58,7 @@ class UnifiedBatchSelector extends ConsumerWidget {
               : (hasNoBatches ? 'No batches' : null),
         );
       },
-      loading: () => UnifiedDropdown<String>(
+      loading: () => WebDropdown<String>(
         value: null,
         label: 'Batch',
         hintText: 'All Batches',
@@ -63,8 +66,9 @@ class UnifiedBatchSelector extends ConsumerWidget {
         onChanged: (_) {},
         icon: Icons.inventory_2,
         isLoading: true,
+        displayMode: displayMode,
       ),
-      error: (_, _) => UnifiedDropdown<String>(
+      error: (_, _) => WebDropdown<String>(
         value: null,
         label: 'Batch',
         hintText: 'All Batches',
@@ -72,6 +76,7 @@ class UnifiedBatchSelector extends ConsumerWidget {
         onChanged: (_) {},
         icon: Icons.inventory_2,
         disabledHint: 'Error loading',
+        displayMode: displayMode,
       ),
     );
   }

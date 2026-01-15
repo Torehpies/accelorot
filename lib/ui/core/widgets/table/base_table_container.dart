@@ -9,22 +9,22 @@ import '../../themes/web_colors.dart';
 class BaseTableContainer extends StatelessWidget {
   /// Left section of filter bar (title, filters, etc.)
   final Widget? leftHeaderWidget;
-  
+
   /// Right section of filter bar (search, date filter, etc.)
   final List<Widget>? rightHeaderWidgets;
-  
+
   /// Table header (column titles, filters in headers)
   final Widget tableHeader;
-  
+
   /// Table body (scrollable content)
   final Widget tableBody;
-  
+
   /// Optional pagination controls at bottom
   final Widget? paginationWidget;
-  
+
   /// Custom container padding (default: symmetric horizontal:16, vertical:0)
   final EdgeInsets? tablePadding;
-  
+
   /// Custom border color
   final Color? borderColor;
 
@@ -52,11 +52,12 @@ class BaseTableContainer extends StatelessWidget {
           // Filter Header Bar (if provided)
           if (leftHeaderWidget != null || rightHeaderWidgets != null)
             _buildFilterBar(),
-          
+
           // Table Wrapper (Header + Body with border)
           Expanded(
             child: Padding(
-              padding: tablePadding ?? 
+              padding:
+                  tablePadding ??
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               child: Container(
                 decoration: BoxDecoration(
@@ -79,7 +80,7 @@ class BaseTableContainer extends StatelessWidget {
                       ),
                       child: tableHeader,
                     ),
-                    
+
                     // Table Body
                     Expanded(child: tableBody),
                   ],
@@ -87,7 +88,7 @@ class BaseTableContainer extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Pagination Footer (if provided)
           if (paginationWidget != null)
             Container(
@@ -107,24 +108,20 @@ class BaseTableContainer extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Left section
-          if (leftHeaderWidget != null)
-            Expanded(child: leftHeaderWidget!),
-          
-          // Spacer between left and right
+          // Left section - natural sizing, no Expanded wrapper
+          if (leftHeaderWidget != null) leftHeaderWidget!,
+
+          // Spacer eats all remaining space, pushes right section to edge
           if (leftHeaderWidget != null && rightHeaderWidgets != null)
             const Spacer(),
-          
-          // Right section
+
+          // Right section - compact and right-aligned
           if (rightHeaderWidgets != null)
             ...rightHeaderWidgets!.map((widget) {
               final index = rightHeaderWidgets!.indexOf(widget);
               return Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (index > 0) const SizedBox(width: 12),
-                  widget,
-                ],
+                children: [if (index > 0) const SizedBox(width: 12), widget],
               );
             }),
         ],

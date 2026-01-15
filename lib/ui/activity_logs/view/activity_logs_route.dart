@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'activity_logs_navigator.dart';
-import 'unified_activity_view.dart';
+import 'web_activity_view.dart';
 
 class ActivityLogsRoute extends StatelessWidget {
   const ActivityLogsRoute({super.key});
@@ -11,7 +11,7 @@ class ActivityLogsRoute extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       mobileView: const ActivityLogsNavigator(),
-      desktopView: const UnifiedActivityView(),
+      desktopView: const WebActivityView(),
     );
   }
 }
