@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers/statistics_providers.dart';
-import '../../web_statistics/widgets/web_stat_card.dart';
+import '../widgets/temperature_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
+import '../widgets/oxygen_statistic_card.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/selected_machine_provider.dart'; 
 import '../../../data/models/machine_model.dart';
@@ -246,70 +248,24 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         
-        // Sample chart data for UI demonstration
-        final sampleChartData = [
-          {'month': 'Jan', 'value': 40.0},
-          {'month': 'Feb', 'value': 55.0},
-          {'month': 'Mar', 'value': 45.0},
-          {'month': 'Apr', 'value': 65.0},
-          {'month': 'May', 'value': 50.0},
-          {'month': 'Jun', 'value': 70.0},
-        ];
+        // Sample data for demonstration
+        final sampleHourlyReadings = [40.0, 55.0, 45.0, 65.0, 50.0, 70.0];
 
         final cards = [
-          WebStatCard(
-            title: 'Temperature',
-            description: 'sample text description...',
-            value: '1300',
-            unit: '°C',
-            idealRange: '55°C - 70°C',
-            progress: 0.75,
-            valueColor: const Color(0xFFEA580C), // Orange
-            progressColor: const Color(0xFFEA580C),
-            trendText: 'Trending up by 5.2% this week',
-            chartData: sampleChartData,
-            moreInfoItems: [
-              'sample text here',
-              'sample text here',
-              'sample text here',
-              'sample text here',
-            ],
+          TemperatureStatisticCard(
+            currentTemperature: 1300.0,
+            hourlyReadings: sampleHourlyReadings,
+            lastUpdated: DateTime.now(),
           ),
-          WebStatCard(
-            title: 'Moisture',
-            description: 'sample text description...',
-            value: '28.0',
-            unit: '%',
-            idealRange: '40% - 60%',
-            progress: 0.5,
-            valueColor: const Color(0xFF0284C7), // Blue
-            progressColor: const Color(0xFF0284C7),
-            trendText: 'Trending up by 5.2% this week',
-            chartData: sampleChartData,
-            moreInfoItems: [
-              'sample text here',
-              'sample text here',
-              'sample text here',
-              'sample text here',
-            ],
+          MoistureStatisticCard(
+            currentMoisture: 28.0,
+            hourlyReadings: sampleHourlyReadings,
+            lastUpdated: DateTime.now(),
           ),
-          WebStatCard(
-            title: 'Air Quality',
-            description: 'sample text description...',
-            value: '550',
-            unit: 'ppm',
-            idealRange: '65 ppm - 70 ppm',
-            progress: 0.65,
-            valueColor: const Color(0xFF7C3AED), // Purple
-            progressColor: const Color(0xFF7C3AED),
-            trendText: 'Trending up by 5.2% this week',
-            chartData: sampleChartData,
-            moreInfoItems: [
-              'sample text here',
-              'sample text here',
-              'sample text here',
-              'sample text here',
-            ],
+          OxygenStatisticCard(
+            currentOxygen: 550.0,
+            hourlyReadings: sampleHourlyReadings,
+            lastUpdated: DateTime.now(),
           ),
         ];
 

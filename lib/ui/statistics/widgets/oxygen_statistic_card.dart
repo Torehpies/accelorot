@@ -15,213 +15,226 @@ class OxygenStatisticCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quality = _getQuality(currentOxygen);
-    final color = _getColorForQuality(quality);
-    final now = DateTime.now();
-    final dataLength = hourlyReadings.isNotEmpty ? hourlyReadings.length : 8;
+    const mainColor = Color(0xFF7C3AED); // Purple color
+    const borderColor = Color(0xFFDDD6FE); // Light Purple Border
 
-    // ✅ Always prepare chart data — even if list is empty
-    final oxygenData = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      final y = hourlyReadings.isNotEmpty ? hourlyReadings[i] : 0.0;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': y};
-    });
-
-    final upperBound = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 1500.0};
-    });
-
-    final lowerBound = List.generate(dataLength, (i) {
-      final hour = now.subtract(Duration(hours: dataLength - 1 - i)).hour;
-      return {'x': '${hour.toString().padLeft(2, '0')}:00', 'y': 0.0};
-    });
+    // Generate monthly chart data (sample for now)
+    final chartData = _generateMonthlyData();
 
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.green.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 2), // Full colored border
+         // No boxShadow
       ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header and current oxygen level
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Air Quality',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             // Header Section
+             Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFFAF5FF), width: 1)
+                )
               ),
-              Text(
-                '${currentOxygen.toStringAsFixed(0)} ppm',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                       const Text(
+                        'Air Quality',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                       const Text(
+                        'sample text description...',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ],
+                  ),
+                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '${currentOxygen.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: mainColor,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                       const Text(
+                        'ppm',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: mainColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
 
-          if (lastUpdated != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Last updated: ${_formatDate(lastUpdated!)}',
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Ideal Range Label
+                  const Text(
+                    'Ideal Range: 65 ppm - 70 ppm',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Progress Bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: _calculateProgress(currentOxygen),
+                      backgroundColor: const Color(0xFFF3E8FF), // Very light purple
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6D28D9)), // Darker Purple
+                      minHeight: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Chart
+                  SizedBox(
+                    height: 120,
+                    child: SfCartesianChart(
+                      plotAreaBorderWidth: 0,
+                      margin: EdgeInsets.zero,
+                      primaryXAxis: CategoryAxis(
+                        labelStyle: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
+                        majorGridLines: const MajorGridLines(width: 0),
+                        axisLine: const AxisLine(width: 0),
+                      ),
+                      primaryYAxis: NumericAxis(
+                        isVisible: false,
+                        majorGridLines: const MajorGridLines(width: 0),
+                      ),
+                      series: <CartesianSeries>[
+                        SplineSeries<Map<String, dynamic>, String>(
+                          dataSource: chartData,
+                          xValueMapper: (data, _) => data['month'] as String,
+                          yValueMapper: (data, _) => data['value'] as double,
+                          color: const Color(0xFF6D28D9), // Darker purple line
+                          width: 3,
+                          markerSettings: const MarkerSettings(
+                            isVisible: true,
+                            color: Color(0xFF6D28D9),
+                            borderColor: Colors.white,
+                            borderWidth: 2,
+                            height: 8,
+                            width: 8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Trend Text
+                  const Text(
+                    'Trending up by 5.2% this week',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // More Information Section
+                  const Text(
+                    'More Information:',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ..._buildMoreInfo(),
+                ],
+              ),
             ),
           ],
-
-          const SizedBox(height: 12),
-
-          // Quality indicator
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Quality: $quality',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'Ideal Range: 0–1500 ppm',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
-          ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: _calculateProgress(currentOxygen),
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 8,
-          ),
-
-          const SizedBox(height: 16),
-
-          // ✅ "No data" message (above graph, not replacing it)
-          if (hourlyReadings.isEmpty) ...[
-            Center(
-              child: Text(
-                '⚠️ No air quality data available',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-
-          const SizedBox(height: 8),
-
-          SizedBox(
-            height: 90,
-            width: double.infinity,
-            child: SfCartesianChart(
-              primaryXAxis: CategoryAxis(
-                labelStyle: const TextStyle(fontSize: 9),
-                majorGridLines: const MajorGridLines(
-                  width: 0.5,
-                  color: Colors.grey,
-                ),
-                interval: 1,
-              ),
-              primaryYAxis: NumericAxis(
-                minimum: 0,
-                maximum: 5000,
-                interval: 1000,
-                majorGridLines: const MajorGridLines(
-                  width: 0.5,
-                  color: Colors.grey,
-                ),
-                labelStyle: const TextStyle(fontSize: 9),
-              ),
-              plotAreaBorderWidth: 0,
-              margin: EdgeInsets.zero,
-              series: <CartesianSeries>[
-                LineSeries<Map<String, Object>, String>(
-                  dataSource: oxygenData,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.blue,
-                  width: 2,
-                  markerSettings: const MarkerSettings(isVisible: true),
-                ),
-                LineSeries<Map<String, Object>, String>(
-                  dataSource: upperBound,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.red,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-                LineSeries<Map<String, Object>, String>(
-                  dataSource: lowerBound,
-                  xValueMapper: (data, _) => data['x'] as String,
-                  yValueMapper: (data, _) => data['y'] as double,
-                  color: Colors.green,
-                  dashArray: const [5, 5],
-                  width: 1,
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // Quality logic for MQ135
-  String _getQuality(double ppm) {
-    if (ppm <= 1500) return 'Excellent';
-    if (ppm <= 3000) return 'Good';
-    if (ppm <= 4000) return 'Fair';
-    return 'Poor';
+  List<Widget> _buildMoreInfo() {
+    final items = [
+      'sample text here',
+      'sample text here',
+      'sample text here',
+      'sample text here',
+    ];
+    
+    return items.map((item) => Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+           Container(
+            width: 4,
+            height: 4,
+            decoration: const BoxDecoration(
+              color: Color(0xFF9CA3AF),
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              item,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF6B7280),
+              ),
+            ),
+          ),
+        ],
+      ),
+    )).toList();
   }
 
-  Color _getColorForQuality(String quality) {
-    switch (quality) {
-      case 'Excellent':
-        return Colors.green;
-      case 'Good':
-        return Colors.orange;
-      case 'Fair':
-        return Colors.amber;
-      default:
-        return Colors.red;
-    }
+  List<Map<String, dynamic>> _generateMonthlyData() {
+    return [
+      {'month': 'Jan', 'value': 40.0},
+      {'month': 'Feb', 'value': 75.0},
+      {'month': 'Mar', 'value': 55.0},
+      {'month': 'Apr', 'value': 25.0},
+      {'month': 'May', 'value': 60.0},
+      {'month': 'Jun', 'value': 62.0},
+    ];
   }
 
-  double _calculateProgress(double ppm) {
-    return (ppm.clamp(0.0, 5000.0) / 5000.0);
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year} '
-        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  double _calculateProgress(double oxygen) {
+    return (oxygen.clamp(0.0, 5000.0) / 5000.0);
   }
 }
