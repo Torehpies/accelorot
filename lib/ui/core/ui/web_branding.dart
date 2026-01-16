@@ -3,6 +3,7 @@ import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 
 class WebBranding extends ConsumerWidget {
   const WebBranding({super.key});
@@ -20,17 +21,12 @@ class WebBranding extends ConsumerWidget {
         final String name = '$firstName $lastName';
         return Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.green100,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(
-                Icons.energy_savings_leaf_rounded,
-                size: 50,
-                color: Colors.white,
-              ),
+            SvgPicture.asset(
+              'assets/images/Accel-O-Rot Logo.svg',
+              width: 100,
+              height: 100,
+              fit: BoxFit.contain,
+              semanticsLabel: 'Accel-O-Rot Logo',
             ),
             const SizedBox(height: 8),
             const Text(
