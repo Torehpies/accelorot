@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'widgets/temperature_statistic_card.dart';
-import 'widgets/moisture_statistic_card.dart';
-import 'widgets/oxygen_statistic_card.dart';
-import '../../data/providers/machine_providers.dart';
-import '../../data/providers/selected_machine_provider.dart'; 
-import '../../data/providers/statistics_providers.dart';
-import '../../data/models/machine_model.dart';
-import '../../services/sess_service.dart';
+import '../widgets/temperature_statistic_card.dart';
+import '../widgets/moisture_statistic_card.dart';
+import '../widgets/oxygen_statistic_card.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../data/providers/selected_machine_provider.dart';
+import '../../../data/providers/statistics_providers.dart';
+import '../../../data/models/machine_model.dart';
+import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;

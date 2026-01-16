@@ -21,7 +21,7 @@ class MachineSelector extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionService = SessionService();
-    
+
     return FutureBuilder<Map<String, dynamic>?>(
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
@@ -40,8 +40,52 @@ class MachineSelector extends ConsumerWidget {
           data: (machines) {
             if (machines.isEmpty) return const SizedBox.shrink();
 
-            final activeMachines = machines.where((m) => !m.isArchived).toList();
-            if (activeMachines.isEmpty) return const SizedBox.shrink();
+            final activeMachines = machines
+                .where((m) => !m.isArchived)
+                .toList();
+            final archivedMachines = machines
+                .where((m) => m.isArchived)
+                .toList();
+
+            activeMachines.sort((a, b) {
+              if (a.lastModified == null && b.lastModified == null) {
+                return a.machineName.compareTo(b.machineName);
+              }
+              if (a.lastModified == null) {
+                return 1; // a after b
+              }
+              if (b.lastModified == null) {
+                return -1; // a before b
+              }
+              final compare = b.lastModified!.compareTo(
+                a.lastModified!,
+              ); // descending
+              return compare != 0
+                  ? compare
+                  : a.machineName.compareTo(b.machineName);
+            });
+
+            // Sort archived machines: by lastModified descending (nulls last), then by machineName
+            archivedMachines.sort((a, b) {
+              if (a.lastModified == null && b.lastModified == null) {
+                return a.machineName.compareTo(b.machineName);
+              }
+              if (a.lastModified == null) {
+                return 1; 
+              }
+              if (b.lastModified == null) {
+                return -1; 
+              }
+              final compare = b.lastModified!.compareTo(
+                a.lastModified!,
+              ); // descending
+              return compare != 0
+                  ? compare
+                  : a.machineName.compareTo(b.machineName);
+            });
+
+            // Combine: active first, then archived
+             final sortedMachines = [...activeMachines, ...archivedMachines];
 
             return Container(
               padding: EdgeInsets.symmetric(
@@ -86,17 +130,43 @@ class MachineSelector extends ConsumerWidget {
                         Icons.arrow_drop_down,
                         color: isCompact ? Colors.teal.shade700 : Colors.teal,
                       ),
+                      menuMaxHeight: 400,
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
                           child: Text('All Machines'),
                         ),
-                        ...activeMachines.map((machine) {
+                        ...sortedMachines.map((machine) {
                           return DropdownMenuItem<String>(
                             value: machine.id,
-                            child: Text(
-                              machine.machineName,
-                              style: TextStyle(fontSize: isCompact ? 13 : 14),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    machine.machineName,
+                                    style: TextStyle(fontSize: isCompact ? 13 : 14),
+                                  ),
+                                ),
+                                if (machine.isArchived)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Archived',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           );
                         }),
@@ -114,4 +184,4 @@ class MachineSelector extends ConsumerWidget {
       },
     );
   }
-} 
+}

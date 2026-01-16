@@ -98,6 +98,7 @@ class BatchSelector extends ConsumerWidget {
                         ? Colors.grey[400]
                         : (isCompact ? Colors.teal.shade700 : Colors.teal),
                   ),
+                  menuMaxHeight: 400,
                   items: hasNoBatches
                       ? null
                       : [
