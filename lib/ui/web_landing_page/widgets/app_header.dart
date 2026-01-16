@@ -41,13 +41,15 @@ class AppHeader extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+							const SizedBox(width: 10),
               SvgPicture.asset(
                 'assets/images/Accel-O-Rot Logo.svg',
-                width: 60,
-                height: 60,
-                fit: BoxFit.contain,
+                width: 40,
+                height: 40,
+                // fit: BoxFit.contain,
                 semanticsLabel: 'Accel-O-Rot Logo',
               ),
+							const SizedBox(width: 10),
               Text(
                 'Accel-O-Rot',
                 style: h2Style.copyWith(
