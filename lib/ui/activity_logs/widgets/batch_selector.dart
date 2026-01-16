@@ -29,14 +29,115 @@ class BatchSelector extends ConsumerWidget {
     // Watch the AsyncNotifierProvider properly
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
-    return batchesAsync.when(
-      data: (batches) {
+    // Use .when but checks value first to avoid loading flickering
+    final batches = batchesAsync.value;
+    final isLoading = batchesAsync.isLoading && !batchesAsync.hasValue;
+    
+    if (isLoading) {
+      // Loading state - only if we have NO data
+       return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8 : 12,
+          vertical: isCompact ? 4 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: isCompact ? Colors.grey[50] : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: isCompact
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.inventory_2,
+              color: Colors.grey[400],
+              size: isCompact ? 18 : 20,
+            ),
+            const SizedBox(width: 12),
+            if (showLabel) ...[
+              Text(
+                'Batch:',
+                style: TextStyle(
+                  fontSize: isCompact ? 13 : 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: Text(
+                showAllOption ? 'All Batches' : 'Select Batch',
+                style: TextStyle(
+                  fontSize: isCompact ? 13 : 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[400],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (batchesAsync.hasError && !batchesAsync.hasValue) {
+       return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isCompact ? 8 : 12,
+          vertical: isCompact ? 6 : 8,
+        ),
+        decoration: BoxDecoration(
+          color: isCompact ? Colors.grey[50] : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.red[400],
+              size: isCompact ? 18 : 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Failed to load batches',
+                style: TextStyle(
+                  fontSize: isCompact ? 13 : 14,
+                  color: Colors.red[600],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Render with data (or empty list if null but not loading)
+    final safeBatches = batches ?? [];
+    return _buildDropdown(safeBatches);
+  }
+
+  Widget _buildDropdown(List<BatchModel> batches) {
         final filteredBatches = selectedMachineId != null
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
 
         filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final hasNoBatches = filteredBatches.isEmpty;
+        
+        // Ensure selectedBatchId is in the list
+        final safeSelectedBatchId = filteredBatches.any((b) => b.id == selectedBatchId)
+            ? selectedBatchId
+            : null;
 
         return Container(
           padding: EdgeInsets.symmetric(
@@ -80,7 +181,7 @@ class BatchSelector extends ConsumerWidget {
               ],
               Expanded(
                 child: DropdownButton<String>(
-                  value: selectedBatchId,
+                  value: safeSelectedBatchId,
                   hint: Text(
                     hasNoBatches
                         ? (selectedMachineId != null
@@ -169,84 +270,5 @@ class BatchSelector extends ConsumerWidget {
             ],
           ),
         );
-      },
-      loading: () => Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isCompact ? 8 : 12,
-          vertical: isCompact ? 4 : 8,
-        ),
-        decoration: BoxDecoration(
-          color: isCompact ? Colors.grey[50] : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: isCompact ? 18 : 20,
-              height: isCompact ? 18 : 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isCompact ? Colors.teal.shade700 : Colors.teal,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            if (showLabel) ...[
-              Text(
-                'Batch:',
-                style: TextStyle(
-                  fontSize: isCompact ? 13 : 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Text(
-                'Loading batches...',
-                style: TextStyle(
-                  fontSize: isCompact ? 13 : 14,
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      error: (error, stack) => Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isCompact ? 8 : 12,
-          vertical: isCompact ? 6 : 8,
-        ),
-        decoration: BoxDecoration(
-          color: isCompact ? Colors.grey[50] : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.red.shade200),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.red[400],
-              size: isCompact ? 18 : 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Failed to load batches',
-                style: TextStyle(
-                  fontSize: isCompact ? 13 : 14,
-                  color: Colors.red[600],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

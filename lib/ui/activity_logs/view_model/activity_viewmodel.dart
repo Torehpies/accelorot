@@ -13,7 +13,7 @@ import 'report_config.dart';
 import 'cycle_config.dart';
 import 'all_activity_config.dart';
 import '../models/activity_common.dart';
-import '../../../data/models/batch_model.dart';
+
 
 part 'activity_viewmodel.g.dart';
 
@@ -201,7 +201,6 @@ class ActivityViewModel extends _$ActivityViewModel {
   void onBatchChanged(String? batchId) {
     state = state.copyWith(
       selectedBatchId: batchId,
-      // Don't reset machine - it should be set by onMachineAutoSelect before this
       selectedFilter: 'All',
       isManualFilter: false,
     );
@@ -211,8 +210,6 @@ class ActivityViewModel extends _$ActivityViewModel {
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
       selectedMachineId: machineId,
-      // Don't reset batch if machine change is from batch auto-select
-      // The batch will be set by onBatchChanged which is called after
       selectedFilter: 'All',
       isManualFilter: false,
     );
