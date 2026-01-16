@@ -66,13 +66,18 @@ class MobileHeader extends StatefulWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize {
-    double height = kToolbarHeight + 56.0;
-    if (showFilterChips && filterChips != null && filterChips!.isNotEmpty) {
-      height += 52.0; // Add space for filter chips
+    double height = kToolbarHeight + 56.0; // main bar + secondary controls
+
+    if (showFilterChips &&
+        filterChips != null &&
+        filterChips!.isNotEmpty) {
+      height += 52.0;
     }
+
     if (errorMessage != null) {
-      height += 60.0; // Add space for error banner
+      height += 60.0;
     }
+
     return Size.fromHeight(height);
   }
 }
@@ -81,8 +86,8 @@ class _MobileHeaderState extends State<MobileHeader>
     with SingleTickerProviderStateMixin {
   late TextEditingController _searchController;
   late String _dropdownValue;
-  late AnimationController _shimmerController;
-  late Animation<double> _pulseAnimation;
+  AnimationController? _shimmerController;
+  Animation<double>? _pulseAnimation;
 
   @override
   void initState() {
@@ -90,33 +95,53 @@ class _MobileHeaderState extends State<MobileHeader>
     _searchController = TextEditingController(text: widget.searchQuery);
     _dropdownValue = widget.dropdownValue ?? '';
 
-    // Initialize shimmer animation for skeleton loading
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-
-    _pulseAnimation = CurvedAnimation(
-      parent: _shimmerController,
-      curve: Curves.easeInOut,
-    );
+    if (widget.isLoading) {
+      _startShimmerAnimation();
+    }
   }
 
   @override
   void didUpdateWidget(MobileHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (oldWidget.searchQuery != widget.searchQuery) {
       _searchController.text = widget.searchQuery ?? '';
     }
     if (oldWidget.dropdownValue != widget.dropdownValue) {
       _dropdownValue = widget.dropdownValue ?? '';
     }
+
+    // Manage shimmer animation based on loading state
+    if (!oldWidget.isLoading && widget.isLoading) {
+      _startShimmerAnimation();
+    } else if (oldWidget.isLoading && !widget.isLoading) {
+      _stopShimmerAnimation();
+    }
+  }
+
+  void _startShimmerAnimation() {
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = CurvedAnimation(
+      parent: _shimmerController!,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _stopShimmerAnimation() {
+    _shimmerController?.stop();
+    _shimmerController?.dispose();
+    _shimmerController = null;
+    _pulseAnimation = null;
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _shimmerController.dispose();
+    _shimmerController?.dispose();
     super.dispose();
   }
 
@@ -467,8 +492,20 @@ class _MobileHeaderState extends State<MobileHeader>
     required double height,
     required double width,
   }) {
+    if (_pulseAnimation == null) {
+      // Fallback in case animation isn't ready
+      return Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          color: AppColors.grey.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      );
+    }
+
     return AnimatedBuilder(
-      animation: _pulseAnimation,
+      animation: _pulseAnimation!,
       builder: (context, child) {
         return Container(
           height: height,
@@ -477,7 +514,7 @@ class _MobileHeaderState extends State<MobileHeader>
             color: Color.lerp(
               AppColors.grey.withValues(alpha: 0.3),
               AppColors.grey.withValues(alpha: 0.1),
-              _pulseAnimation.value,
+              _pulseAnimation!.value,
             ),
             borderRadius: BorderRadius.circular(8),
           ),
@@ -499,6 +536,6 @@ class _MobileHeaderState extends State<MobileHeader>
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }
