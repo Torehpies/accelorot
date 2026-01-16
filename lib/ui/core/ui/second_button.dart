@@ -33,6 +33,7 @@ class SecondaryButton extends StatelessWidget {
           Text(
             text,
             style: WebTextStyles.bodyMedium.copyWith(
+							fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
