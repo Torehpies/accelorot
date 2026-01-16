@@ -118,7 +118,7 @@ class MachineSelector extends ConsumerWidget {
                     child: DropdownButton<String>(
                       value: selectedMachineId,
                       hint: Text(
-                        'All Machines',
+                        'Select Machine',
                         style: TextStyle(
                           fontSize: isCompact ? 13 : 14,
                           fontWeight: FontWeight.w600,
@@ -134,7 +134,7 @@ class MachineSelector extends ConsumerWidget {
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
-                          child: Text('All Machines'),
+                          child: Text('Select Machine'),
                         ),
                         ...sortedMachines.map((machine) {
                           return DropdownMenuItem<String>(

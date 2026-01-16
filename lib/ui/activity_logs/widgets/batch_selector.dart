@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers/batch_providers.dart';
+import '../../../data/models/batch_model.dart';
 
 /// Reusable batch selector dropdown
 class BatchSelector extends ConsumerWidget {
   final String? selectedBatchId;
   final String? selectedMachineId;
   final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onMachineAutoSelect;
   final bool isCompact;
   final bool showLabel;
   final bool showAllOption;
@@ -16,6 +18,7 @@ class BatchSelector extends ConsumerWidget {
     required this.selectedBatchId,
     required this.onChanged,
     this.selectedMachineId,
+    this.onMachineAutoSelect,
     this.isCompact = false,
     this.showLabel = true,
     this.showAllOption = true,
@@ -145,7 +148,22 @@ class BatchSelector extends ConsumerWidget {
                             );
                           }),
                         ],
-                  onChanged: hasNoBatches ? null : onChanged,
+                  onChanged: hasNoBatches
+                      ? null
+                      : (batchId) {
+                          // Auto-select machine FIRST when batch is selected
+                          if (batchId != null && onMachineAutoSelect != null) {
+                            final selectedBatch = filteredBatches.firstWhere(
+                              (b) => b.id == batchId,
+                            );
+                            onMachineAutoSelect!(selectedBatch.machineId);
+                          } else if (batchId == null && onMachineAutoSelect != null) {
+                            // Reset machine selection when "All Batches" is selected
+                            onMachineAutoSelect!(null);
+                          }
+                          // Then call the batch changed callback
+                          onChanged(batchId);
+                        },
                 ),
               ),
             ],

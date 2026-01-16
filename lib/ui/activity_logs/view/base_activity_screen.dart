@@ -121,6 +121,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                   selectedBatchId: state.selectedBatchId,
                   selectedMachineId: state.selectedMachineId,
                   onChanged: onBatchChanged,
+                  onMachineAutoSelect: onMachineChanged,
                   isCompact: true,
                 ),
               ),

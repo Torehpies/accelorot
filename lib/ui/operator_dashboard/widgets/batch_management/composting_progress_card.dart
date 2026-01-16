@@ -360,6 +360,11 @@ class _CompostingProgressCardState
                   child: BatchSelector(
                     selectedBatchId: _selectedBatchId,
                     selectedMachineId: _selectedMachineId,
+                    onMachineAutoSelect: (machineId) {
+                      setState(() {
+                        _selectedMachineId = machineId;
+                      });
+                    },
                     onChanged: (batchId) {
                       setState(() {
                         _selectedBatchId = batchId;
