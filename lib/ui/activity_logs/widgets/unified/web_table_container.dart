@@ -20,7 +20,7 @@ enum DropdownDisplayMode { full, iconOnly }
 class WebTableContainer extends StatelessWidget {
   final List<ActivityLogItem> items;
   final bool isLoading;
-  
+
   // Filter states
   final String? selectedMachineId;
   final String? selectedBatchId;
@@ -28,17 +28,17 @@ class WebTableContainer extends StatelessWidget {
   final String searchQuery;
   final ActivityCategory selectedCategory;
   final ActivitySubType selectedType;
-  
+
   // Sort states
   final String? sortColumn;
   final bool sortAscending;
-  
+
   // Pagination states
   final int? currentPage;
   final int? totalPages;
   final int? itemsPerPage;
   final int? totalItems;
-  
+
   // Callbacks
   final ValueChanged<String?> onMachineChanged;
   final ValueChanged<String?> onBatchChanged;
@@ -111,7 +111,7 @@ class WebTableContainer extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Right header: Date filter and Search
           rightHeaderWidgets: [
             SizedBox(
@@ -121,12 +121,9 @@ class WebTableContainer extends StatelessWidget {
                 isLoading: isLoading,
               ),
             ),
-            SearchField(
-              onChanged: onSearchChanged,
-              isLoading: isLoading,
-            ),
+            SearchField(onChanged: onSearchChanged, isLoading: isLoading),
           ],
-          
+
           // Table header
           tableHeader: TableHeader(
             selectedCategory: selectedCategory,
@@ -138,16 +135,19 @@ class WebTableContainer extends StatelessWidget {
             onSort: onSort,
             isLoading: isLoading,
           ),
-          
+
           // Table body
           tableBody: TableBody(
             items: items,
             onViewDetails: onViewDetails,
             isLoading: isLoading,
           ),
-          
+
           // Pagination
-          paginationWidget: (currentPage != null && totalPages != null && itemsPerPage != null)
+          paginationWidget:
+              (currentPage != null &&
+                  totalPages != null &&
+                  itemsPerPage != null)
               ? PaginationControls(
                   currentPage: currentPage!,
                   totalPages: totalPages!,
@@ -169,7 +169,8 @@ class WebTableContainer extends StatelessWidget {
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    const rightSectionEstimatedWidth = 380.0; // Date filter + Search + gaps (more realistic)
+    const rightSectionEstimatedWidth =
+        380.0; // Date filter + Search + gaps (more realistic)
     const minGapBetweenSections = 24.0; // Spacer minimum
     const containerCrampedThreshold = 800.0; // Increased threshold
 
@@ -181,10 +182,11 @@ class WebTableContainer extends StatelessWidget {
     // Tier 1: Content-based detection
     // Estimate left section width based on current selections
     final leftSectionEstimatedWidth = _estimateLeftSectionWidth(context);
-    
-    final totalNeeded = leftSectionEstimatedWidth + 
-                       rightSectionEstimatedWidth + 
-                       minGapBetweenSections;
+
+    final totalNeeded =
+        leftSectionEstimatedWidth +
+        rightSectionEstimatedWidth +
+        minGapBetweenSections;
 
     // Add 10% buffer to be more conservative
     final totalNeededWithBuffer = totalNeeded * 1.1;
@@ -202,28 +204,33 @@ class WebTableContainer extends StatelessWidget {
     const paddingPerDropdown = 30.0; // Increased: horizontal padding + borders
     const arrowWidth = 20.0;
     const clearButtonWidth = 20.0; // Increased: includes hover space
-    const internalGaps = 24.0; // Increased: gaps between icon, text, arrow, clear
+    const internalGaps =
+        24.0; // Increased: gaps between icon, text, arrow, clear
     const gapBetweenDropdowns = 12.0;
 
     // Estimate Machine dropdown width
-    final machineText = selectedMachineId == null ? 'All Machines' : _getMachineDisplayName();
+    final machineText = selectedMachineId == null
+        ? 'All Machines'
+        : _getMachineDisplayName();
     final machineTextWidth = _estimateTextWidth(context, machineText);
-    final machineDropdownWidth = iconWidth + 
-                                  machineTextWidth + 
-                                  arrowWidth + 
-                                  (selectedMachineId != null ? clearButtonWidth : 0) +
-                                  internalGaps + 
-                                  paddingPerDropdown;
+    final machineDropdownWidth =
+        iconWidth +
+        machineTextWidth +
+        arrowWidth +
+        (selectedMachineId != null ? clearButtonWidth : 0) +
+        internalGaps +
+        paddingPerDropdown;
 
     // Estimate Batch dropdown width
     final batchText = selectedBatchId ?? 'All Batches';
     final batchTextWidth = _estimateTextWidth(context, batchText);
-    final batchDropdownWidth = iconWidth + 
-                               batchTextWidth + 
-                               arrowWidth + 
-                               (selectedBatchId != null ? clearButtonWidth : 0) +
-                               internalGaps + 
-                               paddingPerDropdown;
+    final batchDropdownWidth =
+        iconWidth +
+        batchTextWidth +
+        arrowWidth +
+        (selectedBatchId != null ? clearButtonWidth : 0) +
+        internalGaps +
+        paddingPerDropdown;
 
     return machineDropdownWidth + gapBetweenDropdowns + batchDropdownWidth;
   }
@@ -239,13 +246,10 @@ class WebTableContainer extends StatelessWidget {
   /// Estimates text width using TextPainter
   double _estimateTextWidth(BuildContext context, String text) {
     final textPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: WebTextStyles.bodyMedium,
-      ),
+      text: TextSpan(text: text, style: WebTextStyles.bodyMedium),
       textDirection: TextDirection.ltr,
     )..layout();
-    
+
     return textPainter.width;
   }
 }

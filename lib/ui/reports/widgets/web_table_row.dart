@@ -49,7 +49,6 @@ class WebTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericTableRow(
-      onTap: onTap,
       cellSpacing: AppSpacing.md,
       cells: [
         // Title Column (flex: 2)
