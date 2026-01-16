@@ -9,10 +9,7 @@ import '../../core/themes/web_colors.dart';
 class CtaSection extends StatelessWidget {
   final VoidCallback onGetStarted;
 
-  const CtaSection({
-    super.key,
-    required this.onGetStarted,
-  });
+  const CtaSection({super.key, required this.onGetStarted});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +29,7 @@ class CtaSection extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE0F2FE),
-                  Color(0xFFCCFBF1),
-                ],
+                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
               ),
             ),
             child: Column(
@@ -110,6 +104,7 @@ class CtaSection extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    const SizedBox(width: 10),
                     SvgPicture.asset(
                       'assets/images/Accel-O-Rot Logo.svg',
                       width: 60,
@@ -117,6 +112,7 @@ class CtaSection extends StatelessWidget {
                       fit: BoxFit.contain,
                       semanticsLabel: 'Accel-O-Rot Logo',
                     ),
+                    const SizedBox(width: 10),
                     Text(
                       'Accel-O-Rot',
                       style: h2Style.copyWith(
@@ -143,3 +139,4 @@ class CtaSection extends StatelessWidget {
     );
   }
 }
+

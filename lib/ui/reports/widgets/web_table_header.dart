@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../models/reports_state.dart';
 import '../../core/widgets/filters/filter_dropdown.dart';
-import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/table/table_row.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';

@@ -23,7 +23,6 @@ class _MobileNavigationState extends State<MobileNavigation> {
     const HomeScreen(),
     // ✅ Now uses the navigator instead of direct screen
     const ActivityLogsNavigator(
-      focusedMachineId: null, // null = show all machines
       // viewingOperatorId will be fetched from auth inside screens
     ),
     const StatisticsScreen(),

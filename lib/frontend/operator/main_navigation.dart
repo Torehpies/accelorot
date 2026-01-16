@@ -60,10 +60,8 @@ class _MainNavigationState extends State<MainNavigation> {
       HomeScreen(focusedMachine: widget.focusedMachine),
       ActivityLogsNavigator(
         key: _activityNavigatorKey,
-        focusedMachineId: widget.focusedMachine?.machineId,
       ),
       StatisticsScreen(
-        focusedMachineId: widget.focusedMachine?.machineId,
 
       ),
       const OperatorMachineView(), 

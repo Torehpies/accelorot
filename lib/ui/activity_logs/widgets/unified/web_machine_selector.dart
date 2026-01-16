@@ -1,20 +1,23 @@
-// lib/ui/activity_logs/widgets/unified/unified_machine_selector.dart
+// lib/ui/activity_logs/widgets/unified/web_machine_selector.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/providers/machine_providers.dart';
 import '../../../../data/models/machine_model.dart';
 import '../../../../services/sess_service.dart';
-import 'unified_dropdown.dart';
+import 'web_dropdown.dart';
+import 'web_table_container.dart';
 
-class UnifiedMachineSelector extends ConsumerWidget {
+class WebMachineSelector extends ConsumerWidget {
   final String? selectedMachineId;
   final ValueChanged<String?> onChanged;
+  final DropdownDisplayMode displayMode;
 
-  const UnifiedMachineSelector({
+  const WebMachineSelector({
     super.key,
     required this.selectedMachineId,
     required this.onChanged,
+    required this.displayMode,
   });
 
   @override
@@ -25,7 +28,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return UnifiedDropdown<String>(
+          return WebDropdown<String>(
             value: null,
             label: 'Machine',
             hintText: 'All Machines',
@@ -33,6 +36,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
             onChanged: (_) {},
             icon: Icons.precision_manufacturing,
             isLoading: true,
+            displayMode: displayMode,
           );
         }
 
@@ -40,7 +44,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
         final teamId = userData?['teamId'] as String?;
 
         if (teamId == null) {
-          return UnifiedDropdown<String>(
+          return WebDropdown<String>(
             value: null,
             label: 'Machine',
             hintText: 'All Machines',
@@ -48,6 +52,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
             onChanged: (_) {},
             icon: Icons.precision_manufacturing,
             disabledHint: 'No Team Found',
+            displayMode: displayMode,
           );
         }
 
@@ -58,7 +63,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
             final activeMachines = machines.where((m) => !m.isArchived).toList();
             
             if (activeMachines.isEmpty) {
-              return UnifiedDropdown<String>(
+              return WebDropdown<String>(
                 value: null,
                 label: 'Machine',
                 hintText: 'All Machines',
@@ -66,6 +71,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
                 onChanged: (_) {},
                 icon: Icons.precision_manufacturing,
                 disabledHint: 'No Machines',
+                displayMode: displayMode,
               );
             }
 
@@ -78,9 +84,10 @@ class UnifiedMachineSelector extends ConsumerWidget {
               selectedMachineName: selectedMachine?.machineName ?? 'All Machines',
               activeMachines: activeMachines,
               onChanged: onChanged,
+              displayMode: displayMode,
             );
           },
-          loading: () => UnifiedDropdown<String>(
+          loading: () => WebDropdown<String>(
             value: null,
             label: 'Machine',
             hintText: 'All Machines',
@@ -88,8 +95,9 @@ class UnifiedMachineSelector extends ConsumerWidget {
             onChanged: (_) {},
             icon: Icons.precision_manufacturing,
             isLoading: true,
+            displayMode: displayMode,
           ),
-          error: (_, _) => UnifiedDropdown<String>(
+          error: (_, _) => WebDropdown<String>(
             value: null,
             label: 'Machine',
             hintText: 'All Machines',
@@ -97,6 +105,7 @@ class UnifiedMachineSelector extends ConsumerWidget {
             onChanged: (_) {},
             icon: Icons.precision_manufacturing,
             disabledHint: 'Error loading',
+            displayMode: displayMode,
           ),
         );
       },
@@ -110,23 +119,26 @@ class _UnifiedMachineDropdownInner extends StatelessWidget {
   final String selectedMachineName;
   final List<MachineModel> activeMachines;
   final ValueChanged<String?> onChanged;
+  final DropdownDisplayMode displayMode;
 
   const _UnifiedMachineDropdownInner({
     required this.selectedMachineId,
     required this.selectedMachineName,
     required this.activeMachines,
     required this.onChanged,
+    required this.displayMode,
   });
 
   @override
   Widget build(BuildContext context) {
-    return UnifiedDropdown<String>(
+    return WebDropdown<String>(
       value: selectedMachineId,
       label: 'Machine',
       hintText: 'All Machines',
       displayText: selectedMachineId == null ? 'All Machines' : selectedMachineName,
       icon: Icons.precision_manufacturing,
       onChanged: onChanged,
+      displayMode: displayMode,
       items: [
         const PopupMenuItem<String>(
           value: null,

@@ -7,10 +7,10 @@ import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
 import '../filters/filter_dropdown.dart';
-import 'activity_table_row.dart';
+import 'table_row.dart';
 
 /// Table header row with sortable columns and filter dropdowns
-class ActivityTableHeader extends StatelessWidget {
+class TableHeader extends StatelessWidget {
   final ActivityCategory selectedCategory;
   final ActivitySubType selectedType;
   final String? sortColumn;
@@ -20,7 +20,7 @@ class ActivityTableHeader extends StatelessWidget {
   final ValueChanged<String> onSort;
   final bool isLoading;
 
-  const ActivityTableHeader({
+  const TableHeader({
     super.key,
     required this.selectedCategory,
     required this.selectedType,

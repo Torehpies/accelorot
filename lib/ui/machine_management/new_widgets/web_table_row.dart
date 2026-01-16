@@ -6,7 +6,7 @@ import '../../../data/models/machine_model.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/table/table_row.dart';
 
 /// Single machine row in table
 /// Supports both admin and operator views via nullable onEdit callback

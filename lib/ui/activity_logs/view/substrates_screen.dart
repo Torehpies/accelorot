@@ -10,7 +10,6 @@ class SubstratesScreen extends BaseActivityScreen {
   const SubstratesScreen({
     super.key,
     super.initialFilter,
-    super.focusedMachineId, 
   });
 
   @override
@@ -21,7 +20,6 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.substrates,
         initialFilter: widget.initialFilter,
-        focusedMachineId: widget.focusedMachineId,  
       );
 
   @override
@@ -30,12 +28,7 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   }
 
   @override
-  String getScreenTitle() {
-    final state = getState();
-    return state.focusedMachineId != null
-        ? 'Machine Substrate Logs'
-        : 'Substrate Logs';
-  }
+  String getScreenTitle() => 'Substrate Logs';
 
   @override
   List<String> getFilters() {
@@ -62,11 +55,11 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
     ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
 
-  
   @override
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
   }
+
   @override
   void onMachineChanged(String? machineId) {
     ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
