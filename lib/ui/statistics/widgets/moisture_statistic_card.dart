@@ -26,16 +26,16 @@ class MoistureStatisticCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 2), // Full colored border
-         // No boxShadow
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
              // Header Section
              Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Color(0xFFF0F9FF), width: 1)
@@ -56,11 +56,11 @@ class MoistureStatisticCard extends StatelessWidget {
                           color: Color(0xFF374151),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                        const Text(
                         'sample text description...',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -94,7 +94,7 @@ class MoistureStatisticCard extends StatelessWidget {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -102,12 +102,12 @@ class MoistureStatisticCard extends StatelessWidget {
                   const Text(
                     'Ideal Range: 40% - 60%',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF4B5563),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   
                   // Progress Bar
                   ClipRRect(
@@ -119,11 +119,11 @@ class MoistureStatisticCard extends StatelessWidget {
                       minHeight: 12,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
                   
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 100, // Reduced height
                     child: SfCartesianChart(
                       plotAreaBorderWidth: 0,
                       margin: EdgeInsets.zero,
@@ -155,28 +155,28 @@ class MoistureStatisticCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Trend Text
                   const Text(
                     'Trending up by 5.2% this week',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   ..._buildMoreInfo(),
                 ],
               ),
@@ -213,7 +213,7 @@ class MoistureStatisticCard extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: Color(0xFF6B7280),
               ),
             ),

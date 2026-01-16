@@ -27,16 +27,16 @@ class TemperatureStatisticCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 2), // Full colored border
-        // No boxShadow as requested
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Allow minimum height
           children: [
-            // Header Section with Light Background
+            // Header Section
              Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16), // Reduced padding
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Color(0xFFFFF7ED), width: 1)
@@ -52,16 +52,16 @@ class TemperatureStatisticCard extends StatelessWidget {
                        const Text(
                         'Temperature',
                         style: TextStyle(
-                          fontSize: 18, // Slightly larger
-                          fontWeight: FontWeight.bold, // Bolder
-                          color: Color(0xFF374151), // Darker Grey
+                          fontSize: 18, 
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF374151),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                        const Text(
                         'sample text description...',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -95,7 +95,7 @@ class TemperatureStatisticCard extends StatelessWidget {
             ),
             
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16), // Reduced padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -103,28 +103,28 @@ class TemperatureStatisticCard extends StatelessWidget {
                   const Text(
                     'Ideal Range: 55°C - 70°C',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF4B5563),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   
                   // Progress Bar
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10), // Rounder
+                    borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _calculateProgress(currentTemperature),
-                      backgroundColor: const Color(0xFFFFEDD5), // Very light orange
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFC2410C)), // Darker Orange
-                      minHeight: 12, // Thicker
+                      backgroundColor: const Color(0xFFFFEDD5), 
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFC2410C)),
+                      minHeight: 12,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
                   
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 100, // Reduced height
                     child: SfCartesianChart(
                       plotAreaBorderWidth: 0,
                       margin: EdgeInsets.zero,
@@ -138,11 +138,11 @@ class TemperatureStatisticCard extends StatelessWidget {
                         majorGridLines: const MajorGridLines(width: 0),
                       ),
                       series: <CartesianSeries>[
-                        SplineSeries<Map<String, dynamic>, String>( // Changed to SplineSeries (Line only)
+                        SplineSeries<Map<String, dynamic>, String>(
                           dataSource: chartData,
                           xValueMapper: (data, _) => data['month'] as String,
                           yValueMapper: (data, _) => data['value'] as double,
-                          color: const Color(0xFFC2410C), // Darker orange line
+                          color: const Color(0xFFC2410C),
                           width: 3,
                           markerSettings: const MarkerSettings(
                             isVisible: true,
@@ -156,28 +156,28 @@ class TemperatureStatisticCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   
                   // Trend Text
                   const Text(
                     'Trending up by 5.2% this week',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   ..._buildMoreInfo(),
                 ],
               ),
@@ -214,7 +214,7 @@ class TemperatureStatisticCard extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: Color(0xFF6B7280),
               ),
             ),
@@ -227,9 +227,9 @@ class TemperatureStatisticCard extends StatelessWidget {
   List<Map<String, dynamic>> _generateMonthlyData() {
     return [
       {'month': 'Jan', 'value': 40.0},
-      {'month': 'Feb', 'value': 75.0}, // Peak
+      {'month': 'Feb', 'value': 75.0},
       {'month': 'Mar', 'value': 55.0},
-      {'month': 'Apr', 'value': 35.0}, // Low
+      {'month': 'Apr', 'value': 35.0},
       {'month': 'May', 'value': 60.0},
       {'month': 'Jun', 'value': 65.0},
     ];

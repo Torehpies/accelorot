@@ -144,29 +144,6 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         Expanded(
           child: _buildBatchSelector(),
         ),
-        const SizedBox(width: 16),
-        
-        // Calendar Icon
-        IconButton(
-          onPressed: () {
-            // TODO: Implement calendar functionality
-          },
-          icon: const Icon(Icons.calendar_today_outlined),
-          tooltip: 'Select Date',
-          iconSize: 20,
-          color: Colors.grey[700],
-        ),
-        
-        // Search Icon
-        IconButton(
-          onPressed: () {
-            // TODO: Implement search functionality
-          },
-          icon: const Icon(Icons.search),
-          tooltip: 'Search',
-          iconSize: 22,
-          color: Colors.grey[700],
-        ),
       ],
     );
   }
@@ -284,35 +261,41 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           // Tablet: 2 columns
           return Column(
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: cards[0]),
-                  const SizedBox(width: 20),
-                  Expanded(child: cards[1]),
-                ],
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: cards[0]),
+                    const SizedBox(width: 20),
+                    Expanded(child: cards[1]),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: cards[2]),
-                  const Expanded(child: SizedBox()), // Empty space
-                ],
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: cards[2]),
+                    const Expanded(child: SizedBox()), // Empty space
+                  ],
+                ),
               ),
             ],
           );
         } else {
           // Desktop: 3 columns
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: cards[0]),
-              const SizedBox(width: 20),
-              Expanded(child: cards[1]),
-              const SizedBox(width: 20),
-              Expanded(child: cards[2]),
-            ],
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: cards[0]),
+                const SizedBox(width: 20),
+                Expanded(child: cards[1]),
+                const SizedBox(width: 20),
+                Expanded(child: cards[2]),
+              ],
+            ),
           );
         }
       },

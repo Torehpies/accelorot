@@ -2,21 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../temperature_stats_view.dart';
-import '../moisture_stats_view.dart';
-import '../oxygen_stats_view.dart';
-import '../../../data/providers/machine_providers.dart';
-import '../../../data/providers/selected_machine_provider.dart'; 
-import '../../../data/models/machine_model.dart';
-import '../../../services/sess_service.dart';
+import 'widgets/temperature_statistic_card.dart';
+import 'widgets/moisture_statistic_card.dart';
+import 'widgets/oxygen_statistic_card.dart';
+import '../../data/providers/machine_providers.dart';
+import '../../data/providers/selected_machine_provider.dart'; 
+import '../../data/providers/statistics_providers.dart';
+import '../../data/models/machine_model.dart';
+import '../../services/sess_service.dart';
 
-class StatisticsScreen extends ConsumerWidget {
+class StatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
 
   const StatisticsScreen({super.key, this.focusedMachineId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+  String? selectedBatch;
+
+  // Sample batches for UI demonstration
+  final List<String> sampleBatches = [
+    'Batch A',
+    'Batch B',
+    'Batch C',
+    'Batch D',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     final sessionService = SessionService();
     
     return FutureBuilder<Map<String, dynamic>?>(
@@ -46,7 +62,8 @@ class StatisticsScreen extends ConsumerWidget {
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
         return Scaffold(
-          backgroundColor: Colors.grey[50],
+          backgroundColor: const Color(0xFFF9FAFB),
+          appBar: kIsWeb ? null : MobileHeader(title: 'Statistics'),
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
@@ -64,21 +81,30 @@ class StatisticsScreen extends ConsumerWidget {
               if (selectedMachineId.isEmpty || 
                   !activeMachines.any((m) => m.id == selectedMachineId)) {
                 // Use focusedMachineId or first machine
-                final initialId = focusedMachineId ?? activeMachines.first.id!;
+                final initialId = widget.focusedMachineId ?? activeMachines.first.id!;
                 Future.microtask(() {
                   ref.read(selectedMachineIdProvider.notifier).setMachine(initialId);
                 });
                 return const Center(child: CircularProgressIndicator());
               }
 
+              // Initialize batch if needed
+              if (selectedBatch == null) {
+                Future.microtask(() {
+                  setState(() {
+                    selectedBatch = sampleBatches.first;
+                  });
+                });
+              }
+
               return RefreshIndicator(
-                onRefresh: () => _handleRefresh(ref, teamId),
+                onRefresh: () => _handleRefresh(ref, selectedMachineId),
                 child: ListView(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   children: [
-                    _MachineSelector(machines: activeMachines),
-                    const SizedBox(height: 12),
-                    _MachineStatsView(machines: activeMachines),
+                    _buildSelectors(activeMachines),
+                    const SizedBox(height: 20),
+                    _buildStatisticsCards(selectedMachineId),
                   ],
                 ),
               );
@@ -115,146 +141,176 @@ class StatisticsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleRefresh(WidgetRef ref, String teamId) async {
-    ref.invalidate(machinesStreamProvider(teamId));
-    await Future.delayed(const Duration(milliseconds: 500));
+  Widget _buildSelectors(List<MachineModel> activeMachines) {
+    return Column(
+      children: [
+        _buildMachineSelector(activeMachines),
+        const SizedBox(height: 12),
+        _buildBatchSelector(),
+      ],
+    );
   }
-}
 
-// Separate widget for machine selector - only rebuilds when selection changes
-class _MachineSelector extends ConsumerWidget {
-  final List<MachineModel> machines;
-
-  const _MachineSelector({required this.machines});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget _buildMachineSelector(List<MachineModel> machines) {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.03 * 255).round()),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
-      child: Row(
-        children: [
-          Icon(Icons.precision_manufacturing, color: Colors.grey[700]),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedMachineId,
-                isExpanded: true,
-                items: machines.map((machine) => DropdownMenuItem(
-                  value: machine.id!,
-                  child: Text(machine.machineName),
-                )).toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    ref.read(selectedMachineIdProvider.notifier).setMachine(val);
-                  }
-                },
-              ),
-            ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedMachineId,
+          hint: const Text('Select a machine'),
+          isExpanded: true,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
-        ],
+          items: machines.map((machine) {
+            return DropdownMenuItem(
+              value: machine.id!,
+              child: Text(machine.machineName),
+            );
+          }).toList(),
+          onChanged: (val) {
+            if (val != null) {
+              ref.read(selectedMachineIdProvider.notifier).setMachine(val);
+            }
+          },
+        ),
       ),
     );
   }
-}
 
-// Separate widget for machine stats - only rebuilds when selected machine changes
-class _MachineStatsView extends ConsumerWidget {
-  final List<MachineModel> machines;
-
-  const _MachineStatsView({required this.machines});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
-    final selectedMachine = machines.firstWhere(
-      (m) => m.id == selectedMachineId,
-    );
-
+  Widget _buildBatchSelector() {
     return Container(
-      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: selectedMachine.isArchived ? Colors.grey.shade100 : Colors.white,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: selectedMachine.isArchived ? Colors.grey.shade300 : Colors.teal.shade200,
-          width: 1.5,
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedBatch,
+          hint: const Text('Select a batch'),
+          isExpanded: true,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          items: sampleBatches.map((batch) {
+            return DropdownMenuItem(
+              value: batch,
+              child: Text(batch),
+            );
+          }).toList(),
+          onChanged: (val) {
+            if (val != null) {
+              setState(() {
+                selectedBatch = val;
+              });
+            }
+          },
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: selectedMachine.isArchived ? Colors.grey.shade100 : Colors.teal.shade50,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.precision_manufacturing,
-                  size: 16,
-                  color: selectedMachine.isArchived ? Colors.grey.shade600 : Colors.teal.shade700,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        selectedMachine.machineName,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: selectedMachine.isArchived ? Colors.grey.shade700 : Colors.teal.shade900,
-                        ),
-                      ),
-                      Text(
-                        'ID: ${selectedMachine.id}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: selectedMachine.isArchived ? Colors.grey.shade600 : Colors.teal.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    );
+  }
+
+  Widget _buildStatisticsCards(String machineId) {
+    final temperatureAsync = ref.watch(temperatureDataProvider(machineId));
+    final moistureAsync = ref.watch(moistureDataProvider(machineId));
+    final oxygenAsync = ref.watch(oxygenDataProvider(machineId));
+
+    return Column(
+      children: [
+        // Temperature Card
+        temperatureAsync.when(
+          data: (readings) => TemperatureStatisticCard(
+            currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
+            hourlyReadings: readings.map((r) => r.value).toList(),
+            lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
           ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              children: [
-                TemperatureStatsView(machineId: selectedMachine.id!),
-                const SizedBox(height: 8),
-                OxygenStatsView(machineId: selectedMachine.id!),
-                const SizedBox(height: 8),
-                MoistureStatsView(machineId: selectedMachine.id!),
-              ],
-            ),
+          loading: () => _buildLoadingCard(),
+          error: (error, stack) => _buildErrorCard('Temperature'),
+        ),
+        const SizedBox(height: 16),
+        
+        // Moisture Card
+        moistureAsync.when(
+          data: (readings) => MoistureStatisticCard(
+            currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
+            hourlyReadings: readings.map((r) => r.value).toList(),
+            lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
           ),
-        ],
+          loading: () => _buildLoadingCard(),
+          error: (error, stack) => _buildErrorCard('Moisture'),
+        ),
+        const SizedBox(height: 16),
+        
+        // Air Quality Card
+        oxygenAsync.when(
+          data: (readings) => OxygenStatisticCard(
+            currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
+            hourlyReadings: readings.map((r) => r.value).toList(),
+            lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+          ),
+          loading: () => _buildLoadingCard(),
+          error: (error, stack) => _buildErrorCard('Air Quality'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingCard() {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
       ),
     );
+  }
+
+  Widget _buildErrorCard(String title) {
+    return Container(
+      height: 150,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 36, color: Colors.grey[400]),
+            const SizedBox(height: 8),
+            Text(
+              'Error loading $title data',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleRefresh(WidgetRef ref, String machineId) async {
+    ref.invalidate(temperatureDataProvider(machineId));
+    ref.invalidate(moistureDataProvider(machineId));
+    ref.invalidate(oxygenDataProvider(machineId));
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 }
