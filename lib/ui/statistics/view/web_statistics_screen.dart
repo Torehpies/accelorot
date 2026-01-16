@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/providers/statistics_providers.dart';
-import 'widgets/web_stat_card.dart';
-import '../../data/providers/machine_providers.dart';
-import '../../data/providers/selected_machine_provider.dart'; 
-import '../../data/models/machine_model.dart';
-import '../../services/sess_service.dart';
+import '../../../data/providers/statistics_providers.dart';
+import '../../web_statistics/widgets/web_stat_card.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../data/providers/selected_machine_provider.dart'; 
+import '../../../data/models/machine_model.dart';
+import '../../../services/sess_service.dart';
 
 class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;

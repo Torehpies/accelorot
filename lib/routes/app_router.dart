@@ -27,7 +27,7 @@ import 'package:flutter_application_1/ui/team_management/widgets/team_management
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
-import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
+import 'package:flutter_application_1/ui/statistics/view/web_statistics_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as prov;

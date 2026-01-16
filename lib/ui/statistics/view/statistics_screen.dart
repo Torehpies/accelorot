@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'temperature_stats_view.dart';
-import 'moisture_stats_view.dart';
-import 'oxygen_stats_view.dart';
-import '../../data/providers/machine_providers.dart';
-import '../../data/providers/selected_machine_provider.dart'; 
-import '../../data/models/machine_model.dart';
-import '../../services/sess_service.dart';
+import '../temperature_stats_view.dart';
+import '../moisture_stats_view.dart';
+import '../oxygen_stats_view.dart';
+import '../../../data/providers/machine_providers.dart';
+import '../../../data/providers/selected_machine_provider.dart'; 
+import '../../../data/models/machine_model.dart';
+import '../../../services/sess_service.dart';
 
 class StatisticsScreen extends ConsumerWidget {
   final String? focusedMachineId;
