@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/statistics_providers.dart';
-import '../mobile_statistics/widgets/temperature_statistic_card.dart';
-import '../mobile_statistics/widgets/moisture_statistic_card.dart';
-import '../mobile_statistics/widgets/oxygen_statistic_card.dart';
+import 'widgets/web_stat_card.dart';
 import '../../data/providers/machine_providers.dart';
 import '../../data/providers/selected_machine_provider.dart'; 
 import '../../data/models/machine_model.dart';
 import '../../services/sess_service.dart';
 
-class WebStatisticsScreen extends ConsumerWidget {
+class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
 
   const WebStatisticsScreen({super.key, this.focusedMachineId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WebStatisticsScreen> createState() => _WebStatisticsScreenState();
+}
+
+class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
+  String? selectedBatch;
+
+  // Sample batches for UI demonstration
+  final List<String> sampleBatches = [
+    'Batch A',
+    'Batch B',
+    'Batch C',
+    'Batch D',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     final sessionService = SessionService();
     
     return FutureBuilder<Map<String, dynamic>?>(
@@ -32,10 +45,7 @@ class WebStatisticsScreen extends ConsumerWidget {
 
         if (teamId == null) {
           return Scaffold(
-            appBar: AppBar(
-              title: const Text('Statistics'),
-              backgroundColor: Colors.teal.shade700,
-            ),
+            backgroundColor: const Color(0xFFF9FAFB),
             body: const Center(
               child: Text('No team assigned. Please contact your administrator.'),
             ),
@@ -45,15 +55,7 @@ class WebStatisticsScreen extends ConsumerWidget {
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
         return Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: AppBar(
-            title: const Text(
-              "Statistics",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.teal.shade700,
-            elevation: 0,
-          ),
+          backgroundColor: const Color(0xFFF9FAFB),
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
@@ -70,32 +72,34 @@ class WebStatisticsScreen extends ConsumerWidget {
               final selectedMachineId = ref.watch(selectedMachineIdProvider);
               if (selectedMachineId.isEmpty || 
                   !activeMachines.any((m) => m.id == selectedMachineId)) {
-                final initialId = focusedMachineId ?? activeMachines.first.id!;
+                final initialId = widget.focusedMachineId ?? activeMachines.first.id!;
                 Future.microtask(() {
                   ref.read(selectedMachineIdProvider.notifier).setMachine(initialId);
                 });
                 return const Center(child: CircularProgressIndicator());
               }
 
+              // Initialize batch if needed
+              if (selectedBatch == null) {
+                Future.microtask(() {
+                  setState(() {
+                    selectedBatch = sampleBatches.first;
+                  });
+                });
+              }
+
               return RefreshIndicator(
                 onRefresh: () => _handleRefresh(ref, selectedMachineId),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final width = constraints.maxWidth;
-                    final padding = width < 600 ? 16.0 : 24.0;
-                    
-                    return SingleChildScrollView(
-                      padding: EdgeInsets.all(padding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeader(width, activeMachines, ref),
-                          const SizedBox(height: 24),
-                          _buildStatisticsCards(width, selectedMachineId, ref),
-                        ],
-                      ),
-                    );
-                  },
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(activeMachines, ref),
+                      const SizedBox(height: 32),
+                      _buildStatisticsCards(),
+                    ],
+                  ),
                 ),
               );
             },
@@ -125,77 +129,41 @@ class WebStatisticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(double width, List<MachineModel> machines, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.05 * 255).toInt()),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: width < 600
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeaderContent(),
-                const SizedBox(height: 16),
-                _buildMachineSelector(machines, ref),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(child: _buildHeaderContent()),
-                const SizedBox(width: 16),
-                _buildMachineSelector(machines, ref),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildHeaderContent() {
+  Widget _buildHeader(List<MachineModel> machines, WidgetRef ref) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.teal.shade50,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.precision_manufacturing,
-            color: Colors.teal.shade700,
-            size: 28,
-          ),
+        // Machine Selector
+        Expanded(
+          child: _buildMachineSelector(machines, ref),
         ),
         const SizedBox(width: 16),
+        
+        // Batch Selector
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Machine Monitoring',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Real-time sensor data and analytics',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+          child: _buildBatchSelector(),
+        ),
+        const SizedBox(width: 16),
+        
+        // Calendar Icon
+        IconButton(
+          onPressed: () {
+            // TODO: Implement calendar functionality
+          },
+          icon: const Icon(Icons.calendar_today_outlined),
+          tooltip: 'Select Date',
+          iconSize: 20,
+          color: Colors.grey[700],
+        ),
+        
+        // Search Icon
+        IconButton(
+          onPressed: () {
+            // TODO: Implement search functionality
+          },
+          icon: const Icon(Icons.search),
+          tooltip: 'Search',
+          iconSize: 22,
+          color: Colors.grey[700],
         ),
       ],
     );
@@ -205,238 +173,193 @@ class WebStatisticsScreen extends ConsumerWidget {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.analytics, color: Colors.grey[700], size: 18),
-          const SizedBox(width: 8),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selectedMachineId,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              items: machines.map((machine) {
-                return DropdownMenuItem(
-                  value: machine.id!,
-                  child: Text(machine.machineName),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  ref.read(selectedMachineIdProvider.notifier).setMachine(val);
-                }
-              },
-            ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedMachineId,
+          hint: const Text('Select a machine'),
+          isExpanded: true,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
-        ],
+          items: machines.map((machine) {
+            return DropdownMenuItem(
+              value: machine.id!,
+              child: Text(machine.machineName),
+            );
+          }).toList(),
+          onChanged: (val) {
+            if (val != null) {
+              ref.read(selectedMachineIdProvider.notifier).setMachine(val);
+            }
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildStatisticsCards(double width, String machineId, WidgetRef ref) {
-    // Determine layout based on width
-    if (width < 700) {
-      // Mobile: Single column
-      return Column(
-        children: [
-          _buildTemperatureCard(machineId, ref),
-          const SizedBox(height: 20),
-          _buildMoistureCard(machineId, ref),
-          const SizedBox(height: 20),
-          _buildOxygenCard(machineId, ref),
-        ],
-      );
-    } else if (width < 1100) {
-      // Tablet: 2 columns
-      return Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _buildTemperatureCard(machineId, ref)),
-              const SizedBox(width: 20),
-              Expanded(child: _buildMoistureCard(machineId, ref)),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: _buildOxygenCard(machineId, ref)),
-              const Expanded(child: SizedBox()), // Empty space
-            ],
-          ),
-        ],
-      );
-    } else {
-      // Desktop: 3 columns
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _buildTemperatureCard(machineId, ref)),
-          const SizedBox(width: 20),
-          Expanded(child: _buildMoistureCard(machineId, ref)),
-          const SizedBox(width: 20),
-          Expanded(child: _buildOxygenCard(machineId, ref)),
-        ],
-      );
-    }
-  }
-
-  Widget _buildTemperatureCard(String machineId, WidgetRef ref) {
-    final temperatureAsync = ref.watch(temperatureDataProvider(machineId));
-
-    return _buildSensorCard(
-      title: 'Temperature',
-      icon: Icons.thermostat,
-      iconColor: Colors.orange,
-      asyncValue: temperatureAsync,
-      builder: (readings) => TemperatureStatisticCard(
-        currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
-        hourlyReadings: readings.map((r) => r.value).toList(),
-        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-      ),
-      onRetry: () => ref.invalidate(temperatureDataProvider(machineId)),
-    );
-  }
-
-  Widget _buildMoistureCard(String machineId, WidgetRef ref) {
-    final moistureAsync = ref.watch(moistureDataProvider(machineId));
-
-    return _buildSensorCard(
-      title: 'Moisture',
-      icon: Icons.water_drop,
-      iconColor: Colors.blue,
-      asyncValue: moistureAsync,
-      builder: (readings) => MoistureStatisticCard(
-        currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
-        hourlyReadings: readings.map((r) => r.value).toList(),
-        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-      ),
-      onRetry: () => ref.invalidate(moistureDataProvider(machineId)),
-    );
-  }
-
-  Widget _buildOxygenCard(String machineId, WidgetRef ref) {
-    final oxygenAsync = ref.watch(oxygenDataProvider(machineId));
-
-    return _buildSensorCard(
-      title: 'Air Quality',
-      icon: Icons.air,
-      iconColor: Colors.green,
-      asyncValue: oxygenAsync,
-      builder: (readings) => OxygenStatisticCard(
-        currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
-        hourlyReadings: readings.map((r) => r.value).toList(),
-        lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-      ),
-      onRetry: () => ref.invalidate(oxygenDataProvider(machineId)),
-    );
-  }
-
-  Widget _buildSensorCard<T>({
-    required String title,
-    required IconData icon,
-    required Color iconColor,
-    required AsyncValue<List<T>> asyncValue,
-    required Widget Function(List<T>) builder,
-    required VoidCallback onRetry,
-  }) {
+  Widget _buildBatchSelector() {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.08 * 255).toInt()),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: iconColor.withAlpha((0.1 * 255).toInt()),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: iconColor, size: 24),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: iconColor,
-                  ),
-                ),
-              ],
-            ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selectedBatch,
+          hint: const Text('Select a batch'),
+          isExpanded: true,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: asyncValue.when(
-              data: (readings) => builder(readings),
-              loading: () => const SizedBox(
-                height: 200,
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-              error: (error, stack) => SizedBox(
-                height: 200,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 36, color: Colors.grey[400]),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Error loading data',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: onRetry,
-                        icon: const Icon(Icons.refresh, size: 16),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+          items: sampleBatches.map((batch) {
+            return DropdownMenuItem(
+              value: batch,
+              child: Text(batch),
+            );
+          }).toList(),
+          onChanged: (val) {
+            if (val != null) {
+              setState(() {
+                selectedBatch = val;
+              });
+            }
+          },
+        ),
       ),
+    );
+  }
+
+  Widget _buildStatisticsCards() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        
+        // Sample chart data for UI demonstration
+        final sampleChartData = [
+          {'month': 'Jan', 'value': 40.0},
+          {'month': 'Feb', 'value': 55.0},
+          {'month': 'Mar', 'value': 45.0},
+          {'month': 'Apr', 'value': 65.0},
+          {'month': 'May', 'value': 50.0},
+          {'month': 'Jun', 'value': 70.0},
+        ];
+
+        final cards = [
+          WebStatCard(
+            title: 'Temperature',
+            description: 'sample text description...',
+            value: '1300',
+            unit: '°C',
+            idealRange: '55°C - 70°C',
+            progress: 0.75,
+            valueColor: const Color(0xFFEA580C), // Orange
+            progressColor: const Color(0xFFEA580C),
+            trendText: 'Trending up by 5.2% this week',
+            chartData: sampleChartData,
+            moreInfoItems: [
+              'sample text here',
+              'sample text here',
+              'sample text here',
+              'sample text here',
+            ],
+          ),
+          WebStatCard(
+            title: 'Moisture',
+            description: 'sample text description...',
+            value: '28.0',
+            unit: '%',
+            idealRange: '40% - 60%',
+            progress: 0.5,
+            valueColor: const Color(0xFF0284C7), // Blue
+            progressColor: const Color(0xFF0284C7),
+            trendText: 'Trending up by 5.2% this week',
+            chartData: sampleChartData,
+            moreInfoItems: [
+              'sample text here',
+              'sample text here',
+              'sample text here',
+              'sample text here',
+            ],
+          ),
+          WebStatCard(
+            title: 'Air Quality',
+            description: 'sample text description...',
+            value: '550',
+            unit: 'ppm',
+            idealRange: '65 ppm - 70 ppm',
+            progress: 0.65,
+            valueColor: const Color(0xFF7C3AED), // Purple
+            progressColor: const Color(0xFF7C3AED),
+            trendText: 'Trending up by 5.2% this week',
+            chartData: sampleChartData,
+            moreInfoItems: [
+              'sample text here',
+              'sample text here',
+              'sample text here',
+              'sample text here',
+            ],
+          ),
+        ];
+
+        // Responsive layout
+        if (width < 700) {
+          // Mobile: Single column
+          return Column(
+            children: cards
+                .map((card) => Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: card,
+                    ))
+                .toList(),
+          );
+        } else if (width < 1100) {
+          // Tablet: 2 columns
+          return Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: cards[0]),
+                  const SizedBox(width: 20),
+                  Expanded(child: cards[1]),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: cards[2]),
+                  const Expanded(child: SizedBox()), // Empty space
+                ],
+              ),
+            ],
+          );
+        } else {
+          // Desktop: 3 columns
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: cards[0]),
+              const SizedBox(width: 20),
+              Expanded(child: cards[1]),
+              const SizedBox(width: 20),
+              Expanded(child: cards[2]),
+            ],
+          );
+        }
+      },
     );
   }
 
