@@ -173,6 +173,7 @@ class TableHeaderCell extends StatelessWidget {
       );
     }
 
+    // Sortable header
     return Center(
       child: InkWell(
         onTap: onSort,

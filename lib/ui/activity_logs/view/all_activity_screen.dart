@@ -7,10 +7,7 @@ import 'base_activity_screen.dart';
 import '../models/activity_common.dart';
 
 class AllActivityScreen extends BaseActivityScreen {
-  const AllActivityScreen({
-    super.key,
-    super.focusedMachineId,
-  });
+  const AllActivityScreen({super.key});
 
   @override
   ConsumerState<AllActivityScreen> createState() => _AllActivityScreenState();
@@ -19,7 +16,6 @@ class AllActivityScreen extends BaseActivityScreen {
 class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.allActivity,
-        focusedMachineId: widget.focusedMachineId,
       );
 
   @override
@@ -28,12 +24,7 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
   }
 
   @override
-  String getScreenTitle() {
-    final state = getState();
-    return state.focusedMachineId != null
-        ? 'Machine Activity Logs'
-        : 'All Activity Logs';
-  }
+  String getScreenTitle() => 'All Activity Logs';
 
   @override
   List<String> getFilters() {
@@ -69,6 +60,7 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
   }
+
   @override
   void onMachineChanged(String? machineId) {
     ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);

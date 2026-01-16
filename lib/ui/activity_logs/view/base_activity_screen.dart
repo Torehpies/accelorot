@@ -16,12 +16,10 @@ import '../models/activity_common.dart';
 /// All business logic is in ViewModels
 abstract class BaseActivityScreen extends ConsumerStatefulWidget {
   final String? initialFilter;
-  final String? focusedMachineId;
 
   const BaseActivityScreen({
     super.key,
     this.initialFilter,
-    this.focusedMachineId,
   });
 }
 
@@ -52,7 +50,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   void onDateFilterChanged(DateFilterRange filter);
 
   void onBatchChanged(String? batchId);
-  
   
   void onMachineChanged(String? machineId);
 
@@ -89,22 +86,12 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            getScreenTitle(),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          if (state.focusedMachineId != null)
-            Text(
-              'Machine ID: ${state.focusedMachineId}',
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-        ],
+      title: Text(
+        getScreenTitle(),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
       backgroundColor: Colors.teal,
       actions: [
@@ -119,9 +106,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Column(
         children: [
-          // Machine filter banner
-          if (state.focusedMachineId != null) _buildMachineBanner(),
-
           Row(
             children: [
               Expanded(
@@ -143,7 +127,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
             ],
           ),
           const SizedBox(height: 12),
-
 
           // Search bar
           SearchBarWidget(
@@ -187,40 +170,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                   // Content (loading, error, list, empty)
                   Expanded(child: _buildContent(state)),
                 ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMachineBanner() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.teal.shade50, Colors.teal.shade100],
-        ),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.teal.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.filter_alt,
-            color: Colors.teal.shade700,
-            size: 18,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Showing activities for this machine only',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.teal.shade900,
               ),
             ),
           ),
@@ -309,14 +258,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (state.focusedMachineId != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Activities will appear here once waste is added to this machine',
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
-                ),
-              ],
             ],
           ),
         ),
@@ -337,9 +278,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   }
 
   String _getEmptyMessage(ActivityListState state) {
-    if (state.focusedMachineId != null) {
-      return 'No activities found for this machine';
-    }
     if (state.searchQuery.isNotEmpty) {
       return 'No results found for "${state.searchQuery}"';
     }

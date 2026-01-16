@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
-import '../../core/widgets/table/activity_table_row.dart';
+import '../../core/widgets/table/table_row.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
@@ -49,7 +49,6 @@ class WebTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericTableRow(
-      onTap: onTap,
       cellSpacing: AppSpacing.md,
       cells: [
         // Title Column (flex: 2)

@@ -1,22 +1,20 @@
-// lib/ui/activity_logs/view/unified_activity_view.dart
+// lib/ui/activity_logs/view/web_activity_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/unified/stats_card_row.dart';
-import '../widgets/unified/unified_table_container.dart';
+import '../widgets/unified/web_table_container.dart';
 import '../dialogs/activity_dialog_helper.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 
 /// Main unified activity view with enhanced stats
-class UnifiedActivityView extends ConsumerWidget {
-  final String? focusedMachineId;
+class WebActivityView extends ConsumerWidget {
 
-  const UnifiedActivityView({
+  const WebActivityView({
     super.key,
-    this.focusedMachineId,
   });
 
   @override
@@ -66,7 +64,7 @@ class UnifiedActivityView extends ConsumerWidget {
 
               // Unified Table Container
               Expanded(
-                child: UnifiedTableContainer(
+                child: WebTableContainer(
                   items: state.paginatedItems,
                   isLoading: state.isLoading,
                   selectedMachineId: state.selectedMachineId,

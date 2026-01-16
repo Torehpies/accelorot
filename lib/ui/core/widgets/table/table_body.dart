@@ -3,17 +3,17 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../shared/empty_state.dart';
-import 'activity_table_row.dart';
+import 'table_row.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_colors.dart';
 
 /// Table body with ListView and empty state handling
-class ActivityTableBody extends StatefulWidget {
+class TableBody extends StatefulWidget {
   final List<ActivityLogItem> items;
   final ValueChanged<ActivityLogItem> onViewDetails;
   final bool isLoading;
 
-  const ActivityTableBody({
+  const TableBody({
     super.key,
     required this.items,
     required this.onViewDetails,
@@ -21,10 +21,10 @@ class ActivityTableBody extends StatefulWidget {
   });
 
   @override
-  State<ActivityTableBody> createState() => _ActivityTableBodyState();
+  State<TableBody> createState() => _TableBodyState();
 }
 
-class _ActivityTableBodyState extends State<ActivityTableBody>
+class _TableBodyState extends State<TableBody>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _pulseAnimation;

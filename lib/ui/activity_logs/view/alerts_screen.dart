@@ -10,7 +10,6 @@ class AlertsScreen extends BaseActivityScreen {
   const AlertsScreen({
     super.key,
     super.initialFilter,
-    super.focusedMachineId,
   });
 
   @override
@@ -21,7 +20,6 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.alerts,
         initialFilter: widget.initialFilter,
-        focusedMachineId: widget.focusedMachineId,
       );
 
   @override
@@ -30,10 +28,7 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   }
 
   @override
-  String getScreenTitle() {
-    final state = getState();
-    return state.focusedMachineId != null ? 'Machine Alerts' : 'Alerts Logs';
-  }
+  String getScreenTitle() => 'Alerts Logs';
 
   @override
   List<String> getFilters() {

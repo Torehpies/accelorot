@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../view_model/profile_notifier.dart';
@@ -39,7 +38,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     final state = ref.watch(profileProvider);
     final notifier = ref.read(profileProvider.notifier);
     final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 60;
+    final isSmallScreen = screenWidth < 800;
 
     debugPrint(screenWidth.toString());
     final cardPadding = isSmallScreen ? 16.0 : 24.0;
@@ -50,9 +49,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: kIsWeb
-          ? null 
-          : MobileHeader(title: 'Profile'),
+      appBar: MobileHeader(title: 'Profile'),
             body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.profile == null

@@ -19,12 +19,6 @@ MachineAggregatorService machineAggregatorService(Ref ref) {
 
 @riverpod
 class MachineViewModel extends _$MachineViewModel {
-  // ========================================
-  // MOBILE ONLY - Will be removed after mobile refactor
-  // ========================================
-  static const int _pageSize = 5;
-  // ========================================
-
   late final MachineAggregatorService _aggregator;
   late final MachineFilterService _filterService;
 
@@ -34,7 +28,7 @@ class MachineViewModel extends _$MachineViewModel {
   MachineState build() {
     _aggregator = ref.read(machineAggregatorServiceProvider);
     _filterService = MachineFilterService();
-    
+
     return const MachineState();
   }
 
@@ -42,11 +36,8 @@ class MachineViewModel extends _$MachineViewModel {
 
   Future<void> initialize(String teamId) async {
     _currentTeamId = teamId;
-    
-    state = state.copyWith(
-      status: LoadingStatus.loading,
-      errorMessage: null,
-    );
+
+    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
       final isLoggedIn = await _aggregator.isUserLoggedIn();
@@ -64,7 +55,8 @@ class MachineViewModel extends _$MachineViewModel {
     } catch (e) {
       state = state.copyWith(
         status: LoadingStatus.error,
-        errorMessage: 'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
+        errorMessage:
+            'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
       );
     }
   }
@@ -73,16 +65,13 @@ class MachineViewModel extends _$MachineViewModel {
 
   Future<void> loadMachines(String teamId) async {
     _currentTeamId = teamId;
-    
+
     try {
       state = state.copyWith(status: LoadingStatus.loading);
 
       final machines = await _aggregator.getMachines(teamId);
 
-      state = state.copyWith(
-        machines: machines,
-        status: LoadingStatus.success,
-      );
+      state = state.copyWith(machines: machines, status: LoadingStatus.success);
 
       // Apply filters to the newly loaded data
       _applyFilters();
@@ -102,18 +91,12 @@ class MachineViewModel extends _$MachineViewModel {
   // ===== WEB FILTER HANDLERS =====
 
   void onStatusFilterChanged(MachineStatusFilter filter) {
-    state = state.copyWith(
-      selectedStatusFilter: filter,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedStatusFilter: filter, currentPage: 1);
     _applyFilters();
   }
 
   void onDateFilterChanged(DateFilterRange dateFilter) {
-    state = state.copyWith(
-      dateFilter: dateFilter,
-      currentPage: 1,
-    );
+    state = state.copyWith(dateFilter: dateFilter, currentPage: 1);
     _applyFilters();
   }
 
@@ -126,35 +109,24 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   void onSearchChanged(String query) {
-    state = state.copyWith(
-      searchQuery: query,
-      currentPage: 1,
-      // MOBILE: Reset display limit
-      displayLimit: _pageSize,
-    );
+    state = state.copyWith(searchQuery: query, currentPage: 1);
     _applyFilters();
   }
 
   void clearSearch() {
-    state = state.copyWith(
-      searchQuery: '',
-      currentPage: 1,
-      // MOBILE: Reset display limit
-      displayLimit: _pageSize,
-    );
+    state = state.copyWith(searchQuery: '', currentPage: 1);
     _applyFilters();
   }
 
   // ===== WEB SORTING HANDLERS =====
 
   void onSort(String column) {
-    final isAscending = state.sortColumn == column ? !state.sortAscending : true;
-    
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
-    
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
+
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
+
     _applyFilters();
   }
 
@@ -165,10 +137,7 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   void onItemsPerPageChanged(int itemsPerPage) {
-    state = state.copyWith(
-      itemsPerPage: itemsPerPage,
-      currentPage: 1,
-    );
+    state = state.copyWith(itemsPerPage: itemsPerPage, currentPage: 1);
   }
 
   // ===== FILTERING LOGIC =====
@@ -184,9 +153,172 @@ class MachineViewModel extends _$MachineViewModel {
       sortAscending: state.sortAscending,
     );
 
-    state = state.copyWith(
-      filteredMachines: result.filteredMachines,
+    state = state.copyWith(filteredMachines: result.filteredMachines);
+  }
+
+  // ===== STATS CALCULATIONS =====
+
+  /// Get machine stats with month-over-month change percentage
+  Map<String, Map<String, dynamic>> getMachineStatsWithChange() {
+    final now = DateTime.now();
+
+    // Current month: from start of this month to now
+    final currentMonthStart = DateTime(now.year, now.month, 1);
+    final currentMonthEnd = now;
+
+    // Previous month: full month
+    final previousMonthStart = DateTime(now.year, now.month - 1, 1);
+    final previousMonthEnd = DateTime(
+      now.year,
+      now.month,
+      1,
+    ).subtract(const Duration(microseconds: 1));
+
+    // Get ALL-TIME counts (for display)
+    final allTimeStats = _getAllTimeStats();
+
+    // Get counts for current month (for comparison)
+    final currentStats = _getStatsForDateRange(
+      currentMonthStart,
+      currentMonthEnd,
     );
+
+    // Get counts for previous month (for comparison)
+    final previousStats = _getStatsForDateRange(
+      previousMonthStart,
+      previousMonthEnd,
+    );
+
+    return {
+      'total': _buildChangeData(
+        allTimeStats['total']!,
+        currentStats['total']!,
+        previousStats['total']!,
+        'machines created',
+      ),
+      'active': _buildChangeData(
+        allTimeStats['active']!,
+        currentStats['active']!,
+        previousStats['active']!,
+        'activated',
+      ),
+      'archived': _buildChangeData(
+        allTimeStats['archived']!,
+        currentStats['archived']!,
+        previousStats['archived']!,
+        'archived',
+      ),
+      'suspended': _buildChangeData(
+        allTimeStats['suspended']!,
+        currentStats['suspended']!,
+        previousStats['suspended']!,
+        'suspended',
+      ),
+    };
+  }
+
+  /// Helper: Get all-time stats (for display counts)
+  Map<String, int> _getAllTimeStats() {
+    final total = state.machines.length;
+
+    final active = state.machines
+        .where((m) => m.status == MachineStatus.active && !m.isArchived)
+        .length;
+
+    final archived = state.machines.where((m) => m.isArchived).length;
+
+    final suspended = state.machines
+        .where(
+          (m) => m.status == MachineStatus.underMaintenance && !m.isArchived,
+        )
+        .length;
+
+    return {
+      'total': total,
+      'active': active,
+      'archived': archived,
+      'suspended': suspended,
+    };
+  }
+
+  /// Helper: Get stats for a specific date range
+  Map<String, int> _getStatsForDateRange(DateTime start, DateTime end) {
+    // Total: Count machines CREATED in this range
+    final newMachines = state.machines.where((m) {
+      return m.dateCreated.isAfter(start) && m.dateCreated.isBefore(end);
+    }).length;
+
+    // Active: Count machines that are currently active AND were modified in range
+    final activeChanged = state.machines.where((m) {
+      final wasModified =
+          m.lastModified != null &&
+          m.lastModified!.isAfter(start) &&
+          m.lastModified!.isBefore(end);
+      return m.status == MachineStatus.active && !m.isArchived && wasModified;
+    }).length;
+
+    // Archived: Count machines that are archived AND were modified in range
+    final archivedChanged = state.machines.where((m) {
+      final wasModified =
+          m.lastModified != null &&
+          m.lastModified!.isAfter(start) &&
+          m.lastModified!.isBefore(end);
+      return m.isArchived && wasModified;
+    }).length;
+
+    // Suspended: Count machines under maintenance AND were modified in range
+    final suspendedChanged = state.machines.where((m) {
+      final wasModified =
+          m.lastModified != null &&
+          m.lastModified!.isAfter(start) &&
+          m.lastModified!.isBefore(end);
+      return m.status == MachineStatus.underMaintenance &&
+          !m.isArchived &&
+          wasModified;
+    }).length;
+
+    return {
+      'total': newMachines,
+      'active': activeChanged,
+      'archived': archivedChanged,
+      'suspended': suspendedChanged,
+    };
+  }
+
+  /// Helper: Build change data with percentage and positive/negative indicator
+  Map<String, dynamic> _buildChangeData(
+    int allTimeCount,
+    int currentMonthCount,
+    int previousMonthCount,
+    String changeType,
+  ) {
+    String changeText;
+    bool isPositive = true;
+
+    if (previousMonthCount == 0 && currentMonthCount > 0) {
+      // New this month
+      changeText = 'New';
+      isPositive = true;
+    } else if (previousMonthCount == 0 && currentMonthCount == 0) {
+      // No data yet
+      changeText = 'No log yet';
+      isPositive = true; // Neutral
+    } else {
+      // Calculate percentage change (current month vs previous month)
+      final percentageChange =
+          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
+              .round();
+      isPositive = percentageChange >= 0;
+      final sign = isPositive ? '+' : '';
+      changeText = '$sign$percentageChange%';
+    }
+
+    return {
+      'count': allTimeCount,
+      'change': changeText,
+      'isPositive': isPositive,
+      'changeType': changeType, // "new machines" or "status changed"
+    };
   }
 
   // ===== MACHINE OPERATIONS =====
@@ -290,23 +422,4 @@ class MachineViewModel extends _$MachineViewModel {
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }
-
-  // ========================================
-  // MOBILE ONLY - Will be removed after mobile refactor
-  // ========================================
-
-  void setFilterTab(MachineFilterTab tab) {
-    state = state.copyWith(
-      selectedTab: tab,
-      searchQuery: '',
-      displayLimit: _pageSize,
-      currentPage: 1,
-    );
-  }
-
-  void loadMore() {
-    state = state.copyWith(displayLimit: state.displayLimit + _pageSize);
-  }
-
-  // ========================================
 }

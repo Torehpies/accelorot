@@ -10,7 +10,6 @@ class ReportsScreen extends BaseActivityScreen {
   const ReportsScreen({
     super.key,
     super.initialFilter,
-    super.focusedMachineId,
   });
 
   @override
@@ -21,7 +20,6 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   ActivityParams get _params => ActivityParams(
         screenType: ActivityScreenType.reports,
         initialFilter: widget.initialFilter,
-        focusedMachineId: widget.focusedMachineId,
       );
 
   @override
@@ -30,10 +28,7 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   }
 
   @override
-  String getScreenTitle() {
-    final state = getState();
-    return state.focusedMachineId != null ? 'Machine Reports' : 'Reports';
-  }
+  String getScreenTitle() => 'Reports';
 
   @override
   List<String> getFilters() {
@@ -59,6 +54,7 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   void onDateFilterChanged(DateFilterRange filter) {
     ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
   }
+
   @override
   void onBatchChanged(String? batchId) {
     ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
