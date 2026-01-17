@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_home_provider.dart';
-import '../widgets/swipeable_stat_cards.dart';
-import '../web_widgets/recent_activities_table.dart';
-import '../web_widgets/analytics_widget.dart'; 
-import '../../core/widgets/shared/mobile_header.dart'; 
+import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/swipeable_stat_cards.dart';
+import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_activities_table.dart';
+import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/analytics_widget.dart';
+import '../../core/widgets/shared/mobile_header.dart';
 
 class MobileAdminHomeView extends ConsumerWidget {
   const MobileAdminHomeView({super.key});
