@@ -19,13 +19,24 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final allActivitiesAsync = ref.watch(allActivitiesProvider);
+    final allActivitiesAsync = ref.watch(userTeamActivitiesProvider);
 
     // Calculate report status from widget.reports
-    final reportStatus = <String, int>{};
+    final reportStatus = <String, int>{
+      'OPEN': 0,
+      'ON HOLD': 0,
+      'IN PROGRESS': 0,
+    };
+    
     for (var report in widget.reports) {
-      final status = report.status;
-      reportStatus[status] = (reportStatus[status] ?? 0) + 1;
+      final status = report.status.toLowerCase();
+      if (status == 'open' || status == 'pending') {
+        reportStatus['OPEN'] = (reportStatus['OPEN'] ?? 0) + 1;
+      } else if (status == 'on_hold' || status == 'on hold' || status == 'onhold' || status == 'paused') {
+        reportStatus['ON HOLD'] = (reportStatus['ON HOLD'] ?? 0) + 1;
+      } else if (status == 'in_progress' || status == 'in progress' || status == 'inprogress' || status == 'active') {
+        reportStatus['IN PROGRESS'] = (reportStatus['IN PROGRESS'] ?? 0) + 1;
+      }
     }
 
     return Card(
