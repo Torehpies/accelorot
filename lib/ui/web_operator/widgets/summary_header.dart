@@ -3,7 +3,7 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/summary_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SummaryHeader extends ConsumerWidget {
@@ -18,28 +18,28 @@ class SummaryHeader extends ConsumerWidget {
         if (teamUser?.teamId == null) {
           return const Row(
             children: [
-              _SummaryCard(
+              SummaryCard(
                 title: 'Active Operators',
                 value: '—',
                 icon: Icons.person,
                 iconBackgroundColor: AppColors.greenBackground,
                 iconForegroundColor: AppColors.greenForeground,
               ),
-              _SummaryCard(
+              SummaryCard(
                 title: 'Archived Operators',
                 value: '—',
                 icon: Icons.person,
                 iconBackgroundColor: AppColors.yellowBackground,
                 iconForegroundColor: AppColors.yellowForeground,
               ),
-              _SummaryCard(
+              SummaryCard(
                 title: 'Former Operators',
                 value: '—',
                 icon: Icons.person,
                 iconBackgroundColor: AppColors.redBackground,
                 iconForegroundColor: AppColors.redForeground,
               ),
-              _SummaryCard(
+              SummaryCard(
                 title: 'New Operators',
                 value: '—',
                 icon: Icons.person,
@@ -75,7 +75,7 @@ class _TeamSummaryRow extends ConsumerWidget {
 
     return Row(
       children: [
-        _SummaryCard(
+        SummaryCard(
           title: 'Active Operators',
           value: '$activeOperators',
           icon: Icons.person,
@@ -83,7 +83,7 @@ class _TeamSummaryRow extends ConsumerWidget {
           iconForegroundColor: AppColors.greenForeground,
         ),
         const SizedBox(width: 12),
-        _SummaryCard(
+        SummaryCard(
           title: 'Archived Operators',
           value: '$archivedOperators',
           icon: Icons.person,
@@ -91,7 +91,7 @@ class _TeamSummaryRow extends ConsumerWidget {
           iconForegroundColor: AppColors.yellowForeground,
         ),
         const SizedBox(width: 12),
-        _SummaryCard(
+        SummaryCard(
           title: 'Former Operators',
           value: '${team.formerOperators}',
           icon: Icons.person,
@@ -99,7 +99,7 @@ class _TeamSummaryRow extends ConsumerWidget {
           iconForegroundColor: AppColors.redForeground,
         ),
         const SizedBox(width: 12),
-        _SummaryCard(
+        SummaryCard(
           title: 'New Operators',
           value: '${team.newOperators}',
           icon: Icons.person,
@@ -111,80 +111,3 @@ class _TeamSummaryRow extends ConsumerWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color iconBackgroundColor;
-  final Color iconForegroundColor;
-
-  const _SummaryCard({
-    required this.title,
-    required this.value,
-    required this.iconBackgroundColor,
-    required this.iconForegroundColor,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.background2,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: WebColors.cardBorder, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: WebColors.cardShadow,
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: WebColors.textLabel,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: iconBackgroundColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 20, color: iconForegroundColor),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.w700,
-                color: WebColors.textHeading,
-                height: 1.1,
-              ),
-            ),
-            const SizedBox(height: 5),
-            // const Divider(height: 1, color: WebColors.dividerLight),
-            // const SizedBox(height: 5),
-          ],
-        ),
-      ),
-    );
-  }
-}
