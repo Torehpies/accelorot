@@ -1,5 +1,6 @@
 // lib/ui/machine_management/view_model/machine_viewmodel.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,6 +30,7 @@ class MachineViewModel extends _$MachineViewModel {
   MachineState build() {
     _aggregator = ref.read(machineAggregatorServiceProvider);
     _filterService = MachineFilterService();
+
     Future.microtask(() => _initialize());
 
     return const MachineState();
@@ -50,19 +52,44 @@ class MachineViewModel extends _$MachineViewModel {
         return;
       }
 
-      final teamId = FirebaseAuth.instance.currentUser?.uid;
-
-      if (teamId == null) {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      
+      if (userId == null) {
         state = state.copyWith(
           status: LoadingStatus.error,
-          errorMessage: 'Unable to get team ID',
+          errorMessage: 'Unable to get user ID',
+        );
+        return;
+      }
+
+      // Fetch user document to get teamId
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!userDoc.exists) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'User profile not found',
+        );
+        return;
+      }
+
+      final userData = userDoc.data();
+      final teamId = userData?['teamId'] as String?;
+
+      if (teamId == null || teamId.isEmpty) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'Team ID not found in user profile',
         );
         return;
       }
 
       _currentTeamId = teamId;
       state = state.copyWith(isLoggedIn: true);
-
+      
       await loadMachines(teamId);
     } catch (e) {
       state = state.copyWith(

@@ -14,8 +14,8 @@ import '../new_widgets/web_admin_add_dialog.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../models/machine_state.dart';
 
-class AdminMachineScreen extends ConsumerWidget {
-  const AdminMachineScreen({super.key});
+class WebAdminMachineScreen extends ConsumerWidget {
+  const WebAdminMachineScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
