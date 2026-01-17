@@ -53,7 +53,7 @@ class SettingsSwitchTile extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF4CAF50),
+        activeThumbColor: const Color(0xFF4CAF50),
       ),
     );
   }

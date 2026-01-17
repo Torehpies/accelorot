@@ -22,7 +22,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
   Widget build(BuildContext context) {
     /// ✅ Watch AsyncValue state
     final asyncState = ref.watch(adminHomeProvider);
-    final activitiesAsync = ref.watch(allActivitiesProvider);
+    final activitiesAsync = ref.watch(userTeamActivitiesProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFDFF2FF),

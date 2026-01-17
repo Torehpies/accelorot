@@ -5,6 +5,7 @@ import '../widgets/activity_section_card.dart';
 import '../widgets/navigation_section_card.dart';
 import '../widgets/batch_filter_section.dart';
 import '../models/activity_filter_model.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 
 class ActivityLogsScreen extends StatelessWidget {
   const ActivityLogsScreen({super.key}); // Removed focusedMachineId
@@ -13,14 +14,7 @@ class ActivityLogsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Activity Logs", // Removed conditional title
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.teal,
-      ),
+      appBar: MobileHeader(title: 'Activity Logs'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
