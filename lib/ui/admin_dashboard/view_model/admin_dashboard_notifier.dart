@@ -1,5 +1,4 @@
-// lib/ui/mobile_admin_home/notifier/admin_dashboard_notifier.dart
-
+// lib/ui/mobile_admin_home/view_model/admin_dashboard_notifier.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,10 +46,6 @@ class AdminDashboardState {
   int get totalReports => reports.length;
 }
 
-final adminDashboardProvider = AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
-  AdminDashboardNotifier.new,
-);
-
 class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
   @override
   Future<AdminDashboardState> build() async {
@@ -61,22 +56,25 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
     }
 
     try {
-      // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-    
+      final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
       final teamId = profile?.teamId;
-      
+
       if (teamId == null) {
         return const AdminDashboardState();
       }
 
+      // Use existing repository methods and stream providers
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
-      
-      return AdminDashboardState(operators: operators, machines: machines, reports: reports);
+      final machines = await ref.read(machinesStreamProvider(teamId).future);
+      final reports = await ref.read(reportRepositoryProvider).getTeamReports();
+
+      return AdminDashboardState(
+        operators: operators,
+        machines: machines,
+        reports: reports,
+      );
     } catch (e) {
-      rethrow;
+      return AdminDashboardState(error: e);
     }
   }
 
@@ -89,28 +87,36 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
     }
 
     state = const AsyncValue.loading();
+    
     try {
-      // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
+      final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
       final teamId = profile?.teamId;
-      
+
       if (teamId == null) {
-        // User not assigned to a team yet
         state = const AsyncValue.data(AdminDashboardState());
         return;
       }
 
-
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
-      
+      final machines = await ref.read(machinesStreamProvider(teamId).future);
+      final reports = await ref.read(reportRepositoryProvider).getTeamReports();
 
-      state = AsyncValue.data(AdminDashboardState(operators: operators, machines: machines, reports: reports));
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
+      state = AsyncValue.data(
+        AdminDashboardState(
+          operators: operators,
+          machines: machines,
+          reports: reports,
+        ),
+      );
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
     }
   }
 
   void refresh() => loadData();
 }
+
+// Provider must be at the top level (not inside a class)
+final adminDashboardProvider = AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
+  () => AdminDashboardNotifier(),
+);

@@ -20,8 +20,7 @@ class FirebaseOperatorService implements OperatorService {
     final List<OperatorModel> operators = [];
     for (var doc in membersSnapshot.docs) {
       final data = doc.data();
-      final userId = data['userId'] as String?;
-      if (userId == null) continue;
+      final userId = doc.id;
 
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) continue;
@@ -37,7 +36,7 @@ class FirebaseOperatorService implements OperatorService {
           uid: userId,
           name: name.isNotEmpty ? name : (data['name'] ?? 'Unknown') as String,
           email: (data['email'] ?? u['email'] ?? '') as String,
-          role: (data['role'] ?? u['role'] ?? 'Operator') as String,
+          role: (data['role'] ?? u['teamRole'] ?? 'Operator') as String,
           isArchived: (data['isArchived'] ?? false) as bool,
           hasLeft: (data['hasLeft'] ?? false) as bool,
           leftAt: (data['leftAt'] as Timestamp?)?.toDate(),
