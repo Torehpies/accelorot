@@ -1,12 +1,17 @@
+// lib/ui/machine_management/view/operator_machine_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/operator_machine_notifier.dart';
-import '../../../services/sess_service.dart';
-import 'operator_machine_card.dart';
-import 'search_bar_widget.dart';
+import '../widgets/operator_machine_card.dart';
+import '../../core/widgets/shared/mobile_header.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
-  const OperatorMachineView({super.key});
+  final String teamId;
+
+  const OperatorMachineView({
+    super.key,
+    required this.teamId,
+  });
 
   @override
   ConsumerState<OperatorMachineView> createState() =>
@@ -15,22 +20,11 @@ class OperatorMachineView extends ConsumerStatefulWidget {
 
 class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   final _searchFocusNode = FocusNode();
-  String? _teamId;
 
   @override
   void initState() {
     super.initState();
-    _loadTeamIdAndInit();
-  }
-
-  Future<void> _loadTeamIdAndInit() async {
-    final sessionService = SessionService();
-    final userData = await sessionService.getCurrentUserData();
-    _teamId = userData?['teamId'] as String?;
-
-    if (_teamId != null) {
-      ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
-    }
+    ref.read(operatorMachineProvider.notifier).initialize(widget.teamId);
   }
 
   @override
@@ -40,9 +34,7 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   }
 
   Future<void> _handleRefresh() async {
-    if (_teamId != null) {
-      await ref.read(operatorMachineProvider.notifier).refresh(_teamId!);
-    }
+    await ref.read(operatorMachineProvider.notifier).refresh(widget.teamId);
   }
 
   @override
@@ -54,21 +46,18 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          title: const Text(
-            'My Machines',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.teal,
-          elevation: 0,
-          centerTitle: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.white),
-              onPressed: _handleRefresh,
-              tooltip: 'Refresh',
-            ),
-          ],
+        appBar: MobileHeader(
+          title: 'My Machines',
+          showDropdown: false,
+          showFilterButton: true, // ✅ Now uses correct parameter name
+          showSearch: true,
+          showAddButton: false,
+          elevation: 0.0,
+          backgroundColor: Color(0xFFE0F2FE),
+          foregroundColor: Color(0xFFE0F2FE),
+          onDateRangeChanged: (range) {
+            // ✅ Passes to notifier
+          },
         ),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -131,43 +120,22 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
                   ),
                   child: Column(
                     children: [
-                      // Search Bar
+                      // Refresh Button
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: SearchBarWidget(
-                          onSearchChanged: notifier.setSearchQuery,
-                          onClear: notifier.clearSearch,
-                          focusNode: _searchFocusNode,
-                        ),
-                      ),
-
-                      // Title
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            const Text(
-                              'Your Machines',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.teal,
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              '${state.filteredMachines.length} machine(s)',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
+                            IconButton(
+                              icon: const Icon(Icons.refresh, color: Colors.teal),
+                              onPressed: _handleRefresh,
+                              tooltip: 'Refresh',
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      // Machine List with Error/Loading States Inside
+                      
+                      // Machine List
                       Expanded(child: _buildContent(state, notifier)),
                     ],
                   ),
@@ -184,12 +152,10 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     OperatorMachineState state,
     OperatorMachineNotifier notifier,
   ) {
-    // Loading State - inside container
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Error State - inside container
     if (state.errorMessage != null) {
       return Center(
         child: Padding(
@@ -208,7 +174,7 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
               ElevatedButton.icon(
                 onPressed: () {
                   notifier.clearError();
-                  if (_teamId != null) notifier.initialize(_teamId!);
+                  notifier.initialize(widget.teamId);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Retry'),
@@ -227,7 +193,6 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
       );
     }
 
-    // Empty State
     if (state.filteredMachines.isEmpty) {
       return Center(
         child: Column(
@@ -253,12 +218,10 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
       );
     }
 
-    // Content - Machine List
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
       itemBuilder: (context, index) {
-        // Show "Load More" button at the end
         if (index == state.displayedMachines.length) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),

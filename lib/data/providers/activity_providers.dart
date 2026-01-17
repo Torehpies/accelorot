@@ -11,6 +11,7 @@ import 'report_providers.dart';
 import 'cycle_providers.dart';
 import 'batch_providers.dart';
 import 'profile_providers.dart';
+import 'core_providers.dart';
 
 // ===== ACTIVITY AGGREGATOR PROVIDER =====
 
@@ -36,6 +37,9 @@ final activityFilterServiceProvider = Provider<ActivityFilterService>((ref) {
 
 /// Provider for all activities (substrates + alerts + cycles + reports)
 final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+  // Watch auth state to rebuild when user changes
+  ref.watch(authStateChangesProvider);
+  
   final aggregator = ref.watch(activityAggregatorProvider);
   final result = await aggregator.getAllActivitiesWithCache();
   return result.items;
@@ -67,6 +71,9 @@ final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) asy
 
 /// Provider for activities filtered by user's team
 final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+  // Watch auth state to rebuild when user changes
+  ref.watch(authStateChangesProvider);
+  
   final aggregator = ref.watch(activityAggregatorProvider);
   final profileRepo = ref.watch(profileRepositoryProvider);
   final batchRepo = ref.watch(batchRepositoryProvider);

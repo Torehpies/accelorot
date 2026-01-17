@@ -5,6 +5,7 @@ import '../../../data/providers/operator_providers.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/profile_providers.dart';
 import '../../../data/providers/report_providers.dart';
+import '../../../data/providers/core_providers.dart';
 import '../../../data/models/operator_model.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/models/report.dart';
@@ -79,17 +80,23 @@ class AdminHomeState {
 
   // Report status breakdown
   Map<String, int> get reportStatus {
-    final open = reports.where((r) => r.status.toLowerCase() == 'open').length;
-    final inProgress = reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
-    final closed = reports.where((r) => r.status.toLowerCase() == 'closed' || r.status.toLowerCase() == 'resolved').length;
-    final pending = reports.where((r) => r.status.toLowerCase() == 'pending').length;
-    
-    return {
-      'Open': open,
-      'In Progress': inProgress,
-      'Closed': closed,
-      'Pending': pending,
+    final statusMap = <String, int>{
+      'OPEN': 0,
+      'ON HOLD': 0,
+      'IN PROGRESS': 0,
     };
+    
+    for (var report in reports) {
+      final status = report.status.toLowerCase();
+      if (status == 'open' || status == 'pending') {
+        statusMap['OPEN'] = (statusMap['OPEN'] ?? 0) + 1;
+      } else if (status == 'on_hold' || status == 'on hold' || status == 'onhold' || status == 'paused') {
+        statusMap['ON HOLD'] = (statusMap['ON HOLD'] ?? 0) + 1;
+      } else if (status == 'in_progress' || status == 'in progress' || status == 'inprogress' || status == 'active') {
+        statusMap['IN PROGRESS'] = (statusMap['IN PROGRESS'] ?? 0) + 1;
+      }
+    }
+    return statusMap;
   }
 
   // Recent activities for table
@@ -121,11 +128,14 @@ final adminHomeProvider = AsyncNotifierProvider<AdminHomeNotifier, AdminHomeStat
   AdminHomeNotifier.new,
 );
 
+
 /// NOTIFIER
 class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
   @override
   Future<AdminHomeState> build() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    // Watch the existing auth state provider
+    final authState = ref.watch(authStateChangesProvider);
+    final userId = authState.value?.uid;
     
     if (userId == null) {
       return const AdminHomeState();
@@ -154,7 +164,7 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
       rethrow;
     }
   }
-
+  
   Future<void> loadData() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     
