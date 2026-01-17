@@ -14,29 +14,11 @@ import '../new_widgets/web_admin_add_dialog.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../models/machine_state.dart';
 
-class AdminMachineScreen extends ConsumerStatefulWidget {
-  final String teamId;
-
-  const AdminMachineScreen({
-    super.key,
-    required this.teamId,
-  });
+class AdminMachineScreen extends ConsumerWidget {
+  const AdminMachineScreen({super.key});
 
   @override
-  ConsumerState<AdminMachineScreen> createState() => _AdminMachineScreenState();
-}
-
-class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(machineViewModelProvider);
     final notifier = ref.read(machineViewModelProvider.notifier);
 
@@ -44,14 +26,15 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: state.errorMessage != null && !state.isLoading
-            ? _buildErrorState(state.errorMessage!)
-            : _buildContent(context, state, notifier),
+            ? _buildErrorState(context, ref, state.errorMessage!)
+            : _buildContent(context, ref, state, notifier),
       ),
     );
   }
 
   Widget _buildContent(
     BuildContext context,
+    WidgetRef ref,
     MachineState state,
     MachineViewModel notifier,
   ) {
@@ -66,7 +49,6 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              
               // Stats Cards Row
               const MachineStatsRow(),
 
@@ -89,11 +71,11 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
                   onDateFilterChanged: notifier.onDateFilterChanged,
                   onSearchChanged: notifier.onSearchChanged,
                   onSort: notifier.onSort,
-                  onEdit: (machine) => _showEditDialog(machine, notifier),
-                  onView: (machine) => _showViewDetailsDialog(machine, notifier),
+                  onEdit: (machine) => _showEditDialog(context, machine, notifier),
+                  onView: (machine) => _showViewDetailsDialog(context, machine, notifier),
                   onPageChanged: notifier.onPageChanged,
                   onItemsPerPageChanged: notifier.onItemsPerPageChanged,
-                  onAddMachine: () => _showAddMachineDialog(notifier),
+                  onAddMachine: () => _showAddMachineDialog(context, notifier),
                 ),
               ),
             ],
@@ -103,7 +85,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -131,7 +113,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
+              ref.invalidate(machineViewModelProvider);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: WebColors.tealAccent,
@@ -144,7 +126,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showAddMachineDialog(MachineViewModel notifier) {
+  void _showAddMachineDialog(BuildContext context, MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -157,7 +139,6 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
               required String machineName,
             }) async {
               await notifier.addMachine(
-                teamId: widget.teamId,
                 machineId: machineId,
                 machineName: machineName,
                 assignedUserIds: [],
@@ -169,7 +150,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showEditDialog(MachineModel machine, MachineViewModel notifier) {
+  void _showEditDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -183,7 +164,6 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
               required String machineName,
             }) async {
               await notifier.updateMachine(
-                teamId: widget.teamId,
                 machineId: machineId,
                 machineName: machineName,
               );
@@ -194,7 +174,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  void _showViewDetailsDialog(MachineModel machine, MachineViewModel notifier) {
+  void _showViewDetailsDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -206,7 +186,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
             constraints: const BoxConstraints(maxWidth: 800),
             child: WebAdminViewDetailsModal(
               machine: machine,
-              onArchive: () => _handleArchive(machine, notifier),
+              onArchive: () => _handleArchive(context, machine, notifier),
             ),
           ),
         );
@@ -214,7 +194,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
     );
   }
 
-  Future<void> _handleArchive(MachineModel machine, MachineViewModel notifier) async {
+  Future<void> _handleArchive(BuildContext context, MachineModel machine, MachineViewModel notifier) async {
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
@@ -260,8 +240,8 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
 
     if (confirmed == true) {
       try {
-        await notifier.archiveMachine(widget.teamId, machine.machineId);
-        if (mounted) {
+        await notifier.archiveMachine(machine.machineId);
+        if (context.mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -271,7 +251,7 @@ class _AdminMachineScreenState extends ConsumerState<AdminMachineScreen> {
           );
         }
       } catch (e) {
-        if (mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to archive: $e'),

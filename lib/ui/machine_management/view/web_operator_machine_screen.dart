@@ -12,29 +12,11 @@ import '../new_widgets/web_operator_view_details_modal.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../models/machine_state.dart';
 
-class OperatorMachineScreen extends ConsumerStatefulWidget {
-  final String teamId;
-
-  const OperatorMachineScreen({
-    super.key,
-    required this.teamId,
-  });
+class WebOperatorMachineScreen extends ConsumerWidget {
+  const WebOperatorMachineScreen({super.key});
 
   @override
-  ConsumerState<OperatorMachineScreen> createState() => _OperatorMachineScreenState();
-}
-
-class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(machineViewModelProvider);
     final notifier = ref.read(machineViewModelProvider.notifier);
 
@@ -42,7 +24,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: state.errorMessage != null && !state.isLoading
-            ? _buildErrorState(state.errorMessage!)
+            ? _buildErrorState(context, ref, state.errorMessage!)
             : _buildContent(context, state, notifier),
       ),
     );
@@ -64,7 +46,6 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
-              
               // Stats Cards Row (same as admin)
               const MachineStatsRow(),
 
@@ -87,7 +68,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
                   onDateFilterChanged: notifier.onDateFilterChanged,
                   onSearchChanged: notifier.onSearchChanged,
                   onSort: notifier.onSort,
-                  onView: (machine) => _showViewDetailsDialog(machine),
+                  onView: (machine) => _showViewDetailsDialog(context, machine),
                   onPageChanged: notifier.onPageChanged,
                   onItemsPerPageChanged: notifier.onItemsPerPageChanged,
                 ),
@@ -99,7 +80,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
     );
   }
 
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, WidgetRef ref, String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +108,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () {
-              ref.read(machineViewModelProvider.notifier).initialize(widget.teamId);
+              ref.invalidate(machineViewModelProvider);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: WebColors.tealAccent,
@@ -140,7 +121,7 @@ class _OperatorMachineScreenState extends ConsumerState<OperatorMachineScreen> {
     );
   }
 
-  void _showViewDetailsDialog(MachineModel machine) {
+  void _showViewDetailsDialog(BuildContext context, MachineModel machine) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,

@@ -1,5 +1,6 @@
 // lib/ui/machine_management/view_model/machine_viewmodel.dart
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/machine_model.dart';
@@ -28,15 +29,14 @@ class MachineViewModel extends _$MachineViewModel {
   MachineState build() {
     _aggregator = ref.read(machineAggregatorServiceProvider);
     _filterService = MachineFilterService();
+    Future.microtask(() => _initialize());
 
     return const MachineState();
   }
 
   // ===== INITIALIZATION =====
 
-  Future<void> initialize(String teamId) async {
-    _currentTeamId = teamId;
-
+  Future<void> _initialize() async {
     state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
@@ -50,7 +50,19 @@ class MachineViewModel extends _$MachineViewModel {
         return;
       }
 
+      final teamId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (teamId == null) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'Unable to get team ID',
+        );
+        return;
+      }
+
+      _currentTeamId = teamId;
       state = state.copyWith(isLoggedIn: true);
+
       await loadMachines(teamId);
     } catch (e) {
       state = state.copyWith(
@@ -324,11 +336,14 @@ class MachineViewModel extends _$MachineViewModel {
   // ===== MACHINE OPERATIONS =====
 
   Future<void> addMachine({
-    required String teamId,
     required String machineName,
     required String machineId,
     required List<String> assignedUserIds,
   }) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       final exists = await _aggregator.checkMachineExists(machineId);
       if (exists) {
@@ -338,7 +353,7 @@ class MachineViewModel extends _$MachineViewModel {
       final request = CreateMachineRequest(
         machineId: machineId,
         machineName: machineName,
-        teamId: teamId,
+        teamId: _currentTeamId!,
         assignedUserIds: assignedUserIds,
         status: MachineStatus.active,
       );
@@ -356,12 +371,15 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   Future<void> updateMachine({
-    required String teamId,
     required String machineId,
     String? machineName,
     MachineStatus? status,
     List<String>? assignedUserIds,
   }) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       final request = UpdateMachineRequest(
         machineId: machineId,
@@ -382,7 +400,11 @@ class MachineViewModel extends _$MachineViewModel {
     }
   }
 
-  Future<void> archiveMachine(String teamId, String machineId) async {
+  Future<void> archiveMachine(String machineId) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       await _aggregator.archiveMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));
@@ -396,7 +418,11 @@ class MachineViewModel extends _$MachineViewModel {
     }
   }
 
-  Future<void> restoreMachine(String teamId, String machineId) async {
+  Future<void> restoreMachine(String machineId) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       await _aggregator.restoreMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));

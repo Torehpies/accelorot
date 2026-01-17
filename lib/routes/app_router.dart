@@ -148,13 +148,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) {
-              final teamId = state.extra as String? ?? '';
-              return NoTransitionPage(
-                child: OperatorMachineScreen(teamId: teamId),
-                key: state.pageKey,
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const WebOperatorMachineScreen(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.profile.path,
@@ -212,13 +209,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.adminMachines.path,
             name: RoutePath.adminMachines.name,
-            pageBuilder: (context, state) {
-              final teamId = state.extra as String? ?? '';
-              return NoTransitionPage(
-                key: state.pageKey,
-                child: AdminMachineScreen(teamId: teamId),
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const AdminMachineScreen(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.adminReports.path,
