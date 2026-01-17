@@ -19,7 +19,7 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final allActivitiesAsync = ref.watch(allActivitiesProvider);
+    final allActivitiesAsync = ref.watch(userTeamActivitiesProvider);
 
     // Calculate report status from widget.reports
     final reportStatus = <String, int>{
