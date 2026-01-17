@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/table/activity_table_row.dart
+// lib/ui/core/widgets/table/table_row.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

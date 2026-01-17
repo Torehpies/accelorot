@@ -261,15 +261,15 @@ class MachineViewModel extends _$MachineViewModel {
     final total = state.machines.length;
 
     final active = state.machines
-        .where((m) => m.status == MachineStatus.active && !m.isArchived)
+        .where((m) => m.status == MachineStatus.active)
         .length;
 
-    final archived = state.machines.where((m) => m.isArchived).length;
+    final archived = state.machines
+        .where((m) => m.status == MachineStatus.inactive)
+        .length;
 
     final suspended = state.machines
-        .where(
-          (m) => m.status == MachineStatus.underMaintenance && !m.isArchived,
-        )
+        .where((m) => m.status == MachineStatus.underMaintenance)
         .length;
 
     return {
@@ -293,7 +293,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.status == MachineStatus.active && !m.isArchived && wasModified;
+      return m.status == MachineStatus.active && wasModified;
     }).length;
 
     // Archived: Count machines that are archived AND were modified in range
@@ -302,7 +302,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.isArchived && wasModified;
+      return m.status == MachineStatus.inactive && wasModified;
     }).length;
 
     // Suspended: Count machines under maintenance AND were modified in range
@@ -311,9 +311,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.status == MachineStatus.underMaintenance &&
-          !m.isArchived &&
-          wasModified;
+      return m.status == MachineStatus.underMaintenance && wasModified;
     }).length;
 
     return {

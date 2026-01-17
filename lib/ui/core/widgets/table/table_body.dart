@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/table/activity_table_body.dart
+// lib/ui/core/widgets/table/table_body.dart
 
 import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';

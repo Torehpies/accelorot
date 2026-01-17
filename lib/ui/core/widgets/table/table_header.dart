@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/table/activity_table_header.dart
+// lib/ui/core/widgets/table/table_header.dart
 
 import 'package:flutter/material.dart';
 import '../../../activity_logs/models/unified_activity_config.dart';
