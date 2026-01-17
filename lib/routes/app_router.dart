@@ -5,7 +5,6 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_acc
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
-import 'package:flutter_application_1/ui/web_admin_home/widgets/dashboard_view.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
 import 'package:flutter_application_1/routes/navigations/admin_web_shell.dart';
@@ -25,13 +24,11 @@ import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
+import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
-import 'package:provider/provider.dart' as prov;
-import 'package:flutter_application_1/data/providers/admin_dashboard_providers.dart';
-import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 
@@ -179,14 +176,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminDashboard.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: prov.ChangeNotifierProvider<WebAdminDashboardViewModel>(
-                create: (context) {
-                  final repository = ref.read(dashboardRepositoryProvider);
-                  final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
-                  return WebAdminDashboardViewModel(repository, teamId);
-                },
-                child: const DashboardView(),
-              ),
+              child: const AdminDashboard(),
             ),
           ),
           GoRoute(
