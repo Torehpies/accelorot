@@ -1,30 +1,33 @@
 // lib/ui/core/widgets/table/table_body.dart
 
 import 'package:flutter/material.dart';
-import '../../../../data/models/activity_log_item.dart';
 import '../shared/empty_state.dart';
-import 'table_row.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_colors.dart';
 
-/// Table body with ListView and empty state handling
-class TableBody extends StatefulWidget {
-  final List<ActivityLogItem> items;
-  final ValueChanged<ActivityLogItem> onViewDetails;
+/// Generic table body with ListView and empty state handling
+/// T: The type of items in the list
+class TableBody<T> extends StatefulWidget {
+  final List<T> items;
+  final Widget Function(T item) rowBuilder;
+  final Widget Function()? skeletonRowBuilder;
   final bool isLoading;
+  final Widget? emptyStateWidget;
 
   const TableBody({
     super.key,
     required this.items,
-    required this.onViewDetails,
+    required this.rowBuilder,
+    this.skeletonRowBuilder,
     this.isLoading = false,
+    this.emptyStateWidget,
   });
 
   @override
-  State<TableBody> createState() => _TableBodyState();
+  State<TableBody<T>> createState() => _TableBodyState<T>();
 }
 
-class _TableBodyState extends State<TableBody>
+class _TableBodyState<T> extends State<TableBody<T>>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _pulseAnimation;
@@ -56,7 +59,7 @@ class _TableBodyState extends State<TableBody>
     }
 
     if (widget.items.isEmpty) {
-      return const EmptyState();
+      return widget.emptyStateWidget ?? const EmptyState();
     }
 
     return ListView.separated(
@@ -67,10 +70,7 @@ class _TableBodyState extends State<TableBody>
         color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
-        return ActivityTableRow(
-          item: widget.items[index],
-          onViewDetails: widget.onViewDetails,
-        );
+        return widget.rowBuilder(widget.items[index]);
       },
     );
   }
@@ -85,72 +85,30 @@ class _TableBodyState extends State<TableBody>
         color: WebColors.tableBorder,
       ),
       itemBuilder: (context, index) {
-        return _buildSkeletonRow();
+        return widget.skeletonRowBuilder?.call() ?? _buildDefaultSkeletonRow();
       },
     );
   }
 
-  /// Single skeleton row mimicking the structure of ActivityTableRow
-  Widget _buildSkeletonRow() {
-    return GenericTableRow(
-      cellSpacing: AppSpacing.md,
-      cells: [
-        // Title Column
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 180, height: 16),
+  /// Default skeleton row (can be overridden via skeletonRowBuilder)
+  Widget _buildDefaultSkeletonRow() {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 52),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.tableCellHorizontal,
+        vertical: 8,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildSkeletonBox(width: double.infinity, height: 16),
           ),
-        ),
-
-        // Category Badge
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 80, height: 24, borderRadius: 4),
-          ),
-        ),
-
-        // Type Chip
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 100, height: 24, borderRadius: 4),
-          ),
-        ),
-
-        // Value Column
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 120, height: 16),
-          ),
-        ),
-
-        // Date Column
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 90, height: 16),
-          ),
-        ),
-
-        // Actions Column
-        TableCellWidget(
-          flex: 1,
-          child: Center(
-            child: _buildSkeletonBox(
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  /// Reusable skeleton box with smooth pulsing animation and optional shimmer
+  /// Reusable skeleton box with smooth pulsing animation
   Widget _buildSkeletonBox({
     required double width,
     required double height,
@@ -163,10 +121,9 @@ class _TableBodyState extends State<TableBody>
           width: width,
           height: height,
           decoration: BoxDecoration(
-            // Phase 1 & 2: Better color contrast + looping animation
             color: Color.lerp(
-              WebColors.skeletonLoader, // #F5F5F5 (light gray)
-              WebColors.tableBorder,    // #CBD5E1 (darker slate)
+              WebColors.skeletonLoader,
+              WebColors.tableBorder,
               _pulseAnimation.value,
             ),
             borderRadius: BorderRadius.circular(borderRadius),
@@ -175,5 +132,4 @@ class _TableBodyState extends State<TableBody>
       },
     );
   }
-
 }

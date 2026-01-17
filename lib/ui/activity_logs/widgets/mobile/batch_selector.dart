@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/providers/batch_providers.dart';
+import '../../../../data/providers/batch_providers.dart';
 
 /// Reusable batch selector dropdown
 class BatchSelector extends ConsumerWidget {
