@@ -40,7 +40,6 @@ class WebContentContainer extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Container(
         decoration: BoxDecoration(
-          color: WebColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: WebColors.primaryBorder, width: 1.5),
         ),
