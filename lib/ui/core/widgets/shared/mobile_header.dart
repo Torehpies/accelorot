@@ -10,7 +10,7 @@ class MobileHeader extends StatefulWidget implements PreferredSizeWidget {
   final String? dropdownHint;
   final ValueChanged<String?>? onDropdownChanged;
   final DateTime? startDate; // used as initial date for picker
-  final ValueChanged<DateTimeRange?>? onDateRangeChanged; // still used, but with 1-day range
+  final ValueChanged<DateTimeRange?>? onDateRangeChanged; 
   final String? searchQuery;
   final ValueChanged<String>? onSearchChanged;
   final bool showSearch;
@@ -102,7 +102,7 @@ class _MobileHeaderState extends State<MobileHeader> {
 
     return Container(
       decoration: BoxDecoration(
-        color: widget.backgroundColor ?? AppColors.background2,
+        color: widget.backgroundColor ?? AppColors.background,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),

@@ -13,6 +13,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_manage
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -250,6 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isMachineView = widget.focusedMachine != null;
 
     return Scaffold(
+      appBar: MobileHeader(title: 'Dashboard'),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
