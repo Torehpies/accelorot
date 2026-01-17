@@ -185,7 +185,7 @@ class BatchSelector extends ConsumerWidget {
                   hint: Text(
                     hasNoBatches
                         ? (selectedMachineId != null
-                              ? 'No batches for this machine'
+                              ? 'No batches'
                               : 'No batches available')
                         : (showAllOption ? 'All Batches' : 'Select Batch'),
                     style: TextStyle(
