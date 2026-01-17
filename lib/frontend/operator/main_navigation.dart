@@ -66,7 +66,7 @@ class _MainNavigationState extends State<MainNavigation> {
         focusedMachineId: widget.focusedMachine?.machineId,
 
       ),
-      const OperatorMachineView(), 
+      OperatorMachineView(teamId: widget.focusedMachine?.teamId ?? ''), 
       const ProfileView(),
     ];
   }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/core/ui/status_message.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_header.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_state.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_row.dart';
@@ -13,17 +11,11 @@ const int kDesktopBreakpoint = 800;
 
 class DesktopTeamManagementView extends ConsumerWidget {
   const DesktopTeamManagementView({super.key});
-  void _showAddTeamDialog(BuildContext context) {
-    showDialog(context: context, builder: (_) => AddTeamDialog());
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(teamManagementProvider);
     final notifier = ref.read(teamManagementProvider.notifier);
-    final isSaving = ref.watch(
-      teamManagementProvider.select((s) => s.isSavingTeams),
-    );
 
     return Container(
       margin: const EdgeInsets.all(16),

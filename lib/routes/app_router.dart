@@ -28,13 +28,14 @@ import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_s
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
+//import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as prov;
 import 'package:flutter_application_1/data/providers/admin_dashboard_providers.dart';
 import 'package:flutter_application_1/ui/web_admin_home/view_model/web_admin_dashboard_view_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
+import 'package:flutter_application_1/ui/machine_management/view/responsive_machine_management.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -152,7 +153,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) {
               final teamId = state.extra as String? ?? '';
               return NoTransitionPage(
-                child: OperatorMachineScreen(teamId: teamId),
+                child: ResponsiveMachineManagement(teamId: teamId),
                 key: state.pageKey,
               );
             },
