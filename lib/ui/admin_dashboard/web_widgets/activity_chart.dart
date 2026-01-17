@@ -8,8 +8,19 @@ class ActivityChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxValue = 100; // Fixed max value for consistent scale
-    final yAxisLabels = [100, 80, 60, 40, 20, 0];
+    int maxCount = 0;
+    for (var item in activities) {
+      final count = item['count'] as int;
+      if (count > maxCount) maxCount = count;
+    }
+
+    // Calculate dynamic max value
+    // Ensure at least 5 for empty/low states
+    // Round up to nearest multiple of 5 for nice 5-step intervals
+    final interval = ((maxCount > 0 ? maxCount : 5) / 5).ceil();
+    final maxValue = interval * 5;
+    
+    final yAxisLabels = List.generate(6, (index) => maxValue - (index * interval));
 
     return Container(
       padding: const EdgeInsets.all(20),

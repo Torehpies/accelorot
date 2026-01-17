@@ -10,14 +10,14 @@ import '../../../data/models/machine_model.dart';
 import '../../../data/models/report.dart';
 
 /// STATE
-class WebAdminHomeState {
+class AdminHomeState {
   final List<OperatorModel> operators;
   final List<MachineModel> machines;
   final List<Report> reports;
   final bool isLoading;
   final Object? error;
 
-  const WebAdminHomeState({
+  const AdminHomeState({
     this.operators = const [],
     this.machines = const [],
     this.reports = const [],
@@ -25,14 +25,14 @@ class WebAdminHomeState {
     this.error,
   });
 
-  WebAdminHomeState copyWith({
+  AdminHomeState copyWith({
     List<OperatorModel>? operators,
     List<MachineModel>? machines,
     List<Report>? reports,
     bool? isLoading,
     Object? error,
   }) {
-    return WebAdminHomeState(
+    return AdminHomeState(
       operators: operators ?? this.operators,
       machines: machines ?? this.machines,
       reports: reports ?? this.reports,
@@ -117,18 +117,18 @@ class WebAdminHomeState {
 }
 
 /// PROVIDER
-final webAdminHomeProvider = AsyncNotifierProvider<WebAdminHomeNotifier, WebAdminHomeState>(
-  WebAdminHomeNotifier.new,
+final adminHomeProvider = AsyncNotifierProvider<AdminHomeNotifier, AdminHomeState>(
+  AdminHomeNotifier.new,
 );
 
 /// NOTIFIER
-class WebAdminHomeNotifier extends AsyncNotifier<WebAdminHomeState> {
+class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
   @override
-  Future<WebAdminHomeState> build() async {
+  Future<AdminHomeState> build() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     
     if (userId == null) {
-      return const WebAdminHomeState();
+      return const AdminHomeState();
     }
 
     try {
@@ -138,14 +138,14 @@ class WebAdminHomeNotifier extends AsyncNotifier<WebAdminHomeState> {
       final teamId = profile?.teamId;
       
       if (teamId == null) {
-        return const WebAdminHomeState();
+        return const AdminHomeState();
       }
 
       final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
       final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
-      
-      return WebAdminHomeState(
+
+      return AdminHomeState(
         operators: operators,
         machines: machines,
         reports: reports,
@@ -159,7 +159,7 @@ class WebAdminHomeNotifier extends AsyncNotifier<WebAdminHomeState> {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     
     if (userId == null) {
-      state = const AsyncValue.data(WebAdminHomeState());
+      state = const AsyncValue.data(AdminHomeState());
       return;
     }
 
@@ -171,7 +171,7 @@ class WebAdminHomeNotifier extends AsyncNotifier<WebAdminHomeState> {
       
       if (teamId == null) {
         // User not assigned to a team yet
-        state = const AsyncValue.data(WebAdminHomeState());
+        state = const AsyncValue.data(AdminHomeState());
         return;
       }
 
@@ -179,7 +179,7 @@ class WebAdminHomeNotifier extends AsyncNotifier<WebAdminHomeState> {
       final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
       final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
 
-      state = AsyncValue.data(WebAdminHomeState(
+      state = AsyncValue.data(AdminHomeState(
         operators: operators,
         machines: machines,
         reports: reports,

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../view_model/web_admin_home_provider.dart';
+import '../../../data/models/activity_log_item.dart';
+import '../../../data/providers/activity_providers.dart';
+import '../view_model/admin_home_provider.dart';
 import '../web_widgets/stat_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
@@ -19,7 +21,8 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
   @override
   Widget build(BuildContext context) {
     /// ✅ Watch AsyncValue state
-    final asyncState = ref.watch(webAdminHomeProvider);
+    final asyncState = ref.watch(adminHomeProvider);
+    final activitiesAsync = ref.watch(allActivitiesProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFDFF2FF),
@@ -40,18 +43,18 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () => ref.read(webAdminHomeProvider.notifier).refresh(),
+                onPressed: () => ref.read(adminHomeProvider.notifier).refresh(),
                 child: const Text('Retry'),
               ),
             ],
           ),
         ),
-        data: (state) => _buildDashboard(state),
+        data: (state) => _buildDashboard(state, activitiesAsync),
       ),
     );
   }
 
-  Widget _buildDashboard(WebAdminHomeState state) {
+  Widget _buildDashboard(AdminHomeState state, AsyncValue<List<ActivityLogItem>> activitiesAsync) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Responsive breakpoints
@@ -117,7 +120,14 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                             const SizedBox(height: 16),
                             // Activity Overview chart
                             Expanded(
-                              child: ActivityChart(activities: state.activities),
+                              child: activitiesAsync.when(
+                                data: (activities) {
+                                  final chartData = _groupActivitiesByDay(activities);
+                                  return ActivityChart(activities: chartData);
+                                },
+                                loading: () => const Center(child: CircularProgressIndicator()),
+                                error: (err, _) => Center(child: Text('Error: $err')),
+                              ),
                             ),
                           ],
                         ),
@@ -141,6 +151,49 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
           );
       },
     );
+  }
+
+  List<Map<String, dynamic>> _groupActivitiesByDay(List<ActivityLogItem> activities) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final result = <Map<String, dynamic>>[];
+
+    // Generate last 7 days (chronological: 6 days ago -> Today)
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dayName = _getDayName(date.weekday);
+
+      // Count activities for this specific calendar date
+      int count = 0;
+      for (var activity in activities) {
+        final aDate = activity.timestamp;
+        if (aDate.year == date.year && 
+            aDate.month == date.month && 
+            aDate.day == date.day) {
+          count++;
+        }
+      }
+
+      result.add({
+        'day': dayName,
+        'count': count,
+      });
+    }
+
+    return result;
+  }
+
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case DateTime.monday: return 'Mon';
+      case DateTime.tuesday: return 'Tue';
+      case DateTime.wednesday: return 'Wed';
+      case DateTime.thursday: return 'Thu';
+      case DateTime.friday: return 'Fri';
+      case DateTime.saturday: return 'Sat';
+      case DateTime.sunday: return 'Sun';
+      default: return '';
+    }
   }
 }
 
