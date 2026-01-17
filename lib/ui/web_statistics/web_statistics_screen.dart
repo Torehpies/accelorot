@@ -8,6 +8,7 @@ import '../../data/providers/machine_providers.dart';
 import '../../data/providers/selected_machine_provider.dart'; 
 import '../../data/models/machine_model.dart';
 import '../../services/sess_service.dart';
+import '../core/widgets/shared/mobile_header.dart';
 
 class WebStatisticsScreen extends ConsumerWidget {
   final String? focusedMachineId;
@@ -46,14 +47,7 @@ class WebStatisticsScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: Colors.grey[50],
-          appBar: AppBar(
-            title: const Text(
-              "Statistics",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.teal.shade700,
-            elevation: 0,
-          ),
+          appBar: MobileHeader(title: 'Statistics'),
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines

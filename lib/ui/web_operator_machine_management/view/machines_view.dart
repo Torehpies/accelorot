@@ -1,3 +1,4 @@
+// lib/ui/web_operator_machine_management/view/machines_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';

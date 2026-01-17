@@ -16,8 +16,8 @@ import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
-import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/admin_machine_view.dart';
+//import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
@@ -26,11 +26,12 @@ import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
+//import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
+import 'package:flutter_application_1/ui/machine_management/view/responsive_operator_machine_management.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -148,7 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) {
               final teamId = state.extra as String? ?? '';
               return NoTransitionPage(
-                child: OperatorMachineScreen(teamId: teamId),
+                child: ResponsiveOperatorMachineManagement(teamId: teamId),
                 key: state.pageKey,
               );
             },
@@ -206,7 +207,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               final teamId = state.extra as String? ?? '';
               return NoTransitionPage(
                 key: state.pageKey,
-                child: AdminMachineScreen(teamId: teamId),
+                child: ResponsiveOperatorMachineManagement(teamId: teamId),
               );
             },
           ),
