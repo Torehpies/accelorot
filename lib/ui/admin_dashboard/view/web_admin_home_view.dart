@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../view_model/admin_home_provider.dart';
-import '../web_widgets/stat_card.dart';
+import '../../core/widgets/base_stats_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
 import '../web_widgets/recent_activities_table.dart';
@@ -82,36 +82,45 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                           children: [
                             // Three stat cards
                             SizedBox(
-                              height: 110,
+                              height: 160,
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: StatCard(
+                                    child: BaseStatsCard(
                                       title: "Total Operators",
                                       value: state.totalOperators,
-                                      growth: state.operatorGrowthRate,
                                       icon: Icons.person_outline,
-                                      iconBackgroundColor: const Color(0xFF22C55E),
+                                      iconColor: const Color(0xFF22C55E),
+                                      backgroundColor: const Color(0xFF22C55E).withValues(alpha: 0.1),
+                                      changeText: '${state.operatorGrowthRate.abs().toStringAsFixed(0)}%',
+                                      subtext: 'compared this month',
+                                      isPositive: state.operatorGrowthRate >= 0,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
-                                    child: StatCard(
+                                    child: BaseStatsCard(
                                       title: "Total Machines",
                                       value: state.totalMachines,
-                                      growth: state.machineGrowthRate,
                                       icon: Icons.settings_outlined,
-                                      iconBackgroundColor: const Color(0xFF3B82F6),
+                                      iconColor: const Color(0xFF3B82F6),
+                                      backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                                      changeText: '${state.machineGrowthRate.abs().toStringAsFixed(0)}%',
+                                      subtext: 'compared this month',
+                                      isPositive: state.machineGrowthRate >= 0,
                                     ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
-                                    child: StatCard(
+                                    child: BaseStatsCard(
                                       title: "Total Reports",
                                       value: state.totalReports,
-                                      growth: state.reportGrowthRate,
                                       icon: Icons.description_outlined,
-                                      iconBackgroundColor: const Color(0xFFF59E0B),
+                                      iconColor: const Color(0xFFF59E0B),
+                                      backgroundColor: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                                      changeText: '${state.reportGrowthRate.abs().toStringAsFixed(0)}%',
+                                      subtext: 'compared this month',
+                                      isPositive: state.reportGrowthRate >= 0,
                                     ),
                                   ),
                                 ],
