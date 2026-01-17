@@ -10,7 +10,6 @@ import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-const int kDesktopBreakpoint = 1024;
 const double kMaxFormWidth = 450.0;
 
 class RegistrationFormContent extends ConsumerWidget {

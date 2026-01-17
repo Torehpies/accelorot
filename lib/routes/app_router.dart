@@ -32,8 +32,6 @@ import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 
-const int kDesktopBreakpoint = 1024;
-
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
 
