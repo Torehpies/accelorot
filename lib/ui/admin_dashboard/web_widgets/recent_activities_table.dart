@@ -10,7 +10,7 @@ class RecentActivitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(userTeamActivitiesProvider);
+    final activitiesAsync = ref.watch(allActivitiesProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -30,7 +30,7 @@ class RecentActivitiesTable extends ConsumerWidget {
               const Text('Recent Activities', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
               IconButton(
                 icon: const Icon(Icons.refresh, size: 16),
-                onPressed: () => ref.invalidate(userTeamActivitiesProvider),
+                onPressed: () => ref.invalidate(allActivitiesProvider),
                 tooltip: 'Refresh',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),

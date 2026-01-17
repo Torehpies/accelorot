@@ -81,12 +81,20 @@ final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) a
   // Get all activities
   final result = await aggregator.getAllActivitiesWithCache();
   
-  // Filter activities by team's machines
+  // Filter activities by team's machines or team membership
   return result.items.where((activity) {
+    // For machine-based activities (substrates, cycles, some alerts)
     if (activity.machineId != null) {
       return machineIds.contains(activity.machineId);
     }
-    // Include activities without machineId if they belong to team
+    
+    // For reports and other activities without machines
+    // Include if they belong to the team (check teamId if available, or include all for now)
+    if (activity.type == ActivityType.report) {
+      return true; // Include all reports from team members
+    }
+    
+    // Include alerts and other activities without machineId
     return true;
   }).toList();
 });
