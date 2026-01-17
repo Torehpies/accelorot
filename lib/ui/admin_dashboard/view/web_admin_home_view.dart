@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/web_admin_home_provider.dart';
 import '../../core/ui/admin_app_bar.dart';
-import 'stat_card.dart';
-import 'activity_chart.dart';
-import 'report_donut_chart.dart';
-import 'recent_activities_table.dart';
+import '../web_widgets/stat_card.dart';
+import '../web_widgets/activity_chart.dart';
+import '../web_widgets/report_donut_chart.dart';
+import '../web_widgets/recent_activities_table.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});
@@ -24,15 +24,6 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFDFF2FF),
-      appBar: AdminAppBar(
-        title: 'Dashboard',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () => ref.read(webAdminHomeProvider.notifier).refresh(),
-          ),
-        ],
-      ),
       body: asyncState.when(
         loading: () => const Center(
           child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
