@@ -45,7 +45,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             child: activitiesAsync.when(
               data: (activities) => _buildContent(activities, batches),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Center(
+              error: (_, stack) => const Center(
                 child: Text('Failed to load activities', style: TextStyle(color: Color(0xFF9CA3AF))),
               ),
             ),
