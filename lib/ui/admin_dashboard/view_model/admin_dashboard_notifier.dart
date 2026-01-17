@@ -1,116 +1,109 @@
-// lib/ui/mobile_admin_home/notifier/admin_dashboard_notifier.dart
-
-
+import 'package:flutter/foundation.dart' show kIsWeb; 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../data/providers/operator_providers.dart';
-import '../../../data/providers/machine_providers.dart';
-import '../../../data/providers/profile_providers.dart';
-import '../../../data/providers/report_providers.dart';
-import '../../../data/models/machine_model.dart';
-import '../../../data/models/operator_model.dart';
-import '../../../data/models/report.dart';
+import '../view_model/admin_dashboard_notifier.dart';
+import '../widgets/swipeable_stat_cards.dart';
+import '../widgets/analytics_widget.dart';
+import '../../operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
+import '../../core/widgets/shared/mobile_header.dart'; 
 
-class AdminDashboardState {
-  final List<OperatorModel> operators;
-  final List<MachineModel> machines;
-  final List<Report> reports;
-  final bool isLoading;
-  final Object? error;
+class MobileAdminHomeView extends ConsumerWidget {
+  const MobileAdminHomeView({super.key});
 
-  const AdminDashboardState({
-    this.operators = const [],
-    this.machines = const [],
-    this.reports = const [],
-    this.isLoading = false,
-    this.error,
-  });
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncState = ref.watch(adminDashboardProvider);
 
-  AdminDashboardState copyWith({
-    List<OperatorModel>? operators,
-    List<MachineModel>? machines,
-    List<Report>? reports,
-    bool? isLoading,
-    Object? error,
-  }) {
-    return AdminDashboardState(
-      operators: operators ?? this.operators,
-      machines: machines ?? this.machines,
-      reports: reports ?? this.reports,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+    return Scaffold(
+      appBar: kIsWeb
+          ? null 
+          : const MobileHeader(title: 'Dashboard'),
+
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(adminDashboardProvider.notifier).loadData();
+        },
+        child: asyncState.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+          ),
+          error: (err, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Error: $err', textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.read(adminDashboardProvider.notifier).refresh(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+          data: (state) {
+            final statCards = [
+              StatCardData(
+                count: state.totalOperators,
+                label: 'Total Operators',
+                subtitle: '${state.totalOperators} operators in team',
+                icon: Icons.people,
+                iconColor: Colors.teal,
+                iconBackgroundColor: Colors.teal.shade50,
+              ),
+              StatCardData(
+                count: state.totalMachines,
+                label: 'Total Machines',
+                subtitle: '${state.totalMachines} machines active',
+                icon: Icons.precision_manufacturing,
+                iconColor: Colors.blue,
+                iconBackgroundColor: Colors.blue.shade50,
+              ),
+              StatCardData(
+                count: state.totalReports,
+                label: 'Total Reports',
+                subtitle: '${state.totalReports} reports submitted',
+                icon: Icons.description,
+                iconColor: Colors.amber.shade800,
+                iconBackgroundColor: Colors.amber.shade50,
+              ),
+            ];
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Overview Section
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Overview',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  SwipeableStatCards(cards: statCards),
+                  const SizedBox(height: 24),
+
+                  // Analytics Section
+                  AnalyticsWidget(reports: state.reports),
+                  const SizedBox(height: 24),
+
+                  // Activity Logs Section
+                  const ActivityLogsCard(
+                    focusedMachineId: null, // Show all machines for admin
+                    maxHeight: 400,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
-
-  int get totalOperators => operators.length;
-  int get totalMachines => machines.length;
-  int get totalReports => reports.length;
-}
-
-final adminDashboardProvider = AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
-  AdminDashboardNotifier.new,
-);
-
-class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
-  @override
-  Future<AdminDashboardState> build() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    
-    if (userId == null) {
-      return const AdminDashboardState();
-    }
-
-    try {
-      // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-    
-      final teamId = profile?.teamId;
-      
-      if (teamId == null) {
-        return const AdminDashboardState();
-      }
-
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
-      
-      return AdminDashboardState(operators: operators, machines: machines, reports: reports);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> loadData() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    
-    if (userId == null) {
-      state = const AsyncValue.data(AdminDashboardState());
-      return;
-    }
-
-    state = const AsyncValue.loading();
-    try {
-      // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-      final teamId = profile?.teamId;
-      
-      if (teamId == null) {
-        // User not assigned to a team yet
-        state = const AsyncValue.data(AdminDashboardState());
-        return;
-      }
-
-
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
-      
-
-      state = AsyncValue.data(AdminDashboardState(operators: operators, machines: machines, reports: reports));
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
-  }
-
-  void refresh() => loadData();
 }

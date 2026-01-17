@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb; 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../notifier/admin_dashboard_notifier.dart';
+import '../view_model/admin_dashboard_notifier.dart';
 import '../widgets/swipeable_stat_cards.dart';
 import '../widgets/analytics_widget.dart';
 import '../../operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
