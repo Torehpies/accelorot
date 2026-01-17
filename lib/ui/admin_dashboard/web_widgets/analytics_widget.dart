@@ -88,31 +88,32 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
 
   List<Map<String, dynamic>> _groupActivitiesByDay(List<ActivityLogItem> activities) {
     final now = DateTime.now();
-    final grouped = <String, int>{};
+    final today = DateTime(now.year, now.month, now.day);
+    final result = <Map<String, dynamic>>[];
 
-    // Initialize last 7 days
+    // Generate last 7 days (chronological: 6 days ago -> Today)
     for (int i = 6; i >= 0; i--) {
-      final date = now.subtract(Duration(days: i));
+      final date = today.subtract(Duration(days: i));
       final dayName = _getDayName(date.weekday);
-      grouped[dayName] = 0;
-    }
 
-    // Count activities per day
-    for (var activity in activities) {
-      final timestamp = activity.timestamp; // ActivityLogItem has timestamp property
-      final daysDiff = now.difference(timestamp).inDays;
-      if (daysDiff >= 0 && daysDiff < 7) {
-        final dayName = _getDayName(timestamp.weekday);
-        grouped[dayName] = (grouped[dayName] ?? 0) + 1;
+      // Count activities for this specific calendar date
+      int count = 0;
+      for (var activity in activities) {
+        final aDate = activity.timestamp;
+        if (aDate.year == date.year && 
+            aDate.month == date.month && 
+            aDate.day == date.day) {
+          count++;
+        }
       }
+
+      result.add({
+        'day': dayName,
+        'count': count,
+      });
     }
 
-    // Convert to list in correct order (Mon to Sun)
-    final daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return daysOrder.map((day) => {
-      'day': day,
-      'count': grouped[day] ?? 0,
-    }).toList();
+    return result;
   }
 
   String _getDayName(int weekday) {
