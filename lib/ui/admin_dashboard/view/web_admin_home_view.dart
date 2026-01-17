@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/web_admin_home_provider.dart';
-import '../../core/ui/admin_app_bar.dart';
 import '../web_widgets/stat_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
@@ -59,15 +58,17 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
         final isLargeScreen = constraints.maxWidth > 1200;
         final isMediumScreen = constraints.maxWidth > 800;
         
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Main layout: Left side (Stats + Activity) + Right side (Report Status)
-                SizedBox(
-                  height: isLargeScreen ? 400 : (isMediumScreen ? 360 : 320),
+        // Calculate responsive heights based on available viewport
+        final topSectionHeight = isLargeScreen ? 400.0 : (isMediumScreen ? 360.0 : 320.0);
+        
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Main layout: Left side (Stats + Activity) + Right side (Report Status)
+              SizedBox(
+                height: topSectionHeight,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -131,15 +132,13 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Recent Activities table (full width)
-                SizedBox(
-                  height: 220,
-                  child: RecentActivitiesTable(activities: state.recentActivities),
+                // Recent Activities table (full width, anchored to screen height)
+                Expanded(
+                  child: const RecentActivitiesTable(),
                 ),
               ],
             ),
-          ),
-        );
+          );
       },
     );
   }

@@ -9,6 +9,8 @@ import 'substrate_providers.dart';
 import 'alert_providers.dart';
 import 'report_providers.dart';
 import 'cycle_providers.dart';
+import 'batch_providers.dart';
+import 'profile_providers.dart';
 
 // ===== ACTIVITY AGGREGATOR PROVIDER =====
 
@@ -61,4 +63,30 @@ final cycleActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) asyn
 final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.getReports();
+});
+
+/// Provider for activities filtered by user's team
+final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+  final aggregator = ref.watch(activityAggregatorProvider);
+  final profileRepo = ref.watch(profileRepositoryProvider);
+  final batchRepo = ref.watch(batchRepositoryProvider);
+  
+  // Get user's team
+  final profile = await profileRepo.getCurrentProfile();
+  if (profile?.teamId == null) return [];
+  
+  // Get team's machine IDs
+  final machineIds = await batchRepo.getTeamMachineIds(profile!.teamId!);
+  
+  // Get all activities
+  final result = await aggregator.getAllActivitiesWithCache();
+  
+  // Filter activities by team's machines
+  return result.items.where((activity) {
+    if (activity.machineId != null) {
+      return machineIds.contains(activity.machineId);
+    }
+    // Include activities without machineId if they belong to team
+    return true;
+  }).toList();
 });
