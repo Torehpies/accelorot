@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/widgets/admin_machine_view.dart';
 
 class AdminMachineScreens extends StatelessWidget {
   const AdminMachineScreens({super.key});
@@ -10,7 +11,7 @@ class AdminMachineScreens extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobileView: const WebAdminMachineScreen(),
+      mobileView: const AdminMachineView(),
       desktopView: const WebAdminMachineScreen(),
     );
   }
