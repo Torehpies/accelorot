@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart' show kIsWeb; 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import 'admin_machine_card.dart';
-import 'machine_tab_filter.dart';
+import '../widgets/admin_machine_card.dart';
+import '../widgets/machine_tab_filter.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -15,8 +15,8 @@ class AdminMachineView extends ConsumerStatefulWidget {
 }
 
 class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
-  final _searchFocusNode = FocusNode();
   String? _teamId;
+  bool _isAdmin = false; // Track admin role
 
   @override
   void initState() {
@@ -27,22 +27,25 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   Future<void> _loadTeamIdAndInit() async {
     final sessionService = SessionService();
     final userData = await sessionService.getCurrentUserData();
+
     _teamId = userData?['teamId'] as String?;
+    _isAdmin = userData?['role'] == 'admin'; // Adjust key if your role field differs
 
     if (_teamId != null) {
       ref.read(adminMachineProvider.notifier).initialize(_teamId!);
     }
+
+    if (mounted) setState(() {}); // Rebuild to show/hide Add button
   }
 
-  @override
-  void dispose() {
-    _searchFocusNode.dispose();
-
-    super.dispose();
+  void _onAddPressed() {
+    // TODO: Navigate to "Add Machine" screen
+    // Example:
+    // Navigator.push(context, MaterialPageRoute(builder: (_) => AddMachineScreen()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Add machine functionality not implemented yet.')),
+    );
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,55 +53,27 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final notifier = ref.read(adminMachineProvider.notifier);
 
     return GestureDetector(
-      onTap: () => _searchFocusNode.unfocus(),
+      onTap: () => FocusScope.of(context).unfocus(), // Unfocus any TextField
       child: Scaffold(
         backgroundColor: const Color(0xFFE3F2FD),
-        appBar: kIsWeb
-          ? null 
-          : MobileHeader(title: 'Machines'),
+        appBar: MobileHeader(
+          title: 'Machine List',
+          showSearch: true,
+          showFilterButton: true,
+          showAddButton: _isAdmin,
+          searchQuery: state.searchQuery,
+          onSearchChanged: notifier.setSearchQuery,
+          onDateRangeChanged: (range) {
+            // Optional: Handle date filtering later
+            // notifier.setDateFilter(range);
+          },
+          onAddPressed: _onAddPressed,
+        ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search Bar
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x0D000000),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  focusNode: _searchFocusNode,
-                  onChanged: notifier.setSearchQuery,
-                  decoration: InputDecoration(
-                    hintText: 'Search..',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 15,
-                    ),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
               // Tab Filters
               MachineTabFilter(
                 selectedTab: state.selectedTab,
@@ -148,10 +123,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
               ),
             ],
@@ -182,11 +154,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 64,
-                color: Colors.grey[400],
-              ),
+              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
                 state.searchQuery.isNotEmpty ? 'No machines found' : emptyMessage,
@@ -218,9 +186,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
             ),

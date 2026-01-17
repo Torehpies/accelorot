@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../ui/profile_screen/widgets/profile_view.dart';
-import '../../../../ui/machine_management/widgets/admin_machine_view.dart'; 
+import '../../../../ui/machine_management/view/admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
 import '../../../../ui/admin_dashboard/view/mobile_admin_home_view.dart';
 import '../../../../ui/reports/view/mobile_reports_view.dart';

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/home_screen.dart'
     show HomeScreen;
-import '../../ui/machine_management/widgets/operator_machine_view.dart';
+import '../../ui/machine_management/view/operator_machine_view.dart';
 import '../../ui/profile_screen/widgets/profile_view.dart';
 import 'package:flutter_application_1/ui/statistics/view/statistics_screen.dart';
 
@@ -26,7 +26,7 @@ class _MobileNavigationState extends State<MobileNavigation> {
       // viewingOperatorId will be fetched from auth inside screens
     ),
     const StatisticsScreen(),
-     const OperatorMachineView(),
+     const OperatorMachineView(teamId: '',),
     const ProfileView(),
   ];
 
