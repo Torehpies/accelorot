@@ -24,7 +24,7 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
     // Calculate report status from widget.reports
     final reportStatus = <String, int>{};
     for (var report in widget.reports) {
-      final status = report.status ?? 'Open';
+      final status = report.status;
       reportStatus[status] = (reportStatus[status] ?? 0) + 1;
     }
 
