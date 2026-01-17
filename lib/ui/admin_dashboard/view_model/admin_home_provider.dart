@@ -5,6 +5,7 @@ import '../../../data/providers/operator_providers.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/profile_providers.dart';
 import '../../../data/providers/report_providers.dart';
+import '../../../data/providers/core_providers.dart';
 import '../../../data/models/operator_model.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/models/report.dart';
@@ -127,11 +128,14 @@ final adminHomeProvider = AsyncNotifierProvider<AdminHomeNotifier, AdminHomeStat
   AdminHomeNotifier.new,
 );
 
+
 /// NOTIFIER
 class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
   @override
   Future<AdminHomeState> build() async {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
+    // Watch the existing auth state provider
+    final authState = ref.watch(authStateChangesProvider);
+    final userId = authState.value?.uid;
     
     if (userId == null) {
       return const AdminHomeState();
@@ -160,7 +164,7 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
       rethrow;
     }
   }
-
+  
   Future<void> loadData() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     
