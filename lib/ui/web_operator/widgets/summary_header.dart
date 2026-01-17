@@ -3,6 +3,7 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SummaryHeader extends ConsumerWidget {
@@ -20,28 +21,28 @@ class SummaryHeader extends ConsumerWidget {
               _SummaryCard(
                 title: 'Active Operators',
                 value: '—',
-                icon: Icons.person_outline,
+                icon: Icons.person,
                 iconBackgroundColor: AppColors.greenBackground,
                 iconForegroundColor: AppColors.greenForeground,
               ),
               _SummaryCard(
                 title: 'Archived Operators',
                 value: '—',
-                icon: Icons.person_outline,
+                icon: Icons.person,
                 iconBackgroundColor: AppColors.yellowBackground,
                 iconForegroundColor: AppColors.yellowForeground,
               ),
               _SummaryCard(
                 title: 'Former Operators',
                 value: '—',
-                icon: Icons.person_outline,
+                icon: Icons.person,
                 iconBackgroundColor: AppColors.redBackground,
                 iconForegroundColor: AppColors.redForeground,
               ),
               _SummaryCard(
                 title: 'New Operators',
                 value: '—',
-                icon: Icons.person_outline,
+                icon: Icons.person,
                 iconBackgroundColor: AppColors.blueBackground,
                 iconForegroundColor: AppColors.blueForeground,
               ),
@@ -77,7 +78,7 @@ class _TeamSummaryRow extends ConsumerWidget {
         _SummaryCard(
           title: 'Active Operators',
           value: '$activeOperators',
-          icon: Icons.person_outline,
+          icon: Icons.person,
           iconBackgroundColor: AppColors.greenBackground,
           iconForegroundColor: AppColors.greenForeground,
         ),
@@ -85,7 +86,7 @@ class _TeamSummaryRow extends ConsumerWidget {
         _SummaryCard(
           title: 'Archived Operators',
           value: '$archivedOperators',
-          icon: Icons.person_outline,
+          icon: Icons.person,
           iconBackgroundColor: AppColors.yellowBackground,
           iconForegroundColor: AppColors.yellowForeground,
         ),
@@ -93,7 +94,7 @@ class _TeamSummaryRow extends ConsumerWidget {
         _SummaryCard(
           title: 'Former Operators',
           value: '${team.formerOperators}',
-          icon: Icons.person_outline,
+          icon: Icons.person,
           iconBackgroundColor: AppColors.redBackground,
           iconForegroundColor: AppColors.redForeground,
         ),
@@ -101,7 +102,7 @@ class _TeamSummaryRow extends ConsumerWidget {
         _SummaryCard(
           title: 'New Operators',
           value: '${team.newOperators}',
-          icon: Icons.person_outline,
+          icon: Icons.person,
           iconBackgroundColor: AppColors.blueBackground,
           iconForegroundColor: AppColors.blueForeground,
         ),
@@ -129,41 +130,58 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.background2,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: WebColors.cardBorder, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: WebColors.cardShadow,
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: WebColors.textLabel,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                    fontWeight: FontWeight.w900,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: iconBackgroundColor,
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  child: Icon(icon, size: 20, color: iconForegroundColor),
                 ),
               ],
             ),
-            Container(
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                color: iconBackgroundColor,
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w700,
+                color: WebColors.textHeading,
+                height: 1.1,
               ),
-              child: Icon(icon, size: 30, color: iconForegroundColor),
             ),
+            const SizedBox(height: 5),
+            // const Divider(height: 1, color: WebColors.dividerLight),
+            // const SizedBox(height: 5),
           ],
         ),
       ),
