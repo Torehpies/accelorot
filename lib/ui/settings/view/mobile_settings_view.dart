@@ -11,18 +11,20 @@ import '../../change_password_dialog/widgets/change_password_dialog.dart';
 import '../../core/ui/confirm_dialog.dart';
 
 class MobileSettingsView extends ConsumerWidget {
-  const MobileSettingsView({super.key});
+  final bool showAppBar;
+  
+  const MobileSettingsView({super.key, this.showAppBar = true});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: showAppBar ? AppBar(
         title: const Text('Settings'),
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
-      ),
+      ) : null,
       body: settingsState.map(
         initial: (_) => const Center(child: CircularProgressIndicator()),
         loading: (_) => const Center(child: CircularProgressIndicator()),
@@ -205,41 +207,7 @@ class MobileSettingsView extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 20),
-
-            // Logout Button
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final confirm = await showConfirmDialog(
-                    context: context,
-                    title: 'Logout',
-                    message: 'Are you sure you want to logout?',
-                    confirmText: 'Logout',
-                    cancelText: 'Cancel',
-                  );
-                  if (confirm == true) {
-                    await FirebaseAuth.instance.signOut();
-                    if (context.mounted) {
-                      context.go('/signin');
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.logout),
-                label: const Text('Logout'),
-              ),
-            ),
-
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
           ],
         );
         },

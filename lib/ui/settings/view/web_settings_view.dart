@@ -7,21 +7,6 @@ class WebSettingsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: Card(
-            margin: const EdgeInsets.all(24),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const MobileSettingsView(),
-          ),
-        ),
-      ),
-    );
+    return const MobileSettingsView(showAppBar: false);
   }
 }
