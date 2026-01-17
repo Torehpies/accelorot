@@ -60,7 +60,7 @@ class StatsCardRow extends StatelessWidget {
             iconColor: WebColors.operationsIcon,
             backgroundColor: WebColors.operationsBackground,
             changeText: countsWithChange['operations']?['change'],
-            subtext: 'operators retired this month',
+            subtext: 'operations this month',
             isPositive: countsWithChange['operations']?['isPositive'],
             isLoading: isLoading,
           ),
