@@ -21,26 +21,19 @@ class WebBranding extends ConsumerWidget {
         final String name = '$firstName $lastName';
         return Column(
           children: [
-            Container(
-							padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: SvgPicture.asset(
-                'assets/images/Accel-O-Rot Logo.svg',
-                width: 65,
-                height: 65,
-                fit: BoxFit.contain,
-                semanticsLabel: 'Accel-O-Rot Logo',
-              ),
+            SvgPicture.asset(
+              'assets/images/Accel-O-Rot Logo.svg',
+              width: 65,
+              height: 65,
+              fit: BoxFit.contain,
+              semanticsLabel: 'Accel-O-Rot Logo',
             ),
             const SizedBox(height: 8),
             const Text(
-              'Accel-O-Rot',
+              'ACCEL-O-ROT',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AppColors.green400,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary,
                 fontSize: 22,
               ),
             ),

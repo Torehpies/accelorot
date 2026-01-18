@@ -1,6 +1,7 @@
 // lib/ui/landing_page/widgets/cta_section.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -107,17 +108,17 @@ class CtaSection extends StatelessWidget {
                     const SizedBox(width: 10),
                     SvgPicture.asset(
                       'assets/images/Accel-O-Rot Logo.svg',
-                      width: 60,
-                      height: 60,
+                      width: 50,
+                      height: 50,
                       fit: BoxFit.contain,
                       semanticsLabel: 'Accel-O-Rot Logo',
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Accel-O-Rot',
+                      'ACCEL-O-ROT',
                       style: h2Style.copyWith(
-                        color: WebColors.textTitle,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w900,
                         fontSize: 28,
                       ),
                     ),
@@ -139,4 +140,3 @@ class CtaSection extends StatelessWidget {
     );
   }
 }
-

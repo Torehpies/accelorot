@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
@@ -31,8 +32,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
-
-const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);

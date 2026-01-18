@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-const int kDesktopBreakpoint = 1024;
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 /// Determines and displays the correct view based on screen width.
 class ResponsiveLayout extends StatelessWidget {

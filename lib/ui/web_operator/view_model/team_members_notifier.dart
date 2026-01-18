@@ -31,6 +31,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     final teamId = teamUser?.teamId;
     if (teamId == null || teamId.isEmpty) {
       state = state.copyWith(
+        items: const [],
         members: const [],
         currentPage: 0,
         isLoading: false,
@@ -41,9 +42,13 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
+      final newItems = pageIndex == 0
+          ? cachedPage
+          : [...state.items, ...cachedPage];
       state = state.copyWith(
         currentPage: pageIndex,
         members: cachedPage,
+        items: newItems,
         isLoading: false,
       );
       return;
@@ -52,23 +57,33 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
 
     final service = ref.read(teamMemberServiceProvider);
 
-    final members = await service.fetchTeamMembersPage(
+    final pageMembers = await service.fetchTeamMembersPage(
       teamId: teamId,
       pageSize: state.pageSize,
       pageIndex: pageIndex,
     );
 
     final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..[pageIndex] = members;
+      ..[pageIndex] = pageMembers;
+
+    final newItems = pageIndex == 0
+        ? pageMembers
+        : [...state.items, ...pageMembers];
 
     state = state.copyWith(
-      members: members,
+      items: newItems,
+      members: pageMembers,
       currentPage: pageIndex,
       isLoading: false,
-      hasNextPage: members.length == state.pageSize,
+      hasNextPage: pageMembers.length == state.pageSize,
       pagesByIndex: updatedPages,
       lastFetchedAt: DateTime.now(),
     );
+  }
+
+  Future<void> loadNextPage() async {
+    if (!state.hasNextPage || state.isLoading) return;
+    await _loadPage(state.currentPage + 1);
   }
 
   Future<void> goToPage(int pageIndex) => _loadPage(pageIndex);
@@ -85,9 +100,13 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
 
   Future<void> refresh() async {
     final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..remove(state.currentPage);
-    state = state.copyWith(pagesByIndex: updatedPages, lastFetchedAt: null);
-    await _loadPage(state.currentPage);
+      ..clear();
+    state = state.copyWith(
+      pagesByIndex: updatedPages,
+      items: const [],
+      lastFetchedAt: null,
+    );
+    await _loadPage(0);
   }
 
   Future<void> updateOperator(EditOperatorForm form) async {
@@ -113,9 +132,22 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
         ..[state.currentPage] = updatedMembers;
 
+      final updatedItems = state.items.map((m) {
+        if (m.id == form.id) {
+          return m.copyWith(
+            email: form.email,
+            firstName: form.firstName,
+            lastName: form.lastName,
+            status: form.status,
+          );
+        }
+        return m;
+      }).toList();
+			 
       state = state.copyWith(
         pagesByIndex: updatedPages,
         members: updatedMembers,
+        items: updatedItems,
         lastFetchedAt: DateTime.now(),
       );
 
@@ -135,7 +167,6 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       await ref.read(appUserServiceProvider).updateUserField(form.id, {
         'status': form.status.value,
       });
-
     } catch (e) {
       await refresh();
     } finally {

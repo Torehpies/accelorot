@@ -30,6 +30,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final teamId = teamUser?.teamId;
     if (teamId == null || teamId.isEmpty) {
       state = state.copyWith(
+        items: const [],
         members: const [],
         currentPage: 0,
         isLoading: false,
@@ -40,9 +41,13 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
+      final newItems = pageIndex == 0
+          ? cachedPage
+          : [...state.items, ...cachedPage];
       state = state.copyWith(
         currentPage: pageIndex,
         members: cachedPage,
+        items: newItems,
         isLoading: false,
       );
       return;
@@ -67,7 +72,10 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
       ..[pageIndex] = members;
 
+    final newItems = pageIndex == 0 ? members : [...state.items, ...members];
+
     state = state.copyWith(
+      items: newItems,
       members: members,
       currentPage: pageIndex,
       isLoading: false,
@@ -84,8 +92,14 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       isLoading: false,
       isError: true,
       error: error,
-      members: [],
+      items: const [],
+      members: const [],
     );
+  }
+
+  Future<void> loadNextPage() async {
+    if (!state.hasNextPage || state.isLoading) return;
+    await _loadPage(state.currentPage + 1);
   }
 
   Future<void> goToPage(int pageIndex) => _loadPage(pageIndex);
@@ -102,9 +116,13 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
   Future<void> refresh() async {
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
-      ..remove(state.currentPage);
-    state = state.copyWith(pagesByIndex: updatedPages, lastFetchedAt: null);
-    await _loadPage(state.currentPage);
+      ..clear();
+    state = state.copyWith(
+      pagesByIndex: updatedPages,
+      items: const [],
+      lastFetchedAt: null,
+    );
+    await _loadPage(0);
   }
 
   Future<void> acceptRequest(PendingMember member) async {
@@ -141,7 +159,10 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
 
+    final updatedItems = state.items.where((m) => m.id != member.id).toList();
+
     state = state.copyWith(
+      items: updatedItems,
       members: currentMembers,
       pagesByIndex: updatedPages,
       isLoading: false,
@@ -189,8 +210,10 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
+    final updatedItems = state.items.where((m) => m.id != member.id).toList();
 
     state = state.copyWith(
+			items: updatedItems,
       members: currentMembers,
       pagesByIndex: updatedPages,
       isLoading: false,
