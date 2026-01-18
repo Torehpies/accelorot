@@ -447,8 +447,6 @@ class FirestoreCycleService implements CycleService {
       if (machineId != null) {
         await _firestore.collection('machines').doc(machineId).update({
           'drumActive': newPhase == 'active', // TRUE for active, FALSE for resting
-          'drumCurrentPhase': newPhase,
-          'drumPhaseStartTime': FieldValue.serverTimestamp(),
         });
       }
 
@@ -494,8 +492,6 @@ class FirestoreCycleService implements CycleService {
       if (machineId != null) {
         await _firestore.collection('machines').doc(machineId).update({
           'aeratorActive': newPhase == 'active', // TRUE for active, FALSE for resting
-          'aeratorCurrentPhase': newPhase,
-          'aeratorPhaseStartTime': FieldValue.serverTimestamp(),
         });
       }
 

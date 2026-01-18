@@ -24,10 +24,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
-  String _uptime = '00:00:00';
-  DateTime? _startTime;
   Timer? _timer;
   CycleRecommendation? _cycleDoc;
+  bool _isTransitioning = false; // Prevent multiple rapid transitions
 
   @override
   void initState() {
@@ -54,8 +53,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _startTime = null;
           _cycleDoc = null;
         });
       } else {
@@ -97,21 +94,15 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           settings = DrumRotationSettings(
             activeMinutes: cycle.activeMinutes ?? 1,
             restMinutes: cycle.restMinutes ?? 59,
+            currentPhase: cycle.currentPhase ?? 'stopped',
+            phaseStartTime: cycle.phaseStartTime,
           );
 
           if (cycle.status == 'running') {
             status = SystemStatus.running;
-            _startTime = cycle.startedAt;
-            if (_startTime != null) {
-              _startTimer();
-            }
+            _startTimer();
           } else if (cycle.status == 'completed') {
             status = SystemStatus.stopped;
-            if (cycle.totalRuntimeSeconds != null) {
-              _uptime = _formatDuration(
-                Duration(seconds: cycle.totalRuntimeSeconds!),
-              );
-            }
           }
         });
       } else if (mounted) {
@@ -119,8 +110,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _startTime = null;
           _cycleDoc = null;
         });
       }
@@ -137,11 +126,15 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted && _startTime != null) {
-        final elapsed = DateTime.now().difference(_startTime!);
-        setState(() {
-          _uptime = _formatDuration(elapsed);
-        });
+      if (!mounted) return;
+      
+      setState(() {
+        // Timer updates UI automatically via settings.remainingTime getter
+      });
+
+      // Check for phase transition
+      if (status == SystemStatus.running && settings.currentPhase != 'stopped') {
+        _checkPhaseTransition();
       }
     });
   }
@@ -151,12 +144,91 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     _timer = null;
   }
 
-  String _formatDuration(Duration duration) {
+  Future<void> _checkPhaseTransition() async {
+    // Prevent multiple transitions while one is in progress
+    if (_isTransitioning) return;
+    
+    final remaining = settings.remainingTime;
+
+    // If countdown reached zero, switch phases
+    if (remaining.inSeconds <= 0) {
+      _isTransitioning = true;
+      final newPhase = settings.currentPhase == 'active' ? 'resting' : 'active';
+      
+      debugPrint('🔄 Phase transition: ${settings.currentPhase} → $newPhase');
+
+      // Update locally first for immediate UI feedback
+      setState(() {
+        settings = settings.copyWith(
+          currentPhase: newPhase,
+          phaseStartTime: DateTime.now(),
+        );
+      });
+
+      // Then save to database
+      try {
+        final cycleRepository = ref.read(cycleRepositoryProvider);
+        await cycleRepository.updateAeratorPhase(
+          batchId: widget.currentBatch!.id,
+          newPhase: newPhase,
+        );
+        debugPrint('✅ Phase updated in database');
+        
+        // Reset flag after a delay to allow database to propagate
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) {
+          _isTransitioning = false;
+        }
+      } catch (e) {
+        debugPrint('❌ Error updating phase: $e');
+        _isTransitioning = false;
+      }
+    }
+  }
+
+  Future<void> _forcePhaseSwitch() async {
+    if (widget.currentBatch == null) return;
+    
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      final nextPhase = settings.currentPhase == 'active' ? 'resting' : 'active';
+      
+      debugPrint('🔧 DEBUG: Force switching aerator phase: ${settings.currentPhase} → $nextPhase');
+      
+      await cycleRepository.updateAeratorPhase(
+        batchId: widget.currentBatch!.id,
+        newPhase: nextPhase,
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Aerator phase switched to: $nextPhase'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      
+      debugPrint('✅ DEBUG: Aerator phase force-switched successfully');
+    } catch (e) {
+      debugPrint('❌ DEBUG: Error force-switching aerator phase: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _formatCountdown(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _handleStart() async {
@@ -200,8 +272,15 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
       setState(() {
         _cycleDoc = cycle;
+        if (cycle != null) {
+          settings = DrumRotationSettings(
+            activeMinutes: cycle.activeMinutes ?? settings.activeMinutes,
+            restMinutes: cycle.restMinutes ?? settings.restMinutes,
+            currentPhase: cycle.currentPhase ?? 'active',
+            phaseStartTime: cycle.phaseStartTime,
+          );
+        }
         status = SystemStatus.running;
-        _startTime = DateTime.now();
         _startTimer();
       });
     } catch (e) {
@@ -332,19 +411,22 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         ),
         const SizedBox(height: 16),
 
+        // Countdown and Limit
         Row(
           children: [
             Expanded(
               child: InfoItem(
-                label: 'Uptime',
-                value: _uptime,
+                label: settings.currentPhase == 'active' ? 'Active Time' : 'Rest Time',
+                value: _formatCountdown(settings.remainingTime),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: InfoItem(
-                label: 'Pattern',
-                value: '${settings.activeMinutes}/${settings.restMinutes} min',
+                label: 'Limit',
+                value: settings.currentPhase == 'active' 
+                    ? '${settings.activeMinutes} min'
+                    : '${settings.restMinutes} min',
               ),
             ),
           ],
@@ -364,7 +446,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         _buildDropdown(
           label: 'Select Cycle Pattern',
           value: settings.pattern,
-          items: ['1/59', '3/57', '5/55'],
+          items: ['1/5', '1/10', '1/59', '3/57', '5/55'],
           onChanged: canInteract
               ? (value) {
                   if (value != null) {
@@ -376,6 +458,31 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
               : null,
         ),
         const SizedBox(height: 24),
+
+        // Debug: Force phase switch button
+        if (status == SystemStatus.running)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _forcePhaseSwitch,
+                icon: const Icon(Icons.sync, size: 18),
+                label: const Text(
+                  'DEBUG: Force Phase Switch',
+                  style: TextStyle(fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.orange,
+                  side: const BorderSide(color: Colors.orange),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         SizedBox(
           width: double.infinity,

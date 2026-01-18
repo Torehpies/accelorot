@@ -25,6 +25,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   
   Timer? _timer;
   CycleRecommendation? _cycleDoc;
+  bool _isTransitioning = false; // Prevent multiple rapid transitions
 
   @override
   void initState() {
@@ -145,10 +146,14 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   }
 
   Future<void> _checkPhaseTransition() async {
+    // Prevent multiple transitions while one is in progress
+    if (_isTransitioning) return;
+    
     final remaining = settings.remainingTime;
 
     // If countdown reached zero, switch phases
     if (remaining.inSeconds <= 0) {
+      _isTransitioning = true;
       final newPhase = settings.currentPhase == 'active' ? 'resting' : 'active';
       
       debugPrint('🔄 Phase transition: ${settings.currentPhase} → $newPhase');
@@ -169,8 +174,15 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           newPhase: newPhase,
         );
         debugPrint('✅ Phase updated in database');
+        
+        // Reset flag after a delay to allow database to propagate
+        await Future.delayed(const Duration(seconds: 2));
+        if (mounted) {
+          _isTransitioning = false;
+        }
       } catch (e) {
         debugPrint('❌ Error updating phase: $e');
+        _isTransitioning = false;
       }
     }
   }
@@ -221,10 +233,14 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
       setState(() {
         _cycleDoc = cycle;
-        settings = settings.copyWith(
-          currentPhase: 'active',
-          phaseStartTime: DateTime.now(),
-        );
+        if (cycle != null) {
+          settings = DrumRotationSettings(
+            activeMinutes: cycle.activeMinutes ?? settings.activeMinutes,
+            restMinutes: cycle.restMinutes ?? settings.restMinutes,
+            currentPhase: cycle.currentPhase ?? 'active',
+            phaseStartTime: cycle.phaseStartTime,
+          );
+        }
         status = SystemStatus.running;
         _startTimer();
       });
@@ -432,7 +448,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         _buildDropdown(
           label: 'Select Cycle Pattern',
           value: settings.pattern,
-          items: ['1/59', '3/57', '5/55'],
+          items: ['1/5', '1/10', '1/59', '3/57', '5/55'],
           onChanged: canInteract
               ? (value) {
                   if (value != null) {
