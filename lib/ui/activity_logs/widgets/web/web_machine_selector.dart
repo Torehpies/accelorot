@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/widgets/unified/web_machine_selector.dart
+// lib/ui/activity_logs/widgets/web/web_machine_selector.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -79,7 +79,7 @@ class WebMachineSelector extends ConsumerWidget {
                 ? activeMachines.firstWhere((m) => m.id == selectedMachineId)
                 : null;
 
-            return _UnifiedMachineDropdownInner(
+            return _WebMachineDropdownInner(
               selectedMachineId: selectedMachineId,
               selectedMachineName: selectedMachine?.machineName ?? 'All Machines',
               activeMachines: activeMachines,
@@ -114,14 +114,14 @@ class WebMachineSelector extends ConsumerWidget {
 }
 
 
-class _UnifiedMachineDropdownInner extends StatelessWidget {
+class _WebMachineDropdownInner extends StatelessWidget {
   final String? selectedMachineId;
   final String selectedMachineName;
   final List<MachineModel> activeMachines;
   final ValueChanged<String?> onChanged;
   final DropdownDisplayMode displayMode;
 
-  const _UnifiedMachineDropdownInner({
+  const _WebMachineDropdownInner({
     required this.selectedMachineId,
     required this.selectedMachineName,
     required this.activeMachines,

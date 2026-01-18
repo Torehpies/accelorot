@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/widgets/unified/web_dropdown.dart
+// lib/ui/activity_logs/widgets/web/web_dropdown.dart
 
 import 'package:flutter/material.dart';
 import '../../../core/themes/web_text_styles.dart';

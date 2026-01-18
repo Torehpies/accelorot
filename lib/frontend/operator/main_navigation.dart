@@ -64,7 +64,8 @@ class _MainNavigationState extends State<MainNavigation> {
       StatisticsScreen(
 
       ),
-      OperatorMachineView(teamId: widget.focusedMachine?.teamId ?? ''), 
+      OperatorMachineView(
+      ), 
       const ProfileView(),
     ];
   }

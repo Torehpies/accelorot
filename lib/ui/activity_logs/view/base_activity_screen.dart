@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/activity_list_state.dart';
-import '../widgets/filter_section.dart';
-import '../widgets/activity_card.dart';
-import '../widgets/search_bar_widget.dart';
-import '../widgets/date_filter_button.dart';
-import '../widgets/machine_selector.dart'; 
-import '../widgets/batch_selector.dart';
+import '../widgets/mobile/filter_section.dart';
+import '../widgets/mobile/activity_card.dart';
+import '../widgets/mobile/search_bar_widget.dart';
+import '../widgets/mobile/date_filter_button.dart';
+import '../widgets/mobile/machine_selector.dart'; 
+import '../widgets/mobile/batch_selector.dart';
 import '../models/activity_common.dart';
 
 

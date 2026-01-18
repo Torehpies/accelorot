@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../data/providers/machine_providers.dart';
-import '../../../services/sess_service.dart';
+import '../../../../data/providers/machine_providers.dart';
+import '../../../../services/sess_service.dart';
 
 /// Reusable machine selector dropdown
 class MachineSelector extends ConsumerWidget {
