@@ -2,11 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../data/models/report.dart';
+import '../../core/themes/web_colors.dart';
 import '../view_model/reports_viewmodel.dart';
 import '../widgets/web_stats_row.dart';
 import '../widgets/web_table_container.dart';
-import '../../core/themes/web_colors.dart';
-import 'report_detail_view.dart';
+import '../dialogs/report_view_details_dialog.dart';
+import '../dialogs/report_edit_details_dialog.dart';
 import '../../core/widgets/web_common_widgets.dart';
 
 class WebReportsView extends ConsumerWidget {
@@ -47,7 +49,8 @@ class WebReportsView extends ConsumerWidget {
                       onDateFilterChanged: viewModel.onDateFilterChanged,
                       onSearchChanged: viewModel.onSearchChanged,
                       onSort: viewModel.onSort,
-                      onViewDetails: (report) => _showDetailDialog(context, report, viewModel),
+                      onView: (report) => _showViewDialog(context, report),
+                      onEdit: (report) => _showEditDialog(context, report, viewModel),
                       onPageChanged: viewModel.onPageChanged,
                       onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
                     ),
@@ -56,12 +59,23 @@ class WebReportsView extends ConsumerWidget {
     );
   }
 
-  void _showDetailDialog(BuildContext context, report, ReportsViewModel viewModel) {
-    WebDialogWrapper.show(
+  void _showViewDialog(BuildContext context, Report report) {
+    showDialog(
       context: context,
-      backgroundColor: WebColors.dialogBackground,
-      constraints: const BoxConstraints(maxWidth: 800),
-      child: ReportDetailView(
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: true,
+      builder: (context) => ReportViewDetailsDialog(
+        report: report,
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, Report report, ReportsViewModel viewModel) {
+    showDialog(
+      context: context,
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: false, // Prevent closing while editing
+      builder: (context) => ReportEditDetailsDialog(
         report: report,
         onUpdate: viewModel.updateReport,
       ),
