@@ -97,6 +97,7 @@ class WebTableContainer extends StatelessWidget {
                   selectedMachineId: selectedMachineId,
                   onChanged: onMachineChanged,
                   displayMode: displayMode,
+                  isLoading: isLoading,
                 ),
               ),
               const SizedBox(width: 12),
@@ -107,6 +108,7 @@ class WebTableContainer extends StatelessWidget {
                   selectedMachineId: selectedMachineId,
                   onChanged: onBatchChanged,
                   displayMode: displayMode,
+                  isLoading: isLoading,
                 ),
               ),
             ],
@@ -168,9 +170,9 @@ class WebTableContainer extends StatelessWidget {
     BoxConstraints constraints,
   ) {
     const rightSectionEstimatedWidth =
-        380.0; // Date filter + Search + gaps (more realistic)
-    const minGapBetweenSections = 24.0; // Spacer minimum
-    const containerCrampedThreshold = 800.0; // Increased threshold
+        380.0; // Date filter + Search + gaps 
+    const minGapBetweenSections = 24.0;
+    const containerCrampedThreshold = 800.0; 
 
     // Tier 2: Container too cramped (fallback)
     if (constraints.maxWidth < containerCrampedThreshold) {
@@ -178,7 +180,6 @@ class WebTableContainer extends StatelessWidget {
     }
 
     // Tier 1: Content-based detection
-    // Estimate left section width based on current selections
     final leftSectionEstimatedWidth = _estimateLeftSectionWidth(context);
 
     final totalNeeded =
@@ -186,7 +187,6 @@ class WebTableContainer extends StatelessWidget {
         rightSectionEstimatedWidth +
         minGapBetweenSections;
 
-    // Add 10% buffer to be more conservative
     final totalNeededWithBuffer = totalNeeded * 1.1;
 
     if (totalNeededWithBuffer > constraints.maxWidth) {
@@ -199,11 +199,11 @@ class WebTableContainer extends StatelessWidget {
   /// Estimates the width needed for the left section (Machine + Batch selectors)
   double _estimateLeftSectionWidth(BuildContext context) {
     const iconWidth = 16.0;
-    const paddingPerDropdown = 30.0; // Increased: horizontal padding + borders
+    const paddingPerDropdown = 30.0;
     const arrowWidth = 20.0;
-    const clearButtonWidth = 20.0; // Increased: includes hover space
+    const clearButtonWidth = 20.0;
     const internalGaps =
-        24.0; // Increased: gaps between icon, text, arrow, clear
+        24.0;
     const gapBetweenDropdowns = 12.0;
 
     // Estimate Machine dropdown width
@@ -235,9 +235,6 @@ class WebTableContainer extends StatelessWidget {
 
   /// Gets the display name for the selected machine (needs machine data)
   String _getMachineDisplayName() {
-    // Fallback to ID if we can't get the name
-    // In a real scenario, you'd fetch from provider/state
-    // For estimation purposes, assume average length
     return selectedMachineId ?? 'Machine';
   }
 

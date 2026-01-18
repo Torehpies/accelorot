@@ -14,7 +14,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Monitor composting anytime, anywhere via our mobile app',
           icon: Icons.smartphone_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
         FeatureModel(
@@ -22,7 +22,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Get AI-powered tips for ideal composting conditions.',
           icon: Icons.psychology_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
         FeatureModel(
@@ -30,7 +30,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Auto aeration & moisture control for perfect compost',
           icon: Icons.bolt_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
         FeatureModel(
@@ -38,7 +38,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Receive notifications for critical events and compost readiness',
           icon: Icons.notifications_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
         FeatureModel(
@@ -46,7 +46,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Track trends with interactive graphs and exportable reports',
           icon: Icons.analytics_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
         FeatureModel(
@@ -54,7 +54,7 @@ class LandingPageViewModel extends ChangeNotifier {
           description:
               'Reduce waste, lower emissions, and create sustainable compost',
           icon: Icons.eco_outlined,
-          iconColor: WebColors.tealAccent,
+          iconColor: WebColors.greenAccent,
           backgroundColor: const Color(0xFFCCFBF1),
         ),
       ];

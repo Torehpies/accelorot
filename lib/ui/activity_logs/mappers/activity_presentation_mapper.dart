@@ -157,8 +157,8 @@ class ActivityPresentationMapper {
   static IconData _getCycleIcon(String? controllerType) {
     switch (controllerType) {
       case 'drum_controller':
-        return Icons.sync; // or Icons.rotate_right
-      case 'aerator':
+        return Icons.sync;
+        case 'aerator':
         return Icons.air;
       default:
         return Icons.settings;

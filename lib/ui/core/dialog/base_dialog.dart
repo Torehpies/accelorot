@@ -34,7 +34,7 @@ class BaseDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(20),
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: 600,
+          maxWidth: 500,
           maxHeight: maxHeight,
         ),
         decoration: BoxDecoration(
@@ -51,7 +51,7 @@ class BaseDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
+            // Headera
             DialogHeader(
               title: title,
               subtitle: subtitle,

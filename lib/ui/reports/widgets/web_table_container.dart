@@ -39,7 +39,8 @@ class ReportsTableContainer extends StatelessWidget {
   final ValueChanged<DateFilterRange> onDateFilterChanged;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String> onSort;
-  final ValueChanged<Report> onViewDetails;
+  final ValueChanged<Report> onView;
+  final ValueChanged<Report> onEdit;
   final ValueChanged<int> onPageChanged;
   final ValueChanged<int> onItemsPerPageChanged;
 
@@ -63,7 +64,8 @@ class ReportsTableContainer extends StatelessWidget {
     required this.onDateFilterChanged,
     required this.onSearchChanged,
     required this.onSort,
-    required this.onViewDetails,
+    required this.onView,
+    required this.onEdit,
     required this.onPageChanged,
     required this.onItemsPerPageChanged,
   });
@@ -106,10 +108,11 @@ class ReportsTableContainer extends StatelessWidget {
         isLoading: isLoading,
       ),
 
-      // Table body
+      // Table body with both view and edit callbacks
       tableBody: WebTableBody(
         reports: reports,
-        onViewDetails: onViewDetails,
+        onView: onView,
+        onEdit: onEdit,
         isLoading: isLoading,
       ),
 

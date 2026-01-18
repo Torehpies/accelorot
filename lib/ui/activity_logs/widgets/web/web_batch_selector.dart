@@ -11,6 +11,7 @@ class WebBatchSelector extends ConsumerWidget {
   final String? selectedMachineId;
   final ValueChanged<String?> onChanged;
   final DropdownDisplayMode displayMode;
+  final bool isLoading;
 
   const WebBatchSelector({
     super.key,
@@ -18,6 +19,7 @@ class WebBatchSelector extends ConsumerWidget {
     required this.onChanged,
     this.selectedMachineId,
     required this.displayMode,
+    this.isLoading = false,
   });
 
   @override
@@ -47,6 +49,7 @@ class WebBatchSelector extends ConsumerWidget {
           icon: Icons.inventory_2,
           onChanged: hasNoBatches ? (_) {} : onChanged,
           displayMode: displayMode,
+          isLoading: isLoading,
           items: hasNoBatches
               ? const []
               : [

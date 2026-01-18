@@ -180,7 +180,7 @@ class TableHeaderCell extends StatelessWidget {
             Text(
               label,
               style: isActive
-                  ? WebTextStyles.label.copyWith(color: WebColors.tealAccent)
+                  ? WebTextStyles.label.copyWith(color: WebColors.greenAccent)
                   : WebTextStyles.label,
             ),
             const SizedBox(width: 4),
@@ -189,7 +189,7 @@ class TableHeaderCell extends StatelessWidget {
                   ? (sortAscending ? Icons.arrow_upward : Icons.arrow_downward)
                   : Icons.unfold_more,
               size: 16,
-              color: isActive ? WebColors.tealAccent : WebColors.neutral,
+              color: isActive ? WebColors.greenAccent : WebColors.neutral,
             ),
           ],
         ),

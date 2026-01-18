@@ -12,12 +12,14 @@ class WebMachineSelector extends ConsumerWidget {
   final String? selectedMachineId;
   final ValueChanged<String?> onChanged;
   final DropdownDisplayMode displayMode;
+  final bool isLoading;
 
   const WebMachineSelector({
     super.key,
     required this.selectedMachineId,
     required this.onChanged,
     required this.displayMode,
+    this.isLoading = false,
   });
 
   @override
@@ -27,6 +29,8 @@ class WebMachineSelector extends ConsumerWidget {
     return FutureBuilder<Map<String, dynamic>?>(
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
+        final shouldShowLoading = userSnapshot.connectionState == ConnectionState.waiting || isLoading;
+
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return WebDropdown<String>(
             value: null,
@@ -72,6 +76,7 @@ class WebMachineSelector extends ConsumerWidget {
                 icon: Icons.precision_manufacturing,
                 disabledHint: 'No Machines',
                 displayMode: displayMode,
+                isLoading: shouldShowLoading,
               );
             }
 
@@ -85,6 +90,7 @@ class WebMachineSelector extends ConsumerWidget {
               activeMachines: activeMachines,
               onChanged: onChanged,
               displayMode: displayMode,
+              isLoading: shouldShowLoading,
             );
           },
           loading: () => WebDropdown<String>(
@@ -120,6 +126,7 @@ class _WebMachineDropdownInner extends StatelessWidget {
   final List<MachineModel> activeMachines;
   final ValueChanged<String?> onChanged;
   final DropdownDisplayMode displayMode;
+  final bool isLoading;
 
   const _WebMachineDropdownInner({
     required this.selectedMachineId,
@@ -127,6 +134,7 @@ class _WebMachineDropdownInner extends StatelessWidget {
     required this.activeMachines,
     required this.onChanged,
     required this.displayMode,
+    this.isLoading = false,
   });
 
   @override
@@ -139,6 +147,7 @@ class _WebMachineDropdownInner extends StatelessWidget {
       icon: Icons.precision_manufacturing,
       onChanged: onChanged,
       displayMode: displayMode,
+      isLoading: isLoading,
       items: [
         const PopupMenuItem<String>(
           value: null,

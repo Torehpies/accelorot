@@ -181,7 +181,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                 Icon(
                   Icons.calendar_today,
                   size: 16,
-                  color: isActive ? WebColors.tealAccent : WebColors.textLabel,
+                  color: isActive ? WebColors.greenAccent : WebColors.textLabel,
                 ),
                 if (isActive) ...[
                   const SizedBox(width: 8),
@@ -193,7 +193,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                   Icon(
                     Icons.arrow_drop_down,
                     size: 20,
-                    color: WebColors.tealAccent,
+                    color: WebColors.greenAccent,
                   ),
                   const SizedBox(width: 4),
                   InkWell(

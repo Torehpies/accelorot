@@ -3,15 +3,12 @@ import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../view_model/reports_viewmodel.dart';
-//import '../models/reports_state.dart';
 import '../widgets/mobile_report_card.dart';
-import '../widgets/edit_report_modal.dart';
-//import '../widgets/reports_stats_row.dart';
+import '../dialogs/edit_report_modal.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/base_stats_card.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
-//import '../../core/widgets/shared/pagination_controls.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
   const MobileReportsView({super.key});

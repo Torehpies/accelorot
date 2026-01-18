@@ -47,11 +47,13 @@ class ActivityTableRow extends StatelessWidget {
           ),
         ),
 
-        // Category Badge
+        // Category Column
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: TableBadge(text: categoryName),
+          child: Text(
+            categoryName,
+            style: WebTextStyles.body,
+            textAlign: TextAlign.center,
           ),
         ),
 
