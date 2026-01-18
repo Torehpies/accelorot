@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/mobile_team_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
@@ -35,18 +36,24 @@ class _MobileOperatorManagementScreenState
   @override
   Widget build(BuildContext context) {
     super.build(context);
-		return Text("HI");
-    // return SingleChildScrollView(
-    //   child: Column(
-    //     children: [
-    //       TeamHeaderWithTabs(controller: _tabController),
-    //       const SizedBox(height: 8),
-    //       TabBarView(
-    //         controller: _tabController,
-    //         children: const [TeamMembersTab(), PendingMembersTab()],
-    //       ),
-    //     ],
-    //   ),
-    // );
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+      ),
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          TeamHeaderWithTabs(controller: _tabController),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: TabBarView(
+              controller: _tabController,
+              children: const [MobileTeamMembersTab(), PendingMembersTab()],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
