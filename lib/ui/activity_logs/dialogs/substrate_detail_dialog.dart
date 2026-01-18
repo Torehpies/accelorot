@@ -24,13 +24,12 @@ class SubstrateDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main substrate information in gray section
+          // All substrate information in one gray section
           ReadOnlySection(
             fields: [
               ReadOnlyField(
                 label: 'Title',
                 value: substrate.title,
-                copyable: true,
               ),
               ReadOnlyField(
                 label: 'Category',
@@ -48,30 +47,27 @@ class SubstrateDetailDialog extends StatelessWidget {
                 label: 'Submitted By',
                 value: substrate.operatorName ?? 'Unknown',
               ),
+              
+              // Description as multiline field
+              ReadOnlyMultilineField(
+                label: 'Description',
+                value: substrate.description,
+              ),
+              
+              // Date Added
               ReadOnlyField(
                 label: 'Date Added',
                 value: DateFormat('MM/dd/yyyy, hh:mm a').format(substrate.timestamp),
               ),
+              
+              // Batch ID if available
+              if (substrate.batchId != null)
+                ReadOnlyField(
+                  label: 'Batch ID',
+                  value: substrate.batchId!,
+                ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Description (outside gray box for emphasis)
-          ReadOnlyMultilineField(
-            label: 'Description',
-            value: substrate.description,
-          ),
-          
-          // Batch ID if available
-          if (substrate.batchId != null) ...[
-            const SizedBox(height: 16),
-            ReadOnlyField(
-              label: 'Batch ID',
-              value: substrate.batchId!,
-              copyable: true,
-            ),
-          ],
         ],
       ),
       actions: [

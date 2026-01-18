@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../themes/web_text_styles.dart';
 import '../themes/web_colors.dart';
+import '../services/toast_service.dart';
 
 // ==================== READ ONLY ====================
 
@@ -11,16 +12,12 @@ import '../themes/web_colors.dart';
 class ReadOnlyField extends StatefulWidget {
   final String label;
   final String value;
-  final bool enableHover;
-  final bool copyable;
   final String emptyText;
 
   const ReadOnlyField({
     super.key,
     required this.label,
     required this.value,
-    this.enableHover = true,
-    this.copyable = false,
     this.emptyText = "—",
   });
 
@@ -30,17 +27,30 @@ class ReadOnlyField extends StatefulWidget {
 
 class _ReadOnlyFieldState extends State<ReadOnlyField> {
   bool _isHovered = false;
+  bool _showCopyIcon = false;
+
+  void _onHoverEnter() {
+    setState(() => _isHovered = true);
+    // Delay before showing copy icon
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_isHovered && mounted) {
+        setState(() => _showCopyIcon = true);
+      }
+    });
+  }
+
+  void _onHoverExit() {
+    setState(() {
+      _isHovered = false;
+      _showCopyIcon = false;
+    });
+  }
 
   void _copyToClipboard() {
     if (widget.value.isEmpty) return;
+    
     Clipboard.setData(ClipboardData(text: widget.value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied: ${widget.value}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    ToastService.show(context, message: 'Copied!');
   }
 
   @override
@@ -49,16 +59,14 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
     final isEmptyValue = widget.value.isEmpty;
 
     return MouseRegion(
-      onEnter: widget.enableHover ? (_) => setState(() => _isHovered = true) : null,
-      onExit: widget.enableHover ? (_) => setState(() => _isHovered = false) : null,
+      onEnter: (_) => _onHoverEnter(),
+      onExit: (_) => _onHoverExit(),
       child: GestureDetector(
-        onTap: widget.copyable && !isEmptyValue ? _copyToClipboard : null,
+        onTap: !isEmptyValue ? _copyToClipboard : null,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: _isHovered && widget.enableHover
-                ? WebColors.hoverBackground
-                : Colors.transparent,
+            color: _isHovered ? WebColors.hoverBackground : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Row(
@@ -90,7 +98,7 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
                         textAlign: TextAlign.right,
                       ),
                     ),
-                    if (widget.copyable && !isEmptyValue && _isHovered) ...[
+                    if (_showCopyIcon && !isEmptyValue) ...[
                       const SizedBox(width: 8),
                       Icon(
                         Icons.content_copy,
@@ -113,18 +121,12 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
 class ReadOnlyMultilineField extends StatefulWidget {
   final String label;
   final String value;
-  final bool showGrayBackground;
-  final bool enableHover;
-  final bool copyable;
   final String emptyText;
 
   const ReadOnlyMultilineField({
     super.key,
     required this.label,
     required this.value,
-    this.showGrayBackground = false,
-    this.enableHover = true,
-    this.copyable = false,
     this.emptyText = "—",
   });
 
@@ -134,17 +136,30 @@ class ReadOnlyMultilineField extends StatefulWidget {
 
 class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
   bool _isHovered = false;
+  bool _showCopyIcon = false;
+
+  void _onHoverEnter() {
+    setState(() => _isHovered = true);
+    // Delay before showing copy icon
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_isHovered && mounted) {
+        setState(() => _showCopyIcon = true);
+      }
+    });
+  }
+
+  void _onHoverExit() {
+    setState(() {
+      _isHovered = false;
+      _showCopyIcon = false;
+    });
+  }
 
   void _copyToClipboard() {
     if (widget.value.isEmpty) return;
+    
     Clipboard.setData(ClipboardData(text: widget.value));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied to clipboard'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    ToastService.show(context, message: 'Copied!');
   }
 
   @override
@@ -152,73 +167,55 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
     final displayValue = widget.value.isEmpty ? widget.emptyText : widget.value;
     final isEmptyValue = widget.value.isEmpty;
 
-    final content = MouseRegion(
-      onEnter: widget.enableHover ? (_) => setState(() => _isHovered = true) : null,
-      onExit: widget.enableHover ? (_) => setState(() => _isHovered = false) : null,
+    return MouseRegion(
+      onEnter: (_) => _onHoverEnter(),
+      onExit: (_) => _onHoverExit(),
       child: GestureDetector(
-        onTap: widget.copyable && !isEmptyValue ? _copyToClipboard : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Label with copy indicator
-            Row(
-              children: [
-                Text(
-                  widget.label,
-                  style: WebTextStyles.bodyMediumGray,
-                ),
-                if (widget.copyable && !isEmptyValue && _isHovered) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.content_copy,
-                    size: 14,
-                    color: WebColors.textLabel,
+        onTap: !isEmptyValue ? _copyToClipboard : null,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          decoration: BoxDecoration(
+            color: _isHovered ? WebColors.hoverBackground : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Label with copy indicator
+              Row(
+                children: [
+                  Text(
+                    widget.label,
+                    style: WebTextStyles.bodyMediumGray,
                   ),
+                  if (_showCopyIcon && !isEmptyValue) ...[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.content_copy,
+                      size: 14,
+                      color: WebColors.textLabel,
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            const SizedBox(height: 8),
-            // Value
-            Text(
-              displayValue,
-              style: WebTextStyles.body.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isEmptyValue ? WebColors.textMuted : WebColors.textPrimary,
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              // Value
+              Text(
+                displayValue,
+                style: WebTextStyles.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isEmptyValue ? WebColors.textMuted : WebColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-
-    if (widget.showGrayBackground) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _isHovered && widget.enableHover
-              ? WebColors.hoverBackground.withValues(alpha: 0.5)
-              : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: content,
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: _isHovered && widget.enableHover
-            ? WebColors.hoverBackground
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: content,
     );
   }
 }
 
 /// Gray container section for displaying multiple read-only fields
-/// Use this ONLY for mixed layouts (read-only + input fields)
 class ReadOnlySection extends StatelessWidget {
   final List<Widget> fields;
   final String? sectionTitle;

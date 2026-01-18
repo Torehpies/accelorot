@@ -28,13 +28,12 @@ class CycleDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main cycle information in gray section
+          // All cycle information in one gray section
           ReadOnlySection(
             fields: [
               ReadOnlyField(
                 label: 'Title',
                 value: cycle.title,
-                copyable: true,
               ),
               ReadOnlyField(
                 label: 'Category',
@@ -48,7 +47,6 @@ class CycleDetailDialog extends StatelessWidget {
                 ReadOnlyField(
                   label: 'Machine ID',
                   value: cycle.machineId!,
-                  copyable: true,
                 ),
               if (cycle.cycles != null)
                 ReadOnlyField(
@@ -75,51 +73,33 @@ class CycleDetailDialog extends StatelessWidget {
                   label: 'Total Runtime',
                   value: _formatRuntime(cycle.totalRuntimeSeconds!),
                 ),
+              
+              // Description as multiline field
+              ReadOnlyMultilineField(
+                label: 'Description',
+                value: cycle.description,
+              ),
+              
+              // Started At and Completed At (special for cycles)
+              if (cycle.startedAt != null)
+                ReadOnlyField(
+                  label: 'Started At',
+                  value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.startedAt!),
+                ),
+              if (cycle.completedAt != null)
+                ReadOnlyField(
+                  label: 'Completed At',
+                  value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.completedAt!),
+                ),
+              
+              // Batch ID if available
+              if (cycle.batchId != null)
+                ReadOnlyField(
+                  label: 'Batch ID',
+                  value: cycle.batchId!,
+                ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Description (outside gray box for emphasis)
-          ReadOnlyMultilineField(
-            label: 'Description',
-            value: cycle.description,
-          ),
-          
-          // Timestamps section
-          if (cycle.startedAt != null || cycle.completedAt != null || cycle.timestamp != null) ...[
-            const SizedBox(height: 16),
-            ReadOnlySection(
-              sectionTitle: 'Timeline',
-              fields: [
-                if (cycle.startedAt != null)
-                  ReadOnlyField(
-                    label: 'Started At',
-                    value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.startedAt!),
-                  ),
-                if (cycle.completedAt != null)
-                  ReadOnlyField(
-                    label: 'Completed At',
-                    value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.completedAt!),
-                  ),
-                if (cycle.timestamp != null)
-                  ReadOnlyField(
-                    label: 'Date Added',
-                    value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.timestamp!),
-                  ),
-              ],
-            ),
-          ],
-          
-          // Batch ID if available
-          if (cycle.batchId != null) ...[
-            const SizedBox(height: 16),
-            ReadOnlyField(
-              label: 'Batch ID',
-              value: cycle.batchId!,
-              copyable: true,
-            ),
-          ],
         ],
       ),
       actions: [

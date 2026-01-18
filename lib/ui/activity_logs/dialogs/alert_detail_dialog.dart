@@ -17,8 +17,6 @@ class AlertDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasAdditionalReadings = alert.readings != null && alert.readings!.isNotEmpty;
-    
     return BaseDialog(
       title: 'View Alert',
       subtitle: 'Sensor alert details.',
@@ -26,7 +24,7 @@ class AlertDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main alert information in gray section
+          // All alert information in one gray section
           ReadOnlySection(
             fields: [
               ReadOnlyField(
@@ -36,7 +34,6 @@ class AlertDetailDialog extends StatelessWidget {
               ReadOnlyField(
                 label: 'Machine ID',
                 value: alert.machineId,
-                copyable: true,
               ),
               ReadOnlyField(
                 label: 'Reading Value',
@@ -50,34 +47,29 @@ class AlertDetailDialog extends StatelessWidget {
                 label: 'Status',
                 value: alert.status.toUpperCase(),
               ),
+              
+              // Message as multiline field
+              ReadOnlyMultilineField(
+                label: 'Message',
+                value: alert.message,
+              ),
+              
+              // Additional readings (if available)
+              if (alert.readings != null && alert.readings!.isNotEmpty)
+                ...alert.readings!.entries.map((entry) {
+                  return ReadOnlyField(
+                    label: _formatKey(entry.key),
+                    value: entry.value.toString(),
+                  );
+                }),
+              
+              // Date Added (Timestamp)
               ReadOnlyField(
-                label: 'Timestamp',
+                label: 'Date Added',
                 value: DateFormat('MM/dd/yyyy, hh:mm a').format(alert.timestamp),
               ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Message (outside gray box for emphasis)
-          ReadOnlyMultilineField(
-            label: 'Message',
-            value: alert.message,
-          ),
-          
-          // Additional readings section
-          if (hasAdditionalReadings) ...[
-            const SizedBox(height: 16),
-            ReadOnlySection(
-              sectionTitle: 'Additional Readings',
-              fields: alert.readings!.entries.map((entry) {
-                return ReadOnlyField(
-                  label: _formatKey(entry.key),
-                  value: entry.value.toString(),
-                );
-              }).toList(),
-            ),
-          ],
         ],
       ),
       actions: [

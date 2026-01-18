@@ -17,8 +17,6 @@ class ReportDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isResolved = report.resolvedAt != null;
-    
     return BaseDialog(
       title: 'View Report',
       subtitle: 'View in-depth information about this report.',
@@ -26,13 +24,12 @@ class ReportDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Main report information in gray section
+          // All report information in one gray section
           ReadOnlySection(
             fields: [
               ReadOnlyField(
                 label: 'Title',
                 value: report.title,
-                copyable: true,
               ),
               ReadOnlyField(
                 label: 'Report Type',
@@ -54,39 +51,32 @@ class ReportDetailDialog extends StatelessWidget {
                 label: 'Machine Name',
                 value: report.machineName,
               ),
+              
+              // Description as multiline field
+              ReadOnlyMultilineField(
+                label: 'Description',
+                value: report.description,
+              ),
+              
+              // Date Created (Date Added)
               ReadOnlyField(
-                label: 'Date Created',
+                label: 'Date Added',
                 value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.createdAt),
               ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Description (outside gray box for emphasis)
-          ReadOnlyMultilineField(
-            label: 'Description',
-            value: report.description,
-          ),
-          
-          // Resolution info (if resolved)
-          if (isResolved) ...[
-            const SizedBox(height: 16),
-            ReadOnlySection(
-              sectionTitle: 'Resolution',
-              fields: [
+              
+              // Resolution info (if resolved)
+              if (report.resolvedAt != null)
                 ReadOnlyField(
                   label: 'Resolved At',
                   value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.resolvedAt!),
                 ),
-                if (report.resolvedBy != null)
-                  ReadOnlyField(
-                    label: 'Resolved By',
-                    value: report.resolvedBy!,
-                  ),
-              ],
-            ),
-          ],
+              if (report.resolvedBy != null)
+                ReadOnlyField(
+                  label: 'Resolved By',
+                  value: report.resolvedBy!,
+                ),
+            ],
+          ),
         ],
       ),
       actions: [
