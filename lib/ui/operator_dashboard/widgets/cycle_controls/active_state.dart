@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/drum_rotation_settings.dart';
 import '../../models/system_status.dart';
-import 'drum_input_fields.dart';
 import 'system_action_buttons.dart';
 import 'info_item.dart';
 
@@ -29,7 +28,7 @@ class ActiveState extends StatefulWidget {
 }
 
 class _ActiveStateState extends State<ActiveState> {
-  Timer? _uptimeTimer;
+  Timer? _ticker;
   DateTime? _startTime;
   Duration _totalPausedTime = Duration.zero;
   DateTime? _lastPausedAt;
@@ -37,21 +36,57 @@ class _ActiveStateState extends State<ActiveState> {
   @override
   void initState() {
     super.initState();
-    _startUptimeTimer();
+    _startTicker();
+    if (widget.status == SystemStatus.running) {
+      _startTime = widget.batchStartTime;
+    }
   }
 
   @override
   void dispose() {
-    _uptimeTimer?.cancel();
+    _ticker?.cancel();
     super.dispose();
   }
 
-  void _startUptimeTimer() {
-    _uptimeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted && widget.status == SystemStatus.running) {
-        setState(() {});
+  // Runs every second to update UI counter and check for phase switch
+  void _startTicker() {
+    _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      
+      // Update UI
+      setState(() {});
+
+      // Check if we need to switch phases (Only if running)
+      if (widget.status == SystemStatus.running && 
+          widget.settings.currentPhase != 'stopped') {
+        _checkPhaseTransition();
       }
     });
+  }
+
+  void _checkPhaseTransition() {
+    final remaining = widget.settings.remainingTime;
+
+    // If time is up (0 seconds remaining)
+    if (remaining.inSeconds <= 0) {
+      // Determine next phase
+      final nextPhase = widget.settings.currentPhase == 'active' ? 'resting' : 'active';
+      
+      // Update Settings Object
+      final updatedSettings = widget.settings.copyWith(
+        currentPhase: nextPhase,
+        phaseStartTime: DateTime.now(), // Reset clock for new phase
+      );
+
+      // SAVE TO DB via Callback
+      widget.onSettingsChanged(updatedSettings);
+    }
+  }
+
+  String _formatDuration(Duration d) {
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   Duration _getUptime() {
@@ -74,31 +109,20 @@ class _ActiveStateState extends State<ActiveState> {
     return '$hours:$minutes:$seconds';
   }
 
-  String _getLastCycleText() {
-    if (widget.settings.lastCycleCompleted == null) {
-      return 'Never';
-    }
-
-    final now = DateTime.now();
-    final difference = now.difference(widget.settings.lastCycleCompleted!);
-
-    if (difference.inSeconds < 60) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} mins ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours} hours ago';
-    } else {
-      return '${difference.inDays} days ago';
-    }
-  }
-
   void _handleStart() {
+    // Start in ACTIVE phase
+    final startSettings = widget.settings.copyWith(
+      currentPhase: 'active',
+      phaseStartTime: DateTime.now(),
+    );
+    
     setState(() {
       _startTime = DateTime.now();
       _totalPausedTime = Duration.zero;
       _lastPausedAt = null;
     });
+    
+    widget.onSettingsChanged(startSettings); // Saves to DB
     widget.onStatusChanged(SystemStatus.running);
   }
 
@@ -120,11 +144,19 @@ class _ActiveStateState extends State<ActiveState> {
   }
 
   void _handleStop() {
+    // Stop everything
+    final stopSettings = widget.settings.copyWith(
+      currentPhase: 'stopped',
+      phaseStartTime: null,
+    );
+    
     setState(() {
       _startTime = null;
       _totalPausedTime = Duration.zero;
       _lastPausedAt = null;
     });
+    
+    widget.onSettingsChanged(stopSettings); // Saves to DB
     widget.onStatusChanged(SystemStatus.stopped);
   }
 
@@ -140,12 +172,19 @@ class _ActiveStateState extends State<ActiveState> {
       children: [
         // Batch info
         Padding(
-          padding: const EdgeInsets.only(right: 40.0, left: 5.0),
+          padding: const EdgeInsets.only(right: 0.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              InfoItem(label: 'Uptime', value: _formatUptime()),
-              InfoItem(label: 'Last Cycle', value: _getLastCycleText()),
+              Expanded(child: InfoItem(label: 'Uptime', value: _formatUptime())),
+              const SizedBox(width: 16),
+              Expanded(
+                child: InfoItem(
+                  label: 'Pattern',
+                  value:
+                      '${widget.settings.activeMinutes}/${widget.settings.restMinutes} min',
+                ),
+              ),
             ],
           ),
         ),
@@ -158,25 +197,20 @@ class _ActiveStateState extends State<ActiveState> {
         ),
         const SizedBox(height: 12),
 
-        // Input fields
-        DrumInputFields(
-          selectedCycle: widget.settings.cycles.toString(),
-          selectedPeriod: widget.settings.period,
-          isLocked: _isSettingsLocked,
-          onCycleChanged: (value) {
-            if (value != null) {
-              final updated = widget.settings.copyWith(
-                cycles: int.parse(value),
-              );
-              widget.onSettingsChanged(updated);
-            }
-          },
-          onPeriodChanged: (value) {
-            if (value != null) {
-              final updated = widget.settings.copyWith(period: value);
-              widget.onSettingsChanged(updated);
-            }
-          },
+        // Pattern selector
+        _buildDropdown(
+          label: 'Select Cycle Pattern',
+          value: widget.settings.pattern,
+          items: ['1/59', '3/57', '5/55'],
+          onChanged: _isSettingsLocked
+              ? null
+              : (value) {
+                  if (value != null) {
+                    final updated = widget.settings.copyWith();
+                    updated.setPattern(value);
+                    widget.onSettingsChanged(updated);
+                  }
+                },
         ),
         const SizedBox(height: 20),
 
@@ -188,6 +222,54 @@ class _ActiveStateState extends State<ActiveState> {
           onTogglePause: _handlePause,
         ),
       ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?)? onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: onChanged == null ? Colors.grey.shade100 : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          isDense: true,
+          isExpanded: true,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
+          items: items.map((String item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                '$item min (${item.split('/')[0]} ON / ${item.split('/')[1]} OFF)',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF1a1a1a),
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 }

@@ -102,20 +102,20 @@ class ActivityPresentationMapper {
     final title = cycle.controllerType == 'drum_controller' 
         ? 'Drum Controller' 
         : 'Aerator';
-        // Build description
+        
+    // Build description
     final parts = <String>[];
-    parts.add('Duration: ${cycle.duration ?? "N/A"}');
-    parts.add('Cycles: ${cycle.completedCycles ?? 0}/${cycle.cycles ?? 0}');
     
-
-    if (cycle.totalRuntimeSeconds != null) {
-    final runtime = Duration(seconds: cycle.totalRuntimeSeconds!);
-    final hours = runtime.inHours;
-    final minutes = runtime.inMinutes.remainder(60);
-    parts.add('Runtime: ${hours}h ${minutes}m');
+    if (cycle.activeMinutes != null && cycle.restMinutes != null) {
+      parts.add('Pattern: ${cycle.activeMinutes}min ON / ${cycle.restMinutes}min OFF');
     }
 
-
+    if (cycle.totalRuntimeSeconds != null) {
+      final runtime = Duration(seconds: cycle.totalRuntimeSeconds!);
+      final hours = runtime.inHours;
+      final minutes = runtime.inMinutes.remainder(60);
+      parts.add('Runtime: ${hours}h ${minutes}m');
+    }
     
     return ActivityLogItem(
       id: cycle.id,
@@ -124,16 +124,15 @@ class ActivityPresentationMapper {
       statusColor: _getCycleStatusColor(cycle.status),
       icon: _getCycleIcon(cycle.controllerType),
       description: parts.join('\n'),
-      category: cycle.controllerType, // ?? 'cycles', 
+      category: cycle.controllerType,
       timestamp: cycle.timestamp ?? cycle.startedAt ?? DateTime.now(),
       type: ActivityType.cycle,
       machineId: cycle.machineId,
       batchId: cycle.batchId,
       status: cycle.status,
       controllerType: cycle.controllerType,
-      cycles: cycle.cycles,
-      duration: cycle.duration,
-      completedCycles: cycle.completedCycles,
+      activeMinutes: cycle.activeMinutes,
+      restMinutes: cycle.restMinutes,
       totalRuntimeSeconds: cycle.totalRuntimeSeconds,
     );
   }
@@ -164,7 +163,6 @@ class ActivityPresentationMapper {
         return Icons.settings;
     }
   }
-
 
   /// Get display category for alerts (moved from Alert model)
   static String _getAlertDisplayCategory(String sensorType) {

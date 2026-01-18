@@ -45,23 +45,10 @@ class CycleDetailDialog extends StatelessWidget {
             const SizedBox(height: 8),
           ],
           
-          if (cycle.cycles != null) ...[
+          if (cycle.activeMinutes != null && cycle.restMinutes != null) ...[
             ReadOnlyField(
-              label: 'Cycles:', 
-              value: '${cycle.cycles} cycles',
-            ),
-            const SizedBox(height: 8),
-          ],
-          
-          if (cycle.duration != null) ...[
-            ReadOnlyField(label: 'Duration:', value: cycle.duration!),
-            const SizedBox(height: 8),
-          ],
-          
-          if (cycle.completedCycles != null) ...[
-            ReadOnlyField(
-              label: 'Completed Cycles:', 
-              value: '${cycle.completedCycles}',
+              label: 'Cycle Pattern:', 
+              value: '${cycle.activeMinutes} min ON / ${cycle.restMinutes} min OFF',
             ),
             const SizedBox(height: 8),
           ],

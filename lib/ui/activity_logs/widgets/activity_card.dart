@@ -46,10 +46,10 @@ class ActivityCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    // Show cycle progress
-                    if (item.isCycle && item.cycles != null)
+                    // Show cycle pattern or value
+                    if (item.isCycle && item.activeMinutes != null && item.restMinutes != null)
                       Text(
-                        '${item.completedCycles ?? 0}/${item.cycles}',
+                        '${item.activeMinutes}/${item.restMinutes}',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -57,14 +57,14 @@ class ActivityCard extends StatelessWidget {
                         ),
                       )
                     else
-                    Text(
-                      item.value,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      Text(
+                        item.value,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],

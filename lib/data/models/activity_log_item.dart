@@ -30,10 +30,33 @@ class ActivityLogItem {
 
   // Cycle-specific fields
   final String? controllerType; // 'drum_controller' or 'aerator'
-  final int? cycles;
-  final String? duration;
-  final int? completedCycles;
+  final int? activeMinutes;
+  final int? restMinutes;
   final int? totalRuntimeSeconds;
+
+  const ActivityLogItem({
+    required this.id,
+    required this.title,
+    required this.value,
+    required this.statusColor,
+    required this.icon,
+    required this.description,
+    required this.category,
+    required this.timestamp,
+    required this.type,
+    this.machineId,
+    this.machineName,
+    this.batchId,
+    this.batchName,
+    this.operatorName,
+    this.reportType,
+    this.priority,
+    this.status,
+    this.controllerType,
+    this.activeMinutes,
+    this.restMinutes,
+    this.totalRuntimeSeconds,
+  });
 
 
   // ===== FACTORY CONSTRUCTORS =====
@@ -102,9 +125,8 @@ class ActivityLogItem {
       priority: data['priority'],
       status: data['status'],
       controllerType: data['controllerType'],
-      cycles: data['cycles'],
-      duration: data['duration'],
-      completedCycles: data['completedCycles'],
+      activeMinutes: data['activeMinutes'] as int?,
+      restMinutes: data['restMinutes'] as int?,
       totalRuntimeSeconds: data['totalRuntimeSeconds'],
     );
   }
@@ -131,30 +153,7 @@ class ActivityLogItem {
     }
   }
 
-  const ActivityLogItem({
-    required this.id,
-    required this.title,
-    required this.value,
-    required this.statusColor,
-    required this.icon,
-    required this.description,
-    required this.category,
-    required this.timestamp,
-    required this.type,
-    this.machineId,
-    this.machineName,
-    this.batchId,
-    this.batchName,
-    this.operatorName,
-    this.reportType,
-    this.priority,
-    this.status,
-    this.controllerType,
-    this.cycles,
-    this.duration,
-    this.completedCycles,
-    this.totalRuntimeSeconds,
-  });
+  
 
   // ===== COMPUTED PROPERTIES =====
   

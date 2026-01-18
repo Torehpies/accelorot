@@ -25,75 +25,62 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   SystemStatus status = SystemStatus.idle;
   
   String _uptime = '00:00:00';
-  int _completedCycles = 0;
   DateTime? _startTime;
   Timer? _timer;
-  Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  
-  // Add this to track the last loaded batch ID
-  //String? _lastLoadedBatchId;
 
   @override
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-     // _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
 
-@override
-void didUpdateWidget(AeratorCard oldWidget) {
-  super.didUpdateWidget(oldWidget);
-  
-  // Check if batch ID changed (new batch selected or created)
-  final currentBatchId = widget.currentBatch?.id;
-  final oldBatchId = oldWidget.currentBatch?.id;
-  
-  if (currentBatchId != oldBatchId) {
-    // Batch changed - reset and reload
-    _stopTimer();
-    _cycleTimer?.cancel();
+  @override
+  void didUpdateWidget(AeratorCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
     
-    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-      // No active batch - clear everything
+    // Check if batch ID changed (new batch selected or created)
+    final currentBatchId = widget.currentBatch?.id;
+    final oldBatchId = oldWidget.currentBatch?.id;
+    
+    if (currentBatchId != oldBatchId) {
+      // Batch changed - reset and reload
+      _stopTimer();
+      
+      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+        // No active batch - clear everything
+        setState(() {
+          settings.reset();
+          status = SystemStatus.idle;
+          _uptime = '00:00:00';
+          _startTime = null;
+          _cycleDoc = null;
+        });
+      } else {
+        // New active batch - load its cycle
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            _loadExistingCycle();
+          }
+        });
+      }
+    } else if (widget.currentBatch != null && 
+               oldWidget.currentBatch?.isActive == true && 
+               !widget.currentBatch!.isActive) {
+      // Same batch but became inactive
+      _stopTimer();
+      
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        _completeCycleInFirebase();
+      }
+      
       setState(() {
-        settings.reset();
-        status = SystemStatus.idle;
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _cycleDoc = null;
-        //_lastLoadedBatchId = null;
-      });
-    } else {
-      // New active batch - load its cycle
-      //_lastLoadedBatchId = widget.currentBatch!.id;
-      // Use Future.delayed to ensure the widget is fully built
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _loadExistingCycle();
-        }
+        status = SystemStatus.stopped;
       });
     }
-  } else if (widget.currentBatch != null && 
-             oldWidget.currentBatch?.isActive == true && 
-             !widget.currentBatch!.isActive) {
-    // Same batch but became inactive
-    _stopTimer();
-    _cycleTimer?.cancel();
-    
-    if (_cycleDoc != null && widget.currentBatch?.id != null) {
-      _completeCycleInFirebase();
-    }
-    
-    setState(() {
-      status = SystemStatus.stopped;
-    });
   }
-}
-
 
   Future<void> _loadExistingCycle() async {
     if (widget.currentBatch == null) return;
@@ -108,17 +95,15 @@ void didUpdateWidget(AeratorCard oldWidget) {
         setState(() {
           _cycleDoc = cycle;
           settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 50,
-            period: cycle.duration ?? '1 hour',
+            activeMinutes: cycle.activeMinutes ?? 1,
+            restMinutes: cycle.restMinutes ?? 59,
           );
-          _completedCycles = cycle.completedCycles ?? 0;
 
           if (cycle.status == 'running') {
             status = SystemStatus.running;
             _startTime = cycle.startedAt;
             if (_startTime != null) {
               _startTimer();
-              _simulateCycles();
             }
           } else if (cycle.status == 'completed') {
             status = SystemStatus.stopped;
@@ -135,7 +120,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
           settings.reset();
           status = SystemStatus.idle;
           _uptime = '00:00:00';
-          _completedCycles = 0;
           _startTime = null;
           _cycleDoc = null;
         });
@@ -148,7 +132,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
   @override
   void dispose() {
     _stopTimer();
-    _cycleTimer?.cancel();
     super.dispose();
   }
 
@@ -206,8 +189,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
         userId: user.uid,
-        cycles: settings.cycles,
-        duration: settings.period,
+        activeMinutes: settings.activeMinutes,
+        restMinutes: settings.restMinutes,
       );
 
       // Reload the cycle to get the ID
@@ -219,11 +202,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
         _cycleDoc = cycle;
         status = SystemStatus.running;
         _startTime = DateTime.now();
-        _completedCycles = 0;
         _startTimer();
       });
-
-      _simulateCycles();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -234,48 +214,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
         );
       }
     }
-  }
-
-  void _simulateCycles() {
-    final periodMinutes = _getPeriodMinutes(settings.period);
-    
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
-      if (mounted && status == SystemStatus.running) {
-        setState(() {
-          _completedCycles++;
-        });
-
-        // Update progress in Firebase
-        if (widget.currentBatch?.id != null && _startTime != null) {
-          try {
-            final cycleRepository = ref.read(cycleRepositoryProvider);
-            await cycleRepository.updateAeratorProgress(
-              batchId: widget.currentBatch!.id,
-              completedCycles: _completedCycles,
-              totalRuntime: DateTime.now().difference(_startTime!),
-            );
-          } catch (e) {
-            debugPrint('Failed to update aerator progress: $e');
-          }
-        }
-
-        if (_completedCycles >= settings.cycles) {
-          _stopTimer();
-          timer.cancel();
-          
-          // Complete cycle in Firebase
-          if (widget.currentBatch?.id != null) {
-            await _completeCycleInFirebase();
-          }
-          
-          setState(() {
-            status = SystemStatus.stopped;
-          });
-        }
-      } else {
-        timer.cancel();
-      }
-    });
   }
 
   Future<void> _completeCycleInFirebase() async {
@@ -289,25 +227,6 @@ void didUpdateWidget(AeratorCard oldWidget) {
     } catch (e) {
       debugPrint('Failed to complete aerator: $e');
     }
-  }
-
-  int _getPeriodMinutes(String period) {
-    switch (period) {
-      case '15 minutes':
-        return 15;
-      case '30 minutes':
-        return 30;
-      case '1 hour':
-        return 60;
-      case '2 hours':
-        return 120;
-      default:
-        return 60;
-    }
-  }
-
-  String _getCyclesLabel(int cycles) {
-    return '$cycles Cycles';
   }
 
   @override
@@ -424,8 +343,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
             const SizedBox(width: 16),
             Expanded(
               child: InfoItem(
-                label: 'No. of Cycles',
-                value: _completedCycles.toString(),
+                label: 'Pattern',
+                value: '${settings.activeMinutes}/${settings.restMinutes} min',
               ),
             ),
           ],
@@ -442,43 +361,19 @@ void didUpdateWidget(AeratorCard oldWidget) {
         ),
         const SizedBox(height: 12),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select Duration',
-                value: settings.period,
-                items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          setState(() {
-                            settings = settings.copyWith(period: value);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select No. of Cycles',
-                value: _getCyclesLabel(settings.cycles),
-                items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          final cycles = int.parse(value.split(' ')[0]);
-                          setState(() {
-                            settings = settings.copyWith(cycles: cycles);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-          ],
+        _buildDropdown(
+          label: 'Select Cycle Pattern',
+          value: settings.pattern,
+          items: ['1/59', '3/57', '5/55'],
+          onChanged: canInteract
+              ? (value) {
+                  if (value != null) {
+                    setState(() {
+                      settings.setPattern(value);
+                    });
+                  }
+                }
+              : null,
         ),
         const SizedBox(height: 24),
 
@@ -491,7 +386,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -503,7 +398,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
                   ? 'Completed'
                   : (status == SystemStatus.idle ? 'Start' : status.displayName),
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -547,7 +442,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
-                item,
+                '$item min (${item.split('/')[0]} ON / ${item.split('/')[1]} OFF)',
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF1a1a1a),

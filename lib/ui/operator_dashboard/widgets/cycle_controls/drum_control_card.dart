@@ -23,13 +23,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
   
-  String _uptime = '00:00:00';
-  int _completedCycles = 0;
-  DateTime? _startTime;
   Timer? _timer;
-  Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  //String? _lastLoadedBatchId;
 
   @override
   void initState() {
@@ -39,8 +34,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   void _initializeFromBatch() {
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      //_lastLoadedBatchId = widget.currentBatch!.id;
-      // Schedule load after build completes
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadExistingCycle();
@@ -53,15 +46,10 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   void _resetState() {
     _stopTimer();
-    _cycleTimer?.cancel();
     setState(() {
       settings.reset();
       status = SystemStatus.idle;
-      _uptime = '00:00:00';
-      _completedCycles = 0;
-      _startTime = null;
       _cycleDoc = null;
-      //_lastLoadedBatchId = null;
     });
   }
 
@@ -72,20 +60,12 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     final currentBatchId = widget.currentBatch?.id;
     final oldBatchId = oldWidget.currentBatch?.id;
     
-    debugPrint('🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId');
-    
-    // Batch changed
     if (currentBatchId != oldBatchId) {
-      debugPrint('✅ Batch ID changed - reinitializing');
       _initializeFromBatch();
-    }
-    // Same batch became inactive
-    else if (widget.currentBatch != null && 
-             oldWidget.currentBatch?.isActive == true && 
-             !widget.currentBatch!.isActive) {
-      debugPrint('⚠️ Batch completed');
+    } else if (widget.currentBatch != null && 
+               oldWidget.currentBatch?.isActive == true && 
+               !widget.currentBatch!.isActive) {
       _stopTimer();
-      _cycleTimer?.cancel();
       
       if (_cycleDoc != null) {
         _completeCycleInFirebase();
@@ -117,58 +97,44 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         setState(() {
           _cycleDoc = cycle;
           settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 50,
-            period: cycle.duration ?? '1 hour',
+            activeMinutes: cycle.activeMinutes ?? 1,
+            restMinutes: cycle.restMinutes ?? 59,
+            currentPhase: cycle.currentPhase ?? 'stopped',
+            phaseStartTime: cycle.phaseStartTime,
           );
-          _completedCycles = cycle.completedCycles ?? 0;
 
           if (cycle.status == 'running') {
             status = SystemStatus.running;
-            _startTime = cycle.startedAt;
-            if (_startTime != null) {
-              _startTimer();
-              _simulateCycles();
-            }
+            _startTimer();
           } else if (cycle.status == 'completed') {
             status = SystemStatus.stopped;
-            if (cycle.totalRuntimeSeconds != null) {
-              _uptime = _formatDuration(
-                Duration(seconds: cycle.totalRuntimeSeconds!),
-              );
-            }
           }
         });
       } else if (mounted) {
-        // No existing cycle - reset to idle state
-        setState(() {
-          settings.reset();
-          status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _completedCycles = 0;
-          _startTime = null;
-          _cycleDoc = null;
-        });
+        _resetState();
       }
     } catch (e) {
       debugPrint('❌ Error loading drum controller cycle: $e');
     }
   }
 
-  // ...rest of the existing methods remain the same...
   @override
   void dispose() {
     _stopTimer();
-    _cycleTimer?.cancel();
     super.dispose();
   }
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted && _startTime != null) {
-        final elapsed = DateTime.now().difference(_startTime!);
-        setState(() {
-          _uptime = _formatDuration(elapsed);
-        });
+      if (!mounted) return;
+      
+      setState(() {
+        // Timer updates UI automatically via settings.remainingTime getter
+      });
+
+      // Check for phase transition
+      if (status == SystemStatus.running && settings.currentPhase != 'stopped') {
+        _checkPhaseTransition();
       }
     });
   }
@@ -178,12 +144,42 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     _timer = null;
   }
 
-  String _formatDuration(Duration duration) {
+  Future<void> _checkPhaseTransition() async {
+    final remaining = settings.remainingTime;
+
+    // If countdown reached zero, switch phases
+    if (remaining.inSeconds <= 0) {
+      final newPhase = settings.currentPhase == 'active' ? 'resting' : 'active';
+      
+      debugPrint('🔄 Phase transition: ${settings.currentPhase} → $newPhase');
+
+      // Update locally first for immediate UI feedback
+      setState(() {
+        settings = settings.copyWith(
+          currentPhase: newPhase,
+          phaseStartTime: DateTime.now(),
+        );
+      });
+
+      // Then save to database
+      try {
+        final cycleRepository = ref.read(cycleRepositoryProvider);
+        await cycleRepository.updateDrumPhase(
+          batchId: widget.currentBatch!.id,
+          newPhase: newPhase,
+        );
+        debugPrint('✅ Phase updated in database');
+      } catch (e) {
+        debugPrint('❌ Error updating phase: $e');
+      }
+    }
+  }
+
+  String _formatCountdown(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _handleStart() async {
@@ -215,8 +211,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
         userId: user.uid,
-        cycles: settings.cycles,
-        duration: settings.period,
+        activeMinutes: settings.activeMinutes,
+        restMinutes: settings.restMinutes,
       );
 
       final cycle = await cycleRepository.getDrumController(
@@ -225,13 +221,13 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
       setState(() {
         _cycleDoc = cycle;
+        settings = settings.copyWith(
+          currentPhase: 'active',
+          phaseStartTime: DateTime.now(),
+        );
         status = SystemStatus.running;
-        _startTime = DateTime.now();
-        _completedCycles = 0;
         _startTimer();
       });
-
-      _simulateCycles();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -242,46 +238,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         );
       }
     }
-  }
-
-  void _simulateCycles() {
-    final periodMinutes = _getPeriodMinutes(settings.period);
-    
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
-      if (mounted && status == SystemStatus.running) {
-        setState(() {
-          _completedCycles++;
-        });
-
-        if (widget.currentBatch?.id != null && _startTime != null) {
-          try {
-            final cycleRepository = ref.read(cycleRepositoryProvider);
-            await cycleRepository.updateDrumProgress(
-              batchId: widget.currentBatch!.id,
-              completedCycles: _completedCycles,
-              totalRuntime: DateTime.now().difference(_startTime!),
-            );
-          } catch (e) {
-            debugPrint('Failed to update drum progress: $e');
-          }
-        }
-
-        if (_completedCycles >= settings.cycles) {
-          _stopTimer();
-          timer.cancel();
-          
-          if (widget.currentBatch?.id != null) {
-            await _completeCycleInFirebase();
-          }
-          
-          setState(() {
-            status = SystemStatus.stopped;
-          });
-        }
-      } else {
-        timer.cancel();
-      }
-    });
   }
 
   Future<void> _completeCycleInFirebase() async {
@@ -297,28 +253,50 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     }
   }
 
-  int _getPeriodMinutes(String period) {
-    switch (period) {
-      case '15 minutes':
-        return 15;
-      case '30 minutes':
-        return 30;
-      case '1 hour':
-        return 60;
-      case '2 hours':
-        return 120;
-      default:
-        return 60;
+  // DEBUG: Force phase switch manually
+  Future<void> _forcePhaseSwitch() async {
+    if (widget.currentBatch == null) return;
+    
+    final newPhase = settings.currentPhase == 'active' ? 'resting' : 'active';
+    debugPrint('🔧 FORCE Phase Switch: ${settings.currentPhase} → $newPhase');
+
+    setState(() {
+      settings = settings.copyWith(
+        currentPhase: newPhase,
+        phaseStartTime: DateTime.now(),
+      );
+    });
+
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      await cycleRepository.updateDrumPhase(
+        batchId: widget.currentBatch!.id,
+        newPhase: newPhase,
+      );
+      debugPrint('✅ Force phase switch completed');
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Switched to $newPhase phase'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error force switching phase: $e');
     }
   }
 
-  String _getCyclesLabel(int cycles) {
-    return '$cycles Cycles';
-  }
   @override
   Widget build(BuildContext context) {
     final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;
     final batchCompleted = widget.currentBatch != null && !widget.currentBatch!.isActive;
+
+    // Phase color logic
+    final isResting = settings.currentPhase == 'resting';
+    final phaseColor = isResting ? Colors.orange : const Color(0xFF10B981);
+    final phaseLabel = isResting ? 'RESTING' : 'ACTIVE';
 
     return Container(
       decoration: BoxDecoration(
@@ -386,19 +364,20 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             if (!hasActiveBatch && !batchCompleted)
               const EmptyState()
             else
-              _buildActiveState(batchCompleted),
+              _buildActiveState(batchCompleted, phaseColor, phaseLabel),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActiveState(bool batchCompleted) {
+  Widget _buildActiveState(bool batchCompleted, Color phaseColor, String phaseLabel) {
     final canInteract = !batchCompleted && status == SystemStatus.idle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Machine and Batch Info
         Row(
           children: [
             Expanded(
@@ -418,19 +397,22 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         ),
         const SizedBox(height: 16),
 
+        // Countdown and Limit
         Row(
           children: [
             Expanded(
               child: InfoItem(
-                label: 'Uptime',
-                value: _uptime,
+                label: settings.currentPhase == 'active' ? 'Active Time' : 'Rest Time',
+                value: _formatCountdown(settings.remainingTime),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: InfoItem(
-                label: 'No. of Cycles',
-                value: _completedCycles.toString(),
+                label: 'Limit',
+                value: settings.currentPhase == 'active' 
+                    ? '${settings.activeMinutes} min'
+                    : '${settings.restMinutes} min',
               ),
             ),
           ],
@@ -447,45 +429,46 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         ),
         const SizedBox(height: 12),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select Duration',
-                value: settings.period,
-                items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          setState(() {
-                            settings = settings.copyWith(period: value);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select No. of Cycles',
-                value: _getCyclesLabel(settings.cycles),
-                items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          final cycles = int.parse(value.split(' ')[0]);
-                          setState(() {
-                            settings = settings.copyWith(cycles: cycles);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-          ],
+        _buildDropdown(
+          label: 'Select Cycle Pattern',
+          value: settings.pattern,
+          items: ['1/59', '3/57', '5/55'],
+          onChanged: canInteract
+              ? (value) {
+                  if (value != null) {
+                    setState(() {
+                      settings.setPattern(value);
+                    });
+                  }
+                }
+              : null,
         ),
         const SizedBox(height: 24),
+
+        // Debug: Force phase switch button
+        if (status == SystemStatus.running)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _forcePhaseSwitch,
+                icon: const Icon(Icons.sync, size: 18),
+                label: const Text(
+                  'DEBUG: Force Phase Switch',
+                  style: TextStyle(fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.orange,
+                  side: const BorderSide(color: Colors.orange),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         SizedBox(
           width: double.infinity,

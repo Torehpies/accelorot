@@ -20,15 +20,8 @@ abstract class CycleService {
     required String batchId,
     required String machineId,
     required String userId,
-    required int cycles,
-    required String duration,
-  });
-
-  /// Update drum controller progress
-  Future<void> updateDrumProgress({
-    required String batchId,
-    required int completedCycles,
-    required Duration totalRuntime,
+    required int activeMinutes,
+    required int restMinutes,
   });
 
   /// Complete drum controller
@@ -41,20 +34,25 @@ abstract class CycleService {
     required String batchId,
     required String machineId,
     required String userId,
-    required int cycles,
-    required String duration,
-  });
-
-  /// Update aerator progress
-  Future<void> updateAeratorProgress({
-    required String batchId,
-    required int completedCycles,
-    required Duration totalRuntime,
+    required int activeMinutes,
+    required int restMinutes,
   });
 
   /// Complete aerator
   Future<void> completeAerator({
     required String batchId,
+  });
+
+  /// Update drum controller phase (for countdown synchronization)
+  Future<void> updateDrumPhase({
+    required String batchId,
+    required String newPhase,
+  });
+
+  /// Update aerator phase (for countdown synchronization)
+  Future<void> updateAeratorPhase({
+    required String batchId,
+    required String newPhase,
   });
 
   Future<CycleRecommendation?> fetchCycleById(String cycleId);

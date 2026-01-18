@@ -16,10 +16,14 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     String? userId,
     String? batchId,
     
-    // Cycle settings
-    int? cycles,
-    String? duration,
-    int? completedCycles,
+    // Cycle settings - active/rest pattern
+    int? activeMinutes,      // e.g., 1, 3, 5
+    int? restMinutes,        // e.g., 59, 57, 55
+    
+    // Phase tracking for countdown synchronization
+    String? currentPhase,    // 'active', 'resting', or 'stopped'
+    DateTime? phaseStartTime, // When current phase started
+    
     String? status,
     DateTime? startedAt,
     DateTime? completedAt,
@@ -32,26 +36,27 @@ abstract class CycleRecommendation with _$CycleRecommendation {
   // ===== FIRESTORE CONVERSION =====
 
   /// Create from Firestore document
-static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
-  final data = doc.data() as Map<String, dynamic>;
-  
-  return CycleRecommendation(
-    id: doc.id,
-    category: data['category'] ?? 'cycles',
-    controllerType: data['controllerType'] ?? '',
-    machineId: data['machineId'],
-    userId: data['userId'],
-    batchId: data['batchId'],
-    cycles: data['cycles'],
-    duration: data['duration'],
-    completedCycles: data['completedCycles'],
-    status: data['status'],
-    startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
-    completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
-    totalRuntimeSeconds: data['totalRuntimeSeconds'],
-    timestamp: (data['timestamp'] as Timestamp?)?.toDate(), 
-  );
-}
+  static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    
+    return CycleRecommendation(
+      id: doc.id,
+      category: data['category'] ?? 'cycles',
+      controllerType: data['controllerType'] ?? '',
+      machineId: data['machineId'],
+      userId: data['userId'],
+      batchId: data['batchId'],
+      activeMinutes: data['activeMinutes'] as int?,
+      restMinutes: data['restMinutes'] as int?,
+      currentPhase: data['currentPhase'] as String?,
+      phaseStartTime: (data['phaseStartTime'] as Timestamp?)?.toDate(),
+      status: data['status'],
+      startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
+      completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
+      totalRuntimeSeconds: data['totalRuntimeSeconds'],
+      timestamp: (data['timestamp'] as Timestamp?)?.toDate(), 
+    );
+  }
 
   /// Convert to Firestore map
   Map<String, dynamic> toFirestore() {
@@ -61,13 +66,15 @@ static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
       if (machineId != null) 'machineId': machineId,
       if (userId != null) 'userId': userId,
       if (batchId != null) 'batchId': batchId,
-      if (cycles != null) 'cycles': cycles,
-      if (duration != null) 'duration': duration,
-      if (completedCycles != null) 'completedCycles': completedCycles,
+      if (activeMinutes != null) 'activeMinutes': activeMinutes,
+      if (restMinutes != null) 'restMinutes': restMinutes,
+      if (currentPhase != null) 'currentPhase': currentPhase,
+      if (phaseStartTime != null) 'phaseStartTime': Timestamp.fromDate(phaseStartTime!),
       if (status != null) 'status': status,
       if (startedAt != null) 'startedAt': Timestamp.fromDate(startedAt!),
       if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
       if (totalRuntimeSeconds != null) 'totalRuntimeSeconds': totalRuntimeSeconds,
+      if (timestamp != null) 'timestamp': Timestamp.fromDate(timestamp!),
     };
   }
 
@@ -88,6 +95,9 @@ static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
   /// Check if controller is completed
   bool get isCompleted => status == 'completed';
   
+  /// Get total cycle duration (active + rest) in minutes
+  int get cycleDurationMinutes => (activeMinutes ?? 0) + (restMinutes ?? 0);
+  
   // ===== COMPUTED/DERIVED PROPERTIES =====
   
   /// Get display title
@@ -102,10 +112,15 @@ static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
     }
   }
   
-  /// Get display value (formatted cycles)
-  String get value => cycles != null ? '$cycles cycles' : '0 cycles';
+  /// Get display value (formatted active/rest pattern)
+  String get value {
+    if (activeMinutes == null || restMinutes == null) {
+      return 'No pattern set';
+    }
+    return '$activeMinutes min active / $restMinutes min rest';
+  }
   
-  /// Get description (formatted duration and cycles)
+  /// Get description (formatted cycle pattern)
   String get description => 
-      'Duration: ${duration ?? "N/A"}, Cycles: ${cycles ?? 0}';
+      'Cycle: ${activeMinutes ?? 0}min ON, ${restMinutes ?? 0}min OFF (${cycleDurationMinutes}min total)';
 }

@@ -58,7 +58,17 @@ class MobileSettingsView extends ConsumerWidget {
                   title: 'Profile Information',
                   subtitle: FirebaseAuth.instance.currentUser?.email,
                   onTap: () {
-                    context.push(RoutePath.profile.path);
+                    // Get the current route to determine the user's role
+                    final currentPath = GoRouterState.of(context).uri.path;
+                    
+                    // Navigate to the appropriate profile based on current route
+                    if (currentPath.startsWith('/admin')) {
+                      context.go(RoutePath.adminProfile.path);
+                    } else if (currentPath.startsWith('/superadmin')) {
+                      context.go(RoutePath.superAdminProfile.path);
+                    } else {
+                      context.go(RoutePath.profile.path);
+                    }
                   },
                 ),
                 SettingsTile(

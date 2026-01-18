@@ -81,6 +81,11 @@ abstract class MachineModel with _$MachineModel {
     DateTime? lastModified,
     String? currentBatchId,
     Map<String, dynamic>? metadata,
+
+    @Default(false) bool drumActive,
+    @Default(false) bool aeratorActive,
+    DateTime? drumStartedAt,
+    DateTime? aeratorStartedAt,    
   }) = _MachineModel;
 
   factory MachineModel.fromJson(Map<String, dynamic> json) =>
@@ -148,6 +153,10 @@ abstract class MachineModel with _$MachineModel {
       if (lastModified != null) 'lastModified': Timestamp.fromDate(lastModified!),
       if (currentBatchId != null) 'currentBatchId': currentBatchId,
       if (metadata != null) 'metadata': metadata,
+      'drumActive': drumActive,
+      'aeratorActive': aeratorActive,
+      if (drumStartedAt != null) 'drumStartedAt': Timestamp.fromDate(drumStartedAt!),
+      if (aeratorStartedAt != null) 'aeratorStartedAt': Timestamp.fromDate(aeratorStartedAt!),
     };
   }
 }

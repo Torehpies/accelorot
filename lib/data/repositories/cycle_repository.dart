@@ -23,26 +23,15 @@ class CycleRepository {
     required String batchId,
     required String machineId,
     required String userId,
-    required int cycles,
-    required String duration,
+    required int activeMinutes,
+    required int restMinutes,
   }) =>
       _cycleService.startDrumController(
         batchId: batchId,
         machineId: machineId,
         userId: userId,
-        cycles: cycles,
-        duration: duration,
-      );
-
-  Future<void> updateDrumProgress({
-    required String batchId,
-    required int completedCycles,
-    required Duration totalRuntime,
-  }) =>
-      _cycleService.updateDrumProgress(
-        batchId: batchId,
-        completedCycles: completedCycles,
-        totalRuntime: totalRuntime,
+        activeMinutes: activeMinutes,
+        restMinutes: restMinutes,
       );
 
   Future<void> completeDrumController({
@@ -54,32 +43,41 @@ class CycleRepository {
     required String batchId,
     required String machineId,
     required String userId,
-    required int cycles,
-    required String duration,
+    required int activeMinutes,
+    required int restMinutes,
   }) =>
       _cycleService.startAerator(
         batchId: batchId,
         machineId: machineId,
         userId: userId,
-        cycles: cycles,
-        duration: duration,
-      );
-
-  Future<void> updateAeratorProgress({
-    required String batchId,
-    required int completedCycles,
-    required Duration totalRuntime,
-  }) =>
-      _cycleService.updateAeratorProgress(
-        batchId: batchId,
-        completedCycles: completedCycles,
-        totalRuntime: totalRuntime,
+        activeMinutes: activeMinutes,
+        restMinutes: restMinutes,
       );
 
   Future<void> completeAerator({
     required String batchId,
   }) =>
       _cycleService.completeAerator(batchId: batchId);
+
+  /// Update drum controller phase (for countdown sync)
+  Future<void> updateDrumPhase({
+    required String batchId,
+    required String newPhase,
+  }) =>
+      _cycleService.updateDrumPhase(
+        batchId: batchId,
+        newPhase: newPhase,
+      );
+
+  /// Update aerator phase (for countdown sync)
+  Future<void> updateAeratorPhase({
+    required String batchId,
+    required String newPhase,
+  }) =>
+      _cycleService.updateAeratorPhase(
+        batchId: batchId,
+        newPhase: newPhase,
+      );
 
   /// Get a single cycle by ID
   Future<CycleRecommendation?> getCycle(String id) =>
