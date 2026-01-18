@@ -1,3 +1,5 @@
+// lib/data/services/firebase/firebase_machine_service.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../contracts/machine_service.dart';
@@ -17,6 +19,23 @@ class FirebaseMachineService implements MachineService {
   
   CollectionReference get _machinesCollection =>
       _firestore.collection('machines');
+
+  /// Helper: Get isArchived value from status
+  bool _getIsArchivedFromStatus(MachineStatus status) {
+    return status == MachineStatus.inactive;
+  }
+
+  /// Helper: Convert status enum to Firestore string
+  String _statusToString(MachineStatus status) {
+    switch (status) {
+      case MachineStatus.active:
+        return 'Active';
+      case MachineStatus.inactive:
+        return 'Inactive';
+      case MachineStatus.underMaintenance:
+        return 'Under Maintenance';
+    }
+  }
 
   @override
   Future<List<MachineModel>> fetchMachinesByTeam(String teamId) async {
@@ -57,27 +76,17 @@ class FirebaseMachineService implements MachineService {
     }
 
     try {
-      // Convert status to Firestore string value
-      String statusValue;
-      switch (request.status) {
-        case MachineStatus.active:
-          statusValue = 'Active';
-          break;
-        case MachineStatus.inactive:
-          statusValue = 'Inactive';
-          break;
-        case MachineStatus.underMaintenance:
-          statusValue = 'Under Maintenance';
-          break;
-      }
+      final statusValue = _statusToString(request.status);
+      final isArchivedValue = _getIsArchivedFromStatus(request.status);
 
       await _machinesCollection.doc(request.machineId).set({
         'machineName': request.machineName,
         'teamId': request.teamId,
         'dateCreated': FieldValue.serverTimestamp(),
-        'isArchived': false,
+        'isArchived': isArchivedValue,
         'status': statusValue,
         'createdBy': currentUserId,
+        'assignedUserIds': request.assignedUserIds,
       });
     } catch (e) {
       throw Exception('Failed to create machine: $e');
@@ -101,29 +110,21 @@ class FirebaseMachineService implements MachineService {
       }
       
       if (request.status != null) {
-        String statusValue;
-        switch (request.status!) {
-          case MachineStatus.active:
-            statusValue = 'Active';
-            updates['status'] = statusValue;
-            updates['isArchived'] = false;
-            break;
-          case MachineStatus.inactive:
-            statusValue = 'Inactive';
-            updates['status'] = statusValue;
-            updates['isArchived'] = true;
-            break;
-          case MachineStatus.underMaintenance:
-            statusValue = 'Under Maintenance';
-            updates['status'] = statusValue;
-            updates['isArchived'] = false;
-            break;
-        }
+        final statusValue = _statusToString(request.status!);
+        final isArchivedValue = _getIsArchivedFromStatus(request.status!);
+        
+        updates['status'] = statusValue;
+        updates['isArchived'] = isArchivedValue;
+      }
+      
+      if (request.assignedUserIds != null) {
+        updates['assignedUserIds'] = request.assignedUserIds;
       }
       
       if (request.currentBatchId != null) {
         updates['currentBatchId'] = request.currentBatchId;
       }
+      
       if (request.metadata != null) {
         updates['metadata'] = request.metadata;
       }
@@ -142,8 +143,8 @@ class FirebaseMachineService implements MachineService {
 
     try {
       await _machinesCollection.doc(machineId).update({
-        'isArchived': true, // KEEP: for mobile compatibility
-        'status': 'Inactive', // ADD: new status field
+        'isArchived': true, // For mobile compatibility
+        'status': 'Inactive', // For web (status enum)
         'archivedAt': FieldValue.serverTimestamp(),
         'archivedBy': currentUserId,
       });
@@ -160,8 +161,8 @@ class FirebaseMachineService implements MachineService {
 
     try {
       await _machinesCollection.doc(machineId).update({
-        'isArchived': false, // KEEP: for mobile compatibility
-        'status': 'Active', // ADD: new status field
+        'isArchived': false,
+        'status': 'Active',
         'restoredAt': FieldValue.serverTimestamp(),
         'restoredBy': currentUserId,
       });

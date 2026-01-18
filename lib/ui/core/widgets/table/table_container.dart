@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/table/base_table_container.dart
+// lib/ui/core/widgets/table/table_container.dart
 
 import 'package:flutter/material.dart';
 import '../../constants/spacing.dart';

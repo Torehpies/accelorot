@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/widgets/unified/web_batch_selector.dart
+// lib/ui/activity_logs/widgets/web/web_batch_selector.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -114,7 +114,7 @@ class MachineTableRow extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  icon: const Icon(Icons.open_in_new, size: 18),
                   color: WebColors.textLabel,
                   onPressed: onView,
                   tooltip: 'View Details',

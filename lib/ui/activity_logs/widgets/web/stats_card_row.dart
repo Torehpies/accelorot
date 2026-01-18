@@ -1,4 +1,4 @@
-// lib/ui/activity_logs/widgets/unified/stats_card_row.dart
+// lib/ui/activity_logs/widgets/web/stats_card_row.dart
 
 import 'package:flutter/material.dart';
 import '../../../core/widgets/base_stats_card.dart';
@@ -60,7 +60,7 @@ class StatsCardRow extends StatelessWidget {
             iconColor: WebColors.operationsIcon,
             backgroundColor: WebColors.operationsBackground,
             changeText: countsWithChange['operations']?['change'],
-            subtext: 'operators retired this month',
+            subtext: 'operations this month',
             isPositive: countsWithChange['operations']?['isPositive'],
             isLoading: isLoading,
           ),
