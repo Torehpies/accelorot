@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/format.dart';
-import 'package:flutter_application_1/utils/getOperatorStatusStyle.dart';
+import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 
 typedef StatusStyle = ({Color color, Color textColor});
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/mobile_team_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobileOperatorManagementScreen extends ConsumerStatefulWidget {

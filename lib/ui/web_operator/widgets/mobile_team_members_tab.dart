@@ -7,7 +7,7 @@ import 'package:flutter_application_1/ui/web_operator/view_model/team_members_no
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/utils/format.dart';
-import 'package:flutter_application_1/utils/getOperatorStatusStyle.dart';
+import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobileTeamMembersTab extends ConsumerStatefulWidget {
