@@ -16,8 +16,7 @@ import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/view/admin_machine_view.dart';
-//import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/responsive_admin_machine_management.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
@@ -26,7 +25,6 @@ import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
-//import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
@@ -207,7 +205,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               final teamId = state.extra as String? ?? '';
               return NoTransitionPage(
                 key: state.pageKey,
-                child: ResponsiveOperatorMachineManagement(teamId: teamId),
+                child: ResponsiveAdminMachineManagement(teamId: teamId),
               );
             },
           ),
@@ -251,10 +249,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.superAdminMachines.path,
             name: RoutePath.superAdminMachines.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const AdminMachineView(),
-            ),
+            pageBuilder: (context, state) {
+              final teamId = state.extra as String? ?? '';
+              return NoTransitionPage(
+                key: state.pageKey,
+                child: ResponsiveAdminMachineManagement(teamId: teamId),
+              );
+            },
           ),
           GoRoute(
             path: RoutePath.superAdminProfile.path,
