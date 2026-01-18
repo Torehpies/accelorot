@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -29,7 +31,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
-import 'package:flutter_application_1/ui/machine_management/view/responsive_operator_machine_management.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -144,13 +145,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) {
-              final teamId = state.extra as String? ?? '';
-              return NoTransitionPage(
-                child: ResponsiveOperatorMachineManagement(teamId: teamId),
-                key: state.pageKey,
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const OperatorMachineScreens(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.profile.path,

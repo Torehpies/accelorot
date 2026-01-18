@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/widgets/table/base_table_container.dart';
+import '../../core/widgets/table/table_container.dart';
 import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';

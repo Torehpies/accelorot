@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'batch_start_dialog.dart';
 import 'batch_complete_dialog.dart';
 import '../../models/compost_batch_model.dart';
-import '../../../activity_logs/widgets/machine_selector.dart';
-import '../../../activity_logs/widgets/batch_selector.dart';
+import '../../../activity_logs/widgets/mobile/machine_selector.dart';
+import '../../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../../../data/providers/batch_providers.dart';
 import '../../../../data/models/batch_model.dart';
 
