@@ -6,7 +6,7 @@ import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/web/stats_card_row.dart';
 import '../widgets/web/web_table_container.dart';
 import '../dialogs/activity_dialog_helper.dart';
-import '../../core/widgets/web_common_widgets.dart';
+import '../../core/widgets/web_base_container.dart';
 
 /// Main unified activity view with enhanced stats
 class WebActivityView extends ConsumerWidget {
