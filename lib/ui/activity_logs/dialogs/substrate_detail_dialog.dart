@@ -24,44 +24,53 @@ class SubstrateDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ReadOnlyField(label: 'Title:', value: substrate.title),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Category:', value: substrate.category),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Quantity:', 
-            value: '${substrate.quantity.toStringAsFixed(2)} kg',
+          // Main substrate information in gray section
+          ReadOnlySection(
+            fields: [
+              ReadOnlyField(
+                label: 'Title',
+                value: substrate.title,
+                copyable: true,
+              ),
+              ReadOnlyField(
+                label: 'Category',
+                value: substrate.category,
+              ),
+              ReadOnlyField(
+                label: 'Quantity',
+                value: '${substrate.quantity.toStringAsFixed(2)} kg',
+              ),
+              ReadOnlyField(
+                label: 'Machine Name',
+                value: substrate.machineName ?? 'N/A',
+              ),
+              ReadOnlyField(
+                label: 'Submitted By',
+                value: substrate.operatorName ?? 'Unknown',
+              ),
+              ReadOnlyField(
+                label: 'Date Added',
+                value: DateFormat('MM/dd/yyyy, hh:mm a').format(substrate.timestamp),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
           
-          ReadOnlyField(
-            label: 'Machine Name:', 
-            value: substrate.machineName ?? 'N/A',
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           
+          // Description (outside gray box for emphasis)
           ReadOnlyMultilineField(
-            label: 'Description:',
+            label: 'Description',
             value: substrate.description,
           ),
-          const SizedBox(height: 8),
           
-          ReadOnlyField(
-            label: 'Submitted By:', 
-            value: substrate.operatorName ?? 'Unknown',
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Date Added:',
-            value: DateFormat('MM/dd/yyyy, hh:mm a').format(substrate.timestamp),
-          ),
-          
+          // Batch ID if available
           if (substrate.batchId != null) ...[
-            const SizedBox(height: 8),
-            ReadOnlyField(label: 'Batch ID:', value: substrate.batchId!),
+            const SizedBox(height: 16),
+            ReadOnlyField(
+              label: 'Batch ID',
+              value: substrate.batchId!,
+              copyable: true,
+            ),
           ],
         ],
       ),

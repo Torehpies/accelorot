@@ -51,7 +51,7 @@ class BaseDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
+            // Headera
             DialogHeader(
               title: title,
               subtitle: subtitle,

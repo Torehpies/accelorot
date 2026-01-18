@@ -17,6 +17,8 @@ class ReportDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isResolved = report.resolvedAt != null;
+    
     return BaseDialog(
       title: 'View Report',
       subtitle: 'View in-depth information about this report.',
@@ -24,50 +26,66 @@ class ReportDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ReadOnlyField(label: 'Title:', value: report.title),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Report Type:', value: report.reportTypeLabel),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Priority Level:', value: report.priorityLabel),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Status:', value: report.statusLabel),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Submitted By:', 
-            value: '${report.userName} (${report.userRole})',
+          // Main report information in gray section
+          ReadOnlySection(
+            fields: [
+              ReadOnlyField(
+                label: 'Title',
+                value: report.title,
+                copyable: true,
+              ),
+              ReadOnlyField(
+                label: 'Report Type',
+                value: report.reportTypeLabel,
+              ),
+              ReadOnlyField(
+                label: 'Priority Level',
+                value: report.priorityLabel,
+              ),
+              ReadOnlyField(
+                label: 'Status',
+                value: report.statusLabel,
+              ),
+              ReadOnlyField(
+                label: 'Submitted By',
+                value: '${report.userName} (${report.userRole})',
+              ),
+              ReadOnlyField(
+                label: 'Machine Name',
+                value: report.machineName,
+              ),
+              ReadOnlyField(
+                label: 'Date Created',
+                value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.createdAt),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
           
-          ReadOnlyField(label: 'Machine Name:', value: report.machineName),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           
+          // Description (outside gray box for emphasis)
           ReadOnlyMultilineField(
-            label: 'Description:',
+            label: 'Description',
             value: report.description,
           ),
-          const SizedBox(height: 8),
           
-          ReadOnlyField(
-            label: 'Date Created:',
-            value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.createdAt),
-          ),
-          
-          // Show resolution info if resolved
-          if (report.resolvedAt != null) ...[
-            const SizedBox(height: 8),
-            ReadOnlyField(
-              label: 'Resolved At:',
-              value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.resolvedAt!),
+          // Resolution info (if resolved)
+          if (isResolved) ...[
+            const SizedBox(height: 16),
+            ReadOnlySection(
+              sectionTitle: 'Resolution',
+              fields: [
+                ReadOnlyField(
+                  label: 'Resolved At',
+                  value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.resolvedAt!),
+                ),
+                if (report.resolvedBy != null)
+                  ReadOnlyField(
+                    label: 'Resolved By',
+                    value: report.resolvedBy!,
+                  ),
+              ],
             ),
-          ],
-          
-          if (report.resolvedBy != null) ...[
-            const SizedBox(height: 8),
-            ReadOnlyField(label: 'Resolved By:', value: report.resolvedBy!),
           ],
         ],
       ),

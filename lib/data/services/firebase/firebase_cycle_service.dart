@@ -262,7 +262,7 @@ class FirestoreCycleService implements CycleService {
             'completedCycles': 0,
             'status': 'running',
             'startedAt': FieldValue.serverTimestamp(),
-            'timestamp': FieldValue.serverTimestamp(), // ✅ ADD THIS
+            'timestamp': FieldValue.serverTimestamp(),
             'totalRuntimeSeconds': 0,
           });
 
@@ -380,7 +380,7 @@ class FirestoreCycleService implements CycleService {
             'completedCycles': 0,
             'status': 'running',
             'startedAt': FieldValue.serverTimestamp(),
-            'timestamp': FieldValue.serverTimestamp(), // ✅ ADD THIS
+            'timestamp': FieldValue.serverTimestamp(),
             'totalRuntimeSeconds': 0,
           });
 
