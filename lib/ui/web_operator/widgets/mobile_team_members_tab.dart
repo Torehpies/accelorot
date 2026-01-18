@@ -6,7 +6,6 @@ import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/utils/getOperatorStatusStyle.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,23 +20,53 @@ class MobileTeamMembersTab extends ConsumerStatefulWidget {
 
 class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
     with AutomaticKeepAliveClientMixin {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
+      ref.read(teamMembersProvider.notifier).loadNextPage();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
-    return _MembersList(state: state, notifier: notifier);
+    return _MembersList(
+      state: state,
+      notifier: notifier,
+      scrollController: _scrollController,
+    );
   }
 }
 
 class _MembersList extends StatelessWidget {
   final TeamMembersState state;
   final TeamMembersNotifier notifier;
+  final ScrollController scrollController;
 
-  const _MembersList({required this.state, required this.notifier});
+  const _MembersList({
+    required this.state,
+    required this.notifier,
+    required this.scrollController,
+  });
 
   void _showEditDialog(
     BuildContext context,
@@ -55,11 +84,28 @@ class _MembersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: state.members.length,
+    if (state.isLoading && state.items.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (state.items.isEmpty && !state.isLoading) {
+      return Center(
+        child: Text(
+          'No team members found',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      );
+    }
+    return ListView.separated(
+      controller: scrollController,
+      padding: EdgeInsets.all(16),
+      separatorBuilder: (_, _) => SizedBox(height: 2),
+      itemCount: state.items.length + (state.hasNextPage ? 1 : 0),
       itemBuilder: (context, index) {
-        TeamMember member = state.members[index];
-        StatusStyle statusStyle = getStatusStyle(member.status.value);
+        if (index >= state.items.length) {
+          return _buildLoadingItem();
+        }
+        TeamMember member = state.items[index];
+        final statusStyle = getStatusStyle(member.status.value);
         return DataCard<TeamMember>(
           data: member,
           icon: Icons.person,
@@ -97,10 +143,31 @@ class _MembersList extends StatelessWidget {
                   ),
                 );
                 break;
+              case 'edit':
+                _showEditDialog(context, notifier, member);
+                break;
             }
           },
         );
       },
     );
   }
+}
+
+Widget _buildLoadingItem() {
+  return Padding(
+    padding: EdgeInsets.all(16),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        SizedBox(width: 16),
+        Text('Loading more members...', style: TextStyle(color: Colors.grey)),
+      ],
+    ),
+  );
 }

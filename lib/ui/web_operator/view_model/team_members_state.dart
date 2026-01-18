@@ -6,6 +6,8 @@ part 'team_members_state.freezed.dart';
 @freezed
 abstract class TeamMembersState with _$TeamMembersState {
   const factory TeamMembersState({
+		// Cumulative members for infinite scrolling
+    @Default(<TeamMember>[]) List<TeamMember> items,
     @Default(<TeamMember>[]) List<TeamMember> members,
     @Default({}) Map<int, List<TeamMember>> pagesByIndex,
     @Default(0) int currentPage,

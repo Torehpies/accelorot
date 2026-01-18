@@ -18,7 +18,6 @@ class DataCard<T> extends StatelessWidget {
   final Color? statusTextColor;
   final void Function(String action, T data)? onAction;
   final T data;
-  final bool showActions;
 
   const DataCard({
     super.key,
@@ -37,16 +36,11 @@ class DataCard<T> extends StatelessWidget {
     this.statusTextColor,
     required this.data,
     this.onAction,
-    this.showActions = false,
   });
 
   bool get _hasDescription => description?.isNotEmpty == true;
   bool get _hasCategory => category?.isNotEmpty == true;
   bool get _hasUserName => userName?.isNotEmpty == true;
-
-  void _handleAction(String action) {
-    onAction?.call(action, data);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,30 +132,6 @@ class DataCard<T> extends StatelessWidget {
                   ],
                 ),
               ),
-              if (showActions)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () => _handleAction('accept'),
-                        icon: Icon(Icons.check_circle_outline, size: 16),
-                        label: Text('Accept', style: TextStyle(fontSize: 12)),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => _handleAction('decline'),
-                        icon: Icon(Icons.cancel_outlined, size: 16),
-                        label: Text('Decline', style: TextStyle(fontSize: 12)),
-                      ),
-                      TextButton.icon(
-                        onPressed: () => _handleAction('edit'),
-                        icon: Icon(Icons.edit_outlined, size: 16),
-                        label: Text('Edit', style: TextStyle(fontSize: 12)),
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
         ),
