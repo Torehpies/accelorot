@@ -63,11 +63,13 @@ class WebTableRow extends StatelessWidget {
           ),
         ),
         
-        // Category Column (flex: 2) - Badge
+        // Category Column (flex: 2)
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: TableBadge(text: report.reportTypeLabel),
+          child: Text(
+            report.reportTypeLabel,
+            style: WebTextStyles.body,
+            textAlign: TextAlign.center,
           ),
         ),
         

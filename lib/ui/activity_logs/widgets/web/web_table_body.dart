@@ -48,11 +48,11 @@ class ActivityTableBody extends StatelessWidget {
           ),
         ),
 
-        // Category Badge
+        // Category Column 
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _SkeletonBox(width: 80, height: 24, borderRadius: 4),
+            child: _SkeletonBox(width: 90, height: 16),
           ),
         ),
 

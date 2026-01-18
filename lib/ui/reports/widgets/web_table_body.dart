@@ -105,11 +105,11 @@ class _ReportsTableBodyState extends State<WebTableBody>
           ),
         ),
 
-        // Category Badge
+        // Category
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _buildSkeletonBox(width: 100, height: 24, borderRadius: 4),
+            child: _buildSkeletonBox(width: 110, height: 16), // Reduced size for plain text
           ),
         ),
 
