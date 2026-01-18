@@ -1,7 +1,7 @@
 // lib/ui/core/services/toast_service.dart
 
 import 'package:flutter/material.dart';
-import '../dialog/custom_toast.dart';
+import 'custom_toast.dart';
 
 /// Service to manage toast notifications
 class ToastService {

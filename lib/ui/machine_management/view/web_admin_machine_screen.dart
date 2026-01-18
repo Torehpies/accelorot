@@ -5,12 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/dialog/toast_service.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_admin_table_container.dart';
-import '../new_widgets/web_admin_view_details_modal.dart';
-import '../new_widgets/web_admin_edit_dialog.dart';
-import '../new_widgets/web_admin_add_dialog.dart';
+import '../dialogs/web_admin_view_details_dialog.dart';
+import '../dialogs/web_admin_edit_dialog.dart';
+import '../dialogs/web_admin_add_dialog.dart';
 import '../models/machine_state.dart';
 import '../../core/widgets/web_common_widgets.dart';
 
@@ -58,9 +59,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
   }
 
   void _showAddMachineDialog(BuildContext context, MachineViewModel notifier) {
-    WebDialogWrapper.show(
+    showDialog(
       context: context,
-      child: WebAdminAddDialog(
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: false, // Prevent closing while creating
+      builder: (context) => WebAdminAddDialog(
         onCreate: ({
           required String machineId,
           required String machineName,
@@ -76,9 +79,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
   }
 
   void _showEditDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
-    WebDialogWrapper.show(
+    showDialog(
       context: context,
-      child: WebAdminEditDialog(
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: false, // Prevent closing while editing
+      builder: (context) => WebAdminEditDialog(
         machine: machine,
         onUpdate: ({
           required String machineId,
@@ -94,10 +99,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
   }
 
   void _showViewDetailsDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
-    WebDialogWrapper.show(
+    showDialog(
       context: context,
-      constraints: const BoxConstraints(maxWidth: 800),
-      child: WebAdminViewDetailsModal(
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: true,
+      builder: (context) => WebAdminViewDetailsDialog(
         machine: machine,
         onArchive: () => _handleArchive(context, machine, notifier),
       ),
@@ -107,6 +113,7 @@ class WebAdminMachineScreen extends ConsumerWidget {
   Future<void> _handleArchive(BuildContext context, MachineModel machine, MachineViewModel notifier) async {
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierColor: WebColors.dialogBarrier,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         backgroundColor: WebColors.cardBackground,
@@ -147,32 +154,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
       try {
         await notifier.archiveMachine(machine.machineId);
         if (context.mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Machine archived successfully',
-                style: WebTextStyles.bodyMedium.copyWith(
-                  color: WebColors.buttonText,
-                ),
-              ),
-              backgroundColor: WebColors.success,
-            ),
-          );
+          ToastService.show(context, message: 'Machine archived successfully');
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Failed to archive: $e',
-                style: WebTextStyles.bodyMedium.copyWith(
-                  color: WebColors.buttonText,
-                ),
-              ),
-              backgroundColor: WebColors.error,
-            ),
-          );
+          ToastService.show(context, message: 'Failed to archive: $e');
         }
       }
     }

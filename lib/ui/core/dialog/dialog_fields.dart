@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../themes/web_text_styles.dart';
 import '../themes/web_colors.dart';
-import '../services/toast_service.dart';
+import 'toast_service.dart';
 
 // ==================== READ ONLY ====================
 
@@ -358,7 +358,7 @@ class InputField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: WebColors.tealAccent,
+                color: WebColors.greens,
                 width: 2,
               ),
             ),
@@ -456,7 +456,7 @@ class DropdownField<T> extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: WebColors.tealAccent,
+                color: WebColors.greenAccent,
                 width: 2,
               ),
             ),
@@ -554,7 +554,7 @@ class DatePickerField extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: WebColors.tealAccent,
+              primary: WebColors.greenAccent,
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: WebColors.textPrimary,
@@ -624,7 +624,7 @@ class DatePickerField extends StatelessWidget {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(
-                  color: WebColors.tealAccent,
+                  color: WebColors.greenAccent,
                   width: 2,
                 ),
               ),
@@ -879,8 +879,7 @@ class ToggleField extends StatelessWidget {
             Switch(
               value: value,
               onChanged: enabled ? onChanged : null,
-              activeColor: WebColors.tealAccent,
-              activeTrackColor: WebColors.tealAccent.withValues(alpha: 0.5),
+              activeTrackColor: WebColors.greenAccent.withValues(alpha: 0.5),
               inactiveThumbColor: Colors.grey[400],
               inactiveTrackColor: Colors.grey[300],
             ),

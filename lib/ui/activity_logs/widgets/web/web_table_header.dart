@@ -62,7 +62,7 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Title',
                   style: WebTextStyles.label.copyWith(
-                    color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
+                    color: isTitleActive ? WebColors.greenAccent : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -89,7 +89,7 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Category',
                   style: WebTextStyles.label.copyWith(
-                    color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
+                    color: isCategoryActive ? WebColors.greenAccent : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -116,7 +116,7 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Type',
                   style: WebTextStyles.label.copyWith(
-                    color: isTypeActive ? WebColors.tealAccent : WebColors.textLabel,
+                    color: isTypeActive ? WebColors.greenAccent : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 8),

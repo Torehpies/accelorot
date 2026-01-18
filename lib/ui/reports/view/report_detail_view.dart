@@ -72,11 +72,11 @@ class _ReportDetailViewState extends State<ReportDetailView> {
       labelText: labelText,
       labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : WebColors.textLabel),
       floatingLabelStyle: TextStyle(
-        color: readOnly ? Colors.grey[400] : WebColors.tealAccent,
+        color: readOnly ? Colors.grey[400] : WebColors.greenAccent,
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(
-          color: readOnly ? Colors.grey[300]! : WebColors.tealAccent,
+          color: readOnly ? Colors.grey[300]! : WebColors.greenAccent,
           width: 2,
         ),
         borderRadius: BorderRadius.circular(8),
@@ -353,7 +353,7 @@ class _ReportDetailViewState extends State<ReportDetailView> {
           ElevatedButton(
             onPressed: _isSubmitting ? null : _handleSubmit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: WebColors.tealAccent,
+              backgroundColor: WebColors.greenAccent,
               foregroundColor: WebColors.cardBackground,
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,

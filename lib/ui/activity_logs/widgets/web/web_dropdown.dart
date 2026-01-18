@@ -110,7 +110,7 @@ class WebDropdown<T> extends StatelessWidget {
         Icon(
           icon,
           size: 18,
-          color: hasValue ? WebColors.tealAccent : WebColors.textLabel,
+          color: hasValue ? WebColors.greenAccent : WebColors.textLabel,
         ),
         if (hasValue) ...[
           const SizedBox(width: 6),
@@ -135,7 +135,7 @@ class WebDropdown<T> extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: hasValue ? WebColors.tealAccent : WebColors.textLabel,
+          color: hasValue ? WebColors.greenAccent : WebColors.textLabel,
         ),
         const SizedBox(width: 8),
         Flexible(
@@ -153,7 +153,7 @@ class WebDropdown<T> extends StatelessWidget {
         Icon(
           Icons.arrow_drop_down,
           size: 20,
-          color: hasValue ? WebColors.tealAccent : WebColors.textLabel,
+          color: hasValue ? WebColors.greenAccent : WebColors.textLabel,
         ),
         if (hasValue) ...[
           const SizedBox(width: 4),

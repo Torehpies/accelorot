@@ -114,7 +114,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
   );
 
   static const bodyText = TextStyle(
@@ -149,7 +149,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 48,
     fontWeight: FontWeight.w300,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
     height: 1.0,
   );
 
@@ -176,7 +176,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 32,
     fontWeight: FontWeight.bold,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
     height: 1.2,
   );
 

@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
+import '../../core/themes/web_colors.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_operator_table_container.dart';
-import '../new_widgets/web_operator_view_details_modal.dart';
+import '../dialogs/web_operator_view_details_dialog.dart';
 import '../models/machine_state.dart';
 import '../../core/widgets/web_common_widgets.dart';
 
@@ -52,10 +53,11 @@ class WebOperatorMachineScreen extends ConsumerWidget {
   }
 
   void _showViewDetailsDialog(BuildContext context, MachineModel machine) {
-    WebDialogWrapper.show(
+    showDialog(
       context: context,
-      constraints: const BoxConstraints(maxWidth: 800),
-      child: WebOperatorViewDetailsModal(
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: true,
+      builder: (context) => WebOperatorViewDetailsDialog(
         machine: machine,
       ),
     );

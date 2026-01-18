@@ -105,7 +105,7 @@ class MachineTableHeader extends StatelessWidget {
                     Text(
                       'Status',
                       style: WebTextStyles.label.copyWith(
-                        color: isStatusActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isStatusActive ? WebColors.greenAccent : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
