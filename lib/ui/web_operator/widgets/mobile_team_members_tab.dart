@@ -6,6 +6,7 @@ import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/utils/format.dart';
+import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobileTeamMembersTab extends ConsumerStatefulWidget {
@@ -96,10 +97,12 @@ class _MembersList extends ConsumerWidget {
           return _buildLoadingItem();
         }
         final member = state.items[index];
+				final style = getStatusStyle(member.status.value);
         return DataCard<TeamMember>(
           data: member,
           icon: Icons.person,
-          iconBgColor: AppColors.green100,
+					iconColor: style.textColor,
+          iconBgColor: style.color,
           title: "${member.lastName}, ${member.firstName}",
           category: toTitleCase(member.status.value),
           status: member.email,
