@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
+import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/member_row.dart';
@@ -58,97 +61,22 @@ class _TableContent extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(width: 1, color: AppColors.grey),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         child: Column(
           children: [
-            _StickyHeader(),
+            StickyHeader(
+              labels: ['First Name', 'Last Name', 'Email', 'Status', 'Actions'],
+              flexValues: [2, 2, 3, 1, 1],
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+            ),
             Expanded(
               child: _MembersList(state: state, notifier: notifier),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StickyHeader extends StatelessWidget {
-  const _StickyHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: Color(0xFFEFF7FF)),
-      child: const Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                'First Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                'Last Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              width: 220,
-              child: Center(
-                child: Text(
-                  'Email',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Status',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Actions',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
