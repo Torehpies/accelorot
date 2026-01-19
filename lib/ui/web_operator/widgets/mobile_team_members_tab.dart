@@ -4,10 +4,8 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/data_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/utils/format.dart';
-import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobileTeamMembersTab extends ConsumerStatefulWidget {
@@ -47,43 +45,36 @@ class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
     return _MembersList(
-      state: state,
       notifier: notifier,
       scrollController: _scrollController,
     );
   }
 }
 
-class _MembersList extends StatelessWidget {
-  final TeamMembersState state;
+class _MembersList extends ConsumerWidget {
   final TeamMembersNotifier notifier;
   final ScrollController scrollController;
 
-  const _MembersList({
-    required this.state,
-    required this.notifier,
-    required this.scrollController,
-  });
+  const _MembersList({required this.notifier, required this.scrollController});
 
   void _showEditDialog(
     BuildContext context,
     TeamMembersNotifier notifier,
     TeamMember member,
   ) {
+    Navigator.of(context).pop();
     showDialog(
       context: context,
-      builder: (context) => EditOperatorDialog(
-        operator: member,
-        onSave: (updatedOperator) => notifier.updateOperator(updatedOperator),
-      ),
+      builder: (context) =>
+          EditOperatorDialog(operator: member, onSave: notifier.updateOperator),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(teamMembersProvider);
     if (state.isLoading && state.items.isEmpty) {
       return Center(child: CircularProgressIndicator());
     }
@@ -104,7 +95,7 @@ class _MembersList extends StatelessWidget {
         if (index >= state.items.length) {
           return _buildLoadingItem();
         }
-        TeamMember member = state.items[index];
+        final member = state.items[index];
         return DataCard<TeamMember>(
           data: member,
           icon: Icons.person,
