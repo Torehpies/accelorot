@@ -1,10 +1,11 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../view_model/admin_machine_notifier.dart';
 import '../../../services/sess_service.dart';
-import '../widgets/admin_machine_card.dart';
+import '../../../data/models/machine_model.dart';
+import '../../core/widgets/data_card.dart';
 import '../widgets/machine_tab_filter.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
@@ -16,7 +17,7 @@ class AdminMachineView extends ConsumerStatefulWidget {
 
 class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   String? _teamId;
-  bool _isAdmin = false; // Track admin role
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -29,22 +30,89 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final userData = await sessionService.getCurrentUserData();
 
     _teamId = userData?['teamId'] as String?;
-    _isAdmin = userData?['role'] == 'admin'; // Adjust key if your role field differs
+    _isAdmin = userData?['role'] == 'admin';
 
     if (_teamId != null) {
       ref.read(adminMachineProvider.notifier).initialize(_teamId!);
     }
 
-    if (mounted) setState(() {}); // Rebuild to show/hide Add button
+    if (mounted) setState(() {});
   }
 
   void _onAddPressed() {
-    // TODO: Navigate to "Add Machine" screen
-    // Example:
-    // Navigator.push(context, MaterialPageRoute(builder: (_) => AddMachineScreen()));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Add machine functionality not implemented yet.')),
     );
+  }
+
+  void _navigateToDetails(MachineModel machine) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MachineDetailsView(
+          machine: machine,
+          teamId: machine.teamId,
+        ),
+      ),
+    );
+  }
+
+  // Helper: Get icon background color based on machine status
+  Color _getIconColorForStatus(MachineModel machine) {
+    if (machine.isArchived) {
+      return const Color(0xFF757575); // Gray for archived
+    }
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return const Color(0xFF4CAF50); // Green
+      case MachineStatus.inactive:
+        return const Color(0xFFFFA726); // Orange
+      case MachineStatus.underMaintenance:
+        return const Color(0xFFEF5350); // Red
+    }
+  }
+
+  // Helper: Get status background color
+  Color _getStatusBgColor(MachineModel machine) {
+    if (machine.isArchived) {
+      return const Color(0xFFFFEBEE); // Light red
+    }
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return const Color(0xFFE8F5E9); // Light green
+      case MachineStatus.inactive:
+        return const Color(0xFFFFF3E0); // Light orange
+      case MachineStatus.underMaintenance:
+        return const Color(0xFFFFEBEE); // Light red
+    }
+  }
+
+  // Helper: Get status label
+  String _getStatusLabel(MachineModel machine) {
+    if (machine.isArchived) {
+      return 'Archived';
+    }
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return 'Active';
+      case MachineStatus.inactive:
+        return 'Inactive';
+      case MachineStatus.underMaintenance:
+        return 'Under Maintenance';
+    }
+  }
+
+  // Helper: Format description with machine ID only
+  String _getDescription(MachineModel machine) {
+    return 'ID: ${machine.machineId}';
+  }
+
+  // Helper: Format date for bottom left
+  String _getDateCreated(MachineModel machine) {
+    return DateFormat('MMM dd, yyyy').format(machine.dateCreated);
   }
 
   @override
@@ -53,9 +121,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final notifier = ref.read(adminMachineProvider.notifier);
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(), // Unfocus any TextField
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFE3F2FD),
+        backgroundColor: const Color(0xFFF5F5F5),
         appBar: MobileHeader(
           title: 'Machine List',
           showSearch: true,
@@ -65,7 +133,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           onSearchChanged: notifier.setSearchQuery,
           onDateRangeChanged: (range) {
             // Optional: Handle date filtering later
-            // notifier.setDateFilter(range);
           },
           onAddPressed: _onAddPressed,
         ),
@@ -194,8 +261,42 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         }
 
         final machine = state.displayedMachines[index];
-        return AdminMachineCard(machine: machine);
+        
+        // Using DataCard with swapped positions:
+        // - category (top right) = status label
+        // - status (bottom left) = date created
+        return DataCard(
+          icon: Icons.precision_manufacturing,
+          iconBgColor: _getIconColorForStatus(machine),
+          title: machine.machineName,
+          description: _getDescription(machine),
+          category: _getStatusLabel(machine), // Status at top right
+          status: 'Created on ${_getDateCreated(machine)}', // Date at bottom left
+          userName: 'All Team Members',
+          statusColor: _getStatusBgColor(machine),
+          onTap: () => _navigateToDetails(machine),
+        );
       },
+    );
+  }
+}
+
+// Note: Make sure MachineDetailsView is imported or create a placeholder
+class MachineDetailsView extends StatelessWidget {
+  final MachineModel machine;
+  final String teamId;
+
+  const MachineDetailsView({
+    super.key,
+    required this.machine,
+    required this.teamId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(machine.machineName)),
+      body: Center(child: Text('Machine Details for ${machine.machineName}')),
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/view/home_screen.dar
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
 import '../../ui/profile_screen/widgets/profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../ui/machine_management/view/operator_machine_view.dart'; 
+import '../../ui/machine_management/view/mobile_operator_machine_view.dart'; 
 import '../../data/models/machine_model.dart';
 
 void logCurrentUser(BuildContext context) {
