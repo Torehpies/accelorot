@@ -407,11 +407,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
             status: 'Created on ${_getDateCreated(machine)}',
             userName: 'All Team Members',
             statusColor: _getStatusBgColor(machine),
-            onAction: (action, machineData) {
-              if (action == 'view') {
-                _navigateToDetails(machineData);
-              }
-            },
+            onTap: () => _navigateToDetails(machine),
           );
         },
       ),
