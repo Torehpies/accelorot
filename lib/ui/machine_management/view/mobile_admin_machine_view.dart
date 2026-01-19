@@ -1,5 +1,7 @@
+// lib/ui/machine_management/view/mobile_admin_machine_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/search_bar_widget.dart';
+import 'package:flutter_application_1/ui/core/widgets/mobile_date_filter_button.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/themes/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,18 +52,59 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
 
   void _onAddPressed() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add machine functionality not implemented yet.')),
+      const SnackBar(
+        content: Text('Add machine functionality not implemented yet.'),
+      ),
     );
+  }
+
+  void _onDateFilterChanged(DateFilterRange range) {
+    // TODO: Implement date filtering in your notifier
+    // For now, just show what was selected
+    if (range.isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Filter: ${_getFilterDisplayText(range)}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      // When implemented:
+      // ref.read(adminMachineProvider.notifier).filterByDateRange(
+      //   range.startDate!,
+      //   range.endDate!,
+      // );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Date filter cleared')));
+      // When implemented:
+      // ref.read(adminMachineProvider.notifier).clearDateFilter();
+    }
+  }
+
+  String _getFilterDisplayText(DateFilterRange range) {
+    switch (range.type) {
+      case DateFilterType.today:
+        return 'Today';
+      case DateFilterType.yesterday:
+        return 'Yesterday';
+      case DateFilterType.last7Days:
+        return 'Last 7 Days';
+      case DateFilterType.last30Days:
+        return 'Last 30 Days';
+      case DateFilterType.custom:
+        return 'Custom: ${DateFormat('MMM d, y').format(range.customDate!)}';
+      case DateFilterType.none:
+        return 'None';
+    }
   }
 
   void _navigateToDetails(MachineModel machine) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MachineDetailsView(
-          machine: machine,
-          teamId: machine.teamId,
-        ),
+        builder: (context) =>
+            MachineDetailsView(machine: machine, teamId: machine.teamId),
       ),
     );
   }
@@ -70,7 +113,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     if (machine.isArchived) {
       return const Color(0xFF757575);
     }
-    
+
     switch (machine.status) {
       case MachineStatus.active:
         return AppColors.green100;
@@ -85,7 +128,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     if (machine.isArchived) {
       return AppColors.redBackground;
     }
-    
+
     switch (machine.status) {
       case MachineStatus.active:
         return AppColors.greenBackground;
@@ -100,7 +143,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     if (machine.isArchived) {
       return 'Archived';
     }
-    
+
     switch (machine.status) {
       case MachineStatus.active:
         return 'Active';
@@ -145,7 +188,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                   // Title
                   Text('Machine List', style: AppTextStyles.heading1),
                   const SizedBox(height: 12),
-                  
+
                   // Search bar + Filter/Add buttons row
                   Row(
                     children: [
@@ -161,26 +204,12 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      
-                      // Filter button
-                      Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.green100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.filter_list, color: Colors.white, size: 20),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Date filter not implemented yet')),
-                            );
-                          },
-                          padding: EdgeInsets.zero,
-                        ),
+
+                      // Date filter button
+                      MobileDateFilterButton(
+                        onFilterChanged: _onDateFilterChanged,
                       ),
-                      
+
                       // Add button (only for admin)
                       if (_isAdmin) ...[
                         const SizedBox(width: 8),
@@ -192,7 +221,11 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                            icon: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                             onPressed: _onAddPressed,
                             padding: EdgeInsets.zero,
                           ),
@@ -207,7 +240,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
             // Main content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -265,7 +301,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.green100,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -296,11 +335,19 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.inbox_outlined, size: 64, color: AppColors.textSecondary),
+              Icon(
+                Icons.inbox_outlined,
+                size: 64,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(height: 16),
               Text(
-                state.searchQuery.isNotEmpty ? 'No machines found' : emptyMessage,
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                state.searchQuery.isNotEmpty
+                    ? 'No machines found'
+                    : emptyMessage,
+                style: AppTextStyles.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -328,7 +375,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
             ),
@@ -336,8 +385,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         }
 
         final machine = state.displayedMachines[index];
-        
-        return DataCard(
+
+        return DataCard<MachineModel>(
+          data: machine,
           icon: Icons.precision_manufacturing,
           iconBgColor: _getIconColorForStatus(machine),
           title: machine.machineName,
@@ -346,7 +396,11 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           status: 'Created on ${_getDateCreated(machine)}',
           userName: 'All Team Members',
           statusColor: _getStatusBgColor(machine),
-          onTap: () => _navigateToDetails(machine),
+          onAction: (action, machineData) {
+            if (action == 'view') {
+              _navigateToDetails(machineData);
+            }
+          },
         );
       },
     );
