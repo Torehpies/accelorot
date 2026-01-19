@@ -1,4 +1,5 @@
 // lib/ui/machine_management/view/mobile_admin_machine_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/search_bar_widget.dart';
 import 'package:flutter_application_1/ui/core/widgets/mobile_date_filter_button.dart';
@@ -6,7 +7,8 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/themes/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../view_model/admin_machine_notifier.dart';
+import '../view_model/mobile_machine_viewmodel.dart';
+import '../models/mobile_machine_state.dart';
 import '../../../services/sess_service.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/widgets/data_card.dart';
@@ -19,20 +21,37 @@ class AdminMachineView extends ConsumerStatefulWidget {
   ConsumerState<AdminMachineView> createState() => _AdminMachineViewState();
 }
 
-class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
+class _AdminMachineViewState extends ConsumerState<AdminMachineView>
+    with SingleTickerProviderStateMixin {
   String? _teamId;
   bool _isAdmin = false;
   final FocusNode _searchFocusNode = FocusNode();
+
+  // Animation for skeleton loading
+  late AnimationController _shimmerController;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadTeamIdAndInit();
+
+    // Initialize shimmer animation
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _pulseAnimation = CurvedAnimation(
+      parent: _shimmerController,
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   void dispose() {
     _searchFocusNode.dispose();
+    _shimmerController.dispose();
     super.dispose();
   }
 
@@ -44,7 +63,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     _isAdmin = userData?['role'] == 'admin';
 
     if (_teamId != null) {
-      ref.read(adminMachineProvider.notifier).initialize(_teamId!);
+      ref.read(mobileMachineViewModelProvider.notifier).initialize(_teamId!);
     }
 
     if (mounted) setState(() {});
@@ -56,47 +75,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         content: Text('Add machine functionality not implemented yet.'),
       ),
     );
-  }
-
-  void _onDateFilterChanged(DateFilterRange range) {
-    // TODO: Implement date filtering in your notifier
-    // For now, just show what was selected
-    if (range.isActive) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Filter: ${_getFilterDisplayText(range)}'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      // When implemented:
-      // ref.read(adminMachineProvider.notifier).filterByDateRange(
-      //   range.startDate!,
-      //   range.endDate!,
-      // );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Date filter cleared')));
-      // When implemented:
-      // ref.read(adminMachineProvider.notifier).clearDateFilter();
-    }
-  }
-
-  String _getFilterDisplayText(DateFilterRange range) {
-    switch (range.type) {
-      case DateFilterType.today:
-        return 'Today';
-      case DateFilterType.yesterday:
-        return 'Yesterday';
-      case DateFilterType.last7Days:
-        return 'Last 7 Days';
-      case DateFilterType.last30Days:
-        return 'Last 30 Days';
-      case DateFilterType.custom:
-        return 'Custom: ${DateFormat('MMM d, y').format(range.customDate!)}';
-      case DateFilterType.none:
-        return 'None';
-    }
   }
 
   void _navigateToDetails(MachineModel machine) {
@@ -164,8 +142,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(adminMachineProvider);
-    final notifier = ref.read(adminMachineProvider.notifier);
+    final state = ref.watch(mobileMachineViewModelProvider);
+    final notifier = ref.read(mobileMachineViewModelProvider.notifier);
 
     return GestureDetector(
       onTap: () => _searchFocusNode.unfocus(),
@@ -205,9 +183,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                       ),
                       const SizedBox(width: 8),
 
-                      // Date filter button
+                      // Date filter button - NOW FUNCTIONAL ✅
                       MobileDateFilterButton(
-                        onFilterChanged: _onDateFilterChanged,
+                        onFilterChanged: notifier.setDateFilter,
                       ),
 
                       // Add button (only for admin)
@@ -267,9 +245,19 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   }
 
   Widget _buildMachineContent(
-    AdminMachineState state,
-    AdminMachineNotifier notifier,
+    MobileMachineState state,
+    MobileMachineViewModel notifier,
   ) {
+    // Show skeleton on initial load
+    if (state.isLoading && state.machines.isEmpty) {
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: 3,
+        itemBuilder: (context, index) => _buildSkeletonCard(),
+      );
+    }
+
+    // Show spinner on refresh (when data already exists)
     if (state.isLoading) {
       return Center(
         child: CircularProgressIndicator(color: AppColors.green100),
@@ -313,7 +301,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
       );
     }
 
-    if (state.filteredMachinesByTab.isEmpty) {
+    if (state.filteredMachines.isEmpty) {
       String emptyMessage;
       switch (state.selectedTab) {
         case MachineFilterTab.archived:
@@ -342,65 +330,186 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               ),
               const SizedBox(height: 16),
               Text(
-                state.searchQuery.isNotEmpty
-                    ? 'No machines found'
+                state.searchQuery.isNotEmpty || state.dateFilter.isActive
+                    ? 'No machines match your filters'
                     : emptyMessage,
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              // Clear filters button
+              if (state.dateFilter.isActive || state.searchQuery.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  onPressed: () {
+                    notifier.clearDateFilter();
+                    notifier.clearSearch();
+                  },
+                  icon: const Icon(Icons.clear_all),
+                  label: const Text('Clear All Filters'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.green100,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == state.displayedMachines.length) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 16),
-            child: ElevatedButton.icon(
-              onPressed: notifier.loadMore,
-              icon: const Icon(Icons.expand_more),
-              label: Text(
-                'Load More (${state.remainingCount} remaining)',
-                style: AppTextStyles.button,
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.green100,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-            ),
-          );
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (_teamId != null) {
+          await notifier.refresh(_teamId!);
         }
+      },
+      color: AppColors.green100,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == state.displayedMachines.length) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 16),
+              child: ElevatedButton.icon(
+                onPressed: notifier.loadMore,
+                icon: const Icon(Icons.expand_more),
+                label: Text(
+                  'Load More (${state.remainingCount} remaining)',
+                  style: AppTextStyles.button,
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.green100,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            );
+          }
 
-        final machine = state.displayedMachines[index];
+          final machine = state.displayedMachines[index];
 
-        return DataCard<MachineModel>(
-          data: machine,
-          icon: Icons.precision_manufacturing,
-          iconBgColor: _getIconColorForStatus(machine),
-          title: machine.machineName,
-          description: _getDescription(machine),
-          category: _getStatusLabel(machine),
-          status: 'Created on ${_getDateCreated(machine)}',
-          userName: 'All Team Members',
-          statusColor: _getStatusBgColor(machine),
-          onAction: (action, machineData) {
-            if (action == 'view') {
-              _navigateToDetails(machineData);
-            }
-          },
+          return DataCard<MachineModel>(
+            data: machine,
+            icon: Icons.precision_manufacturing,
+            iconBgColor: _getIconColorForStatus(machine),
+            title: machine.machineName,
+            description: _getDescription(machine),
+            category: _getStatusLabel(machine),
+            status: 'Created on ${_getDateCreated(machine)}',
+            userName: 'All Team Members',
+            statusColor: _getStatusBgColor(machine),
+            onAction: (action, machineData) {
+              if (action == 'view') {
+                _navigateToDetails(machineData);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  /// Build skeleton loading card with pulsing animation
+  Widget _buildSkeletonCard() {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          height: 120,
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.backgroundBorder,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon placeholder
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Color.lerp(
+                    const Color(0xFFE0E0E0),
+                    const Color(0xFFF5F5F5),
+                    _pulseAnimation.value,
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Content placeholder
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Container(
+                      height: 16,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Color.lerp(
+                          const Color(0xFFE0E0E0),
+                          const Color(0xFFF5F5F5),
+                          _pulseAnimation.value,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Subtitle
+                    Container(
+                      height: 14,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        color: Color.lerp(
+                          const Color(0xFFE0E0E0),
+                          const Color(0xFFF5F5F5),
+                          _pulseAnimation.value,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const Spacer(),
+
+                    // Status badge
+                    Row(
+                      children: [
+                        Container(
+                          height: 24,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Color.lerp(
+                              const Color(0xFFE0E0E0),
+                              const Color(0xFFF5F5F5),
+                              _pulseAnimation.value,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

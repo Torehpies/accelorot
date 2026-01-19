@@ -1,5 +1,7 @@
+// lib/ui/machine_management/widgets/machine_tab_filter.dart
+
 import 'package:flutter/material.dart';
-import '../view_model/admin_machine_notifier.dart';
+import '../view_model/mobile_machine_viewmodel.dart';
 
 class MachineTabFilter extends StatelessWidget {
   final MachineFilterTab selectedTab;
