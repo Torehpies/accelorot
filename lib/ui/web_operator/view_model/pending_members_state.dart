@@ -6,6 +6,8 @@ part 'pending_members_state.freezed.dart';
 @freezed
 abstract class PendingMembersState with _$PendingMembersState {
 	const factory PendingMembersState({
+		// Cumulative members for infinite scrolling
+    @Default(<PendingMember>[]) List<PendingMember> items,
     @Default(<PendingMember>[]) List<PendingMember> members,
     @Default({}) Map<int, List<PendingMember>> pagesByIndex,
     @Default(0) int currentPage,

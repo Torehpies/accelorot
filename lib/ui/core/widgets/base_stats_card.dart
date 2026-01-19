@@ -98,11 +98,7 @@ class _BaseStatsCardState extends State<BaseStatsCard>
                   color: widget.backgroundColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  widget.icon,
-                  size: 20,
-                  color: widget.iconColor,
-                ),
+                child: Icon(widget.icon, size: 20, color: widget.iconColor),
               ),
             ],
           ),
@@ -163,10 +159,7 @@ class _BaseStatsCardState extends State<BaseStatsCard>
           else
             const Text(
               '—',
-              style: TextStyle(
-                fontSize: 12,
-                color: WebColors.textMuted,
-              ),
+              style: TextStyle(fontSize: 12, color: WebColors.textMuted),
             ),
         ],
       ),
@@ -174,10 +167,7 @@ class _BaseStatsCardState extends State<BaseStatsCard>
   }
 
   /// Animated skeleton box with pulsing effect
-  Widget _buildSkeletonBox({
-    required double height,
-    required double width,
-  }) {
+  Widget _buildSkeletonBox({required double height, required double width}) {
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
@@ -205,3 +195,4 @@ class _BaseStatsCardState extends State<BaseStatsCard>
     return widget.isPositive == true ? WebColors.success : WebColors.error;
   }
 }
+
