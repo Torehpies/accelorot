@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-const int kDesktopBreakpoint = 800;
+const int kTabletBreakpoint = 800;
+const int kDesktopBreakpoint = 1000;
+
 // --- 2. Theme Data Definition ---
 final ThemeData appTheme = ThemeData(
   useMaterial3: true,

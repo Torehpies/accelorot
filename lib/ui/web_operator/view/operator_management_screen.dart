@@ -11,7 +11,7 @@ class OperatorManagementScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+    final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
     return Scaffold(
       appBar: isDesktop
           ? null

@@ -18,7 +18,7 @@ class RegistrationFormContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+    final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
     final state = ref.watch(registrationProvider);
     final notifier = ref.read(registrationProvider.notifier);

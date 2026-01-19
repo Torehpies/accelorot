@@ -5,8 +5,6 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 class ResponsiveWebShell extends StatelessWidget {
   final Widget child;
   final List<NavItem> navItems;
-  // final Color primaryColor;
-  // final Color secondaryColor;
   final Color color;
   final String roleName;
   final Widget brandingWidget;
@@ -16,8 +14,6 @@ class ResponsiveWebShell extends StatelessWidget {
     super.key,
     required this.child,
     required this.navItems,
-    // required this.primaryColor,
-    // required this.secondaryColor,
     required this.color,
     required this.roleName,
     required this.brandingWidget,
@@ -34,13 +30,6 @@ class ResponsiveWebShell extends StatelessWidget {
           Container(
             width: sidebarWidth,
             color: color,
-            // decoration: BoxDecoration(
-            //   gradient: LinearGradient(
-            //     colors: [primaryColor, secondaryColor],
-            //     begin: Alignment.topCenter,
-            //     end: Alignment.bottomCenter,
-            //   ),
-            // ),
             child: SafeArea(
               child: Column(
                 children: [
