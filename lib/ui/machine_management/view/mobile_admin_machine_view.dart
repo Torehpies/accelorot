@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
+import 'package:flutter_application_1/ui/core/widgets/search_bar_widget.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../view_model/admin_machine_notifier.dart';
@@ -18,11 +20,18 @@ class AdminMachineView extends ConsumerStatefulWidget {
 class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   String? _teamId;
   bool _isAdmin = false;
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadTeamIdAndInit();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTeamIdAndInit() async {
@@ -57,39 +66,36 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     );
   }
 
-  // Helper: Get icon background color based on machine status
   Color _getIconColorForStatus(MachineModel machine) {
     if (machine.isArchived) {
-      return const Color(0xFF757575); // Gray for archived
+      return const Color(0xFF757575);
     }
     
     switch (machine.status) {
       case MachineStatus.active:
-        return const Color(0xFF4CAF50); // Green
+        return AppColors.green100;
       case MachineStatus.inactive:
-        return const Color(0xFFFFA726); // Orange
+        return const Color(0xFFFFA726);
       case MachineStatus.underMaintenance:
-        return const Color(0xFFEF5350); // Red
+        return AppColors.error;
     }
   }
 
-  // Helper: Get status background color
   Color _getStatusBgColor(MachineModel machine) {
     if (machine.isArchived) {
-      return const Color(0xFFFFEBEE); // Light red
+      return AppColors.redBackground;
     }
     
     switch (machine.status) {
       case MachineStatus.active:
-        return const Color(0xFFE8F5E9); // Light green
+        return AppColors.greenBackground;
       case MachineStatus.inactive:
-        return const Color(0xFFFFF3E0); // Light orange
+        return AppColors.yellowBackground;
       case MachineStatus.underMaintenance:
-        return const Color(0xFFFFEBEE); // Light red
+        return AppColors.redBackground;
     }
   }
 
-  // Helper: Get status label
   String _getStatusLabel(MachineModel machine) {
     if (machine.isArchived) {
       return 'Archived';
@@ -105,12 +111,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     }
   }
 
-  // Helper: Format description with machine ID only
   String _getDescription(MachineModel machine) {
     return 'ID: ${machine.machineId}';
   }
 
-  // Helper: Format date for bottom left
   String _getDateCreated(MachineModel machine) {
     return DateFormat('MMM dd, yyyy').format(machine.dateCreated);
   }
@@ -121,37 +125,106 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final notifier = ref.read(adminMachineProvider.notifier);
 
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
+      onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
-        appBar: MobileHeader(
-          title: 'Machine List',
-          showSearch: true,
-          showFilterButton: true,
-          showAddButton: _isAdmin,
-          searchQuery: state.searchQuery,
-          onSearchChanged: notifier.setSearchQuery,
-          onDateRangeChanged: (range) {
-            // Optional: Handle date filtering later
-          },
-          onAddPressed: _onAddPressed,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Tab Filters
-              MachineTabFilter(
-                selectedTab: state.selectedTab,
-                onTabSelected: notifier.setFilterTab,
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            // Custom header with search bar on left and filter/add on right
+            Container(
+              color: AppColors.background2,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 12,
+                left: 20,
+                right: 20,
+                bottom: 12,
               ),
-              const SizedBox(height: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text('Machine List', style: AppTextStyles.heading1),
+                  const SizedBox(height: 12),
+                  
+                  // Search bar + Filter/Add buttons row
+                  Row(
+                    children: [
+                      // Search bar - takes remaining space
+                      Expanded(
+                        child: SearchBarWidget(
+                          onSearchChanged: notifier.setSearchQuery,
+                          onClear: () => notifier.setSearchQuery(''),
+                          focusNode: _searchFocusNode,
+                          hintText: 'Search machines...',
+                          height: 40,
+                          borderRadius: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      
+                      // Filter button
+                      Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.green100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.filter_list, color: Colors.white, size: 20),
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Date filter not implemented yet')),
+                            );
+                          },
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                      
+                      // Add button (only for admin)
+                      if (_isAdmin) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.green100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.add, color: Colors.white, size: 20),
+                            onPressed: _onAddPressed,
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
 
-              // Machine List
-              Expanded(child: _buildMachineContent(state, notifier)),
-            ],
-          ),
+            // Main content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Tab Filters
+                    MachineTabFilter(
+                      selectedTab: state.selectedTab,
+                      onTabSelected: notifier.setFilterTab,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Machine List
+                    Expanded(child: _buildMachineContent(state, notifier)),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -162,7 +235,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     AdminMachineNotifier notifier,
   ) {
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.green100),
+      );
     }
 
     if (state.errorMessage != null) {
@@ -172,11 +247,11 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+              Icon(Icons.error_outline, size: 64, color: AppColors.error),
               const SizedBox(height: 16),
               Text(
                 state.errorMessage!,
-                style: TextStyle(color: Colors.red.shade700, fontSize: 14),
+                style: AppTextStyles.body.copyWith(color: AppColors.error),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -186,9 +261,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                   if (_teamId != null) notifier.initialize(_teamId!);
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
+                label: Text('Retry', style: AppTextStyles.button),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: AppColors.green100,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
@@ -221,11 +296,11 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
+              Icon(Icons.inbox_outlined, size: 64, color: AppColors.textSecondary),
               const SizedBox(height: 16),
               Text(
                 state.searchQuery.isNotEmpty ? 'No machines found' : emptyMessage,
-                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -246,10 +321,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               icon: const Icon(Icons.expand_more),
               label: Text(
                 'Load More (${state.remainingCount} remaining)',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: AppTextStyles.button,
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppColors.green100,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 minimumSize: const Size(double.infinity, 50),
@@ -262,16 +337,13 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
 
         final machine = state.displayedMachines[index];
         
-        // Using DataCard with swapped positions:
-        // - category (top right) = status label
-        // - status (bottom left) = date created
         return DataCard(
           icon: Icons.precision_manufacturing,
           iconBgColor: _getIconColorForStatus(machine),
           title: machine.machineName,
           description: _getDescription(machine),
-          category: _getStatusLabel(machine), // Status at top right
-          status: 'Created on ${_getDateCreated(machine)}', // Date at bottom left
+          category: _getStatusLabel(machine),
+          status: 'Created on ${_getDateCreated(machine)}',
           userName: 'All Team Members',
           statusColor: _getStatusBgColor(machine),
           onTap: () => _navigateToDetails(machine),
@@ -281,7 +353,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   }
 }
 
-// Note: Make sure MachineDetailsView is imported or create a placeholder
 class MachineDetailsView extends StatelessWidget {
   final MachineModel machine;
   final String teamId;
