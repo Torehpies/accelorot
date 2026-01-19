@@ -7,16 +7,12 @@ class DataCard<T> extends StatelessWidget {
   final Color iconBgColor;
   final String title;
   final String? description;
-  final String? descriptionTitle;
   final String? category;
-  final String? categoryTitle;
-  final Color? categoryColor;
-  final Color? categoryTextColor;
   final String status;
   final String? userName;
   final Color? statusColor;
   final Color? statusTextColor;
-  final void Function(String action, T data)? onAction;
+  final VoidCallback? onTap;
   final T data;
 
   const DataCard({
@@ -25,17 +21,13 @@ class DataCard<T> extends StatelessWidget {
     required this.iconBgColor,
     required this.title,
     this.description,
-    this.descriptionTitle,
     this.category,
-    this.categoryTitle,
-    this.categoryColor,
-    this.categoryTextColor,
     required this.status,
     this.userName,
     this.statusColor,
     this.statusTextColor,
     required this.data,
-    this.onAction,
+    this.onTap,
   });
 
   bool get _hasDescription => description?.isNotEmpty == true;
@@ -53,7 +45,7 @@ class DataCard<T> extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => onAction?.call('view', data),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/core/ui/data_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/utils/format.dart';
-import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MobileTeamMembersTab extends ConsumerStatefulWidget {
-  const MobileTeamMembersTab({super.key});
+class MobilePendingMembersTab extends ConsumerStatefulWidget {
+  const MobilePendingMembersTab({super.key});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
       _MobileTeamMembersState();
 }
 
-class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
+class _MobileTeamMembersState extends ConsumerState<MobilePendingMembersTab>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
 
@@ -40,15 +39,15 @@ class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref.read(teamMembersProvider.notifier).loadNextPage();
+      ref.read(pendingMembersProvider.notifier).loadNextPage();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final state = ref.watch(teamMembersProvider);
-    final notifier = ref.read(teamMembersProvider.notifier);
+    final state = ref.watch(pendingMembersProvider);
+    final notifier = ref.read(pendingMembersProvider.notifier);
     return _MembersList(
       state: state,
       notifier: notifier,
@@ -58,8 +57,8 @@ class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
 }
 
 class _MembersList extends StatelessWidget {
-  final TeamMembersState state;
-  final TeamMembersNotifier notifier;
+  final PendingMembersState state;
+  final PendingMembersNotifier notifier;
   final ScrollController scrollController;
 
   const _MembersList({
@@ -67,20 +66,6 @@ class _MembersList extends StatelessWidget {
     required this.notifier,
     required this.scrollController,
   });
-
-  void _showEditDialog(
-    BuildContext context,
-    TeamMembersNotifier notifier,
-    TeamMember member,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => EditOperatorDialog(
-        operator: member,
-        onSave: (updatedOperator) => notifier.updateOperator(updatedOperator),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +75,7 @@ class _MembersList extends StatelessWidget {
     if (state.items.isEmpty && !state.isLoading) {
       return Center(
         child: Text(
-          'No team members found',
+          'No pending requests found',
           style: Theme.of(context).textTheme.titleMedium,
         ),
       );
@@ -104,13 +89,12 @@ class _MembersList extends StatelessWidget {
         if (index >= state.items.length) {
           return _buildLoadingItem();
         }
-        TeamMember member = state.items[index];
-        return DataCard<TeamMember>(
+        PendingMember member = state.items[index];
+        return DataCard<PendingMember>(
           data: member,
           icon: Icons.person,
           iconBgColor: AppColors.green100,
           title: "${member.lastName}, ${member.firstName}",
-          category: toTitleCase(member.status.value),
           status: member.email,
           onTap: () {
             showModalBottomSheet(
@@ -119,25 +103,72 @@ class _MembersList extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              builder: (context) => DataBottomSheet<TeamMember>(
+              builder: (context) => DataBottomSheet<PendingMember>(
                 data: member,
                 title: '${member.lastName}, ${member.firstName}',
                 avatarIcon: Icons.person,
                 avatarColor: AppColors.green100,
                 details: [
                   MapEntry('Email', member.email),
-                  MapEntry('Status', toTitleCase(member.status.value)),
-                  MapEntry('Created', formatDateAndTime(member.addedAt)),
+                  MapEntry(
+                    'Requested At',
+                    formatDateAndTime(member.requestedAt),
+                  ),
                 ],
-                primaryActionLabel: 'Edit',
-                onPrimaryAction: (member) =>
-                    _showEditDialog(context, notifier, member),
+                primaryActionLabel: "Accept",
+                onPrimaryAction: (pendingMember) =>
+                    _showAcceptDialog(context, member),
+                primaryActionIcon: Icons.check,
+                actions: [
+                  OutlinedButton.icon(
+                    onPressed: () => _showDeclineDialog(context, member),
+                    icon: Icon(Icons.cancel),
+                    label: Text('Decline'),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 17,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             );
           },
         );
       },
     );
+  }
+
+  Future<void> _showAcceptDialog(
+    BuildContext context,
+    PendingMember member,
+  ) async {
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Accept Request',
+      message: 'Accept ${member.firstName} ${member.lastName}?',
+    );
+    if (confirmed == true) {
+      await notifier.acceptRequest(member);
+    }
+  }
+
+  Future<void> _showDeclineDialog(
+    BuildContext context,
+    PendingMember member,
+  ) async {
+    final confirmed = await showConfirmDialog(
+      context: context,
+      title: 'Decline Request',
+      message: 'Decline ${member.firstName} ${member.lastName}?',
+    );
+    if (confirmed == true) {
+      await notifier.declineRequest(member);
+    }
   }
 }
 
