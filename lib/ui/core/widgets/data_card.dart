@@ -4,42 +4,36 @@ import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart'
 
 class DataCard<T> extends StatelessWidget {
   final IconData icon;
-  final Color iconBgColor;
+  final Color? iconBgColor;
+  final Color? iconColor;
   final String title;
   final String? description;
-  final String? descriptionTitle;
   final String? category;
-  final String? categoryTitle;
-  final Color? categoryColor;
-  final Color? categoryTextColor;
   final String status;
   final String? userName;
   final Color? statusColor;
   final Color? statusTextColor;
-  final void Function(String action, T data)? onAction;
+  final VoidCallback? onTap;
   final T data;
 
   const DataCard({
     super.key,
     required this.icon,
-    required this.iconBgColor,
+    this.iconBgColor,
     required this.title,
     this.description,
-    this.descriptionTitle,
     this.category,
-    this.categoryTitle,
-    this.categoryColor,
-    this.categoryTextColor,
     required this.status,
     this.userName,
     this.statusColor,
     this.statusTextColor,
     required this.data,
-    this.onAction,
+    this.onTap,
+    this.iconColor,
   });
 
-  bool get _hasDescription => description?.isNotEmpty == true;
   bool get _hasCategory => category?.isNotEmpty == true;
+  bool get _hasDescription => description?.isNotEmpty == true;
   bool get _hasUserName => userName?.isNotEmpty == true;
 
   @override
@@ -53,7 +47,7 @@ class DataCard<T> extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => onAction?.call('view', data),
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -61,13 +55,13 @@ class DataCard<T> extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
-                  color: iconBgColor,
+                  color: iconBgColor ?? AppColors.green100,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: Colors.white, size: 24),
+                child: Icon(icon, color: iconColor ?? Colors.white, size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -99,32 +93,38 @@ class DataCard<T> extends StatelessWidget {
                       const SizedBox(height: 12),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor ?? AppColors.grey,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            status,
-                            style: TextStyle(
-                              color: statusTextColor ?? AppColors.textPrimary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor ?? AppColors.grey,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                color: statusTextColor ?? AppColors.textPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ),
                         const Spacer(),
                         if (_hasUserName)
-                          Text(
-                            'by $userName',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade500,
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              'by $userName',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                       ],

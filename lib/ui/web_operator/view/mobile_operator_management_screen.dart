@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/mobile_pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/mobile_team_members_tab.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,10 +45,10 @@ class _MobileOperatorManagementScreenState
         children: [
           TeamHeaderWithTabs(controller: _tabController),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.6,
+            height: MediaQuery.of(context).size.height * 0.65,
             child: TabBarView(
               controller: _tabController,
-              children: const [MobileTeamMembersTab(), PendingMembersTab()],
+              children: const [MobileTeamMembersTab(), MobilePendingMembersTab()],
             ),
           ),
         ],
