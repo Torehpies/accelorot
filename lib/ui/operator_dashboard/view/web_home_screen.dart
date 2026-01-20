@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
@@ -16,11 +16,10 @@ import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 
-
 class WebHomeScreen extends ConsumerStatefulWidget {
-  final MachineModel? focusedMachine; 
+  final MachineModel? focusedMachine;
 
-  const WebHomeScreen({super.key, this.focusedMachine}); 
+  const WebHomeScreen({super.key, this.focusedMachine});
 
   @override
   ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
@@ -33,28 +32,26 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
-  
+
   // Add this to force widget rebuilds
   int _rebuildKey = 0;
-
-
 
   @override
   void initState() {
     super.initState();
-   _selectedMachineId = widget.focusedMachine?.machineId;
+    _selectedMachineId = widget.focusedMachine?.machineId;
   }
 
   void _updateActiveBatch(BatchModel? batch) {
     debugPrint('🔄 _updateActiveBatch called with batch: ${batch?.id}');
-    
+
     if (mounted) {
       setState(() {
         _activeBatchModel = batch;
         _selectedBatchId = batch?.id;
         // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
-        
+
         if (batch != null) {
           _selectedMachineId = batch.machineId;
           _currentBatch = CompostBatch(
@@ -70,25 +67,25 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
         }
       });
     }
-    
+
     debugPrint('✅ _updateActiveBatch completed - rebuildKey: $_rebuildKey');
   }
 
-    Future<void> _autoSelectBatchForMachine(String machineId) async {
+  Future<void> _autoSelectBatchForMachine(String machineId) async {
     // Wait for provider to refresh
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     final batchesAsync = ref.read(userTeamBatchesProvider);
     batchesAsync.whenData((batches) {
       final machineBatches = batches
           .where((b) => b.machineId == machineId)
           .toList();
-      
+
       if (machineBatches.isNotEmpty) {
         // Sort by createdAt to get newest
         machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final latestBatch = machineBatches.first;
-        
+
         if (mounted) {
           setState(() {
             _selectedBatchId = latestBatch.id;
@@ -119,12 +116,12 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     if (result == true && mounted) {
       // Refresh the activity logs after batch is created
       ref.invalidate(allActivitiesProvider);
-      
+
       // Force rebuild by incrementing key
       setState(() {
         _rebuildKey++;
       });
-      
+
       debugPrint('🔄 Batch created, forced rebuild with key: $_rebuildKey');
     }
   }
@@ -135,7 +132,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       _rebuildKey++;
     });
   }
-
 
   void _handleFABPress() async {
     final action = await showDialog<String>(
@@ -209,10 +205,9 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       );
 
       if (result == true && mounted) {
-
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
-        
+
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
@@ -225,23 +220,18 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
         ref.invalidate(allActivitiesProvider);
       }
     } else if (action == 'submit_report') {
-
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => SubmitReport(
-          preSelectedMachineId: _selectedMachineId, 
-          preSelectedBatchId: _selectedBatchId,  
+          preSelectedMachineId: _selectedMachineId,
+          preSelectedBatchId: _selectedBatchId,
         ),
       );
 
-      
-
-
       if (result == true && mounted) {
-
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
-        
+
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
@@ -255,7 +245,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -287,14 +276,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                               currentBatch: _currentBatch,
                               onBatchStarted: _handleBatchStarted,
                               onBatchCompleted: _handleBatchCompleted,
-                              preSelectedMachineId: widget.focusedMachine?.machineId,
+                              preSelectedMachineId:
+                                  widget.focusedMachine?.machineId,
                               onBatchChanged: _updateActiveBatch,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Expanded(
                             child: ActivityLogsCard(
-                              focusedMachineId: widget.focusedMachine?.machineId,
+                              focusedMachineId:
+                                  widget.focusedMachine?.machineId,
                             ),
                           ),
                         ],
@@ -309,13 +300,15 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                         children: [
                           Expanded(
                             child: DrumControlCard(
-                              currentBatch: _activeBatchModel, 
+                              currentBatch: _activeBatchModel,
+                              machineId: _selectedMachineId,
                             ),
                           ),
                           const SizedBox(height: 16),
                           Expanded(
                             child: AeratorCard(
-                              currentBatch: _activeBatchModel, 
+                              currentBatch: _activeBatchModel,
+                              machineId: _selectedMachineId,
                             ),
                           ),
                         ],
@@ -332,14 +325,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
         onPressed: _handleFABPress,
         backgroundColor: Colors.teal[800],
         elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(
-          Icons.add,
-          size: 32,
-          color: Colors.white,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: const Icon(Icons.add, size: 32, color: Colors.white),
       ),
     );
   }

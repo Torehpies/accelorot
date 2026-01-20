@@ -15,7 +15,6 @@ import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 
-
 class HomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine;
 
@@ -30,7 +29,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
-  
+
   // Add this to force widget rebuilds
   int _rebuildKey = 0;
 
@@ -42,14 +41,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _updateActiveBatch(BatchModel? batch) {
     debugPrint('🔄 _updateActiveBatch called with batch: ${batch?.id}');
-    
+
     if (mounted) {
       setState(() {
         _activeBatchModel = batch;
         _selectedBatchId = batch?.id;
         // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
-        
+
         if (batch != null) {
           _selectedMachineId = batch.machineId;
           _currentBatch = CompostBatch(
@@ -65,25 +64,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       });
     }
-    
+
     debugPrint('✅ _updateActiveBatch completed - rebuildKey: $_rebuildKey');
   }
 
-    Future<void> _autoSelectBatchForMachine(String machineId) async {
+  Future<void> _autoSelectBatchForMachine(String machineId) async {
     // Wait for provider to refresh
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     final batchesAsync = ref.read(userTeamBatchesProvider);
     batchesAsync.whenData((batches) {
       final machineBatches = batches
           .where((b) => b.machineId == machineId)
           .toList();
-      
+
       if (machineBatches.isNotEmpty) {
         // Sort by createdAt to get newest
         machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final latestBatch = machineBatches.first;
-        
+
         if (mounted) {
           setState(() {
             _selectedBatchId = latestBatch.id;
@@ -114,12 +113,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (result == true && mounted) {
       // Refresh the activity logs after batch is created
       ref.invalidate(allActivitiesProvider);
-      
+
       // Force rebuild by incrementing key
       setState(() {
         _rebuildKey++;
       });
-      
+
       debugPrint('🔄 Batch created, forced rebuild with key: $_rebuildKey');
     }
   }
@@ -205,7 +204,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (result == true && mounted) {
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
-        
+
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
@@ -222,15 +221,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final result = await showDialog<bool>(
         context: context,
         builder: (context) => SubmitReport(
-          preSelectedMachineId: _selectedMachineId, 
-          preSelectedBatchId: _selectedBatchId,  
+          preSelectedMachineId: _selectedMachineId,
+          preSelectedBatchId: _selectedBatchId,
         ),
       );
 
       if (result == true && mounted) {
         ref.invalidate(allActivitiesProvider);
         ref.invalidate(userTeamBatchesProvider);
-        
+
         if (_selectedMachineId != null) {
           await _autoSelectBatchForMachine(_selectedMachineId!);
         }
@@ -246,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     final isMachineView = widget.focusedMachine != null;
 
@@ -285,6 +284,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // Swipeable cycle cards
                   SwipeableCycleCards(
                     currentBatch: _activeBatchModel,
+                    machineId: _selectedMachineId,
                   ),
                   const SizedBox(height: 16),
 

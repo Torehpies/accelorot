@@ -7,14 +7,12 @@ class FirebaseMachineService implements MachineService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  FirebaseMachineService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FirebaseMachineService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   String? get currentUserId => _auth.currentUser?.uid;
-  
+
   CollectionReference get _machinesCollection =>
       _firestore.collection('machines');
 
@@ -99,7 +97,7 @@ class FirebaseMachineService implements MachineService {
       if (request.machineName != null) {
         updates['machineName'] = request.machineName;
       }
-      
+
       if (request.status != null) {
         String statusValue;
         switch (request.status!) {
@@ -120,7 +118,7 @@ class FirebaseMachineService implements MachineService {
             break;
         }
       }
-      
+
       if (request.currentBatchId != null) {
         updates['currentBatchId'] = request.currentBatchId;
       }
@@ -186,7 +184,42 @@ class FirebaseMachineService implements MachineService {
         .where('teamId', isEqualTo: teamId)
         .orderBy('dateCreated', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => MachineModel.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => MachineModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  @override
+  Future<void> updateDrumActive(String machineId, bool isActive) async {
+    if (currentUserId == null) {
+      throw Exception('User must be authenticated');
+    }
+
+    try {
+      await _machinesCollection.doc(machineId).update({
+        'drumActive': isActive,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update drum status: $e');
+    }
+  }
+
+  @override
+  Future<void> updateAeratorActive(String machineId, bool isActive) async {
+    if (currentUserId == null) {
+      throw Exception('User must be authenticated');
+    }
+
+    try {
+      await _machinesCollection.doc(machineId).update({
+        'aeratorActive': isActive,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update aerator status: $e');
+    }
   }
 }
