@@ -5,6 +5,7 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/login/view_model/login_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 const double kMaxFormWidth = 450.0;
@@ -66,9 +67,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         );
   }
 
-	void _signInWithGoogle() {
-		ref.read(loginProvider.notifier).signInWithGoogle();
-	}
+  void _signInWithGoogle() {
+    ref.read(loginProvider.notifier).signInWithGoogle();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +80,14 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Center(child: _buildLogo()),
+        SvgPicture.asset(
+          'assets/images/Accel-O-Rot Logo.svg',
+          width: 65,
+          height: 65,
+          fit: BoxFit.contain,
+          semanticsLabel: 'Accel-O-Rot Logo',
+        ),
+
         const SizedBox(height: 16),
         Center(child: _buildTitle(theme)),
         SizedBox(height: 32),
@@ -192,25 +200,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   // --- Helper Widgets ---
-  Widget _buildLogo() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        color: AppColors.green100,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.teal.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
-    );
-  }
-
   Widget _buildTitle(ThemeData theme) {
     return Column(
       children: [
