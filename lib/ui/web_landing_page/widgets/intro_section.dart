@@ -91,46 +91,56 @@ class IntroSection extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.xxxl),
-          // Right side - Metrics
+          // Right side - Metrics Cards (2x2 Grid)
           Expanded(
             flex: 3,
             child: Column(
               children: [
+                // Top Row
                 Row(
                   children: [
+                    // Top Left - Temperature
                     const Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.thermostat_outlined,
                         value: '45°C',
                         label: 'Temperature',
+                        position: 0, // top-left
                       ),
                     ),
                     const SizedBox(width: AppSpacing.lg),
+                    // Top Right - Moisture
                     const Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.water_drop_outlined,
                         value: '58%',
                         label: 'Moisture',
+                        position: 1, // top-right
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
+                // Bottom Row
                 Row(
                   children: [
+                    // Bottom Left - Oxygen
                     const Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.air_outlined,
                         value: '21%',
                         label: 'Oxygen',
+                        position: 2, // bottom-left
                       ),
                     ),
                     const SizedBox(width: AppSpacing.lg),
+                    // Bottom Right - Progress
                     const Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.trending_up_outlined,
                         value: 'Day 8',
                         label: 'Progress',
+                        position: 3, // bottom-right
                       ),
                     ),
                   ],

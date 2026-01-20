@@ -1,7 +1,8 @@
 // lib/ui/landing_page/widgets/cta_section.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+//import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -117,7 +118,7 @@ class CtaSection extends StatelessWidget {
                     Text(
                       'ACCEL-O-ROT',
                       style: h2Style.copyWith(
-                        color: AppColors.textPrimary,
+                        color: WebColors.textTitle,
                         fontWeight: FontWeight.w900,
                         fontSize: 28,
                       ),

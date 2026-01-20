@@ -93,6 +93,13 @@
     // Buttons
     static const buttonSecondary = Color(0xFF6B7280); // Secondary button
     
+    // Example — adjust hex values to match your brand
+    static const Color blue50 = Color(0xFFE6F7FF);   // Very light blue background
+    static const Color blue200 = Color(0xFF91D5FF);  // Border/hover color
+    static const Color blue300 = Color(0xFF69C0FF);  // Pressed border
+    static const Color textPrimaryColor = Color(0xFF000000); // Black/dark text
+    
+    
     // Shadows
     static final cardShadow = Colors.black.withValues(alpha: 0.02);
     

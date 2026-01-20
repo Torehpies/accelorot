@@ -31,7 +31,7 @@ import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.da
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
+import 'package:flutter_application_1/ui/web_landing_page/view/landing_page_view.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
