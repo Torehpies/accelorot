@@ -33,6 +33,7 @@ import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/responsive_operator_machine_management.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -140,7 +141,17 @@ final routerProvider = Provider<GoRouter>((ref) {
               key: state.pageKey,
             ),
           ),
-
+          GoRoute(
+            path: RoutePath.operatorMachines.path,
+            name: RoutePath.operatorMachines.name,
+            pageBuilder: (context, state) {
+              final teamId = state.extra as String? ?? '';
+              return NoTransitionPage(
+                child: ResponsiveOperatorMachineManagement(teamId: teamId),
+                key: state.pageKey,
+              );
+            },
+          ),
           GoRoute(
             path: RoutePath.operatorSettings.path,
             name: RoutePath.operatorSettings.name,
