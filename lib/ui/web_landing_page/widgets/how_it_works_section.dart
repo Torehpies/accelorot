@@ -19,8 +19,8 @@ class HowItWorksSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.xxl,
+        horizontal: AppSpacing.xxxl * 2,
+        vertical: AppSpacing.xxxl * 3,
       ),
       color: const Color(0xFFFAFAFA),
       child: Column(
@@ -28,13 +28,13 @@ class HowItWorksSection extends StatelessWidget {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: WebTextStyles.h2.copyWith(fontSize: 36),
+              style: WebTextStyles.h2.copyWith(fontSize: 40),
               children: [
                 const TextSpan(text: 'How '),
                 TextSpan(
                   text: 'Accel-O-Rot',
                   style: WebTextStyles.h2.copyWith(
-                    fontSize: 36,
+                    fontSize: 40,
                     color: WebColors.textTitle,
                   ),
                 ),
@@ -42,16 +42,16 @@ class HowItWorksSection extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             'Simple, automated, and effective composting in 4 easy steps',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle.copyWith(
-              fontSize: 15,
+              fontSize: 16,
               color: const Color(0xFF6B7280),
             ),
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xxxl * 2),
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = constraints.maxWidth > 1200 
@@ -67,9 +67,9 @@ class HowItWorksSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: AppSpacing.md,
+                  crossAxisSpacing: AppSpacing.lg,
                   mainAxisSpacing: AppSpacing.lg,
-                  childAspectRatio: 1.1,
+                  childAspectRatio: 1.0,
                 ),
                 itemCount: steps.length,
                 itemBuilder: (context, index) {

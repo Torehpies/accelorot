@@ -96,108 +96,112 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
           onEnter: (_) => setState(() => _isHovered = true),
           onExit: (_) => setState(() => _isHovered = false),
           child: AnimatedBuilder(
-            animation: _glowAnimation,
+            animation: Listenable.merge([
+              _glowAnimation,
+            ]),
             builder: (context, child) {
-              // Calculate glow intensity - stronger pulse on hover
-              final glowIntensity = _isHovered
-                  ? 0.4 + (_glowAnimation.value * 0.3) // Pulse 0.4-0.7
-                  : 0.0 + (_glowAnimation.value * 0.1); // Subtle pulse 0.0-0.1
+              // Zoom scale: 1.0 normal, 1.03 on hover
+              final scale = _isHovered ? 1.03 : 1.0;
 
-              // Calculate shadow color intensity
+              // Glow logic
+              final glowIntensity = _isHovered
+                  ? 0.4 + (_glowAnimation.value * 0.3)
+                  : 0.0 + (_glowAnimation.value * 0.1);
+
               final shadowOpacity = glowIntensity * 0.15;
               final shadowBlur = 8.0 + (glowIntensity * 8.0);
 
-              return Container(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      const Color(0xFFDEF9F4).withValues(
-                        alpha: _isHovered ? 1.0 : 0.9,
-                      ), // Base soft mint
-                      const Color(0xFFC0F0E0).withValues(
-                        alpha: _isHovered ? 0.8 : 0.6,
-                      ), // Lighter overlay
+              return Transform.scale(
+                scale: scale,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFDEF9F4).withValues(
+                          alpha: _isHovered ? 1.0 : 0.9,
+                        ),
+                        const Color(0xFFC0F0E0).withValues(
+                          alpha: _isHovered ? 0.8 : 0.6,
+                        ),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Color.lerp(
+                        const Color(0xFFB2DFD3),
+                        const Color(0xFF10B981),
+                        glowIntensity * 0.3,
+                      )!,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981)
+                            .withValues(alpha: shadowOpacity),
+                        blurRadius: shadowBlur,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Color.lerp(
-                      const Color(0xFFB2DFD3),
-                      const Color(0xFF10B981),
-                      glowIntensity * 0.3,
-                    )!,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    // Glow shadow
-                    BoxShadow(
-                      color: const Color(0xFF10B981).withValues(
-                        alpha: shadowOpacity,
-                      ),
-                      blurRadius: shadowBlur,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                    // Subtle base shadow
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Icon with subtle background
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: _isHovered
-                            ? const Color(0xFF10B981).withValues(alpha: 0.08)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          if (_isHovered)
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withValues(
-                                alpha: glowIntensity * 0.15,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: _isHovered
+                              ? const Color(0xFF10B981).withValues(alpha: 0.08)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            if (_isHovered)
+                              BoxShadow(
+                                color: const Color(0xFF10B981).withValues(
+                                  alpha: glowIntensity * 0.15,
+                                ),
+                                blurRadius: shadowBlur * 0.6,
+                                spreadRadius: 0,
                               ),
-                              blurRadius: shadowBlur * 0.6,
-                              spreadRadius: 0,
-                            ),
-                        ],
+                          ],
+                        ),
+                        child: Icon(
+                          widget.icon,
+                          size: 28,
+                          color: const Color(0xFF10B981),
+                        ),
                       ),
-                      child: Icon(
-                        widget.icon,
-                        size: 28,
-                        color: const Color(0xFF10B981), // Emerald green
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        widget.value,
+                        style: WebTextStyles.h2.copyWith(
+                          color: const Color(0xFF111827),
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      widget.value,
-                      style: WebTextStyles.h2.copyWith(
-                        color: const Color(0xFF111827), // Dark gray text
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        height: 1.0,
+                      const SizedBox(height: 6),
+                      Text(
+                        widget.label,
+                        style: WebTextStyles.caption.copyWith(
+                          color: const Color(0xFF6B7280),
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.label,
-                      style: WebTextStyles.caption.copyWith(
-                        color: const Color(0xFF6B7280), // Muted label
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

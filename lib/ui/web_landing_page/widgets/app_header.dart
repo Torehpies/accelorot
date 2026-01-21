@@ -1,15 +1,13 @@
 // lib/ui/landing_page/widgets/app_header.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-//import 'package:go_router/go_router.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import '../../core/ui/second_button.dart';
 
-class AppHeader extends StatefulWidget {
+class AppHeader extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onGetStarted;
   final VoidCallback onDownload;
@@ -26,19 +24,12 @@ class AppHeader extends StatefulWidget {
   });
 
   @override
-  State<AppHeader> createState() => _AppHeaderState();
-}
-
-class _AppHeaderState extends State<AppHeader> {
-  void _handleBreadcrumbTap(String section) {
-    widget.onBreadcrumbTap(section);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final h2Style = WebTextStyles.h2;
 
-    return Container(
+    return SizedBox(
+     height: 106, 
+      child: Container(
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -59,7 +50,7 @@ class _AppHeaderState extends State<AppHeader> {
           children: [
             // Logo + Brand Name
             GestureDetector(
-              onTap: () => _handleBreadcrumbTap('home'),
+              onTap: () => onBreadcrumbTap('home'),
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Row(
@@ -75,7 +66,7 @@ class _AppHeaderState extends State<AppHeader> {
                     Text(
                       'ACCEL-O-ROT',
                       style: h2Style.copyWith(
-                        color: AppColors.textPrimary,
+                        color: WebColors.iconsPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 22,
                       ),
@@ -92,38 +83,38 @@ class _AppHeaderState extends State<AppHeader> {
                 children: [
                   _BreadcrumbItem(
                     label: 'Home',
-                    isActive: widget.activeSection == 'home',
-                    onTap: () => _handleBreadcrumbTap('home'),
+                    isActive: activeSection == 'home',
+                    onTap: () => onBreadcrumbTap('home'),
                   ),
                   _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'Features',
-                    isActive: widget.activeSection == 'features',
-                    onTap: () => _handleBreadcrumbTap('features'),
+                    isActive: activeSection == 'features',
+                    onTap: () => onBreadcrumbTap('features'),
                   ),
                   _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'How It Works',
-                    isActive: widget.activeSection == 'how-it-works',
-                    onTap: () => _handleBreadcrumbTap('how-it-works'),
+                    isActive: activeSection == 'how-it-works',
+                    onTap: () => onBreadcrumbTap('how-it-works'),
                   ),
                   _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'Impact',
-                    isActive: widget.activeSection == 'impact',
-                    onTap: () => _handleBreadcrumbTap('impact'),
+                    isActive: activeSection == 'impact',
+                    onTap: () => onBreadcrumbTap('impact'),
                   ),
-                   _BreadcrumbDivider(),
+                  _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'Contact',
-                    isActive: widget.activeSection == 'contact',
-                    onTap: () => _handleBreadcrumbTap('contact'),
+                    isActive: activeSection == 'contact',
+                    onTap: () => onBreadcrumbTap('contact'),
                   ),
                   _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'Download',
-                    isActive: widget.activeSection == 'download',
-                    onTap: () => _handleBreadcrumbTap('download'),
+                    isActive: activeSection == 'cta',
+                    onTap: () => onBreadcrumbTap('cta'),
                   ),
                 ],
               ),
@@ -136,7 +127,7 @@ class _AppHeaderState extends State<AppHeader> {
                   height: 50,
                   child: SecondaryButton(
                     text: 'Login',
-                    onPressed: widget.onLogin,
+                    onPressed: onLogin,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -144,7 +135,7 @@ class _AppHeaderState extends State<AppHeader> {
                   height: 50,
                   child: PrimaryButton(
                     text: 'Get Started',
-                    onPressed: widget.onGetStarted,
+                    onPressed: onGetStarted,
                   ),
                 ),
               ],
@@ -152,6 +143,7 @@ class _AppHeaderState extends State<AppHeader> {
           ],
         ),
       ),
+    )
     );
   }
 }
@@ -173,18 +165,19 @@ class _BreadcrumbItem extends StatelessWidget {
       onTap: onTap,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'dm-sans',
-            fontSize: 14,
-            fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
-            color: isActive
-                ? WebColors.textTitle
-                : WebColors.textMuted,
-            decoration: isActive ? TextDecoration.underline : null,
-            decorationThickness: 2.5,
-            decorationColor: WebColors.textTitle,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'dm-sans',
+              fontSize: 14,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+              color: isActive
+                  ? WebColors.textTitle
+                  : WebColors.textMuted,
+              decoration: TextDecoration.none,
+            ),
           ),
         ),
       ),
@@ -198,14 +191,11 @@ class _BreadcrumbDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: Text(
-        '>',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: WebColors.textMuted,
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Icon(
+        Icons.chevron_right,
+        size: 16,
+        color: WebColors.textMuted,
       ),
     );
   }

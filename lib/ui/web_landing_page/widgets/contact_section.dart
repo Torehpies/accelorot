@@ -17,14 +17,7 @@ class ContactSection extends StatelessWidget {
         vertical: AppSpacing.xxxl * 3,
       ),
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE0F2FE),
-            Color(0xFFCCFBF1),
-          ],
-        ),
+        color: Colors.white,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,51 +36,73 @@ class ContactSection extends StatelessWidget {
           Text(
             'Have questions about our smart composting system? We\'re here to help you start your sustainable journey.',
             style: WebTextStyles.subtitle.copyWith(
-              color: WebColors.textTitle,
+              color: const Color(0xFF6B7280),
               fontSize: 16,
               height: 1.6,
             ),
           ),
           const SizedBox(height: AppSpacing.xxxl * 2),
           // Contact Cards
-          Row(
-            children: [
-              Expanded(
-                child: _ContactCard(
-                  icon: Icons.email_outlined,
-                  title: 'Email Us',
-                  subtitle: 'support@accel-o-rot.com',
-                  onTap: () {
-                    // Handle email tap - could open email client
-                    // Example: launch('mailto:support@accel-o-rot.com');
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xl),
-              Expanded(
-                child: _ContactCard(
-                  icon: Icons.phone_outlined,
-                  title: 'Call Us',
-                  subtitle: '+63 000 000 0000',
-                  onTap: () {
-                    // Handle call tap - could open phone dialer
-                    // Example: launch('tel:+639123456789');
-                  },
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xl),
-              Expanded(
-                child: _ContactCard(
-                  icon: Icons.location_on_outlined,
-                  title: 'Visit Us',
-                  subtitle: 'Metro Manila, Philippines',
-                  onTap: () {
-                    // Handle location tap - could open maps
-                    // Example: launch('https://maps.google.com/...');
-                  },
-                ),
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              bool isMobile = constraints.maxWidth < 900;
+              
+              return isMobile
+                  ? Column(
+                      children: [
+                        _ContactCard(
+                          icon: Icons.email_outlined,
+                          title: 'Email Us',
+                          subtitle: 'support@accel-o-rot.com',
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _ContactCard(
+                          icon: Icons.phone_outlined,
+                          title: 'Call Us',
+                          subtitle: '+63 000 000 0000',
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        _ContactCard(
+                          icon: Icons.location_on_outlined,
+                          title: 'Visit Us',
+                          subtitle: 'Metro Manila, Philippines',
+                          onTap: () {},
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: _ContactCard(
+                            icon: Icons.email_outlined,
+                            title: 'Email Us',
+                            subtitle: 'support@accel-o-rot.com',
+                            onTap: () {},
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xl),
+                        Expanded(
+                          child: _ContactCard(
+                            icon: Icons.phone_outlined,
+                            title: 'Call Us',
+                            subtitle: '+63 000 000 0000',
+                            onTap: () {},
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.xl),
+                        Expanded(
+                          child: _ContactCard(
+                            icon: Icons.location_on_outlined,
+                            title: 'Visit Us',
+                            subtitle: 'Metro Manila, Philippines',
+                            onTap: () {},
+                          ),
+                        ),
+                      ],
+                    );
+            },
           ),
         ],
       ),
@@ -128,15 +143,14 @@ class _ContactCardState extends State<_ContactCard> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           decoration: BoxDecoration(
             color: _isHovered
-            //WebColors.textTitle,
-                ? WebColors.textTitle.withValues(alpha: 0.25)
-                : WebColors.textTitle.withValues(alpha: 0.15),
+                ? const Color(0xFFF3F4F6)
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _isHovered
-                  ? WebColors.textTitle.withValues(alpha: 0.4)
-                  : WebColors.textTitle.withValues(alpha: 0.2),
-              width: 1,
+                  ? const Color(0xFFD1D5DB)
+                  : const Color(0xFFE5E7EB),
+              width: 1.5,
             ),
           ),
           child: Row(
@@ -147,15 +161,17 @@ class _ContactCardState extends State<_ContactCard> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: WebColors.textTitle.withValues(
-                    alpha: _isHovered ? 0.3 : 0.2,
-                  ),
+                  color: _isHovered
+                      ? WebColors.greenAccent.withValues(alpha: 0.15)
+                      : const Color(0xFFE0F2FE),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   widget.icon,
                   size: 28,
-                  color: Colors.white,
+                  color: _isHovered
+                      ? WebColors.greenAccent
+                      : WebColors.iconsPrimary,
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),
@@ -180,7 +196,7 @@ class _ContactCardState extends State<_ContactCard> {
                         fontFamily: 'dm-sans',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: WebColors.textTitle.withValues(alpha: 0.8),
+                        color: const Color(0xFF6B7280),
                       ),
                     ),
                   ],

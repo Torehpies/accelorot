@@ -30,7 +30,7 @@ class _LandingPageViewState extends State<LandingPageView> {
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _impactKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
-  final GlobalKey _downloadKey = GlobalKey();
+  final GlobalKey _ctaKey = GlobalKey();
 
   @override
   void initState() {
@@ -48,35 +48,47 @@ class _LandingPageViewState extends State<LandingPageView> {
   }
 
   void _updateActiveSection() {
-    // Determine which section is currently in view
-    final scrollPosition = _scrollController.offset;
+    // Get the positions of each section
+    final introPos = _getKeyPosition(_introKey);
+    final featuresPos = _getKeyPosition(_featuresKey);
+    final howItWorksPos = _getKeyPosition(_howItWorksKey);
+    final impactPos = _getKeyPosition(_impactKey);
+    final contactPos = _getKeyPosition(_contactKey);
+    final ctaPos = _getKeyPosition(_ctaKey);
 
-    // Approximate positions (adjust based on actual section heights)
-    if (scrollPosition < 300) {
-      if (_activeSection != 'home') {
-        setState(() => _activeSection = 'home');
-      }
-    } else if (scrollPosition < 1200) {
-      if (_activeSection != 'features') {
-        setState(() => _activeSection = 'features');
-      }
-    } else if (scrollPosition < 2100) {
-      if (_activeSection != 'how-it-works') {
-        setState(() => _activeSection = 'how-it-works');
-      }
-    } else if (scrollPosition < 3000) {
-      if (_activeSection != 'impact') {
-        setState(() => _activeSection = 'impact');
-      }
-    } else if (scrollPosition < 3800) {
-      if (_activeSection != 'contact') {
-        setState(() => _activeSection = 'contact');
-      }
-    } else {
-      if (_activeSection != 'download') {
-        setState(() => _activeSection = 'download');
+    final scrollPosition = _scrollController.offset;
+    final centerViewport = scrollPosition + MediaQuery.of(context).size.height / 2;
+
+    String newSection = 'home';
+
+    if (centerViewport >= ctaPos) {
+      newSection = 'cta';
+    } else if (centerViewport >= contactPos) {
+      newSection = 'contact';
+    } else if (centerViewport >= impactPos) {
+      newSection = 'impact';
+    } else if (centerViewport >= howItWorksPos) {
+      newSection = 'how-it-works';
+    } else if (centerViewport >= featuresPos) {
+      newSection = 'features';
+    } else if (centerViewport >= introPos) {
+      newSection = 'home';
+    }
+
+    if (_activeSection != newSection) {
+      setState(() => _activeSection = newSection);
+    }
+  }
+
+  double _getKeyPosition(GlobalKey key) {
+    final context = key.currentContext;
+    if (context != null) {
+      final box = context.findRenderObject() as RenderBox?;
+      if (box != null) {
+        return box.localToGlobal(Offset.zero).dy;
       }
     }
+    return 0;
   }
 
   void _onBreadcrumbTap(String section) {
@@ -101,6 +113,9 @@ class _LandingPageViewState extends State<LandingPageView> {
         break;
       case 'contact':
         _scrollToKey(_contactKey);
+        break;
+      case 'cta':
+        _scrollToKey(_ctaKey);
         break;
       case 'download':
         setState(() => _showDownloadModal = true);
@@ -196,21 +211,23 @@ class _LandingPageViewState extends State<LandingPageView> {
                           ),
                         ),
                       ),
+                      // Contact Section
                       FadeInOnScroll(
                         child: SizedBox(
                           key: _contactKey,
                           child: const ContactSection(),
                         ),
                       ),
-                      // CTA Section (Download)
+                      // CTA Section
                       FadeInOnScroll(
-                        child: SizedBox(
-                          key: _downloadKey,
-                          child: CtaSection(
-                            onGetStarted: _onGetStarted,
-                          ),
+                      child: SizedBox(
+                        key: _ctaKey,
+                        child: CtaSection(
+                          onGetStarted: _onGetStarted,
+                          onDownload: () => _onBreadcrumbTap('download'),
                         ),
                       ),
+                    ),
                     ],
                   ),
                 ),
