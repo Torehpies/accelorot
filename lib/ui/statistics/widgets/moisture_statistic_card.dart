@@ -71,7 +71,7 @@ class MoistureStatisticCard extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${currentMoisture.toStringAsFixed(1)}',
+                        currentMoisture.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
