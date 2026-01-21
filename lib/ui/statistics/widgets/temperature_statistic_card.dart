@@ -72,7 +72,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${currentTemperature.toStringAsFixed(0)}',
+                        currentTemperature.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

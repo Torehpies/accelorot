@@ -57,7 +57,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF9FAFB),
+          backgroundColor: const Color(0xFFDFF2FF), // Light blue to match navigation
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
@@ -221,28 +221,45 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
   }
 
   Widget _buildStatisticsCards() {
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
+    // Watch the actual data providers
+    final temperatureAsync = ref.watch(temperatureDataProvider(selectedMachineId));
+    final moistureAsync = ref.watch(moistureDataProvider(selectedMachineId));
+    final oxygenAsync = ref.watch(oxygenDataProvider(selectedMachineId));
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        
-        // Sample data for demonstration
-        final sampleHourlyReadings = [40.0, 55.0, 45.0, 65.0, 50.0, 70.0];
 
+        // Build cards with actual backend data
         final cards = [
-          TemperatureStatisticCard(
-            currentTemperature: 1300.0,
-            hourlyReadings: sampleHourlyReadings,
-            lastUpdated: DateTime.now(),
+          temperatureAsync.when(
+            data: (readings) => TemperatureStatisticCard(
+              currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
+              hourlyReadings: readings.map((r) => r.value).toList(),
+              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+            ),
+            loading: () => _buildLoadingCard('Temperature'),
+            error: (error, stack) => _buildErrorCard('Temperature', error),
           ),
-          MoistureStatisticCard(
-            currentMoisture: 28.0,
-            hourlyReadings: sampleHourlyReadings,
-            lastUpdated: DateTime.now(),
+          moistureAsync.when(
+            data: (readings) => MoistureStatisticCard(
+              currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
+              hourlyReadings: readings.map((r) => r.value).toList(),
+              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+            ),
+            loading: () => _buildLoadingCard('Moisture'),
+            error: (error, stack) => _buildErrorCard('Moisture', error),
           ),
-          OxygenStatisticCard(
-            currentOxygen: 550.0,
-            hourlyReadings: sampleHourlyReadings,
-            lastUpdated: DateTime.now(),
+          oxygenAsync.when(
+            data: (readings) => OxygenStatisticCard(
+              currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
+              hourlyReadings: readings.map((r) => r.value).toList(),
+              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+            ),
+            loading: () => _buildLoadingCard('Air Quality'),
+            error: (error, stack) => _buildErrorCard('Air Quality', error),
           ),
         ];
 
@@ -307,5 +324,77 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     ref.invalidate(moistureDataProvider(machineId));
     ref.invalidate(oxygenDataProvider(machineId));
     await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  Widget _buildLoadingCard(String title) {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(strokeWidth: 2),
+            const SizedBox(height: 12),
+            Text(
+              'Loading $title...',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard(String title, Object error) {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+            const SizedBox(height: 12),
+            Text(
+              'Error loading $title',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              style: TextStyle(color: Colors.grey[600], fontSize: 11),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () {
+                final selectedMachineId = ref.read(selectedMachineIdProvider);
+                ref.invalidate(temperatureDataProvider(selectedMachineId));
+                ref.invalidate(moistureDataProvider(selectedMachineId));
+                ref.invalidate(oxygenDataProvider(selectedMachineId));
+              },
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

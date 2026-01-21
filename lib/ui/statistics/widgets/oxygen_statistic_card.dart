@@ -71,7 +71,7 @@ class OxygenStatisticCard extends StatelessWidget {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        '${currentOxygen.toStringAsFixed(0)}',
+                        currentOxygen.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
