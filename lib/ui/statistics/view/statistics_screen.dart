@@ -10,6 +10,7 @@ import '../../../data/providers/selected_machine_provider.dart';
 import '../../../data/providers/statistics_providers.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
+import '../../activity_logs/widgets/mobile/batch_selector.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
@@ -22,14 +23,7 @@ class StatisticsScreen extends ConsumerStatefulWidget {
 
 class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   String? selectedBatch;
-
-  // Sample batches for UI demonstration
-  final List<String> sampleBatches = [
-    'Batch A',
-    'Batch B',
-    'Batch C',
-    'Batch D',
-  ];
+  String? _previousMachineId;
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +60,19 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           appBar: kIsWeb ? null : MobileHeader(title: 'Statistics'),
           body: machinesAsync.when(
             data: (machines) {
+              // For statistics: show both active and archived machines
+              // Active machines first, then archived at the bottom
               final activeMachines = machines
                   .where((m) => !m.isArchived && m.id != null)
                   .toList();
+              final archivedMachines = machines
+                  .where((m) => m.isArchived && m.id != null)
+                  .toList();
+              final allMachines = [...activeMachines, ...archivedMachines];
               
-              if (activeMachines.isEmpty) {
+              if (allMachines.isEmpty) {
                 return const Center(
-                  child: Text('No active machines available'),
+                  child: Text('No machines available'),
                 );
               }
 
@@ -88,11 +88,13 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              // Initialize batch if needed
-              if (selectedBatch == null) {
+              // Auto-select current batch when machine changes
+              final selectedMachine = allMachines.firstWhere((m) => m.id == selectedMachineId);
+              if (_previousMachineId != selectedMachineId) {
                 Future.microtask(() {
                   setState(() {
-                    selectedBatch = sampleBatches.first;
+                    _previousMachineId = selectedMachineId;
+                    selectedBatch = selectedMachine.currentBatchId;
                   });
                 });
               }
@@ -174,7 +176,28 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           items: machines.map((machine) {
             return DropdownMenuItem(
               value: machine.id!,
-              child: Text(machine.machineName),
+              child: Row(
+                children: [
+                  Expanded(child: Text(machine.machineName)),
+                  if (machine.isArchived)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Archived',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             );
           }).toList(),
           onChanged: (val) {
@@ -188,38 +211,20 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   Widget _buildBatchSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selectedBatch,
-          hint: const Text('Select a batch'),
-          isExpanded: true,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          items: sampleBatches.map((batch) {
-            return DropdownMenuItem(
-              value: batch,
-              child: Text(batch),
-            );
-          }).toList(),
-          onChanged: (val) {
-            if (val != null) {
-              setState(() {
-                selectedBatch = val;
-              });
-            }
-          },
-        ),
-      ),
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
+    return BatchSelector(
+      selectedBatchId: selectedBatch,
+      selectedMachineId: selectedMachineId,
+      onChanged: (batchId) {
+        setState(() {
+          selectedBatch = batchId;
+        });
+      },
+      showLabel: false,
+      showAllOption: true,
+      showOnlyActive: false, // Show both active and completed batches
+      isCompact: false,
     );
   }
 

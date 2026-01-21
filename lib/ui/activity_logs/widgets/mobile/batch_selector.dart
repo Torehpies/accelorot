@@ -12,6 +12,7 @@ class BatchSelector extends ConsumerWidget {
   final bool isCompact;
   final bool showLabel;
   final bool showAllOption;
+  final bool showOnlyActive; // New parameter to filter batches
 
   const BatchSelector({
     super.key,
@@ -22,6 +23,7 @@ class BatchSelector extends ConsumerWidget {
     this.isCompact = false,
     this.showLabel = true,
     this.showAllOption = true,
+    this.showOnlyActive = true, // Default: show only active batches
   });
 
   @override
@@ -127,11 +129,28 @@ class BatchSelector extends ConsumerWidget {
   }
 
   Widget _buildDropdown(List<BatchModel> batches) {
-        final filteredBatches = selectedMachineId != null
+        // Filter by machine if specified
+        var filteredBatches = selectedMachineId != null
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
 
-        filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        // Filter by active status if needed
+        if (showOnlyActive) {
+          filteredBatches = filteredBatches.where((b) => b.isActive).toList();
+        } else {
+          // If showing both, separate active and completed, then combine with active first
+          final activeBatches = filteredBatches.where((b) => b.isActive).toList();
+          final completedBatches = filteredBatches.where((b) => !b.isActive).toList();
+          activeBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          completedBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          filteredBatches = [...activeBatches, ...completedBatches];
+        }
+
+        // Sort by creation date if showing only active
+        if (showOnlyActive) {
+          filteredBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
+
         final hasNoBatches = filteredBatches.isEmpty;
         
         // Ensure selectedBatchId is in the list
