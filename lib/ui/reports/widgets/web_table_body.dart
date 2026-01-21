@@ -10,21 +10,23 @@ import 'web_table_row.dart';
 
 class WebTableBody extends StatefulWidget {
   final List<Report> reports;
-  final ValueChanged<Report> onViewDetails;
+  final ValueChanged<Report> onView;
+  final ValueChanged<Report> onEdit;
   final bool isLoading;
 
   const WebTableBody({
     super.key,
     required this.reports,
-    required this.onViewDetails,
+    required this.onView,
+    required this.onEdit,
     this.isLoading = false,
   });
 
   @override
-  State<WebTableBody> createState() => _ReportsTableBodyState();
+  State<WebTableBody> createState() => _WebTableBodyState();
 }
 
-class _ReportsTableBodyState extends State<WebTableBody>
+class _WebTableBodyState extends State<WebTableBody>
     with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _pulseAnimation;
@@ -73,7 +75,8 @@ class _ReportsTableBodyState extends State<WebTableBody>
       itemBuilder: (context, index) {
         return WebTableRow(
           report: widget.reports[index],
-          onTap: () => widget.onViewDetails(widget.reports[index]),
+          onView: () => widget.onView(widget.reports[index]),
+          onEdit: () => widget.onEdit(widget.reports[index]),
         );
       },
     );
@@ -105,11 +108,11 @@ class _ReportsTableBodyState extends State<WebTableBody>
           ),
         ),
 
-        // Category Badge
+        // Category
         TableCellWidget(
           flex: 2,
           child: Center(
-            child: _buildSkeletonBox(width: 100, height: 24, borderRadius: 4),
+            child: _buildSkeletonBox(width: 110, height: 16),
           ),
         ),
 
@@ -129,11 +132,18 @@ class _ReportsTableBodyState extends State<WebTableBody>
           ),
         ),
 
-        // Actions
+        // Actions - Two icon buttons
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+                const SizedBox(width: 4),
+                _buildSkeletonBox(width: 24, height: 24, borderRadius: 12),
+              ],
+            ),
           ),
         ),
       ],

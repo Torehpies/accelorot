@@ -6,8 +6,8 @@
   /// Centralized color palette for web activity logs - Updated with design colors
   class WebColors {
     // Primary Colors (from design)
-    static const tealAccent = Color(0xFF0D9488); // Main teal accent color
-    static const tealLight = Color(0xFF14B8A6); // Lighter teal for gradients
+    static const greenAccent = Color(0xFF10B981); // Main teal accent color
+    static const greenLight = Color(0xFF34D399); // Lighter teal for gradients
     
     // Backgrounds
     static const pageBackground = Color(0xFFE0F2FE); // Light blue page background
@@ -38,7 +38,7 @@
     static const textSecondary = Color(0xFF374151); // Secondary content
     static const textLabel = Color(0xFF6B7280); // Labels and titles
     static const textMuted = Color(0xFF9CA3AF); // Muted subtext
-    static const textButton = Color(0xFF0D9488); // Primary button text (teal)
+    static const textButton = Color(0xFF10B981); // Primary button text (green)
     static const textTitle = Color(0xFF28A85A); // Titles (green)
     static const textbutton2 = Color(0xFFFFFFFF); // Links (blue)
 

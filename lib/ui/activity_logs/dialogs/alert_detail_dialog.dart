@@ -6,7 +6,6 @@ import '../../../data/models/alert.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/themes/web_text_styles.dart';
 
 class AlertDetailDialog extends StatelessWidget {
   final Alert alert;
@@ -25,63 +24,51 @@ class AlertDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ReadOnlyField(
-            label: 'Sensor Type:', 
-            value: _formatSensorType(alert.sensorType),
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Machine ID:', value: alert.machineId),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Reading Value:',
-            value: alert.readingValue.toStringAsFixed(2),
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Threshold:',
-            value: alert.threshold.toStringAsFixed(2),
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Status:',
-            value: alert.status.toUpperCase(),
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyMultilineField(
-            label: 'Message:',
-            value: alert.message,
-          ),
-          
-          // Show additional readings if available
-          if (alert.readings != null && alert.readings!.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 8),
-            Text(
-              'Additional Readings:',
-              style: WebTextStyles.bodyMediumGray.copyWith(
-                fontWeight: FontWeight.bold,
+          // All alert information in one gray section
+          ReadOnlySection(
+            fields: [
+              ReadOnlyField(
+                label: 'Sensor Type',
+                value: _formatSensorType(alert.sensorType),
               ),
-            ),
-            const SizedBox(height: 12),
-            ...alert.readings!.entries.map((entry) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ReadOnlyField(
-                label: '${_formatKey(entry.key)}:',
-                value: entry.value.toString(),
+              ReadOnlyField(
+                label: 'Machine ID',
+                value: alert.machineId,
               ),
-            )),
-          ],
-          
-          const SizedBox(height: 8),
-          ReadOnlyField(
-            label: 'Timestamp:',
-            value: DateFormat('MM/dd/yyyy, hh:mm a').format(alert.timestamp),
+              ReadOnlyField(
+                label: 'Reading Value',
+                value: alert.readingValue.toStringAsFixed(2),
+              ),
+              ReadOnlyField(
+                label: 'Threshold',
+                value: alert.threshold.toStringAsFixed(2),
+              ),
+              ReadOnlyField(
+                label: 'Status',
+                value: alert.status.toUpperCase(),
+              ),
+              
+              // Message as multiline field
+              ReadOnlyMultilineField(
+                label: 'Message',
+                value: alert.message,
+              ),
+              
+              // Additional readings (if available)
+              if (alert.readings != null && alert.readings!.isNotEmpty)
+                ...alert.readings!.entries.map((entry) {
+                  return ReadOnlyField(
+                    label: _formatKey(entry.key),
+                    value: entry.value.toString(),
+                  );
+                }),
+              
+              // Date Added (Timestamp)
+              ReadOnlyField(
+                label: 'Date Added',
+                value: DateFormat('MM/dd/yyyy, hh:mm a').format(alert.timestamp),
+              ),
+            ],
           ),
         ],
       ),

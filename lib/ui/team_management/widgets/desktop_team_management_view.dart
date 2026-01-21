@@ -7,8 +7,6 @@ import 'package:flutter_application_1/ui/team_management/widgets/team_row.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const int kDesktopBreakpoint = 800;
-
 class DesktopTeamManagementView extends ConsumerWidget {
   const DesktopTeamManagementView({super.key});
 

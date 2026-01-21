@@ -26,7 +26,7 @@ class _MobileNavigationState extends State<MobileNavigation> {
       // viewingOperatorId will be fetched from auth inside screens
     ),
     const StatisticsScreen(),
-     const OperatorMachineView(teamId: '',),
+     const OperatorMachineView(),
     const ProfileView(),
   ];
 

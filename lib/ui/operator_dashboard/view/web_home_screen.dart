@@ -259,7 +259,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 1024;
+    final isDesktop = MediaQuery.of(context).size.width > kTabletBreakpoint;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

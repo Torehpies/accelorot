@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
+import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -17,7 +20,6 @@ import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_view.dart';
-//import 'package:flutter_application_1/ui/machine_management/view/web_admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
@@ -31,9 +33,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
-import 'package:flutter_application_1/ui/machine_management/view/responsive_operator_machine_management.dart';
-
-const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -110,7 +109,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
             return WebShell(child: child);
@@ -146,13 +145,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) {
-              final teamId = state.extra as String? ?? '';
-              return NoTransitionPage(
-                child: ResponsiveOperatorMachineManagement(teamId: teamId),
-                key: state.pageKey,
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const OperatorMachineScreens(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.profile.path,
@@ -167,7 +163,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return AdminWebShell(child: child);
           } else {
@@ -203,13 +199,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: RoutePath.adminMachines.path,
             name: RoutePath.adminMachines.name,
-            pageBuilder: (context, state) {
-              final teamId = state.extra as String? ?? '';
-              return NoTransitionPage(
-                key: state.pageKey,
-                child: ResponsiveOperatorMachineManagement(teamId: teamId),
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const AdminMachineScreens(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.adminReports.path,
@@ -232,7 +225,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return SuperAdminWebShell(child: child);
           } else {
