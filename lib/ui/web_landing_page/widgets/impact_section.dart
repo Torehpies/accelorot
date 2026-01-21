@@ -20,7 +20,7 @@ class ImpactSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.xxl,
+        vertical: AppSpacing.xxl * 2,
       ),
       color: Colors.white,
       child: LayoutBuilder(
@@ -41,12 +41,19 @@ class ImpactSection extends StatelessWidget {
         RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: WebTextStyles.h2.copyWith(fontSize: 32),
+            style: WebTextStyles.h2.copyWith(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: WebColors.textHeading,
+            ),
             children: const [
               TextSpan(text: 'Making a '),
               TextSpan(
                 text: 'Sustainable\nImpact',
-                style: TextStyle(color: WebColors.textTitle),
+                style: TextStyle(
+                  color: WebColors.greenAccent,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -55,9 +62,12 @@ class ImpactSection extends StatelessWidget {
         Text(
           'In the Philippines, over 50% of municipal solid waste is organic. Accel-O-Rot helps manage waste responsibly.',
           textAlign: TextAlign.center,
-          style: WebTextStyles.sectionSubtitle,
+          style: WebTextStyles.sectionSubtitle.copyWith(
+            fontSize: 16,
+            color: WebColors.textSecondary,
+          ),
         ),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.xl * 2),
         _buildImpactItem(
           Icons.recycling_outlined,
           'Reduces landfill waste',
@@ -72,15 +82,15 @@ class ImpactSection extends StatelessWidget {
           Icons.people_outline,
           'Empowers communities',
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.xxl * 2),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: AppSpacing.md,
             mainAxisSpacing: AppSpacing.md,
-            childAspectRatio: 0.95,
+            childAspectRatio: 1.0,
           ),
           itemCount: stats.length,
           itemBuilder: (context, index) {
@@ -102,12 +112,19 @@ class ImpactSection extends StatelessWidget {
             children: [
               RichText(
                 text: TextSpan(
-                  style: WebTextStyles.h2.copyWith(fontSize: 36),
+                  style: WebTextStyles.h2.copyWith(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: WebColors.textHeading,
+                  ),
                   children: const [
                     TextSpan(text: 'Making a '),
                     TextSpan(
                       text: 'Sustainable\nImpact',
-                      style: TextStyle(color: WebColors.textTitle),
+                      style: TextStyle(
+                        color: WebColors.greenAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -115,9 +132,12 @@ class ImpactSection extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               Text(
                 'In the Philippines, over 50% of municipal solid waste is organic. Accel-O-Rot helps manage waste responsibly.',
-                style: WebTextStyles.sectionSubtitle,
+                style: WebTextStyles.sectionSubtitle.copyWith(
+                  fontSize: 16,
+                  color: WebColors.textSecondary,
+                ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.xl * 2),
               _buildImpactItem(
                 Icons.recycling_outlined,
                 'Reduces landfill waste',
@@ -135,17 +155,17 @@ class ImpactSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: AppSpacing.xl),
+        const SizedBox(width: AppSpacing.xxxl),
         Expanded(
           flex: 3,
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: AppSpacing.md,
               mainAxisSpacing: AppSpacing.md,
-              childAspectRatio: 0.95,
+              childAspectRatio: 1.0,
             ),
             itemCount: stats.length,
             itemBuilder: (context, index) {
@@ -159,31 +179,29 @@ class ImpactSection extends StatelessWidget {
 
   Widget _buildImpactItem(IconData icon, String text) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          width: 28,
-          height: 28,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: const Color(0xFF28A85A).withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(6),
+            color: WebColors.greenAccent.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            size: 16,
-            color: const Color(0xFF28A85A),
+            size: 18,
+            color: WebColors.greenAccent,
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              text,
-              style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 14,
-                height: 1.4,
-              ),
+          child: Text(
+            text,
+            style: WebTextStyles.bodyText.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: WebColors.textSecondary,
             ),
           ),
         ),

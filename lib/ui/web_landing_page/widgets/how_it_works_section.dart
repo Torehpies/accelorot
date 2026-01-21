@@ -20,7 +20,7 @@ class HowItWorksSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.xxl,
+        vertical: AppSpacing.xxl * 2,
       ),
       color: const Color(0xFFFAFAFA),
       child: Column(
@@ -28,14 +28,18 @@ class HowItWorksSection extends StatelessWidget {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: WebTextStyles.h2.copyWith(fontSize: 36),
+              style: WebTextStyles.h2.copyWith(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: WebColors.textHeading,
+              ),
               children: [
                 const TextSpan(text: 'How '),
                 TextSpan(
                   text: 'Accel-O-Rot',
-                  style: WebTextStyles.h2.copyWith(
-                    fontSize: 36,
-                    color: WebColors.textTitle,
+                  style: TextStyle(
+                    color: WebColors.greenAccent,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const TextSpan(text: ' Works'),
@@ -46,12 +50,12 @@ class HowItWorksSection extends StatelessWidget {
           Text(
             'Simple, automated, and effective composting in 4 easy steps',
             textAlign: TextAlign.center,
-            style: WebTextStyles.subtitle.copyWith(
-              fontSize: 15,
-              color: const Color(0xFF6B7280),
+            style: WebTextStyles.sectionSubtitle.copyWith(
+              fontSize: 16,
+              color: WebColors.textSecondary,
             ),
           ),
-          const SizedBox(height: AppSpacing.xxl),
+          const SizedBox(height: AppSpacing.xxl * 2),
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = constraints.maxWidth > 1200 
@@ -67,9 +71,9 @@ class HowItWorksSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: AppSpacing.md,
+                  crossAxisSpacing: AppSpacing.lg,
                   mainAxisSpacing: AppSpacing.lg,
-                  childAspectRatio: 1.1,
+                  childAspectRatio: 0.95,
                 ),
                 itemCount: steps.length,
                 itemBuilder: (context, index) {
