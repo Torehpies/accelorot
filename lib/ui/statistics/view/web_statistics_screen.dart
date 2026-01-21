@@ -9,6 +9,7 @@ import '../../../data/providers/selected_machine_provider.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
+import '../../activity_logs/widgets/mobile/machine_selector.dart';
 
 class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
@@ -132,11 +133,21 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
   }
 
   Widget _buildHeader(List<MachineModel> machines, WidgetRef ref) {
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
     return Row(
       children: [
         // Machine Selector
         Expanded(
-          child: _buildMachineSelector(machines, ref),
+          child: MachineSelector(
+            selectedMachineId: selectedMachineId,
+            onChanged: (machineId) {
+              if (machineId != null) {
+                ref.read(selectedMachineIdProvider.notifier).setMachine(machineId);
+              }
+            },
+            isCompact: false,
+          ),
         ),
         const SizedBox(width: 16),
         
@@ -148,61 +159,6 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildMachineSelector(List<MachineModel> machines, WidgetRef ref) {
-    final selectedMachineId = ref.watch(selectedMachineIdProvider);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: selectedMachineId,
-          hint: const Text('Select a machine'),
-          isExpanded: true,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          items: machines.map((machine) {
-            return DropdownMenuItem(
-              value: machine.id!,
-              child: Row(
-                children: [
-                  Expanded(child: Text(machine.machineName)),
-                  if (machine.isArchived)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Archived',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: (val) {
-            if (val != null) {
-              ref.read(selectedMachineIdProvider.notifier).setMachine(val);
-            }
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildBatchSelector() {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
     
@@ -211,7 +167,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       selectedMachineId: selectedMachineId,
       onChanged: (batchId) => setState(() => selectedBatch = batchId),
       showLabel: false,
-      showAllOption: true,
+      showAllOption: false, 
       showOnlyActive: false,
       isCompact: false,
     );
