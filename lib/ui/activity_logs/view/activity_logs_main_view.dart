@@ -1,9 +1,9 @@
 // lib/ui/activity_logs/view/activity_logs_main_view.dart
 
 import 'package:flutter/material.dart';
-import '../widgets/activity_section_card.dart';
-import '../widgets/navigation_section_card.dart';
-import '../widgets/batch_filter_section.dart';
+import '../widgets/mobile/activity_section_card.dart';
+import '../widgets/mobile/navigation_section_card.dart';
+import '../widgets/mobile/batch_filter_section.dart';
 import '../models/activity_filter_model.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 

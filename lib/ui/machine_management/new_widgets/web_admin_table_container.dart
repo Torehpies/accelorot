@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/widgets/table/base_table_container.dart';
+import '../../core/widgets/table/table_container.dart';
 import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
@@ -104,7 +104,7 @@ class WebAdminTableContainer extends StatelessWidget {
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Machine'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: WebColors.tealAccent,
+                  backgroundColor: WebColors.greenAccent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,

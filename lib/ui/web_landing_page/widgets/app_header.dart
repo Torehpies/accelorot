@@ -1,10 +1,10 @@
 // lib/ui/landing_page/widgets/app_header.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import '../../core/ui/second_button.dart';
 
@@ -51,10 +51,10 @@ class AppHeader extends StatelessWidget {
               ),
 							const SizedBox(width: 10),
               Text(
-                'Accel-O-Rot',
+                'ACCEL-O-ROT',
                 style: h2Style.copyWith(
-                  color: WebColors.textTitle,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
                   fontSize: 28,
                 ),
               ),

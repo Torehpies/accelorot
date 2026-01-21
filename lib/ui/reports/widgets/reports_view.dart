@@ -6,7 +6,7 @@ import 'reports_search_bar.dart';
 import 'filter_dropdown.dart';
 import 'sort_dropdown.dart';
 import 'report_card.dart';
-import 'edit_report_modal.dart';
+import '../dialogs/edit_report_modal.dart';
 
 class ReportsView extends ConsumerStatefulWidget {
   const ReportsView({super.key});

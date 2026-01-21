@@ -76,7 +76,7 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
   Widget build(BuildContext context) {
     final valueStr = _getDisplayText(widget.value).toLowerCase();
     final isActive = !valueStr.contains('all');
-    final iconColor = isActive ? WebColors.tealAccent : WebColors.textLabel;
+    final iconColor = isActive ? WebColors.greenAccent : WebColors.textLabel;
 
     return MouseRegion(
       cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
@@ -93,7 +93,7 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
               Icons.filter_alt,
               size: 18,
               color: _isHovered 
-                ? (isActive ? WebColors.tealAccent.withValues(alpha: 0.8) : WebColors.textSecondary)
+                ? (isActive ? WebColors.greenAccent.withValues(alpha: 0.8) : WebColors.textSecondary)
                 : iconColor,
             ),
           ),

@@ -71,7 +71,7 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Title',
                       style: WebTextStyles.label.copyWith(
-                        color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isTitleActive ? WebColors.greenAccent : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -100,7 +100,7 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Category',
                       style: WebTextStyles.label.copyWith(
-                        color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isCategoryActive ? WebColors.greenAccent : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -129,7 +129,7 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Status',
                       style: WebTextStyles.label.copyWith(
-                        color: isStatusActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isStatusActive ? WebColors.greenAccent : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -158,7 +158,7 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Priority:',
                       style: WebTextStyles.label.copyWith(
-                        color: isPriorityActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isPriorityActive ? WebColors.greenAccent : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
