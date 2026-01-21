@@ -1,13 +1,13 @@
 // lib/ui/landing_page/widgets/app_header.dart
-
 import 'package:flutter/material.dart';
-//import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+//import 'package:go_router/go_router.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
-import '../../core/ui/third_button.dart';
+import '../../core/ui/second_button.dart';
 
 class AppHeader extends StatefulWidget {
   final VoidCallback onLogin;
@@ -75,7 +75,7 @@ class _AppHeaderState extends State<AppHeader> {
                     Text(
                       'ACCEL-O-ROT',
                       style: h2Style.copyWith(
-                        color: WebColors.textTitle, 
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.w900,
                         fontSize: 22,
                       ),
@@ -113,7 +113,7 @@ class _AppHeaderState extends State<AppHeader> {
                     isActive: widget.activeSection == 'impact',
                     onTap: () => _handleBreadcrumbTap('impact'),
                   ),
-                  _BreadcrumbDivider(),
+                   _BreadcrumbDivider(),
                   _BreadcrumbItem(
                     label: 'Contact',
                     isActive: widget.activeSection == 'contact',
@@ -134,14 +134,14 @@ class _AppHeaderState extends State<AppHeader> {
               children: [
                 SizedBox(
                   height: 50,
-                  child: ThirdButton(
+                  child: SecondaryButton(
                     text: 'Login',
                     onPressed: widget.onLogin,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 SizedBox(
-                  height: 50, // ✅ Removed borderRadius — it's handled inside PrimaryButton
+                  height: 50,
                   child: PrimaryButton(
                     text: 'Get Started',
                     onPressed: widget.onGetStarted,

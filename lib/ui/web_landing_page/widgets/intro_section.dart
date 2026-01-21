@@ -94,7 +94,9 @@ class IntroSection extends StatelessWidget {
           // Right side - Metrics Cards (2x2 Grid)
           Expanded(
             flex: 3,
+            child: Center(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Top Row
                 Row(
@@ -148,6 +150,7 @@ class IntroSection extends StatelessWidget {
               ],
             ),
           ),
+          )
         ],
       ),
     );

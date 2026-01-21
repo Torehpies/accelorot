@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/themes/web_colors.dart';
 
 class ContactSection extends StatelessWidget {
   const ContactSection({super.key});
@@ -20,8 +21,8 @@ class ContactSection extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF28A85A),
-            Color(0xFF205F3A),
+            Color(0xFFE0F2FE),
+            Color(0xFFCCFBF1),
           ],
         ),
       ),
@@ -32,7 +33,7 @@ class ContactSection extends StatelessWidget {
           Text(
             'Get in Touch with\nAccel-O-Rot',
             style: WebTextStyles.h1.copyWith(
-              color: Colors.white,
+              color: WebColors.textTitle,
               fontSize: 40,
               height: 1.3,
             ),
@@ -42,7 +43,7 @@ class ContactSection extends StatelessWidget {
           Text(
             'Have questions about our smart composting system? We\'re here to help you start your sustainable journey.',
             style: WebTextStyles.subtitle.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: WebColors.textTitle,
               fontSize: 16,
               height: 1.6,
             ),
@@ -127,13 +128,14 @@ class _ContactCardState extends State<_ContactCard> {
           padding: const EdgeInsets.all(AppSpacing.xl),
           decoration: BoxDecoration(
             color: _isHovered
-                ? Colors.white.withValues(alpha: 0.25)
-                : Colors.white.withValues(alpha: 0.15),
+            //WebColors.textTitle,
+                ? WebColors.textTitle.withValues(alpha: 0.25)
+                : WebColors.textTitle.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: _isHovered
-                  ? Colors.white.withValues(alpha: 0.4)
-                  : Colors.white.withValues(alpha: 0.2),
+                  ? WebColors.textTitle.withValues(alpha: 0.4)
+                  : WebColors.textTitle.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -145,7 +147,7 @@ class _ContactCardState extends State<_ContactCard> {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(
+                  color: WebColors.textTitle.withValues(
                     alpha: _isHovered ? 0.3 : 0.2,
                   ),
                   shape: BoxShape.circle,
@@ -168,7 +170,7 @@ class _ContactCardState extends State<_ContactCard> {
                         fontFamily: 'dm-sans',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: WebColors.textTitle,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -178,7 +180,7 @@ class _ContactCardState extends State<_ContactCard> {
                         fontFamily: 'dm-sans',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: WebColors.textTitle.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
