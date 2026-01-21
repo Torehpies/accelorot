@@ -108,7 +108,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
             return WebShell(child: child);
@@ -162,7 +162,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return AdminWebShell(child: child);
           } else {
@@ -224,7 +224,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return SuperAdminWebShell(child: child);
           } else {

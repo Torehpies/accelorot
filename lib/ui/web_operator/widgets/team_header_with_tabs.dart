@@ -9,7 +9,7 @@ class TeamHeaderWithTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+    final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
