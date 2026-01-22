@@ -30,3 +30,5 @@ final machineByIdProvider = FutureProvider.family<MachineModel?, String>(
     return repository.getMachineById(machineId);
   },
 );
+
+

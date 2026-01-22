@@ -14,6 +14,7 @@ import 'cycle_config.dart';
 import 'all_activity_config.dart';
 import '../models/activity_common.dart';
 
+
 part 'activity_viewmodel.g.dart';
 
 /// Enum for different activity screen types
@@ -209,7 +210,6 @@ class ActivityViewModel extends _$ActivityViewModel {
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
       selectedMachineId: machineId,
-      selectedBatchId: null, 
       selectedFilter: 'All',
       isManualFilter: false,
     );
