@@ -32,7 +32,7 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
   @override
   void initState() {
     super.initState();
-    _repository = BatchRepositoryRemote(FirestoreBatchService(FirebaseFirestore.instance)); // ✅ FIXED: Added FirebaseFirestore.instance
+    _repository = BatchRepositoryRemote(FirestoreBatchService(FirebaseFirestore.instance)); 
   }
 
   /// Fetch active batches for the selected machine

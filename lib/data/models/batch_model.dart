@@ -17,8 +17,8 @@ abstract class BatchModel with _$BatchModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     String? teamId,
-    String? batchName, // Added batch name field
-    String? startNotes, // Added start notes field
+    String? batchName,
+    String? startNotes, 
     DateTime? completedAt,
     double? finalWeight,
     String? completionNotes,
@@ -40,8 +40,8 @@ abstract class BatchModel with _$BatchModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       teamId: data['teamId'],
-      batchName: data['batchName'], // Added
-      startNotes: data['startNotes'], // Added
+      batchName: data['batchName'],
+      startNotes: data['startNotes'],
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       finalWeight: (data['finalWeight'] as num?)?.toDouble(),
       completionNotes: data['completionNotes'] as String?,

@@ -17,7 +17,7 @@ class ResponsiveLayout extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop =
-            MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+            MediaQuery.of(context).size.width >= kTabletBreakpoint;
         if (isDesktop) {
           // Screens wider than 800 get the desktop view
           return desktopView;

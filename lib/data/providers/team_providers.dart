@@ -13,6 +13,7 @@ import 'package:flutter_application_1/data/services/firebase/firebase_team_membe
 import 'package:flutter_application_1/data/services/firebase/firebase_team_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+
 part 'team_providers.g.dart';
 
 @Riverpod(keepAlive: true)
@@ -45,4 +46,12 @@ Future<Team> currentTeam(Ref ref) async {
 	final teamUser = ref.watch(appUserProvider).value;
 	final teamId = teamUser?.teamId;
   return ref.read(teamServiceProvider).getTeam(teamId!);
+}
+
+// Stream provider to reactively get current user's teamId
+@riverpod
+Stream<String?> currentUserTeamId(Ref ref) async* {
+  await for (final user in ref.watch(appUserProvider.future).asStream()) {
+    yield user?.teamId;
+  }
 }

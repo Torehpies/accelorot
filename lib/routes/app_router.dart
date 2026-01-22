@@ -27,7 +27,8 @@ import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_s
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
-import 'package:flutter_application_1/ui/web_statistics/web_statistics_screen.dart';
+import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
+//import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
@@ -108,7 +109,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
             return WebShell(child: child);
@@ -137,7 +138,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.statistics.path,
             name: RoutePath.statistics.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const WebStatisticsScreen(),
+              child: const ResponsiveStatistics(),
               key: state.pageKey,
             ),
           ),
@@ -162,7 +163,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return AdminWebShell(child: child);
           } else {
@@ -224,7 +225,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return SuperAdminWebShell(child: child);
           } else {
