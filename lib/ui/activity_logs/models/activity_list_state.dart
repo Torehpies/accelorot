@@ -13,21 +13,22 @@ abstract class ActivityListState with _$ActivityListState {
     // Data
     @Default([]) List<ActivityLogItem> allActivities,
     @Default([]) List<ActivityLogItem> filteredActivities,
-    
+
     // Filter state
     @Default('All') String selectedFilter,
     @Default('') String searchQuery,
     @Default(false) bool isManualFilter,
-    @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
+    @Default(DateFilterRange(type: DateFilterType.none))
+    DateFilterRange dateFilter,
     @Default({}) Set<String> autoHighlightedFilters,
     String? selectedBatchId,
     String? selectedMachineId,
-    
+
     // UI state
     @Default(LoadingStatus.initial) LoadingStatus status,
     String? errorMessage,
     @Default(false) bool isLoggedIn,
-    
+
     // Screen configuration
     String? focusedMachineId,
   }) = _ActivityListState;
@@ -37,5 +38,6 @@ abstract class ActivityListState with _$ActivityListState {
   /// Convenience getters
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
-  bool get isEmpty => filteredActivities.isEmpty && status == LoadingStatus.success;
+  bool get isEmpty =>
+      filteredActivities.isEmpty && status == LoadingStatus.success;
 }

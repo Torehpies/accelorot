@@ -7,8 +7,8 @@ import 'view_screens/temperature_stats_view.dart';
 import 'widgets/date_filter.dart';
 import 'history/history.dart';
 import '../../../data/models/machine_model.dart';
-import '../../../data/services/firebase/firebase_machine_service.dart'; 
-import '../../../data/repositories/machine_repository/machine_repository.dart'; 
+import '../../../data/services/firebase/firebase_machine_service.dart';
+import '../../../data/repositories/machine_repository/machine_repository.dart';
 import '../../../data/repositories/machine_repository/machine_repository_remote.dart';
 import '../../../services/sess_service.dart';
 
@@ -34,7 +34,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   String _searchQuery = "";
-  
+
   // Add these
   late final FirebaseMachineService _machineService;
   late final MachineRepository _repository;

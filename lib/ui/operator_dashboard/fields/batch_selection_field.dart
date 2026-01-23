@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/batch_model.dart';
-import '../../../data/services/firebase/firebase_batch_service.dart'; 
-import '../../../data/repositories/batch_repository/batch_repository.dart'; 
+import '../../../data/services/firebase/firebase_batch_service.dart';
+import '../../../data/repositories/batch_repository/batch_repository.dart';
 import '../../../data/repositories/batch_repository/batch_repository_remote.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,7 +32,9 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
   @override
   void initState() {
     super.initState();
-    _repository = BatchRepositoryRemote(FirestoreBatchService(FirebaseFirestore.instance)); 
+    _repository = BatchRepositoryRemote(
+      FirestoreBatchService(FirebaseFirestore.instance),
+    );
   }
 
   /// Fetch active batches for the selected machine
@@ -42,11 +44,11 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
     }
 
     try {
-      final batches = await _repository.getBatchesForMachines([widget.selectedMachineId!]);
+      final batches = await _repository.getBatchesForMachines([
+        widget.selectedMachineId!,
+      ]);
       // Filter for active batches and sort by creation date (newest first)
-      return batches
-          .where((batch) => batch.isActive)
-          .toList()
+      return batches.where((batch) => batch.isActive).toList()
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } catch (e) {
       throw Exception('Failed to fetch batches: $e');
@@ -86,9 +88,10 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
         }
 
         final batches = snapshot.data ?? [];
-        
+
         // If no machine selected, show disabled state
-        if (widget.selectedMachineId == null || widget.selectedMachineId!.isEmpty) {
+        if (widget.selectedMachineId == null ||
+            widget.selectedMachineId!.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(

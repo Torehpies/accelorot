@@ -8,10 +8,7 @@ import '../models/step_model.dart';
 
 class StepCard extends StatelessWidget {
   final StepModel step;
-  const StepCard({
-    super.key,
-    required this.step,
-  });
+  const StepCard({super.key, required this.step});
 
   @override
   Widget build(BuildContext context) {

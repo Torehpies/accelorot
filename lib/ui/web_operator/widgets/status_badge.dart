@@ -22,6 +22,8 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         titleCaseStatus,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: statusStyle.textColor,
           fontWeight: FontWeight.w600,

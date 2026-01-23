@@ -26,16 +26,18 @@ class ActivityFilterConfig {
 }
 
 /// Function type for filtering items by category
-typedef CategoryMapper = List<T> Function<T extends Object>(
-  List<T> items,
-  String filter,
-  String Function(T) getCategoryFn,
-);
+typedef CategoryMapper =
+    List<T> Function<T extends Object>(
+      List<T> items,
+      String filter,
+      String Function(T) getCategoryFn,
+    );
 
-typedef CategoryHighlighter = Set<String> Function(
-  Set<String> categoriesInResults,
-  List<String> allFilters,
-);
+typedef CategoryHighlighter =
+    Set<String> Function(
+      Set<String> categoriesInResults,
+      List<String> allFilters,
+    );
 
 class CategoryMappers {
   static CategoryMapper simple() {
@@ -99,6 +101,4 @@ class CategoryHighlighters {
       return result;
     };
   }
-
-  
 }

@@ -6,11 +6,7 @@ class ReportCard extends StatelessWidget {
   final Report report;
   final VoidCallback onTap;
 
-  const ReportCard({
-    super.key,
-    required this.report,
-    required this.onTap,
-  });
+  const ReportCard({super.key, required this.report, required this.onTap});
 
   Color get priorityColor {
     switch (report.priority.toLowerCase()) {
@@ -131,7 +127,7 @@ class ReportCard extends StatelessWidget {
                       children: [
                         // Machine info
                         Text(
-                          'Machine: ${report.machineName }', //?? report.machineId}',
+                          'Machine: ${report.machineName}', //?? report.machineId}',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Colors.black45,
@@ -153,10 +149,7 @@ class ReportCard extends StatelessWidget {
                   ),
                   Text(
                     formattedTimestamp,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black45,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.black45),
                   ),
                 ],
               ),

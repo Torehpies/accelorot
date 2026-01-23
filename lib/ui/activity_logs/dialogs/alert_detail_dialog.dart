@@ -10,10 +10,7 @@ import '../../core/dialog/dialog_fields.dart';
 class AlertDetailDialog extends StatelessWidget {
   final Alert alert;
 
-  const AlertDetailDialog({
-    super.key,
-    required this.alert,
-  });
+  const AlertDetailDialog({super.key, required this.alert});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +28,7 @@ class AlertDetailDialog extends StatelessWidget {
                 label: 'Sensor Type',
                 value: _formatSensorType(alert.sensorType),
               ),
-              ReadOnlyField(
-                label: 'Machine ID',
-                value: alert.machineId,
-              ),
+              ReadOnlyField(label: 'Machine ID', value: alert.machineId),
               ReadOnlyField(
                 label: 'Reading Value',
                 value: alert.readingValue.toStringAsFixed(2),
@@ -43,17 +37,11 @@ class AlertDetailDialog extends StatelessWidget {
                 label: 'Threshold',
                 value: alert.threshold.toStringAsFixed(2),
               ),
-              ReadOnlyField(
-                label: 'Status',
-                value: alert.status.toUpperCase(),
-              ),
-              
+              ReadOnlyField(label: 'Status', value: alert.status.toUpperCase()),
+
               // Message as multiline field
-              ReadOnlyMultilineField(
-                label: 'Message',
-                value: alert.message,
-              ),
-              
+              ReadOnlyMultilineField(label: 'Message', value: alert.message),
+
               // Additional readings (if available)
               if (alert.readings != null && alert.readings!.isNotEmpty)
                 ...alert.readings!.entries.map((entry) {
@@ -62,11 +50,13 @@ class AlertDetailDialog extends StatelessWidget {
                     value: entry.value.toString(),
                   );
                 }),
-              
+
               // Date Added (Timestamp)
               ReadOnlyField(
                 label: 'Date Added',
-                value: DateFormat('MM/dd/yyyy, hh:mm a').format(alert.timestamp),
+                value: DateFormat(
+                  'MM/dd/yyyy, hh:mm a',
+                ).format(alert.timestamp),
               ),
             ],
           ),

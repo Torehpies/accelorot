@@ -37,12 +37,16 @@ class WebDropdown<T> extends StatelessWidget {
     if (isLoading || items.isEmpty) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -53,16 +57,14 @@ class WebDropdown<T> extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       color: WebColors.cardBackground,
-      constraints: const BoxConstraints(
-        maxHeight: 300,
-      ),
+      constraints: const BoxConstraints(maxHeight: 300),
       items: items,
     );
 
     // FIX: Only skip onChanged if menu was dismissed (no selection made)
     // Check if the selected value exists in the items list (including null/"All")
     final wasItemSelected = items.any((item) => item.value == selected);
-    
+
     if (wasItemSelected) {
       onChanged(selected);
     }
@@ -82,7 +84,9 @@ class WebDropdown<T> extends StatelessWidget {
       message: isIconOnly ? '$label: ${displayText ?? hintText}' : '',
       waitDuration: const Duration(milliseconds: 500),
       child: MouseRegion(
-        cursor: (isLoading || items.isEmpty) ? SystemMouseCursors.basic : SystemMouseCursors.click,
+        cursor: (isLoading || items.isEmpty)
+            ? SystemMouseCursors.basic
+            : SystemMouseCursors.click,
         child: GestureDetector(
           onTap: () => _showMenu(context),
           child: Container(
@@ -95,7 +99,9 @@ class WebDropdown<T> extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: WebColors.cardBorder),
             ),
-            child: isIconOnly ? _buildIconOnlyMode(hasValue) : _buildFullMode(hasValue),
+            child: isIconOnly
+                ? _buildIconOnlyMode(hasValue)
+                : _buildFullMode(hasValue),
           ),
         ),
       ),
@@ -140,12 +146,14 @@ class WebDropdown<T> extends StatelessWidget {
         const SizedBox(width: 8),
         Flexible(
           child: Text(
-            isLoading 
-                ? 'Loading...' 
-                : (items.isEmpty && disabledHint != null 
-                    ? disabledHint! 
-                    : (displayText ?? hintText)),
-            style: hasValue ? WebTextStyles.bodyMedium : WebTextStyles.bodyMediumGray,
+            isLoading
+                ? 'Loading...'
+                : (items.isEmpty && disabledHint != null
+                      ? disabledHint!
+                      : (displayText ?? hintText)),
+            style: hasValue
+                ? WebTextStyles.bodyMedium
+                : WebTextStyles.bodyMediumGray,
             overflow: TextOverflow.ellipsis,
           ),
         ),

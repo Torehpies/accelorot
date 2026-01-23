@@ -20,20 +20,19 @@ import 'cycle_detail_dialog.dart';
 class ActivityDialogHelper {
   /// Show detail dialog for any activity item
   /// Looks up full entity from cache - NO ASYNC LOADING!
-  static void show(
-    BuildContext context,
-    WidgetRef ref,
-    ActivityLogItem item,
-  ) {
+  static void show(BuildContext context, WidgetRef ref, ActivityLogItem item) {
     // Get the view model to access cache
     final viewModel = ref.read(unifiedActivityViewModelProvider.notifier);
-    
+
     // Lookup full entity from cache
     final fullEntity = viewModel.getFullEntity(item);
 
     // If entity not found in cache (edge case - shouldn't happen)
     if (fullEntity == null) {
-      _showErrorDialog(context, 'Entity not found in cache. Please refresh and try again.');
+      _showErrorDialog(
+        context,
+        'Entity not found in cache. Please refresh and try again.',
+      );
       return;
     }
 
@@ -64,9 +63,7 @@ class ActivityDialogHelper {
     } else if (entity is CycleRecommendation) {
       return CycleDetailDialog(cycle: entity);
     } else {
-      return _ErrorDialog(
-        error: 'Unknown entity type: ${entity.runtimeType}',
-      );
+      return _ErrorDialog(error: 'Unknown entity type: ${entity.runtimeType}');
     }
   }
 
@@ -111,19 +108,12 @@ class _ErrorDialog extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: WebColors.error,
-              size: 24,
-            ),
+            const Icon(Icons.error_outline, color: WebColors.error, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 error,
-                style: const TextStyle(
-                  color: WebColors.error,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: WebColors.error, fontSize: 14),
               ),
             ),
           ],

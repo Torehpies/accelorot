@@ -19,26 +19,17 @@ class OperatorRepositoryRemote implements OperatorRepository {
 
   @override
   Future<void> archive(String teamId, String operatorUid) {
-    return _service.archiveOperator(
-      teamId: teamId,
-      operatorUid: operatorUid,
-    );
+    return _service.archiveOperator(teamId: teamId, operatorUid: operatorUid);
   }
 
   @override
   Future<void> restore(String teamId, String operatorUid) {
-    return _service.restoreOperator(
-      teamId: teamId,
-      operatorUid: operatorUid,
-    );
+    return _service.restoreOperator(teamId: teamId, operatorUid: operatorUid);
   }
 
   @override
   Future<void> remove(String teamId, String operatorUid) {
-    return _service.removeOperator(
-      teamId: teamId,
-      operatorUid: operatorUid,
-    );
+    return _service.removeOperator(teamId: teamId, operatorUid: operatorUid);
   }
 
   @override

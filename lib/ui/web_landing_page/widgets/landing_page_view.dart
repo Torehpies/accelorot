@@ -10,7 +10,6 @@ import 'how_it_works_section.dart';
 import 'impact_section.dart';
 import 'cta_section.dart';
 
-
 class LandingPageView extends StatefulWidget {
   const LandingPageView({super.key});
 
@@ -36,9 +35,9 @@ class _LandingPageViewState extends State<LandingPageView> {
   }
 
   // Navigation methods that use context
-  
+
   void _onLogin() {
-     context.go('/signin'); // or RoutePath.signin.path
+    context.go('/signin'); // or RoutePath.signin.path
   }
 
   void _onGetStarted() {
@@ -62,36 +61,25 @@ class _LandingPageViewState extends State<LandingPageView> {
         child: Column(
           children: [
             // Header (Fixed for web)
-            AppHeader(
-              onLogin: _onLogin,
-              onGetStarted: _onGetStarted,
-            ),
+            AppHeader(onLogin: _onLogin, onGetStarted: _onGetStarted),
 
             // Intro Section
             IntroSection(
               onGetStarted: _onGetStarted,
               onLearnMore: _onLearnMore,
             ),
-            
+
             // Features Section
-            FeaturesSection(
-              features: _viewModel.features,
-            ),
-            
+            FeaturesSection(features: _viewModel.features),
+
             // How It Works Section
-            HowItWorksSection(
-              steps: _viewModel.steps,
-            ),
-            
+            HowItWorksSection(steps: _viewModel.steps),
+
             // Impact Section
-            ImpactSection(
-              stats: _viewModel.impactStats,
-            ),
-            
+            ImpactSection(stats: _viewModel.impactStats),
+
             // CTA Section
-            CtaSection(
-              onGetStarted: _onGetStarted,
-            ),
+            CtaSection(onGetStarted: _onGetStarted),
           ],
         ),
       ),

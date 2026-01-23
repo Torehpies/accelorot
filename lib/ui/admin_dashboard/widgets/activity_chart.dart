@@ -18,12 +18,14 @@ class ActivityChart extends StatelessWidget {
     final counts = last6Days.map((date) {
       return activities.where((activity) {
         return activity.timestamp.year == date.year &&
-               activity.timestamp.month == date.month &&
-               activity.timestamp.day == date.day;
+            activity.timestamp.month == date.month &&
+            activity.timestamp.day == date.day;
       }).length;
     }).toList();
 
-    final maxCount = counts.isEmpty ? 10.0 : counts.map((e) => e.toDouble()).reduce((a, b) => a > b ? a : b);
+    final maxCount = counts.isEmpty
+        ? 10.0
+        : counts.map((e) => e.toDouble()).reduce((a, b) => a > b ? a : b);
     final maxY = (maxCount < 5 ? 5.0 : (maxCount * 1.2).ceilToDouble());
 
     return Padding(
@@ -90,10 +92,7 @@ class ActivityChart extends StatelessWidget {
                 getTitlesWidget: (value, meta) {
                   return Text(
                     value.toInt().toString(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
                   );
                 },
               ),
@@ -104,15 +103,10 @@ class ActivityChart extends StatelessWidget {
             drawVerticalLine: false,
             horizontalInterval: (maxY / 3).clamp(1.0, 1000.0),
             getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: Colors.grey.shade200,
-                strokeWidth: 1,
-              );
+              return FlLine(color: Colors.grey.shade200, strokeWidth: 1);
             },
           ),
-          borderData: FlBorderData(
-            show: false,
-          ),
+          borderData: FlBorderData(show: false),
           barGroups: List.generate(counts.length, (index) {
             return BarChartGroupData(
               x: index,

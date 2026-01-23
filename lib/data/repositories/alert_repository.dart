@@ -11,8 +11,7 @@ class AlertRepository {
   AlertRepository(this._alertService);
 
   /// Fetch all alerts for the current user's team
-  Future<List<Alert>> getTeamAlerts() =>
-      _alertService.fetchTeamAlerts();
+  Future<List<Alert>> getTeamAlerts() => _alertService.fetchTeamAlerts();
 
   /// Fetch alerts for a specific batch
   Future<List<Alert>> getAlertsForBatch(String batchId) =>
@@ -21,8 +20,7 @@ class AlertRepository {
   /// Stream alerts for real-time updates
   Stream<List<Alert>> streamAlerts(String batchId) =>
       _alertService.streamAlerts(batchId);
-      
+
   ///Fetch a single alert by ID
-  Future<Alert?> getAlert(String id) =>
-      _alertService.fetchAlertById(id);
+  Future<Alert?> getAlert(String id) => _alertService.fetchAlertById(id);
 }

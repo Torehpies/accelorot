@@ -114,7 +114,7 @@ class ActivityLogItemWidget extends ConsumerWidget {
                       ),
                     ],
 
-                    if ((log.machineName != null || log.machineId != null) && 
+                    if ((log.machineName != null || log.machineId != null) &&
                         (log.batchName != null || log.batchId != null)) ...[
                       const SizedBox(width: 6),
                       Text(
@@ -140,20 +140,17 @@ class ActivityLogItemWidget extends ConsumerWidget {
                     ],
                   ],
                 ),
-                
+
                 const SizedBox(height: 3),
 
                 // Operator Name
                 Text(
-                  log.operatorName != null && log.operatorName!.isNotEmpty 
-                      ? log.operatorName! 
+                  log.operatorName != null && log.operatorName!.isNotEmpty
+                      ? log.operatorName!
                       : 'System',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                 ),
-                
+
                 const SizedBox(height: 6),
 
                 // Info Row: Category - Status - Date
@@ -169,7 +166,7 @@ class ActivityLogItemWidget extends ConsumerWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                      
+
                     // Status
                     Text(
                       _getStatusText(log),
@@ -199,12 +196,12 @@ class ActivityLogItemWidget extends ConsumerWidget {
     );
   }
 
-  // Helper methods to match the logic from ActivityLogsCard if needed, 
-  // or use existing ones if available. 
+  // Helper methods to match the logic from ActivityLogsCard if needed,
+  // or use existing ones if available.
   // Since ActivityLogItemWidget is stateless and independent, we should include helpers here or import them.
   // The user provided ActivityLogsHelpers.dart but it doesn't have all methods.
   // I will implement simple versions here for self-containment or copy from ActivityLogsCard.
-  
+
   String _getCategoryText(ActivityLogItem log) {
     if (log.type == ActivityType.substrate) return 'Substrate';
     if (log.type == ActivityType.alert) return 'Alert';
@@ -220,7 +217,9 @@ class ActivityLogItemWidget extends ConsumerWidget {
     if (log.type == ActivityType.report) {
       return log.priority?.toUpperCase() ?? log.status?.toUpperCase() ?? 'OPEN';
     }
-    if (log.type == ActivityType.alert) return log.status?.toUpperCase() ?? 'ACTIVE';
+    if (log.type == ActivityType.alert) {
+      return log.status?.toUpperCase() ?? 'ACTIVE';
+    }
     return 'COMPLETED';
   }
 

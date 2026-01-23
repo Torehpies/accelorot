@@ -13,7 +13,7 @@ abstract class TeamManagementState with _$TeamManagementState {
     @Default(10) int pageSize,
     @Default(false) bool isLoading,
     @Default(true) bool hasNextPage,
-		DateTime? lastFetchedAt,
+    DateTime? lastFetchedAt,
     @Default(false) bool isSavingTeams,
     UiMessage? message,
   }) = _TeamManagementState;

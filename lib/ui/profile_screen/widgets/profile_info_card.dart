@@ -20,7 +20,10 @@ class ProfileInfoCard extends StatelessWidget {
       children: [
         _buildInfoField('Username', profile.displayName),
         SizedBox(height: verticalSpacing),
-        _buildInfoField('Full Name', '${profile.firstName} ${profile.lastName}'.trim()),
+        _buildInfoField(
+          'Full Name',
+          '${profile.firstName} ${profile.lastName}'.trim(),
+        ),
         SizedBox(height: verticalSpacing),
         _buildInfoField('Email Address', profile.email),
         SizedBox(height: verticalSpacing),

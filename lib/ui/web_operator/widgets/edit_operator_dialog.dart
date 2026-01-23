@@ -17,13 +17,14 @@ abstract class EditOperatorForm with _$EditOperatorForm {
     @Default(UserStatus.active) UserStatus status,
   }) = _EditOperatorForm;
 
-  factory EditOperatorForm.fromOperator(TeamMember operator) => EditOperatorForm(
-    firstName: operator.firstName,
-    lastName: operator.lastName,
-    email: operator.email,
-    status: operator.status,
-    id: operator.id,
-  );
+  factory EditOperatorForm.fromOperator(TeamMember operator) =>
+      EditOperatorForm(
+        firstName: operator.firstName,
+        lastName: operator.lastName,
+        email: operator.email,
+        status: operator.status,
+        id: operator.id,
+      );
 }
 
 class EditOperatorDialog extends StatefulWidget {
@@ -168,4 +169,3 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
     }
   }
 }
-

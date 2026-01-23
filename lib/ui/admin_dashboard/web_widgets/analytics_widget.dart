@@ -27,14 +27,20 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
       'ON HOLD': 0,
       'IN PROGRESS': 0,
     };
-    
+
     for (var report in widget.reports) {
       final status = report.status.toLowerCase();
       if (status == 'open' || status == 'pending') {
         reportStatus['OPEN'] = (reportStatus['OPEN'] ?? 0) + 1;
-      } else if (status == 'on_hold' || status == 'on hold' || status == 'onhold' || status == 'paused') {
+      } else if (status == 'on_hold' ||
+          status == 'on hold' ||
+          status == 'onhold' ||
+          status == 'paused') {
         reportStatus['ON HOLD'] = (reportStatus['ON HOLD'] ?? 0) + 1;
-      } else if (status == 'in_progress' || status == 'in progress' || status == 'inprogress' || status == 'active') {
+      } else if (status == 'in_progress' ||
+          status == 'in progress' ||
+          status == 'inprogress' ||
+          status == 'active') {
         reportStatus['IN PROGRESS'] = (reportStatus['IN PROGRESS'] ?? 0) + 1;
       }
     }
@@ -66,12 +72,8 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
               padding: const EdgeInsets.all(4),
               child: Row(
                 children: [
-                  Expanded(
-                    child: _buildTab('Activity', 0),
-                  ),
-                  Expanded(
-                    child: _buildTab('Reports', 1),
-                  ),
+                  Expanded(child: _buildTab('Activity', 0)),
+                  Expanded(child: _buildTab('Reports', 1)),
                 ],
               ),
             ),
@@ -86,7 +88,8 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
                         final groupedData = _groupActivitiesByDay(activities);
                         return ActivityChart(activities: groupedData);
                       },
-                      loading: () => const Center(child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (err, _) => Center(child: Text('Error: $err')),
                     )
                   : ReportDonutChart(reportStatus: reportStatus),
@@ -97,7 +100,9 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
     );
   }
 
-  List<Map<String, dynamic>> _groupActivitiesByDay(List<ActivityLogItem> activities) {
+  List<Map<String, dynamic>> _groupActivitiesByDay(
+    List<ActivityLogItem> activities,
+  ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final result = <Map<String, dynamic>>[];
@@ -111,17 +116,14 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
       int count = 0;
       for (var activity in activities) {
         final aDate = activity.timestamp;
-        if (aDate.year == date.year && 
-            aDate.month == date.month && 
+        if (aDate.year == date.year &&
+            aDate.month == date.month &&
             aDate.day == date.day) {
           count++;
         }
       }
 
-      result.add({
-        'day': dayName,
-        'count': count,
-      });
+      result.add({'day': dayName, 'count': count});
     }
 
     return result;
@@ -129,14 +131,22 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
 
   String _getDayName(int weekday) {
     switch (weekday) {
-      case DateTime.monday: return 'Mon';
-      case DateTime.tuesday: return 'Tue';
-      case DateTime.wednesday: return 'Wed';
-      case DateTime.thursday: return 'Thu';
-      case DateTime.friday: return 'Fri';
-      case DateTime.saturday: return 'Sat';
-      case DateTime.sunday: return 'Sun';
-      default: return '';
+      case DateTime.monday:
+        return 'Mon';
+      case DateTime.tuesday:
+        return 'Tue';
+      case DateTime.wednesday:
+        return 'Wed';
+      case DateTime.thursday:
+        return 'Thu';
+      case DateTime.friday:
+        return 'Fri';
+      case DateTime.saturday:
+        return 'Sat';
+      case DateTime.sunday:
+        return 'Sun';
+      default:
+        return '';
     }
   }
 
@@ -169,7 +179,9 @@ class _AnalyticsWidgetState extends ConsumerState<AnalyticsWidget> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? const Color(0xFF1F2937) : const Color(0xFF6B7280),
+            color: isSelected
+                ? const Color(0xFF1F2937)
+                : const Color(0xFF6B7280),
           ),
         ),
       ),

@@ -9,14 +9,12 @@ class FirebaseMachineService implements MachineService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  FirebaseMachineService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FirebaseMachineService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   String? get currentUserId => _auth.currentUser?.uid;
-  
+
   CollectionReference get _machinesCollection =>
       _firestore.collection('machines');
 
@@ -108,23 +106,23 @@ class FirebaseMachineService implements MachineService {
       if (request.machineName != null) {
         updates['machineName'] = request.machineName;
       }
-      
+
       if (request.status != null) {
         final statusValue = _statusToString(request.status!);
         final isArchivedValue = _getIsArchivedFromStatus(request.status!);
-        
+
         updates['status'] = statusValue;
         updates['isArchived'] = isArchivedValue;
       }
-      
+
       if (request.assignedUserIds != null) {
         updates['assignedUserIds'] = request.assignedUserIds;
       }
-      
+
       if (request.currentBatchId != null) {
         updates['currentBatchId'] = request.currentBatchId;
       }
-      
+
       if (request.metadata != null) {
         updates['metadata'] = request.metadata;
       }
@@ -187,7 +185,10 @@ class FirebaseMachineService implements MachineService {
         .where('teamId', isEqualTo: teamId)
         .orderBy('dateCreated', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => MachineModel.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => MachineModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 }

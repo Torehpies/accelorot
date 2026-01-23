@@ -57,9 +57,7 @@ class WebOperatorMachineScreen extends ConsumerWidget {
       context: context,
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: true,
-      builder: (context) => WebOperatorViewDetailsDialog(
-        machine: machine,
-      ),
+      builder: (context) => WebOperatorViewDetailsDialog(machine: machine),
     );
   }
 }

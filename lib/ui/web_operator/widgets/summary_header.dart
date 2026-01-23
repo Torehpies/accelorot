@@ -54,7 +54,7 @@ class SummaryHeader extends ConsumerWidget {
 
         return teamAsync.when(
           data: (team) => _TeamSummaryRow(team: team),
-          loading: () => const CircularProgressIndicator(),
+          loading: () => _buildShimmerRow(),
           error: (error, stack) => Text('Team Error: $error'),
         );
       },
@@ -62,6 +62,48 @@ class SummaryHeader extends ConsumerWidget {
       error: (error, stack) => Text('User Error: $error'),
     );
   }
+}
+
+Row _buildShimmerRow() {
+  return const Row(
+    children: [
+      SummaryCard(
+        isLoading: true,
+        title: '',
+        value: '',
+        icon: Icons.person,
+        iconBackgroundColor: Colors.grey,
+        iconForegroundColor: Colors.grey,
+      ),
+      SizedBox(width: 12),
+      SummaryCard(
+        isLoading: true,
+        title: '',
+        value: '',
+        icon: Icons.person,
+        iconBackgroundColor: Colors.grey,
+        iconForegroundColor: Colors.grey,
+      ),
+      SizedBox(width: 12),
+      SummaryCard(
+        isLoading: true,
+        title: '',
+        value: '',
+        icon: Icons.person,
+        iconBackgroundColor: Colors.grey,
+        iconForegroundColor: Colors.grey,
+      ),
+      SizedBox(width: 12),
+      SummaryCard(
+        isLoading: true,
+        title: '',
+        value: '',
+        icon: Icons.person,
+        iconBackgroundColor: Colors.grey,
+        iconForegroundColor: Colors.grey,
+      ),
+    ],
+  );
 }
 
 class _TeamSummaryRow extends ConsumerWidget {
@@ -110,4 +152,3 @@ class _TeamSummaryRow extends ConsumerWidget {
     );
   }
 }
-

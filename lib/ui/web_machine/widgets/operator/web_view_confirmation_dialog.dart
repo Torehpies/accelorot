@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/machine_model.dart';
 
-
 class WebViewConfirmationDialog extends StatelessWidget {
   final MachineModel machine;
 
-  const WebViewConfirmationDialog({
-    super.key,
-    required this.machine,
-  });
+  const WebViewConfirmationDialog({super.key, required this.machine});
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +27,16 @@ class WebViewConfirmationDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isActive ? Colors.teal.shade50 : Colors.grey.shade200,
+                    color: isActive
+                        ? Colors.teal.shade50
+                        : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.precision_manufacturing,
-                    color: isActive ? Colors.teal.shade700 : Colors.grey.shade600,
+                    color: isActive
+                        ? Colors.teal.shade700
+                        : Colors.grey.shade600,
                     size: 32,
                   ),
                 ),
@@ -55,10 +55,7 @@ class WebViewConfirmationDialog extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Machine Information',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -87,7 +84,9 @@ class WebViewConfirmationDialog extends StatelessWidget {
             _DetailRow(
               icon: Icons.calendar_today,
               label: 'Date Created',
-              value: DateFormat('MMM dd, yyyy hh:mm a').format(machine.dateCreated),
+              value: DateFormat(
+                'MMM dd, yyyy hh:mm a',
+              ).format(machine.dateCreated),
             ),
             const SizedBox(height: 16),
             _DetailRow(
@@ -108,7 +107,11 @@ class WebViewConfirmationDialog extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange[700], size: 20),
+                    Icon(
+                      Icons.warning_amber,
+                      color: Colors.orange[700],
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(

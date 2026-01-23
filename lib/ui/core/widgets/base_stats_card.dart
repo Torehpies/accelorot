@@ -195,4 +195,3 @@ class _BaseStatsCardState extends State<BaseStatsCard>
     return widget.isPositive == true ? WebColors.success : WebColors.error;
   }
 }
-

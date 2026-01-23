@@ -48,7 +48,9 @@ class MachineStatusCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0x2622C55E), // AppColors.green100 at 15% opacity
+                color: const Color(
+                  0x2622C55E,
+                ), // AppColors.green100 at 15% opacity
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -58,7 +60,7 @@ class MachineStatusCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            
+
             // Content
             Expanded(
               child: Column(
@@ -80,15 +82,15 @@ class MachineStatusCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  
+
                   // Machine ID
                   _buildInfoRow('Machine ID:', machineId),
                   const SizedBox(height: 6),
-                  
+
                   // Assigned user
                   _buildInfoRow('Assigned User:', assignedUser),
                   const SizedBox(height: 6),
-                  
+
                   // Date created
                   _buildInfoRow('Date Created:', dateCreated),
                 ],
@@ -106,10 +108,7 @@ class MachineStatusCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: statusColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-          width: 1,
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

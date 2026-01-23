@@ -9,10 +9,7 @@ import 'impact_stat_card.dart';
 
 class ImpactSection extends StatelessWidget {
   final List<ImpactStatModel> stats;
-  const ImpactSection({
-    super.key,
-    required this.stats,
-  });
+  const ImpactSection({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -58,20 +55,11 @@ class ImpactSection extends StatelessWidget {
           style: WebTextStyles.sectionSubtitle,
         ),
         const SizedBox(height: AppSpacing.xl),
-        _buildImpactItem(
-          Icons.recycling_outlined,
-          'Reduces landfill waste',
-        ),
+        _buildImpactItem(Icons.recycling_outlined, 'Reduces landfill waste'),
         const SizedBox(height: AppSpacing.md),
-        _buildImpactItem(
-          Icons.eco_outlined,
-          'Produces nutrient-rich compost',
-        ),
+        _buildImpactItem(Icons.eco_outlined, 'Produces nutrient-rich compost'),
         const SizedBox(height: AppSpacing.md),
-        _buildImpactItem(
-          Icons.people_outline,
-          'Empowers communities',
-        ),
+        _buildImpactItem(Icons.people_outline, 'Empowers communities'),
         const SizedBox(height: AppSpacing.xxl),
         GridView.builder(
           shrinkWrap: true,
@@ -128,10 +116,7 @@ class ImpactSection extends StatelessWidget {
                 'Produces nutrient-rich compost',
               ),
               const SizedBox(height: AppSpacing.md),
-              _buildImpactItem(
-                Icons.people_outline,
-                'Empowers communities',
-              ),
+              _buildImpactItem(Icons.people_outline, 'Empowers communities'),
             ],
           ),
         ),
@@ -168,11 +153,7 @@ class ImpactSection extends StatelessWidget {
             color: const Color(0xFF28A85A).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(6),
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: const Color(0xFF28A85A),
-          ),
+          child: Icon(icon, size: 16, color: const Color(0xFF28A85A)),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(

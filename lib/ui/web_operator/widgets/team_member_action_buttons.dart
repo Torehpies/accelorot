@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/action_icon_button.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/view_operator_dialog.dart';
 
@@ -17,14 +18,15 @@ class TeamMemberActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        IconButton(
-          icon: Icon(Icons.edit_outlined),
+        actionIconButton(
+          icon: Icons.edit_outlined,
           onPressed: () => _showEditDialog(context, notifier, member),
           tooltip: 'Edit Member',
         ),
-        IconButton(
-          icon: Icon(Icons.visibility_outlined),
+        actionIconButton(
+          icon: Icons.visibility_outlined,
           onPressed: () => _showViewDialog(context, notifier, member),
           tooltip: 'View Member',
         ),

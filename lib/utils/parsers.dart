@@ -10,7 +10,7 @@ class DataParsers {
   static double parseQuantity(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
-    
+
     final str = value.toString();
     final numStr = str.replaceAll(RegExp(r'[^0-9.]'), '');
     return double.tryParse(numStr) ?? 0.0;

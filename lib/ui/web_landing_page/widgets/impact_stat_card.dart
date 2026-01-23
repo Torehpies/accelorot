@@ -8,10 +8,7 @@ import '../models/impact_stat_model.dart';
 
 class ImpactStatCard extends StatelessWidget {
   final ImpactStatModel stat;
-  const ImpactStatCard({
-    super.key,
-    required this.stat,
-  });
+  const ImpactStatCard({super.key, required this.stat});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,7 @@ class ImpactStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: WebColors.featurecard.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: WebColors.featurecard,),
+        border: Border.all(color: WebColors.featurecard),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

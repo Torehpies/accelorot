@@ -22,7 +22,7 @@ class DrumControlCard extends ConsumerStatefulWidget {
 class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
-  
+
   String _uptime = '00:00:00';
   int _completedCycles = 0;
   DateTime? _startTime;
@@ -68,29 +68,31 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   @override
   void didUpdateWidget(DrumControlCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     final currentBatchId = widget.currentBatch?.id;
     final oldBatchId = oldWidget.currentBatch?.id;
-    
-    debugPrint('🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId');
-    
+
+    debugPrint(
+      '🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId',
+    );
+
     // Batch changed
     if (currentBatchId != oldBatchId) {
       debugPrint('✅ Batch ID changed - reinitializing');
       _initializeFromBatch();
     }
     // Same batch became inactive
-    else if (widget.currentBatch != null && 
-             oldWidget.currentBatch?.isActive == true && 
-             !widget.currentBatch!.isActive) {
+    else if (widget.currentBatch != null &&
+        oldWidget.currentBatch?.isActive == true &&
+        !widget.currentBatch!.isActive) {
       debugPrint('⚠️ Batch completed');
       _stopTimer();
       _cycleTimer?.cancel();
-      
+
       if (_cycleDoc != null) {
         _completeCycleInFirebase();
       }
-      
+
       setState(() {
         status = SystemStatus.stopped;
       });
@@ -103,7 +105,9 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       return;
     }
 
-    debugPrint('📥 Loading drum controller for batch: ${widget.currentBatch!.id}');
+    debugPrint(
+      '📥 Loading drum controller for batch: ${widget.currentBatch!.id}',
+    );
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -111,7 +115,9 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         batchId: widget.currentBatch!.id,
       );
 
-      debugPrint('📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
+      debugPrint(
+        '📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}',
+      );
 
       if (mounted && cycle != null) {
         setState(() {
@@ -210,7 +216,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      
+
       await cycleRepository.startDrumController(
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
@@ -246,8 +252,10 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   void _simulateCycles() {
     final periodMinutes = _getPeriodMinutes(settings.period);
-    
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
+
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (
+      timer,
+    ) async {
       if (mounted && status == SystemStatus.running) {
         setState(() {
           _completedCycles++;
@@ -269,11 +277,11 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         if (_completedCycles >= settings.cycles) {
           _stopTimer();
           timer.cancel();
-          
+
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
-          
+
           setState(() {
             status = SystemStatus.stopped;
           });
@@ -315,10 +323,13 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   String _getCyclesLabel(int cycles) {
     return '$cycles Cycles';
   }
+
   @override
   Widget build(BuildContext context) {
-    final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;
-    final batchCompleted = widget.currentBatch != null && !widget.currentBatch!.isActive;
+    final hasActiveBatch =
+        widget.currentBatch != null && widget.currentBatch!.isActive;
+    final batchCompleted =
+        widget.currentBatch != null && !widget.currentBatch!.isActive;
 
     return Container(
       decoration: BoxDecoration(
@@ -360,8 +371,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                     color: batchCompleted
                         ? const Color(0xFFF3F4F6)
                         : (hasActiveBatch
-                            ? const Color(0xFFD1FAE5)
-                            : const Color(0xFFFEF3C7)),
+                              ? const Color(0xFFD1FAE5)
+                              : const Color(0xFFFEF3C7)),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -374,8 +385,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                       color: batchCompleted
                           ? const Color(0xFF6B7280)
                           : (hasActiveBatch
-                              ? const Color(0xFF065F46)
-                              : const Color(0xFF92400E)),
+                                ? const Color(0xFF065F46)
+                                : const Color(0xFF92400E)),
                     ),
                   ),
                 ),
@@ -421,10 +432,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         Row(
           children: [
             Expanded(
-              child: InfoItem(
-                label: 'Uptime',
-                value: _uptime,
-              ),
+              child: InfoItem(label: 'Uptime', value: _uptime),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -506,11 +514,10 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             child: Text(
               batchCompleted
                   ? 'Completed'
-                  : (status == SystemStatus.idle ? 'Start' : status.displayName),
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+                  : (status == SystemStatus.idle
+                        ? 'Start'
+                        : status.displayName),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -536,10 +543,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           value: value,
           hint: Text(
             label,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
           isDense: true,
           isExpanded: true,
@@ -553,10 +557,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF1a1a1a),
-                ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF1a1a1a)),
               ),
             );
           }).toList(),

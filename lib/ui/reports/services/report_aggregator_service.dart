@@ -12,8 +12,8 @@ class ReportAggregatorService {
   ReportAggregatorService({
     required ReportRepository reportRepo,
     FirebaseAuth? auth,
-  })  : _reportRepo = reportRepo,
-        _auth = auth ?? FirebaseAuth.instance;
+  }) : _reportRepo = reportRepo,
+       _auth = auth ?? FirebaseAuth.instance;
 
   // ===== USER MANAGEMENT =====
 
@@ -29,10 +29,10 @@ class ReportAggregatorService {
   Future<List<Report>> getReports() async {
     try {
       final reports = await _reportRepo.getTeamReports();
-      
+
       // Sort by creation date descending (newest first)
       reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      
+
       return reports;
     } catch (e) {
       rethrow;

@@ -61,10 +61,7 @@ class MachineTableRow extends StatelessWidget {
             child: Center(
               child: Text(
                 dateFormat.format(machine.dateCreated),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF6B7280),
-                ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
               ),
             ),
           ),

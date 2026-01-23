@@ -12,23 +12,21 @@ final machineServiceProvider = Provider<FirebaseMachineService>((ref) {
 // Repository Provider
 final machineRepositoryProvider = Provider<MachineRepository>((ref) {
   final service = ref.watch(machineServiceProvider);
-  return MachineRepositoryRemote(service); 
+  return MachineRepositoryRemote(service);
 });
 
 // Provider for machines by team
-final machinesStreamProvider = StreamProvider.family<List<MachineModel>, String>(
-  (ref, teamId) {
-    final repository = ref.watch(machineRepositoryProvider);
-    return repository.watchMachinesByTeam(teamId);
-  },
-);
+final machinesStreamProvider =
+    StreamProvider.family<List<MachineModel>, String>((ref, teamId) {
+      final repository = ref.watch(machineRepositoryProvider);
+      return repository.watchMachinesByTeam(teamId);
+    });
 
 // FutureProvider for single machine
-final machineByIdProvider = FutureProvider.family<MachineModel?, String>(
-  (ref, machineId) async {
-    final repository = ref.watch(machineRepositoryProvider);
-    return repository.getMachineById(machineId);
-  },
-);
-
-
+final machineByIdProvider = FutureProvider.family<MachineModel?, String>((
+  ref,
+  machineId,
+) async {
+  final repository = ref.watch(machineRepositoryProvider);
+  return repository.getMachineById(machineId);
+});

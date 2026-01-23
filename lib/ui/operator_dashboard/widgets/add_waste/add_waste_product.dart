@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../operator_dashboard/fields/waste_category_section.dart';
 import '../../../operator_dashboard/fields/plant_type_section.dart';
@@ -10,14 +10,18 @@ import '../../../operator_dashboard/fields/waste_config.dart';
 import '../../../operator_dashboard/fields/machine_selection_field.dart';
 //import '../../../activity_logs/widgets/batch_selector.dart';
 import '../../../../data/providers/substrate_providers.dart';
-import '../../../../data/models/substrate.dart'; 
+import '../../../../data/models/substrate.dart';
 import '../../../operator_dashboard/fields/batch_selection_field.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
   final String? preSelectedBatchId;
 
-  const AddWasteProduct({super.key, this.preSelectedMachineId,    this.preSelectedBatchId, });
+  const AddWasteProduct({
+    super.key,
+    this.preSelectedMachineId,
+    this.preSelectedBatchId,
+  });
 
   @override
   ConsumerState<AddWasteProduct> createState() => _AddWasteProductState();
@@ -42,7 +46,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
   @override
   void initState() {
     super.initState();
- 
+
     _selectedMachineId = widget.preSelectedMachineId;
     _selectedBatchId = widget.preSelectedBatchId;
   }
@@ -131,12 +135,12 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
 
     try {
       final substrateRepo = ref.read(substrateRepositoryProvider);
-      await substrateRepo.addSubstrate(substrateData); 
-      
+      await substrateRepo.addSubstrate(substrateData);
+
       if (!mounted) return;
-      
+
       Navigator.pop(context, true);
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -186,10 +190,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
                 children: [
                   const Text(
                     'Add Waste Product',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
@@ -201,7 +202,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
               ),
               const SizedBox(height: 16),
 
-              // Machine Selection 
+              // Machine Selection
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
                 onChanged: (value) {

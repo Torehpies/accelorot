@@ -94,7 +94,9 @@ class MachineTableHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     MouseRegion(
-                      cursor: isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                      cursor: isLoading
+                          ? SystemMouseCursors.basic
+                          : SystemMouseCursors.click,
                       child: PopupMenuButton<String>(
                         icon: Icon(
                           Icons.arrow_drop_down,
@@ -104,39 +106,44 @@ class MachineTableHeader extends StatelessWidget {
                               : WebColors.textLabel,
                         ),
                         offset: const Offset(0, 35),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         elevation: 8,
                         color: WebColors.cardBackground,
                         enabled: !isLoading,
                         onSelected: (value) => onStatusChanged(value),
                         itemBuilder: (context) {
                           return ['All', 'Active', 'Archived']
-                              .map((status) => PopupMenuItem(
-                                    value: status,
-                                    child: Row(
-                                      children: [
-                                        if (statusFilter == status)
-                                          const Icon(
-                                            Icons.check,
-                                            size: 16,
-                                            color: WebColors.success,
-                                          ),
-                                        if (statusFilter == status) const SizedBox(width: 8),
-                                        Text(
-                                          status,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: statusFilter == status
-                                                ? FontWeight.w600
-                                                : FontWeight.normal,
-                                            color: statusFilter == status
-                                                ? WebColors.success
-                                                : WebColors.textSecondary,
-                                          ),
+                              .map(
+                                (status) => PopupMenuItem(
+                                  value: status,
+                                  child: Row(
+                                    children: [
+                                      if (statusFilter == status)
+                                        const Icon(
+                                          Icons.check,
+                                          size: 16,
+                                          color: WebColors.success,
                                         ),
-                                      ],
-                                    ),
-                                  ))
+                                      if (statusFilter == status)
+                                        const SizedBox(width: 8),
+                                      Text(
+                                        status,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: statusFilter == status
+                                              ? FontWeight.w600
+                                              : FontWeight.normal,
+                                          color: statusFilter == status
+                                              ? WebColors.success
+                                              : WebColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
                               .toList();
                         },
                       ),
@@ -148,12 +155,7 @@ class MachineTableHeader extends StatelessWidget {
             const SizedBox(width: AppSpacing.md),
             const Expanded(
               flex: 2,
-              child: Center(
-                child: Text(
-                  'Actions',
-                  style: WebTextStyles.label,
-                ),
-              ),
+              child: Center(child: Text('Actions', style: WebTextStyles.label)),
             ),
           ],
         ),

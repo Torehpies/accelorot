@@ -12,9 +12,9 @@ String mapAuthErrorCodeToMessage(String code) {
 
 String mapRegisterErrorCodeToMessage(String code) {
   return switch (code) {
-		'weak-password' => 'The provided password is weak.',
-		'email-already-in-use' => 'The account already exists for that email.',
-		'invalid-email' => 'The email address is not valid.',
-		_ => 'Registration failed. Please try again.',
-	};
+    'weak-password' => 'The provided password is weak.',
+    'email-already-in-use' => 'The account already exists for that email.',
+    'invalid-email' => 'The email address is not valid.',
+    _ => 'Registration failed. Please try again.',
+  };
 }

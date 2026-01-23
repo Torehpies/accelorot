@@ -11,12 +11,10 @@ class WebAdminAddDialog extends StatefulWidget {
   final Future<void> Function({
     required String machineId,
     required String machineName,
-  }) onCreate;
+  })
+  onCreate;
 
-  const WebAdminAddDialog({
-    super.key,
-    required this.onCreate,
-  });
+  const WebAdminAddDialog({super.key, required this.onCreate});
 
   @override
   State<WebAdminAddDialog> createState() => _WebAdminAddDialogState();
@@ -76,17 +74,14 @@ class _WebAdminAddDialogState extends State<WebAdminAddDialog> {
     setState(() => _isSubmitting = true);
 
     try {
-      await widget.onCreate(
-        machineId: id,
-        machineName: name,
-      );
+      await widget.onCreate(machineId: id, machineName: name);
 
       if (!mounted) return;
       Navigator.of(context).pop();
       ToastService.show(context, message: 'Machine created successfully');
     } catch (e) {
       if (!mounted) return;
-      
+
       // Check for duplicate ID error
       final errorMessage = e.toString();
       if (errorMessage.contains('already exists')) {

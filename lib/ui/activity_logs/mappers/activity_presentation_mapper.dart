@@ -99,24 +99,21 @@ class ActivityPresentationMapper {
 
   static ActivityLogItem fromCycleRecommendation(CycleRecommendation cycle) {
     // Determine title based on controller type
-    final title = cycle.controllerType == 'drum_controller' 
-        ? 'Drum Controller' 
+    final title = cycle.controllerType == 'drum_controller'
+        ? 'Drum Controller'
         : 'Aerator';
-        // Build description
+    // Build description
     final parts = <String>[];
     parts.add('Duration: ${cycle.duration ?? "N/A"}');
     parts.add('Cycles: ${cycle.completedCycles ?? 0}/${cycle.cycles ?? 0}');
-    
 
     if (cycle.totalRuntimeSeconds != null) {
-    final runtime = Duration(seconds: cycle.totalRuntimeSeconds!);
-    final hours = runtime.inHours;
-    final minutes = runtime.inMinutes.remainder(60);
-    parts.add('Runtime: ${hours}h ${minutes}m');
+      final runtime = Duration(seconds: cycle.totalRuntimeSeconds!);
+      final hours = runtime.inHours;
+      final minutes = runtime.inMinutes.remainder(60);
+      parts.add('Runtime: ${hours}h ${minutes}m');
     }
 
-
-    
     return ActivityLogItem(
       id: cycle.id,
       title: title,
@@ -124,7 +121,7 @@ class ActivityPresentationMapper {
       statusColor: _getCycleStatusColor(cycle.status),
       icon: _getCycleIcon(cycle.controllerType),
       description: parts.join('\n'),
-      category: cycle.controllerType, // ?? 'cycles', 
+      category: cycle.controllerType, // ?? 'cycles',
       timestamp: cycle.timestamp ?? cycle.startedAt ?? DateTime.now(),
       type: ActivityType.cycle,
       machineId: cycle.machineId,
@@ -158,13 +155,12 @@ class ActivityPresentationMapper {
     switch (controllerType) {
       case 'drum_controller':
         return Icons.sync;
-        case 'aerator':
+      case 'aerator':
         return Icons.air;
       default:
         return Icons.settings;
     }
   }
-
 
   /// Get display category for alerts (moved from Alert model)
   static String _getAlertDisplayCategory(String sensorType) {

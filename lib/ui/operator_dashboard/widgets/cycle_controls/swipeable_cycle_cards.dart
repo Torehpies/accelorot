@@ -7,10 +7,7 @@ import '../../../../data/models/batch_model.dart';
 class SwipeableCycleCards extends StatefulWidget {
   final BatchModel? currentBatch;
 
-  const SwipeableCycleCards({
-    super.key,
-    required this.currentBatch,
-  });
+  const SwipeableCycleCards({super.key, required this.currentBatch});
 
   @override
   State<SwipeableCycleCards> createState() => _SwipeableCycleCardsState();

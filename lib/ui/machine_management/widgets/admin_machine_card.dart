@@ -7,19 +7,14 @@ import 'machine_details_view.dart';
 class AdminMachineCard extends ConsumerWidget {
   final MachineModel machine;
 
-  const AdminMachineCard({
-    super.key,
-    required this.machine,
-  });
+  const AdminMachineCard({super.key, required this.machine});
 
   void _navigateToDetails(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MachineDetailsView(
-          machine: machine,
-          teamId: machine.teamId,
-        ),
+        builder: (context) =>
+            MachineDetailsView(machine: machine, teamId: machine.teamId),
       ),
     );
   }
@@ -63,9 +58,7 @@ class AdminMachineCard extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(20),
-        constraints: const BoxConstraints(
-          minHeight: 140,
-        ),
+        constraints: const BoxConstraints(minHeight: 140),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),

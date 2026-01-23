@@ -30,8 +30,8 @@ class WebOperatorMachineList extends StatelessWidget {
               final crossAxisCount = constraints.maxWidth > 1200
                   ? 3
                   : constraints.maxWidth > 800
-                      ? 2
-                      : 1;
+                  ? 2
+                  : 1;
 
               return GridView.builder(
                 padding: const EdgeInsets.all(24),
@@ -60,7 +60,10 @@ class WebOperatorMachineList extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),

@@ -44,10 +44,7 @@ class ReportsSearchBar extends StatelessWidget {
             onChanged: onSearchChanged,
             decoration: InputDecoration(
               hintText: 'Search reports...',
-              hintStyle: TextStyle(
-                color: Colors.grey.shade400,
-                fontSize: 16,
-              ),
+              hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
               prefixIcon: Icon(
                 Icons.search,
                 color: Colors.grey.shade600,

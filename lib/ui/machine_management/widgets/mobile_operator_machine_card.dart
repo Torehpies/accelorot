@@ -194,8 +194,6 @@ class MobileOperatorMachineCard extends StatelessWidget {
               ],
             ),
           ),
-
-
         ],
       ),
     );

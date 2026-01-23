@@ -7,9 +7,7 @@ import 'batch_providers.dart';
 
 /// Cycle service provider
 final cycleServiceProvider = Provider((ref) {
-  return FirestoreCycleService(
-    batchService: ref.watch(batchServiceProvider),
-  );
+  return FirestoreCycleService(batchService: ref.watch(batchServiceProvider));
 });
 
 /// Cycle repository provider
