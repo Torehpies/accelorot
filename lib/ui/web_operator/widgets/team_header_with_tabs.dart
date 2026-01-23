@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
@@ -34,17 +35,12 @@ List<Widget> _buildFilters(TabController controller) => [
   Consumer(
     builder: (context, ref, child) {
       final activeTabIndex = controller.index;
-      final isTeamMembersTab = activeTabIndex == 0;
       return DateFilterDropdown(
-        isLoading: isTeamMembersTab
+        isLoading: activeTabIndex == 0
             ? ref.watch(teamMembersProvider).isLoading
             : ref.watch(pendingMembersProvider).isLoading,
         onFilterChanged: (filter) {
-          if (isTeamMembersTab) {
-            ref.read(teamMembersProvider.notifier).setDateFilter(filter);
-          } else {
-            ref.read(pendingMembersProvider.notifier).setDateFilter(filter);
-          }
+          ref.read(operatorsDateFilterProvider.notifier).setFilter(filter);
         },
       );
     },

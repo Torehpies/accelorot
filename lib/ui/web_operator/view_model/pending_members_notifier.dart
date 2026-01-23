@@ -3,6 +3,7 @@ import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -41,6 +42,22 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
   @override
   PendingMembersState build() {
+    ref.listen(operatorsDateFilterProvider, (previous, next) {
+      if (previous != next && next.isActive) {
+        // Clear cache and reload when shared filter changes
+        final updatedPages = Map<int, List<PendingMember>>.from(
+          state.pagesByIndex,
+        )..clear();
+        state = state.copyWith(
+          dateFilter: next,
+          pagesByIndex: updatedPages,
+          items: const [],
+          currentPage: 0,
+          lastFetchedAt: null,
+        );
+        _loadPage(0);
+      }
+    });
     state = const PendingMembersState();
     Future.microtask(() => _loadPage(0));
     return state;
