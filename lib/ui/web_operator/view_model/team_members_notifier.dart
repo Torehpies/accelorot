@@ -18,8 +18,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   @override
   TeamMembersState build() {
     ref.listen(operatorsDateFilterProvider, (previous, next) {
-      if (previous != next && next.isActive) {
-        // Clear cache and reload when shared filter changes
+      if (previous != next) {
         final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
           ..clear();
         state = state.copyWith(

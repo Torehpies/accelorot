@@ -43,7 +43,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   @override
   PendingMembersState build() {
     ref.listen(operatorsDateFilterProvider, (previous, next) {
-      if (previous != next && next.isActive) {
+      if (previous != next) {
         // Clear cache and reload when shared filter changes
         final updatedPages = Map<int, List<PendingMember>>.from(
           state.pagesByIndex,
