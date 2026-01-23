@@ -82,7 +82,7 @@ class HowItWorksSection extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.xl),
 
-          // Responsive animated grid
+          // Responsive animated grid with smaller cards and more spacing
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = constraints.maxWidth > 1200
@@ -98,15 +98,19 @@ class HowItWorksSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: AppSpacing.lg,
-                  mainAxisSpacing: AppSpacing.lg,
-                  childAspectRatio: 1.05,
+                  crossAxisSpacing: AppSpacing.xl, // more horizontal spacing
+                  mainAxisSpacing: AppSpacing.xl, // more vertical spacing
+                  childAspectRatio: 0.9, // slightly taller than wide for compact cards
                 ),
                 itemCount: steps.length,
                 itemBuilder: (context, index) {
-                  return _AnimatedStepCard(
-                    delay: Duration(milliseconds: 120 * index),
-                    child: StepCard(step: steps[index]),
+                  return SizedBox(
+                    width: 200,  // <-- min width of card
+                    height: 220, // <-- min height of card
+                    child: _AnimatedStepCard(
+                      delay: Duration(milliseconds: 120 * index),
+                      child: StepCard(step: steps[index]),
+                    ),
                   );
                 },
               );
@@ -118,7 +122,7 @@ class HowItWorksSection extends StatelessWidget {
   }
 }
 
-/// Entrance animation using only Transform (no Opacity)
+/// Entrance animation using only Transform
 class _AnimatedStepCard extends StatefulWidget {
   final Duration delay;
   final Widget child;
