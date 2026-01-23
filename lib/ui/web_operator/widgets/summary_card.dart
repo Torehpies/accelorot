@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:shimmer/shimmer.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
@@ -8,6 +9,7 @@ class SummaryCard extends StatelessWidget {
   final IconData icon;
   final Color iconBackgroundColor;
   final Color iconForegroundColor;
+  final bool isLoading;
 
   const SummaryCard({
     super.key,
@@ -16,6 +18,7 @@ class SummaryCard extends StatelessWidget {
     required this.iconBackgroundColor,
     required this.iconForegroundColor,
     required this.icon,
+    this.isLoading = false,
   });
 
   @override
@@ -23,6 +26,10 @@ class SummaryCard extends StatelessWidget {
     final isTablet =
         MediaQuery.of(context).size.width >= kTabletBreakpoint &&
         MediaQuery.of(context).size.width < kDesktopBreakpoint;
+
+    if (isLoading) {
+      return Expanded(child: _buildShimmerCard(isTablet));
+    }
     return Expanded(
       child: Tooltip(
         message: "$title: $value",
@@ -66,6 +73,86 @@ class SummaryCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerCard(bool isTablet) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.background2,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: WebColors.cardBorder, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: WebColors.cardShadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isTablet) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _shimmerTitle(width: 120, height: 16),
+                  _shimmerIcon(),
+                ],
+              ),
+            ],
+            const SizedBox(height: 4),
+            !isTablet
+                ? _shimmerValue()
+                : Row(
+                    children: [
+                      _shimmerTitle(width: 100, height: 14),
+                      const SizedBox(width: 10),
+                      _shimmerValue(),
+                    ],
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Shimmer blocks matching your real content
+  Widget _shimmerTitle({required double width, required double height}) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  Widget _shimmerIcon() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+  Widget _shimmerValue() {
+    return Container(
+      width: 60,
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }
