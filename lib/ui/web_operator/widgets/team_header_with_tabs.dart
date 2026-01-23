@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamHeaderWithTabs extends StatelessWidget {
   final TabController controller;
@@ -16,7 +19,6 @@ class TeamHeaderWithTabs extends StatelessWidget {
         mainAxisAlignment: isDesktop
             ? MainAxisAlignment.start
             : MainAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.center,
         children: [
           TabsRow(controller: controller),
           if (isDesktop) ..._buildFilters(),
@@ -28,10 +30,15 @@ class TeamHeaderWithTabs extends StatelessWidget {
 
 List<Widget> _buildFilters() => [
   const Spacer(),
-  TextButton.icon(
-    onPressed: () {},
-    icon: const Icon(Icons.calendar_today_outlined, size: 18),
-    label: const Text('Date'),
+  Consumer(
+    builder: (context, ref, child) {
+      return DateFilterDropdown(
+        isLoading: ref.watch(teamMembersProvider).isLoading,
+        onFilterChanged: (filter) {
+          ref.read(teamMembersProvider.notifier).setDateFilter(filter);
+        },
+      );
+    },
   ),
   const SizedBox(width: 12),
   SizedBox(
