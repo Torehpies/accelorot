@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb; 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/admin_home_provider.dart';
@@ -15,9 +15,7 @@ class MobileAdminHomeView extends ConsumerWidget {
     final asyncState = ref.watch(adminHomeProvider);
 
     return Scaffold(
-      appBar: kIsWeb
-          ? null 
-          : const MobileHeader(title: 'Dashboard'),
+      appBar: kIsWeb ? null : const MobileHeader(title: 'Dashboard'),
 
       body: RefreshIndicator(
         onRefresh: () async {
@@ -36,7 +34,8 @@ class MobileAdminHomeView extends ConsumerWidget {
                 Text('Error: $err', textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.read(adminHomeProvider.notifier).refresh(),
+                  onPressed: () =>
+                      ref.read(adminHomeProvider.notifier).refresh(),
                   child: const Text('Retry'),
                 ),
               ],
@@ -79,10 +78,7 @@ class MobileAdminHomeView extends ConsumerWidget {
                   // Analytics Widget (combines Activity Chart and Status Chart with tabs)
                   AnalyticsWidget(reports: state.reports),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: 500,
-                    child: const RecentActivitiesTable(),
-                  ),
+                  SizedBox(height: 500, child: const RecentActivitiesTable()),
                 ],
               ),
             );

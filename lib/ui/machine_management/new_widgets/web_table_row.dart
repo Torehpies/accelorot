@@ -60,7 +60,7 @@ class MachineTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Machine Name Column
         TableCellWidget(
           flex: 2,
@@ -72,7 +72,7 @@ class MachineTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Date Added Column
         TableCellWidget(
           flex: 2,
@@ -82,7 +82,7 @@ class MachineTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Status Chip (filled background)
         TableCellWidget(
           flex: 2,
@@ -105,7 +105,7 @@ class MachineTableRow extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Actions Column (View and Edit icons)
         TableCellWidget(
           flex: 1,

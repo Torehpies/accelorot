@@ -23,8 +23,9 @@ class ActivityTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryName =
-        UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
+    final categoryName = UnifiedActivityConfig.getCategoryNameFromActivityType(
+      item.type,
+    );
 
     // Parse the category string to enum, then get color
     final subType = ActivitySubType.fromString(item.category);

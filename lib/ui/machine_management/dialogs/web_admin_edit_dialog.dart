@@ -12,7 +12,8 @@ class WebAdminEditDialog extends StatefulWidget {
   final Future<void> Function({
     required String machineId,
     required String machineName,
-  }) onUpdate;
+  })
+  onUpdate;
 
   const WebAdminEditDialog({
     super.key,
@@ -130,7 +131,9 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
         ),
         DialogAction.primary(
           label: 'Update Machine',
-          onPressed: _nameError == null && !_isSubmitting ? _handleSubmit : null,
+          onPressed: _nameError == null && !_isSubmitting
+              ? _handleSubmit
+              : null,
           isLoading: _isSubmitting,
         ),
       ],

@@ -33,12 +33,14 @@ class ReportDonutChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Report Status',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
-              )),
+          const Text(
+            'Report Status',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF374151),
+            ),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: Center(
@@ -62,9 +64,11 @@ class ReportDonutChart extends StatelessWidget {
                             )
                           else
                             const Center(
-                                child: Text("No data",
-                                    style: TextStyle(
-                                        color: Color(0xFF9CA3AF)))),
+                              child: Text(
+                                "No data",
+                                style: TextStyle(color: Color(0xFF9CA3AF)),
+                              ),
+                            ),
                           Text(
                             '$total',
                             style: const TextStyle(
@@ -82,12 +86,14 @@ class ReportDonutChart extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Text('Legend:',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-              )),
+          const Text(
+            'Legend:',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF6B7280),
+            ),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 16,

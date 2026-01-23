@@ -66,7 +66,7 @@ class WebTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Category Column (flex: 2)
         TableCellWidget(
           flex: 2,
@@ -76,7 +76,7 @@ class WebTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Status Column (flex: 2) - Filled Chip
         TableCellWidget(
           flex: 2,
@@ -99,15 +99,13 @@ class WebTableRow extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Priority Column (flex: 2) - Outline Badge
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: ReportsPriorityBadge(priority: report.priority),
-          ),
+          child: Center(child: ReportsPriorityBadge(priority: report.priority)),
         ),
-        
+
         // Actions Column (flex: 1) - View and Edit buttons
         TableCellWidget(
           flex: 1,

@@ -14,11 +14,7 @@ Widget actionIconButton({
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: onPressed,
-          child: Icon(
-            icon,
-            size: 20,
-            color: Colors.grey[700],
-          ),
+          child: Icon(icon, size: 20, color: Colors.grey[700]),
         ),
       ),
     ),

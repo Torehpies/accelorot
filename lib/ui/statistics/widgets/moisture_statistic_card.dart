@@ -33,22 +33,22 @@ class MoistureStatisticCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-             // Header Section
-             Container(
+            // Header Section
+            Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 1)
-                )
+                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 1),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       const Text(
+                      const Text(
                         'Moisture',
                         style: TextStyle(
                           fontSize: 18,
@@ -57,7 +57,7 @@ class MoistureStatisticCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                       const Text(
+                      const Text(
                         'sample text description...',
                         style: TextStyle(
                           fontSize: 11,
@@ -66,7 +66,7 @@ class MoistureStatisticCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                   Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
@@ -79,7 +79,7 @@ class MoistureStatisticCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                       const Text(
+                      const Text(
                         '%',
                         style: TextStyle(
                           fontSize: 18,
@@ -108,19 +108,23 @@ class MoistureStatisticCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Progress Bar
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _calculateProgress(currentMoisture),
-                      backgroundColor: const Color(0xFFE0F2FE), // Very light blue
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0369A1)), // Darker Blue
+                      backgroundColor: const Color(
+                        0xFFE0F2FE,
+                      ), // Very light blue
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0369A1),
+                      ), // Darker Blue
                       minHeight: 12,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Chart
                   SizedBox(
                     height: 100, // Reduced height
@@ -128,7 +132,10 @@ class MoistureStatisticCard extends StatelessWidget {
                       plotAreaBorderWidth: 0,
                       margin: EdgeInsets.zero,
                       primaryXAxis: CategoryAxis(
-                        labelStyle: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
+                        labelStyle: const TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF9CA3AF),
+                        ),
                         majorGridLines: const MajorGridLines(width: 0),
                         axisLine: const AxisLine(width: 0),
                       ),
@@ -156,17 +163,14 @@ class MoistureStatisticCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Trend Text
                   const Text(
                     'Trending up by 5.2% this week',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // More Information Section
                   const Text(
                     'More Information:',
@@ -194,33 +198,37 @@ class MoistureStatisticCard extends StatelessWidget {
       'sample text here',
       'sample text here',
     ];
-    
-    return items.map((item) => Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-           Container(
-            width: 4,
-            height: 4,
-            decoration: const BoxDecoration(
-              color: Color(0xFF9CA3AF),
-              shape: BoxShape.circle,
+
+    return items
+        .map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF9CA3AF),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              item,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
-      ),
-    )).toList();
+        )
+        .toList();
   }
 
   List<Map<String, dynamic>> _generateMonthlyData() {

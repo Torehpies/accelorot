@@ -19,8 +19,7 @@ class WebAdminHomeScreen extends StatelessWidget {
 class _WebAdminHomeScreenContent extends StatefulWidget {
   const _WebAdminHomeScreenContent();
   @override
-  State<_WebAdminHomeScreenContent> createState() =>
-      _WebAdminHomeScreenState();
+  State<_WebAdminHomeScreenContent> createState() => _WebAdminHomeScreenState();
 }
 
 class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
@@ -194,11 +193,19 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 _buildSectionHeader(
                                   'Operator Management',
                                   onTapManage: () {
-                                    final teamId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                    final teamId =
+                                        FirebaseAuth
+                                            .instance
+                                            .currentUser
+                                            ?.uid ??
+                                        '';
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => OperatorManagementScreen(teamId: teamId),
+                                        builder: (context) =>
+                                            OperatorManagementScreen(
+                                              teamId: teamId,
+                                            ),
                                       ),
                                     );
                                   },
@@ -206,7 +213,9 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 const SizedBox(height: 10),
                                 // === TABLE HEADER ===
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -216,7 +225,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -227,7 +241,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -239,7 +258,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -251,7 +275,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -262,8 +291,10 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 // === TABLE BODY ===
                                 Expanded(
                                   child: ListView.separated(
-                                    separatorBuilder: (_, _) =>
-                                        const Divider(height: 16, color: Colors.grey),
+                                    separatorBuilder: (_, _) => const Divider(
+                                      height: 16,
+                                      color: Colors.grey,
+                                    ),
                                     itemCount: _operators.length,
                                     itemBuilder: (context, index) {
                                       final operator = _operators[index];
@@ -291,7 +322,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                 operator['email'],
                                                 style: const TextStyle(
                                                   fontSize: 12,
-                                                  color: Color.fromARGB(255, 73, 73, 73),
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    73,
+                                                    73,
+                                                    73,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -303,7 +339,8 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                   height: 7,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    color: operator['isArchived']
+                                                    color:
+                                                        operator['isArchived']
                                                         ? Colors.red
                                                         : Colors.green,
                                                   ),
@@ -313,27 +350,34 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                             Expanded(
                                               flex: 1,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
                                                 children: [
                                                   IconButton(
-                                                    icon: const Icon(Icons.edit, size: 14),
-                                                    onPressed: () {
-                                                      
-                                                    },
+                                                    icon: const Icon(
+                                                      Icons.edit,
+                                                      size: 14,
+                                                    ),
+                                                    onPressed: () {},
                                                     color: Colors.blue,
                                                     padding: EdgeInsets.zero,
-                                                    visualDensity: VisualDensity.compact,
-                                                    constraints: BoxConstraints(),
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    constraints:
+                                                        BoxConstraints(),
                                                   ),
                                                   IconButton(
-                                                    icon: const Icon(Icons.delete, size: 14),
-                                                    onPressed: () {
-                                                      
-                                                    },
+                                                    icon: const Icon(
+                                                      Icons.delete,
+                                                      size: 14,
+                                                    ),
+                                                    onPressed: () {},
                                                     color: Colors.red,
                                                     padding: EdgeInsets.zero,
-                                                    visualDensity: VisualDensity.compact,
-                                                    constraints: BoxConstraints(),
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    constraints:
+                                                        BoxConstraints(),
                                                   ),
                                                 ],
                                               ),
@@ -368,13 +412,18 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                   onTapManage: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const WebAdminMachineView()),
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const WebAdminMachineView(),
+                                      ),
                                     );
                                   },
                                 ),
                                 const SizedBox(height: 10),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -384,7 +433,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -395,7 +449,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -407,7 +466,12 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 12,
-                                            color: Color.fromARGB(255, 73, 73, 73),
+                                            color: Color.fromARGB(
+                                              255,
+                                              73,
+                                              73,
+                                              73,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -417,8 +481,10 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                 const Divider(height: 16, color: Colors.grey),
                                 Expanded(
                                   child: ListView.separated(
-                                    separatorBuilder: (_, _) =>
-                                        const Divider(height: 16, color: Colors.grey),
+                                    separatorBuilder: (_, _) => const Divider(
+                                      height: 16,
+                                      color: Colors.grey,
+                                    ),
                                     itemCount: _machines.length,
                                     itemBuilder: (context, index) {
                                       final machine = _machines[index];
@@ -446,34 +512,46 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                                                 machine['machineId'],
                                                 style: const TextStyle(
                                                   fontSize: 12,
-                                                  color: Color.fromARGB(255, 73, 73, 73),
+                                                  color: Color.fromARGB(
+                                                    255,
+                                                    73,
+                                                    73,
+                                                    73,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                             Expanded(
                                               flex: 1,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
                                                 children: [
                                                   IconButton(
-                                                    icon: const Icon(Icons.edit, size: 14),
-                                                    onPressed: () {
-                                                     
-                                                    },
+                                                    icon: const Icon(
+                                                      Icons.edit,
+                                                      size: 14,
+                                                    ),
+                                                    onPressed: () {},
                                                     color: Colors.blue,
                                                     padding: EdgeInsets.zero,
-                                                    visualDensity: VisualDensity.compact,
-                                                    constraints: BoxConstraints(),
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    constraints:
+                                                        BoxConstraints(),
                                                   ),
                                                   IconButton(
-                                                    icon: const Icon(Icons.delete, size: 14),
-                                                    onPressed: () {
-                                                      
-                                                    },
+                                                    icon: const Icon(
+                                                      Icons.delete,
+                                                      size: 14,
+                                                    ),
+                                                    onPressed: () {},
                                                     color: Colors.red,
                                                     padding: EdgeInsets.zero,
-                                                    visualDensity: VisualDensity.compact,
-                                                    constraints: BoxConstraints(),
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    constraints:
+                                                        BoxConstraints(),
                                                   ),
                                                 ],
                                               ),
@@ -539,7 +617,10 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
     );
   }
 
-  Widget _buildSectionHeader(String title, {required VoidCallback onTapManage}) {
+  Widget _buildSectionHeader(
+    String title, {
+    required VoidCallback onTapManage,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -564,11 +645,7 @@ class _WebAdminHomeScreenState extends State<_WebAdminHomeScreenContent> {
                   fontSize: 15,
                 ),
               ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 13,
-                color: Colors.teal,
-              ),
+              Icon(Icons.arrow_forward_ios, size: 13, color: Colors.teal),
             ],
           ),
         ),

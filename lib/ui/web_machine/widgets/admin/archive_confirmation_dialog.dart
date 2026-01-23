@@ -18,10 +18,7 @@ class ArchiveConfirmationDialog {
         ),
         content: const Text(
           'Are you sure you want to archive this machine?',
-          style: TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6B7280),
-          ),
+          style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
         ),
         actions: [
           TextButton(

@@ -27,10 +27,7 @@ class MachineEmptyState extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             'Try adjusting your search or filters',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF9CA3AF),
-            ),
+            style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
             textAlign: TextAlign.center,
           ),
         ],

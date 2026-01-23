@@ -16,15 +16,33 @@ class CalendarWidget extends StatelessWidget {
     final firstDayWeekday = firstDay.weekday; // Monday = 1
 
     const weekDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,21 +50,35 @@ class CalendarWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${monthNames[month - 1]} $year',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+              Text(
+                '${monthNames[month - 1]} $year',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.chevron_left, size: 18, color: Color(0xFF6B7280)),
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      size: 18,
+                      color: Color(0xFF6B7280),
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.chevron_right, size: 18, color: Color(0xFF6B7280)),
+                    icon: const Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: Color(0xFF6B7280),
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -64,7 +96,11 @@ class CalendarWidget extends StatelessWidget {
                 child: Text(
                   day,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF9CA3AF)),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF9CA3AF),
+                  ),
                 ),
               );
             }).toList(),
@@ -76,7 +112,8 @@ class CalendarWidget extends StatelessWidget {
             runSpacing: 8,
             children: List.generate(42, (index) {
               final day = index - firstDayWeekday + 2;
-              final isToday = day == now.day && month == now.month && year == now.year;
+              final isToday =
+                  day == now.day && month == now.month && year == now.year;
               final isCurrentMonth = day > 0 && day <= daysInMonth;
 
               return Container(
@@ -91,7 +128,11 @@ class CalendarWidget extends StatelessWidget {
                   isCurrentMonth ? '$day' : '',
                   style: TextStyle(
                     fontSize: 11,
-                    color: isToday ? Colors.white : (isCurrentMonth ? const Color(0xFF374151) : Colors.grey[300]),
+                    color: isToday
+                        ? Colors.white
+                        : (isCurrentMonth
+                              ? const Color(0xFF374151)
+                              : Colors.grey[300]),
                     fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),

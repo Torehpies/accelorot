@@ -6,16 +6,17 @@ import '../../../../../data/services/firebase/firebase_machine_service.dart';
 
 class AdminMachineController extends ChangeNotifier {
   // ==================== DEPENDENCIES ====================
-  
+
   final MachineRepository _repository;
   final FirebaseMachineService _service;
 
   AdminMachineController({
     MachineRepository? repository,
     FirebaseMachineService? service,
-  })  : _repository = repository ?? MachineRepositoryRemote(FirebaseMachineService()), // Changed
-        _service = service ?? FirebaseMachineService();
-
+  }) : _repository =
+           repository ??
+           MachineRepositoryRemote(FirebaseMachineService()), // Changed
+       _service = service ?? FirebaseMachineService();
 
   // ==================== STATE ====================
 
@@ -77,7 +78,7 @@ class AdminMachineController extends ChangeNotifier {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    
+
     try {
       _isAuthenticated = _service.currentUserId != null;
 

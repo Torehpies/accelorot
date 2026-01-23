@@ -38,11 +38,13 @@ class ActivityTableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final availableTypes = UnifiedActivityConfig.getSubTypesForCategory(selectedCategory);
-    
+    final availableTypes = UnifiedActivityConfig.getSubTypesForCategory(
+      selectedCategory,
+    );
+
     // Validate that selectedType is valid for selectedCategory
-    final validType = availableTypes.contains(selectedType) 
-        ? selectedType 
+    final validType = availableTypes.contains(selectedType)
+        ? selectedType
         : ActivitySubType.all;
 
     final isCategoryActive = _isFilterActive(selectedCategory.displayName);
@@ -62,7 +64,9 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Title',
                   style: WebTextStyles.label.copyWith(
-                    color: isTitleActive ? WebColors.greenAccent : WebColors.textLabel,
+                    color: isTitleActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -78,7 +82,7 @@ class ActivityTableHeader extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Category Column with Dropdown
         Expanded(
           flex: 2,
@@ -89,7 +93,9 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Category',
                   style: WebTextStyles.label.copyWith(
-                    color: isCategoryActive ? WebColors.greenAccent : WebColors.textLabel,
+                    color: isCategoryActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -105,7 +111,7 @@ class ActivityTableHeader extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Type Column with Dropdown
         Expanded(
           flex: 2,
@@ -116,7 +122,9 @@ class ActivityTableHeader extends StatelessWidget {
                 Text(
                   'Type',
                   style: WebTextStyles.label.copyWith(
-                    color: isTypeActive ? WebColors.greenAccent : WebColors.textLabel,
+                    color: isTypeActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -132,13 +140,10 @@ class ActivityTableHeader extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Value Column Header
-        const Expanded(
-          flex: 2,
-          child: TableHeaderCell(label: 'Value'),
-        ),
-        
+        const Expanded(flex: 2, child: TableHeaderCell(label: 'Value')),
+
         // Date Added Column (sortable)
         Expanded(
           flex: 2,
@@ -151,16 +156,11 @@ class ActivityTableHeader extends StatelessWidget {
             onSort: isLoading ? null : () => onSort('date'),
           ),
         ),
-        
+
         // Actions Column Header
         const Expanded(
           flex: 1,
-          child: Center(
-            child: Text(
-              'Actions',
-              style: WebTextStyles.label,
-            ),
-          ),
+          child: Center(child: Text('Actions', style: WebTextStyles.label)),
         ),
       ],
     );

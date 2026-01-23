@@ -20,7 +20,6 @@ class MachineSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
     final teamIdAsync = ref.watch(currentUserTeamIdProvider);
 
     return teamIdAsync.when(
@@ -28,23 +27,20 @@ class MachineSelector extends ConsumerWidget {
         if (teamId == null) return const SizedBox.shrink();
 
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
-        
 
         final machines = machinesAsync.value ?? [];
         final isLoading = machinesAsync.isLoading && !machinesAsync.hasValue;
-        
+
         if (isLoading) {
           return const SizedBox.shrink();
         }
-        
-        if (machines.isEmpty && !machinesAsync.isLoading) return const SizedBox.shrink();
 
-        final activeMachines = machines
-            .where((m) => !m.isArchived)
-            .toList();
-        final archivedMachines = machines
-            .where((m) => m.isArchived)
-            .toList();
+        if (machines.isEmpty && !machinesAsync.isLoading) {
+          return const SizedBox.shrink();
+        }
+
+        final activeMachines = machines.where((m) => !m.isArchived).toList();
+        final archivedMachines = machines.where((m) => m.isArchived).toList();
 
         activeMachines.sort((a, b) {
           if (a.lastModified == null && b.lastModified == null) {
@@ -69,10 +65,10 @@ class MachineSelector extends ConsumerWidget {
             return a.machineName.compareTo(b.machineName);
           }
           if (a.lastModified == null) {
-            return 1; 
+            return 1;
           }
           if (b.lastModified == null) {
-            return -1; 
+            return -1;
           }
           final compare = b.lastModified!.compareTo(
             a.lastModified!,
@@ -82,12 +78,13 @@ class MachineSelector extends ConsumerWidget {
               : a.machineName.compareTo(b.machineName);
         });
 
-            // Combine: active first, then archived
+        // Combine: active first, then archived
         final sortedMachines = [...activeMachines, ...archivedMachines];
-        
+
         // Ensure selectedMachineId is valid
-        final selectedMachine = sortedMachines.any((m) => m.id == selectedMachineId) 
-            ? selectedMachineId 
+        final selectedMachine =
+            sortedMachines.any((m) => m.id == selectedMachineId)
+            ? selectedMachineId
             : null;
 
         return Container(

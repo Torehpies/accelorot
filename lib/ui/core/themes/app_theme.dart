@@ -17,11 +17,11 @@ final ThemeData appTheme = ThemeData(
       fontWeight: FontWeight.bold,
       color: AppColors.textPrimary,
     ),
-    titleLarge: TextStyle( 
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-    color: AppColors.textPrimary,
-  ),
+    titleLarge: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: AppColors.textPrimary,
+    ),
     titleMedium: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyMedium: TextStyle(color: AppColors.textPrimary),

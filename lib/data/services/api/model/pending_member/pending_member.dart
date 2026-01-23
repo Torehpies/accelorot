@@ -7,7 +7,7 @@ part 'pending_member.g.dart';
 @freezed
 abstract class PendingMember with _$PendingMember {
   const factory PendingMember({
-		required String id,
+    required String id,
     required String email,
     @Default('') String firstName,
     @Default('') String lastName,

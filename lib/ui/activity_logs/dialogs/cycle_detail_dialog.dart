@@ -10,15 +10,12 @@ import '../../core/dialog/dialog_fields.dart';
 class CycleDetailDialog extends StatelessWidget {
   final CycleRecommendation cycle;
 
-  const CycleDetailDialog({
-    super.key,
-    required this.cycle,
-  });
+  const CycleDetailDialog({super.key, required this.cycle});
 
   @override
   Widget build(BuildContext context) {
     final isRecommendation = cycle.category.toLowerCase() == 'recoms';
-    
+
     return BaseDialog(
       title: isRecommendation ? 'View Recommendation' : 'View Cycle',
       subtitle: isRecommendation
@@ -31,33 +28,18 @@ class CycleDetailDialog extends StatelessWidget {
           // All cycle information in one gray section
           ReadOnlySection(
             fields: [
-              ReadOnlyField(
-                label: 'Title',
-                value: cycle.title,
-              ),
-              ReadOnlyField(
-                label: 'Category',
-                value: cycle.category,
-              ),
+              ReadOnlyField(label: 'Title', value: cycle.title),
+              ReadOnlyField(label: 'Category', value: cycle.category),
               ReadOnlyField(
                 label: 'Controller Type',
                 value: _formatControllerType(cycle.controllerType),
               ),
               if (cycle.machineId != null)
-                ReadOnlyField(
-                  label: 'Machine ID',
-                  value: cycle.machineId!,
-                ),
+                ReadOnlyField(label: 'Machine ID', value: cycle.machineId!),
               if (cycle.cycles != null)
-                ReadOnlyField(
-                  label: 'Cycles',
-                  value: '${cycle.cycles} cycles',
-                ),
+                ReadOnlyField(label: 'Cycles', value: '${cycle.cycles} cycles'),
               if (cycle.duration != null)
-                ReadOnlyField(
-                  label: 'Duration',
-                  value: cycle.duration!,
-                ),
+                ReadOnlyField(label: 'Duration', value: cycle.duration!),
               if (cycle.completedCycles != null)
                 ReadOnlyField(
                   label: 'Completed Cycles',
@@ -73,31 +55,32 @@ class CycleDetailDialog extends StatelessWidget {
                   label: 'Total Runtime',
                   value: _formatRuntime(cycle.totalRuntimeSeconds!),
                 ),
-              
+
               // Description as multiline field
               ReadOnlyMultilineField(
                 label: 'Description',
                 value: cycle.description,
               ),
-              
+
               // Started At and Completed At (special for cycles)
               if (cycle.startedAt != null)
                 ReadOnlyField(
                   label: 'Started At',
-                  value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.startedAt!),
+                  value: DateFormat(
+                    'MM/dd/yyyy, hh:mm a',
+                  ).format(cycle.startedAt!),
                 ),
               if (cycle.completedAt != null)
                 ReadOnlyField(
                   label: 'Completed At',
-                  value: DateFormat('MM/dd/yyyy, hh:mm a').format(cycle.completedAt!),
+                  value: DateFormat(
+                    'MM/dd/yyyy, hh:mm a',
+                  ).format(cycle.completedAt!),
                 ),
-              
+
               // Batch ID if available
               if (cycle.batchId != null)
-                ReadOnlyField(
-                  label: 'Batch ID',
-                  value: cycle.batchId!,
-                ),
+                ReadOnlyField(label: 'Batch ID', value: cycle.batchId!),
             ],
           ),
         ],

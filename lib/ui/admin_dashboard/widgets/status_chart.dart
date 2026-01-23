@@ -17,63 +17,77 @@ class StatusChart extends StatelessWidget {
       );
     }
 
-    final openCount = reports.where((r) => r.status.toLowerCase() == 'open').length;
-    final inProgressCount = reports.where((r) => r.status.toLowerCase() == 'in_progress').length;
-    final closedCount = reports.where((r) => r.status.toLowerCase() == 'closed' || r.status.toLowerCase() == 'resolved').length;
+    final openCount = reports
+        .where((r) => r.status.toLowerCase() == 'open')
+        .length;
+    final inProgressCount = reports
+        .where((r) => r.status.toLowerCase() == 'in_progress')
+        .length;
+    final closedCount = reports
+        .where(
+          (r) =>
+              r.status.toLowerCase() == 'closed' ||
+              r.status.toLowerCase() == 'resolved',
+        )
+        .length;
     //final total = reports.length;
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-        // Pie Chart
-        SizedBox(
-          width: 180,
-          height: 180,
-          child: PieChart(
-            PieChartData(
-              sectionsSpace: 2,
-              centerSpaceRadius: 50,
-              startDegreeOffset: -90,
-              sections: [
-                if (openCount > 0)
-                  PieChartSectionData(
-                    color: const Color(0xFFEF4444), // Red for Open
-                    value: openCount.toDouble(),
-                    title: '',
-                    radius: 20,
-                  ),
-                if (inProgressCount > 0)
-                  PieChartSectionData(
-                    color: const Color(0xFFF59E0B), // Amber for In Progress
-                    value: inProgressCount.toDouble(),
-                    title: '',
-                    radius: 20,
-                  ),
-                if (closedCount > 0)
-                  PieChartSectionData(
-                    color: const Color(0xFF10B981), // Green for Closed
-                    value: closedCount.toDouble(),
-                    title: '',
-                    radius: 20,
-                  ),
-              ],
+          // Pie Chart
+          SizedBox(
+            width: 180,
+            height: 180,
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 2,
+                centerSpaceRadius: 50,
+                startDegreeOffset: -90,
+                sections: [
+                  if (openCount > 0)
+                    PieChartSectionData(
+                      color: const Color(0xFFEF4444), // Red for Open
+                      value: openCount.toDouble(),
+                      title: '',
+                      radius: 20,
+                    ),
+                  if (inProgressCount > 0)
+                    PieChartSectionData(
+                      color: const Color(0xFFF59E0B), // Amber for In Progress
+                      value: inProgressCount.toDouble(),
+                      title: '',
+                      radius: 20,
+                    ),
+                  if (closedCount > 0)
+                    PieChartSectionData(
+                      color: const Color(0xFF10B981), // Green for Closed
+                      value: closedCount.toDouble(),
+                      title: '',
+                      radius: 20,
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        // Legend
-        Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          alignment: WrapAlignment.center,
-          children: [
-            _buildLegendItem('Open', const Color(0xFFEF4444), openCount),
-            _buildLegendItem('In Progress', const Color(0xFFF59E0B), inProgressCount),
-            _buildLegendItem('Closed', const Color(0xFF10B981), closedCount),
-          ],
-        ),
-      ],
+          const SizedBox(height: 16),
+          // Legend
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildLegendItem('Open', const Color(0xFFEF4444), openCount),
+              _buildLegendItem(
+                'In Progress',
+                const Color(0xFFF59E0B),
+                inProgressCount,
+              ),
+              _buildLegendItem('Closed', const Color(0xFF10B981), closedCount),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -85,10 +99,7 @@ class StatusChart extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
         Text(

@@ -62,9 +62,9 @@ class MachineTableHeader extends StatelessWidget {
                 onSort: isLoading ? null : () => onSort('machineId'),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Name Column (sortable)
             Expanded(
               flex: 2,
@@ -77,9 +77,9 @@ class MachineTableHeader extends StatelessWidget {
                 onSort: isLoading ? null : () => onSort('name'),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Date Added Column (sortable)
             Expanded(
               flex: 2,
@@ -92,9 +92,9 @@ class MachineTableHeader extends StatelessWidget {
                 onSort: isLoading ? null : () => onSort('date'),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Status Column with Dropdown
             Expanded(
               flex: 2,
@@ -105,7 +105,9 @@ class MachineTableHeader extends StatelessWidget {
                     Text(
                       'Status',
                       style: WebTextStyles.label.copyWith(
-                        color: isStatusActive ? WebColors.greenAccent : WebColors.textLabel,
+                        color: isStatusActive
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -121,18 +123,13 @@ class MachineTableHeader extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Actions Column
             const Expanded(
               flex: 1,
-              child: Center(
-                child: Text(
-                  'Actions',
-                  style: WebTextStyles.label,
-                ),
-              ),
+              child: Center(child: Text('Actions', style: WebTextStyles.label)),
             ),
           ],
         ),

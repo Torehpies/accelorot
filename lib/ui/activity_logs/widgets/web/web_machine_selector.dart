@@ -29,7 +29,9 @@ class WebMachineSelector extends ConsumerWidget {
     return FutureBuilder<Map<String, dynamic>?>(
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
-        final shouldShowLoading = userSnapshot.connectionState == ConnectionState.waiting || isLoading;
+        final shouldShowLoading =
+            userSnapshot.connectionState == ConnectionState.waiting ||
+            isLoading;
 
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return WebDropdown<String>(
@@ -64,8 +66,10 @@ class WebMachineSelector extends ConsumerWidget {
 
         return machinesAsync.when(
           data: (machines) {
-            final activeMachines = machines.where((m) => !m.isArchived).toList();
-            
+            final activeMachines = machines
+                .where((m) => !m.isArchived)
+                .toList();
+
             if (activeMachines.isEmpty) {
               return WebDropdown<String>(
                 value: null,
@@ -80,13 +84,15 @@ class WebMachineSelector extends ConsumerWidget {
               );
             }
 
-            final selectedMachine = activeMachines.any((m) => m.id == selectedMachineId)
+            final selectedMachine =
+                activeMachines.any((m) => m.id == selectedMachineId)
                 ? activeMachines.firstWhere((m) => m.id == selectedMachineId)
                 : null;
 
             return _WebMachineDropdownInner(
               selectedMachineId: selectedMachineId,
-              selectedMachineName: selectedMachine?.machineName ?? 'All Machines',
+              selectedMachineName:
+                  selectedMachine?.machineName ?? 'All Machines',
               activeMachines: activeMachines,
               onChanged: onChanged,
               displayMode: displayMode,
@@ -119,7 +125,6 @@ class WebMachineSelector extends ConsumerWidget {
   }
 }
 
-
 class _WebMachineDropdownInner extends StatelessWidget {
   final String? selectedMachineId;
   final String selectedMachineName;
@@ -143,16 +148,15 @@ class _WebMachineDropdownInner extends StatelessWidget {
       value: selectedMachineId,
       label: 'Machine',
       hintText: 'All Machines',
-      displayText: selectedMachineId == null ? 'All Machines' : selectedMachineName,
+      displayText: selectedMachineId == null
+          ? 'All Machines'
+          : selectedMachineName,
       icon: Icons.precision_manufacturing,
       onChanged: onChanged,
       displayMode: displayMode,
       isLoading: isLoading,
       items: [
-        const PopupMenuItem<String>(
-          value: null,
-          child: Text('All Machines'),
-        ),
+        const PopupMenuItem<String>(value: null, child: Text('All Machines')),
         ...activeMachines.map((machine) {
           return PopupMenuItem<String>(
             value: machine.id,

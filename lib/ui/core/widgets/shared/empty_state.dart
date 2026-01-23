@@ -25,16 +25,9 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 56,
-              color: WebColors.iconDisabled,
-            ),
+            Icon(icon, size: 56, color: WebColors.iconDisabled),
             const SizedBox(height: 12),
-            Text(
-              title,
-              style: WebTextStyles.label.copyWith(fontSize: 16),
-            ),
+            Text(title, style: WebTextStyles.label.copyWith(fontSize: 16)),
             const SizedBox(height: 4),
             Text(
               subtitle,

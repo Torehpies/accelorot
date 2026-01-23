@@ -54,22 +54,18 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                 const Color(0xFFDEF9F4),
                 const Color(0xFFE8F5E9).withValues(alpha: 0.5),
               ],
-              stops: [_animationController.value, _animationController.value + 0.5],
+              stops: [
+                _animationController.value,
+                _animationController.value + 0.5,
+              ],
             ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: const Color(0xFFB2DFD3),
-              width: 1,
-            ),
+            border: Border.all(color: const Color(0xFFB2DFD3), width: 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                widget.icon,
-                size: 32,
-                color: const Color(0xFF10B981),
-              ),
+              Icon(widget.icon, size: 32, color: const Color(0xFF10B981)),
               const SizedBox(height: AppSpacing.md),
               Text(
                 widget.value,

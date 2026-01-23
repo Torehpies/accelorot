@@ -12,8 +12,7 @@ class ReportRepository {
 
   /// Fetch all reports for the current user's team
   /// Auto-resolves team from current user
-  Future<List<Report>> getTeamReports() =>
-      _reportService.fetchTeamReports();
+  Future<List<Report>> getTeamReports() => _reportService.fetchTeamReports();
 
   /// Fetch reports for a specific team (admin use)
   Future<List<Report>> getReportsByTeam(String teamId) =>

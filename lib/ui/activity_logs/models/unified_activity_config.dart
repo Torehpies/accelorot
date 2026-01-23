@@ -7,9 +7,11 @@ import 'activity_enums.dart';
 /// Centralized config for unified activity log handling
 class UnifiedActivityConfig {
   // ===== ENUM-BASED HELPERS =====
-  
+
   /// Get available sub-types for a category
-  static List<ActivitySubType> getSubTypesForCategory(ActivityCategory category) {
+  static List<ActivitySubType> getSubTypesForCategory(
+    ActivityCategory category,
+  ) {
     return ActivityEnumHelpers.getSubTypesForCategory(category);
   }
 
@@ -40,7 +42,7 @@ class UnifiedActivityConfig {
   }
 
   // ===== BACKWARD COMPATIBILITY HELPERS =====
-  
+
   /// Parse category from string (for legacy code)
   static ActivityCategory parseCategoryFromString(String category) {
     switch (category.toLowerCase()) {
@@ -61,5 +63,4 @@ class UnifiedActivityConfig {
   static ActivitySubType parseSubTypeFromString(String type) {
     return ActivitySubType.fromString(type);
   }
-
 }

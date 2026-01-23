@@ -13,7 +13,9 @@ class DateFilterButton extends StatefulWidget {
 }
 
 class _DateFilterButtonState extends State<DateFilterButton> {
-  DateFilterRange _currentFilter = const DateFilterRange(type: DateFilterType.none);
+  DateFilterRange _currentFilter = const DateFilterRange(
+    type: DateFilterType.none,
+  );
 
   void _showFilterMenu() {
     final RenderBox button = context.findRenderObject() as RenderBox;

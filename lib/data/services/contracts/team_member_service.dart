@@ -6,7 +6,7 @@ abstract class TeamMemberService {
     required String teamId,
     required int pageSize,
     required int pageIndex,
-		DateFilterRange? dateFilter,
+    DateFilterRange? dateFilter,
   });
   Future<void> updateTeamMember({
     required TeamMember member,

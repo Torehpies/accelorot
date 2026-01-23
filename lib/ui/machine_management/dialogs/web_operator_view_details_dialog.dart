@@ -10,10 +10,7 @@ import '../../core/dialog/dialog_fields.dart';
 class WebOperatorViewDetailsDialog extends StatelessWidget {
   final MachineModel machine;
 
-  const WebOperatorViewDetailsDialog({
-    super.key,
-    required this.machine,
-  });
+  const WebOperatorViewDetailsDialog({super.key, required this.machine});
 
   String get statusText {
     switch (machine.status) {
@@ -34,14 +31,8 @@ class WebOperatorViewDetailsDialog extends StatelessWidget {
       maxHeightFactor: 0.6,
       content: ReadOnlySection(
         fields: [
-          ReadOnlyField(
-            label: 'Machine ID',
-            value: machine.machineId,
-          ),
-          ReadOnlyField(
-            label: 'Status',
-            value: statusText,
-          ),
+          ReadOnlyField(label: 'Machine ID', value: machine.machineId),
+          ReadOnlyField(label: 'Status', value: statusText),
           ReadOnlyField(
             label: 'Current Batch',
             value: machine.currentBatchId ?? 'No active batch',

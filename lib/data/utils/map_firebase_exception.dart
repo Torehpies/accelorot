@@ -5,15 +5,15 @@ DataLayerError mapFirebaseAuthException(FirebaseException e) {
   switch (e.code) {
     case 'permission-denied':
       return const DataLayerError.permissionError();
-		case 'network-request-failed':
+    case 'network-request-failed':
       return const DataLayerError.networkError();
-		case 'invalid-credential':
+    case 'invalid-credential':
       return const DataLayerError.invalidCredentialError();
-		case 'too-many-requests':
+    case 'too-many-requests':
       return const DataLayerError.tooManyRequestsError();
-		case 'popup-closed-by-user':
+    case 'popup-closed-by-user':
       return const DataLayerError.popupClosedByUserError();
     default:
-			return DataLayerError.unknownError(e);
+      return DataLayerError.unknownError(e);
   }
 }

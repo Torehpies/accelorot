@@ -12,13 +12,13 @@ class FirestoreBatchService implements BatchService {
   FirestoreBatchService(this._firestore);
 
   // ===== COLLECTION REFERENCES =====
-  
+
   CollectionReference get _batches => _firestore.collection('batches');
   CollectionReference get _users => _firestore.collection('users');
   CollectionReference get _machines => _firestore.collection('machines');
 
   // ===== CONSTANTS =====
-  
+
   static const int firestoreWhereinLimit = 10;
 
   // ===== BATCH OPERATIONS =====

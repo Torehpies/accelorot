@@ -14,28 +14,29 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
     // Global filters (affect all data)
     String? selectedMachineId,
     String? selectedBatchId,
-    @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
+    @Default(DateFilterRange(type: DateFilterType.none))
+    DateFilterRange dateFilter,
     @Default('') String searchQuery,
-    
+
     // Table filters - NOW USING ENUMS
     @Default(ActivityCategory.all) ActivityCategory selectedCategory,
     @Default(ActivitySubType.all) ActivitySubType selectedType,
-    
+
     // Sorting
     String? sortColumn,
     @Default(true) bool sortAscending,
-    
+
     // Data
     @Default([]) List<ActivityLogItem> allActivities,
     @Default([]) List<ActivityLogItem> filteredActivities,
-    
+
     // Entity cache
     @Default({}) Map<String, dynamic> entityCache,
-    
+
     // Pagination
     @Default(1) int currentPage,
     @Default(10) int itemsPerPage,
-    
+
     // UI state
     @Default(LoadingStatus.initial) LoadingStatus status,
     String? errorMessage,
@@ -48,20 +49,23 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
 
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
-  bool get isEmpty => filteredActivities.isEmpty && status == LoadingStatus.success;
+  bool get isEmpty =>
+      filteredActivities.isEmpty && status == LoadingStatus.success;
 
   /// Get paginated items for current page
   List<ActivityLogItem> get paginatedItems {
     final startIndex = (currentPage - 1) * itemsPerPage;
     final endIndex = startIndex + itemsPerPage;
-    
+
     if (startIndex >= filteredActivities.length) {
       return [];
     }
-    
+
     return filteredActivities.sublist(
       startIndex,
-      endIndex > filteredActivities.length ? filteredActivities.length : endIndex,
+      endIndex > filteredActivities.length
+          ? filteredActivities.length
+          : endIndex,
     );
   }
 

@@ -6,15 +6,12 @@ abstract class AuthService {
   Stream<String?> get onAuthStateChanged;
   String? get currentUserUid;
   Future<String> signInWithEmail(String email, String password);
-  Future<User> signUp(
-    String email,
-    String password,
-  );
+  Future<User> signUp(String email, String password);
   Future<void> signOut();
   Future<Result<void, DataLayerError>> sendVerificationEmail();
   Future<Result<bool, DataLayerError>> checkEmailVerified();
   Future<Result<void, DataLayerError>> updateDisplayName(
     User user,
     String name,
-	);
+  );
 }

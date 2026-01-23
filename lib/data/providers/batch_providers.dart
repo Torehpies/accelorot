@@ -17,21 +17,24 @@ final batchRepositoryProvider = Provider<BatchRepository>((ref) {
 });
 
 /// Provider for batches by machine IDs
-final batchesForMachinesProvider = FutureProvider.family<List<BatchModel>, List<String>>(
-  (ref, machineIds) async {
-    final repository = ref.watch(batchRepositoryProvider);
-    return repository.getBatchesForMachines(machineIds);
-  },
-);
+final batchesForMachinesProvider =
+    FutureProvider.family<List<BatchModel>, List<String>>((
+      ref,
+      machineIds,
+    ) async {
+      final repository = ref.watch(batchRepositoryProvider);
+      return repository.getBatchesForMachines(machineIds);
+    });
 
 /// batches of team ID
-final batchesForTeamProvider = FutureProvider.family<List<BatchModel>, String>(
-  (ref, teamId) async {
-    final repository = ref.watch(batchRepositoryProvider);
-    final machineIds = await repository.getTeamMachineIds(teamId);
-    return repository.getBatchesForMachines(machineIds);
-  },
-);
+final batchesForTeamProvider = FutureProvider.family<List<BatchModel>, String>((
+  ref,
+  teamId,
+) async {
+  final repository = ref.watch(batchRepositoryProvider);
+  final machineIds = await repository.getTeamMachineIds(teamId);
+  return repository.getBatchesForMachines(machineIds);
+});
 
 /// AsyncNotifier for user's team batches (better for state management)
 class UserTeamBatchesNotifier extends AsyncNotifier<List<BatchModel>> {
@@ -39,14 +42,14 @@ class UserTeamBatchesNotifier extends AsyncNotifier<List<BatchModel>> {
   Future<List<BatchModel>> build() async {
     final repository = ref.watch(batchRepositoryProvider);
     final profileRepo = ref.watch(profileRepositoryProvider);
-    
+
     // Get current user's profile to get teamId
     final profile = await profileRepo.getCurrentProfile();
     if (profile?.teamId == null) return [];
-    
+
     // Get all machines for the team
     final machineIds = await repository.getTeamMachineIds(profile!.teamId!);
-    
+
     // Get batches for those machines
     return repository.getBatchesForMachines(machineIds);
   }
@@ -59,14 +62,14 @@ class UserTeamBatchesNotifier extends AsyncNotifier<List<BatchModel>> {
 }
 
 /// Provider using the AsyncNotifier
-final userTeamBatchesProvider = AsyncNotifierProvider<UserTeamBatchesNotifier, List<BatchModel>>(
-  () => UserTeamBatchesNotifier(),
-);
+final userTeamBatchesProvider =
+    AsyncNotifierProvider<UserTeamBatchesNotifier, List<BatchModel>>(
+      () => UserTeamBatchesNotifier(),
+    );
 
 /// Provider for active batch for a specific machine
-final activeBatchForMachineProvider = FutureProvider.family<BatchModel?, String>(
-  (ref, machineId) async {
-    final repository = ref.watch(batchRepositoryProvider);
-    return repository.getActiveBatchForMachine(machineId);
-  },
-);
+final activeBatchForMachineProvider =
+    FutureProvider.family<BatchModel?, String>((ref, machineId) async {
+      final repository = ref.watch(batchRepositoryProvider);
+      return repository.getActiveBatchForMachine(machineId);
+    });

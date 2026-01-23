@@ -30,11 +30,11 @@ class ActivityAggregatorService {
     required ReportRepository reportRepo,
     required CycleRepository cycleRepo,
     FirebaseAuth? auth,
-  })  : _substrateRepo = substrateRepo,
-        _alertRepo = alertRepo,
-        _reportRepo = reportRepo,
-        _cycleRepo = cycleRepo,
-        _auth = auth ?? FirebaseAuth.instance;
+  }) : _substrateRepo = substrateRepo,
+       _alertRepo = alertRepo,
+       _reportRepo = reportRepo,
+       _cycleRepo = cycleRepo,
+       _auth = auth ?? FirebaseAuth.instance;
 
   // ===== USER MANAGEMENT =====
 
@@ -74,7 +74,9 @@ class ActivityAggregatorService {
   Future<List<ActivityLogItem>> getCyclesRecom() async {
     final cycles = await _cycleRepo.getTeamCycles();
     return cycles
-        .map((cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle))
+        .map(
+          (cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle),
+        )
         .toList();
   }
 

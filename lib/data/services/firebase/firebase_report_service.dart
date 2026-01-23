@@ -9,11 +9,9 @@ class FirebaseReportService implements ReportService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  FirebaseReportService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FirebaseReportService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   String get _currentUserId {
     final user = _auth.currentUser;
@@ -26,12 +24,12 @@ class FirebaseReportService implements ReportService {
         .collection('users')
         .doc(_currentUserId)
         .get();
-    
+
     if (!userDoc.exists) throw Exception('User document not found');
-    
+
     final teamId = userDoc.data()?['teamId'];
     if (teamId == null) throw Exception('User has no team assigned');
-    
+
     return teamId as String;
   }
 
@@ -81,9 +79,7 @@ class FirebaseReportService implements ReportService {
           .orderBy('createdAt', descending: true)
           .get();
 
-      return snapshot.docs
-          .map((doc) => Report.fromFirestore(doc))
-          .toList();
+      return snapshot.docs.map((doc) => Report.fromFirestore(doc)).toList();
     } catch (e) {
       throw Exception('Failed to fetch reports for machine: $e');
     }
@@ -132,7 +128,7 @@ class FirebaseReportService implements ReportService {
       // Fetch user info
       String userName = request.userName;
       String userRole = 'Unknown';
-      
+
       if (request.userId != null) {
         final userDoc = await _firestore
             .collection('users')
@@ -171,7 +167,6 @@ class FirebaseReportService implements ReportService {
           .collection('reports')
           .doc(docId)
           .set(report.toFirestore());
-
     } catch (e) {
       throw Exception('Failed to create report: $e');
     }
@@ -183,9 +178,7 @@ class FirebaseReportService implements ReportService {
     UpdateReportRequest request,
   ) async {
     try {
-      final updateData = <String, dynamic>{
-        'updatedAt': Timestamp.now(),
-      };
+      final updateData = <String, dynamic>{'updatedAt': Timestamp.now()};
 
       if (request.title != null) updateData['title'] = request.title;
       if (request.description != null) {
@@ -193,7 +186,7 @@ class FirebaseReportService implements ReportService {
       }
       if (request.status != null) {
         updateData['status'] = request.status;
-        
+
         // If closing/resolving, add resolved info
         if (request.status == 'closed' || request.status == 'resolved') {
           updateData['resolvedAt'] = Timestamp.now();
@@ -209,7 +202,6 @@ class FirebaseReportService implements ReportService {
           .collection('reports')
           .doc(request.reportId)
           .update(updateData);
-
     } catch (e) {
       throw Exception('Failed to update report: $e');
     }
@@ -247,7 +239,9 @@ class FirebaseReportService implements ReportService {
         .collection('reports')
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Report.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Report.fromFirestore(doc)).toList(),
+        );
   }
 }

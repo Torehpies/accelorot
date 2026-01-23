@@ -19,7 +19,7 @@ class WebMachineDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -31,9 +31,7 @@ class WebMachineDetailsView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Color(0xFFE5E7EB)),
-              ),
+              border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
             ),
             child: Row(
               children: [
@@ -118,7 +116,9 @@ class WebMachineDetailsView extends StatelessWidget {
                   ],
                   const SizedBox(height: 12),
                   MachineInfoRow(
-                    icon: machine.isArchived ? Icons.archive : Icons.check_circle,
+                    icon: machine.isArchived
+                        ? Icons.archive
+                        : Icons.check_circle,
                     label: 'Status',
                     value: machine.isArchived ? 'Archived' : 'Active',
                   ),
@@ -132,9 +132,7 @@ class WebMachineDetailsView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Color(0xFFE5E7EB)),
-                ),
+                border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -184,9 +182,7 @@ class WebMachineDetailsView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Color(0xFFE5E7EB)),
-                ),
+                border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,

@@ -55,14 +55,10 @@ class CompostCard extends StatelessWidget {
                 color: iconColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 28,
-              ),
+              child: Icon(icon, color: iconColor, size: 28),
             ),
             const SizedBox(width: 16),
-            
+
             // Content
             Expanded(
               child: Column(
@@ -104,22 +100,20 @@ class CompostCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Machine info
                   _buildInfoText('Machine: $machineName'),
                   const SizedBox(height: 4),
-                  
+
                   // Batch info
                   _buildInfoText('Batch: $batchName'),
                   const SizedBox(height: 8),
-                  
+
                   // User and date
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: _buildInfoText('By: $userName'),
-                      ),
+                      Flexible(child: _buildInfoText('By: $userName')),
                       Text(
                         dateTime,
                         style: const TextStyle(

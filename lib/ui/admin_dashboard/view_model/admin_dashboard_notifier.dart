@@ -50,13 +50,15 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
   @override
   Future<AdminDashboardState> build() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    
+
     if (userId == null) {
       return const AdminDashboardState();
     }
 
     try {
-      final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
+      final profile = await ref
+          .read(profileRepositoryProvider)
+          .getCurrentProfile();
       final teamId = profile?.teamId;
 
       if (teamId == null) {
@@ -64,7 +66,9 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
       }
 
       // Use existing repository methods and stream providers
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
+      final operators = await ref
+          .read(operatorRepositoryProvider)
+          .getOperators(teamId);
       final machines = await ref.read(machinesStreamProvider(teamId).future);
       final reports = await ref.read(reportRepositoryProvider).getTeamReports();
 
@@ -80,16 +84,18 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
 
   Future<void> loadData() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    
+
     if (userId == null) {
       state = const AsyncValue.data(AdminDashboardState());
       return;
     }
 
     state = const AsyncValue.loading();
-    
+
     try {
-      final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
+      final profile = await ref
+          .read(profileRepositoryProvider)
+          .getCurrentProfile();
       final teamId = profile?.teamId;
 
       if (teamId == null) {
@@ -97,7 +103,9 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
         return;
       }
 
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
+      final operators = await ref
+          .read(operatorRepositoryProvider)
+          .getOperators(teamId);
       final machines = await ref.read(machinesStreamProvider(teamId).future);
       final reports = await ref.read(reportRepositoryProvider).getTeamReports();
 
@@ -117,6 +125,7 @@ class AdminDashboardNotifier extends AsyncNotifier<AdminDashboardState> {
 }
 
 // Provider must be at the top level (not inside a class)
-final adminDashboardProvider = AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
-  () => AdminDashboardNotifier(),
-);
+final adminDashboardProvider =
+    AsyncNotifierProvider<AdminDashboardNotifier, AdminDashboardState>(
+      () => AdminDashboardNotifier(),
+    );

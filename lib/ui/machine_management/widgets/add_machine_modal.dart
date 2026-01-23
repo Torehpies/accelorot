@@ -9,10 +9,7 @@ import 'success_dialog.dart';
 class AddMachineModal extends ConsumerStatefulWidget {
   final String teamId;
 
-  const AddMachineModal({
-    super.key,
-    required this.teamId,
-  });
+  const AddMachineModal({super.key, required this.teamId});
 
   @override
   ConsumerState<AddMachineModal> createState() => _AddMachineModalState();
@@ -38,7 +35,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
       final operators = await ref
           .read(operatorRepositoryProvider)
           .getOperators(widget.teamId);
-      
+
       if (mounted) {
         setState(() {
           _users = operators.where((o) => !o.isArchived).toList();
@@ -67,7 +64,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
 
     try {
       final notifier = ref.read(adminMachineProvider.notifier);
-      
+
       await notifier.addMachine(
         teamId: widget.teamId,
         machineId: _machineIdController.text.trim(),
@@ -82,10 +79,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -122,10 +116,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
               children: [
                 const Text(
                   'Add Machine',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -137,20 +128,14 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
             const SizedBox(height: 8),
             Text(
               'Add a new machine procured from the manufacturer.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 20),
 
             // Machine Name
             const Text(
               'Machine Name',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -180,10 +165,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
             // Machine ID
             const Text(
               'Machine ID',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -214,10 +196,7 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
             // Assign User
             const Text(
               'Assign User',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             UserSelectorDropdown(
@@ -274,8 +253,9 @@ class _AddMachineModalState extends ConsumerState<AddMachineModal> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(

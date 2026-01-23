@@ -20,7 +20,9 @@ class TemperatureStatsView extends ConsumerWidget {
       data: (readings) {
         final currentTemp = readings.isNotEmpty ? readings.last.value : 0.0;
         final hourlyReadings = readings.map((r) => r.value).toList();
-        final lastUpdated = readings.isNotEmpty ? readings.last.timestamp : null;
+        final lastUpdated = readings.isNotEmpty
+            ? readings.last.timestamp
+            : null;
 
         return SizedBox(
           height: 300,
