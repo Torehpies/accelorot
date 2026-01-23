@@ -10,6 +10,7 @@ abstract class PendingMembersState with _$PendingMembersState {
     // Cumulative members for infinite scrolling
     @Default(<PendingMember>[]) List<PendingMember> items,
     @Default(<PendingMember>[]) List<PendingMember> members,
+    @Default(<PendingMember>[]) List<PendingMember> filteredMembers,
     @Default({}) Map<int, List<PendingMember>> pagesByIndex,
     @Default(0) int currentPage,
     @Default(10) int pageSize,
@@ -20,5 +21,6 @@ abstract class PendingMembersState with _$PendingMembersState {
     Exception? error,
     @Default(DateFilterRange(type: DateFilterType.none))
     DateFilterRange dateFilter,
+    @Default('') String searchQuery,
   }) = _PendingMembersState;
 }

@@ -40,6 +40,7 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
     );
   }
 }
+
 class _TableContent extends StatelessWidget {
   final PendingMembersState state;
   final PendingMembersNotifier notifier;
@@ -48,10 +49,22 @@ class _TableContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state.isLoading && state.members.isEmpty) {
+    if (state.isLoading && state.filteredMembers.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (state.filteredMembers.isEmpty && !state.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('No pending members found'),
+          ],
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
@@ -162,9 +175,11 @@ class _MembersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: state.members.length,
-      itemBuilder: (context, index) =>
-          PendingMemberRow(member: state.members[index], notifier: notifier),
+      itemCount: state.filteredMembers.length,
+      itemBuilder: (context, index) => PendingMemberRow(
+        member: state.filteredMembers[index],
+        notifier: notifier,
+      ),
     );
   }
 }

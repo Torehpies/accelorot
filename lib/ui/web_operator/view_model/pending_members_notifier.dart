@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/services/api/model/pending_member/pen
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_search_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -44,18 +45,13 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   PendingMembersState build() {
     ref.listen(operatorsDateFilterProvider, (previous, next) {
       if (previous != next) {
-        // Clear cache and reload when shared filter changes
-        final updatedPages = Map<int, List<PendingMember>>.from(
-          state.pagesByIndex,
-        )..clear();
-        state = state.copyWith(
-          dateFilter: next,
-          pagesByIndex: updatedPages,
-          items: const [],
-          currentPage: 0,
-          lastFetchedAt: null,
-        );
-        _loadPage(0);
+        _handleFilterOrSearchChange(next, state.searchQuery);
+      }
+    });
+
+    ref.listen(operatorsSearchProvider, (previous, next) {
+      if (previous != next) {
+        _handleFilterOrSearchChange(state.dateFilter, next);
       }
     });
     state = const PendingMembersState();
@@ -111,6 +107,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
       ..clear();
     state = state.copyWith(
+      dateFilter: const DateFilterRange(type: DateFilterType.none),
+      searchQuery: '',
       pagesByIndex: updatedPages,
       items: const [],
       lastFetchedAt: null,
@@ -141,6 +139,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final currentMembers = List<PendingMember>.from(state.members)
       ..removeWhere((m) => m.id == member.id);
 
+    final filteredMembers = _applySearchFilter(currentMembers);
+
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
 
@@ -149,13 +149,12 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     state = state.copyWith(
       items: updatedItems,
       members: currentMembers,
+      filteredMembers: filteredMembers,
       pagesByIndex: updatedPages,
       isLoading: false,
       hasNextPage: currentMembers.length == state.pageSize,
       lastFetchedAt: DateTime.now(),
     );
-
-    Future.microtask(() => _loadPage(state.currentPage));
   }
 
   void _handleDeclineError(Exception error) {
@@ -166,6 +165,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final currentMembers = List<PendingMember>.from(state.members)
       ..removeWhere((m) => m.id == member.id);
 
+    final filteredMembers = _applySearchFilter(currentMembers);
+
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
     final updatedItems = state.items.where((m) => m.id != member.id).toList();
@@ -173,13 +174,12 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     state = state.copyWith(
       items: updatedItems,
       members: currentMembers,
+      filteredMembers: filteredMembers,
       pagesByIndex: updatedPages,
       isLoading: false,
       hasNextPage: currentMembers.length == state.pageSize,
       lastFetchedAt: DateTime.now(),
     );
-
-    Future.microtask(() => _loadPage(state.currentPage));
   }
 
   void _handleError(Exception error) {
@@ -193,14 +193,19 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   }
 
   void _handleSuccess(int pageIndex, List<PendingMember> members) {
-    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
-      ..[pageIndex] = members;
+    final filteredMembers = _applySearchFilter(members); // ✅ Apply search
 
-    final newItems = pageIndex == 0 ? members : [...state.items, ...members];
+    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
+      ..[pageIndex] = members; // Store unfiltered for pagination
+
+    final newItems = pageIndex == 0
+        ? filteredMembers
+        : [...state.items, ...filteredMembers];
 
     state = state.copyWith(
       items: newItems,
-      members: members,
+      members: members, // Raw data
+      filteredMembers: filteredMembers, // Filtered data for UI
       currentPage: pageIndex,
       isLoading: false,
       isError: false,
@@ -225,6 +230,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       state = state.copyWith(
         items: const [],
         members: const [],
+        filteredMembers: const [],
         currentPage: 0,
         isLoading: false,
         hasNextPage: false,
@@ -234,12 +240,14 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
+      final filteredMembers = _applySearchFilter(cachedPage);
       final newItems = pageIndex == 0
-          ? cachedPage
-          : [...state.items, ...cachedPage];
+          ? filteredMembers
+          : [...state.items, ...filteredMembers];
       state = state.copyWith(
         currentPage: pageIndex,
         members: cachedPage,
+        filteredMembers: filteredMembers,
         items: newItems,
         isLoading: false,
       );
@@ -249,7 +257,6 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     state = state.copyWith(isLoading: true);
 
     final service = ref.read(pendingMembersServiceProvider);
-
     final result = await service.getPendingMembersPage(
       teamId: teamId,
       pageSize: state.pageSize,
@@ -258,8 +265,57 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     );
 
     return switch (result) {
-      Ok<List<PendingMember>>() => _handleSuccess(pageIndex, result.value),
+      Ok<List<PendingMember>>(value: final members) => _handleSuccess(
+        pageIndex,
+        members,
+      ),
       Error<List<PendingMember>>() => _handleError(result.error),
     };
+  }
+
+  void setSearch(String query) {
+    state = state.copyWith(searchQuery: query);
+    _applyFilters();
+  }
+
+  void _handleFilterOrSearchChange(DateFilterRange filter, String searchQuery) {
+    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
+      ..clear();
+    state = state.copyWith(
+      dateFilter: filter,
+      searchQuery: searchQuery,
+      pagesByIndex: updatedPages,
+      items: const [],
+      currentPage: 0,
+      lastFetchedAt: null,
+    );
+    _loadPage(0);
+  }
+
+  void _applyFilters() {
+    final query = state.searchQuery.toLowerCase();
+    final filtered = state.members.where((member) {
+      final matchesSearch =
+          query.isEmpty ||
+          member.email.toLowerCase().contains(query) ||
+          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+            query,
+          );
+      return matchesSearch;
+    }).toList();
+
+    state = state.copyWith(filteredMembers: filtered);
+  }
+
+  List<PendingMember> _applySearchFilter(List<PendingMember> members) {
+    if (state.searchQuery.isEmpty) return members;
+
+    final query = state.searchQuery.toLowerCase();
+    return members.where((member) {
+      return member.email.toLowerCase().contains(query) ||
+          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+            query,
+          );
+    }).toList();
   }
 }

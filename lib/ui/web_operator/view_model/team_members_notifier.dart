@@ -4,6 +4,7 @@ import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_search_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -19,16 +20,13 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   TeamMembersState build() {
     ref.listen(operatorsDateFilterProvider, (previous, next) {
       if (previous != next) {
-        final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-          ..clear();
-        state = state.copyWith(
-          dateFilter: next,
-          pagesByIndex: updatedPages,
-          items: const [],
-          currentPage: 0,
-          lastFetchedAt: null,
-        );
-        _loadPage(0);
+        _handleFilterOrSearchChange(next, state.searchQuery);
+      }
+    });
+
+    ref.listen(operatorsSearchProvider, (previous, next) {
+      if (previous != next) {
+        _handleFilterOrSearchChange(state.dateFilter, next);
       }
     });
     state = const TeamMembersState();
@@ -169,12 +167,14 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
+      final filteredMembers = _applySearchFilter(cachedPage);
       final newItems = pageIndex == 0
           ? cachedPage
           : [...state.items, ...cachedPage];
       state = state.copyWith(
         currentPage: pageIndex,
         members: cachedPage,
+        filteredMembers: filteredMembers,
         items: newItems,
         isLoading: false,
       );
@@ -191,21 +191,69 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       dateFilter: state.dateFilter,
     );
 
+    final filteredMembers = _applySearchFilter(pageMembers);
     final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
       ..[pageIndex] = pageMembers;
 
     final newItems = pageIndex == 0
-        ? pageMembers
-        : [...state.items, ...pageMembers];
+        ? filteredMembers
+        : [...state.items, ...filteredMembers];
 
     state = state.copyWith(
       items: newItems,
       members: pageMembers,
+      filteredMembers: filteredMembers,
       currentPage: pageIndex,
       isLoading: false,
       hasNextPage: pageMembers.length == state.pageSize,
       pagesByIndex: updatedPages,
       lastFetchedAt: DateTime.now(),
     );
+  }
+
+  void setSearch(String query) {
+    state = state.copyWith(searchQuery: query);
+    _applyFilters();
+  }
+
+  void _handleFilterOrSearchChange(DateFilterRange filter, String searchQuery) {
+    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
+      ..clear();
+    state = state.copyWith(
+      dateFilter: filter,
+      searchQuery: searchQuery,
+      pagesByIndex: updatedPages,
+      items: const [],
+      currentPage: 0,
+      lastFetchedAt: null,
+    );
+    _loadPage(0);
+  }
+
+  void _applyFilters() {
+    final query = state.searchQuery.toLowerCase();
+    final filtered = state.members.where((member) {
+      final matchesSearch =
+          query.isEmpty ||
+          member.email.toLowerCase().contains(query) ||
+          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+            query,
+          );
+      return matchesSearch;
+    }).toList();
+
+    state = state.copyWith(filteredMembers: filtered);
+  }
+
+  List<TeamMember> _applySearchFilter(List<TeamMember> members) {
+    if (state.searchQuery.isEmpty) return members;
+
+    final query = state.searchQuery.toLowerCase();
+    return members.where((member) {
+      return member.email.toLowerCase().contains(query) ||
+          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+            query,
+          );
+    }).toList();
   }
 }

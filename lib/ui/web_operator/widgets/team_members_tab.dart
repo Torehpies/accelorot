@@ -90,10 +90,29 @@ class _MembersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (state.isLoading && state.members.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.filteredMembers.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('No members found', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: state.members.length,
-      itemBuilder: (context, index) =>
-          TeamMemberRow(member: state.members[index], notifier: notifier),
+      itemCount: state.filteredMembers.length,
+      itemBuilder: (context, index) => TeamMemberRow(
+        member: state.filteredMembers[index],
+        notifier: notifier,
+      ),
     );
   }
 }

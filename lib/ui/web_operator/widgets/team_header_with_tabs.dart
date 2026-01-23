@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
@@ -46,16 +47,27 @@ List<Widget> _buildFilters(TabController controller) => [
     },
   ),
   const SizedBox(width: 12),
-  SizedBox(
-    width: 220,
-    child: TextField(
-      decoration: InputDecoration(
-        isDense: true,
-        prefixIcon: const Icon(Icons.search, size: 18),
-        hintText: 'Search…',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
-      ),
-    ),
+  Consumer(
+    builder: (context, ref, child) {
+      final activeTabIndex = controller.index;
+      final isLoading = activeTabIndex == 0
+          ? ref.watch(teamMembersProvider).isLoading
+          : ref.watch(pendingMembersProvider).isLoading;
+
+      return SizedBox(
+        width: 220,
+        child: SearchField(
+          isLoading: isLoading,
+          onChanged: (query) {
+            if (activeTabIndex == 0) {
+              ref.read(teamMembersProvider.notifier).setSearch(query);
+            } else {
+              ref.read(pendingMembersProvider.notifier).setSearch(query);
+            }
+          },
+        ),
+      );
+    },
   ),
   const SizedBox(width: 12),
   ElevatedButton(

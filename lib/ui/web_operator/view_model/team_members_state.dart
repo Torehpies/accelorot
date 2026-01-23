@@ -10,6 +10,7 @@ abstract class TeamMembersState with _$TeamMembersState {
     // Cumulative members for infinite scrolling
     @Default(<TeamMember>[]) List<TeamMember> items,
     @Default(<TeamMember>[]) List<TeamMember> members,
+    @Default(<TeamMember>[]) List<TeamMember> filteredMembers,
     @Default({}) Map<int, List<TeamMember>> pagesByIndex,
     @Default(0) int currentPage,
     @Default(10) int pageSize,
@@ -18,5 +19,6 @@ abstract class TeamMembersState with _$TeamMembersState {
     DateTime? lastFetchedAt,
     @Default(DateFilterRange(type: DateFilterType.none))
     DateFilterRange dateFilter,
+    @Default('') String searchQuery,
   }) = _TeamMembersState;
 }
