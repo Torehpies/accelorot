@@ -14,6 +14,24 @@ part 'team_members_notifier.g.dart';
 
 @riverpod
 class TeamMembersNotifier extends _$TeamMembersNotifier {
+  void setPageSize(int newSize) {
+    if (newSize == state.pageSize) return;
+    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
+      ..clear();
+
+    state = state.copyWith(
+      pageSize: newSize,
+      currentPage: 0,
+      pagesByIndex: updatedPages,
+      items: const [],
+      members: const [],
+      filteredMembers: const [],
+      lastFetchedAt: null,
+      hasNextPage: false,
+    );
+    _loadPage(0);
+  }
+
   static const _cacheTtl = Duration(minutes: 1);
 
   @override
@@ -177,6 +195,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         filteredMembers: filteredMembers,
         items: newItems,
         isLoading: false,
+        hasNextPage: cachedPage.length == state.pageSize,
       );
       return;
     }

@@ -6,7 +6,7 @@ import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/member_row.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamMembersTab extends ConsumerStatefulWidget {
@@ -133,12 +133,21 @@ class _PaginationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PaginationBar(
-      currentPage: currentPage,
-      canGoNext: hasNextPage,
-      onBack: notifier.previousPage,
-      onNext: notifier.nextPage,
-      onPageSelected: notifier.goToPage,
+    final pageSize = ref.watch(teamMembersProvider).pageSize;
+    final hasNext = ref.watch(teamMembersProvider).hasNextPage;
+    final current = currentPage;
+    final pageCount = hasNext ? current + 2 : current + 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: PaginationControls(
+        currentPage: current + 1, // 1-based
+        totalPages: pageCount,
+        itemsPerPage: pageSize,
+        isLoading: ref.watch(teamMembersProvider).isLoading,
+        onPageChanged: (page) => notifier.goToPage(page - 1),
+        onItemsPerPageChanged: notifier.setPageSize,
+      ),
     );
   }
 }

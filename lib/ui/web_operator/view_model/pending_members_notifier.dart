@@ -12,6 +12,24 @@ part 'pending_members_notifier.g.dart';
 
 @riverpod
 class PendingMembersNotifier extends _$PendingMembersNotifier {
+  void setPageSize(int newSize) {
+    if (newSize == state.pageSize) return;
+    final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
+      ..clear();
+
+    state = state.copyWith(
+      pageSize: newSize,
+      currentPage: 0,
+      pagesByIndex: updatedPages,
+      items: const [],
+      members: const [],
+      filteredMembers: const [],
+      lastFetchedAt: null,
+      hasNextPage: false,
+    );
+    _loadPage(0);
+  }
+
   static const _cacheTtl = Duration(minutes: 1);
 
   Future<void> acceptRequest(PendingMember member) async {
@@ -250,6 +268,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
         filteredMembers: filteredMembers,
         items: newItems,
         isLoading: false,
+        hasNextPage: cachedPage.length == state.pageSize,
       );
       return;
     }

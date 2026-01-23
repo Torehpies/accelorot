@@ -5,7 +5,7 @@ import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,11 +33,18 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
           child: _TableContent(state: state, notifier: notifier),
         ),
         const SizedBox(height: 12),
-        _PaginationSection(
-          currentPage: state.currentPage,
-          hasNextPage: state.hasNextPage,
-          notifier: notifier,
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 10),
+
+          child: _PaginationSection(
+            currentPage: state.currentPage,
+
+            hasNextPage: state.hasNextPage,
+
+            notifier: notifier,
+          ),
         ),
+
         const SizedBox(height: 12),
       ],
     );
@@ -136,12 +143,20 @@ class _PaginationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PaginationBar(
-      currentPage: currentPage,
-      canGoNext: hasNextPage,
-      onBack: notifier.previousPage,
-      onNext: notifier.nextPage,
-      onPageSelected: notifier.goToPage,
+    final pageSize = ref.watch(pendingMembersProvider).pageSize;
+    final isLoading = ref.watch(pendingMembersProvider).isLoading;
+    final pageCount = hasNextPage ? currentPage + 2 : currentPage + 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: PaginationControls(
+        currentPage: currentPage + 1,
+        totalPages: pageCount,
+        itemsPerPage: pageSize,
+        isLoading: isLoading,
+        onPageChanged: (page) => notifier.goToPage(page - 1),
+        onItemsPerPageChanged: notifier.setPageSize,
+      ),
     );
   }
 }
