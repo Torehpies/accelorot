@@ -16,6 +16,9 @@ class TeamHeaderWithTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
+    final isTablet =
+        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -24,14 +27,14 @@ class TeamHeaderWithTabs extends StatelessWidget {
             : MainAxisAlignment.center,
         children: [
           TabsRow(controller: controller),
-          if (isDesktop) ..._buildFilters(controller),
+          if (isDesktop) ..._buildFilters(controller, isTablet),
         ],
       ),
     );
   }
 }
 
-List<Widget> _buildFilters(TabController controller) => [
+List<Widget> _buildFilters(TabController controller, bool isTablet) => [
   const Spacer(),
   Consumer(
     builder: (context, ref, child) {
@@ -70,12 +73,21 @@ List<Widget> _buildFilters(TabController controller) => [
     },
   ),
   const SizedBox(width: 12),
-  ElevatedButton(
-    onPressed: () {},
-    style: ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+  Tooltip(
+    message: 'Add Operator',
+    child: ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Icon(Icons.add),
+          ?!isTablet ? const Text('Add Operator') : null,
+        ],
+      ),
     ),
-    child: const Text('Add Operator'),
   ),
 ];

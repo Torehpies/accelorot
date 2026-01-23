@@ -52,6 +52,9 @@ class _TableContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet =
+        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
     if (state.isLoading && state.members.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -69,7 +72,7 @@ class _TableContent extends StatelessWidget {
           children: [
             StickyHeader(
               labels: ['First Name', 'Last Name', 'Email', 'Status', 'Actions'],
-              flexValues: [2, 2, 3, 1, 1],
+              flexValues: [isTablet ? 1 : 2, isTablet ? 1 : 2, 3, 1, 1],
               style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
             ),
             Expanded(

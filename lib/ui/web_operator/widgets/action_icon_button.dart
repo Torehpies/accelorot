@@ -8,7 +8,7 @@ Widget actionIconButton({
   return Tooltip(
     message: tooltip,
     child: SizedBox.square(
-      dimension: 32,
+      dimension: 30,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -16,7 +16,7 @@ Widget actionIconButton({
           onTap: onPressed,
           child: Icon(
             icon,
-            size: 24,
+            size: 20,
             color: Colors.grey[700],
           ),
         ),
