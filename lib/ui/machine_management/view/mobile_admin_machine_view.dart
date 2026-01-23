@@ -149,92 +149,97 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: Column(
-          children: [
-            // Custom header with filters
-            Container(
-              color: AppColors.background,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 12,
-                left: 20,
-                right: 20,
-                bottom: 12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text('Machine List', style: AppTextStyles.heading1),
-                  const SizedBox(height: 12),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  'Machine List',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-                  // Filter row: Search + Status + Date + Add
-                  Row(
-                    children: [
-                      // Search bar - takes remaining space
-                      Expanded(
-                        child: SearchBarWidget(
-                          onSearchChanged: notifier.setSearchQuery,
-                          onClear: () => notifier.setSearchQuery(''),
-                          focusNode: _searchFocusNode,
-                          hintText: 'Search machines...',
-                          height: 40,
-                          borderRadius: 12,
+                // Filter row: Search + Status + Date + Add
+                Row(
+                  children: [
+                    // Search bar - takes remaining space
+                    Expanded(
+                      child: SearchBarWidget(
+                        onSearchChanged: notifier.setSearchQuery,
+                        onClear: () => notifier.setSearchQuery(''),
+                        focusNode: _searchFocusNode,
+                        hintText: 'Search machines...',
+                        height: 40,
+                        borderRadius: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Status filter button
+                    MobileStatusFilterButton(
+                      currentFilter: state.selectedStatusFilter,
+                      onFilterChanged: notifier.setStatusFilter,
+                      isLoading: state.isLoading,
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Date filter button
+                    MobileDateFilterButton(
+                      onFilterChanged: notifier.setDateFilter,
+                      isLoading: state.isLoading,
+                    ),
+
+                    // Add button (only for admin)
+                    if (_isAdmin) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.green100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          onPressed: _onAddPressed,
+                          padding: EdgeInsets.zero,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-                      // Status filter button
-                      MobileStatusFilterButton(
-                        currentFilter: state.selectedStatusFilter,
-                        onFilterChanged: notifier.setStatusFilter,
-                        isLoading: state.isLoading,
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Date filter button
-                      MobileDateFilterButton(
-                        onFilterChanged: notifier.setDateFilter,
-                        isLoading: state.isLoading,
-                      ),
-
-                      // Add button (only for admin)
-                      if (_isAdmin) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.green100,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            onPressed: _onAddPressed,
-                            padding: EdgeInsets.zero,
-                          ),
+                // Main content container
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background2,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
-                    ],
+                    ),
+                    child: _buildMachineContent(state, notifier),
                   ),
-                ],
-              ),
-            ),
-
-            // Main content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
                 ),
-                child: _buildMachineContent(state, notifier),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -247,7 +252,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
     // Show skeleton on initial load
     if (state.isLoading && state.machines.isEmpty) {
       return ListView.builder(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.all(16),
         itemCount: 3,
         itemBuilder: (context, index) => _buildSkeletonCard(),
       );
@@ -361,7 +366,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
       },
       color: AppColors.green100,
       child: ListView.builder(
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.all(16),
         itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == state.displayedMachines.length) {
