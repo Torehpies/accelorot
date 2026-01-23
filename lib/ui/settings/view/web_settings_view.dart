@@ -7,6 +7,6 @@ class WebSettingsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const MobileSettingsView(showAppBar: false);
+    return const MobileSettingsView();
   }
 }
