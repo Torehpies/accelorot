@@ -30,13 +30,7 @@ class CtaSection extends StatelessWidget {
               horizontal: AppSpacing.xxxl * 2,
               vertical: AppSpacing.xxxl * 3,
             ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
-              ),
-            ),
+            color: Colors.white,
             child: Column(
               children: [
                 Text(
