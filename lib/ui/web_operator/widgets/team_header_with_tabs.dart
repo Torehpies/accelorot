@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,21 +22,29 @@ class TeamHeaderWithTabs extends StatelessWidget {
             : MainAxisAlignment.center,
         children: [
           TabsRow(controller: controller),
-          if (isDesktop) ..._buildFilters(),
+          if (isDesktop) ..._buildFilters(controller),
         ],
       ),
     );
   }
 }
 
-List<Widget> _buildFilters() => [
+List<Widget> _buildFilters(TabController controller) => [
   const Spacer(),
   Consumer(
     builder: (context, ref, child) {
+      final activeTabIndex = controller.index;
+      final isTeamMembersTab = activeTabIndex == 0;
       return DateFilterDropdown(
-        isLoading: ref.watch(teamMembersProvider).isLoading,
+        isLoading: isTeamMembersTab
+            ? ref.watch(teamMembersProvider).isLoading
+            : ref.watch(pendingMembersProvider).isLoading,
         onFilterChanged: (filter) {
-          ref.read(teamMembersProvider.notifier).setDateFilter(filter);
+          if (isTeamMembersTab) {
+            ref.read(teamMembersProvider.notifier).setDateFilter(filter);
+          } else {
+            ref.read(pendingMembersProvider.notifier).setDateFilter(filter);
+          }
         },
       );
     },
