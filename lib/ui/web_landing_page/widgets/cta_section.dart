@@ -20,6 +20,7 @@ class CtaSection extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
+          // ================= CTA CONTAINER WITH GRADIENT =================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
@@ -30,7 +31,10 @@ class CtaSection extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
+                colors: [
+                  Color(0xFF84FAB0), // start green
+                  Color(0xFF8FD3F4), // end blue
+                ],
               ),
             ),
             child: Column(
@@ -49,11 +53,12 @@ class CtaSection extends StatelessWidget {
                   'Join the sustainable composting revolution with Accel-O-Rot\'s smart IoT\nsystem',
                   textAlign: TextAlign.center,
                   style: WebTextStyles.subtitle.copyWith(
-                    color: Color(0xFF111827),
+                    color: const Color(0xFF111827),
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
+                // ================= GET STARTED BUTTON =================
                 Container(
                   decoration: BoxDecoration(
                     color: WebColors.iconsPrimary,
@@ -95,7 +100,8 @@ class CtaSection extends StatelessWidget {
               ],
             ),
           ),
-          // Footers
+
+          // ================= FOOTER =================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.lg),

@@ -3,65 +3,85 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../models/step_model.dart';
 
 class StepCard extends StatelessWidget {
   final StepModel step;
+  final bool enableHover;
+
   const StepCard({
     super.key,
     required this.step,
+    this.enableHover = true, // new: hover effect for desktop
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF28A85A).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '0${step.number}',
-            style: WebTextStyles.h1.copyWith(
-              fontSize: 48,
-              color: WebColors.textTitle.withValues(alpha: 0.5),
-              height: 1.0,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            step.title,
-            style: WebTextStyles.h3.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Flexible(
-            child: Text(
-              step.description,
-              softWrap: true,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
-      ),
+    final screenWidth = MediaQuery.of(context).size.width;
+    final numberFontSize = screenWidth > 1200
+        ? 48.0
+        : screenWidth > 900
+            ? 42.0
+            : 32.0; // responsive sizes
+
+    Widget cardContent = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          '${step.number}',
+          style: WebTextStyles.stepNumber.copyWith(fontSize: numberFontSize),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          step.title,
+          textAlign: TextAlign.center,
+          style: WebTextStyles.stepCardTitle,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          step.description,
+          textAlign: TextAlign.center,
+          style: WebTextStyles.stepCardDescription,
+        ),
+      ],
     );
+
+    // Desktop hover effect
+    if (enableHover && screenWidth > 900) {
+      cardContent = MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 248, 247, 247),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: const Color(0xFFBAE6FD),
+              width: 1,
+            ),
+          ),
+          padding: EdgeInsets.all(AppSpacing.xl),
+          child: cardContent,
+        ),
+      );
+    } else {
+      cardContent = Container(
+        padding: EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 248, 247, 247),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFBAE6FD),
+            width: 1,
+          ),
+        ),
+        child: cardContent,
+      );
+    }
+
+    return cardContent;
   }
 }
