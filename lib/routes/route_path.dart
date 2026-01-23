@@ -28,7 +28,12 @@ enum RoutePath {
   //super admin paths
   superAdminTeams(path: '/superadmin/teams'),
   superAdminMachines(path: '/superadmin/machines'),
-  superAdminProfile(path: '/superadmin/profile');
+  superAdminProfile(path: '/superadmin/profile'),
+  
+  // settings
+  operatorSettings(path: '/operator/settings'),
+  adminSettings(path: '/admin/settings'),
+  superAdminSettings(path: '/superadmin/settings');
 
   const RoutePath({required this.path});
   final String path;
