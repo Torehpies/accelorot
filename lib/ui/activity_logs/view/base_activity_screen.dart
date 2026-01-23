@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/activity_list_state.dart';
 import '../widgets/mobile/filter_section.dart';
 import '../widgets/mobile/activity_card.dart';
-import '../../core/widgets/search_bar_widget.dart';
+import '../../core/widgets/filters/mobile_search_bar.dart';
 import '../widgets/mobile/date_filter_button.dart';
 import '../widgets/mobile/machine_selector.dart'; 
 import '../widgets/mobile/batch_selector.dart';

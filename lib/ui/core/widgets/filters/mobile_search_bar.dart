@@ -1,7 +1,7 @@
 // lib/ui/core/widgets/search_bar_widget.dart
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
-import '../themes/app_text_styles.dart';
+import '../../themes/app_theme.dart';
+import '../../themes/app_text_styles.dart';
 
 class SearchBarWidget extends StatefulWidget {
   final ValueChanged<String> onSearchChanged;

@@ -11,17 +11,7 @@ import '../../activity_logs/models/activity_common.dart';
 
 part 'mobile_machine_viewmodel.g.dart';
 
-// ===== MOBILE FILTER TABS =====
-// Defines the tab filtering system for mobile UI
-enum MachineFilterTab { 
-  all,       // non-archived machines
-  active,    // active machines
-  suspended, // machines under maintenance
-  archived   // archived machines
-}
-
 // ===== AGGREGATOR SERVICE PROVIDER =====
-// Provides the MachineAggregatorService for mobile views
 @riverpod
 MachineAggregatorService mobileMachineAggregatorService(Ref ref) {
   final repository = ref.watch(machineRepositoryProvider);
@@ -75,13 +65,13 @@ class MobileMachineViewModel extends _$MobileMachineViewModel {
     }
   }
 
-  // ===== MOBILE-SPECIFIC: TAB FILTERING =====
+  // ===== MOBILE-SPECIFIC: STATUS FILTERING =====
 
-  void setFilterTab(MachineFilterTab tab) {
+  void setStatusFilter(MachineStatusFilter filter) {
     HapticFeedback.selectionClick();
     state = state.copyWith(
-      selectedTab: tab,
-      searchQuery: '', // Clear search when switching tabs
+      selectedStatusFilter: filter,
+      searchQuery: '', // Clear search when switching status
       displayLimit: _loadMoreIncrement, // Reset to initial limit
     );
   }
@@ -135,6 +125,17 @@ class MobileMachineViewModel extends _$MobileMachineViewModel {
 
   void setSort(String sortBy) {
     state = state.copyWith(selectedSort: sortBy);
+  }
+
+  // ===== CLEAR ALL FILTERS =====
+
+  void clearAllFilters() {
+    state = state.copyWith(
+      selectedStatusFilter: MachineStatusFilter.all,
+      dateFilter: const DateFilterRange(type: DateFilterType.none),
+      searchQuery: '',
+      displayLimit: _loadMoreIncrement,
+    );
   }
 
   // ===== MACHINE OPERATIONS =====

@@ -1,8 +1,9 @@
 // lib/ui/machine_management/view/mobile_admin_machine_view.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/search_bar_widget.dart';
-import 'package:flutter_application_1/ui/core/widgets/mobile_date_filter_button.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/mobile_search_bar.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/mobile_date_filter_button.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/mobile_status_filter_button.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/themes/app_text_styles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,7 +13,6 @@ import '../models/mobile_machine_state.dart';
 import '../../../services/sess_service.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/widgets/data_card.dart';
-import '../widgets/machine_tab_filter.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -89,14 +89,14 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
 
   Color _getIconColorForStatus(MachineModel machine) {
     if (machine.isArchived) {
-      return const Color(0xFF757575);
+      return AppColors.textSecondary;
     }
 
     switch (machine.status) {
       case MachineStatus.active:
         return AppColors.green100;
       case MachineStatus.inactive:
-        return const Color(0xFFFFA726);
+        return AppColors.yellowForeground;
       case MachineStatus.underMaintenance:
         return AppColors.error;
     }
@@ -151,9 +151,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
         backgroundColor: AppColors.background,
         body: Column(
           children: [
-            // Custom header with search bar on left and filter/add on right
+            // Custom header with filters
             Container(
-              color: AppColors.background2,
+              color: AppColors.background,
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 12,
                 left: 20,
@@ -167,7 +167,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                   Text('Machine List', style: AppTextStyles.heading1),
                   const SizedBox(height: 12),
 
-                  // Search bar + Filter/Add buttons row
+                  // Filter row: Search + Status + Date + Add
                   Row(
                     children: [
                       // Search bar - takes remaining space
@@ -183,9 +183,18 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                       ),
                       const SizedBox(width: 8),
 
-                      // Date filter button - NOW FUNCTIONAL ✅
+                      // Status filter button
+                      MobileStatusFilterButton(
+                        currentFilter: state.selectedStatusFilter,
+                        onFilterChanged: notifier.setStatusFilter,
+                        isLoading: state.isLoading,
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Date filter button
                       MobileDateFilterButton(
                         onFilterChanged: notifier.setDateFilter,
+                        isLoading: state.isLoading,
                       ),
 
                       // Add button (only for admin)
@@ -222,20 +231,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                   horizontal: 20,
                   vertical: 16,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Tab Filters
-                    MachineTabFilter(
-                      selectedTab: state.selectedTab,
-                      onTabSelected: notifier.setFilterTab,
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Machine List
-                    Expanded(child: _buildMachineContent(state, notifier)),
-                  ],
-                ),
+                child: _buildMachineContent(state, notifier),
               ),
             ),
           ],
@@ -303,15 +299,15 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
 
     if (state.filteredMachines.isEmpty) {
       String emptyMessage;
-      switch (state.selectedTab) {
-        case MachineFilterTab.archived:
+      switch (state.selectedStatusFilter) {
+        case MachineStatusFilter.inactive:
           emptyMessage = 'No archived machines';
           break;
-        case MachineFilterTab.active:
+        case MachineStatusFilter.active:
           emptyMessage = 'No active machines';
           break;
-        case MachineFilterTab.suspended:
-          emptyMessage = 'No inactive machines';
+        case MachineStatusFilter.underMaintenance:
+          emptyMessage = 'No suspended machines';
           break;
         default:
           emptyMessage = 'No machines available';
@@ -330,7 +326,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
               ),
               const SizedBox(height: 16),
               Text(
-                state.searchQuery.isNotEmpty || state.dateFilter.isActive
+                state.hasActiveFilters
                     ? 'No machines match your filters'
                     : emptyMessage,
                 style: AppTextStyles.body.copyWith(
@@ -340,13 +336,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
               ),
 
               // Clear filters button
-              if (state.dateFilter.isActive || state.searchQuery.isNotEmpty) ...[
+              if (state.hasActiveFilters) ...[
                 const SizedBox(height: 16),
                 TextButton.icon(
-                  onPressed: () {
-                    notifier.clearDateFilter();
-                    notifier.clearSearch();
-                  },
+                  onPressed: notifier.clearAllFilters,
                   icon: const Icon(Icons.clear_all),
                   label: const Text('Clear All Filters'),
                   style: TextButton.styleFrom(
@@ -424,7 +417,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.background2,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: AppColors.backgroundBorder,
@@ -440,8 +433,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                 height: 48,
                 decoration: BoxDecoration(
                   color: Color.lerp(
-                    const Color(0xFFE0E0E0),
-                    const Color(0xFFF5F5F5),
+                    AppColors.grey,
+                    AppColors.background,
                     _pulseAnimation.value,
                   ),
                   borderRadius: BorderRadius.circular(8),
@@ -460,8 +453,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Color.lerp(
-                          const Color(0xFFE0E0E0),
-                          const Color(0xFFF5F5F5),
+                          AppColors.grey,
+                          AppColors.background,
                           _pulseAnimation.value,
                         ),
                         borderRadius: BorderRadius.circular(4),
@@ -475,8 +468,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                       width: 150,
                       decoration: BoxDecoration(
                         color: Color.lerp(
-                          const Color(0xFFE0E0E0),
-                          const Color(0xFFF5F5F5),
+                          AppColors.grey,
+                          AppColors.background,
                           _pulseAnimation.value,
                         ),
                         borderRadius: BorderRadius.circular(4),
@@ -492,8 +485,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView>
                           width: 80,
                           decoration: BoxDecoration(
                             color: Color.lerp(
-                              const Color(0xFFE0E0E0),
-                              const Color(0xFFF5F5F5),
+                              AppColors.grey,
+                              AppColors.background,
                               _pulseAnimation.value,
                             ),
                             borderRadius: BorderRadius.circular(12),
