@@ -13,10 +13,10 @@ class AllActivityScreen extends BaseActivityScreen {
   ConsumerState<AllActivityScreen> createState() => _AllActivityScreenState();
 }
 
-class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen> {
-  ActivityParams get _params => ActivityParams(
-        screenType: ActivityScreenType.allActivity,
-      );
+class _AllActivityScreenState
+    extends BaseActivityScreenState<AllActivityScreen> {
+  ActivityParams get _params =>
+      ActivityParams(screenType: ActivityScreenType.allActivity);
 
   @override
   ActivityListState getState() {
@@ -33,12 +33,16 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
 
   @override
   void onFilterChanged(String filter) {
-    ref.read(activityViewModelProvider(_params).notifier).onFilterChanged(filter);
+    ref
+        .read(activityViewModelProvider(_params).notifier)
+        .onFilterChanged(filter);
   }
 
   @override
   void onSearchChanged(String query) {
-    ref.read(activityViewModelProvider(_params).notifier).onSearchChanged(query);
+    ref
+        .read(activityViewModelProvider(_params).notifier)
+        .onSearchChanged(query);
   }
 
   @override
@@ -48,7 +52,9 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
 
   @override
   void onDateFilterChanged(DateFilterRange filter) {
-    ref.read(activityViewModelProvider(_params).notifier).onDateFilterChanged(filter);
+    ref
+        .read(activityViewModelProvider(_params).notifier)
+        .onDateFilterChanged(filter);
   }
 
   @override
@@ -58,11 +64,15 @@ class _AllActivityScreenState extends BaseActivityScreenState<AllActivityScreen>
 
   @override
   void onBatchChanged(String? batchId) {
-    ref.read(activityViewModelProvider(_params).notifier).onBatchChanged(batchId);
+    ref
+        .read(activityViewModelProvider(_params).notifier)
+        .onBatchChanged(batchId);
   }
 
   @override
   void onMachineChanged(String? machineId) {
-    ref.read(activityViewModelProvider(_params).notifier).onMachineChanged(machineId);
+    ref
+        .read(activityViewModelProvider(_params).notifier)
+        .onMachineChanged(machineId);
   }
 }

@@ -28,6 +28,8 @@ dependencies:
   json_annotation: ^4.9.0
   riverpod_annotation: ^4.0.0     
   flutter_svg: ^2.0.0+1
+  shimmer: ^3.0.0
+  equatable: ^2.0.8
 
 dev_dependencies:
   flutter_test:

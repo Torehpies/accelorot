@@ -57,7 +57,11 @@ class NavigationSectionCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.teal, size: 18),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.teal,
+                  size: 18,
+                ),
               ],
             ),
           ),

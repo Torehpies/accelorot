@@ -134,19 +134,26 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
                     children: [
                       // Refresh Button
                       Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.teal),
+                              icon: const Icon(
+                                Icons.refresh,
+                                color: Colors.teal,
+                              ),
                               onPressed: _handleRefresh,
                               tooltip: 'Refresh',
                             ),
                           ],
                         ),
                       ),
-                      
+
                       // Machine List
                       Expanded(child: _buildContent(state, notifier)),
                     ],

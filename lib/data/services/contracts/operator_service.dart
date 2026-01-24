@@ -5,11 +5,20 @@ import '../../models/operator_model.dart';
 abstract class OperatorService {
   Future<List<OperatorModel>> fetchTeamOperators(String teamId);
   Future<List<Map<String, dynamic>>> fetchPendingMembers(String teamId);
-  
-  Future<void> archiveOperator({required String teamId, required String operatorUid});
-  Future<void> restoreOperator({required String teamId, required String operatorUid});
-  Future<void> removeOperator({required String teamId, required String operatorUid});
-  
+
+  Future<void> archiveOperator({
+    required String teamId,
+    required String operatorUid,
+  });
+  Future<void> restoreOperator({
+    required String teamId,
+    required String operatorUid,
+  });
+  Future<void> removeOperator({
+    required String teamId,
+    required String operatorUid,
+  });
+
   Future<void> acceptInvitation({
     required String teamId,
     required String requestorId,
@@ -17,7 +26,7 @@ abstract class OperatorService {
     required String email,
     required String pendingDocId,
   });
-  
+
   Future<void> declineInvitation({
     required String teamId,
     required String requestorId,

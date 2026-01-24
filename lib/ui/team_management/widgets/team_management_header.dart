@@ -25,8 +25,8 @@ class TeamManagementHeader extends ConsumerWidget {
           const Spacer(),
           ElevatedButton(
             onPressed: () {
-							_showAddTeamDialog(context);
-						},
+              _showAddTeamDialog(context);
+            },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(

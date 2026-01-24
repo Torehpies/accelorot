@@ -21,41 +21,42 @@ class WebActivityView extends ConsumerWidget {
       child: state.hasError
           ? WebErrorState(message: state.errorMessage ?? 'An error occurred')
           : !state.isLoggedIn && !state.isLoading
-              ? const WebLoginRequired(message: 'Please log in to view activities')
-              : WebContentContainer(
-                  child: WebStatsTableLayout(
-                    statsRow: StatsCardRow(
-                      countsWithChange: viewModel.getCategoryCountsWithChange(),
-                      isLoading: state.isLoading,
-                    ),
-                    table: WebTableContainer(
-                      items: state.paginatedItems,
-                      isLoading: state.isLoading,
-                      selectedMachineId: state.selectedMachineId,
-                      selectedBatchId: state.selectedBatchId,
-                      dateFilter: state.dateFilter,
-                      searchQuery: state.searchQuery,
-                      selectedCategory: state.selectedCategory,
-                      selectedType: state.selectedType,
-                      sortColumn: state.sortColumn,
-                      sortAscending: state.sortAscending,
-                      onMachineChanged: viewModel.onMachineChanged,
-                      onBatchChanged: viewModel.onBatchChanged,
-                      onDateFilterChanged: viewModel.onDateFilterChanged,
-                      onSearchChanged: viewModel.onSearchChanged,
-                      onCategoryChanged: viewModel.onCategoryChanged,
-                      onTypeChanged: viewModel.onTypeChanged,
-                      onSort: viewModel.onSort,
-                      onViewDetails: (item) => ActivityDialogHelper.show(context, ref, item),
-                      currentPage: state.currentPage,
-                      totalPages: state.totalPages,
-                      itemsPerPage: state.itemsPerPage,
-                      totalItems: state.filteredActivities.length,
-                      onPageChanged: viewModel.onPageChanged,
-                      onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
-                    ),
-                  ),
+          ? const WebLoginRequired(message: 'Please log in to view activities')
+          : WebContentContainer(
+              child: WebStatsTableLayout(
+                statsRow: StatsCardRow(
+                  countsWithChange: viewModel.getCategoryCountsWithChange(),
+                  isLoading: state.isLoading,
                 ),
+                table: WebTableContainer(
+                  items: state.paginatedItems,
+                  isLoading: state.isLoading,
+                  selectedMachineId: state.selectedMachineId,
+                  selectedBatchId: state.selectedBatchId,
+                  dateFilter: state.dateFilter,
+                  searchQuery: state.searchQuery,
+                  selectedCategory: state.selectedCategory,
+                  selectedType: state.selectedType,
+                  sortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onMachineChanged: viewModel.onMachineChanged,
+                  onBatchChanged: viewModel.onBatchChanged,
+                  onDateFilterChanged: viewModel.onDateFilterChanged,
+                  onSearchChanged: viewModel.onSearchChanged,
+                  onCategoryChanged: viewModel.onCategoryChanged,
+                  onTypeChanged: viewModel.onTypeChanged,
+                  onSort: viewModel.onSort,
+                  onViewDetails: (item) =>
+                      ActivityDialogHelper.show(context, ref, item),
+                  currentPage: state.currentPage,
+                  totalPages: state.totalPages,
+                  itemsPerPage: state.itemsPerPage,
+                  totalItems: state.filteredActivities.length,
+                  onPageChanged: viewModel.onPageChanged,
+                  onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
+                ),
+              ),
+            ),
     );
   }
 }

@@ -32,11 +32,13 @@ class WebBatchSelector extends ConsumerWidget {
         final filteredBatches = selectedMachineId != null
             ? batches.where((b) => b.machineId == selectedMachineId).toList()
             : batches;
-        
+
         final hasNoBatches = filteredBatches.isEmpty;
 
         // Look up the selected batch to get its proper display name
-        final selectedBatch = selectedBatchId != null && filteredBatches.any((b) => b.id == selectedBatchId)
+        final selectedBatch =
+            selectedBatchId != null &&
+                filteredBatches.any((b) => b.id == selectedBatchId)
             ? filteredBatches.firstWhere((b) => b.id == selectedBatchId)
             : null;
 

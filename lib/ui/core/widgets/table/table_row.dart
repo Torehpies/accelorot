@@ -33,15 +33,14 @@ class GenericTableRow extends StatelessWidget {
       hoverColor: hoverColor ?? WebColors.hoverBackground,
       child: Container(
         constraints: BoxConstraints(minHeight: height ?? 52),
-        padding: padding ??
+        padding:
+            padding ??
             const EdgeInsets.symmetric(
               horizontal: AppSpacing.tableCellHorizontal,
               vertical: 8,
             ),
         // Removed the border decoration entirely - separator handles dividers
-        child: Row(
-          children: _buildCellsWithSpacing(),
-        ),
+        child: Row(children: _buildCellsWithSpacing()),
       ),
     );
   }
@@ -65,18 +64,11 @@ class TableCellWidget extends StatelessWidget {
   final int flex;
   final Widget child;
 
-  const TableCellWidget({
-    super.key,
-    required this.flex,
-    required this.child,
-  });
+  const TableCellWidget({super.key, required this.flex, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: child,
-    );
+    return Expanded(flex: flex, child: child);
   }
 }
 
@@ -84,10 +76,7 @@ class TableCellWidget extends StatelessWidget {
 class TableBadge extends StatelessWidget {
   final String text;
 
-  const TableBadge({
-    super.key,
-    required this.text,
-  });
+  const TableBadge({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -112,11 +101,7 @@ class TableChip extends StatelessWidget {
   final String text;
   final Color color;
 
-  const TableChip({
-    super.key,
-    required this.text,
-    required this.color,
-  });
+  const TableChip({super.key, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -161,12 +146,7 @@ class TableHeaderCell extends StatelessWidget {
     final isActive = sortable && sortColumn == currentSortColumn;
 
     if (!sortable) {
-      return Center(
-        child: Text(
-          label,
-          style: WebTextStyles.label,
-        ),
-      );
+      return Center(child: Text(label, style: WebTextStyles.label));
     }
 
     // Sortable header

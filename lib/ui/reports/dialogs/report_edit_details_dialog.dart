@@ -17,7 +17,8 @@ class ReportEditDetailsDialog extends StatefulWidget {
     String? description,
     String? status,
     String? priority,
-  }) onUpdate;
+  })
+  onUpdate;
 
   const ReportEditDetailsDialog({
     super.key,
@@ -26,7 +27,8 @@ class ReportEditDetailsDialog extends StatefulWidget {
   });
 
   @override
-  State<ReportEditDetailsDialog> createState() => _ReportEditDetailsDialogState();
+  State<ReportEditDetailsDialog> createState() =>
+      _ReportEditDetailsDialogState();
 }
 
 class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
@@ -42,10 +44,12 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.report.title);
-    _descriptionController = TextEditingController(text: widget.report.description);
+    _descriptionController = TextEditingController(
+      text: widget.report.description,
+    );
     _selectedStatus = widget.report.status;
     _selectedPriority = widget.report.priority;
-    
+
     _titleController.addListener(_validateTitle);
     _descriptionController.addListener(_validateDescription);
   }
@@ -210,7 +214,9 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
               ),
               ReadOnlyField(
                 label: 'Date Added',
-                value: DateFormat('MM/dd/yyyy, hh:mm a').format(widget.report.createdAt),
+                value: DateFormat(
+                  'MM/dd/yyyy, hh:mm a',
+                ).format(widget.report.createdAt),
               ),
             ],
           ),
@@ -223,7 +229,8 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
         ),
         DialogAction.primary(
           label: 'Update Report',
-          onPressed: _titleError == null && _descriptionError == null && !_isSubmitting
+          onPressed:
+              _titleError == null && _descriptionError == null && !_isSubmitting
               ? _handleSubmit
               : null,
           isLoading: _isSubmitting,

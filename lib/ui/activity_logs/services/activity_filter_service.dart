@@ -16,7 +16,6 @@ class ActivityFilterService {
     String? selectedBatchId,
     String? selectedMachineId,
   }) {
-
     var filtered = applyMachineFilter(items, selectedMachineId);
 
     filtered = applyBatchFilter(filtered, selectedBatchId);
@@ -26,8 +25,6 @@ class ActivityFilterService {
 
     // Step 2: Apply search filter
     filtered = applySearchFilter(filtered, searchQuery);
-
-    
 
     // Step 3: Compute auto-highlighted filters based on search results
     final highlighted = computeHighlightedFilters(
@@ -64,7 +61,7 @@ class ActivityFilterService {
   }
 
   /// Filter activities by search query
-  /// 
+  ///
   /// Searches across multiple fields: title, value, description,
   /// category, machine name, operator name, batch ID, status
   List<ActivityLogItem> applySearchFilter(
@@ -74,9 +71,7 @@ class ActivityFilterService {
     if (searchQuery.isEmpty) return items;
 
     final query = searchQuery.toLowerCase();
-    return items
-        .where((item) => item.matchesSearchQuery(query))
-        .toList();
+    return items.where((item) => item.matchesSearchQuery(query)).toList();
   }
 
   List<ActivityLogItem> applyBatchFilter(
@@ -96,7 +91,7 @@ class ActivityFilterService {
   }
 
   /// Compute which filter chips should be highlighted based on search results
-  /// 
+  ///
   /// When a user searches, this determines which category filters
   /// contain matching results (for visual feedback)
   Set<String> computeHighlightedFilters({
@@ -112,7 +107,7 @@ class ActivityFilterService {
   }
 
   /// Filter activities by category
-  /// 
+  ///
   /// Only applies when user has manually selected a filter
   /// (not 'All' and isManualFilter is true)
   List<ActivityLogItem> applyCategoryFilter({

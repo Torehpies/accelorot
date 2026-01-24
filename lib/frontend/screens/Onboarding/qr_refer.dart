@@ -56,7 +56,7 @@ class _QRReferScreenState extends State<QRReferScreen> {
     // Redirect immediately if already assigned
     if (_teamId != null) {
       if (!mounted) return;
-			context.go('/dashboard');
+      context.go('/dashboard');
     }
   }
 
@@ -86,9 +86,9 @@ class _QRReferScreenState extends State<QRReferScreen> {
 
       if (teamsQuery.docs.isEmpty) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid referral code')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Invalid referral code')));
         setState(() => _scanning = false);
         return;
       }
@@ -115,10 +115,10 @@ class _QRReferScreenState extends State<QRReferScreen> {
           .collection('pending_members')
           .doc(user.uid)
           .set({
-        'requestorId': user.uid,
-        'requestorEmail': user.email ?? '',
-        'requestedAt': FieldValue.serverTimestamp(),
-      });
+            'requestorId': user.uid,
+            'requestorEmail': user.email ?? '',
+            'requestedAt': FieldValue.serverTimestamp(),
+          });
 
       // 4. Set pendingTeamId in user document
       await _auth.setPendingTeamId(user.uid, teamId);
@@ -130,20 +130,22 @@ class _QRReferScreenState extends State<QRReferScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Request submitted! Waiting for approval.')),
+        const SnackBar(
+          content: Text('Request submitted! Waiting for approval.'),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit code: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to submit code: $e')));
       setState(() => _scanning = false);
     }
   }
 
   Future<void> _handleBackToLogin() async {
     await _auth.signOut();
-		// context.go('/signin');
+    // context.go('/signin');
   }
 
   Widget _buildJoinTeam() {
@@ -177,7 +179,10 @@ class _QRReferScreenState extends State<QRReferScreen> {
                           height: 80,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Colors.teal.shade400, Colors.teal.shade700],
+                              colors: [
+                                Colors.teal.shade400,
+                                Colors.teal.shade700,
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -190,7 +195,11 @@ class _QRReferScreenState extends State<QRReferScreen> {
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
+                          child: const Icon(
+                            Icons.trending_up,
+                            size: 36,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -281,13 +290,12 @@ class _QRReferScreenState extends State<QRReferScreen> {
                         height: isDesktop ? 350 : 300,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: MobileScanner(
-                            onDetect: _onDetect,
-                          ),
+                          child: MobileScanner(onDetect: _onDetect),
                         ),
                       ),
                       const SizedBox(height: 12),
-                      if (_scanning) const Center(child: CircularProgressIndicator()),
+                      if (_scanning)
+                        const Center(child: CircularProgressIndicator()),
                     ] else
                       Container(
                         padding: const EdgeInsets.all(24),
@@ -358,7 +366,9 @@ class _QRReferScreenState extends State<QRReferScreen> {
     }
 
     if (_teamId != null) {
-      return const Scaffold(body: Center(child: Text('Redirecting to dashboard...')));
+      return const Scaffold(
+        body: Center(child: Text('Redirecting to dashboard...')),
+      );
     }
 
     if (_pendingTeamId != null) {

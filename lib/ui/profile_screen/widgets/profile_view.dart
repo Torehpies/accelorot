@@ -50,7 +50,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: MobileHeader(title: 'Profile'),
-            body: state.isLoading
+      body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.profile == null
           ? Center(

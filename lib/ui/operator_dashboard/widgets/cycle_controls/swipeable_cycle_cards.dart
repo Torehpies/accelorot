@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'drum_control_card.dart';
 import 'aerator_card.dart';
 import '../../../../data/models/batch_model.dart';
@@ -6,19 +7,21 @@ import '../../../../data/models/batch_model.dart';
 class SwipeableCycleCards extends StatefulWidget {
   final BatchModel? currentBatch;
 
-  const SwipeableCycleCards({
-    super.key,
-    required this.currentBatch,
-  });
+  const SwipeableCycleCards({super.key, required this.currentBatch});
 
   @override
   State<SwipeableCycleCards> createState() => _SwipeableCycleCardsState();
 }
 
 class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
-
-
+  final ScrollController _scrollController = ScrollController();
   int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,27 +42,38 @@ class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
             }
             return false;
           },
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: DrumControlCard(currentBatch: widget.currentBatch),
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+              },
+              scrollbars: false,
+            ),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: cardWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: DrumControlCard(currentBatch: widget.currentBatch),
+                    ),
                   ),
-                ),
-                SizedBox(
-                  width: cardWidth,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: AeratorCard(currentBatch: widget.currentBatch),
+                  SizedBox(
+                    width: cardWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: AeratorCard(currentBatch: widget.currentBatch),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

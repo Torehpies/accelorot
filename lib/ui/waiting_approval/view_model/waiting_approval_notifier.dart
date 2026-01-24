@@ -17,12 +17,9 @@ class WaitingApprovalNotifier extends _$WaitingApprovalNotifier {
     state = AsyncLoading();
     final memberRepo = ref.read(pendingMemberRepositoryProvider);
     final appUser = ref.read(appUserProvider).value;
-		final teamId = appUser?.requestTeamId ?? '';
-		final id = appUser?.uid ?? '';
-    final result = await memberRepo.declineInvitation(
-      teamId: teamId,
-      id: id,
-    );
+    final teamId = appUser?.requestTeamId ?? '';
+    final id = appUser?.uid ?? '';
+    final result = await memberRepo.declineInvitation(teamId: teamId, id: id);
     result.when(
       success: (success) {
         state = AsyncData(success);

@@ -37,7 +37,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
       final allOperators = await ref
           .read(operatorRepositoryProvider)
           .getOperators(widget.teamId);
-      
+
       if (mounted) {
         setState(() {
           _assignedUsers = allOperators
@@ -82,10 +82,8 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => EditMachineModal(
-        machine: widget.machine,
-        teamId: widget.teamId,
-      ),
+      builder: (context) =>
+          EditMachineModal(machine: widget.machine, teamId: widget.teamId),
     );
   }
 
@@ -99,10 +97,9 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
       final navigator = Navigator.of(context);
       final messenger = ScaffoldMessenger.of(context);
       try {
-        await ref.read(adminMachineProvider.notifier).archiveMachine(
-              widget.teamId,
-              widget.machine.machineId,
-            );
+        await ref
+            .read(adminMachineProvider.notifier)
+            .archiveMachine(widget.teamId, widget.machine.machineId);
         if (!mounted) return;
         navigator.pop();
         messenger.showSnackBar(
@@ -125,7 +122,9 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('MMM-dd-yyyy').format(widget.machine.dateCreated);
+    final dateStr = DateFormat(
+      'MMM-dd-yyyy',
+    ).format(widget.machine.dateCreated);
     final isArchived = widget.machine.isArchived;
 
     return Scaffold(
@@ -197,10 +196,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   // Machine ID
                   Text(
                     'ID: ${widget.machine.machineId}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -227,10 +223,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                 children: [
                   const Text(
                     'Assigned User',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 16),
                   if (_isLoadingUsers)
@@ -245,43 +238,42 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                       padding: const EdgeInsets.all(12),
                       child: Text(
                         'All Team Members',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                     )
                   else
-                    ..._assignedUsers.map((user) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.grey.shade300,
-                                child: Text(
-                                  user.name.isNotEmpty
-                                      ? user.name[0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black54,
-                                  ),
+                    ..._assignedUsers.map(
+                      (user) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey.shade300,
+                              child: Text(
+                                user.name.isNotEmpty
+                                    ? user.name[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black54,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  user.name,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                user.name,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ],
-                          ),
-                        )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -307,10 +299,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                 children: [
                   const Text(
                     'Status',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -322,10 +311,10 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                       color: isArchived
                           ? const Color(0xFFFFEBEE)
                           : widget.machine.status == MachineStatus.active
-                              ? const Color(0x1A4CAF50)
-                              : widget.machine.status == MachineStatus.inactive
-                                  ? const Color(0x1AFFA726)
-                                  : const Color(0x1AEF5350),
+                          ? const Color(0x1A4CAF50)
+                          : widget.machine.status == MachineStatus.inactive
+                          ? const Color(0x1AFFA726)
+                          : const Color(0x1AEF5350),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -382,18 +371,12 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                 children: [
                   const Text(
                     'Date Created',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     dateStr,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[700],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                   ),
                 ],
               ),
@@ -433,7 +416,10 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: Color(0xFF4CAF50), width: 1.5),
+                        side: const BorderSide(
+                          color: Color(0xFF4CAF50),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -466,10 +452,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   ),
                   child: const Text(
                     'Archive',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -516,10 +499,7 @@ class _MachineDetailsViewState extends ConsumerState<MachineDetailsView> {
                   ),
                   child: const Text(
                     'Archive',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

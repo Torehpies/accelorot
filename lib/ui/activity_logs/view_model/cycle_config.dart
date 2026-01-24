@@ -5,7 +5,7 @@ import '../models/activity_filter_config.dart';
 class CyclesConfig {
   static ActivityFilterConfig get config => ActivityFilterConfig(
     screenTitle: 'Cycles & Controllers',
-    filters: const ['All', 'Drum Controller', 'Aerator'], 
+    filters: const ['All', 'Drum Controller', 'Aerator'],
     categoryMapper: CategoryMappers.grouped({
       'Drum Controller': ['drum_controller'],
       'Aerator': ['aerator'],

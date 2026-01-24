@@ -38,11 +38,7 @@ class SearchField extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.search,
-                color: WebColors.textLabel,
-                size: 16,
-              ),
+              const Icon(Icons.search, color: WebColors.textLabel, size: 16),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(

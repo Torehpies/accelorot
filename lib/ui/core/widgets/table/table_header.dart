@@ -32,14 +32,13 @@ class TableHeader extends StatelessWidget {
             topRight: Radius.circular(8),
           ),
         ),
-        padding: padding ??
+        padding:
+            padding ??
             const EdgeInsets.symmetric(
               horizontal: AppSpacing.tableCellHorizontal,
               vertical: 8,
             ),
-        child: Row(
-          children: _buildColumnsWithSpacing(),
-        ),
+        child: Row(children: _buildColumnsWithSpacing()),
       ),
     );
   }

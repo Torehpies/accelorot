@@ -27,12 +27,8 @@ class MachineTableBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (hasNoTeam) {
-      return const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: NoTeamState(),
-      );
+      return const Padding(padding: EdgeInsets.all(16.0), child: NoTeamState());
     }
 
     if (isEmpty || items.isEmpty) {
@@ -44,11 +40,8 @@ class MachineTableBody extends StatelessWidget {
 
     return ListView.separated(
       itemCount: items.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: WebColors.tableBorder,
-      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, thickness: 1, color: WebColors.tableBorder),
       itemBuilder: (context, index) {
         return MachineTableRow(
           machine: items[index],

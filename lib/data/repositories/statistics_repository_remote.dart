@@ -7,9 +7,8 @@ import 'contracts/statistics_repository.dart';
 class StatisticsRepositoryRemote implements StatisticsRepository {
   final StatisticsService _statisticsService;
 
-  StatisticsRepositoryRemote({
-    required StatisticsService statisticsService,
-  }) : _statisticsService = statisticsService;
+  StatisticsRepositoryRemote({required StatisticsService statisticsService})
+    : _statisticsService = statisticsService;
 
   @override
   Future<List<TemperatureModel>> getTemperatureReadings(

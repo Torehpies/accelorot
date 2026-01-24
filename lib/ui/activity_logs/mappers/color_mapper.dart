@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// Maps status strings and priorities to Colors for UI display
 class ActivityColorMapper {
   // ===== SUBSTRATE COLORS =====
-  
+
   static Color getColorForSubstrate(String category) {
     switch (category.toLowerCase()) {
       case 'greens':
@@ -20,7 +20,7 @@ class ActivityColorMapper {
   }
 
   // ===== ALERT COLORS =====
-  
+
   static Color getColorForAlert(String status) {
     switch (status.toLowerCase()) {
       case 'below':
@@ -35,7 +35,7 @@ class ActivityColorMapper {
   }
 
   // ===== REPORT COLORS (by priority) =====
-  
+
   static Color getColorForReportPriority(String priority) {
     switch (priority.toLowerCase()) {
       case 'low':
@@ -52,7 +52,7 @@ class ActivityColorMapper {
   }
 
   // ===== CYCLE COLORS =====
-  
+
   static Color getColorForCycle(String category) {
     switch (category.toLowerCase()) {
       case 'recoms':
@@ -65,7 +65,7 @@ class ActivityColorMapper {
   }
 
   // ===== GENERIC COLOR FROM STRING =====
-  
+
   /// Convert color string to Color (for legacy compatibility)
   static Color colorFromString(String colorStr) {
     switch (colorStr.toLowerCase()) {

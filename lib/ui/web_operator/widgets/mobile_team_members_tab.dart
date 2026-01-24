@@ -97,11 +97,11 @@ class _MembersList extends ConsumerWidget {
           return _buildLoadingItem();
         }
         final member = state.items[index];
-				final style = getStatusStyle(member.status.value);
+        final style = getStatusStyle(member.status.value);
         return DataCard<TeamMember>(
           data: member,
           icon: Icons.person,
-					iconColor: style.textColor,
+          iconColor: style.textColor,
           iconBgColor: style.color,
           title: "${member.lastName}, ${member.firstName}",
           category: toTitleCase(member.status.value),

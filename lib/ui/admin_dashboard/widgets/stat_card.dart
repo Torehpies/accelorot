@@ -63,8 +63,12 @@ class StatCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        color: subtitle!.startsWith('+') ? Colors.green : Colors.black54,
-                        fontWeight: subtitle!.startsWith('+') ? FontWeight.w600 : FontWeight.normal,
+                        color: subtitle!.startsWith('+')
+                            ? Colors.green
+                            : Colors.black54,
+                        fontWeight: subtitle!.startsWith('+')
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                     ),
                   ],
@@ -81,11 +85,7 @@ class StatCard extends StatelessWidget {
                   color: iconBackgroundColor ?? Colors.teal.shade50,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 24,
-                  color: iconColor ?? Colors.teal,
-                ),
+                child: Icon(icon, size: 24, color: iconColor ?? Colors.teal),
               ),
             ],
           ],

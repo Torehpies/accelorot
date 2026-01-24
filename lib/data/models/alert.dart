@@ -20,15 +20,15 @@ abstract class Alert with _$Alert {
     required DateTime timestamp,
     Map<String, dynamic>? readings, // Additional sensor readings
   }) = _Alert;
-  
+
   const Alert._();
 
   // ===== FIRESTORE CONVERSION =====
-  
+
   /// Create from Firestore document
   static Alert fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-    
+
     return Alert(
       id: doc.id,
       machineId: data['machine_id'] ?? '',

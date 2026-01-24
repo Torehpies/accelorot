@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers/statistics_providers.dart';
-import 'widgets/moisture_statistic_card.dart';
+import 'widgets/oxygen_statistic_card.dart';
 
-class MoistureStatsView extends ConsumerWidget {
+class OxygenStatsView extends ConsumerWidget {
   final String? machineId;
 
-  const MoistureStatsView({super.key, this.machineId});
+  const OxygenStatsView({super.key, this.machineId});
 
   static const String _defaultMachineId = "01";
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final moistureAsync = ref.watch(
-      moistureDataProvider(machineId ?? _defaultMachineId),
+    final oxygenAsync = ref.watch(
+      oxygenDataProvider(machineId ?? _defaultMachineId),
     );
 
-    return moistureAsync.when(
+    return oxygenAsync.when(
       data: (readings) {
-        final currentMoisture = readings.isNotEmpty ? readings.last.value : 0.0;
+        final currentOxygen = readings.isNotEmpty ? readings.last.value : 0.0;
         final hourlyReadings = readings.map((r) => r.value).toList();
-        final lastUpdated = readings.isNotEmpty ? readings.last.timestamp : null;
+        final lastUpdated = readings.isNotEmpty
+            ? readings.last.timestamp
+            : null;
 
-        return MoistureStatisticCard(
-          currentMoisture: currentMoisture,
+        return OxygenStatisticCard(
+          currentOxygen: currentOxygen,
           hourlyReadings: hourlyReadings,
           lastUpdated: lastUpdated,
         );
@@ -48,7 +50,7 @@ class MoistureStatsView extends ConsumerWidget {
               const SizedBox(height: 6),
               TextButton.icon(
                 onPressed: () => ref.invalidate(
-                  moistureDataProvider(machineId ?? _defaultMachineId),
+                  oxygenDataProvider(machineId ?? _defaultMachineId),
                 ),
                 icon: const Icon(Icons.refresh, size: 14),
                 label: const Text('Retry', style: TextStyle(fontSize: 11)),

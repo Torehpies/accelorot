@@ -26,10 +26,7 @@ class IntroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE0F2FE),
-            Color(0xFFCCFBF1),
-          ],
+          colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
         ),
       ),
       padding: const EdgeInsets.all(AppSpacing.xxxl * 3),
@@ -45,10 +42,7 @@ class IntroSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xl),
                 RichText(
                   text: TextSpan(
-                    style: WebTextStyles.h1.copyWith(
-                      fontSize: 48,
-                      height: 1.2,
-                    ),
+                    style: WebTextStyles.h1.copyWith(fontSize: 48, height: 1.2),
                     children: [
                       const TextSpan(text: 'Transform Your\n'),
                       TextSpan(

@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class SuccessDialog extends StatelessWidget {
   final String message;
 
-  const SuccessDialog({
-    super.key,
-    required this.message,
-  });
+  const SuccessDialog({super.key, required this.message});
 
   static Future<void> show(BuildContext context, String message) {
     return showDialog(
@@ -55,10 +52,7 @@ class SuccessDialog extends StatelessWidget {
             // Message
             Text(
               message,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -79,10 +73,7 @@ class SuccessDialog extends StatelessWidget {
                 ),
                 child: const Text(
                   'Okay',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

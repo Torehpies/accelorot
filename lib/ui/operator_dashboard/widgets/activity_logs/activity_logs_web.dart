@@ -246,19 +246,16 @@ class ActivityLogsWeb extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   // Value (kg/running)
                   if (log.value.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
                       log.value,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
-                  
+
                   const SizedBox(height: 4),
 
                   // Machine • Batch • Operator
@@ -275,7 +272,13 @@ class ActivityLogsWeb extends ConsumerWidget {
                       ],
                       if ((log.machineName != null || log.machineId != null) &&
                           batchDisplayName.isNotEmpty) ...[
-                        Text(' • ', style: TextStyle(color: Colors.grey[400], fontSize: 11)),
+                        Text(
+                          ' • ',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                       if (batchDisplayName.isNotEmpty)
                         Text(
@@ -285,9 +288,17 @@ class ActivityLogsWeb extends ConsumerWidget {
                             color: Colors.grey[500],
                           ),
                         ),
-                      if (((log.machineName != null || log.machineId != null) || batchDisplayName.isNotEmpty) &&
-                          (log.operatorName != null && log.operatorName!.isNotEmpty)) ...[
-                        Text(' • ', style: TextStyle(color: Colors.grey[400], fontSize: 11)),
+                      if (((log.machineName != null || log.machineId != null) ||
+                              batchDisplayName.isNotEmpty) &&
+                          (log.operatorName != null &&
+                              log.operatorName!.isNotEmpty)) ...[
+                        Text(
+                          ' • ',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                       Flexible(
                         child: Text(
@@ -341,10 +352,7 @@ class ActivityLogsWeb extends ConsumerWidget {
               flex: 2,
               child: Text(
                 _formatDate(log.timestamp),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF6B7280),
-                ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
                 textAlign: TextAlign.right,
               ),
             ),

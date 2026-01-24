@@ -119,7 +119,7 @@ class ReportsState {
 @riverpod
 class ReportsNotifier extends _$ReportsNotifier {
   static const int _pageSize = 10;
-  
+
   ReportRepository get _repository => ref.read(reportRepositoryProvider);
 
   @override
@@ -188,12 +188,12 @@ class ReportsNotifier extends _$ReportsNotifier {
       );
 
       await _repository.updateReport(machineId, request);
-      
+
       // Get teamId and refresh
       final sessionService = SessionService();
       final userData = await sessionService.getCurrentUserData();
       final teamId = userData?['teamId'] as String?;
-      
+
       if (teamId != null) {
         await Future.delayed(const Duration(milliseconds: 1000));
         await refresh(teamId);

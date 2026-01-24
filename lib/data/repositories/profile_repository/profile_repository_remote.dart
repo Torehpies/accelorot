@@ -2,7 +2,6 @@ import 'profile_repository.dart';
 import '../../models/profile_model.dart';
 import '../../services/contracts/profile_service.dart';
 
-
 class ProfileRepositoryRemote implements ProfileRepository {
   final ProfileService _service;
 
@@ -23,7 +22,7 @@ class ProfileRepositoryRemote implements ProfileRepository {
   }) async {
     final profile = await _service.fetchCurrentUserProfile();
     if (profile == null) throw Exception('User not authenticated');
-    
+
     return _service.updateProfile(
       uid: profile.uid,
       firstName: firstName,

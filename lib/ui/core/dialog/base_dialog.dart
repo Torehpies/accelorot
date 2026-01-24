@@ -33,10 +33,7 @@ class BaseDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(20),
       child: Container(
-        constraints: BoxConstraints(
-          maxWidth: 500,
-          maxHeight: maxHeight,
-        ),
+        constraints: BoxConstraints(maxWidth: 500, maxHeight: maxHeight),
         decoration: BoxDecoration(
           color: WebColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
@@ -52,16 +49,10 @@ class BaseDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Headera
-            DialogHeader(
-              title: title,
-              subtitle: subtitle,
-              canClose: canClose,
-            ),
+            DialogHeader(title: title, subtitle: subtitle, canClose: canClose),
 
             // Content (scrollable)
-            Flexible(
-              child: DialogContent(child: content),
-            ),
+            Flexible(child: DialogContent(child: content)),
 
             // Footer
             DialogFooter(actions: actions),

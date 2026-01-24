@@ -100,7 +100,7 @@ class _CompostingProgressCardState
           );
         },
         loading: () => false,
-        error: (_,_) => false,
+        error: (_, _) => false,
       );
 
       if (hasActiveBatch) {
@@ -231,7 +231,7 @@ class _CompostingProgressCardState
         final machineBatches = batches
             .where((b) => b.machineId == _selectedMachineId)
             .toList();
-        
+
         if (machineBatches.isNotEmpty) {
           Future.microtask(() {
             if (mounted) {
@@ -360,6 +360,11 @@ class _CompostingProgressCardState
                   child: BatchSelector(
                     selectedBatchId: _selectedBatchId,
                     selectedMachineId: _selectedMachineId,
+                    onMachineAutoSelect: (machineId) {
+                      setState(() {
+                        _selectedMachineId = machineId;
+                      });
+                    },
                     onChanged: (batchId) {
                       setState(() {
                         _selectedBatchId = batchId;

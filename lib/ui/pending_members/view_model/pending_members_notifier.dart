@@ -15,14 +15,14 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   @override
   PendingMembersState build() {
     _repository = ref.read(pendingMemberRepositoryProvider);
-		Future.microtask(() => fetchMembers());
+    Future.microtask(() => fetchMembers());
     return const PendingMembersState();
   }
 
   Future<void> fetchMembers({bool forceRefresh = false}) async {
     state = state.copyWith(isLoadingMembers: true);
     final user = ref.read(appUserProvider).value;
-		final teamId = user?.teamId ?? '';
+    final teamId = user?.teamId ?? '';
 
     final result = await _repository.getPendingMembers(
       teamId: teamId,
@@ -34,15 +34,18 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
         state = state.copyWith(members: members, isLoadingMembers: false);
       },
       failure: (e) {
-				state = state.copyWith(isLoadingMembers: false, errorMessage: e.toString());
-			},
+        state = state.copyWith(
+          isLoadingMembers: false,
+          errorMessage: e.toString(),
+        );
+      },
     );
   }
 
   Future<void> acceptInvitation(PendingMember member) async {
     state = state.copyWith(isSavingMembers: true);
     final admin = ref.read(appUserProvider).value;
-		final teamId = admin?.teamId ?? '';
+    final teamId = admin?.teamId ?? '';
 
     final result = await _repository.acceptInvitation(
       teamId: teamId,
@@ -70,13 +73,10 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   Future<void> declineInvitation(PendingMember member) async {
     state = state.copyWith(isSavingMembers: true);
     final admin = ref.read(appUserProvider).value;
-		final teamId = admin?.teamId ?? '';
-		final id = admin?.uid ?? '';
+    final teamId = admin?.teamId ?? '';
+    final id = admin?.uid ?? '';
 
-    final result = await _repository.declineInvitation(
-      teamId: teamId,
-			id: id
-    );
+    final result = await _repository.declineInvitation(teamId: teamId, id: id);
 
     result.when(
       success: (_) {

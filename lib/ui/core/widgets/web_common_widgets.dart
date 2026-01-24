@@ -9,18 +9,13 @@ import '../themes/web_text_styles.dart';
 class WebScaffoldContainer extends StatelessWidget {
   final Widget child;
 
-  const WebScaffoldContainer({
-    super.key,
-    required this.child,
-  });
+  const WebScaffoldContainer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: child,
-      ),
+      body: SafeArea(child: child),
     );
   }
 }
@@ -29,10 +24,7 @@ class WebScaffoldContainer extends StatelessWidget {
 class WebContentContainer extends StatelessWidget {
   final Widget child;
 
-  const WebContentContainer({
-    super.key,
-    required this.child,
-  });
+  const WebContentContainer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +35,7 @@ class WebContentContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: WebColors.primaryBorder, width: 1.5),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(12), child: child),
       ),
     );
   }
@@ -80,11 +69,7 @@ class WebErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const WebErrorState({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const WebErrorState({super.key, required this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -92,17 +77,11 @@ class WebErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: WebColors.error,
-          ),
+          const Icon(Icons.error_outline, size: 64, color: WebColors.error),
           const SizedBox(height: 16),
           Text(
             'Error',
-            style: WebTextStyles.h3.copyWith(
-              color: WebColors.textSecondary,
-            ),
+            style: WebTextStyles.h3.copyWith(color: WebColors.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
@@ -117,7 +96,10 @@ class WebErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: WebColors.buttonsPrimary,
                 foregroundColor: WebColors.buttonText,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -141,10 +123,7 @@ class WebErrorState extends StatelessWidget {
 class WebLoginRequired extends StatelessWidget {
   final String? message;
 
-  const WebLoginRequired({
-    super.key,
-    this.message,
-  });
+  const WebLoginRequired({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -152,11 +131,7 @@ class WebLoginRequired extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.lock_outline,
-            size: 64,
-            color: WebColors.textMuted,
-          ),
+          Icon(Icons.lock_outline, size: 64, color: WebColors.textMuted),
           const SizedBox(height: 16),
           Text(
             message ?? 'Please log in to view this content',
@@ -187,14 +162,14 @@ class WebDialogWrapper {
       barrierColor: WebColors.dialogBarrier,
       builder: (context) {
         Widget dialogChild = child;
-        
+
         if (constraints != null) {
           dialogChild = ConstrainedBox(
             constraints: constraints,
             child: dialogChild,
           );
         }
-        
+
         return Dialog(
           backgroundColor: backgroundColor ?? WebColors.dialogBackground,
           insetPadding: insetPadding ?? const EdgeInsets.all(40),

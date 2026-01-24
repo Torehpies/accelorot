@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/compost_batch_model.dart';
 import '../../../../data/providers/batch_providers.dart';
 
-
 class BatchCompleteDialog extends ConsumerStatefulWidget {
   final CompostBatch batch;
   final VoidCallback? onComplete;
@@ -13,7 +12,8 @@ class BatchCompleteDialog extends ConsumerStatefulWidget {
   const BatchCompleteDialog({required this.batch, this.onComplete, super.key});
 
   @override
-  ConsumerState<BatchCompleteDialog> createState() => _BatchCompleteDialogState();
+  ConsumerState<BatchCompleteDialog> createState() =>
+      _BatchCompleteDialogState();
 }
 
 class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
@@ -81,7 +81,6 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
       // Callback and close
       widget.onComplete?.call();
       Navigator.of(context).pop(true);
-
     } catch (e) {
       if (!mounted) return;
 
@@ -140,14 +139,13 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
                 children: [
                   const Text(
                     'Complete Batch',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    onPressed: _isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
@@ -166,7 +164,10 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
                     const SizedBox(height: 8),
                     _buildDetailRow('Batch ID', widget.batch.batchNumber),
                     const SizedBox(height: 8),
-                    _buildDetailRow('Started', _formatDate(widget.batch.batchStart)),
+                    _buildDetailRow(
+                      'Started',
+                      _formatDate(widget.batch.batchStart),
+                    ),
                     const SizedBox(height: 8),
                     _buildDetailRow('Days Elapsed', '$daysPassed days'),
                   ],
@@ -187,7 +188,9 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
               TextField(
                 controller: _finalWeightController,
                 enabled: !_isLoading,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                 ],
@@ -243,7 +246,9 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                    onPressed: _isLoading
+                        ? null
+                        : () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
                   const SizedBox(width: 12),
@@ -266,7 +271,9 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text('Complete Batch'),
@@ -284,19 +291,10 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ],
     );

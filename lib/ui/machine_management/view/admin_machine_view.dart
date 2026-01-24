@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,7 +28,8 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final userData = await sessionService.getCurrentUserData();
 
     _teamId = userData?['teamId'] as String?;
-    _isAdmin = userData?['role'] == 'admin'; // Adjust key if your role field differs
+    _isAdmin =
+        userData?['role'] == 'admin'; // Adjust key if your role field differs
 
     if (_teamId != null) {
       ref.read(adminMachineProvider.notifier).initialize(_teamId!);
@@ -43,7 +43,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     // Example:
     // Navigator.push(context, MaterialPageRoute(builder: (_) => AddMachineScreen()));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add machine functionality not implemented yet.')),
+      const SnackBar(
+        content: Text('Add machine functionality not implemented yet.'),
+      ),
     );
   }
 
@@ -123,7 +125,10 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -157,7 +162,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
-                state.searchQuery.isNotEmpty ? 'No machines found' : emptyMessage,
+                state.searchQuery.isNotEmpty
+                    ? 'No machines found'
+                    : emptyMessage,
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
                 textAlign: TextAlign.center,
               ),
@@ -186,7 +193,9 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
             ),

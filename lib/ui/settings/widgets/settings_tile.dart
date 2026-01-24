@@ -22,7 +22,8 @@ class SettingsTile extends StatelessWidget {
       leading: Icon(icon, color: const Color(0xFF4CAF50)),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
+      trailing:
+          trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
       onTap: onTap,
     );
   }

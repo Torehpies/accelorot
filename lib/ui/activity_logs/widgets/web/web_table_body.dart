@@ -27,10 +27,8 @@ class ActivityTableBody extends StatelessWidget {
     return TableBody<ActivityLogItem>(
       items: items,
       isLoading: isLoading,
-      rowBuilder: (item) => ActivityTableRow(
-        item: item,
-        onViewDetails: onViewDetails,
-      ),
+      rowBuilder: (item) =>
+          ActivityTableRow(item: item, onViewDetails: onViewDetails),
       skeletonRowBuilder: _buildActivitySkeletonRow,
     );
   }
@@ -43,17 +41,13 @@ class ActivityTableBody extends StatelessWidget {
         // Title Column
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _SkeletonBox(width: 180, height: 16),
-          ),
+          child: Center(child: _SkeletonBox(width: 180, height: 16)),
         ),
 
-        // Category Column 
+        // Category Column
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _SkeletonBox(width: 90, height: 16),
-          ),
+          child: Center(child: _SkeletonBox(width: 90, height: 16)),
         ),
 
         // Type Chip
@@ -67,28 +61,20 @@ class ActivityTableBody extends StatelessWidget {
         // Value Column
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _SkeletonBox(width: 120, height: 16),
-          ),
+          child: Center(child: _SkeletonBox(width: 120, height: 16)),
         ),
 
         // Date Column
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _SkeletonBox(width: 90, height: 16),
-          ),
+          child: Center(child: _SkeletonBox(width: 90, height: 16)),
         ),
 
         // Actions Column
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: _SkeletonBox(
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-            ),
+            child: _SkeletonBox(width: 24, height: 24, borderRadius: 12),
           ),
         ),
       ],

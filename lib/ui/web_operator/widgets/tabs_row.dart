@@ -38,13 +38,19 @@ class TabsRow extends StatelessWidget {
             Tab(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('Members'),
+                child: Text(
+                  'Members',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
             Tab(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text('For Approval'),
+                child: Text(
+                  'For Approval',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],

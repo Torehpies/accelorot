@@ -21,7 +21,8 @@ class ToastService {
 
     // Calculate position based on existing toasts
     final toastIndex = _activeToasts.length;
-    final topPosition = _topOffset + (toastIndex * (_toastSpacing + 60)); // 60 = toast height
+    final topPosition =
+        _topOffset + (toastIndex * (_toastSpacing + 60)); // 60 = toast height
 
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(

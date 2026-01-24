@@ -11,7 +11,9 @@ class PasswordResetNotifier extends _$PasswordResetNotifier {
   Future<void> sendResetEmail(String email) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final result = await ref.read(authRepositoryProvider).sendPasswordResetEmail(email);
+      final result = await ref
+          .read(authRepositoryProvider)
+          .sendPasswordResetEmail(email);
       if (!result['success']) throw Exception(result['message']);
       return result['message'];
     });

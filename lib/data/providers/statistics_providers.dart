@@ -22,23 +22,32 @@ final statisticsServiceProvider = Provider<StatisticsService>((ref) {
 // Statistics Repository provider
 final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   final service = ref.watch(statisticsServiceProvider);
-  return StatisticsRepositoryRemote (statisticsService: service);
+  return StatisticsRepositoryRemote(statisticsService: service);
 });
 
 // Temperature data provider
-final temperatureDataProvider = FutureProvider.family<List<TemperatureModel>, String>((ref, machineId) async {
-  final repository = ref.watch(statisticsRepositoryProvider);
-  return repository.getTemperatureReadings(machineId);
-});
+final temperatureDataProvider =
+    FutureProvider.family<List<TemperatureModel>, String>((
+      ref,
+      machineId,
+    ) async {
+      final repository = ref.watch(statisticsRepositoryProvider);
+      return repository.getTemperatureReadings(machineId);
+    });
 
 // Moisture data provider
-final moistureDataProvider = FutureProvider.family<List<MoistureModel>, String>((ref, machineId) async {
-  final repository = ref.watch(statisticsRepositoryProvider);
-  return repository.getMoistureReadings(machineId);
-});
+final moistureDataProvider = FutureProvider.family<List<MoistureModel>, String>(
+  (ref, machineId) async {
+    final repository = ref.watch(statisticsRepositoryProvider);
+    return repository.getMoistureReadings(machineId);
+  },
+);
 
 // Oxygen data provider
-final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((ref, machineId) async {
+final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((
+  ref,
+  machineId,
+) async {
   final repository = ref.watch(statisticsRepositoryProvider);
   return repository.getOxygenReadings(machineId);
 });

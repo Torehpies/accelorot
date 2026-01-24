@@ -33,7 +33,7 @@ class WebStatsRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Open Reports Card
         Expanded(
           child: BaseStatsCard(
@@ -49,7 +49,7 @@ class WebStatsRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // In Progress Reports Card
         Expanded(
           child: BaseStatsCard(
@@ -65,7 +65,7 @@ class WebStatsRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // On Hold Reports Card
         Expanded(
           child: BaseStatsCard(
@@ -73,7 +73,7 @@ class WebStatsRow extends StatelessWidget {
             value: statsWithChange['onHold']?['count'] ?? 0,
             icon: Icons.pause_circle_outline,
             iconColor: WebColors.error,
-            backgroundColor: const Color(0xFFFEE2E2), // red-100  
+            backgroundColor: const Color(0xFFFEE2E2), // red-100
             changeText: statsWithChange['onHold']?['change'],
             subtext: 'closed reports this month',
             isPositive: statsWithChange['onHold']?['isPositive'],

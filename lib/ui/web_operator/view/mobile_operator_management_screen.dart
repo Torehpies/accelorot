@@ -48,7 +48,10 @@ class _MobileOperatorManagementScreenState
             height: MediaQuery.of(context).size.height * 0.65,
             child: TabBarView(
               controller: _tabController,
-              children: const [MobileTeamMembersTab(), MobilePendingMembersTab()],
+              children: const [
+                MobileTeamMembersTab(),
+                MobilePendingMembersTab(),
+              ],
             ),
           ),
         ],

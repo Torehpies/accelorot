@@ -27,9 +27,7 @@ class MachineTableHeaderCell extends StatelessWidget {
     final isActive = sortable && sortColumn == currentSortColumn;
 
     if (!sortable) {
-      return Center(
-        child: Text(label, style: WebTextStyles.label),
-      );
+      return Center(child: Text(label, style: WebTextStyles.label));
     }
 
     return Center(

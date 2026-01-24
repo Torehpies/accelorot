@@ -9,10 +9,7 @@ import 'step_card.dart';
 
 class HowItWorksSection extends StatelessWidget {
   final List<StepModel> steps;
-  const HowItWorksSection({
-    super.key,
-    required this.steps,
-  });
+  const HowItWorksSection({super.key, required this.steps});
 
   @override
   Widget build(BuildContext context) {
@@ -54,13 +51,13 @@ class HowItWorksSection extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxxl * 2),
           LayoutBuilder(
             builder: (context, constraints) {
-              int crossAxisCount = constraints.maxWidth > 1200 
-                  ? 4 
-                  : constraints.maxWidth > 900 
-                      ? 3 
-                      : constraints.maxWidth > 600 
-                          ? 2 
-                          : 1;
+              int crossAxisCount = constraints.maxWidth > 1200
+                  ? 4
+                  : constraints.maxWidth > 900
+                  ? 3
+                  : constraints.maxWidth > 600
+                  ? 2
+                  : 1;
 
               return GridView.builder(
                 shrinkWrap: true,
