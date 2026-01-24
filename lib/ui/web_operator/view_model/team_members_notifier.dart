@@ -117,6 +117,8 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         return m;
       }).toList();
 
+      final updatedFilteredMembers = _applySearchFilter(updatedMembers);
+
       final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
         ..[state.currentPage] = updatedMembers;
 
@@ -135,6 +137,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       state = state.copyWith(
         pagesByIndex: updatedPages,
         members: updatedMembers,
+        filteredMembers: updatedFilteredMembers,
         items: updatedItems,
         lastFetchedAt: DateTime.now(),
       );
