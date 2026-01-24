@@ -29,6 +29,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+android/build/
 /coverage/
 
 # Symbolication related
@@ -69,12 +70,11 @@ linux/flutter/generated_plugins.cmake
 web/firebase-messaging-sw.js
 
 notes.md
+TODO.md
 
-
-
-
-# Freezed
+# Generated files (freezed, riverpod, mocks)
 *.g.dart
 *.freezed.dart
+*.mocks.dart
 
 .env

@@ -1,6 +1,6 @@
 # ACCEL-O-ROT APP 
 
-Accel-o-rot app made with flutter.
+Accel-o-rot app made with flutter and firebase.
 
 ## Authors
 - Alera, Erricka Joy R.

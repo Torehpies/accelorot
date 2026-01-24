@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../controllers/admin_machine_controller.dart';
-import '../../models/machine_model.dart';
+import '../../../../../data/models/machine_model.dart';
 
 class EditMachineModal extends StatefulWidget {
   final AdminMachineController controller;
