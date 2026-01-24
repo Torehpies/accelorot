@@ -10,6 +10,7 @@ class SummaryCard extends StatelessWidget {
   final Color iconBackgroundColor;
   final Color iconForegroundColor;
   final bool isLoading;
+  final bool isExpanded;
 
   const SummaryCard({
     super.key,
@@ -19,6 +20,7 @@ class SummaryCard extends StatelessWidget {
     required this.iconForegroundColor,
     required this.icon,
     this.isLoading = false,
+    this.isExpanded = true,
   });
 
   @override
@@ -27,54 +29,51 @@ class SummaryCard extends StatelessWidget {
         MediaQuery.of(context).size.width >= kTabletBreakpoint &&
         MediaQuery.of(context).size.width < kDesktopBreakpoint;
 
-    if (isLoading) {
-      return Expanded(child: _buildShimmerCard(isTablet));
-    }
-    return Expanded(
-      child: Tooltip(
-        message: "$title: $value",
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.background2,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: WebColors.cardBorder, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: WebColors.cardShadow,
-                blurRadius: 10,
-                offset: const Offset(0, 2),
+    final card = isLoading
+        ? _buildShimmerCard(isTablet)
+        : Tooltip(
+            message: "$title: $value",
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.background2,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: WebColors.cardBorder, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: WebColors.cardShadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!isTablet) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [_buildTitle(), _buildIcon()],
-                ),
-              ],
-              const SizedBox(height: 4),
-              !isTablet
-                  ? _buildValue()
-                  : Row(
-                      children: [
-                        _buildTitle(),
-                        SizedBox(width: 10),
-                        _buildValue(),
-                      ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isTablet) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [_buildTitle(), _buildIcon()],
                     ),
-              const SizedBox(height: 5),
-              // const Divider(height: 1, color: WebColors.dividerLight),
-              // const SizedBox(height: 5),
-            ],
-          ),
-        ),
-      ),
-    );
+                  ],
+                  const SizedBox(height: 4),
+                  !isTablet
+                      ? _buildValue()
+                      : Row(
+                          children: [
+                            _buildTitle(),
+                            SizedBox(width: 10),
+                            _buildValue(),
+                          ],
+                        ),
+                  const SizedBox(height: 5),
+                ],
+              ),
+            ),
+          );
+
+    return isExpanded ? Expanded(child: card) : card;
   }
 
   Widget _buildShimmerCard(bool isTablet) {
