@@ -1,7 +1,6 @@
 // lib/ui/landing_page/widgets/cta_section.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -9,8 +8,13 @@ import '../../core/themes/web_colors.dart';
 
 class CtaSection extends StatelessWidget {
   final VoidCallback onGetStarted;
+  final VoidCallback? onDownload;
 
-  const CtaSection({super.key, required this.onGetStarted});
+  const CtaSection({
+    super.key,
+    required this.onGetStarted,
+    this.onDownload,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -100,18 +104,20 @@ class CtaSection extends StatelessWidget {
               ],
             ),
           ),
-
-          // ================= FOOTER =================
+          // Footers
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxxl * 2,
+              vertical: AppSpacing.xl,
+            ),
             color: Colors.white,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 10),
                     SvgPicture.asset(
                       'assets/images/Accel-O-Rot Logo.svg',
                       width: 50,
@@ -119,22 +125,24 @@ class CtaSection extends StatelessWidget {
                       fit: BoxFit.contain,
                       semanticsLabel: 'Accel-O-Rot Logo',
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpacing.md),
                     Text(
                       'ACCEL-O-ROT',
                       style: h2Style.copyWith(
-                        color: AppColors.textPrimary,
+                        color: WebColors.textTitle,
                         fontWeight: FontWeight.w900,
-                        fontSize: 28,
+                        fontSize: 24,
                       ),
                     ),
                   ],
                 ),
-                const Spacer(),
                 Flexible(
                   child: Text(
                     '© 2026 Accel-O-Rot. Accelerating sustainable composting through innovation.',
-                    style: WebTextStyles.caption,
+                    style: WebTextStyles.caption.copyWith(
+                      color: const Color(0xFF6B7280),
+                      fontSize: 13,
+                    ),
                     textAlign: TextAlign.right,
                   ),
                 ),

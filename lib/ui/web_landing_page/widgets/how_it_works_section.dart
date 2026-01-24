@@ -68,21 +68,16 @@ class HowItWorksSection extends StatelessWidget {
               ),
             ),
           ),
-
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Simple, automated, and effective composting in 4 easy steps',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle.copyWith(
-              fontSize: 16,
-              color: WebColors.textLabel,
-              height: 1.4,
+              fontSize: 15,
+              color: const Color(0xFF6B7280),
             ),
           ),
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // Responsive animated grid with smaller cards and more spacing
+          const SizedBox(height: AppSpacing.xxl),
           LayoutBuilder(
             builder: (context, constraints) {
               int crossAxisCount = constraints.maxWidth > 1200
@@ -98,9 +93,9 @@ class HowItWorksSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: AppSpacing.xl, // more horizontal spacing
-                  mainAxisSpacing: AppSpacing.xl, // more vertical spacing
-                  childAspectRatio: 0.9, // slightly taller than wide for compact cards
+                  crossAxisSpacing: AppSpacing.md,
+                  mainAxisSpacing: AppSpacing.lg,
+                  childAspectRatio: 1.1,
                 ),
                 itemCount: steps.length,
                 itemBuilder: (context, index) {
