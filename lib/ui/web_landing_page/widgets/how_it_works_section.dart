@@ -22,7 +22,7 @@ class HowItWorksSection extends StatelessWidget {
         horizontal: AppSpacing.xxxl * 2,
         vertical: AppSpacing.xxxl * 3,
       ),
-      color: const Color(0xFFFAFAFA),
+      color: Colors.white,
       child: Column(
         children: [
           RichText(

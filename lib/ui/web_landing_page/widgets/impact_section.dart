@@ -19,8 +19,8 @@ class ImpactSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxxl,
-        vertical: AppSpacing.xxl,
+        horizontal: AppSpacing.xxxl * 2,
+        vertical: AppSpacing.xxxl * 3,
       ),
       color: Colors.white,
       child: LayoutBuilder(

@@ -51,35 +51,31 @@ class _FeaturesSectionState extends State<FeaturesSection> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxxl * 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxxl * 2,
+        vertical: AppSpacing.xxxl * 3,
+      ),
       color: Colors.white,
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl * 2),
-            child: Column(
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: WebTextStyles.h2,
               children: [
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: WebTextStyles.h2,
-                    children: [
-                      const TextSpan(text: 'Smart Features for '),
-                      TextSpan(
-                        text: 'Efficient Composting',
-                        style: TextStyle(color: WebColors.textTitle),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Our IoT-enabled system combines automation, real-time monitoring, and AI recommendations',
-                  textAlign: TextAlign.center,
-                  style: WebTextStyles.subtitle,
+                const TextSpan(text: 'Smart Features for '),
+                TextSpan(
+                  text: 'Efficient Composting',
+                  style: TextStyle(color: WebColors.textTitle),
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Our IoT-enabled system combines automation, real-time monitoring, and AI recommendations',
+            textAlign: TextAlign.center,
+            style: WebTextStyles.subtitle,
           ),
           const SizedBox(height: AppSpacing.xxxl),
           // Carousel
@@ -100,7 +96,7 @@ class _FeaturesSectionState extends State<FeaturesSection> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(24),
-                          color: Colors.white, // Ensures solid background
+                          color: Colors.white,
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(24),

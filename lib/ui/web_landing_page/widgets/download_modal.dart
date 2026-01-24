@@ -88,7 +88,7 @@ class _DownloadModalState extends State<DownloadModal>
                             height: 80,
                             decoration: BoxDecoration(
                               color:
-                                  const Color(0xFF49D47F),
+                                  Color(0xFF0D6B3C).withValues(alpha: 0.85),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(

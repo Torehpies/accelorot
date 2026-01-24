@@ -16,9 +16,7 @@ class ContactSection extends StatelessWidget {
         horizontal: AppSpacing.xxxl * 2,
         vertical: AppSpacing.xxxl * 3,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
