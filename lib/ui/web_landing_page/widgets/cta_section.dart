@@ -24,13 +24,23 @@ class CtaSection extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
+          // ================= CTA CONTAINER WITH GRADIENT =================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xxxl * 2,
               vertical: AppSpacing.xxxl * 3,
             ),
-            color: Colors.white,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF84FAB0), // start green
+                  Color(0xFF8FD3F4), // end blue
+                ],
+              ),
+            ),
             child: Column(
               children: [
                 Text(
@@ -47,105 +57,54 @@ class CtaSection extends StatelessWidget {
                   'Join the sustainable composting revolution with Accel-O-Rot\'s smart IoT\nsystem',
                   textAlign: TextAlign.center,
                   style: WebTextStyles.subtitle.copyWith(
-                    color: const Color(0xFF6B7280),
+                    color: const Color(0xFF111827),
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
-                // Buttons Row
-                Wrap(
-                  spacing: AppSpacing.lg,
-                  alignment: WrapAlignment.center,
-                  children: [
-                    // Download Button
-                    if (onDownload != null)
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          border: Border.all(
-                            color: WebColors.iconsPrimary,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
+                // ================= GET STARTED BUTTON =================
+                Container(
+                  decoration: BoxDecoration(
+                    color: WebColors.iconsPrimary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onGetStarted,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
                         ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: onDownload,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 14,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.download,
-                                    size: 18,
-                                    color: WebColors.iconsPrimary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Download App',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: WebColors.iconsPrimary,
-                                    ),
-                                  ),
-                                ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Get Started Today',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: WebColors.textbutton2,
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    // Get Started Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: WebColors.iconsPrimary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: onGetStarted,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 14,
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 18,
+                              color: WebColors.textbutton2,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Get Started Today',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.arrow_forward,
-                                  size: 18,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
-          // Footer
+          // Footers
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
