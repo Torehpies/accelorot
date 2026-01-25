@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 
 class SettingsModel extends Equatable {
@@ -30,7 +29,7 @@ class SettingsModel extends Equatable {
       'notifications': notifications.toMap(),
     };
   }
-  
+
   SettingsModel copyWith({
     AccountSettings? account,
     NotificationSettings? notifications,
@@ -47,7 +46,7 @@ class SettingsModel extends Equatable {
 
 class AccountSettings extends Equatable {
   final bool twoFactorEnabled;
-  final bool emailUpdates; // "Email Preferences"
+  final bool emailUpdates;
 
   const AccountSettings({
     required this.twoFactorEnabled,
@@ -127,7 +126,6 @@ class NotificationSettings extends Equatable {
     return NotificationSettings(
       pushEnabled: map['pushEnabled'] ?? true,
       emailReportsEnabled: map['emailReportsEnabled'] ?? true,
-      // Handle potential int to double conversion issues from Firestore
       tempThreshold: (map['tempThreshold'] as num?)?.toDouble() ?? 70.0,
       moistureThreshold: (map['moistureThreshold'] as num?)?.toDouble() ?? 50.0,
       oxygenThreshold: (map['oxygenThreshold'] as num?)?.toDouble() ?? 15.0,
@@ -174,9 +172,12 @@ class NotificationSettings extends Equatable {
       oxygenThreshold: oxygenThreshold ?? this.oxygenThreshold,
       filterErrors: filterErrors ?? this.filterErrors,
       filterWarnings: filterWarnings ?? this.filterWarnings,
-      temperatureAlertsEnabled: temperatureAlertsEnabled ?? this.temperatureAlertsEnabled,
-      moistureAlertsEnabled: moistureAlertsEnabled ?? this.moistureAlertsEnabled,
-      oxygenAlertsEnabled: oxygenAlertsEnabled ?? this.oxygenAlertsEnabled,
+      temperatureAlertsEnabled:
+          temperatureAlertsEnabled ?? this.temperatureAlertsEnabled,
+      moistureAlertsEnabled:
+          moistureAlertsEnabled ?? this.moistureAlertsEnabled,
+      oxygenAlertsEnabled:
+          oxygenAlertsEnabled ?? this.oxygenAlertsEnabled,
     );
   }
 
