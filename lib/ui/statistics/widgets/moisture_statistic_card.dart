@@ -1,15 +1,16 @@
+import '../../../data/models/moisture_model.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class MoistureStatisticCard extends StatelessWidget {
   final double currentMoisture;
-  final List<double> hourlyReadings;
+  final List<MoistureModel> readings;
   final DateTime? lastUpdated;
 
   const MoistureStatisticCard({
     super.key,
     required this.currentMoisture,
-    required this.hourlyReadings,
+    required this.readings,
     this.lastUpdated,
   });
 
@@ -18,8 +19,8 @@ class MoistureStatisticCard extends StatelessWidget {
     const mainColor = Color(0xFF0284C7); // Blue color
     const borderColor = Color(0xFFBAE6FD); // Light Blue Border
 
-    // Generate monthly chart data (sample for now)
-    final chartData = _generateMonthlyData();
+    // Generate daily chart data from real readings
+    final chartData = _generateDailyData();
 
     return Container(
       decoration: BoxDecoration(
@@ -139,7 +140,7 @@ class MoistureStatisticCard extends StatelessWidget {
                       series: <CartesianSeries>[
                         SplineSeries<Map<String, dynamic>, String>(
                           dataSource: chartData,
-                          xValueMapper: (data, _) => data['month'] as String,
+                          xValueMapper: (data, _) => data['day'] as String,
                           yValueMapper: (data, _) => data['value'] as double,
                           color: const Color(0xFF0369A1), // Darker blue line
                           width: 3,
@@ -223,15 +224,29 @@ class MoistureStatisticCard extends StatelessWidget {
     )).toList();
   }
 
-  List<Map<String, dynamic>> _generateMonthlyData() {
-    return [
-      {'month': 'Jan', 'value': 40.0},
-      {'month': 'Feb', 'value': 75.0},
-      {'month': 'Mar', 'value': 55.0},
-      {'month': 'Apr', 'value': 25.0},
-      {'month': 'May', 'value': 60.0},
-      {'month': 'Jun', 'value': 62.0},
-    ];
+  List<Map<String, dynamic>> _generateDailyData() {
+    if (readings.isEmpty) return [];
+
+    // Sort mappings by date to be safe
+    final sortedReadings = List<MoistureModel>.from(readings);
+    sortedReadings.sort((a, b) => (a.timestamp ?? DateTime.now()).compareTo(b.timestamp ?? DateTime.now()));
+
+    if (sortedReadings.isEmpty) return [];
+
+    // Calculate start date (midnight of the first reading)
+    final firstDate = sortedReadings.first.timestamp ?? DateTime.now();
+    final startDate = DateTime(firstDate.year, firstDate.month, firstDate.day);
+
+    return sortedReadings.map((reading) {
+      final date = reading.timestamp ?? DateTime.now();
+      final currentDate = DateTime(date.year, date.month, date.day);
+      final dayDiff = currentDate.difference(startDate).inDays;
+      
+      return {
+        'day': 'Day ${dayDiff + 1}',
+        'value': reading.value,
+      };
+    }).toList();
   }
 
   double _calculateProgress(double moisture) {

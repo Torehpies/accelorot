@@ -24,7 +24,7 @@ class MoistureStatsView extends ConsumerWidget {
 
         return MoistureStatisticCard(
           currentMoisture: currentMoisture,
-          hourlyReadings: hourlyReadings,
+          readings: readings,
           lastUpdated: lastUpdated,
         );
       },

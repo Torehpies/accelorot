@@ -190,7 +190,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           temperatureAsync.when(
             data: (readings) => TemperatureStatisticCard(
               currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Temperature'),
@@ -199,7 +199,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           moistureAsync.when(
             data: (readings) => MoistureStatisticCard(
               currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Moisture'),
@@ -208,7 +208,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           oxygenAsync.when(
             data: (readings) => OxygenStatisticCard(
               currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Air Quality'),

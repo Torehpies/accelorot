@@ -24,7 +24,7 @@ class OxygenStatsView extends ConsumerWidget {
 
         return OxygenStatisticCard(
           currentOxygen: currentOxygen,
-          hourlyReadings: hourlyReadings,
+          readings: readings,
           lastUpdated: lastUpdated,
         );
       },
