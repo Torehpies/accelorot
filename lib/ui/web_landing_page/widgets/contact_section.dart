@@ -1,231 +1,15 @@
-// lib/ui/landing_page/widgets/contact_cta_section.dart
+// lib/ui/web_landing_page/widgets/contact_section.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
-
-// ========================================================
-// CONTACT SECTION
-// ========================================================
 
 class ContactSection extends StatelessWidget {
-  const ContactSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxxl * 2,
-        vertical: AppSpacing.xxxl * 3,
-      ),
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Heading
-          Text(
-            'Get in Touch with\nAccel-O-Rot',
-            style: WebTextStyles.h1.copyWith(
-              color: WebColors.textTitle,
-              fontSize: 40,
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // Subheading
-          Text(
-            'Have questions about our smart composting system? We\'re here to help you start your sustainable journey.',
-            style: WebTextStyles.subtitle.copyWith(
-              color: const Color(0xFF6B7280),
-              fontSize: 16,
-              height: 1.6,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxxl * 2),
-          // Contact Cards
-          LayoutBuilder(
-            builder: (context, constraints) {
-              bool isMobile = constraints.maxWidth < 900;
-
-              return isMobile
-                  ? Column(
-                      children: [
-                        _ContactCard(
-                          icon: Icons.email_outlined,
-                          title: 'Email Us',
-                          subtitle: 'support@accel-o-rot.com',
-                          onTap: () {},
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _ContactCard(
-                          icon: Icons.phone_outlined,
-                          title: 'Call Us',
-                          subtitle: '+63 912 345 6789',
-                          onTap: () {},
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        _ContactCard(
-                          icon: Icons.location_on_outlined,
-                          title: 'Visit Us',
-                          subtitle: 'Metro Manila, Philippines',
-                          onTap: () {},
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        Expanded(
-                          child: _ContactCard(
-                            icon: Icons.email_outlined,
-                            title: 'Email Us',
-                            subtitle: 'support@accel-o-rot.com',
-                            onTap: () {},
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xl),
-                        Expanded(
-                          child: _ContactCard(
-                            icon: Icons.phone_outlined,
-                            title: 'Call Us',
-                            subtitle: '+63 912 345 6789',
-                            onTap: () {},
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xl),
-                        Expanded(
-                          child: _ContactCard(
-                            icon: Icons.location_on_outlined,
-                            title: 'Visit Us',
-                            subtitle: 'Metro Manila, Philippines',
-                            onTap: () {},
-                          ),
-                        ),
-                      ],
-                    );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ========================================================
-// CONTACT CARD WIDGET
-// ========================================================
-
-class _ContactCard extends StatefulWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ContactCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  State<_ContactCard> createState() => _ContactCardState();
-}
-
-class _ContactCardState extends State<_ContactCard> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() => _isHovered = false),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? const Color(0xFFF3F4F6)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _isHovered
-                  ? const Color(0xFFD1D5DB)
-                  : const Color(0xFFE5E7EB),
-              width: 1.5,
-            ),
-          ),
-          child: Row(
-            children: [
-              // Icon Container
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: _isHovered
-                      ? WebColors.greenAccent.withValues(alpha: 0.15)
-                      : const Color(0xFFE0F2FE),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  widget.icon,
-                  size: 28,
-                  color: _isHovered
-                      ? WebColors.greenAccent
-                      : WebColors.iconsPrimary,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              // Text Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontFamily: 'dm-sans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: WebColors.textTitle,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.subtitle,
-                      style: TextStyle(
-                        fontFamily: 'dm-sans',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: const Color(0xFF6B7280),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ========================================================
-// CTA SECTION
-// ========================================================
-
-class CtaSection extends StatelessWidget {
   final VoidCallback onGetStarted;
   final VoidCallback? onDownload;
 
-  const CtaSection({
+  const ContactSection({
     super.key,
     required this.onGetStarted,
     this.onDownload,
@@ -239,101 +23,152 @@ class CtaSection extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
-          // ================= CTA CONTAINER WITH GRADIENT =================
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxxl * 2,
-              vertical: AppSpacing.xxxl * 3,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF84FAB0), // start green
-                  Color(0xFF8FD3F4), // end blue
-                ],
-              ),
-            ),
+            padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
+            color: const Color(0xFF25282B), // Dark background
             child: Column(
-              children: [
-                Text(
-                  'Ready to Transform Your Waste\nManagement?',
-                  textAlign: TextAlign.center,
-                  style: WebTextStyles.h1.copyWith(
-                    color: WebColors.textTitle,
-                    fontSize: 40,
-                    height: 1.3,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'Join the sustainable composting revolution with Accel-O-Rot\'s smart IoT\nsystem',
-                  textAlign: TextAlign.center,
-                  style: WebTextStyles.subtitle.copyWith(
-                    color: const Color(0xFF111827),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                // ================= BUTTONS ROW =================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Download App Button
-                    if (onDownload != null) ...[
-                      _DownloadAppButton(onTap: onDownload!),
-                      const SizedBox(width: AppSpacing.lg),
-                    ],
-                    // Get Started Button
-                    _GetStartedButton(onTap: onGetStarted),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // ================= FOOTER =================
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxxl * 2,
-              vertical: AppSpacing.xl,
-            ),
-            color: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SvgPicture.asset(
-                      'assets/images/Accel-O-Rot Logo.svg',
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.contain,
-                      semanticsLabel: 'Accel-O-Rot Logo',
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              SvgPicture.asset(
+                                'assets/images/Accel-O-Rot Logo.svg',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.contain,
+                                semanticsLabel: 'Accel-O-Rot Logo',
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Text(
+                                'Accel-O-Rot',
+                                style: h2Style.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 24,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            'Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting in the Philippines.',
+                            style: WebTextStyles.caption.copyWith(
+                              color: const Color(0xFF9CA3AF),
+                              fontSize: 14,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(
+                            children: [
+                              // Facebook (valid)
+                              _SocialIcon(icon: Icons.facebook_outlined),
+                              const SizedBox(width: AppSpacing.md),
+                              // Twitter → replaced with public (globe icon)
+                              _SocialIcon(icon: Icons.public),
+                              const SizedBox(width: AppSpacing.md),
+                              // Instagram → replaced with camera (valid fallback)
+                              _SocialIcon(icon: Icons.camera_alt_outlined),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      'ACCEL-O-ROT',
-                      style: h2Style.copyWith(
-                        color: WebColors.textTitle,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 24,
+                    const SizedBox(width: AppSpacing.xxxl),
+                    _FooterColumn(
+                      title: 'Quick Links',
+                      links: [
+                        'How It Works',
+                        'Features',
+                        'Impact',
+                        'Contact'
+                      ],
+                    ),
+                    const SizedBox(width: AppSpacing.xxxl),
+                    _FooterColumn(
+                      title: 'Resources',
+                      links: [
+                        'RA 9003 Compliance',
+                      ],
+                    ),
+                    const SizedBox(width: AppSpacing.xxxl),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Contact Us',
+                            style: WebTextStyles.h3.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _ContactRow(
+                            icon: Icons.location_on_outlined,
+                            text: 'Metro Manila, Caloocan City, Philippines',
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _ContactRow(
+                            icon: Icons.email_outlined,
+                            text: 'support@accel-o-rot.ph',
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _ContactRow(
+                            icon: Icons.phone_outlined,
+                            text: '+63 000 000 0000',
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Flexible(
-                  child: Text(
-                    '© 2026 Accel-O-Rot. Accelerating sustainable composting through innovation.',
-                    style: WebTextStyles.caption.copyWith(
-                      color: const Color(0xFF6B7280),
-                      fontSize: 13,
+                const SizedBox(height: AppSpacing.xxxl),
+                // Divider
+                Container(height: 1, color: const Color(0xFF374151)),
+                const SizedBox(height: AppSpacing.md),
+                // Copyright & Legal
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '© 2026 Accel-O-Rot. All rights reserved. Made with 🌱 in the Philippines.',
+                      style: WebTextStyles.caption.copyWith(
+                        color: const Color(0xFF9CA3AF),
+                        fontSize: 13,
+                      ),
                     ),
-                    textAlign: TextAlign.right,
-                  ),
+                    Row(
+                      children: [
+                        Text(
+                          'Privacy Policy',
+                          style: WebTextStyles.caption.copyWith(
+                            color: const Color(0xFF9CA3AF),
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.lg),
+                        Text(
+                          'Terms of Service',
+                          style: WebTextStyles.caption.copyWith(
+                            color: const Color(0xFF9CA3AF),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -343,10 +178,6 @@ class CtaSection extends StatelessWidget {
     );
   }
 }
-
-// ========================================================
-// DOWNLOAD APP BUTTON
-// ========================================================
 
 class _DownloadAppButton extends StatefulWidget {
   final VoidCallback onTap;
@@ -370,35 +201,23 @@ class _DownloadAppButtonState extends State<_DownloadAppButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 11,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(
-              color: const Color(0xFF28A85A),
-              width: 2,
-            ),
+            border: Border.all(color: const Color(0xFF28A85A), width: 2),
             borderRadius: BorderRadius.circular(8),
             boxShadow: _isHovered
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF28A85A).withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
+                ? [BoxShadow(
+                    color: const Color(0xFF28A85A).withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )]
                 : [],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.download_outlined,
-                size: 18,
-                color: const Color(0xFF28A85A),
-              ),
+              Icon(Icons.download_outlined, size: 18, color: const Color(0xFF28A85A)),
               const SizedBox(width: 8),
               Text(
                 'Download App',
@@ -416,10 +235,6 @@ class _DownloadAppButtonState extends State<_DownloadAppButton> {
     );
   }
 }
-
-// ========================================================
-// GET STARTED BUTTON
-// ========================================================
 
 class _GetStartedButton extends StatefulWidget {
   final VoidCallback onTap;
@@ -443,20 +258,13 @@ class _GetStartedButtonState extends State<_GetStartedButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 11,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
           decoration: BoxDecoration(
-            color: _isHovered
-                ? const Color(0xFF2D9B6B)
-                : const Color(0xFF28A85A),
+            color: _isHovered ? const Color(0xFF2D9B6B) : const Color(0xFF28A85A),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF28A85A).withOpacity(
-                  _isHovered ? 0.3 : 0.15,
-                ),
+                color: const Color(0xFF28A85A).withValues(alpha: (_isHovered ? 0.3 : 0.15)),
                 blurRadius: _isHovered ? 12 : 6,
                 offset: const Offset(0, 2),
               ),
@@ -475,15 +283,113 @@ class _GetStartedButtonState extends State<_GetStartedButton> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(
-                Icons.arrow_forward,
-                size: 16,
-                color: Colors.white,
-              ),
+              const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SocialIcon extends StatelessWidget {
+  final IconData icon;
+
+  const _SocialIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: const Color(0xFF374151),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
+  }
+}
+
+class _FooterColumn extends StatelessWidget {
+  final String title;
+  final List<String> links;
+
+  const _FooterColumn({required this.title, required this.links});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: WebTextStyles.h3.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          for (var link in links) ...[
+            _FooterLink(text: link),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  final String text;
+
+  const _FooterLink({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {},
+        child: Text(
+          text,
+          style: WebTextStyles.caption.copyWith(
+            color: const Color(0xFF9CA3AF),
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContactRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _ContactRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 20),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            text,
+            style: WebTextStyles.caption.copyWith(
+              color: const Color(0xFF9CA3AF),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

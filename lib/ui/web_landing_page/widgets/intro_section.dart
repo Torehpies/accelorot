@@ -1,6 +1,5 @@
-// lib/ui/landing_page/widgets/intro_section.dart
-
 import 'package:flutter/material.dart';
+
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
@@ -26,14 +25,22 @@ class IntroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
+          colors: [
+            Color(0xFFE0F2FE),
+            Color(0xFFCCFBF1),
+          ],
         ),
       ),
-      padding: const EdgeInsets.all(AppSpacing.xxxl * 3),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xxxl * 3,
+        AppSpacing.xxxl * 3,
+        AppSpacing.xxxl * 3,
+        AppSpacing.xxxl * 7, // You can reduce this if no wave is needed
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left side - Content
+          // LEFT
           Expanded(
             flex: 5,
             child: Column(
@@ -42,7 +49,10 @@ class IntroSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xl),
                 RichText(
                   text: TextSpan(
-                    style: WebTextStyles.h1.copyWith(fontSize: 48, height: 1.2),
+                    style: WebTextStyles.h1.copyWith(
+                      fontSize: 48,
+                      height: 1.2,
+                    ),
                     children: [
                       const TextSpan(text: 'Transform Your\n'),
                       TextSpan(
@@ -55,7 +65,9 @@ class IntroSection extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
-                  'Accelerate decomposition with our IoT-enabled rotary drum system.\nMonitor in real-time, automate processes, \nand produce quality compost in just 2 weeks.',
+                  'Accelerate decomposition with our IoT-enabled rotary drum system.\n'
+                  'Monitor in real-time, automate processes,\n'
+                  'and produce quality compost in just 2 weeks.',
                   style: WebTextStyles.subtitle.copyWith(
                     fontSize: 16,
                     height: 1.6,
@@ -84,59 +96,50 @@ class IntroSection extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(width: AppSpacing.xxxl),
-          // Right side - Metrics Cards (2x2 Grid)
+
+          // RIGHT
           Expanded(
             flex: 3,
-            child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Top Row
                 Row(
-                  children: [
-                    // Top Left - Temperature
-                    const Expanded(
+                  children: const [
+                    Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.thermostat_outlined,
                         value: '45°C',
                         label: 'Temperature',
-                        position: 0, // top-left
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
-                    // Top Right - Moisture
-                    const Expanded(
+                    SizedBox(width: AppSpacing.lg),
+                    Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.water_drop_outlined,
                         value: '58%',
                         label: 'Moisture',
-                        position: 1, // top-right
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                // Bottom Row
                 Row(
-                  children: [
-                    // Bottom Left - Oxygen
-                    const Expanded(
+                  children: const [
+                    Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.air_outlined,
                         value: '21%',
                         label: 'Oxygen',
-                        position: 2, // bottom-left
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.lg),
-                    // Bottom Right - Progress
-                    const Expanded(
+                    SizedBox(width: AppSpacing.lg),
+                    Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.trending_up_outlined,
                         value: 'Day 8',
                         label: 'Progress',
-                        position: 3, // bottom-right
                       ),
                     ),
                   ],
@@ -144,7 +147,6 @@ class IntroSection extends StatelessWidget {
               ],
             ),
           ),
-          )
         ],
       ),
     );

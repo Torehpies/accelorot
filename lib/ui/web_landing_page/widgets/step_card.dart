@@ -16,36 +16,75 @@ class StepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        // ✅ SAME background as HowItWorksSection
-        color: const Color.fromARGB(255, 204, 251, 241),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
         border: Border.all(
-          color: const Color.fromARGB(255, 118, 230, 207), // subtle border, still visible
-          width: 1,
+          color: const Color(0xFFE2E8F0),
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          Text(
-            '${step.number}',
-            style: WebTextStyles.stepNumber,
-            textAlign: TextAlign.center,
+          /// Step Number (top-right, faint)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Text(
+              step.number.toString().padLeft(2, '0'),
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w700,
+                color: step.accentColor.withOpacity(0.15),
+              ),
+            ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            step.title,
-            textAlign: TextAlign.center,
-            style: WebTextStyles.stepCardTitle,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            step.description,
-            textAlign: TextAlign.center,
-            style: WebTextStyles.stepCardDescription,
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Icon badge
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: step.accentColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  step.icon,
+                  size: 28,
+                  color: step.accentColor,
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              /// Title
+              Text(
+                step.title,
+                style: WebTextStyles.stepCardTitle.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.sm),
+
+              /// Description
+              Text(
+                step.description,
+                style: WebTextStyles.stepCardDescription.copyWith(
+                  height: 1.6,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ),
         ],
       ),

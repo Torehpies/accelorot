@@ -11,6 +11,7 @@ class WebColors {
 
   // Backgrounds
   static const pageBackground = Color(0xFFE0F2FE); // Light blue page background
+  static const pageBackground2 = Color(0xFFDFF7F2); // Light mint/cyan page background
   static const lightCyanBackground = Color(0xFFCCFBF1); // Very light cyan
   static const lightBlueBackground = Color(0xFFD9EBF1); // Light blue secondary
   static const cardBackground = Colors.white; // Card/container background
@@ -47,6 +48,8 @@ class WebColors {
   static const textButton = Color(0xFF10B981); // Primary button text (green)
   static const textTitle = Color(0xFF28A85A); // Titles (green)
   static const textbutton2 = Color(0xFFFFFFFF); // Links (blue)
+  static const greenPrimary = Color(0xFF28A85A);
+
 
   static const textForeground = Color(0xFF29333D); // Text (Foreground)
   static const textMutedNew = Color(0xFF626D7A); // Muted Text (new spec)
