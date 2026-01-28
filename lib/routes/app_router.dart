@@ -28,6 +28,7 @@ import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
+import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.dart';
 //import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
@@ -50,6 +51,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
         builder: (context, state) => const LandingPageView(),
+      ),
+      GoRoute(
+        path: '/download',
+        name: 'download',
+        builder: (context, state) => const DownloadApp(),
       ),
       GoRoute(
         path: RoutePath.loading.path,
@@ -287,4 +293,5 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-});
+}
+);

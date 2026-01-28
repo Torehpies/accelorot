@@ -59,9 +59,7 @@ class WebColors {
   static const success = Color(0xFF10B981); // Success state
   static const warning = Color(0xFFF59E0B); // Warning state
   static const info = Color(0xFF3B82F6); // Info state
-  static const neutralStatus = Color(
-    0xFF4338CA,
-  ); // Neutral status (New, No log)
+  static const neutralStatus = Color(0xFF4338CA); // Neutral status (New, No log)
 
     static const ecoDark = Color(0xFF205F3A); // Eco Dark (Accents)
     
