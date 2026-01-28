@@ -172,7 +172,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
                         decoration: BoxDecoration(
                           color: index == _currentIndex
                               ? WebColors.greenAccent
-                              : Colors.grey.withOpacity(0.6),
+                              : Colors.grey.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
