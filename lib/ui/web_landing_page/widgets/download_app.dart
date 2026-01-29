@@ -100,11 +100,12 @@ class DownloadApp extends StatelessWidget {
                                         child: Text('Download APK', textAlign: TextAlign.center),
                                       ),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: const Color(0xFF16A34A),
+                                        backgroundColor: const Color(0xFF22C55E), 
+                                        foregroundColor: Colors.white,            
                                         elevation: 0,
-                                        side: const BorderSide(color: Color(0xFF22C55E)),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -130,8 +131,6 @@ class DownloadApp extends StatelessWidget {
   }
 }
 
-// --- _LeftSection removed (now inlined above) ---
-// Remaining widgets (_PhonePreview, _StatCard, etc.) unchanged
 class _PhonePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

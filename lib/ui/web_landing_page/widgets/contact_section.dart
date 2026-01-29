@@ -8,11 +8,13 @@ import '../../core/themes/web_text_styles.dart';
 class ContactSection extends StatelessWidget {
   final VoidCallback onGetStarted;
   final VoidCallback? onDownload;
+  final Function(String)? onNavigateToSection;
 
   const ContactSection({
     super.key,
     required this.onGetStarted,
     this.onDownload,
+    this.onNavigateToSection,
   });
 
   @override
@@ -70,13 +72,10 @@ class ContactSection extends StatelessWidget {
                           const SizedBox(height: AppSpacing.lg),
                           Row(
                             children: [
-                              // Facebook (valid)
                               _SocialIcon(icon: Icons.facebook_outlined),
                               const SizedBox(width: AppSpacing.md),
-                              // Twitter → replaced with public (globe icon)
                               _SocialIcon(icon: Icons.public),
                               const SizedBox(width: AppSpacing.md),
-                              // Instagram → replaced with camera (valid fallback)
                               _SocialIcon(icon: Icons.camera_alt_outlined),
                             ],
                           ),
@@ -86,19 +85,40 @@ class ContactSection extends StatelessWidget {
                     const SizedBox(width: AppSpacing.xxxl),
                     _FooterColumn(
                       title: 'Quick Links',
-                      links: [
-                        'How It Works',
+                      links: const [
                         'Features',
+                        'How It Works',
                         'Impact',
-                        'Contact'
+                        'Join Us',
                       ],
+                      onLinkTap: (link) {
+                        if (onNavigateToSection != null) {
+                          switch (link) {
+                            case 'Features':
+                              onNavigateToSection!('features');
+                              break;
+                            case 'How It Works':
+                              onNavigateToSection!('how-it-works');
+                              break;
+                            case 'Impact':
+                              onNavigateToSection!('impact');
+                              break;
+                            case 'Join Us':
+                              onNavigateToSection!('banner');
+                              break;
+                          }
+                        }
+                      },
                     ),
                     const SizedBox(width: AppSpacing.xxxl),
                     _FooterColumn(
                       title: 'Resources',
-                      links: [
+                      links: const [
                         'RA 9003 Compliance',
                       ],
+                      onLinkTap: (link) {
+                        // Handle resource links if needed
+                      },
                     ),
                     const SizedBox(width: AppSpacing.xxxl),
                     Expanded(
@@ -179,119 +199,6 @@ class ContactSection extends StatelessWidget {
   }
 }
 
-class _DownloadAppButton extends StatefulWidget {
-  final VoidCallback onTap;
-
-  const _DownloadAppButton({required this.onTap});
-
-  @override
-  State<_DownloadAppButton> createState() => _DownloadAppButtonState();
-}
-
-class _DownloadAppButtonState extends State<_DownloadAppButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFF28A85A), width: 2),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: _isHovered
-                ? [BoxShadow(
-                    color: const Color(0xFF28A85A).withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  )]
-                : [],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.download_outlined, size: 18, color: const Color(0xFF28A85A)),
-              const SizedBox(width: 8),
-              Text(
-                'Download App',
-                style: TextStyle(
-                  fontFamily: 'dm-sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF28A85A),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GetStartedButton extends StatefulWidget {
-  final VoidCallback onTap;
-
-  const _GetStartedButton({required this.onTap});
-
-  @override
-  State<_GetStartedButton> createState() => _GetStartedButtonState();
-}
-
-class _GetStartedButtonState extends State<_GetStartedButton> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
-          decoration: BoxDecoration(
-            color: _isHovered ? const Color(0xFF2D9B6B) : const Color(0xFF28A85A),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF28A85A).withValues(alpha: (_isHovered ? 0.3 : 0.15)),
-                blurRadius: _isHovered ? 12 : 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Get Started Today',
-                style: TextStyle(
-                  fontFamily: 'dm-sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, size: 16, color: Colors.white),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SocialIcon extends StatelessWidget {
   final IconData icon;
 
@@ -316,8 +223,13 @@ class _SocialIcon extends StatelessWidget {
 class _FooterColumn extends StatelessWidget {
   final String title;
   final List<String> links;
+  final Function(String)? onLinkTap;
 
-  const _FooterColumn({required this.title, required this.links});
+  const _FooterColumn({
+    required this.title,
+    required this.links,
+    this.onLinkTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -336,7 +248,10 @@ class _FooterColumn extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           for (var link in links) ...[
-            _FooterLink(text: link),
+            _FooterLink(
+              text: link,
+              onTap: onLinkTap != null ? () => onLinkTap!(link) : null,
+            ),
             const SizedBox(height: AppSpacing.sm),
           ],
         ],
@@ -347,15 +262,19 @@ class _FooterColumn extends StatelessWidget {
 
 class _FooterLink extends StatelessWidget {
   final String text;
+  final VoidCallback? onTap;
 
-  const _FooterLink({required this.text});
+  const _FooterLink({
+    required this.text,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () {},
+        onTap: onTap,
         child: Text(
           text,
           style: WebTextStyles.caption.copyWith(

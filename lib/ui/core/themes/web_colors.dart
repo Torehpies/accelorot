@@ -21,9 +21,8 @@ class WebColors {
   static const lightGrayBackground = Color(0xFFFAFAFA); // Light gray background
 
   static const secondaryBackground = Color(0xFFD9EBF1); // Secondary background
-  static const sectionBackground = Color(
-    0xFF28A85A,
-  ); // Titles (green) // Section backgrounds
+  static const sectionBackground = Color(0xFF28A85A,); // Titles (green) // Section backgrounds
+   static const Color textBody = Color(0xFF374151); // or whatever color you intend
 
   // Borders & Dividers
   static const primaryBorder = Color(

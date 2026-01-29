@@ -33,7 +33,8 @@ import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.d
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/ui/web_landing_page/view/landing_page_view.dart';
+//import 'package:flutter_application_1/ui/web_landing_page/view/web_landing_page_view.dart';
+import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 
 const int kDesktopBreakpoint = 1024;
@@ -50,7 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
-        builder: (context, state) => const LandingPageView(),
+        builder: (context, state) => const ResponsiveLandingPage(),
       ),
       GoRoute(
         path: '/download',

@@ -8,6 +8,7 @@ class TemMoisOxyCard extends StatefulWidget {
   final IconData icon;
   final String value;
   final String label;
+  final String? hoverInfo; // Additional info shown on hover
   final int position; // 0: top-left, 1: top-right, 2: bottom-left, 3: bottom-right
 
   const TemMoisOxyCard({
@@ -15,6 +16,7 @@ class TemMoisOxyCard extends StatefulWidget {
     required this.icon,
     required this.value,
     required this.label,
+    this.hoverInfo,
     this.position = 0,
   });
 
@@ -40,7 +42,6 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
     );
 
     // Staggered entrance animation based on position
-    // 0: top-left, 1: top-right, 2: bottom-left, 3: bottom-right
     final delayFraction = (widget.position * 0.15).clamp(0.0, 0.45);
 
     // Fade-in animation with stagger
@@ -100,8 +101,8 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
               _glowAnimation,
             ]),
             builder: (context, child) {
-              // Zoom scale: 1.0 normal, 1.03 on hover
-              final scale = _isHovered ? 1.03 : 1.0;
+              // Zoom scale: 1.0 normal, 1.02 on hover (reduced for smoother effect)
+              final scale = _isHovered ? 1.02 : 1.0;
 
               // Glow logic
               final glowIntensity = _isHovered
@@ -111,9 +112,13 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
               final shadowOpacity = glowIntensity * 0.15;
               final shadowBlur = 8.0 + (glowIntensity * 8.0);
 
-              return Transform.scale(
+              return AnimatedScale(
                 scale: scale,
-                child: Container(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutCubic,
                   padding: const EdgeInsets.all(AppSpacing.xl),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -157,7 +162,9 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                     mainAxisAlignment: MainAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeOutCubic,
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
@@ -200,6 +207,30 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                           fontSize: 13,
                         ),
                       ),
+                      // Show additional info on hover
+                      if (widget.hoverInfo != null)
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeOutCubic,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            opacity: _isHovered ? 1.0 : 0.0,
+                            child: _isHovered
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 12),
+                                    child: Text(
+                                      widget.hoverInfo!,
+                                      style: WebTextStyles.caption.copyWith(
+                                        color: const Color(0xFF6B7280),
+                                        fontSize: 12,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
                     ],
                   ),
                 ),

@@ -1,7 +1,6 @@
 // lib/ui/web_landing_page/widgets/features_section.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -27,14 +26,15 @@ class FeaturesSection extends StatefulWidget {
 class FeaturesSectionState extends State<FeaturesSection> {
   late PageController _pageController;
   int _currentIndex = 0;
+  double _currentPage = 0.0;
 
   final List<String> featureImages = [
-    'assets/images/mobile_dashboard_1.svg',
-    'assets/images/ai_recommendations_1.svg',
-    'assets/images/auto_regulations_1.svg',
-    'assets/images/real_time_alerts_1.svg',
-    'assets/images/data_analytics_1.svg',
-    'assets/images/sustainable_composting_1.svg',
+    'assets/images/Mobile Dashboard.png',
+    'assets/images/AI Recommendations.png',
+    'assets/images/Auto-Regulations.png',
+    'assets/images/Real-Time Alerts.png',
+    'assets/images/Data Analytics.png',
+    'assets/images/Sustainable Composting.png',
   ];
 
   @override
@@ -43,12 +43,12 @@ class FeaturesSectionState extends State<FeaturesSection> {
     _pageController = PageController(viewportFraction: 0.85);
     _pageController.addListener(() {
       setState(() {
-        _currentIndex = (_pageController.page ?? 0).round();
+        _currentPage = _pageController.page ?? 0.0;
+        _currentIndex = _currentPage.round();
       });
     });
   }
 
-  // ✅ CRITICAL: This method was missing — now added!
   void resetCarousel() {
     if (_pageController.hasClients) {
       _pageController.animateToPage(
@@ -67,11 +67,13 @@ class FeaturesSectionState extends State<FeaturesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxxl * 2,
-        vertical: AppSpacing.xxxl * 3,
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth > 1200 ? AppSpacing.xxxl * 2 : AppSpacing.xl,
+        vertical: AppSpacing.xxxl * 1.5,
       ),
       color: Colors.white,
       child: Column(
@@ -90,90 +92,56 @@ class FeaturesSectionState extends State<FeaturesSection> {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           Text(
             'Our IoT-enabled system combines automation, real-time monitoring, and AI recommendations',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle,
           ),
-          const SizedBox(height: AppSpacing.xxxl),
+          const SizedBox(height: AppSpacing.lg),
 
           // CAROUSEL
-          SizedBox(
-            height: 380,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: screenWidth > 1400 ? 1000 : screenWidth * 0.85,
+              maxHeight: 500,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                PageView.builder(
-                  controller: _pageController,
-                  itemCount: featureImages.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          height: 300,
-                          color: Colors.grey.shade50,
-                          child: Center(
-                            child: SvgPicture.asset(
-                              featureImages[index],
-                              fit: BoxFit.scaleDown,
-                              width: 280,
-                              height: 280,
-                              placeholderBuilder: (context) =>
-                                  const CircularProgressIndicator(),
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.broken_image,
-                                          color: Colors.red, size: 48),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        'Failed to load:\n${featureImages[index]}',
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontSize: 12, color: Colors.black87),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        error.toString().split('\n').first,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontSize: 10, color: Colors.red),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: featureImages.length,
+                    itemBuilder: (context, index) {
+                      return _buildCarouselItem(index);
+                    },
+                  ),
                 ),
-
+                const SizedBox(height: 20),
                 // INDICATOR DOTS
-                Positioned(
-                  bottom: 12,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      featureImages.length,
-                      (index) => AnimatedContainer(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    featureImages.length,
+                    (index) => GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         margin: const EdgeInsets.symmetric(horizontal: 6),
-                        width: index == _currentIndex ? 22 : 8,
-                        height: 8,
+                        width: index == _currentIndex ? 32 : 10,
+                        height: 10,
                         decoration: BoxDecoration(
                           color: index == _currentIndex
                               ? WebColors.greenAccent
-                              : Colors.grey.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(4),
+                              : Colors.grey.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
@@ -182,8 +150,107 @@ class FeaturesSectionState extends State<FeaturesSection> {
               ],
             ),
           ),
+
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
+    );
+  }
+
+  Widget _buildCarouselItem(int index) {
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, child) {
+        double value = 1.0;
+
+        if (_pageController.position.haveDimensions) {
+          value = _pageController.page! - index;
+          value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+        }
+
+        return Center(
+          child: Transform.scale(
+            scale: value,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Opacity(
+                opacity: value > 0.9 ? 1.0 : 0.6,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    maxWidth: 700,
+                    maxHeight: 440,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: value > 0.95
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 20,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 10,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      featureImages[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.broken_image_outlined,
+                                color: Colors.grey.shade400,
+                                size: 56,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Failed to load image',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                featureImages[index],
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

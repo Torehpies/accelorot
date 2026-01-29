@@ -35,7 +35,7 @@ class IntroSection extends StatelessWidget {
         AppSpacing.xxxl * 3,
         AppSpacing.xxxl * 3,
         AppSpacing.xxxl * 3,
-        AppSpacing.xxxl * 7, // You can reduce this if no wave is needed
+        AppSpacing.xxxl * 7,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +99,7 @@ class IntroSection extends StatelessWidget {
 
           const SizedBox(width: AppSpacing.xxxl),
 
-          // RIGHT
+          // RIGHT - Cards with hover info
           Expanded(
             flex: 3,
             child: Column(
@@ -112,6 +112,8 @@ class IntroSection extends StatelessWidget {
                         icon: Icons.thermostat_outlined,
                         value: '45°C',
                         label: 'Temperature',
+                        hoverInfo: 'Optimal range: 40-60°C for thermophilic composting',
+                        position: 0,
                       ),
                     ),
                     SizedBox(width: AppSpacing.lg),
@@ -120,6 +122,8 @@ class IntroSection extends StatelessWidget {
                         icon: Icons.water_drop_outlined,
                         value: '58%',
                         label: 'Moisture',
+                        hoverInfo: 'Ideal moisture level for efficient decomposition',
+                        position: 1,
                       ),
                     ),
                   ],
@@ -132,14 +136,18 @@ class IntroSection extends StatelessWidget {
                         icon: Icons.air_outlined,
                         value: '21%',
                         label: 'Oxygen',
+                        hoverInfo: 'Adequate aeration for aerobic decomposition',
+                        position: 2,
                       ),
                     ),
                     SizedBox(width: AppSpacing.lg),
                     Expanded(
                       child: TemMoisOxyCard(
                         icon: Icons.trending_up_outlined,
-                        value: 'Day 8',
-                        label: 'Progress',
+                        value: 'Day 14',
+                        label: 'Complete',
+                        hoverInfo: 'Halfway through the 2-week composting cycle',
+                        position: 3,
                       ),
                     ),
                   ],

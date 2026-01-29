@@ -30,13 +30,38 @@ class AppHeader extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       height: 88,
       decoration: BoxDecoration(
-        color: isScrolled ? Colors.white : const Color(0xFFE9FAFB),
+        gradient: isScrolled
+            ? null
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE0F2FE),
+                  Color(0xFFCCFBF1),
+                ],
+              ),
+        color: isScrolled ? Colors.white : null,
+        border: isScrolled
+            ? const Border(
+                bottom: BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1,
+                ),
+              )
+            : null,
         boxShadow: isScrolled
             ? [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
                 ),
               ]
             : [],
@@ -68,7 +93,7 @@ class AppHeader extends StatelessWidget {
 
             const Spacer(),
 
-            /// Breadcrumb Navigation (Image-style)
+            /// Breadcrumb Navigation (Updated style)
             Row(
               children: [
                 _BreadcrumbItem(
@@ -154,30 +179,18 @@ class _BreadcrumbItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => onTap(id),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive
-                  ? WebColors.success // green active text
-                  : WebColors.textMuted,
-            ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+            color: isActive
+                ? WebColors.success // green for active
+                : const Color(0xFF6B7280), // gray for inactive
           ),
-          const SizedBox(height: 6),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 2,
-            width: isActive ? 32 : 0,
-            decoration: BoxDecoration(
-              color: WebColors.success,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -188,11 +201,11 @@ class _Chevron extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Icon(
         Icons.chevron_right,
-        size: 18,
-        color: WebColors.textMuted.withOpacity(0.6),
+        size: 16,
+        color: const Color(0xFF9CA3AF),
       ),
     );
   }
