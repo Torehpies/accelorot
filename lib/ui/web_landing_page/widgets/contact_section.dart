@@ -1,7 +1,7 @@
-// lib/ui/web_landing_page/widgets/contact_section.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 
@@ -16,6 +16,15 @@ class ContactSection extends StatelessWidget {
     this.onDownload,
     this.onNavigateToSection,
   });
+
+  // Helper to safely launch URLs or email
+  Future<void> _launchUrl(String urlString) async {
+    final uri = Uri.parse(urlString.trim());
+    if (!await launchUrl(uri)) {
+      // In production, you might show a snackbar instead of throwing
+      debugPrint('Could not launch $urlString');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +81,15 @@ class ContactSection extends StatelessWidget {
                           const SizedBox(height: AppSpacing.lg),
                           Row(
                             children: [
-                              _SocialIcon(icon: Icons.facebook_outlined),
+                              _SocialIcon(
+                                iconData: Icons.facebook_outlined,
+                                onPressed: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                backgroundColor: const Color(0xFF1877F2), // Facebook blue
+                              ),
                               const SizedBox(width: AppSpacing.md),
-                              _SocialIcon(icon: Icons.public),
+                              _SocialIcon(iconData: Icons.public, onPressed: null),
                               const SizedBox(width: AppSpacing.md),
-                              _SocialIcon(icon: Icons.camera_alt_outlined),
+                              _SocialIcon(iconData: Icons.camera_alt_outlined, onPressed: null),
                             ],
                           ),
                         ],
@@ -92,22 +105,7 @@ class ContactSection extends StatelessWidget {
                         'Join Us',
                       ],
                       onLinkTap: (link) {
-                        if (onNavigateToSection != null) {
-                          switch (link) {
-                            case 'Features':
-                              onNavigateToSection!('features');
-                              break;
-                            case 'How It Works':
-                              onNavigateToSection!('how-it-works');
-                              break;
-                            case 'Impact':
-                              onNavigateToSection!('impact');
-                              break;
-                            case 'Join Us':
-                              onNavigateToSection!('banner');
-                              break;
-                          }
-                        }
+                        onNavigateToSection?.call(link);
                       },
                     ),
                     const SizedBox(width: AppSpacing.xxxl),
@@ -142,7 +140,8 @@ class ContactSection extends StatelessWidget {
                           const SizedBox(height: AppSpacing.md),
                           _ContactRow(
                             icon: Icons.email_outlined,
-                            text: 'support@accel-o-rot.ph',
+                            text: 'accelorot.management@gmail.com',
+                            onTap: () => _launchUrl('mailto:accelorot.management@gmail.com'),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           _ContactRow(
@@ -200,23 +199,41 @@ class ContactSection extends StatelessWidget {
 }
 
 class _SocialIcon extends StatelessWidget {
-  final IconData icon;
+  final IconData iconData;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
 
-  const _SocialIcon({required this.icon});
+  const _SocialIcon({
+    required this.iconData,
+    this.onPressed,
+    this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final child = Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFF374151),
+        color: backgroundColor ?? const Color(0xFF374151),
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(iconData, color: Colors.white, size: 20),
       ),
     );
+
+    if (onPressed != null) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onPressed,
+          child: child,
+        ),
+      );
+    }
+
+    return child;
   }
 }
 
@@ -247,13 +264,16 @@ class _FooterColumn extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          for (var link in links) ...[
-            _FooterLink(
-              text: link,
-              onTap: onLinkTap != null ? () => onLinkTap!(link) : null,
+          for (final link in links)
+            Column(
+              children: [
+                _FooterLink(
+                  text: link,
+                  onTap: onLinkTap != null ? () => onLinkTap!(link) : null,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
         ],
       ),
     );
@@ -290,12 +310,17 @@ class _FooterLink extends StatelessWidget {
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String text;
+  final VoidCallback? onTap;
 
-  const _ContactRow({required this.icon, required this.text});
+  const _ContactRow({
+    required this.icon,
+    required this.text,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final content = Row(
       children: [
         Icon(icon, color: Colors.white, size: 20),
         const SizedBox(width: AppSpacing.sm),
@@ -310,5 +335,17 @@ class _ContactRow extends StatelessWidget {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: onTap,
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 }
