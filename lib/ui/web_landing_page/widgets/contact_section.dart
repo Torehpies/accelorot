@@ -112,7 +112,9 @@ class ContactSection extends StatelessWidget {
                     _FooterColumn(
                       title: 'Resources',
                       links: const [
+                        'FAQ',
                         'RA 9003 Compliance',
+                        
                       ],
                       onLinkTap: (link) {
                         // Handle resource links if needed
