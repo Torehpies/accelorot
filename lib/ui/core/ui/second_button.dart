@@ -1,7 +1,7 @@
 // lib/ui/web_landing_page/customize_core/landingpage_second_button.dart
 
 import 'package:flutter/material.dart';
-import '../../core/themes/web_text_styles.dart';
+import '../themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 
 class SecondaryButton extends StatelessWidget {
