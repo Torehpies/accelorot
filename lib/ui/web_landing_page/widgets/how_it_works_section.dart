@@ -1,6 +1,7 @@
 // lib/ui/landing_page/widgets/how_it_works_section.dart
 
 import 'package:flutter/material.dart';
+import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../models/step_model.dart';
@@ -16,68 +17,75 @@ class HowItWorksSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        horizontal: width > 1400 ? 140 : 32,
-        vertical: 100,
+        horizontal: screenWidth > 1400
+            ? AppSpacing.xxxl * 1.5
+            : AppSpacing.xxxl,
+        vertical: AppSpacing.xl * 1.2,
       ),
-      color: const Color(0xFFEAF9FF),
+      color: const Color.fromARGB(255, 204, 251, 241), // <-- SAME COLOR AS YOUR ORIGINAL CODE
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFDFF5EE),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'Simple Process',
-              style: WebTextStyles.subtitle.copyWith(
-                color: WebColors.greenPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Title
-          Text(
-            'How Accel-O-Rot Works',
-            textAlign: TextAlign.center,
-            style: WebTextStyles.h2.copyWith(
-              fontSize: width > 768 ? 44 : 34,
-              fontWeight: FontWeight.w800,
-              color: WebColors.textTitle,
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Subtitle
-          SizedBox(
-            width: 720,
-            child: Text(
-              'Our smart composting system transforms your organic waste into garden-ready compost with minimal effort. Just add waste and let technology handle the rest.',
+          // Gradient title - SAME AS YOUR ORIGINAL
+          ShaderMask(
+            shaderCallback: (Rect bounds) {
+              return LinearGradient(
+                colors: [WebColors.buttonsPrimary, WebColors.greenLight],
+                stops: const [0.3, 1.0],
+              ).createShader(bounds);
+            },
+            child: RichText(
               textAlign: TextAlign.center,
-              style: WebTextStyles.subtitle.copyWith(
-                height: 1.6,
-                color: const Color(0xFF64748B),
+              text: TextSpan(
+                style: WebTextStyles.h2.copyWith(
+                  fontSize: screenWidth > 768 ? 42 : 32,
+                  fontWeight: FontWeight.bold,
+                  shadows: const [
+                    Shadow(
+                      offset: Offset(0, 2),
+                      blurRadius: 8,
+                      color: Color.fromARGB(20, 0, 0, 0),
+                    ),
+                  ],
+                ),
+                children: [
+                  const TextSpan(text: 'How '),
+                  TextSpan(
+                    text: 'Accel-O-Rot',
+                    style: WebTextStyles.h2.copyWith(
+                      fontSize: screenWidth > 768 ? 42 : 32,
+                      fontWeight: FontWeight.bold,
+                      foreground: Paint()..color = WebColors.textTitle,
+                    ),
+                  ),
+                  const TextSpan(text: ' Works'),
+                ],
               ),
             ),
           ),
-
-          const SizedBox(height: 64),
-
-          // Cards
+          const SizedBox(height: AppSpacing.md),
+          
+          // Subtitle - SAME AS YOUR ORIGINAL
+          Text(
+            'Simple, automated, and effective composting in 4 easy steps',
+            textAlign: TextAlign.center,
+            style: WebTextStyles.subtitle.copyWith(
+              fontSize: 15,
+              color: const Color(0xFF6B7280),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          
+          // Grid Layout - KATULAD NG NASA IMAHE (4 columns sa malaking screen)
           LayoutBuilder(
             builder: (context, constraints) {
-              int count = constraints.maxWidth > 1200
-                  ? 4
+              int crossAxisCount = constraints.maxWidth > 1200
+                  ? 4 // <-- 4 COLUMNS TULAD NG NASA IMAHE
                   : constraints.maxWidth > 900
                       ? 3
                       : constraints.maxWidth > 600
@@ -87,17 +95,21 @@ class HowItWorksSection extends StatelessWidget {
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: steps.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: count,
-                  mainAxisSpacing: 32,
-                  crossAxisSpacing: 32,
-                  childAspectRatio: 1.15,
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: AppSpacing.lg, // <-- MAS MALAKING SPACING
+                  mainAxisSpacing: AppSpacing.lg,
+                  childAspectRatio: 1.0, // <-- SQUARE CARDS TULAD NG NASA IMAHE
                 ),
+                itemCount: steps.length,
                 itemBuilder: (context, index) {
-                  return _AnimatedStepCard(
-                    delay: Duration(milliseconds: 120 * index),
-                    child: StepCard(step: steps[index]),
+                  return SizedBox(
+                    width: 280, // <-- MAS MALAKING WIDTH PARA MAS MALAPIT SA IMAHE
+                    height: 280, // <-- SQUARE HEIGHT
+                    child: _AnimatedStepCard(
+                      delay: Duration(milliseconds: 120 * index),
+                      child: StepCard(step: steps[index]),
+                    ),
                   );
                 },
               );
@@ -109,6 +121,7 @@ class HowItWorksSection extends StatelessWidget {
   }
 }
 
+/// Entrance animation using only Transform
 class _AnimatedStepCard extends StatefulWidget {
   final Duration delay;
   final Widget child;
@@ -124,9 +137,9 @@ class _AnimatedStepCard extends StatefulWidget {
 
 class _AnimatedStepCardState extends State<_AnimatedStepCard>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scale;
-  late final Animation<double> _offset;
+  late AnimationController _controller;
+  late Animation<double> _scale;
+  late Animation<double> _offset;
 
   @override
   void initState() {
@@ -137,12 +150,18 @@ class _AnimatedStepCardState extends State<_AnimatedStepCard>
       duration: const Duration(milliseconds: 600),
     );
 
-    _scale = Tween(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutQuart),
+      ),
     );
 
-    _offset = Tween(begin: 24.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    _offset = Tween<double>(begin: 16, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.8, curve: Curves.easeOutQuart),
+      ),
     );
 
     Future.delayed(widget.delay, () {
@@ -160,10 +179,13 @@ class _AnimatedStepCardState extends State<_AnimatedStepCard>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (_, child) {
+      builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, _offset.value),
-          child: Transform.scale(scale: _scale.value, child: child),
+          child: Transform.scale(
+            scale: _scale.value,
+            child: child,
+          ),
         );
       },
       child: widget.child,
