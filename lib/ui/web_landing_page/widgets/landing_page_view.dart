@@ -8,7 +8,6 @@ import 'intro_section.dart';
 import 'features_section.dart';
 import 'how_it_works_section.dart';
 import 'impact_section.dart';
-import 'cta_section.dart';
 
 class LandingPageView extends StatefulWidget {
   const LandingPageView({super.key});
@@ -77,12 +76,12 @@ class _LandingPageViewState extends State<LandingPageView> {
 
             // Impact Section
             ImpactSection(stats: _viewModel.impactStats),
-
-            // CTA Section
-            CtaSection(onGetStarted: _onGetStarted),
+            
+            // CTA Section removed
+            // CtaSection(onGetStarted: _onGetStarted),
           ],
         ),
       ),
     );
   }
-}
+} 
