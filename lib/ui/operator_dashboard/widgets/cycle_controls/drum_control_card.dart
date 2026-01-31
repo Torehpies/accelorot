@@ -345,69 +345,103 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Scale fonts based on card width (not screen width)
+          final cardWidth = constraints.maxWidth;
+          final cardHeight = constraints.maxHeight;
+          final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0); // Dynamic scaling
+          final titleFontSize = baseFontSize;
+          final labelFontSize = (baseFontSize * 0.8).clamp(10.0, 16.0);
+          final bodyFontSize = (baseFontSize * 0.65).clamp(9.0, 13.0);
+          final badgeFontSize = (baseFontSize * 0.6).clamp(9.0, 12.0);
+          
+          return Padding(
+            padding: EdgeInsets.all(cardWidth * 0.06), // 6% of card width
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Drum Controller',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1a1a1a),
-                    letterSpacing: -0.5,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Drum Controller',
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF1a1a1a),
+                          letterSpacing: -0.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: cardWidth * 0.02),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: cardWidth * 0.03,
+                        vertical: cardWidth * 0.015,
+                      ),
+                      decoration: BoxDecoration(
+                        color: batchCompleted
+                            ? const Color(0xFFF3F4F6)
+                            : (hasActiveBatch
+                                  ? const Color(0xFFD1FAE5)
+                                  : const Color(0xFFFEF3C7)),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        batchCompleted
+                            ? 'Completed'
+                            : (hasActiveBatch ? 'Active' : 'Inactive'),
+                        style: TextStyle(
+                          fontSize: badgeFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: batchCompleted
+                              ? const Color(0xFF6B7280)
+                              : (hasActiveBatch
+                                    ? const Color(0xFF065F46)
+                                    : const Color(0xFF92400E)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: batchCompleted
-                        ? const Color(0xFFF3F4F6)
-                        : (hasActiveBatch
-                              ? const Color(0xFFD1FAE5)
-                              : const Color(0xFFFEF3C7)),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    batchCompleted
-                        ? 'Completed'
-                        : (hasActiveBatch ? 'Active' : 'Inactive'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: batchCompleted
-                          ? const Color(0xFF6B7280)
-                          : (hasActiveBatch
-                                ? const Color(0xFF065F46)
-                                : const Color(0xFF92400E)),
+                SizedBox(height: cardWidth * 0.06),
+
+                if (!hasActiveBatch && !batchCompleted)
+                  const EmptyState()
+                else
+                  Flexible(
+                    child: _buildActiveState(
+                      batchCompleted,
+                      cardWidth,
+                      cardHeight,
+                      labelFontSize,
+                      bodyFontSize,
                     ),
                   ),
-                ),
               ],
             ),
-            const SizedBox(height: 24),
-
-            if (!hasActiveBatch && !batchCompleted)
-              const EmptyState()
-            else
-              _buildActiveState(batchCompleted),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildActiveState(bool batchCompleted) {
+  Widget _buildActiveState(
+    bool batchCompleted,
+    double cardWidth,
+    double cardHeight,
+    double labelFontSize,
+    double bodyFontSize,
+  ) {
     final canInteract = !batchCompleted && status == SystemStatus.idle;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -416,44 +450,51 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
               child: InfoItem(
                 label: 'Machine Name',
                 value: widget.currentBatch!.machineId,
+                fontSize: bodyFontSize,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: cardWidth * 0.03),
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
                 value: widget.currentBatch!.displayName,
+                fontSize: bodyFontSize,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: cardHeight * 0.03),
 
         Row(
           children: [
             Expanded(
-              child: InfoItem(label: 'Uptime', value: _uptime),
+              child: InfoItem(
+                label: 'Uptime',
+                value: _uptime,
+                fontSize: bodyFontSize,
+              ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: cardWidth * 0.03),
             Expanded(
               child: InfoItem(
                 label: 'No. of Cycles',
                 value: _completedCycles.toString(),
+                fontSize: bodyFontSize,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: cardHeight * 0.04),
 
-        const Text(
+        Text(
           'Set Controller',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1a1a1a),
+            color: const Color(0xFF1a1a1a),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: cardHeight * 0.025),
 
         Row(
           children: [
@@ -462,6 +503,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                 label: 'Select Duration',
                 value: settings.period,
                 items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
+                screenWidth: cardWidth,
                 onChanged: canInteract
                     ? (value) {
                         if (value != null) {
@@ -473,12 +515,13 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                     : null,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: cardWidth * 0.03),
             Expanded(
               child: _buildDropdown(
                 label: 'Select No. of Cycles',
                 value: _getCyclesLabel(settings.cycles),
                 items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
+                screenWidth: cardWidth,
                 onChanged: canInteract
                     ? (value) {
                         if (value != null) {
@@ -493,7 +536,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: cardHeight * 0.04),
 
         SizedBox(
           width: double.infinity,
@@ -504,7 +547,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                   ? Colors.grey.shade400
                   : const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: EdgeInsets.symmetric(vertical: cardHeight * 0.025),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -517,7 +560,10 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
                   : (status == SystemStatus.idle
                         ? 'Start'
                         : status.displayName),
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: labelFontSize,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -529,10 +575,17 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     required String label,
     required String? value,
     required List<String> items,
+    required double screenWidth,
     required Function(String?)? onChanged,
   }) {
+    // Calculate font size based on card width
+    final dropdownFontSize = (screenWidth / 30).clamp(10.0, 13.0);
+    
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.03,
+        vertical: screenWidth * 0.025,
+      ),
       decoration: BoxDecoration(
         color: onChanged == null ? Colors.grey.shade100 : Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -543,21 +596,31 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           value: value,
           hint: Text(
             label,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(
+              fontSize: dropdownFontSize,
+              color: Colors.grey.shade600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           isDense: true,
           isExpanded: true,
           icon: Icon(
             Icons.keyboard_arrow_down,
             color: Colors.grey.shade600,
-            size: 20,
+            size: (screenWidth / 20).clamp(16.0, 20.0),
           ),
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF1a1a1a)),
+                style: TextStyle(
+                  fontSize: dropdownFontSize,
+                  color: const Color(0xFF1a1a1a),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             );
           }).toList(),

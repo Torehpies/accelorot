@@ -248,31 +248,32 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > kTabletBreakpoint;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             return Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 32 : 24,
-                  vertical: 24,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Left side - Batch Tracker and Recent Activity
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 360,
-                            child: CompostingProgressCard(
+              child: SingleChildScrollView(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.02, // 2% responsive padding
+                    vertical: screenHeight * 0.02,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Left side - Batch Tracker and Recent Activity
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            CompostingProgressCard(
                               currentBatch: _currentBatch,
                               onBatchStarted: _handleBatchStarted,
                               onBatchCompleted: _handleBatchCompleted,
@@ -280,37 +281,47 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                                   widget.focusedMachine?.machineId,
                               onBatchChanged: _updateActiveBatch,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: ActivityLogsCard(
-                              focusedMachineId:
-                                  widget.focusedMachine?.machineId,
+                            SizedBox(height: screenHeight * 0.02),
+                            Container(
+                              constraints: BoxConstraints(
+                                minHeight: 300,
+                                maxHeight: screenHeight * 0.6, // Max 60% of screen height
+                              ),
+                              child: ActivityLogsCard(
+                                focusedMachineId:
+                                    widget.focusedMachine?.machineId,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Right side - Drum Controller and Aerator Cards
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: DrumControlCard(
-                              currentBatch: _activeBatchModel,
+                      SizedBox(width: screenWidth * 0.015),
+                      // Right side - Drum Controller and Aerator Cards
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              constraints: BoxConstraints(
+                                maxHeight: screenHeight * 0.48, // Max 48% of screen height
+                              ),
+                              child: DrumControlCard(
+                                currentBatch: _activeBatchModel,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: AeratorCard(currentBatch: _activeBatchModel),
-                          ),
-                        ],
+                            SizedBox(height: screenHeight * 0.02),
+                            Container(
+                              constraints: BoxConstraints(
+                                maxHeight: screenHeight * 0.48,
+                              ),
+                              child: AeratorCard(currentBatch: _activeBatchModel),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
