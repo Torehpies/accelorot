@@ -8,7 +8,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_manage
 
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/swipeable_cycle_cards.dart';
 
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_activities_table.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
@@ -288,9 +288,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // Activity logs
                   SizedBox(
                     height: 400,
-                    child: ActivityLogsCard(
-                      focusedMachineId: _selectedMachineId,
-                      maxHeight: 400,
+                    child: RecentActivitiesTable(
+                      activityProvider: allActivitiesProvider,
                     ),
                   ),
                 ],
