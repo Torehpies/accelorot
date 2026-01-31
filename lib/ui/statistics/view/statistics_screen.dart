@@ -101,7 +101,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               }
 
               return RefreshIndicator(
-                onRefresh: () => _handleRefresh(ref, selectedMachineId),
+                onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
@@ -183,9 +183,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   }
 
   Widget _buildStatisticsCards(String machineId) {
-    final temperatureAsync = ref.watch(temperatureDataProvider(machineId));
-    final moistureAsync = ref.watch(moistureDataProvider(machineId));
-    final oxygenAsync = ref.watch(oxygenDataProvider(machineId));
+    // Watch data for selected batch
+    final batchId = selectedBatch ?? '';
+    final temperatureAsync = ref.watch(temperatureDataProvider(batchId));
+    final moistureAsync = ref.watch(moistureDataProvider(batchId));
+    final oxygenAsync = ref.watch(oxygenDataProvider(batchId));
 
     return Column(
       children: [
@@ -266,10 +268,10 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     );
   }
 
-  Future<void> _handleRefresh(WidgetRef ref, String machineId) async {
-    ref.invalidate(temperatureDataProvider(machineId));
-    ref.invalidate(moistureDataProvider(machineId));
-    ref.invalidate(oxygenDataProvider(machineId));
+  Future<void> _handleRefresh(WidgetRef ref, String batchId) async {
+    ref.invalidate(temperatureDataProvider(batchId));
+    ref.invalidate(moistureDataProvider(batchId));
+    ref.invalidate(oxygenDataProvider(batchId));
     await Future.delayed(const Duration(milliseconds: 500));
   }
 }

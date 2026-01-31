@@ -1,6 +1,7 @@
 import '../../../data/models/temperature_model.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class TemperatureStatisticCard extends StatelessWidget {
   final double currentTemperature;
@@ -29,12 +30,10 @@ class TemperatureStatisticCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 2), // Full colored border
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Allow minimum height
-          children: [
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // Allow minimum height
+        children: [
             // Header Section
              Container(
               padding: const EdgeInsets.all(16), // Reduced padding
@@ -125,39 +124,117 @@ class TemperatureStatisticCard extends StatelessWidget {
                   
                   // Chart
                   SizedBox(
-                    height: 100, // Reduced height
-                    child: SfCartesianChart(
-                      plotAreaBorderWidth: 0,
-                      margin: EdgeInsets.zero,
-                      primaryXAxis: CategoryAxis(
-                        labelStyle: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)),
-                        majorGridLines: const MajorGridLines(width: 0),
-                        axisLine: const AxisLine(width: 0),
-                      ),
-                      primaryYAxis: NumericAxis(
-                        isVisible: false,
-                        majorGridLines: const MajorGridLines(width: 0),
-                      ),
-                      series: <CartesianSeries>[
-                        SplineSeries<Map<String, dynamic>, String>(
-                          dataSource: chartData,
-                          xValueMapper: (data, _) => data['day'] as String,
-                          yValueMapper: (data, _) => data['value'] as double,
-                          color: const Color(0xFFC2410C),
-                          width: 3,
-                          markerSettings: const MarkerSettings(
-                            isVisible: true,
-                            color: Color(0xFFC2410C),
-                            borderColor: Colors.white,
-                            borderWidth: 2,
-                            height: 8,
-                            width: 8,
+                    height: 120,
+                    child: LineChart(
+                      LineChartData(
+                        lineTouchData: LineTouchData(
+                          enabled: true,
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipColor: (touchedSpot) => Colors.white,
+                            getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
+                              return touchedBarSpots.map((barSpot) {
+                                final dataIndex = barSpot.spotIndex;
+                                final downsampledData = _downsampleData(chartData);
+                                if (dataIndex < downsampledData.length) {
+                                  final data = downsampledData[dataIndex];
+                                  final timestamp = data['timestamp'] as DateTime?;
+                                  final value = barSpot.y;
+                                  
+                                  return LineTooltipItem(
+                                    '${value.toStringAsFixed(1)}°C\n${timestamp != null ? DateFormat('MMM d, y\nh:mm a').format(timestamp) : ''}',
+                                    const TextStyle(
+                                      color: Color(0xFF1F2937),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  );
+                                }
+                                return null;
+                              }).toList();
+                            },
+                            tooltipBorder: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                            tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           ),
                         ),
-                      ],
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          drawHorizontalLine: true,
+                          horizontalInterval: null, // Let us control the lines
+                          getDrawingHorizontalLine: (value) {
+                            return FlLine(
+                              color: const Color(0xFFF3F4F6),
+                              strokeWidth: 1,
+                            );
+                          },
+                        ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 30,
+                              interval: 1,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                return Text(
+                                  'Day ${value.toInt() + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
+                            isCurved: true,
+                            color: const Color(0xFFC2410C),
+                            barWidth: 2.5, // Balanced thickness for visibility
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(
+                              show: true,
+                              checkToShowDot: (spot, barData) {
+                                // Only show dots for markers
+                                final downsampledData = _downsampleData(chartData);
+                                final index = barData.spots.indexOf(spot);
+                                if (index >= 0 && index < downsampledData.length) {
+                                  return downsampledData[index]['isMarker'] == true;
+                                }
+                                return false;
+                              },
+                              getDotPainter: (spot, percent, barData, index) {
+                                return FlDotCirclePainter(
+                                  radius: 3.5,
+                                  color: const Color(0xFFC2410C),
+                                  strokeWidth: 2,
+                                  strokeColor: Colors.white,
+                                );
+                              },
+                            ),
+                            belowBarData: BarAreaData(show: false),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+
+                  // Divider
+                  const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+                  const SizedBox(height: 16),
                   
                   // Trend Text
                   const Text(
@@ -185,7 +262,6 @@ class TemperatureStatisticCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -238,16 +314,60 @@ class TemperatureStatisticCard extends StatelessWidget {
     final firstDate = sortedReadings.first.timestamp ?? DateTime.now();
     final startDate = DateTime(firstDate.year, firstDate.month, firstDate.day);
 
-    return sortedReadings.map((reading) {
-      final date = reading.timestamp ?? DateTime.now();
-      final currentDate = DateTime(date.year, date.month, date.day);
-      final dayDiff = currentDate.difference(startDate).inDays;
-      
-      return {
-        'day': 'Day ${dayDiff + 1}',
-        'value': reading.value,
-      };
-    }).toList();
+    final List<Map<String, dynamic>> data = [];
+    
+    // Group by day to identify start/end for markers
+    final Map<int, List<int>> dayIndices = {};
+
+    for (int i = 0; i < sortedReadings.length; i++) {
+        final reading = sortedReadings[i];
+        final date = reading.timestamp ?? DateTime.now();
+        // Calculate continuous day value (e.g., 0.5 for noon on Day 1)
+        final diff = date.difference(startDate);
+        // Use exact fractional days for X axis
+        final double dayValue = diff.inSeconds / (24 * 3600);
+        final int dayInt = dayValue.floor();
+
+        if (!dayIndices.containsKey(dayInt)) {
+            dayIndices[dayInt] = [];
+        }
+        dayIndices[dayInt]!.add(i);
+
+        data.add({
+            'day': dayValue,
+            'value': reading.value,
+            'isMarker': false, // Default no marker
+            'timestamp': date, // Store timestamp for tooltip
+        });
+    }
+
+    // Mark start and end of each day
+    dayIndices.forEach((day, indices) {
+        if (indices.isNotEmpty) {
+            data[indices.first]['isMarker'] = true; // Start of day
+            data[indices.last]['isMarker'] = true;  // End of day
+        }
+    });
+
+    return data;
+  }
+
+  // Downsample data to reduce visual clutter when there are too many points
+  List<Map<String, dynamic>> _downsampleData(List<Map<String, dynamic>> data) {
+    if (data.length <= 50) return data; // No need to downsample
+    
+    // Keep every Nth point, but always keep markers (start/end of days)
+    final int step = (data.length / 50).ceil();
+    final List<Map<String, dynamic>> downsampled = [];
+    
+    for (int i = 0; i < data.length; i++) {
+      // Keep if it's a marker OR if it's on the step interval
+      if (data[i]['isMarker'] == true || i % step == 0) {
+        downsampled.add(data[i]);
+      }
+    }
+    
+    return downsampled;
   }
 
   double _calculateProgress(double temperature) {
