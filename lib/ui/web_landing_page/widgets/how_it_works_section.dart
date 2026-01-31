@@ -139,15 +139,13 @@ class StepCard extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.sm),
 
-          Expanded(
-            child: Text(
-              step.description,
-              textAlign: TextAlign.center,
-              style: WebTextStyles.stepCardDescription.copyWith(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFF666666),
-              ),
+          Text(
+            step.description,
+            textAlign: TextAlign.center,
+            style: WebTextStyles.stepCardDescription.copyWith(
+              fontSize: 13,
+              height: 1.5,
+              color: const Color(0xFF666666),
             ),
           ),
         ],

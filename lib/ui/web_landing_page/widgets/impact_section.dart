@@ -483,72 +483,77 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
             AnimatedOpacity(
               duration: const Duration(milliseconds: 300),
               opacity: _isHovered ? 1 : 0,
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: _getIconSize(),
-                      height: _getIconSize(),
-                      decoration: BoxDecoration(
-                        color: widget.isGreen 
-                          ? const Color.fromARGB(51, 255, 255, 255)
-                          : const Color.fromARGB(26, 118, 230, 207),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: widget.isGreen ? Colors.white : WebColors.greenLight,
-                          width: 1.5,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: _getIconSize(),
+                          height: _getIconSize(),
+                          decoration: BoxDecoration(
+                            color: widget.isGreen 
+                              ? const Color.fromARGB(51, 255, 255, 255)
+                              : const Color.fromARGB(26, 118, 230, 207),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: widget.isGreen ? Colors.white : WebColors.greenLight,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Icon(
+                            _getIconForIndex(widget.stat),
+                            size: _getIconSize() * 0.5,
+                            color: widget.isGreen ? Colors.white : WebColors.greenLight,
+                          ),
                         ),
-                      ),
-                      child: Icon(
-                        _getIconForIndex(widget.stat),
-                        size: _getIconSize() * 0.5,
-                        color: widget.isGreen ? Colors.white : WebColors.greenLight,
-                      ),
-                    ),
-                    SizedBox(height: _getSpacing()),
-                    
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        children: _buildCombinedValueTextHover(displayValue, widget.stat.label),
-                      ),
-                    ),
-                    SizedBox(height: _getSpacing() * 0.5),
-                    
-                    if (!widget.stat.label.toLowerCase().contains('week'))
-                      Text(
-                        widget.stat.label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: _getFontSize() + 2,
-                          fontWeight: FontWeight.w600,
-                          color: widget.isGreen ? Colors.white : WebColors.textTitle,
+                        SizedBox(height: _getSpacing() * 0.75),
+                        
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: _buildCombinedValueTextHover(displayValue, widget.stat.label),
+                          ),
                         ),
-                      ),
-                    SizedBox(height: _getSpacing()),
-                    
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Text(
-                        widget.additionalInfo,
-                        textAlign: TextAlign.center,
-                        maxLines: _getMaxLines(),
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: _getFontSize() - 2,
-                          fontWeight: FontWeight.normal,
-                          color: widget.isGreen 
-                            ? const Color(0xFFE6E6E6)
-                            : const Color(0xFF666666),
-                          height: 1.4,
+                        SizedBox(height: _getSpacing() * 0.5),
+                        
+                        if (!widget.stat.label.toLowerCase().contains('week'))
+                          Text(
+                            widget.stat.label,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: _getFontSize() + 1,
+                              fontWeight: FontWeight.w600,
+                              color: widget.isGreen ? Colors.white : WebColors.textTitle,
+                            ),
+                          ),
+                        SizedBox(height: _getSpacing() * 0.75),
+                        
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            widget.additionalInfo,
+                            textAlign: TextAlign.center,
+                            maxLines: null,
+                            overflow: TextOverflow.visible,
+                            style: TextStyle(
+                              fontSize: _getFontSize() - 1,
+                              fontWeight: FontWeight.normal,
+                              color: widget.isGreen 
+                                ? const Color(0xFFE6E6E6)
+                                : const Color(0xFF666666),
+                              height: 1.5,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -589,19 +594,11 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
   }
 
   double _getFontSize() {
-    if (widget.screenWidth < 400) return widget.isMobile ? 9 : 10;
-    if (widget.screenWidth < 600) return widget.isMobile ? 10 : 11;
+    if (widget.screenWidth < 400) return widget.isMobile ? 12 : 13;
+    if (widget.screenWidth < 600) return widget.isMobile ? 12 : 13;
     if (widget.screenWidth < 800) return widget.isMobile ? 11 : 12;
     if (widget.screenWidth < 1024) return widget.isMobile ? 12 : 13;
     return widget.isMobile ? 13 : 14;
-  }
-
-  int _getMaxLines() {
-    if (widget.screenWidth < 400) return 3;
-    if (widget.screenWidth < 600) return 4;
-    if (widget.screenWidth < 800) return 5;
-    if (widget.screenWidth < 1024) return 6;
-    return 7;
   }
 
   List<TextSpan> _buildCombinedValueText(String value, String label) {
@@ -616,13 +613,13 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: '$value\n',
           style: TextStyle(
-            fontSize: fontSize * 2.2,
+            fontSize: widget.screenWidth < 600 ? fontSize * 2.8 : fontSize * 2.2,
             fontWeight: FontWeight.w800,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
               Shadow(
-                color: const Color.fromARGB(38, 0, 0, 0),
-                blurRadius: 2,
+                color: const Color.fromARGB(26, 0, 0, 0),
+                blurRadius: 1,
                 offset: const Offset(0, 1),
               ),
             ] : null,
@@ -631,7 +628,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: unit,
           style: TextStyle(
-            fontSize: fontSize * 1.5,
+            fontSize: widget.screenWidth < 600 ? fontSize * 2.0 : fontSize * 1.5,
             fontWeight: FontWeight.w600,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
@@ -647,7 +644,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
           TextSpan(
             text: '\n$mainLabel',
             style: TextStyle(
-              fontSize: fontSize,
+              fontSize: widget.screenWidth < 600 ? fontSize + 1 : fontSize,
               fontWeight: FontWeight.w500,
               color: widget.isGreen ? Colors.white : const Color(0xFF666666),
             ),
@@ -658,7 +655,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: value,
           style: TextStyle(
-            fontSize: fontSize * 2.2,
+            fontSize: widget.screenWidth < 600 ? fontSize * 2.8 : fontSize * 2.2,
             fontWeight: FontWeight.w800,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
@@ -686,7 +683,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: value,
           style: TextStyle(
-            fontSize: fontSize * 2.4,
+            fontSize: widget.screenWidth < 600 ? fontSize * 3.0 : fontSize * 2.4,
             fontWeight: FontWeight.w800,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
@@ -701,7 +698,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: ' $unit',
           style: TextStyle(
-            fontSize: fontSize * 1.7,
+            fontSize: widget.screenWidth < 600 ? fontSize * 2.1 : fontSize * 1.7,
             fontWeight: FontWeight.w600,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
@@ -717,7 +714,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
           TextSpan(
             text: '\n$mainLabel',
             style: TextStyle(
-              fontSize: fontSize + 2,
+              fontSize: widget.screenWidth < 600 ? fontSize + 2 : fontSize + 2,
               fontWeight: FontWeight.w600,
               color: widget.isGreen ? Colors.white : WebColors.textTitle,
             ),
@@ -728,7 +725,7 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
         TextSpan(
           text: value,
           style: TextStyle(
-            fontSize: fontSize * 2.4,
+            fontSize: widget.screenWidth < 600 ? fontSize * 3.0 : fontSize * 2.4,
             fontWeight: FontWeight.w800,
             color: widget.isGreen ? Colors.white : WebColors.textTitle,
             shadows: widget.isGreen ? [
@@ -756,6 +753,8 @@ class _ExpandableStatCardState extends State<ExpandableStatCard> {
     }
     return Icons.eco_outlined;
   }
+
+  // This method is no longer needed
 }
 
 // ===================== HOVERABLE IMPACT ITEM WIDGET =====================
