@@ -188,6 +188,10 @@ class MoistureStatisticCard extends StatelessWidget {
                               reservedSize: 30,
                               interval: 1,
                               getTitlesWidget: (double value, TitleMeta meta) {
+                                // Only show label if value is close to an integer (start of day)
+                                if ((value - value.round()).abs() > 0.01) {
+                                  return const SizedBox.shrink();
+                                }
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
@@ -340,13 +344,12 @@ class MoistureStatisticCard extends StatelessWidget {
         });
     }
 
-    // Mark start and end of each day
-    dayIndices.forEach((day, indices) {
-        if (indices.isNotEmpty) {
-            data[indices.first]['isMarker'] = true; // Start of day
-            data[indices.last]['isMarker'] = true;  // End of day
-        }
-    });
+    // Mark only the start of each day
+  dayIndices.forEach((day, indices) {
+      if (indices.isNotEmpty) {
+          data[indices.first]['isMarker'] = true; // Start of day only
+      }
+  });
 
     return data;
   }

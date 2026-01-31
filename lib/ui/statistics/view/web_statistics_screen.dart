@@ -200,7 +200,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           temperatureAsync.when(
             data: (readings) => TemperatureStatisticCard(
               currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Temperature'),
