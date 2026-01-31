@@ -10,34 +10,29 @@ import '../../activity_logs/models/activity_common.dart';
 part 'admin_machine_notifier.g.dart';
 
 // Mobile filter system (temporary - will be removed after mobile refactor)
-enum MachineFilterTab {
-  all,
-  active,
-  suspended,
-  archived,
-}
+enum MachineFilterTab { all, active, suspended, archived }
 
 class AdminMachineState {
   final List<MachineModel> machines;
-  
+
   // Mobile filtering (uses tabs + isArchived)
   final MachineFilterTab selectedTab;
-  
+
   // Web filtering (uses status only)
   final MachineStatusFilter selectedStatusFilter;
-  
+
   // Date filtering (using Activity Logs model)
   final DateFilterRange dateFilter;
-  
+
   final bool isLoading;
   final String? errorMessage;
   final String searchQuery;
   final int displayLimit;
-  
+
   // Pagination
   final int currentPage;
   final int itemsPerPage;
-  
+
   // Sorting
   final String? sortColumn;
   final bool sortAscending;
@@ -103,7 +98,10 @@ class AdminMachineState {
         break;
       case MachineFilterTab.suspended:
         filtered = machines
-            .where((m) => !m.isArchived && m.status == MachineStatus.underMaintenance)
+            .where(
+              (m) =>
+                  !m.isArchived && m.status == MachineStatus.underMaintenance,
+            )
             .toList();
         break;
       case MachineFilterTab.archived:
@@ -142,7 +140,7 @@ class AdminMachineState {
     if (dateFilter.isActive) {
       filtered = filtered.where((m) {
         return m.dateCreated.isAfter(dateFilter.startDate!) &&
-               m.dateCreated.isBefore(dateFilter.endDate!);
+            m.dateCreated.isBefore(dateFilter.endDate!);
       }).toList();
     }
 
@@ -181,9 +179,9 @@ class AdminMachineState {
     final filtered = filteredMachinesByStatus;
     final startIndex = (currentPage - 1) * itemsPerPage;
     final endIndex = startIndex + itemsPerPage;
-    
+
     if (startIndex >= filtered.length) return [];
-    
+
     return filtered.sublist(
       startIndex,
       endIndex > filtered.length ? filtered.length : endIndex,
@@ -196,7 +194,11 @@ class AdminMachineState {
   }
 
   // Sort machines based on column
-  List<MachineModel> _sortMachines(List<MachineModel> machines, String column, bool ascending) {
+  List<MachineModel> _sortMachines(
+    List<MachineModel> machines,
+    String column,
+    bool ascending,
+  ) {
     final sorted = List<MachineModel>.from(machines);
 
     switch (column) {
@@ -220,7 +222,7 @@ class AdminMachineState {
 @riverpod
 class AdminMachineNotifier extends _$AdminMachineNotifier {
   static const int _pageSize = 5;
-  
+
   MachineRepository get _repository => ref.read(machineRepositoryProvider);
 
   @override
@@ -232,12 +234,14 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final machines = await _repository.getMachinesByTeam(teamId)
+      final machines = await _repository
+          .getMachinesByTeam(teamId)
           .timeout(const Duration(seconds: 10));
       state = state.copyWith(machines: machines, isLoading: false);
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
+        errorMessage:
+            'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
         isLoading: false,
       );
     }
@@ -245,11 +249,15 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
 
   Future<void> refresh(String teamId) async {
     try {
-      final machines = await _repository.getMachinesByTeam(teamId)
+      final machines = await _repository
+          .getMachinesByTeam(teamId)
           .timeout(const Duration(seconds: 10));
       state = state.copyWith(machines: machines);
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Failed to refresh: ${e.toString().replaceAll('Exception:', '').trim()}');
+      state = state.copyWith(
+        errorMessage:
+            'Failed to refresh: ${e.toString().replaceAll('Exception:', '').trim()}',
+      );
     }
   }
 
@@ -265,18 +273,12 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
 
   // WEB: Filter by status
   void setStatusFilter(MachineStatusFilter filter) {
-    state = state.copyWith(
-      selectedStatusFilter: filter,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedStatusFilter: filter, currentPage: 1);
   }
 
   // WEB: Filter by date range
   void setDateFilter(DateFilterRange dateFilter) {
-    state = state.copyWith(
-      dateFilter: dateFilter,
-      currentPage: 1,
-    );
+    state = state.copyWith(dateFilter: dateFilter, currentPage: 1);
   }
 
   void clearDateFilter() {
@@ -312,10 +314,7 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
   }
 
   void onItemsPerPageChanged(int itemsPerPage) {
-    state = state.copyWith(
-      itemsPerPage: itemsPerPage,
-      currentPage: 1,
-    );
+    state = state.copyWith(itemsPerPage: itemsPerPage, currentPage: 1);
   }
 
   // Sorting method
@@ -323,10 +322,7 @@ class AdminMachineNotifier extends _$AdminMachineNotifier {
     if (state.sortColumn == column) {
       state = state.copyWith(sortAscending: !state.sortAscending);
     } else {
-      state = state.copyWith(
-        sortColumn: column,
-        sortAscending: true,
-      );
+      state = state.copyWith(sortColumn: column, sortAscending: true);
     }
   }
 

@@ -10,10 +10,7 @@ import '../../core/dialog/dialog_fields.dart';
 class ReportViewDetailsDialog extends StatelessWidget {
   final Report report;
 
-  const ReportViewDetailsDialog({
-    super.key,
-    required this.report,
-  });
+  const ReportViewDetailsDialog({super.key, required this.report});
 
   @override
   Widget build(BuildContext context) {
@@ -23,26 +20,14 @@ class ReportViewDetailsDialog extends StatelessWidget {
       maxHeightFactor: 0.75,
       content: ReadOnlySection(
         fields: [
-          ReadOnlyField(
-            label: 'Category',
-            value: report.reportTypeLabel,
-          ),
-          ReadOnlyField(
-            label: 'Status',
-            value: report.statusLabel,
-          ),
+          ReadOnlyField(label: 'Category', value: report.reportTypeLabel),
+          ReadOnlyField(label: 'Status', value: report.statusLabel),
           ReadOnlyField(
             label: 'Priority',
             value: _formatPriority(report.priority),
           ),
-          ReadOnlyField(
-            label: 'Machine Name',
-            value: report.machineName,
-          ),
-          ReadOnlyField(
-            label: 'Submitted By',
-            value: report.userName,
-          ),
+          ReadOnlyField(label: 'Machine Name', value: report.machineName),
+          ReadOnlyField(label: 'Submitted By', value: report.userName),
           ReadOnlyField(
             label: 'Date Added',
             value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.createdAt),
@@ -50,7 +35,9 @@ class ReportViewDetailsDialog extends StatelessWidget {
           if (report.updatedAt != null)
             ReadOnlyField(
               label: 'Last Modified',
-              value: DateFormat('MM/dd/yyyy, hh:mm a').format(report.updatedAt!),
+              value: DateFormat(
+                'MM/dd/yyyy, hh:mm a',
+              ).format(report.updatedAt!),
             ),
           ReadOnlyMultilineField(
             label: 'Description',

@@ -34,10 +34,7 @@ class StatusDropdown extends StatelessWidget {
         decoration: BoxDecoration(
           color: enabled ? Colors.grey[50] : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[300]!,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey[300]!, width: 1),
         ),
         child: Row(
           children: [
@@ -46,10 +43,7 @@ class StatusDropdown extends StatelessWidget {
             Expanded(
               child: Text(
                 _getStatusLabel(status),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             ),
             Icon(
@@ -78,10 +72,7 @@ class StatusDropdown extends StatelessWidget {
                 children: [
                   const Text(
                     'Select Status',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   IconButton(
@@ -95,17 +86,9 @@ class StatusDropdown extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Status Options
-              _buildStatusOption(
-                context,
-                MachineStatus.active,
-                'Active',
-              ),
+              _buildStatusOption(context, MachineStatus.active, 'Active'),
               const SizedBox(height: 8),
-              _buildStatusOption(
-                context,
-                MachineStatus.inactive,
-                'Inactive',
-              ),
+              _buildStatusOption(context, MachineStatus.inactive, 'Inactive'),
               const SizedBox(height: 8),
               _buildStatusOption(
                 context,

@@ -31,10 +31,10 @@ class MachineTabFilter extends StatelessWidget {
 
   Widget _buildTab(String label, MachineFilterTab tab) {
     final isSelected = selectedTab == tab;
-    
+
     Color backgroundColor;
     Color textColor;
-    
+
     if (isSelected) {
       switch (tab) {
         case MachineFilterTab.all:
@@ -72,10 +72,10 @@ class MachineTabFilter extends StatelessWidget {
                     color: tab == MachineFilterTab.all
                         ? const Color(0x4D6B7280)
                         : tab == MachineFilterTab.active
-                            ? const Color(0x4D4CAF50)
-                            : tab == MachineFilterTab.archived
-                                ? const Color(0x4DFFA726)
-                                : const Color(0x4DEF5350),
+                        ? const Color(0x4D4CAF50)
+                        : tab == MachineFilterTab.archived
+                        ? const Color(0x4DFFA726)
+                        : const Color(0x4DEF5350),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

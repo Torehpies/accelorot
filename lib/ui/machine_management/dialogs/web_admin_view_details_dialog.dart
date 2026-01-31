@@ -36,14 +36,8 @@ class WebAdminViewDetailsDialog extends StatelessWidget {
       maxHeightFactor: 0.6,
       content: ReadOnlySection(
         fields: [
-          ReadOnlyField(
-            label: 'Machine ID',
-            value: machine.machineId,
-          ),
-          ReadOnlyField(
-            label: 'Status',
-            value: statusText,
-          ),
+          ReadOnlyField(label: 'Machine ID', value: machine.machineId),
+          ReadOnlyField(label: 'Status', value: statusText),
           ReadOnlyField(
             label: 'Current Batch',
             value: machine.currentBatchId ?? 'No active batch',

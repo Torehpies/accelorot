@@ -25,10 +25,7 @@ abstract class ProfileModel with _$ProfileModel {
       _$ProfileModelFromJson(json);
 
   /// Create ProfileModel from Firestore user document
-  factory ProfileModel.fromFirestore(
-    String uid,
-    Map<String, dynamic> data,
-  ) {
+  factory ProfileModel.fromFirestore(String uid, Map<String, dynamic> data) {
     return ProfileModel(
       uid: uid,
       email: data['email'] ?? '',
@@ -41,7 +38,6 @@ abstract class ProfileModel with _$ProfileModel {
       emailVerified: data['emailVerified'] ?? true,
     );
   }
-
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -57,14 +53,11 @@ abstract class ProfileModel with _$ProfileModel {
   }
 
   Map<String, dynamic> toUpdateMap() {
-    return {
-      'firstname': firstName,
-      'lastname': lastName,
-    };
+    return {'firstname': firstName, 'lastname': lastName};
   }
 
   String get displayName => '$firstName $lastName'.trim();
-  
+
   String get initials {
     final first = firstName.isNotEmpty ? firstName[0] : '';
     final last = lastName.isNotEmpty ? lastName[0] : '';

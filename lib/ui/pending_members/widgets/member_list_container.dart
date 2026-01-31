@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/models/pending_member.dart';
 import 'package:flutter_application_1/ui/pending_members/widgets/member_list_tile.dart';

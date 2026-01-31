@@ -7,7 +7,7 @@ part 'operator_machine_notifier.g.dart';
 
 // Update this to match the enum from the widget
 enum DateFilter {
-  none,      // Changed from 'all' to 'none'
+  none, // Changed from 'all' to 'none'
   today,
   last3Days,
   last7Days,
@@ -70,7 +70,8 @@ class OperatorMachineState {
     var filtered = machines;
 
     // Apply date filter (skip if 'none' is selected)
-    if (dateFilter != DateFilter.none) { // Changed from 'all' to 'none'
+    if (dateFilter != DateFilter.none) {
+      // Changed from 'all' to 'none'
       final now = DateTime.now();
       DateTime? startDate;
       DateTime? endDate = now;
@@ -99,8 +100,11 @@ class OperatorMachineState {
       if (startDate != null) {
         filtered = filtered.where((m) {
           final machineDate = m.dateCreated;
-          return machineDate.isAfter(startDate!.subtract(const Duration(days: 1))) && 
-                 (endDate == null || machineDate.isBefore(endDate.add(const Duration(days: 1))));
+          return machineDate.isAfter(
+                startDate!.subtract(const Duration(days: 1)),
+              ) &&
+              (endDate == null ||
+                  machineDate.isBefore(endDate.add(const Duration(days: 1))));
         }).toList();
       }
     }
@@ -127,11 +131,11 @@ class OperatorMachineState {
   List<MachineModel> get currentPageMachines {
     final startIndex = (currentPage - 1) * baseItemsPerPage;
     final endIndex = currentPage * baseItemsPerPage;
-    
+
     if (startIndex >= filteredMachines.length) {
       return [];
     }
-    
+
     return filteredMachines.sublist(
       startIndex,
       endIndex > filteredMachines.length ? filteredMachines.length : endIndex,
@@ -155,18 +159,16 @@ class OperatorMachineState {
     return currentPageMachines.length - displayedMachines.length;
   }
 
-  int get activeMachinesCount =>
-      machines.where((m) => !m.isArchived).length;
+  int get activeMachinesCount => machines.where((m) => !m.isArchived).length;
 
-  int get archivedMachinesCount =>
-      machines.where((m) => m.isArchived).length;
+  int get archivedMachinesCount => machines.where((m) => m.isArchived).length;
 }
 
 @riverpod
 class OperatorMachineNotifier extends _$OperatorMachineNotifier {
   static const int _basePageSize = 10;
   static const int _loadMoreIncrement = 10;
-  
+
   MachineRepository get _repository => ref.read(machineRepositoryProvider);
 
   @override
@@ -178,7 +180,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final machines = await _repository.getMachinesByTeam(teamId)
+      final machines = await _repository
+          .getMachinesByTeam(teamId)
           .timeout(const Duration(seconds: 10));
       state = state.copyWith(
         machines: machines,
@@ -189,7 +192,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
       );
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
+        errorMessage:
+            'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
         isLoading: false,
       );
     }
@@ -197,11 +201,15 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
 
   Future<void> refresh(String teamId) async {
     try {
-      final machines = await _repository.getMachinesByTeam(teamId)
+      final machines = await _repository
+          .getMachinesByTeam(teamId)
           .timeout(const Duration(seconds: 10));
       state = state.copyWith(machines: machines);
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Failed to refresh: ${e.toString().replaceAll('Exception:', '').trim()}');
+      state = state.copyWith(
+        errorMessage:
+            'Failed to refresh: ${e.toString().replaceAll('Exception:', '').trim()}',
+      );
     }
   }
 
@@ -261,7 +269,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     if (state.currentPage < state.totalPages) {
       state = state.copyWith(
         currentPage: state.currentPage + 1,
-        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
+        itemsPerPage:
+            state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }
@@ -270,7 +279,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     if (state.currentPage > 1) {
       state = state.copyWith(
         currentPage: state.currentPage - 1,
-        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
+        itemsPerPage:
+            state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }
@@ -279,7 +289,8 @@ class OperatorMachineNotifier extends _$OperatorMachineNotifier {
     if (page >= 1 && page <= state.totalPages) {
       state = state.copyWith(
         currentPage: page,
-        itemsPerPage: state.baseItemsPerPage, // Reset to base page size on page change
+        itemsPerPage:
+            state.baseItemsPerPage, // Reset to base page size on page change
       );
     }
   }

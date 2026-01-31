@@ -17,20 +17,17 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   @override
   UnifiedActivityState build() {
     _aggregator = ref.read(activityAggregatorProvider);
-    
+
     // Initialize asynchronously
     Future.microtask(() => _initialize());
-    
+
     return const UnifiedActivityState();
   }
 
   // ===== INITIALIZATION =====
 
   Future<void> _initialize() async {
-    state = state.copyWith(
-      status: LoadingStatus.loading,
-      errorMessage: null,
-    );
+    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
       final isLoggedIn = await _aggregator.isUserLoggedIn();
@@ -65,7 +62,8 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
       state = state.copyWith(
         allActivities: result.items,
-        entityCache: result.entityCache, // Store cache for instant dialog loading
+        entityCache:
+            result.entityCache, // Store cache for instant dialog loading
         status: LoadingStatus.success,
       );
 
@@ -105,26 +103,17 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   void onBatchChanged(String? batchId) {
-    state = state.copyWith(
-      selectedBatchId: batchId,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedBatchId: batchId, currentPage: 1);
     _applyFilters();
   }
 
   void onDateFilterChanged(DateFilterRange dateFilter) {
-    state = state.copyWith(
-      dateFilter: dateFilter,
-      currentPage: 1,
-    );
+    state = state.copyWith(dateFilter: dateFilter, currentPage: 1);
     _applyFilters();
   }
 
   void onSearchChanged(String query) {
-    state = state.copyWith(
-      searchQuery: query.toLowerCase(),
-      currentPage: 1,
-    );
+    state = state.copyWith(searchQuery: query.toLowerCase(), currentPage: 1);
     _applyFilters();
   }
 
@@ -139,23 +128,19 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   void onTypeChanged(ActivitySubType type) {
-    state = state.copyWith(
-      selectedType: type,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedType: type, currentPage: 1);
     _applyFilters();
   }
 
   // ===== SORTING HANDLERS =====
 
   void onSort(String column) {
-    final isAscending = state.sortColumn == column ? !state.sortAscending : true;
-    
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
-    
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
+
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
+
     _applyFilters();
   }
 
@@ -179,16 +164,16 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     // 1. Filter by Machine
     if (state.selectedMachineId != null) {
-      filtered = filtered.where((item) => 
-        item.machineId == state.selectedMachineId
-      ).toList();
+      filtered = filtered
+          .where((item) => item.machineId == state.selectedMachineId)
+          .toList();
     }
 
     // 2. Filter by Batch
     if (state.selectedBatchId != null) {
-      filtered = filtered.where((item) => 
-        item.batchId == state.selectedBatchId
-      ).toList();
+      filtered = filtered
+          .where((item) => item.batchId == state.selectedBatchId)
+          .toList();
     }
 
     // 3. Filter by Date
@@ -203,9 +188,9 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     // 4. Filter by Search Query
     if (state.searchQuery.isNotEmpty) {
-      filtered = filtered.where((item) => 
-        item.matchesSearchQuery(state.searchQuery)
-      ).toList();
+      filtered = filtered
+          .where((item) => item.matchesSearchQuery(state.searchQuery))
+          .toList();
     }
 
     // 5. Filter by Category
@@ -218,9 +203,13 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     // 6. Filter by Type
     if (state.selectedType != ActivitySubType.all) {
-      filtered = filtered.where((item) => 
-        item.category.toLowerCase() == state.selectedType.displayName.toLowerCase()
-      ).toList();
+      filtered = filtered
+          .where(
+            (item) =>
+                item.category.toLowerCase() ==
+                state.selectedType.displayName.toLowerCase(),
+          )
+          .toList();
     }
 
     // 7. Apply Sorting
@@ -280,23 +269,33 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   /// Get category counts with month-over-month change percentage
   Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
     final now = DateTime.now();
-    
+
     // Current month: from start of this month to now
     final currentMonthStart = DateTime(now.year, now.month, 1);
     final currentMonthEnd = now;
-    
+
     // Previous month: full month
     final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd = DateTime(now.year, now.month, 1).subtract(const Duration(microseconds: 1));
+    final previousMonthEnd = DateTime(
+      now.year,
+      now.month,
+      1,
+    ).subtract(const Duration(microseconds: 1));
 
     // Get ALL-TIME counts (for display)
     final allTimeCounts = getCategoryCounts();
-    
+
     // Get counts for current month (for comparison)
-    final currentCounts = _getCountsForDateRange(currentMonthStart, currentMonthEnd);
-    
+    final currentCounts = _getCountsForDateRange(
+      currentMonthStart,
+      currentMonthEnd,
+    );
+
     // Get counts for previous month (for comparison)
-    final previousCounts = _getCountsForDateRange(previousMonthStart, previousMonthEnd);
+    final previousCounts = _getCountsForDateRange(
+      previousMonthStart,
+      previousMonthEnd,
+    );
 
     return {
       'substrates': _buildChangeData(
@@ -363,7 +362,9 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       isPositive = true; // Neutral
     } else {
       // Calculate percentage change (current month vs previous month)
-      final percentageChange = ((currentMonthCount - previousMonthCount) / previousMonthCount * 100).round();
+      final percentageChange =
+          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
+              .round();
       isPositive = percentageChange >= 0;
       final sign = isPositive ? '+' : '';
       changeText = '$sign$percentageChange%';

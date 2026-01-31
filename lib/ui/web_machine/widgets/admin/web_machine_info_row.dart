@@ -24,11 +24,7 @@ class MachineInfoRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 16,
-            color: const Color(0xFF9CA3AF),
-          ),
+          Icon(icon, size: 16, color: const Color(0xFF9CA3AF)),
           const SizedBox(width: 12),
           Text(
             '$label: ',

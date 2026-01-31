@@ -6,14 +6,10 @@ abstract class CycleService {
   Future<List<CycleRecommendation>> fetchTeamCycles();
 
   /// Get drum controller for a batch
-  Future<CycleRecommendation?> getDrumController({
-    required String batchId,
-  });
+  Future<CycleRecommendation?> getDrumController({required String batchId});
 
   /// Get aerator for a batch
-  Future<CycleRecommendation?> getAerator({
-    required String batchId,
-  });
+  Future<CycleRecommendation?> getAerator({required String batchId});
 
   /// Start drum controller
   Future<String> startDrumController({
@@ -32,9 +28,7 @@ abstract class CycleService {
   });
 
   /// Complete drum controller
-  Future<void> completeDrumController({
-    required String batchId,
-  });
+  Future<void> completeDrumController({required String batchId});
 
   /// Start aerator
   Future<String> startAerator({
@@ -53,9 +47,7 @@ abstract class CycleService {
   });
 
   /// Complete aerator
-  Future<void> completeAerator({
-    required String batchId,
-  });
+  Future<void> completeAerator({required String batchId});
 
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
 }

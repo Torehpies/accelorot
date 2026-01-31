@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../themes/app_theme.dart';
 
 /// A reusable container widget that displays a list of cards with search and filter capabilities
-/// 
+///
 /// This widget provides:
 /// - Search functionality at the top
 /// - Horizontal scrollable filter chips/tabs
@@ -12,47 +12,47 @@ import '../themes/app_theme.dart';
 class FilterableCardListContainer extends StatefulWidget {
   /// List of filter options to display as chips/tabs
   final List<String> filters;
-  
+
   /// Currently selected filter
   final String selectedFilter;
-  
+
   /// Callback when filter is changed
   final ValueChanged<String> onFilterChanged;
-  
+
   /// Search query text
   final String? searchQuery;
-  
+
   /// Callback when search query changes
   final ValueChanged<String>? onSearchChanged;
-  
+
   /// List of widgets (cards) to display
   final List<Widget> cards;
-  
+
   /// Show search bar
   final bool showSearch;
-  
+
   /// Show filter chips
   final bool showFilters;
-  
+
   /// Placeholder text for search field
   final String searchHint;
-  
+
   /// Widget to display when cards list is empty
   final Widget? emptyState;
-  
+
   /// Whether data is loading
   final bool isLoading;
-  
+
   /// Background color of the container
   final Color? backgroundColor;
-  
+
   /// Padding around the container content
   final EdgeInsetsGeometry? padding;
-  
+
   /// Custom color mapping for filters (filter name -> color)
   /// If not provided, uses default green color for selected filter
   final Map<String, Color>? filterColors;
-  
+
   const FilterableCardListContainer({
     super.key,
     required this.filters,
@@ -108,7 +108,8 @@ class _FilterableCardListContainerState
         children: [
           // Search and filters section
           Container(
-            padding: widget.padding ??
+            padding:
+                widget.padding ??
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: widget.backgroundColor ?? AppColors.background,
             child: Column(
@@ -118,20 +119,20 @@ class _FilterableCardListContainerState
                   _buildSearchBar(),
                   const SizedBox(height: 12),
                 ],
-                
+
                 // Filter chips
                 if (widget.showFilters) _buildFilterChips(),
               ],
             ),
           ),
-          
+
           // Cards list
           Expanded(
             child: widget.isLoading
                 ? _buildLoadingState()
                 : widget.cards.isEmpty
-                    ? _buildEmptyState()
-                    : _buildCardsList(),
+                ? _buildEmptyState()
+                : _buildCardsList(),
           ),
         ],
       ),
@@ -179,10 +180,7 @@ class _FilterableCardListContainerState
           ),
           isDense: true,
         ),
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-        ),
+        style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
       ),
     );
   }
@@ -197,7 +195,7 @@ class _FilterableCardListContainerState
         itemBuilder: (context, index) {
           final filter = widget.filters[index];
           final isSelected = filter == widget.selectedFilter;
-          
+
           // Get color for this filter
           Color selectedColor = AppColors.green100;
           if (widget.filterColors != null &&
@@ -257,11 +255,7 @@ class _FilterableCardListContainerState
             if (isSelected)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                child: Icon(Icons.check, color: Colors.white, size: 16),
               ),
             Text(
               label,
@@ -279,7 +273,8 @@ class _FilterableCardListContainerState
 
   Widget _buildCardsList() {
     return ListView.builder(
-      padding: widget.padding ??
+      padding:
+          widget.padding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: widget.cards.length,
       itemBuilder: (context, index) {
@@ -292,11 +287,7 @@ class _FilterableCardListContainerState
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: CircularProgressIndicator(
-        color: AppColors.green100,
-      ),
-    );
+    return Center(child: CircularProgressIndicator(color: AppColors.green100));
   }
 
   Widget _buildEmptyState() {
@@ -326,7 +317,9 @@ class _FilterableCardListContainerState
           const Text(
             'Try adjusting your search or filters',
             style: TextStyle(
-              color: Color(0xB36B7280), // AppColors.textSecondary at 70% opacity
+              color: Color(
+                0xB36B7280,
+              ), // AppColors.textSecondary at 70% opacity
               fontSize: 14,
             ),
           ),

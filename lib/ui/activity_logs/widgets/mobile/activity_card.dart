@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../data/models/activity_log_item.dart';
 
 class ActivityCard extends StatelessWidget {
-  final ActivityLogItem item;  
+  final ActivityLogItem item;
 
   const ActivityCard({super.key, required this.item});
 
@@ -57,14 +57,14 @@ class ActivityCard extends StatelessWidget {
                         ),
                       )
                     else
-                    Text(
-                      item.value,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      Text(
+                        item.value,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],

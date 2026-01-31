@@ -17,7 +17,7 @@ class TeamSelectionScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(teamSelectionProvider);
     final notifier = ref.read(teamSelectionProvider.notifier);
-    final appUser =  ref.watch(appUserProvider).value;
+    final appUser = ref.watch(appUserProvider).value;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 

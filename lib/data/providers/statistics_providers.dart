@@ -22,7 +22,7 @@ final statisticsServiceProvider = Provider<StatisticsService>((ref) {
 // Statistics Repository provider
 final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   final service = ref.watch(statisticsServiceProvider);
-  return StatisticsRepositoryRemote (statisticsService: service);
+  return StatisticsRepositoryRemote(statisticsService: service);
 });
 
 // Temperature data provider

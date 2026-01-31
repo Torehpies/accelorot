@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../ui/core/ui/theme_constants.dart';
+
 class AdminSearchBar extends StatelessWidget {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;

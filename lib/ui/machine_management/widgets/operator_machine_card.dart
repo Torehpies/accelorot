@@ -7,10 +7,7 @@ import 'machine_view_dialog.dart';
 class OperatorMachineCard extends StatelessWidget {
   final MachineModel machine;
 
-  const OperatorMachineCard({
-    super.key,
-    required this.machine,
-  });
+  const OperatorMachineCard({super.key, required this.machine});
 
   void _showMachineDetails(BuildContext context) {
     showDialog(

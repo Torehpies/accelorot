@@ -67,11 +67,8 @@ class _WebTableBodyState extends State<WebTableBody>
 
     return ListView.separated(
       itemCount: widget.reports.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: WebColors.tableBorder,
-      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, thickness: 1, color: WebColors.tableBorder),
       itemBuilder: (context, index) {
         return WebTableRow(
           report: widget.reports[index],
@@ -85,11 +82,8 @@ class _WebTableBodyState extends State<WebTableBody>
   Widget _buildSkeletonRows() {
     return ListView.separated(
       itemCount: 8,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: WebColors.tableBorder,
-      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, thickness: 1, color: WebColors.tableBorder),
       itemBuilder: (context, index) {
         return _buildSkeletonRow();
       },
@@ -103,17 +97,13 @@ class _WebTableBodyState extends State<WebTableBody>
         // Title
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 180, height: 16),
-          ),
+          child: Center(child: _buildSkeletonBox(width: 180, height: 16)),
         ),
 
         // Category
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: _buildSkeletonBox(width: 110, height: 16),
-          ),
+          child: Center(child: _buildSkeletonBox(width: 110, height: 16)),
         ),
 
         // Status Chip

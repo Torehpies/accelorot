@@ -5,21 +5,16 @@ import '../../../data/models/machine_model.dart';
 class MachineViewDialog extends StatelessWidget {
   final MachineModel machine;
 
-  const MachineViewDialog({
-    super.key,
-    required this.machine,
-  });
+  const MachineViewDialog({super.key, required this.machine});
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('MMM dd, yyyy • hh:mm a').format(
-      machine.dateCreated,
-    );
+    final dateStr = DateFormat(
+      'MMM dd, yyyy • hh:mm a',
+    ).format(machine.dateCreated);
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         child: Column(
@@ -44,7 +39,7 @@ class MachineViewDialog extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2), 
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -71,7 +66,7 @@ class MachineViewDialog extends StatelessWidget {
                           'ID: ${machine.machineId}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withValues(alpha: 0.9), 
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],
@@ -152,9 +147,9 @@ class MachineViewDialog extends StatelessWidget {
                       _buildInfoRow(
                         icon: Icons.update,
                         label: 'Last Modified',
-                        value: DateFormat('MMM dd, yyyy • hh:mm a').format(
-                          machine.lastModified!,
-                        ),
+                        value: DateFormat(
+                          'MMM dd, yyyy • hh:mm a',
+                        ).format(machine.lastModified!),
                       ),
                     ]),
                   ],
@@ -191,10 +186,7 @@ class MachineViewDialog extends StatelessWidget {
                 ),
                 child: const Text(
                   'Close',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -223,9 +215,7 @@ class MachineViewDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade200),
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );

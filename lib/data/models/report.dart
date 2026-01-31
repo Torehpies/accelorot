@@ -12,7 +12,8 @@ part 'report.g.dart';
 abstract class Report with _$Report {
   const factory Report({
     required String id,
-    required String reportType, // 'maintenance_issue', 'observation', 'safety_concern'
+    required String
+    reportType, // 'maintenance_issue', 'observation', 'safety_concern'
     required String title,
     required String machineId,
     required String machineName,
@@ -32,7 +33,7 @@ abstract class Report with _$Report {
   const Report._();
 
   // ===== JSON SERIALIZATION (for report_model compatibility) =====
-  
+
   factory Report.fromJson(Map<String, dynamic> json) => _$ReportFromJson(json);
 
   // ===== FIRESTORE CONVERSION (for report.dart compatibility) =====
@@ -40,10 +41,10 @@ abstract class Report with _$Report {
   /// Create from Firestore document
   static Report fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
-    
+
     return Report(
-      id: doc.id, 
-      reportType: data['reportType'] ?? 'observation',  
+      id: doc.id,
+      reportType: data['reportType'] ?? 'observation',
       title: data['title'] ?? '',
       machineId: data['machineId'] ?? '',
       machineName: data['machineName'] ?? 'Unknown Machine',
@@ -85,7 +86,8 @@ abstract class Report with _$Report {
   // ===== DISPLAY HELPERS (for UI compatibility) =====
 
   /// Check if report is resolved
-  bool get isResolved => status.toLowerCase() == 'completed' || status.toLowerCase() == 'on_hold';
+  bool get isResolved =>
+      status.toLowerCase() == 'completed' || status.toLowerCase() == 'on_hold';
 
   /// Get formatted report type label
   String get reportTypeLabel {
@@ -159,7 +161,7 @@ abstract class CreateReportRequest with _$CreateReportRequest {
     required String userName,
     String? userId,
   }) = _CreateReportRequest;
-  
+
   factory CreateReportRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateReportRequestFromJson(json);
 }
@@ -174,7 +176,7 @@ abstract class UpdateReportRequest with _$UpdateReportRequest {
     String? priority,
     Map<String, dynamic>? metadata,
   }) = _UpdateReportRequest;
-  
+
   factory UpdateReportRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateReportRequestFromJson(json);
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
+import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/member_row.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pagination_bar.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamMembersTab extends ConsumerStatefulWidget {
@@ -49,6 +52,9 @@ class _TableContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet =
+        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
     if (state.isLoading && state.members.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -58,97 +64,22 @@ class _TableContent extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(width: 1, color: AppColors.grey),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(8),
         child: Column(
           children: [
-            _StickyHeader(),
+            StickyHeader(
+              labels: ['First Name', 'Last Name', 'Email', 'Status', 'Actions'],
+              flexValues: [isTablet ? 1 : 2, isTablet ? 1 : 2, 3, 1, 1],
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+            ),
             Expanded(
               child: _MembersList(state: state, notifier: notifier),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StickyHeader extends StatelessWidget {
-  const _StickyHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: Color(0xFFEFF7FF)),
-      child: const Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                'First Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                'Last Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              width: 220,
-              child: Center(
-                child: Text(
-                  'Email',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Status',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Actions',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -162,10 +93,29 @@ class _MembersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (state.isLoading && state.members.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.filteredMembers.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('No members found', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: state.members.length,
-      itemBuilder: (context, index) =>
-          TeamMemberRow(member: state.members[index], notifier: notifier),
+      itemCount: state.filteredMembers.length,
+      itemBuilder: (context, index) => TeamMemberRow(
+        member: state.filteredMembers[index],
+        notifier: notifier,
+      ),
     );
   }
 }
@@ -183,12 +133,21 @@ class _PaginationSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PaginationBar(
-      currentPage: currentPage,
-      canGoNext: hasNextPage,
-      onBack: notifier.previousPage,
-      onNext: notifier.nextPage,
-      onPageSelected: notifier.goToPage,
+    final pageSize = ref.watch(teamMembersProvider).pageSize;
+    final hasNext = ref.watch(teamMembersProvider).hasNextPage;
+    final current = currentPage;
+    final pageCount = hasNext ? current + 2 : current + 1;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: PaginationControls(
+        currentPage: current + 1, // 1-based
+        totalPages: pageCount,
+        itemsPerPage: pageSize,
+        isLoading: ref.watch(teamMembersProvider).isLoading,
+        onPageChanged: (page) => notifier.goToPage(page - 1),
+        onItemsPerPageChanged: notifier.setPageSize,
+      ),
     );
   }
 }

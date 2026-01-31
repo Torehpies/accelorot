@@ -19,19 +19,16 @@ class ReportsViewModel extends _$ReportsViewModel {
   ReportsState build() {
     _aggregator = ref.read(reportAggregatorProvider);
     _filterService = ReportFilterService();
-    
+
     Future.microtask(() => _initialize());
-    
+
     return const ReportsState();
   }
 
   // ===== INITIALIZATION =====
 
   Future<void> _initialize() async {
-    state = state.copyWith(
-      status: LoadingStatus.loading,
-      errorMessage: null,
-    );
+    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
       final isLoggedIn = await _aggregator.isUserLoggedIn();
@@ -84,55 +81,39 @@ class ReportsViewModel extends _$ReportsViewModel {
   // ===== FILTER HANDLERS =====
 
   void onStatusChanged(ReportStatusFilter status) {
-    state = state.copyWith(
-      selectedStatus: status,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedStatus: status, currentPage: 1);
     _applyFilters();
   }
 
   void onCategoryChanged(ReportCategoryFilter category) {
-    state = state.copyWith(
-      selectedCategory: category,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedCategory: category, currentPage: 1);
     _applyFilters();
   }
 
   void onPriorityChanged(ReportPriorityFilter priority) {
-    state = state.copyWith(
-      selectedPriority: priority,
-      currentPage: 1,
-    );
+    state = state.copyWith(selectedPriority: priority, currentPage: 1);
     _applyFilters();
   }
 
   void onDateFilterChanged(DateFilterRange dateFilter) {
-    state = state.copyWith(
-      dateFilter: dateFilter,
-      currentPage: 1,
-    );
+    state = state.copyWith(dateFilter: dateFilter, currentPage: 1);
     _applyFilters();
   }
 
   void onSearchChanged(String query) {
-    state = state.copyWith(
-      searchQuery: query.toLowerCase(),
-      currentPage: 1,
-    );
+    state = state.copyWith(searchQuery: query.toLowerCase(), currentPage: 1);
     _applyFilters();
   }
 
   // ===== SORTING HANDLERS =====
 
   void onSort(String column) {
-    final isAscending = state.sortColumn == column ? !state.sortAscending : true;
-    
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
-    
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
+
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
+
     _applyFilters();
   }
 
@@ -143,10 +124,7 @@ class ReportsViewModel extends _$ReportsViewModel {
   }
 
   void onItemsPerPageChanged(int itemsPerPage) {
-    state = state.copyWith(
-      itemsPerPage: itemsPerPage,
-      currentPage: 1,
-    );
+    state = state.copyWith(itemsPerPage: itemsPerPage, currentPage: 1);
   }
 
   // ===== FILTERING LOGIC =====
@@ -164,9 +142,7 @@ class ReportsViewModel extends _$ReportsViewModel {
       sortAscending: state.sortAscending,
     );
 
-    state = state.copyWith(
-      filteredReports: result.filteredReports,
-    );
+    state = state.copyWith(filteredReports: result.filteredReports);
   }
 
   // ===== STATS CALCULATIONS =====
@@ -176,16 +152,26 @@ class ReportsViewModel extends _$ReportsViewModel {
     final currentMonthStart = DateTime(now.year, now.month, 1);
     final currentMonthEnd = now;
     final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd = DateTime(now.year, now.month, 1).subtract(const Duration(microseconds: 1));
+    final previousMonthEnd = DateTime(
+      now.year,
+      now.month,
+      1,
+    ).subtract(const Duration(microseconds: 1));
 
     // All-time counts
     final allTimeCounts = _getAllTimeCounts();
-    
+
     // Current month counts
-    final currentCounts = _getCountsForDateRange(currentMonthStart, currentMonthEnd);
-    
+    final currentCounts = _getCountsForDateRange(
+      currentMonthStart,
+      currentMonthEnd,
+    );
+
     // Previous month counts
-    final previousCounts = _getCountsForDateRange(previousMonthStart, previousMonthEnd);
+    final previousCounts = _getCountsForDateRange(
+      previousMonthStart,
+      previousMonthEnd,
+    );
 
     return {
       'completed': _buildChangeData(
@@ -264,7 +250,9 @@ class ReportsViewModel extends _$ReportsViewModel {
       changeText = 'No log yet';
       isPositive = true;
     } else {
-      final percentageChange = ((currentMonthCount - previousMonthCount) / previousMonthCount * 100).round();
+      final percentageChange =
+          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
+              .round();
       isPositive = percentageChange >= 0;
       final sign = isPositive ? '+' : '';
       changeText = '$sign$percentageChange%';
@@ -297,11 +285,8 @@ class ReportsViewModel extends _$ReportsViewModel {
         priority: priority,
       );
 
-      await _aggregator.updateReport(
-        machineId: machineId,
-        request: request,
-      );
-      
+      await _aggregator.updateReport(machineId: machineId, request: request);
+
       // Refresh after update
       await Future.delayed(const Duration(milliseconds: 500));
       await refresh();

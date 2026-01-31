@@ -3,11 +3,7 @@ class SensorReadingModel {
   final double value;
   final DateTime? timestamp;
 
-  SensorReadingModel({
-    required this.id,
-    required this.value,
-    this.timestamp,
-  });
+  SensorReadingModel({required this.id, required this.value, this.timestamp});
 
   /// Shared timestamp parser (public so children can access)
   static DateTime? parseTimestamp(dynamic timestamp) {

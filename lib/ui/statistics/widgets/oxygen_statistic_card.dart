@@ -38,17 +38,17 @@ class OxygenStatisticCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFFAF5FF), width: 1)
-                )
+                  bottom: BorderSide(color: Color(0xFFFAF5FF), width: 1),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       const Text(
+                      const Text(
                         'Air Quality',
                         style: TextStyle(
                           fontSize: 18,
@@ -57,7 +57,7 @@ class OxygenStatisticCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 2),
-                       const Text(
+                      const Text(
                         'sample text description...',
                         style: TextStyle(
                           fontSize: 11,
@@ -66,7 +66,7 @@ class OxygenStatisticCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                   Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
@@ -79,7 +79,7 @@ class OxygenStatisticCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                       const Text(
+                      const Text(
                         'ppm',
                         style: TextStyle(
                           fontSize: 18,
@@ -108,19 +108,23 @@ class OxygenStatisticCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Progress Bar
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _calculateProgress(currentOxygen),
-                      backgroundColor: const Color(0xFFF3E8FF), // Very light purple
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF6D28D9)), // Darker Purple
+                      backgroundColor: const Color(
+                        0xFFF3E8FF,
+                      ), // Very light purple
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFF6D28D9),
+                      ), // Darker Purple
                       minHeight: 12,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Chart
                   SizedBox(
                     height: 120,
@@ -237,13 +241,10 @@ class OxygenStatisticCard extends StatelessWidget {
                   // Trend Text
                   const Text(
                     'Trending up by 5.2% this week',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // More Information Section
                   const Text(
                     'More Information:',

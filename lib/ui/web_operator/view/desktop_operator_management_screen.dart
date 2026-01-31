@@ -58,7 +58,6 @@ class _DesktopOperatorManagementScreenState
               child: Column(
                 children: [
                   TeamHeaderWithTabs(controller: _tabController),
-                  const SizedBox(height: 8),
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,

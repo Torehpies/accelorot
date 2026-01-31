@@ -7,10 +7,7 @@ import '../models/feature_model.dart';
 
 class FeatureCard extends StatelessWidget {
   final FeatureModel feature;
-  const FeatureCard({
-    super.key,
-    required this.feature,
-  });
+  const FeatureCard({super.key, required this.feature});
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +34,7 @@ class FeatureCard extends StatelessWidget {
               color: feature.backgroundColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              feature.icon,
-              color: feature.iconColor,
-              size: 24,
-            ),
+            child: Icon(feature.icon, color: feature.iconColor, size: 24),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
@@ -55,8 +48,8 @@ class FeatureCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             feature.description,
-            maxLines: 3, 
-            overflow: TextOverflow.ellipsis, 
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
             style: WebTextStyles.bodyMediumGray.copyWith(
               fontSize: 14,
               height: 1.5,

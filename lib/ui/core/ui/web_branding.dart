@@ -14,7 +14,7 @@ class WebBranding extends ConsumerWidget {
 
     final isTablet =
         MediaQuery.of(context).size.width >= kTabletBreakpoint &&
-        MediaQuery.of(context).size.width <= kDesktopBreakpoint;
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
 
     final iconSize = 65.0;
     final smallIconSize = 40.0;

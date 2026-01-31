@@ -35,30 +35,30 @@ class TemperatureStatisticCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min, // Allow minimum height
         children: [
             // Header Section
-             Container(
+            Container(
               padding: const EdgeInsets.all(16), // Reduced padding
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFFFF7ED), width: 1)
-                )
+                  bottom: BorderSide(color: Color(0xFFFFF7ED), width: 1),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                       const Text(
+                      const Text(
                         'Temperature',
                         style: TextStyle(
-                          fontSize: 18, 
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF374151),
                         ),
                       ),
                       const SizedBox(height: 2),
-                       const Text(
+                      const Text(
                         'sample text description...',
                         style: TextStyle(
                           fontSize: 11,
@@ -67,7 +67,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                   Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
@@ -80,7 +80,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                       const Text(
+                      const Text(
                         '°C',
                         style: TextStyle(
                           fontSize: 18,
@@ -93,13 +93,13 @@ class TemperatureStatisticCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(16), // Reduced padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   // Ideal Range Label
+                  // Ideal Range Label
                   const Text(
                     'Ideal Range: 55°C - 70°C',
                     style: TextStyle(
@@ -109,19 +109,21 @@ class TemperatureStatisticCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Progress Bar
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: _calculateProgress(currentTemperature),
-                      backgroundColor: const Color(0xFFFFEDD5), 
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFC2410C)),
+                      backgroundColor: const Color(0xFFFFEDD5),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xFFC2410C),
+                      ),
                       minHeight: 12,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Chart
                   SizedBox(
                     height: 120,
@@ -239,13 +241,10 @@ class TemperatureStatisticCard extends StatelessWidget {
                   // Trend Text
                   const Text(
                     'Trending up by 5.2% this week',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF6B7280),
-                    ),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // More Information Section
                   const Text(
                     'More Information:',
@@ -272,33 +271,37 @@ class TemperatureStatisticCard extends StatelessWidget {
       'sample text here',
       'sample text here',
     ];
-    
-    return items.map((item) => Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 4,
-            height: 4,
-            decoration: const BoxDecoration(
-              color: Color(0xFF9CA3AF),
-              shape: BoxShape.circle,
+
+    return items
+        .map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF9CA3AF),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              item,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
-      ),
-    )).toList();
+        )
+        .toList();
   }
 
   List<Map<String, dynamic>> _generateDailyData() {

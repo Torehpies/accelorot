@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_members_service.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
+import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
 class FirebasePendingMembersService implements PendingMembersService {
@@ -103,11 +104,18 @@ class FirebasePendingMembersService implements PendingMembersService {
     required String teamId,
     required int pageSize,
     required int pageIndex,
+    DateFilterRange? dateFilter,
   }) async {
     try {
-      final query = _pendingMembersRef(teamId)
-          .orderBy('requestedAt', descending: true)
-          .limit(pageSize * (pageIndex + 1));
+      Query<Map<String, dynamic>> query = _pendingMembersRef(
+        teamId,
+      ).orderBy('requestedAt', descending: true);
+
+      if (dateFilter?.isActive == true) {
+        query = query
+            .where('requestedAt', isGreaterThanOrEqualTo: dateFilter!.startDate)
+            .where('requestedAt', isLessThanOrEqualTo: dateFilter.endDate);
+      }
 
       final snapshot = await query.get();
 

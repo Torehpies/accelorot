@@ -9,10 +9,7 @@ import 'feature_card.dart';
 
 class FeaturesSection extends StatelessWidget {
   final List<FeatureModel> features;
-  const FeaturesSection({
-    super.key,
-    required this.features,
-  });
+  const FeaturesSection({super.key, required this.features});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +46,7 @@ class FeaturesSection extends StatelessWidget {
               crossAxisCount: 3,
               crossAxisSpacing: AppSpacing.xl,
               mainAxisSpacing: AppSpacing.xl,
-              mainAxisExtent: 250, 
+              mainAxisExtent: 250,
             ),
             itemCount: features.length,
             itemBuilder: (context, index) {

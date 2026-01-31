@@ -14,21 +14,21 @@ import 'web_table_body.dart';
 class WebOperatorTableContainer extends StatelessWidget {
   final List<MachineModel> machines;
   final bool isLoading;
-  
+
   // Filter states
   final MachineStatusFilter selectedStatusFilter;
   final String searchQuery;
-  
+
   // Sort states
   final String? sortColumn;
   final bool sortAscending;
-  
+
   // Pagination states
   final int currentPage;
   final int totalPages;
   final int itemsPerPage;
   final int totalItems;
-  
+
   // Callbacks (no onEdit, no onAddMachine)
   final ValueChanged<MachineStatusFilter> onStatusFilterChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
@@ -67,7 +67,7 @@ class WebOperatorTableContainer extends StatelessWidget {
         'Machine List',
         style: WebTextStyles.sectionTitle,
       ),
-      
+
       // Right header: Date filter and Search only (no Add button)
       rightHeaderWidgets: [
         SizedBox(
@@ -80,10 +80,7 @@ class WebOperatorTableContainer extends StatelessWidget {
         SizedBox(
           height: 32,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 220,
-              maxWidth: 320,
-            ),
+            constraints: const BoxConstraints(minWidth: 220, maxWidth: 320),
             child: SearchField(
               hintText: 'Search...',
               onChanged: onSearchChanged,
@@ -92,7 +89,7 @@ class WebOperatorTableContainer extends StatelessWidget {
           ),
         ),
       ],
-      
+
       // Table header with filters
       tableHeader: MachineTableHeader(
         selectedStatusFilter: selectedStatusFilter,
@@ -102,7 +99,7 @@ class WebOperatorTableContainer extends StatelessWidget {
         onSort: onSort,
         isLoading: isLoading,
       ),
-      
+
       // Table body (no onEdit callback - will be null)
       tableBody: MachineTableBody(
         machines: machines,
@@ -110,7 +107,7 @@ class WebOperatorTableContainer extends StatelessWidget {
         onView: onView,
         isLoading: isLoading,
       ),
-      
+
       // Pagination
       paginationWidget: PaginationControls(
         currentPage: currentPage,

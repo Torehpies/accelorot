@@ -5,7 +5,7 @@ import '../widgets/temperature_statistic_card.dart';
 import '../widgets/moisture_statistic_card.dart';
 import '../widgets/oxygen_statistic_card.dart';
 import '../../../data/providers/machine_providers.dart';
-import '../../../data/providers/selected_machine_provider.dart'; 
+import '../../../data/providers/selected_machine_provider.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
@@ -17,7 +17,8 @@ class WebStatisticsScreen extends ConsumerStatefulWidget {
   const WebStatisticsScreen({super.key, this.focusedMachineId});
 
   @override
-  ConsumerState<WebStatisticsScreen> createState() => _WebStatisticsScreenState();
+  ConsumerState<WebStatisticsScreen> createState() =>
+      _WebStatisticsScreenState();
 }
 
 class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
@@ -27,7 +28,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final sessionService = SessionService();
-    
+
     return FutureBuilder<Map<String, dynamic>?>(
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
@@ -44,7 +45,9 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           return Scaffold(
             backgroundColor: const Color(0xFFF9FAFB),
             body: const Center(
-              child: Text('No team assigned. Please contact your administrator.'),
+              child: Text(
+                'No team assigned. Please contact your administrator.',
+              ),
             ),
           );
         }
@@ -52,7 +55,9 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
         return Scaffold(
-          backgroundColor: const Color(0xFFDFF2FF), // Light blue to match navigation
+          backgroundColor: const Color(
+            0xFFDFF2FF,
+          ), // Light blue to match navigation
           body: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
@@ -62,26 +67,29 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
                   .where((m) => m.isArchived && m.id != null)
                   .toList();
               final allMachines = [...activeMachines, ...archivedMachines];
-              
+
               if (allMachines.isEmpty) {
-                return const Center(
-                  child: Text('No machines available'),
-                );
+                return const Center(child: Text('No machines available'));
               }
 
               // Initialize selected machine if needed
               final selectedMachineId = ref.watch(selectedMachineIdProvider);
-              if (selectedMachineId.isEmpty || 
+              if (selectedMachineId.isEmpty ||
                   !allMachines.any((m) => m.id == selectedMachineId)) {
-                final initialId = widget.focusedMachineId ?? allMachines.first.id!;
+                final initialId =
+                    widget.focusedMachineId ?? allMachines.first.id!;
                 Future.microtask(() {
-                  ref.read(selectedMachineIdProvider.notifier).setMachine(initialId);
+                  ref
+                      .read(selectedMachineIdProvider.notifier)
+                      .setMachine(initialId);
                 });
                 return const Center(child: CircularProgressIndicator());
               }
 
               // Auto-select current batch when machine changes
-              final selectedMachine = allMachines.firstWhere((m) => m.id == selectedMachineId);
+              final selectedMachine = allMachines.firstWhere(
+                (m) => m.id == selectedMachineId,
+              );
               if (_previousMachineId != selectedMachineId) {
                 Future.microtask(() {
                   setState(() {
@@ -119,7 +127,8 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
-                    onPressed: () => ref.invalidate(machinesStreamProvider(teamId)),
+                    onPressed: () =>
+                        ref.invalidate(machinesStreamProvider(teamId)),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                   ),
@@ -134,7 +143,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
 
   Widget _buildHeader(List<MachineModel> machines, WidgetRef ref) {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
+
     return Row(
       children: [
         // Machine Selector
@@ -143,31 +152,31 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
             selectedMachineId: selectedMachineId,
             onChanged: (machineId) {
               if (machineId != null) {
-                ref.read(selectedMachineIdProvider.notifier).setMachine(machineId);
+                ref
+                    .read(selectedMachineIdProvider.notifier)
+                    .setMachine(machineId);
               }
             },
             isCompact: false,
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Batch Selector
-        Expanded(
-          child: _buildBatchSelector(),
-        ),
+        Expanded(child: _buildBatchSelector()),
       ],
     );
   }
 
   Widget _buildBatchSelector() {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
+
     return BatchSelector(
       selectedBatchId: selectedBatch,
       selectedMachineId: selectedMachineId,
       onChanged: (batchId) => setState(() => selectedBatch = batchId),
       showLabel: false,
-      showAllOption: false, 
+      showAllOption: false,
       showOnlyActive: false,
       isCompact: false,
     );
@@ -191,7 +200,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           temperatureAsync.when(
             data: (readings) => TemperatureStatisticCard(
               currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
-              readings: readings,
+              hourlyReadings: readings.map((r) => r.value).toList(),
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Temperature'),
@@ -222,10 +231,12 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           // Mobile: Single column
           return Column(
             children: cards
-                .map((card) => Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: card,
-                    ))
+                .map(
+                  (card) => Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: card,
+                  ),
+                )
                 .toList(),
           );
         } else if (width < 1100) {

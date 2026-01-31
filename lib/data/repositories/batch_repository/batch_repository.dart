@@ -12,14 +12,14 @@ abstract class BatchRepository {
   });
 
   Future<void> updateBatchTimestamp(String batchId);
-  
+
   /// Complete a batch with final weight and notes
   Future<void> completeBatch(
     String batchId, {
     required double finalWeight,
     String? completionNotes,
   });
-  
+
   Future<String?> getUserTeamId(String userId);
 
   /// Get all machine IDs for a team

@@ -6,10 +6,7 @@ import 'web_view_confirmation_dialog.dart';
 class WebOperatorMachineCard extends StatelessWidget {
   final MachineModel machine;
 
-  const WebOperatorMachineCard({
-    super.key,
-    required this.machine,
-  });
+  const WebOperatorMachineCard({super.key, required this.machine});
 
   void _showMachineDetails(BuildContext context) {
     showDialog(
@@ -46,18 +43,25 @@ class WebOperatorMachineCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isActive ? Colors.teal.shade100 : Colors.grey.shade200,
+                      color: isActive
+                          ? Colors.teal.shade100
+                          : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.precision_manufacturing,
-                      color: isActive ? Colors.teal.shade700 : Colors.grey.shade600,
+                      color: isActive
+                          ? Colors.teal.shade700
+                          : Colors.grey.shade600,
                       size: 28,
                     ),
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: isActive ? Colors.green : Colors.orange,
                       borderRadius: BorderRadius.circular(20),

@@ -49,11 +49,7 @@ class ActivitySectionCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        icon,
-                        color: Colors.teal.shade700,
-                        size: 20,
-                      ),
+                      Icon(icon, color: Colors.teal.shade700, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         title,
@@ -84,9 +80,7 @@ class ActivitySectionCard extends StatelessWidget {
 
               // Filter boxes
               Expanded(
-                child: Row(
-                  children: _buildFilterBoxesWithSpacing(context),
-                ),
+                child: Row(children: _buildFilterBoxesWithSpacing(context)),
               ),
             ],
           ),
@@ -98,10 +92,10 @@ class ActivitySectionCard extends StatelessWidget {
   /// Builds filter boxes with 8px spacing between them
   List<Widget> _buildFilterBoxesWithSpacing(BuildContext context) {
     final List<Widget> widgets = [];
-    
+
     for (int i = 0; i < filters.length; i++) {
       final filter = filters[i];
-      
+
       widgets.add(
         FilterBox(
           icon: filter.icon,
@@ -111,19 +105,19 @@ class ActivitySectionCard extends StatelessWidget {
             Navigator.of(context).pushNamed(
               filter.route,
               arguments: {
-                'initialFilter': filter.initialFilterArg ?? filter.filterValue
+                'initialFilter': filter.initialFilterArg ?? filter.filterValue,
               },
             );
           },
         ),
       );
-      
+
       // Add spacing between boxes (but not after the last one)
       if (i < filters.length - 1) {
         widgets.add(const SizedBox(width: 8));
       }
     }
-    
+
     return widgets;
   }
 }

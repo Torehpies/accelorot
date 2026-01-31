@@ -11,7 +11,8 @@ abstract class DataLayerError with _$DataLayerError {
       InvalidCredentialError;
   const factory DataLayerError.permissionError() = PermissionError;
   const factory DataLayerError.tooManyRequestsError() = TooManyRequestsError;
-  const factory DataLayerError.popupClosedByUserError() = PopupClosedByUserError;
+  const factory DataLayerError.popupClosedByUserError() =
+      PopupClosedByUserError;
   const factory DataLayerError.databaseError(String message) = DatabaseError;
   const factory DataLayerError.mappingError() = MappingError;
   const factory DataLayerError.userExistsError() = UserExistsError;

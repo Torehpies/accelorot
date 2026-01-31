@@ -47,7 +47,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
       final operators = await ref
           .read(operatorRepositoryProvider)
           .getOperators(widget.teamId);
-      
+
       if (mounted) {
         setState(() {
           _users = operators.where((o) => !o.isArchived).toList();
@@ -74,7 +74,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
 
     try {
       final notifier = ref.read(adminMachineProvider.notifier);
-      
+
       await notifier.updateMachine(
         teamId: widget.teamId,
         machineId: widget.machine.machineId,
@@ -90,10 +90,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -130,10 +127,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
               children: [
                 const Text(
                   'Edit Machine',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 IconButton(
@@ -145,20 +139,14 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
             const SizedBox(height: 8),
             Text(
               'Add a new machine procured from the manufacturer.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 20),
 
             // Machine Name
             const Text(
               'Machine Name',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -188,10 +176,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
             // Status
             const Text(
               'Status',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             StatusDropdown(
@@ -206,10 +191,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
             // Machine ID (read-only)
             const Text(
               'Machine ID',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextFormField(
@@ -233,10 +215,7 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
             // User
             const Text(
               'User',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             UserSelectorDropdown(
@@ -293,8 +272,9 @@ class _EditMachineModalState extends ConsumerState<EditMachineModal> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(

@@ -10,11 +10,7 @@ class NoTeamState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 64,
-            color: Color(0xFF9CA3AF),
-          ),
+          Icon(Icons.info_outline, size: 64, color: Color(0xFF9CA3AF)),
           SizedBox(height: 16),
           Text(
             'No team assigned',

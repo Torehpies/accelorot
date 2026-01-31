@@ -7,9 +7,7 @@ import 'batch_providers.dart';
 
 /// Alert service provider
 final alertServiceProvider = Provider((ref) {
-  return FirestoreAlertService(
-    batchService: ref.watch(batchServiceProvider),
-  );
+  return FirestoreAlertService(batchService: ref.watch(batchServiceProvider));
 });
 
 /// Alert repository provider

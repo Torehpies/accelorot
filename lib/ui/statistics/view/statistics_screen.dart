@@ -29,7 +29,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final sessionService = SessionService();
-    
+
     return FutureBuilder<Map<String, dynamic>?>(
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
@@ -44,12 +44,12 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
         if (teamId == null) {
           return Scaffold(
-             appBar: kIsWeb
-          ? null 
-          : MobileHeader(title: 'Statistics'),
-          
+            appBar: kIsWeb ? null : MobileHeader(title: 'Statistics'),
+
             body: const Center(
-              child: Text('No team assigned. Please contact your administrator.'),
+              child: Text(
+                'No team assigned. Please contact your administrator.',
+              ),
             ),
           );
         }
@@ -70,27 +70,30 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   .where((m) => m.isArchived && m.id != null)
                   .toList();
               final allMachines = [...activeMachines, ...archivedMachines];
-              
+
               if (allMachines.isEmpty) {
-                return const Center(
-                  child: Text('No machines available'),
-                );
+                return const Center(child: Text('No machines available'));
               }
 
               // Initialize selected machine if needed
               final selectedMachineId = ref.watch(selectedMachineIdProvider);
-              if (selectedMachineId.isEmpty || 
+              if (selectedMachineId.isEmpty ||
                   !activeMachines.any((m) => m.id == selectedMachineId)) {
                 // Use focusedMachineId or first machine
-                final initialId = widget.focusedMachineId ?? activeMachines.first.id!;
+                final initialId =
+                    widget.focusedMachineId ?? activeMachines.first.id!;
                 Future.microtask(() {
-                  ref.read(selectedMachineIdProvider.notifier).setMachine(initialId);
+                  ref
+                      .read(selectedMachineIdProvider.notifier)
+                      .setMachine(initialId);
                 });
                 return const Center(child: CircularProgressIndicator());
               }
 
               // Auto-select current batch when machine changes
-              final selectedMachine = allMachines.firstWhere((m) => m.id == selectedMachineId);
+              final selectedMachine = allMachines.firstWhere(
+                (m) => m.id == selectedMachineId,
+              );
               if (_previousMachineId != selectedMachineId) {
                 Future.microtask(() {
                   setState(() {
@@ -131,7 +134,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
-                    onPressed: () => ref.invalidate(machinesStreamProvider(teamId)),
+                    onPressed: () =>
+                        ref.invalidate(machinesStreamProvider(teamId)),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                   ),
@@ -146,14 +150,16 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   Widget _buildSelectors(List<MachineModel> activeMachines) {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
+
     return Column(
       children: [
         MachineSelector(
           selectedMachineId: selectedMachineId,
           onChanged: (machineId) {
             if (machineId != null) {
-              ref.read(selectedMachineIdProvider.notifier).setMachine(machineId);
+              ref
+                  .read(selectedMachineIdProvider.notifier)
+                  .setMachine(machineId);
             }
           },
           isCompact: false,
@@ -166,7 +172,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
 
   Widget _buildBatchSelector() {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
+
     return BatchSelector(
       selectedBatchId: selectedBatch,
       selectedMachineId: selectedMachineId,
@@ -202,7 +208,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           error: (error, stack) => _buildErrorCard('Temperature'),
         ),
         const SizedBox(height: 16),
-        
+
         // Moisture Card
         moistureAsync.when(
           data: (readings) => MoistureStatisticCard(
@@ -214,7 +220,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           error: (error, stack) => _buildErrorCard('Moisture'),
         ),
         const SizedBox(height: 16),
-        
+
         // Air Quality Card
         oxygenAsync.when(
           data: (readings) => OxygenStatisticCard(
@@ -237,9 +243,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
+      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 

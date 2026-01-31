@@ -45,7 +45,7 @@ class AdminHomeState {
   int get totalOperators => operators.length;
   int get totalMachines => machines.length;
   int get totalReports => reports.length;
-  
+
   int get activeOperators => operators.where((o) => !o.isArchived).length;
   int get archivedOperators => operators.where((o) => o.isArchived).length;
   int get activeMachines => machines.where((m) => !m.isArchived).length;
@@ -66,12 +66,20 @@ class AdminHomeState {
       final day = now.subtract(Duration(days: 6 - index));
       final dayReports = reports.where((r) {
         return r.createdAt.year == day.year &&
-               r.createdAt.month == day.month &&
-               r.createdAt.day == day.day;
+            r.createdAt.month == day.month &&
+            r.createdAt.day == day.day;
       }).length;
-      
+
       return {
-        'day': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][day.weekday - 1],
+        'day': [
+          'Mon',
+          'Tue',
+          'Wed',
+          'Thu',
+          'Fri',
+          'Sat',
+          'Sun',
+        ][day.weekday - 1],
         'count': dayReports,
       };
     });
@@ -80,19 +88,21 @@ class AdminHomeState {
 
   // Report status breakdown
   Map<String, int> get reportStatus {
-    final statusMap = <String, int>{
-      'OPEN': 0,
-      'ON HOLD': 0,
-      'IN PROGRESS': 0,
-    };
-    
+    final statusMap = <String, int>{'OPEN': 0, 'ON HOLD': 0, 'IN PROGRESS': 0};
+
     for (var report in reports) {
       final status = report.status.toLowerCase();
       if (status == 'open' || status == 'pending') {
         statusMap['OPEN'] = (statusMap['OPEN'] ?? 0) + 1;
-      } else if (status == 'on_hold' || status == 'on hold' || status == 'onhold' || status == 'paused') {
+      } else if (status == 'on_hold' ||
+          status == 'on hold' ||
+          status == 'onhold' ||
+          status == 'paused') {
         statusMap['ON HOLD'] = (statusMap['ON HOLD'] ?? 0) + 1;
-      } else if (status == 'in_progress' || status == 'in progress' || status == 'inprogress' || status == 'active') {
+      } else if (status == 'in_progress' ||
+          status == 'in progress' ||
+          status == 'inprogress' ||
+          status == 'active') {
         statusMap['IN PROGRESS'] = (statusMap['IN PROGRESS'] ?? 0) + 1;
       }
     }
@@ -103,9 +113,11 @@ class AdminHomeState {
   List<Map<String, String>> get recentActivities {
     final recent = reports.take(5).map((report) {
       String icon = 'clipboard';
-      if (report.priority.toLowerCase() == 'high' || report.priority.toLowerCase() == 'critical') {
+      if (report.priority.toLowerCase() == 'high' ||
+          report.priority.toLowerCase() == 'critical') {
         icon = 'alert';
-      } else if (report.status.toLowerCase() == 'closed' || report.status.toLowerCase() == 'resolved') {
+      } else if (report.status.toLowerCase() == 'closed' ||
+          report.status.toLowerCase() == 'resolved') {
         icon = 'check';
       }
 
@@ -115,19 +127,20 @@ class AdminHomeState {
         'username': report.userName,
         'category': report.reportType,
         'status': report.statusLabel,
-        'date': '${report.createdAt.month}/${report.createdAt.day}/${report.createdAt.year}',
+        'date':
+            '${report.createdAt.month}/${report.createdAt.day}/${report.createdAt.year}',
       };
     }).toList();
-    
+
     return recent;
   }
 }
 
 /// PROVIDER
-final adminHomeProvider = AsyncNotifierProvider<AdminHomeNotifier, AdminHomeState>(
-  AdminHomeNotifier.new,
-);
-
+final adminHomeProvider =
+    AsyncNotifierProvider<AdminHomeNotifier, AdminHomeState>(
+      AdminHomeNotifier.new,
+    );
 
 /// NOTIFIER
 class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
@@ -136,24 +149,32 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
     // Watch the existing auth state provider
     final authState = ref.watch(authStateChangesProvider);
     final userId = authState.value?.uid;
-    
+
     if (userId == null) {
       return const AdminHomeState();
     }
 
     try {
       // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
-    
+      final profile = await ref
+          .read(profileRepositoryProvider)
+          .getProfileByUid(userId);
+
       final teamId = profile?.teamId;
-      
+
       if (teamId == null) {
         return const AdminHomeState();
       }
 
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
+      final operators = await ref
+          .read(operatorRepositoryProvider)
+          .getOperators(teamId);
+      final machines = await ref
+          .read(machineRepositoryProvider)
+          .getMachinesByTeam(teamId);
+      final reports = await ref
+          .read(reportRepositoryProvider)
+          .getReportsByTeam(teamId);
 
       return AdminHomeState(
         operators: operators,
@@ -164,10 +185,10 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
       rethrow;
     }
   }
-  
+
   Future<void> loadData() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    
+
     if (userId == null) {
       state = const AsyncValue.data(AdminHomeState());
       return;
@@ -176,24 +197,34 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
     state = const AsyncValue.loading();
     try {
       // Fetch user profile to get teamId
-      final profile = await ref.read(profileRepositoryProvider).getProfileByUid(userId);
+      final profile = await ref
+          .read(profileRepositoryProvider)
+          .getProfileByUid(userId);
       final teamId = profile?.teamId;
-      
+
       if (teamId == null) {
         // User not assigned to a team yet
         state = const AsyncValue.data(AdminHomeState());
         return;
       }
 
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(teamId);
-      final machines = await ref.read(machineRepositoryProvider).getMachinesByTeam(teamId);
-      final reports = await ref.read(reportRepositoryProvider).getReportsByTeam(teamId);
+      final operators = await ref
+          .read(operatorRepositoryProvider)
+          .getOperators(teamId);
+      final machines = await ref
+          .read(machineRepositoryProvider)
+          .getMachinesByTeam(teamId);
+      final reports = await ref
+          .read(reportRepositoryProvider)
+          .getReportsByTeam(teamId);
 
-      state = AsyncValue.data(AdminHomeState(
-        operators: operators,
-        machines: machines,
-        reports: reports,
-      ));
+      state = AsyncValue.data(
+        AdminHomeState(
+          operators: operators,
+          machines: machines,
+          reports: reports,
+        ),
+      );
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
     }

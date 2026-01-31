@@ -12,7 +12,8 @@ abstract class MachineState with _$MachineState {
   const factory MachineState({
     // Filters
     @Default(MachineStatusFilter.all) MachineStatusFilter selectedStatusFilter,
-    @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
+    @Default(DateFilterRange(type: DateFilterType.none))
+    DateFilterRange dateFilter,
     @Default('') String searchQuery,
 
     // Sorting
@@ -39,7 +40,8 @@ abstract class MachineState with _$MachineState {
 
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
-  bool get isEmpty => filteredMachines.isEmpty && status == LoadingStatus.success;
+  bool get isEmpty =>
+      filteredMachines.isEmpty && status == LoadingStatus.success;
 
   /// Get paginated machines for current page
   List<MachineModel> get paginatedMachines {
