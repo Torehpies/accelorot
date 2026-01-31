@@ -67,12 +67,12 @@ enum MachineStatusFilter {
 @freezed
 abstract class MachineModel with _$MachineModel {
   const MachineModel._();
-  
+
   const factory MachineModel({
-    String? id, 
+    String? id,
     required String machineId,
     required String machineName,
-    String? userId, 
+    String? userId,
     required String teamId,
     required DateTime dateCreated,
     @Default(false) bool isArchived,
@@ -81,6 +81,8 @@ abstract class MachineModel with _$MachineModel {
     DateTime? lastModified,
     String? currentBatchId,
     Map<String, dynamic>? metadata,
+    @Default(false) bool drumActive,
+    @Default(false) bool aeratorActive,
   }) = _MachineModel;
 
   factory MachineModel.fromJson(Map<String, dynamic> json) =>
@@ -90,38 +92,45 @@ abstract class MachineModel with _$MachineModel {
     final data = doc.data() as Map<String, dynamic>? ?? <String, dynamic>{};
     final docId = doc.id;
     final machineIdFromData = (data['machineId'] as String?) ?? docId;
-    
+
     MachineStatus status = MachineStatus.active;
     if (data['status'] != null) {
       final statusStr = data['status'] as String;
       status = MachineStatus.values.firstWhere(
-        (e) => e.toString().split('.').last == statusStr.toLowerCase() ||
-               statusStr == 'Active' && e == MachineStatus.active ||
-               statusStr == 'Inactive' && e == MachineStatus.inactive ||
-               statusStr == 'Under Maintenance' && e == MachineStatus.underMaintenance,
+        (e) =>
+            e.toString().split('.').last == statusStr.toLowerCase() ||
+            statusStr == 'Active' && e == MachineStatus.active ||
+            statusStr == 'Inactive' && e == MachineStatus.inactive ||
+            statusStr == 'Under Maintenance' &&
+                e == MachineStatus.underMaintenance,
         orElse: () => MachineStatus.active,
       );
     }
-    
+
     return MachineModel(
       id: docId,
       machineId: machineIdFromData,
       machineName: data['machineName'] ?? '',
       userId: data['userId'] as String?,
       teamId: data['teamId'] ?? '',
-      dateCreated: (data['dateCreated'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      dateCreated:
+          (data['dateCreated'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isArchived: data['isArchived'] ?? false,
       status: status,
-      assignedUserIds: (data['assignedUserIds'] as List<dynamic>?)
+      assignedUserIds:
+          (data['assignedUserIds'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
       lastModified: (data['lastModified'] as Timestamp?)?.toDate(),
       currentBatchId: data['currentBatchId'] as String?,
-      metadata: (data['metadata'] as Map<String, dynamic>?) ?? <String, dynamic>{},
+      metadata:
+          (data['metadata'] as Map<String, dynamic>?) ?? <String, dynamic>{},
+      drumActive: data['drumActive'] ?? false,
+      aeratorActive: data['aeratorActive'] ?? false,
     );
   }
-  
+
   Map<String, dynamic> toFirestore() {
     String statusValue;
     switch (status) {
@@ -135,7 +144,7 @@ abstract class MachineModel with _$MachineModel {
         statusValue = 'Under Maintenance';
         break;
     }
-    
+
     return {
       'machineId': machineId,
       'machineName': machineName,
@@ -145,9 +154,12 @@ abstract class MachineModel with _$MachineModel {
       'isArchived': isArchived,
       'status': statusValue,
       'assignedUserIds': assignedUserIds,
-      if (lastModified != null) 'lastModified': Timestamp.fromDate(lastModified!),
+      if (lastModified != null)
+        'lastModified': Timestamp.fromDate(lastModified!),
       if (currentBatchId != null) 'currentBatchId': currentBatchId,
       if (metadata != null) 'metadata': metadata,
+      'drumActive': drumActive,
+      'aeratorActive': aeratorActive,
     };
   }
 }
@@ -161,7 +173,7 @@ abstract class CreateMachineRequest with _$CreateMachineRequest {
     @Default([]) List<String> assignedUserIds,
     @Default(MachineStatus.active) MachineStatus status,
   }) = _CreateMachineRequest;
-  
+
   factory CreateMachineRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateMachineRequestFromJson(json);
 }
@@ -176,7 +188,7 @@ abstract class UpdateMachineRequest with _$UpdateMachineRequest {
     String? currentBatchId,
     Map<String, dynamic>? metadata,
   }) = _UpdateMachineRequest;
-  
+
   factory UpdateMachineRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateMachineRequestFromJson(json);
 }

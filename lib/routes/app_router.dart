@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
@@ -32,6 +31,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/landing_page_view.dart';
+import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
+const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -95,16 +96,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RoutePath.restricted.name,
         builder: (context, state) {
           final extraReason = state.extra as String?;
-
-          //final authStatusState = ref.read(authStateProvider);
-          //final fallbackReason = authStatusState.restrictedReason;
-
           final fallbackReason = "archived";
-
           final reason = extraReason ?? fallbackReason;
           return RestrictedAccessScreen(reason: reason);
         },
       ),
+      // OPERATOR SHELL
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
@@ -150,6 +147,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: RoutePath.operatorSettings.path,
+            name: RoutePath.operatorSettings.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const SettingsScreen(),
+            ),
+          ),
+          GoRoute(
             path: RoutePath.profile.path,
             name: RoutePath.profile.name,
             pageBuilder: (context, state) => NoTransitionPage(
@@ -159,6 +164,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // ADMIN SHELL
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
@@ -191,7 +197,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.adminOperators.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              // child: const OperatorManagementScreen(),
               child: const OperatorManagementScreen(),
             ),
           ),
@@ -212,6 +217,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: RoutePath.adminSettings.path,
+            name: RoutePath.adminSettings.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const SettingsScreen(),
+            ),
+          ),
+          GoRoute(
             path: RoutePath.adminProfile.path,
             name: RoutePath.adminProfile.name,
             pageBuilder: (context, state) => NoTransitionPage(
@@ -221,6 +234,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // SUPER ADMIN SHELL
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
@@ -246,6 +260,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const AdminMachineView(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.superAdminSettings.path,
+            name: RoutePath.superAdminSettings.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const SettingsScreen(),
             ),
           ),
           GoRoute(

@@ -8,13 +8,14 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_contro
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
+import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
-
 
 class AeratorCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
+  final String? machineId;
 
-  const AeratorCard({super.key, this.currentBatch});
+  const AeratorCard({super.key, this.currentBatch, this.machineId});
 
   @override
   ConsumerState<AeratorCard> createState() => _AeratorCardState();
@@ -23,14 +24,14 @@ class AeratorCard extends ConsumerStatefulWidget {
 class _AeratorCardState extends ConsumerState<AeratorCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
-  
+
   String _uptime = '00:00:00';
   int _completedCycles = 0;
   DateTime? _startTime;
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  
+
   // Add this to track the last loaded batch ID
   //String? _lastLoadedBatchId;
 
@@ -38,62 +39,61 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-     // _lastLoadedBatchId = widget.currentBatch!.id;
+      // _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
 
-@override
-void didUpdateWidget(AeratorCard oldWidget) {
-  super.didUpdateWidget(oldWidget);
-  
-  // Check if batch ID changed (new batch selected or created)
-  final currentBatchId = widget.currentBatch?.id;
-  final oldBatchId = oldWidget.currentBatch?.id;
-  
-  if (currentBatchId != oldBatchId) {
-    // Batch changed - reset and reload
-    _stopTimer();
-    _cycleTimer?.cancel();
-    
-    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-      // No active batch - clear everything
-      setState(() {
-        settings.reset();
-        status = SystemStatus.idle;
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _cycleDoc = null;
-        //_lastLoadedBatchId = null;
-      });
-    } else {
-      // New active batch - load its cycle
-      //_lastLoadedBatchId = widget.currentBatch!.id;
-      // Use Future.delayed to ensure the widget is fully built
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          _loadExistingCycle();
-        }
-      });
-    }
-  } else if (widget.currentBatch != null && 
-             oldWidget.currentBatch?.isActive == true && 
-             !widget.currentBatch!.isActive) {
-    // Same batch but became inactive
-    _stopTimer();
-    _cycleTimer?.cancel();
-    
-    if (_cycleDoc != null && widget.currentBatch?.id != null) {
-      _completeCycleInFirebase();
-    }
-    
-    setState(() {
-      status = SystemStatus.stopped;
-    });
-  }
-}
+  @override
+  void didUpdateWidget(AeratorCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
+    // Check if batch ID changed (new batch selected or created)
+    final currentBatchId = widget.currentBatch?.id;
+    final oldBatchId = oldWidget.currentBatch?.id;
+
+    if (currentBatchId != oldBatchId) {
+      // Batch changed - reset and reload
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+        // No active batch - clear everything
+        setState(() {
+          settings.reset();
+          status = SystemStatus.idle;
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _cycleDoc = null;
+          //_lastLoadedBatchId = null;
+        });
+      } else {
+        // New active batch - load its cycle
+        //_lastLoadedBatchId = widget.currentBatch!.id;
+        // Use Future.delayed to ensure the widget is fully built
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            _loadExistingCycle();
+          }
+        });
+      }
+    } else if (widget.currentBatch != null &&
+        oldWidget.currentBatch?.isActive == true &&
+        !widget.currentBatch!.isActive) {
+      // Same batch but became inactive
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        _completeCycleInFirebase();
+      }
+
+      setState(() {
+        status = SystemStatus.stopped;
+      });
+    }
+  }
 
   Future<void> _loadExistingCycle() async {
     if (widget.currentBatch == null) return;
@@ -187,6 +187,16 @@ void didUpdateWidget(AeratorCard oldWidget) {
       return;
     }
 
+    if (widget.machineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No machine selected'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -200,7 +210,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      
+      final machineRepository = ref.read(machineRepositoryProvider);
+
       // Start aerator in Firebase
       await cycleRepository.startAerator(
         batchId: widget.currentBatch!.id,
@@ -209,6 +220,9 @@ void didUpdateWidget(AeratorCard oldWidget) {
         cycles: settings.cycles,
         duration: settings.period,
       );
+
+      // Update machine aeratorActive status
+      await machineRepository.updateAeratorActive(widget.machineId!, true);
 
       // Reload the cycle to get the ID
       final cycle = await cycleRepository.getAerator(
@@ -224,6 +238,15 @@ void didUpdateWidget(AeratorCard oldWidget) {
       });
 
       _simulateCycles();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator started'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -236,10 +259,55 @@ void didUpdateWidget(AeratorCard oldWidget) {
     }
   }
 
+  Future<void> _handleStop() async {
+    if (widget.machineId == null) return;
+
+    try {
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      // Update machine aeratorActive status
+      await machineRepository.updateAeratorActive(widget.machineId!, false);
+
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        await _completeCycleInFirebase();
+      }
+
+      setState(() {
+        status = SystemStatus.stopped;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator stopped'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to stop: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _simulateCycles() {
     final periodMinutes = _getPeriodMinutes(settings.period);
-    
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
+
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (
+      timer,
+    ) async {
       if (mounted && status == SystemStatus.running) {
         setState(() {
           _completedCycles++;
@@ -262,12 +330,12 @@ void didUpdateWidget(AeratorCard oldWidget) {
         if (_completedCycles >= settings.cycles) {
           _stopTimer();
           timer.cancel();
-          
+
           // Complete cycle in Firebase
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
-          
+
           setState(() {
             status = SystemStatus.stopped;
           });
@@ -283,9 +351,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      await cycleRepository.completeAerator(
-        batchId: widget.currentBatch!.id,
-      );
+      await cycleRepository.completeAerator(batchId: widget.currentBatch!.id);
     } catch (e) {
       debugPrint('Failed to complete aerator: $e');
     }
@@ -312,8 +378,10 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
   @override
   Widget build(BuildContext context) {
-    final hasActiveBatch = widget.currentBatch != null && widget.currentBatch!.isActive;
-    final batchCompleted = widget.currentBatch != null && !widget.currentBatch!.isActive;
+    final hasActiveBatch =
+        widget.currentBatch != null && widget.currentBatch!.isActive;
+    final batchCompleted =
+        widget.currentBatch != null && !widget.currentBatch!.isActive;
 
     return Container(
       decoration: BoxDecoration(
@@ -355,8 +423,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
                     color: batchCompleted
                         ? const Color(0xFFF3F4F6)
                         : (hasActiveBatch
-                            ? const Color(0xFFD1FAE5)
-                            : const Color(0xFFFEF3C7)),
+                              ? const Color(0xFFD1FAE5)
+                              : const Color(0xFFFEF3C7)),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -369,8 +437,8 @@ void didUpdateWidget(AeratorCard oldWidget) {
                       color: batchCompleted
                           ? const Color(0xFF6B7280)
                           : (hasActiveBatch
-                              ? const Color(0xFF065F46)
-                              : const Color(0xFF92400E)),
+                                ? const Color(0xFF065F46)
+                                : const Color(0xFF92400E)),
                     ),
                   ),
                 ),
@@ -390,7 +458,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
 
   Widget _buildActiveState(bool batchCompleted) {
     final canInteract = !batchCompleted && status == SystemStatus.idle;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -416,10 +484,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
         Row(
           children: [
             Expanded(
-              child: InfoItem(
-                label: 'Uptime',
-                value: _uptime,
-              ),
+              child: InfoItem(label: 'Uptime', value: _uptime),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -482,33 +547,43 @@ void didUpdateWidget(AeratorCard oldWidget) {
         ),
         const SizedBox(height: 24),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: canInteract ? _handleStart : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: batchCompleted
-                  ? Colors.grey.shade400
-                  : const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        if (status == SystemStatus.idle || status == SystemStatus.stopped)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: batchCompleted ? null : _handleStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF14B8A6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+                disabledBackgroundColor: Colors.grey.shade300,
               ),
-              elevation: 0,
-              disabledBackgroundColor: Colors.grey.shade300,
             ),
-            child: Text(
-              batchCompleted
-                  ? 'Completed'
-                  : (status == SystemStatus.idle ? 'Start' : status.displayName),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+          )
+        else if (status == SystemStatus.running)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _handleStop,
+              icon: const Icon(Icons.stop),
+              label: const Text('Stop'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -531,10 +606,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
           value: value,
           hint: Text(
             label,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
           isDense: true,
           isExpanded: true,
@@ -548,10 +620,7 @@ void didUpdateWidget(AeratorCard oldWidget) {
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF1a1a1a),
-                ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF1a1a1a)),
               ),
             );
           }).toList(),

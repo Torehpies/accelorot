@@ -5,10 +5,12 @@ import '../../../../data/models/batch_model.dart';
 
 class SwipeableCycleCards extends StatefulWidget {
   final BatchModel? currentBatch;
+  final String? machineId;
 
   const SwipeableCycleCards({
     super.key,
     required this.currentBatch,
+    this.machineId,
   });
 
   @override
@@ -16,8 +18,6 @@ class SwipeableCycleCards extends StatefulWidget {
 }
 
 class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
-
-
   int _currentPage = 0;
 
   @override
@@ -49,14 +49,20 @@ class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
                   width: cardWidth,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 12),
-                    child: DrumControlCard(currentBatch: widget.currentBatch),
+                    child: DrumControlCard(
+                      currentBatch: widget.currentBatch,
+                      machineId: widget.machineId,
+                    ),
                   ),
                 ),
                 SizedBox(
                   width: cardWidth,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 12),
-                    child: AeratorCard(currentBatch: widget.currentBatch),
+                    child: AeratorCard(
+                      currentBatch: widget.currentBatch,
+                      machineId: widget.machineId,
+                    ),
                   ),
                 ),
               ],
