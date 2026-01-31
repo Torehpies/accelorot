@@ -287,9 +287,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                                 minHeight: 300,
                                 maxHeight: screenHeight * 0.6, // Max 60% of screen height
                               ),
-                              child: RecentActivitiesTable(
-                                activityProvider: allActivitiesProvider,
-                              ),
+                              child: const RecentActivitiesTable(),
                             ),
                           ],
                         ),

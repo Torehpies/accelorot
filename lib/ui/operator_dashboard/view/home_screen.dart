@@ -286,11 +286,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const SizedBox(height: 16),
 
                   // Activity logs
-                  SizedBox(
+                  const SizedBox(
                     height: 400,
-                    child: RecentActivitiesTable(
-                      activityProvider: allActivitiesProvider,
-                    ),
+                    child: RecentActivitiesTable(),
                   ),
                 ],
               ),
