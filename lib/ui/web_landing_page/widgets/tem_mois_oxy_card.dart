@@ -8,8 +8,8 @@ class TemMoisOxyCard extends StatefulWidget {
   final IconData icon;
   final String value;
   final String label;
-  final String? hoverInfo; // Additional info shown on hover
-  final int position; // 0: top-left, 1: top-right, 2: bottom-left, 3: bottom-right
+  final String? hoverInfo;
+  final int position;
 
   const TemMoisOxyCard({
     super.key,
@@ -31,6 +31,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _glowAnimation;
   bool _isHovered = false;
+  bool _isTapped = false; // For mobile touch feedback
 
   @override
   void initState() {
@@ -86,159 +87,183 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
     super.dispose();
   }
 
+  void _handleTap() {
+    setState(() {
+      _isTapped = !_isTapped;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: (_) => setState(() => _isHovered = true),
-          onExit: (_) => setState(() => _isHovered = false),
-          child: AnimatedBuilder(
-            animation: Listenable.merge([
-              _glowAnimation,
-            ]),
-            builder: (context, child) {
-              // Zoom scale: 1.0 normal, 1.02 on hover (reduced for smoother effect)
-              final scale = _isHovered ? 1.02 : 1.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine if this is a mobile/small screen
+        final isMobile = constraints.maxWidth < 200;
+        final isActive = _isHovered || _isTapped;
 
-              // Glow logic
-              final glowIntensity = _isHovered
-                  ? 0.4 + (_glowAnimation.value * 0.3)
-                  : 0.0 + (_glowAnimation.value * 0.1);
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) => setState(() => _isHovered = true),
+              onExit: (_) => setState(() => _isHovered = false),
+              child: GestureDetector(
+                onTap: widget.hoverInfo != null ? _handleTap : null,
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([_glowAnimation]),
+                  builder: (context, child) {
+                    // Zoom scale: 1.0 normal, 1.02 on hover/tap
+                    final scale = isActive ? 1.02 : 1.0;
 
-              final shadowOpacity = glowIntensity * 0.15;
-              final shadowBlur = 8.0 + (glowIntensity * 8.0);
+                    // Glow logic
+                    final glowIntensity = isActive
+                        ? 0.4 + (_glowAnimation.value * 0.3)
+                        : 0.0 + (_glowAnimation.value * 0.1);
 
-              return AnimatedScale(
-                scale: scale,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOutCubic,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFFDEF9F4).withValues(
-                          alpha: _isHovered ? 1.0 : 0.9,
-                        ),
-                        const Color(0xFFC0F0E0).withValues(
-                          alpha: _isHovered ? 0.8 : 0.6,
-                        ),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Color.lerp(
-                        const Color(0xFFB2DFD3),
-                        const Color(0xFF10B981),
-                        glowIntensity * 0.3,
-                      )!,
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF10B981)
-                            .withValues(alpha: shadowOpacity),
-                        blurRadius: shadowBlur,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedContainer(
+                    final shadowOpacity = glowIntensity * 0.15;
+                    final shadowBlur = 8.0 + (glowIntensity * 8.0);
+
+                    // Responsive sizing
+                    final iconSize = isMobile ? 24.0 : 28.0;
+                    final valueSize = isMobile ? 22.0 : 28.0;
+                    final labelSize = isMobile ? 11.0 : 13.0;
+                    final hoverInfoSize = isMobile ? 10.0 : 12.0;
+                    final padding = isMobile ? AppSpacing.lg : AppSpacing.xl;
+
+                    return AnimatedScale(
+                      scale: scale,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutCubic,
+                      child: AnimatedContainer(
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeOutCubic,
-                        width: 44,
-                        height: 44,
+                        padding: EdgeInsets.all(padding),
                         decoration: BoxDecoration(
-                          color: _isHovered
-                              ? const Color(0xFF10B981).withValues(alpha: 0.08)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFDEF9F4).withValues(
+                                alpha: isActive ? 1.0 : 0.9,
+                              ),
+                              const Color(0xFFC0F0E0).withValues(
+                                alpha: isActive ? 0.8 : 0.6,
+                              ),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
+                          border: Border.all(
+                            color: Color.lerp(
+                              const Color(0xFFB2DFD3),
+                              const Color(0xFF10B981),
+                              glowIntensity * 0.3,
+                            )!,
+                            width: 1,
+                          ),
                           boxShadow: [
-                            if (_isHovered)
-                              BoxShadow(
-                                color: const Color(0xFF10B981).withValues(
-                                  alpha: glowIntensity * 0.15,
+                            BoxShadow(
+                              color: const Color(0xFF10B981)
+                                  .withValues(alpha: shadowOpacity),
+                              blurRadius: shadowBlur,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 4),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutCubic,
+                              width: isMobile ? 36 : 44,
+                              height: isMobile ? 36 : 44,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? const Color(0xFF10B981).withValues(alpha: 0.08)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
+                                boxShadow: [
+                                  if (isActive)
+                                    BoxShadow(
+                                      color: const Color(0xFF10B981).withValues(
+                                        alpha: glowIntensity * 0.15,
+                                      ),
+                                      blurRadius: shadowBlur * 0.6,
+                                      spreadRadius: 0,
+                                    ),
+                                ],
+                              ),
+                              child: Icon(
+                                widget.icon,
+                                size: iconSize,
+                                color: const Color(0xFF10B981),
+                              ),
+                            ),
+                            SizedBox(height: isMobile ? AppSpacing.sm : AppSpacing.md),
+                            Text(
+                              widget.value,
+                              style: WebTextStyles.h2.copyWith(
+                                color: const Color(0xFF111827),
+                                fontSize: valueSize,
+                                fontWeight: FontWeight.bold,
+                                height: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              widget.label,
+                              style: WebTextStyles.caption.copyWith(
+                                color: const Color(0xFF6B7280),
+                                fontSize: labelSize,
+                              ),
+                            ),
+                            // Show additional info on hover or tap
+                            if (widget.hoverInfo != null)
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                  opacity: isActive ? 1.0 : 0.0,
+                                  child: isActive
+                                      ? Padding(
+                                          padding: EdgeInsets.only(
+                                            top: isMobile ? 8 : 12,
+                                          ),
+                                          child: Text(
+                                            widget.hoverInfo!,
+                                            style: WebTextStyles.caption.copyWith(
+                                              color: const Color(0xFF6B7280),
+                                              fontSize: hoverInfoSize,
+                                              height: 1.4,
+                                            ),
+                                          ),
+                                        )
+                                      : const SizedBox.shrink(),
                                 ),
-                                blurRadius: shadowBlur * 0.6,
-                                spreadRadius: 0,
                               ),
                           ],
                         ),
-                        child: Icon(
-                          widget.icon,
-                          size: 28,
-                          color: const Color(0xFF10B981),
-                        ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        widget.value,
-                        style: WebTextStyles.h2.copyWith(
-                          color: const Color(0xFF111827),
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          height: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.label,
-                        style: WebTextStyles.caption.copyWith(
-                          color: const Color(0xFF6B7280),
-                          fontSize: 13,
-                        ),
-                      ),
-                      // Show additional info on hover
-                      if (widget.hoverInfo != null)
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeOutCubic,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeInOut,
-                            opacity: _isHovered ? 1.0 : 0.0,
-                            child: _isHovered
-                                ? Padding(
-                                    padding: const EdgeInsets.only(top: 12),
-                                    child: Text(
-                                      widget.hoverInfo!,
-                                      style: WebTextStyles.caption.copyWith(
-                                        color: const Color(0xFF6B7280),
-                                        fontSize: 12,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -30,42 +30,32 @@ class AppHeader extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       height: 88,
       decoration: BoxDecoration(
-        gradient: isScrolled
-            ? null
-            : const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE0F2FE),
-                  Color(0xFFCCFBF1),
-                ],
-              ),
-        color: isScrolled ? Colors.white : null,
-        border: isScrolled
-            ? const Border(
-                bottom: BorderSide(
-                  color: Color(0xFFE5E7EB),
-                  width: 1,
-                ),
-              )
-            : null,
-        boxShadow: isScrolled
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : [],
-      ),
+  color: isScrolled ? Colors.white : const  Color(0xFFE0F2FE),// or any solid color you prefer for unscrolled state
+  border: isScrolled
+      ? const Border(
+          bottom: BorderSide(
+            color: Color(0xFFE5E7EB),
+            width: 1,
+          ),
+        )
+      : null,
+  boxShadow: isScrolled
+      ? [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            spreadRadius: 0,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
+          ),
+        ]
+      : [],
+),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
         child: Row(
@@ -93,7 +83,7 @@ class AppHeader extends StatelessWidget {
 
             const Spacer(),
 
-            /// Breadcrumb Navigation (Updated style)
+            /// Breadcrumb Navigation — LARGER TEXT & ICONS
             Row(
               children: [
                 _BreadcrumbItem(
@@ -102,31 +92,38 @@ class AppHeader extends StatelessWidget {
                   active: activeSection,
                   onTap: onBreadcrumbTap,
                 ),
-                _Chevron(),
+                _Chevron(size: 20),
                 _BreadcrumbItem(
                   label: 'Features',
                   id: 'features',
                   active: activeSection,
                   onTap: onBreadcrumbTap,
                 ),
-                _Chevron(),
+                _Chevron(size: 20),
                 _BreadcrumbItem(
                   label: 'How It Works',
                   id: 'how-it-works',
                   active: activeSection,
                   onTap: onBreadcrumbTap,
                 ),
-                _Chevron(),
+                _Chevron(size: 20),
                 _BreadcrumbItem(
                   label: 'Impact',
                   id: 'impact',
                   active: activeSection,
                   onTap: onBreadcrumbTap,
                 ),
-                _Chevron(),
+                _Chevron(size: 20),
                 _BreadcrumbItem(
-                  label: 'Join Us',
-                  id: 'banner',
+                  label: 'Downloads',
+                  id: 'download',
+                  active: activeSection,
+                  onTap: onBreadcrumbTap,
+                ),
+                _Chevron(size: 20),
+                _BreadcrumbItem(
+                  label: 'FAQs',
+                  id: 'faq',
                   active: activeSection,
                   onTap: onBreadcrumbTap,
                 ),
@@ -159,7 +156,6 @@ class AppHeader extends StatelessWidget {
   }
 }
 
-
 class _BreadcrumbItem extends StatelessWidget {
   final String label;
   final String id;
@@ -184,11 +180,11 @@ class _BreadcrumbItem extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 16, 
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
             color: isActive
-                ? WebColors.success // green for active
-                : const Color(0xFF6B7280), // gray for inactive
+                ? WebColors.success
+                : const Color(0xFF6B7280),
           ),
         ),
       ),
@@ -196,15 +192,18 @@ class _BreadcrumbItem extends StatelessWidget {
   }
 }
 
-
 class _Chevron extends StatelessWidget {
+  final double size;
+
+  const _Chevron({this.size = 16});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Icon(
         Icons.chevron_right,
-        size: 16,
+        size: size, 
         color: const Color(0xFF9CA3AF),
       ),
     );

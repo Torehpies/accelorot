@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/app_header.dart';
 
 class AppSpacing {
   static const double xl = 24.0;
@@ -15,112 +14,401 @@ class DownloadApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFE0F2FE),
-      body: Column(
-        children: [
-          // App Header
-          AppHeader(
-            onLogin: () => context.go('/login'),
-            onGetStarted: () => context.go('/signup'),
-            onDownload: () {},
-            onBreadcrumbTap: (section) {
-              context.go('/');
-            },
-            activeSection: 'download',
-            isScrolled: false,
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 🔙 Back to Home Link (top-left)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.lg,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: IconButton(
+                      onPressed: () => context.go('/'),
+                      icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Back to Home',
+                      splashRadius: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Back to Home',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-          // Main content — REMOVED outer Center
-          Expanded(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xxxl,
-                  vertical: AppSpacing.lg,
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isMobile = constraints.maxWidth < 900;
-                    return Flex(
-                      direction: isMobile ? Axis.vertical : Axis.horizontal,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // ✅ LEFT SECTION: vertically centered, aligned to left
-                        Expanded(
-                          flex: 6,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: IntrinsicHeight(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+            // Main content
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isMobile = constraints.maxWidth < 900;
+                  final maxWidth = isMobile ? double.infinity : 1200.0;
+                  final horizontalPadding = isMobile ? AppSpacing.lg : AppSpacing.xxxl;
+
+                  Widget content = Column(
+                    children: [
+                      // Left-side content (always appears first in DOM)
+                      Container(
+                        constraints: BoxConstraints(maxWidth: maxWidth),
+                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                style: TextStyle(
+                                  fontFamily: 'dm-sans',
+                                  fontSize: isMobile ? 32 : 44,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.2,
+                                  color: Colors.black,
+                                ),
                                 children: [
-                                  // Title
-                                  RichText(
-                                    text: const TextSpan(
-                                      style: TextStyle(
-                                        fontFamily: 'dm-sans',
-                                        fontSize: 44,
-                                        fontWeight: FontWeight.w800,
-                                        height: 1.2,
-                                        color: Colors.black,
-                                      ),
-                                      children: [
-                                        TextSpan(text: 'Download the\n'),
-                                        TextSpan(
-                                          text: 'Accel-O-Rot App',
-                                          style: TextStyle(color: Color(0xFF22C55E)),
-                                        ),
-                                      ],
-                                    ),
+                                  TextSpan(text: 'Download the\n'),
+                                  TextSpan(
+                                    text: 'Accel-O-Rot App',
+                                    style: TextStyle(color: Color(0xFF22C55E)),
                                   ),
-                                  const SizedBox(height: AppSpacing.lg),
-                                  const Text(
-                                    'Get our AI-powered mobile app to monitor your composting system, '
-                                    'receive real-time insights, and manage your organic waste efficiently.\n\n'
-                                    'Available for Android.',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      height: 1.6,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.xxxl), 
-                                  SizedBox(
-                                    width: 260,
-                                    child: ElevatedButton.icon(
-                                      onPressed: () {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Downloading Accel-O-Rot v1.0.0.apk')),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.download),
-                                      label: const Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 14),
-                                        child: Text('Download APK', textAlign: TextAlign.center),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF22C55E), 
-                                        foregroundColor: Colors.white,            
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.xl),
                                 ],
                               ),
                             ),
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(
+                              'Get our AI-powered mobile app to monitor your composting system, '
+                              'receive real-time insights, and manage your organic waste efficiently.\n\n'
+                              'Available for Android.',
+                              style: TextStyle(
+                                fontSize: isMobile ? 14 : 16,
+                                height: 1.6,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxxl),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 260),
+                              child: SizedBox(
+                                width: isMobile
+                                    ? MediaQuery.of(context).size.width * 0.8
+                                    : 260,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.download, size: 18),
+                                  label: const Text('Download Accel-O-Rot v1.0.0.apk'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF22C55E),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (isMobile) const SizedBox(height: AppSpacing.xxxl),
+                          ],
+                        ),
+                      ),
+                      
+                      // Right-side content (appears after left content in DOM)
+                      if (isMobile)
+                        _PhonePreview()
+                      else
+                        Container(
+                          constraints: BoxConstraints(maxWidth: maxWidth),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: horizontalPadding,
+                            vertical: AppSpacing.lg,
+                          ),
+                          child: Center(child: _PhonePreview()),
+                        ),
+                    ],
+                  );
+
+                  // Apply scrolling only on mobile
+                  if (isMobile) {
+                    content = SingleChildScrollView(
+                      child: content,
+                    );
+                  }
+
+                  return content;
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Phone preview and other widgets remain unchanged
+class _PhonePreview extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 320,
+      height: 650,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(40),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 50,
+            offset: const Offset(0, 20),
+            color: Colors.black.withOpacity(0.15),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text('9:41', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Row(
+                children: [
+                  Icon(Icons.signal_cellular_alt, size: 16),
+                  SizedBox(width: 4),
+                  Icon(Icons.wifi, size: 16),
+                  SizedBox(width: 4),
+                  Icon(Icons.battery_full, size: 16),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ScrollConfiguration(
+              behavior: ScrollBehavior().copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Total Operators',
+                            value: '15',
+                            percentage: '13%',
+                            icon: Icons.person_outline,
+                            color: Color(0xFF22C55E),
                           ),
                         ),
-                        if (!isMobile) const SizedBox(width: AppSpacing.xxxl),
-                        if (isMobile) const SizedBox(height: AppSpacing.xxxl),
-                        Expanded(flex: 4, child: _PhonePreview()),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _StatCard(
+                            title: 'Total Machines',
+                            value: '12',
+                            percentage: '8%',
+                            icon: Icons.settings_outlined,
+                            color: Color(0xFF3B82F6),
+                          ),
+                        ),
                       ],
-                    );
-                  },
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Analytics',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: const Text(
+                                    'Activity',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'Reports',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Activity Overview',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF22C55E),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    'Per Day',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 90,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _ChartBar(height: 0, label: 'Thu'),
+                                _ChartBar(height: 0, label: 'Fri'),
+                                _ChartBar(height: 0, label: 'Sat'),
+                                _ChartBar(height: 70, label: 'Sun'),
+                                _ChartBar(height: 0, label: 'Mon'),
+                                _ChartBar(height: 0, label: 'Tue'),
+                                _ChartBar(height: 0, label: 'Wed'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Recent Activities',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              Icon(Icons.refresh, size: 16, color: Colors.grey.shade600),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          _ActivityItem(
+                            icon: Icons.air,
+                            iconColor: Color(0xFF3B82F6),
+                            title: 'Aerator',
+                            subtitle: 'machine01',
+                            category: 'Aerator',
+                            status: 'COMPLETE',
+                          ),
+                          const SizedBox(height: 10),
+                          _ActivityItem(
+                            icon: Icons.settings_input_component,
+                            iconColor: Color(0xFF3B82F6),
+                            title: 'Drum Controller',
+                            subtitle: 'machine01',
+                            category: 'Drum',
+                            status: 'COMPLETE',
+                          ),
+                          const SizedBox(height: 10),
+                          _ActivityItem(
+                            icon: Icons.settings_input_component,
+                            iconColor: Color(0xFF3B82F6),
+                            title: 'Drum Controller',
+                            subtitle: 'machine01',
+                            category: 'Drum',
+                            status: 'COMPLETE',
+                          ),
+                          const SizedBox(height: 10),
+                          _ActivityItem(
+                            icon: Icons.air,
+                            iconColor: Color(0xFF3B82F6),
+                            title: 'Aerator',
+                            subtitle: 'machine01',
+                            category: 'Drum',
+                            status: 'COMPLETE',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -131,259 +419,7 @@ class DownloadApp extends StatelessWidget {
   }
 }
 
-class _PhonePreview extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 320,
-        height: 650,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(40),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 50,
-              offset: const Offset(0, 20),
-              color: Colors.black.withValues(alpha: 0.15),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text('9:41', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                Row(
-                  children: [
-                    Icon(Icons.signal_cellular_alt, size: 16),
-                    SizedBox(width: 4),
-                    Icon(Icons.wifi, size: 16),
-                    SizedBox(width: 4),
-                    Icon(Icons.battery_full, size: 16),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ScrollConfiguration(
-                behavior: ScrollBehavior().copyWith(scrollbars: false),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _StatCard(
-                              title: 'Total Operators',
-                              value: '15',
-                              percentage: '13%',
-                              icon: Icons.person_outline,
-                              color: Color(0xFF22C55E),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _StatCard(
-                              title: 'Total Machines',
-                              value: '12',
-                              percentage: '8%',
-                              icon: Icons.settings_outlined,
-                              color: Color(0xFF3B82F6),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Analytics',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.grey.shade300),
-                                    ),
-                                    child: const Text(
-                                      'Activity',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      'Reports',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Activity Overview',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF22C55E),
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Text(
-                                      'Per Day',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              height: 90,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _ChartBar(height: 0, label: 'Thu'),
-                                  _ChartBar(height: 0, label: 'Fri'),
-                                  _ChartBar(height: 0, label: 'Sat'),
-                                  _ChartBar(height: 70, label: 'Sun'),
-                                  _ChartBar(height: 0, label: 'Mon'),
-                                  _ChartBar(height: 0, label: 'Tue'),
-                                  _ChartBar(height: 0, label: 'Wed'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Recent Activities',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Icon(Icons.refresh, size: 16, color: Colors.grey.shade600),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            _ActivityItem(
-                              icon: Icons.air,
-                              iconColor: Color(0xFF3B82F6),
-                              title: 'Aerator',
-                              subtitle: 'machine01',
-                              category: 'Aerator',
-                              status: 'COMPLETE',
-                            ),
-                            const SizedBox(height: 10),
-                            _ActivityItem(
-                              icon: Icons.settings_input_component,
-                              iconColor: Color(0xFF3B82F6),
-                              title: 'Drum Controller',
-                              subtitle: 'machine01',
-                              category: 'Drum',
-                              status: 'COMPLETE',
-                            ),
-                            const SizedBox(height: 10),
-                            _ActivityItem(
-                              icon: Icons.settings_input_component,
-                              iconColor: Color(0xFF3B82F6),
-                              title: 'Drum Controller',
-                              subtitle: 'machine01',
-                              category: 'Drum',
-                              status: 'COMPLETE',
-                            ),
-                            const SizedBox(height: 10),
-                            _ActivityItem(
-                              icon: Icons.air,
-                              iconColor: Color(0xFF3B82F6),
-                              title: 'Aerator',
-                              subtitle: 'machine01',
-                              category: 'Drum',
-                              status: 'COMPLETE',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
+// Other helper widgets remain unchanged...
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;

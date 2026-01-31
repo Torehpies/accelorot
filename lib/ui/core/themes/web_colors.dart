@@ -35,7 +35,6 @@ class WebColors {
     0xFFCBD5E1,
   ); // Table borders and row dividers (darker, sharper)
   static const featurecard = Color(0xFF49d47f);
-
   static const cardBorders2 = Color(0xFFCED9DF); // Secondary borders color
 
   // Text Colors

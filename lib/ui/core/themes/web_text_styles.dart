@@ -197,4 +197,39 @@ class WebTextStyles {
     color: WebColors.textSecondary,
     height: 1.5,
   );
+
+  // FAQ section title (e.g., "Frequently Asked Questions")
+  static const faqSectionTitle = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: WebColors.textHeading,
+    height: 1.3,
+  );
+
+  // FAQ section subtitle (description under title)
+  static const faqSectionSubtitle = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: WebColors.textSecondary,
+    height: 1.5,
+  );
+
+  // FAQ question text (in _FaqCard)
+  static const faqQuestion = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 16,
+    fontWeight: FontWeight.w500, // normal weight when collapsed, bold when expanded (handled in widget)
+    color: WebColors.textHeading,
+  );
+
+  // FAQ answer text
+  static const faqAnswer = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    color: WebColors.textPrimary,
+    height: 1.5,
+  );
 }

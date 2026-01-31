@@ -17,12 +17,43 @@ class ContactSection extends StatelessWidget {
     this.onNavigateToSection,
   });
 
-  // Helper to safely launch URLs or email
   Future<void> _launchUrl(String urlString) async {
     final uri = Uri.parse(urlString.trim());
     if (!await launchUrl(uri)) {
-      // In production, you might show a snackbar instead of throwing
       debugPrint('Could not launch $urlString');
+    }
+  }
+
+
+  Future<void> _launchGmailCompose() async {
+    final email = 'accelorot.management@gmail.com';
+    final subject = 'Inquiry from Accel-O-Rot Website';
+
+    final gmailUri = Uri.parse(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject'
+    );
+
+    if (!await launchUrl(gmailUri)) {
+      // Fallback to standard mailto
+      final mailtoUri = Uri(
+        scheme: 'mailto',
+        path: email,
+        queryParameters: {'subject': subject},
+      );
+      if (!await launchUrl(mailtoUri)) {
+        debugPrint('Could not launch email client');
+      }
+    }
+  }
+
+  String _getNavigationId(String linkText) {
+    switch (linkText) {
+      case 'Features': return 'features';
+      case 'How It Works': return 'how-it-works';
+      case 'Impact': return 'impact';
+      case 'Download': return 'download';
+      case 'FAQ': return 'faq';
+      default: return linkText.toLowerCase().replaceAll(' ', '-');
     }
   }
 
@@ -37,161 +68,213 @@ class ContactSection extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
-            color: const Color(0xFF25282B), // Dark background
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            color: const Color(0xFF25282B),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 768;
+
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SvgPicture.asset(
-                                'assets/images/Accel-O-Rot Logo.svg',
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.contain,
-                                semanticsLabel: 'Accel-O-Rot Logo',
+                              Row(
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/Accel-O-Rot Logo.svg',
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.contain,
+                                    semanticsLabel: 'Accel-O-Rot Logo',
+                                  ),
+                                  const SizedBox(width: AppSpacing.md),
+                                  Text(
+                                    'Accel-O-Rot',
+                                    style: h2Style.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 24,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: AppSpacing.md),
+                              const SizedBox(height: AppSpacing.md),
                               Text(
-                                'Accel-O-Rot',
-                                style: h2Style.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 24,
+                                'Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting in the Philippines.',
+                                style: WebTextStyles.caption.copyWith(
+                                  color: const Color(0xFF9CA3AF),
+                                  fontSize: 14,
+                                  height: 1.5,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            'Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting in the Philippines.',
-                            style: WebTextStyles.caption.copyWith(
-                              color: const Color(0xFF9CA3AF),
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Row(
-                            children: [
-                              _SocialIcon(
-                                iconData: Icons.facebook_outlined,
-                                onPressed: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
-                                backgroundColor: const Color(0xFF1877F2), // Facebook blue
+                              const SizedBox(height: AppSpacing.lg),
+                              // ✅ SOCIAL ICONS ROW (Facebook + X + Instagram via SVG)
+                              Row(
+                                children: [
+                                  _SocialIcon(
+                                    iconData: Icons.facebook_outlined,
+                                    onPressed: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                    backgroundColor: const Color(0xFF1877F2),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  _SocialIcon(
+                                    svgAsset: 'assets/icons/X_logo.svg',
+                                    onPressed: () => _launchUrl('https://twitter.com/your_x_handle'), // ← REPLACE
+                                    backgroundColor: const Color(0xFF000000),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  _SocialIcon(
+                                    svgAsset: 'assets/icons/Instagram_logo.svg',
+                                    onPressed: () => _launchUrl('https://instagram.com/your_instagram_handle'), // ← REPLACE
+                                    backgroundColor: const Color(0xFFE1306C),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: AppSpacing.md),
-                              _SocialIcon(iconData: Icons.public, onPressed: null),
-                              const SizedBox(width: AppSpacing.md),
-                              _SocialIcon(iconData: Icons.camera_alt_outlined, onPressed: null),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xxxl),
-                    _FooterColumn(
-                      title: 'Quick Links',
-                      links: const [
-                        'Features',
-                        'How It Works',
-                        'Impact',
-                        'Join Us',
+                        ),
                       ],
-                      onLinkTap: (link) {
-                        onNavigateToSection?.call(link);
-                      },
                     ),
-                    const SizedBox(width: AppSpacing.xxxl),
-                    _FooterColumn(
-                      title: 'Resources',
-                      links: const [
-                        'FAQ',
-                        'RA 9003 Compliance',
-                        
-                      ],
-                      onLinkTap: (link) {
-                        // Handle resource links if needed
-                      },
-                    ),
-                    const SizedBox(width: AppSpacing.xxxl),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
+
+                    const SizedBox(height: AppSpacing.xxxl),
+
+                    if (isMobile)
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Contact Us',
-                            style: WebTextStyles.h3.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 18,
+                          _FooterColumn(
+                            title: 'Quick Links',
+                            links: const [
+                              'Features',
+                              'How It Works',
+                              'Impact',
+                              'Download',
+                              'FAQ',
+                            ],
+                            onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                          ),
+                          const SizedBox(height: AppSpacing.xxxl),
+                          _FooterColumn(
+                            title: 'Legal Policies',
+                            links: const [
+                              'Privacy Policy',
+                              'Terms of Service',
+                            ],
+                            onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                          ),
+                          const SizedBox(height: AppSpacing.xxxl),
+                          _FooterColumn(
+                            title: 'Contact Us',
+                            links: [],
+                            onLinkTap: null,
+                            customContent: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _ContactRow(
+                                  icon: Icons.location_on_outlined,
+                                  text: 'Metro Manila, Caloocan City, Philippines',
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                _ContactRow(
+                                  icon: Icons.email_outlined,
+                                  text: 'accelorot.management@gmail.com',
+                                  onTap: _launchGmailCompose,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                _ContactRow(
+                                  icon: Icons.phone_outlined,
+                                  text: '+63 000 000 0000',
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          _ContactRow(
-                            icon: Icons.location_on_outlined,
-                            text: 'Metro Manila, Caloocan City, Philippines',
+                        ],
+                      )
+                    else
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: AppSpacing.xxxl),
+                              child: _FooterColumn(
+                                title: 'Quick Links',
+                                links: const [
+                                  'Features',
+                                  'How It Works',
+                                  'Impact',
+                                  'Download',
+                                  'FAQ',
+                                ],
+                                onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          _ContactRow(
-                            icon: Icons.email_outlined,
-                            text: 'accelorot.management@gmail.com',
-                            onTap: () => _launchUrl('mailto:accelorot.management@gmail.com'),
+                          Expanded(
+                            flex: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
+                              child: _FooterColumn(
+                                title: 'Legal Policies',
+                                links: const [
+                                  'Privacy Policy',
+                                  'Terms of Service',
+                                ],
+                                onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          _ContactRow(
-                            icon: Icons.phone_outlined,
-                            text: '+63 000 000 0000',
+                          Expanded(
+                            flex: 1,
+                            child: _FooterColumn(
+                              title: 'Contact Us',
+                              links: [],
+                              onLinkTap: null,
+                              customContent: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _ContactRow(
+                                    icon: Icons.location_on_outlined,
+                                    text: 'Metro Manila, Caloocan City, Philippines',
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  _ContactRow(
+                                    icon: Icons.email_outlined,
+                                    text: 'accelorot.management@gmail.com',
+                                    onTap: _launchGmailCompose,
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  _ContactRow(
+                                    icon: Icons.phone_outlined,
+                                    text: '+63 000 000 0000',
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                // Divider
-                Container(height: 1, color: const Color(0xFF374151)),
-                const SizedBox(height: AppSpacing.md),
-                // Copyright & Legal
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+
+                    const SizedBox(height: AppSpacing.xxxl),
+                    Container(height: 1, color: const Color(0xFF374151)),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
-                      '© 2026 Accel-O-Rot. All rights reserved. Made with 🌱 in the Philippines.',
+                      '© 2026 Accel-O-Rot. All rights reserved.',
                       style: WebTextStyles.caption.copyWith(
                         color: const Color(0xFF9CA3AF),
                         fontSize: 13,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          'Privacy Policy',
-                          style: WebTextStyles.caption.copyWith(
-                            color: const Color(0xFF9CA3AF),
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.lg),
-                        Text(
-                          'Terms of Service',
-                          style: WebTextStyles.caption.copyWith(
-                            color: const Color(0xFF9CA3AF),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
@@ -200,29 +283,96 @@ class ContactSection extends StatelessWidget {
   }
 }
 
-class _SocialIcon extends StatelessWidget {
-  final IconData iconData;
-  final VoidCallback? onPressed;
-  final Color? backgroundColor;
+// --- Helper Widgets ---
+class _FooterColumn extends StatelessWidget {
+  final String title;
+  final List<String> links;
+  final Function(String)? onLinkTap;
+  final Widget? customContent;
 
-  const _SocialIcon({
-    required this.iconData,
-    this.onPressed,
-    this.backgroundColor,
+  const _FooterColumn({
+    required this.title,
+    required this.links,
+    this.onLinkTap,
+    this.customContent,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: WebTextStyles.h3.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        if (customContent != null)
+          customContent!
+        else
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < links.length; i++)
+                Column(
+                  children: [
+                    _FooterLink(
+                      text: links[i],
+                      onTap: onLinkTap != null ? () => onLinkTap!(links[i]) : null,
+                    ),
+                    if (i < links.length - 1) 
+                      const SizedBox(height: AppSpacing.md),
+                  ],
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _SocialIcon extends StatelessWidget {
+  final String? svgAsset;
+  final IconData? iconData;
+  final VoidCallback? onPressed;
+  final Color backgroundColor;
+
+  const _SocialIcon({
+    this.svgAsset,
+    this.iconData,
+    this.onPressed,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget iconChild;
+
+    if (svgAsset != null) {
+      iconChild = SvgPicture.asset(
+        svgAsset!,
+        color: Colors.white,
+        width: 20,
+        height: 20,
+      );
+    } else if (iconData != null) {
+      iconChild = Icon(iconData, color: Colors.white, size: 20);
+    } else {
+      iconChild = const Icon(Icons.link, color: Colors.white, size: 20);
+    }
+
     final child = Container(
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: backgroundColor ?? const Color(0xFF374151),
+        color: backgroundColor,
         shape: BoxShape.circle,
       ),
-      child: Center(
-        child: Icon(iconData, color: Colors.white, size: 20),
-      ),
+      child: Center(child: iconChild),
     );
 
     if (onPressed != null) {
@@ -236,49 +386,6 @@ class _SocialIcon extends StatelessWidget {
     }
 
     return child;
-  }
-}
-
-class _FooterColumn extends StatelessWidget {
-  final String title;
-  final List<String> links;
-  final Function(String)? onLinkTap;
-
-  const _FooterColumn({
-    required this.title,
-    required this.links,
-    this.onLinkTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 1,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: WebTextStyles.h3.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          for (final link in links)
-            Column(
-              children: [
-                _FooterLink(
-                  text: link,
-                  onTap: onLinkTap != null ? () => onLinkTap!(link) : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-            ),
-        ],
-      ),
-    );
   }
 }
 

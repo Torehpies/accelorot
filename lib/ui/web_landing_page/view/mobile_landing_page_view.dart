@@ -7,8 +7,9 @@ import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/impact_section.dart';
-import '../widgets/banner_section.dart';
+import '../widgets/download_section.dart';
 import '../widgets/contact_section.dart';
+import '../widgets/faqs_section.dart'; 
 import '../view_models/landing_page_view_model.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
@@ -30,6 +31,7 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
   final _howItWorksKey = GlobalKey();
   final _impactKey = GlobalKey();
   final _bannerKey = GlobalKey();
+  final _faqKey = GlobalKey(); 
   final _contactKey = GlobalKey();
 
   String _activeSection = 'home';
@@ -63,6 +65,7 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
       'how-it-works': _howItWorksKey,
       'impact': _impactKey,
       'banner': _bannerKey,
+      'faq': _faqKey,
       'contact': _contactKey,
     };
 
@@ -115,6 +118,9 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
         break;
       case 'banner':
         _scrollTo(_bannerKey);
+        break;
+        case 'faq':
+        _scrollTo(_faqKey);
         break;
       case 'contact':
         _scrollTo(_contactKey);
@@ -194,12 +200,15 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
                 // BANNER SECTION
                 Container(
                   key: _bannerKey,
-                  child: BannerSection(
-                    onGetStarted: _handleGetStarted,
+                  child: DownloadSection(
                     onDownload: _handleDownload,
                   ),
                 ),
-
+                // FAQ SECTION 
+                Container(
+                  key: _faqKey,
+                  child: const FaqSection(),
+                ),
                 // CONTACT SECTION
                 Container(
                   key: _contactKey,
@@ -385,7 +394,13 @@ class _MobileHeader extends StatelessWidget {
                     active: activeSection,
                     onTap: onBreadcrumbTap,
                   ),
-
+                   _MenuItem( 
+                    label: 'FAQ',
+                    id: 'faq',
+                    active: activeSection,
+                    onTap: onBreadcrumbTap,
+                  ),
+                  const SizedBox(height: 4),
                   const SizedBox(height: 32),
 
                   // Action Buttons

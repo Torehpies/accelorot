@@ -1,5 +1,4 @@
 // lib/ui/web_landing_page/web_landing_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/app_header.dart';
@@ -7,8 +6,9 @@ import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/impact_section.dart';
-import '../widgets/banner_section.dart';
+import '../widgets/download_section.dart';
 import '../widgets/contact_section.dart';
+import '../widgets/faqs_section.dart';
 import '../view_models/landing_page_view_model.dart';
 
 class WebLandingPageView extends StatefulWidget {
@@ -27,7 +27,8 @@ class _WebLandingPageState extends State<WebLandingPageView> {
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _impactKey = GlobalKey();
-  final GlobalKey _bannerKey = GlobalKey();
+  final GlobalKey _faqKey = GlobalKey();
+  final GlobalKey _downloadKey = GlobalKey(); 
 
   String _activeSection = 'home';
   bool _isScrolled = false;
@@ -46,35 +47,34 @@ class _WebLandingPageState extends State<WebLandingPageView> {
   }
 
   void _onScroll() {
-    // Update header style based on scroll
     final scrolled = _scrollController.offset > 50;
     if (scrolled != _isScrolled) {
       setState(() => _isScrolled = scrolled);
     }
 
-    // Detect active section
     _updateActiveSection();
   }
 
   void _updateActiveSection() {
     final scrollOffset = _scrollController.offset;
     final screenHeight = MediaQuery.of(context).size.height;
-    
-    // Get section positions
     final homePos = _getSectionPosition(_homeKey);
     final featuresPos = _getSectionPosition(_featuresKey);
     final howItWorksPos = _getSectionPosition(_howItWorksKey);
     final impactPos = _getSectionPosition(_impactKey);
-    final bannerPos = _getSectionPosition(_bannerKey);
+    final faqPos = _getSectionPosition(_faqKey); 
+    final downloadPos = _getSectionPosition(_downloadKey);
 
-    // Use 30% of screen height as threshold for section detection
     final threshold = screenHeight * 0.3;
     final currentPosition = scrollOffset + threshold;
 
     String newSection = 'home';
     
-    if (currentPosition >= bannerPos) {
-      newSection = 'banner';
+    // Order matters: check from bottom to top
+    if (currentPosition >= faqPos) {
+      newSection = 'faq';
+    } else if (currentPosition >= downloadPos) { 
+      newSection = 'download'; // ✅ CRITICAL FIX: Match breadcrumb ID 'download' (was 'banner')
     } else if (currentPosition >= impactPos) {
       newSection = 'impact';
     } else if (currentPosition >= howItWorksPos) {
@@ -116,8 +116,11 @@ class _WebLandingPageState extends State<WebLandingPageView> {
       case 'impact':
         targetKey = _impactKey;
         break;
-      case 'banner':
-        targetKey = _bannerKey;
+      case 'faq': 
+        targetKey = _faqKey;
+        break; 
+      case 'download':
+        targetKey = _downloadKey;
         break;
     }
 
@@ -126,7 +129,6 @@ class _WebLandingPageState extends State<WebLandingPageView> {
       final box = context.findRenderObject() as RenderBox;
       final position = box.localToGlobal(Offset.zero).dy + _scrollController.offset;
       
-      // Scroll to position minus header height (88px)
       _scrollController.animateTo(
         position - 88,
         duration: const Duration(milliseconds: 800),
@@ -135,7 +137,6 @@ class _WebLandingPageState extends State<WebLandingPageView> {
     }
   }
 
-  // Navigation handlers
   void _handleLogin() {
     context.go('/login');
   }
@@ -158,57 +159,19 @@ class _WebLandingPageState extends State<WebLandingPageView> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Main scrollable content
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               children: [
-                // Add spacing for fixed header
                 const SizedBox(height: 88),
                 
-                // HOME SECTION
-                Container(
-                  key: _homeKey,
-                  child: IntroSection(
-                    onGetStarted: _handleGetStarted,
-                    onLearnMore: _handleLearnMore,
-                  ),
-                ),
-
-                // FEATURES SECTION
-                Container(
-                  key: _featuresKey,
-                  child: FeaturesSection(
-                    features: _viewModel.features,
-                  ),
-                ),
-
-                // HOW IT WORKS SECTION
-                Container(
-                  key: _howItWorksKey,
-                  child: HowItWorksSection(
-                    steps: _viewModel.steps,
-                  ),
-                ),
-
-                // IMPACT SECTION
-                Container(
-                  key: _impactKey,
-                  child: ImpactSection(
-                    stats: _viewModel.impactStats,
-                  ),
-                ),
-
-                // BANNER SECTION
-                Container(
-                  key: _bannerKey,
-                  child: BannerSection(
-                    onGetStarted: _handleGetStarted,
-                    onDownload: _handleDownload,
-                  ),
-                ),
-
-                // CONTACT SECTION
+                Container(key: _homeKey, child: IntroSection(onGetStarted: _handleGetStarted, onLearnMore: _handleLearnMore)),
+                Container(key: _featuresKey, child: FeaturesSection(features: _viewModel.features)),
+                Container(key: _howItWorksKey, child: HowItWorksSection(steps: _viewModel.steps)),
+                Container(key: _impactKey, child: ImpactSection(stats: _viewModel.impactStats)),
+                Container(key: _downloadKey, child: DownloadSection(onDownload: _handleDownload)), // Key matches navigation logic
+                Container(key: _faqKey, child: const FaqSection()),
+                
                 ContactSection(
                   onGetStarted: _handleGetStarted,
                   onDownload: _handleDownload,
@@ -218,7 +181,6 @@ class _WebLandingPageState extends State<WebLandingPageView> {
             ),
           ),
 
-          // Fixed header at top
           Positioned(
             top: 0,
             left: 0,

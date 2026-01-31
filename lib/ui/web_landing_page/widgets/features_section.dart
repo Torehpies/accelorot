@@ -1,5 +1,3 @@
-// lib/ui/web_landing_page/widgets/features_section.dart
-
 import 'package:flutter/material.dart';
 
 import '../../core/constants/spacing.dart';
@@ -49,12 +47,22 @@ class FeaturesSectionState extends State<FeaturesSection> {
     });
   }
 
-  void resetCarousel() {
-    if (_pageController.hasClients) {
+  void goToPrevious() {
+    if (_currentIndex > 0 && _pageController.hasClients) {
       _pageController.animateToPage(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
+        _currentIndex - 1,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void goToNext() {
+    if (_currentIndex < featureImages.length - 1 && _pageController.hasClients) {
+      _pageController.animateToPage(
+        _currentIndex + 1,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
       );
     }
   }
@@ -100,16 +108,18 @@ class FeaturesSectionState extends State<FeaturesSection> {
           ),
           const SizedBox(height: AppSpacing.lg),
 
-          // CAROUSEL
+          // CAROUSEL — image-only, arrows inside (no dots)
           ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: screenWidth > 1400 ? 1000 : screenWidth * 0.85,
               maxHeight: 500,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Expanded(
+                // Scaled image carousel
+                SizedBox(
+                  height: 440,
                   child: PageView.builder(
                     controller: _pageController,
                     itemCount: featureImages.length,
@@ -118,32 +128,43 @@ class FeaturesSectionState extends State<FeaturesSection> {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
-                // INDICATOR DOTS
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    featureImages.length,
-                    (index) => GestureDetector(
-                      onTap: () {
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        width: index == _currentIndex ? 32 : 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: index == _currentIndex
-                              ? WebColors.greenAccent
-                              : Colors.grey.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
+
+                // LEFT ARROW — inside image, left edge, vertically centered
+                Positioned(
+                  left: 24,
+                  top: 0,
+                  bottom: 0,
+                  child: IconButton(
+                    onPressed: _currentIndex > 0 ? goToPrevious : null,
+                    icon: Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 36,
+                      color: WebColors.greenAccent.withOpacity(_currentIndex > 0 ? 1.0 : 0.4),
+                    ),
+                    splashRadius: 28,
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
+                    ),
+                  ),
+                ),
+
+                // RIGHT ARROW — inside image, right edge, vertically centered
+                Positioned(
+                  right: 24,
+                  top: 0,
+                  bottom: 0,
+                  child: IconButton(
+                    onPressed: _currentIndex < featureImages.length - 1 ? goToNext : null,
+                    icon: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 36,
+                      color: WebColors.greenAccent.withOpacity(_currentIndex < featureImages.length - 1 ? 1.0 : 0.4),
+                    ),
+                    splashRadius: 28,
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
                     ),
                   ),
                 ),
@@ -173,78 +194,53 @@ class FeaturesSectionState extends State<FeaturesSection> {
             scale: value,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Opacity(
-                opacity: value > 0.9 ? 1.0 : 0.6,
-                child: Container(
-                  constraints: const BoxConstraints(
-                    maxWidth: 700,
-                    maxHeight: 440,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: value > 0.95
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.12),
-                              blurRadius: 20,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 10,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 4),
+              constraints: const BoxConstraints(
+                maxWidth: 700,
+                maxHeight: 440,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: value > 0.95
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 20,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  featureImages[index],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey.shade100,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image_outlined, size: 64, color: Colors.grey[500]),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Image Load Failed',
+                              style: TextStyle(color: Colors.grey[700], fontSize: 16),
                             ),
                           ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      featureImages[index],
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.broken_image_outlined,
-                                color: Colors.grey.shade400,
-                                size: 56,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Failed to load image',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                featureImages[index],
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
