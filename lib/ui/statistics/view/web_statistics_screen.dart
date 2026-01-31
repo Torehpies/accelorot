@@ -183,7 +183,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
   }
 
   Widget _buildStatisticsCards() {
-    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    //final selectedMachineId = ref.watch(selectedMachineIdProvider);
     
     // Watch the actual data providers with the selected batch
     final batchId = selectedBatch ?? '';
