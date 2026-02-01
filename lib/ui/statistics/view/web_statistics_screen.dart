@@ -100,7 +100,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               }
 
               return RefreshIndicator(
-                onRefresh: () => _handleRefresh(ref, selectedMachineId),
+                onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32),
                   child: Column(
@@ -183,14 +183,13 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
   }
 
   Widget _buildStatisticsCards() {
-    final selectedMachineId = ref.watch(selectedMachineIdProvider);
-
-    // Watch the actual data providers
-    final temperatureAsync = ref.watch(
-      temperatureDataProvider(selectedMachineId),
-    );
-    final moistureAsync = ref.watch(moistureDataProvider(selectedMachineId));
-    final oxygenAsync = ref.watch(oxygenDataProvider(selectedMachineId));
+    //final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
+    // Watch the actual data providers with the selected batch
+    final batchId = selectedBatch ?? '';
+    final temperatureAsync = ref.watch(temperatureDataProvider(batchId));
+    final moistureAsync = ref.watch(moistureDataProvider(batchId));
+    final oxygenAsync = ref.watch(oxygenDataProvider(batchId));
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -200,10 +199,8 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         final cards = [
           temperatureAsync.when(
             data: (readings) => TemperatureStatisticCard(
-              currentTemperature: readings.isNotEmpty
-                  ? readings.last.value
-                  : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Temperature'),
@@ -212,7 +209,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           moistureAsync.when(
             data: (readings) => MoistureStatisticCard(
               currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Moisture'),
@@ -221,7 +218,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
           oxygenAsync.when(
             data: (readings) => OxygenStatisticCard(
               currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
-              hourlyReadings: readings.map((r) => r.value).toList(),
+              readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
             loading: () => _buildLoadingCard('Air Quality'),
@@ -287,10 +284,10 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Future<void> _handleRefresh(WidgetRef ref, String machineId) async {
-    ref.invalidate(temperatureDataProvider(machineId));
-    ref.invalidate(moistureDataProvider(machineId));
-    ref.invalidate(oxygenDataProvider(machineId));
+  Future<void> _handleRefresh(WidgetRef ref, String batchId) async {
+    ref.invalidate(temperatureDataProvider(batchId));
+    ref.invalidate(moistureDataProvider(batchId));
+    ref.invalidate(oxygenDataProvider(batchId));
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
@@ -352,10 +349,10 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: () {
-                final selectedMachineId = ref.read(selectedMachineIdProvider);
-                ref.invalidate(temperatureDataProvider(selectedMachineId));
-                ref.invalidate(moistureDataProvider(selectedMachineId));
-                ref.invalidate(oxygenDataProvider(selectedMachineId));
+                final batchId = selectedBatch ?? '';
+                ref.invalidate(temperatureDataProvider(batchId));
+                ref.invalidate(moistureDataProvider(batchId));
+                ref.invalidate(oxygenDataProvider(batchId));
               },
               icon: const Icon(Icons.refresh, size: 16),
               label: const Text('Retry'),
