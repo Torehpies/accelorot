@@ -284,7 +284,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                             SizedBox(height: screenHeight * 0.02),
                             Container(
                               constraints: BoxConstraints(
-                                minHeight: 300,
                                 maxHeight: screenHeight * 0.6, // Max 60% of screen height
                               ),
                               child: const RecentActivitiesTable(),
