@@ -1,93 +1,39 @@
-import 'package:flutter/material.dart';
-import '../../core/constants/spacing.dart';
-import '../../core/themes/web_text_styles.dart';
-import '../models/step_model.dart';
+// lib/ui/landing_page/models/step_model.dart
 
-class StepCard extends StatelessWidget {
-  final StepModel step;
+class StepModel {
+  final int number;
+  final String title;
+  final String description;
 
-  const StepCard({
-    super.key,
-    required this.step,
+  StepModel({
+    required this.number,
+    required this.title,
+    required this.description,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 260, // same behavior as FeaturesSection
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color.fromARGB(255, 240, 240, 240),
-          width: 1.5,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(38, 0, 0, 0),
-            blurRadius: 14,
-            offset: Offset(0, 6),
-          ),
-        ],
+  // Updated sample data based on the image content
+  static List<StepModel> getSampleSteps() {
+    return [
+      StepModel(
+        number: 1,
+        title: 'Add Organic Waste',
+        description: 'Simply add your greens (nitrogen-rich), browns (carbon-rich), and starter compost into the rotary drum.',
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // STEP NUMBER
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color.fromARGB(255, 204, 251, 241),
-              border: Border.all(
-                color: const Color.fromARGB(255, 118, 230, 207),
-                width: 2.5,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '${step.number}',
-                style: WebTextStyles.stepNumber.copyWith(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF28A85A),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // TITLE
-          Text(
-            step.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: WebTextStyles.stepCardTitle.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          // DESCRIPTION
-          Expanded(
-            child: Text(
-              step.description,
-              textAlign: TextAlign.center,
-              style: WebTextStyles.stepCardDescription.copyWith(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFF666666),
-              ),
-            ),
-          ),
-        ],
+      StepModel(
+        number: 2,
+        title: 'Smart Monitoring',
+        description: 'IoT sensors continuously track temperature, moisture, and air quality—adjusting conditions automatically.',
       ),
-    );
+      StepModel(
+        number: 3,
+        title: 'AI Recommendations',
+        description: 'Receive intelligent suggestions on moisture levels, aeration frequency, and optimal harvest timing.',
+      ),
+      StepModel(
+        number: 4,
+        title: 'Harvest Quality Compost',
+        description: 'In just 14 days, collect mature, nutrient-rich compost safe for gardens and agriculture.',
+      ),
+    ];
   }
 }

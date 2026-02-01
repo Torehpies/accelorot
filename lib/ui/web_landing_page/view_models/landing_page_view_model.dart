@@ -62,25 +62,25 @@ class LandingPageViewModel extends ChangeNotifier {
       number: 1,
       title: 'Add Materials',
       description:
-          'Load organic waste, greens (nitrogen), and browns (carbon) into the drum',
+        'Simply add your greens (nitrogen-rich), browns (carbon-rich), and starter compost into the rotary drum.',
     ),
     StepModel(
       number: 2,
       title: 'Monitor Sensors',
       description:
-          'IoT sensors track temperature, humidity, moisture, and oxygen levels',
+          'IoT sensors continuously track temperature, moisture, and air quality—adjusting conditions automatically.',
     ),
     StepModel(
       number: 3,
-      title: 'Auto-Regulate',
+      title: 'AI Recommendations',
       description:
-          'System automatically adjusts aeration and moisture for optimal conditions',
+          'Receive intelligent suggestions on moisture levels, aeration frequency, and optimal harvest timing.',
     ),
     StepModel(
       number: 4,
-      title: 'Harvest Compost',
+      title: 'Harvest Quality Compost',
       description:
-          'Receive alerts when pathogen-free, mature compost is ready in 2 weeks',
+          'Receive alerts when pathogen-free, mature compost is ready in 14 days',
     ),
   ];
 

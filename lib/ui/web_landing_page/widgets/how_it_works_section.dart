@@ -1,3 +1,5 @@
+// lib/ui/landing_page/widgets/how_it_works_section.dart
+
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -16,19 +18,31 @@ class HowItWorksSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xxxl * 2),
-      color: const Color.fromARGB(255, 204, 251, 241),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.xxxl,
+        horizontal: AppSpacing.xxxl,
+      ),
+      color: const Color( 0xFFE0F2FE),
       child: Column(
         children: [
+
+          // Title
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: WebTextStyles.h2,
+              style: WebTextStyles.h2.copyWith(
+                fontSize: 38,
+                fontWeight: FontWeight.w800,
+                color: WebColors.textTitle,
+              ),
               children: [
                 const TextSpan(text: 'How '),
                 TextSpan(
                   text: 'Accel-O-Rot',
-                  style: TextStyle(color: WebColors.textTitle),
+                  style: TextStyle(
+                    color: WebColors.greenAccent,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const TextSpan(text: ' Works'),
               ],
@@ -37,29 +51,39 @@ class HowItWorksSection extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.lg),
 
-          Text(
-            'Simple, automated, and effective composting in 4 easy steps',
-            textAlign: TextAlign.center,
-            style: WebTextStyles.subtitle,
+          // Subtitle
+          SizedBox(
+            width: 720,
+            child: Text(
+              'Our smart composting system transforms your organic waste into garden-ready compost with minimal effort. Just add waste and let technology handle the rest.',
+              textAlign: TextAlign.center,
+              style: WebTextStyles.subtitle.copyWith(
+                fontSize: 16,
+                color: const Color(0xFF555555),
+              ),
+            ),
           ),
 
-          const SizedBox(height: AppSpacing.xxxl * 2),
+          const SizedBox(height: AppSpacing.xxxl),
 
-          /// ✅ ALWAYS INLINE – SHRINK ONLY
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(steps.length, (index) {
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index == steps.length - 1
-                        ? 0
-                        : AppSpacing.xl,
+          // Steps row
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(steps.length, (index) {
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: index == steps.length - 1
+                          ? 0
+                          : AppSpacing.xl,
+                    ),
+                    child: StepCard(step: steps[index]),
                   ),
-                  child: StepCard(step: steps[index]),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ],
       ),
@@ -67,10 +91,8 @@ class HowItWorksSection extends StatelessWidget {
   }
 }
 
-/// ===================================================
-/// STEP CARD (SAME FILE → NO IMPORT ISSUES)
-/// ===================================================
-class StepCard extends StatelessWidget {
+// STEP CARD
+class StepCard extends StatefulWidget {
   final StepModel step;
 
   const StepCard({
@@ -79,77 +101,117 @@ class StepCard extends StatelessWidget {
   });
 
   @override
+  State<StepCard> createState() => _StepCardState();
+}
+
+class _StepCardState extends State<StepCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 260,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color.fromARGB(255, 240, 240, 240),
-          width: 1.5,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(38, 0, 0, 0),
-            blurRadius: 14,
-            offset: Offset(0, 6),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        height: 220,
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: _hovered
+                ? WebColors.greenAccent
+                : const Color.fromARGB(255, 246, 248, 250),
+            width: _hovered ? 2 : 1.5,
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color.fromARGB(255, 204, 251, 241),
-              border: Border.all(
-                color: const Color.fromARGB(255, 118, 230, 207),
-                width: 2.5,
-              ),
-            ),
-            child: Center(
+        ),
+        child: Stack(
+          children: [
+            // Step number
+            Positioned(
+              top: 0,
+              right: 0,
               child: Text(
-                '${step.number}',
-                style: WebTextStyles.stepNumber.copyWith(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF28A85A),
+                widget.step.number.toString().padLeft(2, '0'),
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: Color.fromARGB(255, 212, 212, 212),
                 ),
               ),
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon box
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5FDFA),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFE8F5EF),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    _getIcon(widget.step.number),
+                    color: WebColors.greenAccent,
+                    size: 24,
+                  ),
+                ),
 
-          Text(
-            step.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: WebTextStyles.stepCardTitle.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+                const SizedBox(height: AppSpacing.md),
+
+                // Title
+                Text(
+                  widget.step.title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: WebColors.textTitle,
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.xs),
+
+                // Description
+                Expanded(
+                  child: Text(
+                    widget.step.description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: Color(0xFF6B7280),
+                    ),
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: AppSpacing.sm),
-
-          Text(
-            step.description,
-            textAlign: TextAlign.center,
-            style: WebTextStyles.stepCardDescription.copyWith(
-              fontSize: 13,
-              height: 1.5,
-              color: const Color(0xFF666666),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  // Simple icon selector
+  IconData _getIcon(int stepNumber) {
+    switch (stepNumber) {
+      case 1:
+        return Icons.recycling; // For "Add Materials"
+      case 2:
+        return Icons.monitor_heart_outlined; // For "Monitor Sensors"
+      case 3:
+        return Icons.settings_outlined; // For "Auto-Regulate"
+      case 4:
+        return Icons.eco_outlined; // For "Harvest Compost"
+      default:
+        return Icons.circle;
+    }
   }
 }
