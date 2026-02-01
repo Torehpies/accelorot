@@ -22,7 +22,6 @@ class AdminMachineView extends ConsumerStatefulWidget {
 
 class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
   String? _teamId;
-  bool _isAdmin = false;
   final FocusNode _searchFocusNode = FocusNode();
 
   @override
@@ -42,7 +41,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     final userData = await sessionService.getCurrentUserData();
 
     _teamId = userData?['teamId'] as String?;
-    _isAdmin = userData?['role'] == 'admin';
 
     if (_teamId != null) {
       ref.read(mobileMachineViewModelProvider.notifier).initialize(_teamId!);
@@ -172,7 +170,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         backgroundColor: AppColors.background,
         appBar: MobileListHeader(
           title: 'Machine List',
-          showAddButton: _isAdmin,
+          showAddButton: true,
           onAddPressed: _handleAddMachine,
           addButtonColor: AppColors.green100,
           filterBarConfig: MobileFilterBarConfig(

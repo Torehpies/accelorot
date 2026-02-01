@@ -95,7 +95,7 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(106);
+  Size get preferredSize => const Size.fromHeight(108);
 
   @override
   Widget build(BuildContext context) {
@@ -115,13 +115,14 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: AppColors.background,
           elevation: 0,
           scrolledUnderElevation: 0,
-          toolbarHeight: 112,
+          toolbarHeight: 108,
           automaticallyImplyLeading: false,
           flexibleSpace: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildTitleRow(),
                   const SizedBox(height: 12),
@@ -149,21 +150,21 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         if (showAddButton && onAddPressed != null)
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: addButtonColor ?? AppColors.green100,
-              borderRadius: BorderRadius.circular(12),
+          ElevatedButton.icon(
+            onPressed: onAddPressed,
+            icon: Icon(
+              addButtonIcon ?? Icons.add,
+              size: 18,
             ),
-            child: IconButton(
-              icon: Icon(
-                addButtonIcon ?? Icons.add,
-                color: Colors.white,
-                size: 20,
+            label: const Text('Add Machine'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: addButtonColor ?? AppColors.green100,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              onPressed: onAddPressed,
-              padding: EdgeInsets.zero,
+              elevation: 0,
             ),
           ),
       ],
