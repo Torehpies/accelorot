@@ -39,11 +39,11 @@ class DataCard<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: AppColors.background1,
+      color: AppColors.background2,
       shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        side: BorderSide(color: AppColors.grey, width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
