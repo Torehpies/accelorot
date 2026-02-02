@@ -19,7 +19,7 @@ class ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: DataCard<ActivityLogItem>(
         // Icon styling - circular background with status color
         icon: item.icon,

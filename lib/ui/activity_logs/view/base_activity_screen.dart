@@ -142,9 +142,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
               item: item,
               onTap: () => _onActivityTap(item),
             ),
-            skeletonBuilder: (context, index) => const DataCardSkeleton(
-              bottomPadding: 12, // Match ActivityCard's bottom padding
-            ),
+            skeletonBuilder: (context, index) => const DataCardSkeleton(),
           ),
         ),
       ),
