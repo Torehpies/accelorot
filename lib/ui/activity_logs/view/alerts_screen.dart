@@ -15,9 +15,9 @@ class AlertsScreen extends BaseActivityScreen {
 
 class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   ActivityParams get _params => ActivityParams(
-    screenType: ActivityScreenType.alerts,
-    initialFilter: widget.initialFilter,
-  );
+        screenType: ActivityScreenType.alerts,
+        initialFilter: widget.initialFilter,
+      );
 
   @override
   ActivityListState getState() {
@@ -25,18 +25,8 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
   }
 
   @override
-  String getScreenTitle() => 'Alerts Logs';
-
-  @override
-  List<String> getFilters() {
-    return const ['All', 'Temperature', 'Moisture', 'Air Quality'];
-  }
-
-  @override
-  void onFilterChanged(String filter) {
-    ref
-        .read(activityViewModelProvider(_params).notifier)
-        .onFilterChanged(filter);
+  ActivityViewModel getViewModel() {
+    return ref.read(activityViewModelProvider(_params).notifier);
   }
 
   @override
@@ -75,5 +65,10 @@ class _AlertsScreenState extends BaseActivityScreenState<AlertsScreen> {
     ref
         .read(activityViewModelProvider(_params).notifier)
         .onMachineChanged(machineId);
+  }
+
+  @override
+  void onLoadMore() {
+    ref.read(activityViewModelProvider(_params).notifier).loadMore();
   }
 }

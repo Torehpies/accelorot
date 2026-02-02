@@ -97,7 +97,7 @@ class BatchSelector extends ConsumerWidget {
         onChanged: (_) {},
         isLoading: true,
       ),
-      error: (_, __) => MobileSelectorButton<dynamic>(
+      error: (_, _) => MobileSelectorButton<dynamic>(
         icon: Icons.inventory_2,
         allLabel: 'All Batches',
         selectedItemId: null,

@@ -5,6 +5,7 @@ import '../widgets/mobile/activity_section_card.dart';
 import '../widgets/mobile/navigation_section_card.dart';
 import '../widgets/mobile/batch_filter_section.dart';
 import '../models/activity_filter_model.dart';
+import '../../core/themes/app_theme.dart';
 
 class ActivityLogsScreen extends StatelessWidget {
   const ActivityLogsScreen({super.key});
@@ -12,7 +13,7 @@ class ActivityLogsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

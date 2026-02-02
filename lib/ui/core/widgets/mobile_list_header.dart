@@ -56,31 +56,54 @@ class _MobileFilterBar extends StatelessWidget {
   }
 }
 
-/// Reusable list header with title, action button, and filters
+/// Reusable list header with title, action button, optional selectors, and filters
+/// Height automatically adjusts based on content:
+/// - Title only: 54px
+/// - Title + Search/Filters: 108px
+/// - Title + Selectors + Search/Filters: 162px
 class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final Widget? leading;
   final bool showAddButton;
   final VoidCallback? onAddPressed;
   final Color? addButtonColor;
   final IconData? addButtonIcon;
   final String? addButtonLabel;
+  final List<Widget> selectorWidgets;
   final SearchBarConfig? searchConfig;
   final List<Widget> filterWidgets;
 
   const MobileListHeader({
     super.key,
     required this.title,
+    this.leading,
     this.showAddButton = false,
     this.onAddPressed,
     this.addButtonColor,
     this.addButtonIcon,
     this.addButtonLabel,
+    this.selectorWidgets = const [],
     this.searchConfig,
     this.filterWidgets = const [],
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(108);
+  Size get preferredSize {
+    // Calculate height dynamically based on content
+    double height = 54;
+
+    // Add selector row height if present
+    if (selectorWidgets.isNotEmpty) {
+      height += 54;
+    }
+
+    // Add search/filter row height if present
+    if (searchConfig != null) {
+      height += 54;
+    }
+
+    return Size.fromHeight(height);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +123,7 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: AppColors.background,
           elevation: 0,
           scrolledUnderElevation: 0,
-          toolbarHeight: 108,
+          toolbarHeight: preferredSize.height,
           automaticallyImplyLeading: false,
           flexibleSpace: SafeArea(
             child: Padding(
@@ -109,13 +132,23 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Row 1: Title (always present)
                   _buildTitleRow(),
-                  const SizedBox(height: 12),
-                  if (searchConfig != null)
+
+                  // Row 2: Selectors (optional - Machine, Batch, etc.)
+                  if (selectorWidgets.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _buildSelectorRow(),
+                  ],
+
+                  // Row 3: Search + Filters (optional)
+                  if (searchConfig != null) ...[
+                    const SizedBox(height: 12),
                     _MobileFilterBar(
                       searchConfig: searchConfig!,
                       filterWidgets: filterWidgets,
                     ),
+                  ],
                 ],
               ),
             ),
@@ -127,14 +160,19 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildTitleRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+        if (leading != null) ...[
+          leading!,
+          const SizedBox(width: 8),
+        ],
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
         if (showAddButton && onAddPressed != null)
@@ -155,6 +193,17 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
               elevation: 0,
             ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildSelectorRow() {
+    return Row(
+      children: [
+        for (int i = 0; i < selectorWidgets.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(child: selectorWidgets[i]),
+        ],
       ],
     );
   }

@@ -16,9 +16,9 @@ class CyclesRecomScreen extends BaseActivityScreen {
 class _CyclesRecomScreenState
     extends BaseActivityScreenState<CyclesRecomScreen> {
   ActivityParams get _params => ActivityParams(
-    screenType: ActivityScreenType.cyclesRecom,
-    initialFilter: widget.initialFilter,
-  );
+        screenType: ActivityScreenType.cyclesRecom,
+        initialFilter: widget.initialFilter,
+      );
 
   @override
   ActivityListState getState() {
@@ -26,18 +26,8 @@ class _CyclesRecomScreenState
   }
 
   @override
-  String getScreenTitle() => 'Cycles & Recommendations';
-
-  @override
-  List<String> getFilters() {
-    return const ['All', 'Recoms', 'Cycles'];
-  }
-
-  @override
-  void onFilterChanged(String filter) {
-    ref
-        .read(activityViewModelProvider(_params).notifier)
-        .onFilterChanged(filter);
+  ActivityViewModel getViewModel() {
+    return ref.read(activityViewModelProvider(_params).notifier);
   }
 
   @override
@@ -76,5 +66,10 @@ class _CyclesRecomScreenState
     ref
         .read(activityViewModelProvider(_params).notifier)
         .onMachineChanged(machineId);
+  }
+
+  @override
+  void onLoadMore() {
+    ref.read(activityViewModelProvider(_params).notifier).loadMore();
   }
 }

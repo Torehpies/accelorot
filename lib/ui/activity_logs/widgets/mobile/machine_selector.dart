@@ -99,7 +99,7 @@ class MachineSelector extends ConsumerWidget {
             onChanged: (_) {},
             isLoading: true,
           ),
-          error: (_, __) => MobileSelectorButton<dynamic>(
+          error: (_, _) => MobileSelectorButton<dynamic>(
             icon: Icons.precision_manufacturing,
             allLabel: 'All Machines',
             selectedItemId: null,
@@ -121,7 +121,7 @@ class MachineSelector extends ConsumerWidget {
         onChanged: (_) {},
         isLoading: true,
       ),
-      error: (_, __) => MobileSelectorButton<dynamic>(
+      error: (_, _) => MobileSelectorButton<dynamic>(
         icon: Icons.precision_manufacturing,
         allLabel: 'All Machines',
         selectedItemId: null,
