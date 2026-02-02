@@ -69,6 +69,14 @@ class FirebaseStatisticsService implements StatisticsService {
               });
             }
           }
+        } else {
+          // No readings for this day - add a zero value at midnight
+          debugPrint('⚪ $dateStr: No readings, adding zero value');
+          allReadings.add({
+            'id': '$dateStr-00-00-00',
+            'value': 0.0,
+            'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
+          });
         }
       }
 
