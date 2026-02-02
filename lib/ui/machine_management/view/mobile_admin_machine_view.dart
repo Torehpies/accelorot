@@ -128,7 +128,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.backgroundBorder.withOpacity(0.3),
+          color: AppColors.backgroundBorder.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -207,7 +207,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               if (_teamId != null) notifier.initialize(_teamId!);
             },
             itemBuilder: _buildMachineCard,
-            skeletonBuilder: (_, __) => _buildSkeletonCard(),
+            skeletonBuilder: (_, _) => _buildSkeletonCard(),
           ),
         ),
       ),

@@ -1,27 +1,38 @@
 // lib/ui/machine_management/view/operator_machine_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../view_model/operator_machine_notifier.dart';
-import '../widgets/operator_machine_card.dart';
-import '../../core/widgets/shared/mobile_header.dart';
+import '../../core/widgets/mobile_common_widgets.dart';
+import '../../core/widgets/mobile_list_header.dart';
+import '../../core/widgets/mobile_list_content.dart';
+import '../../core/themes/app_theme.dart';
+import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
+import '../view_model/mobile_machine_viewmodel.dart';
+import '../models/mobile_machine_state.dart';
+import '../widgets/operator_machine_card.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
   const OperatorMachineView({super.key});
 
   @override
-  ConsumerState<OperatorMachineView> createState() =>
-      _OperatorMachineViewState();
+  ConsumerState<OperatorMachineView> createState() => _OperatorMachineViewState();
 }
 
 class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
-  final _searchFocusNode = FocusNode();
   String? _teamId;
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadTeamIdAndInit();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTeamIdAndInit() async {
@@ -31,241 +42,142 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     _teamId = userData?['teamId'] as String?;
 
     if (_teamId != null) {
-      ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
+      ref.read(mobileMachineViewModelProvider.notifier).initialize(_teamId!);
     }
 
     if (mounted) setState(() {});
   }
 
-  @override
-  void dispose() {
-    _searchFocusNode.dispose();
-    super.dispose();
-  }
+  EmptyStateConfig _getEmptyStateConfig(MobileMachineState state) {
+    String message;
 
-  Future<void> _handleRefresh() async {
-    if (_teamId != null) {
-      await ref.read(operatorMachineProvider.notifier).refresh(_teamId!);
+    switch (state.selectedStatusFilter) {
+      case MachineStatusFilter.inactive:
+        message = 'No archived machines';
+        break;
+      case MachineStatusFilter.active:
+        message = 'No active machines';
+        break;
+      case MachineStatusFilter.underMaintenance:
+        message = 'No suspended machines';
+        break;
+      default:
+        message = 'No machines available.\nContact your admin for machine assignment.';
     }
+
+    if (state.hasActiveFilters) {
+      message = 'No machines match your filters';
+    }
+
+    return EmptyStateConfig(
+      icon: Icons.inbox_outlined,
+      message: message,
+      actionLabel: state.hasActiveFilters ? 'Clear All Filters' : null,
+      onAction: state.hasActiveFilters
+          ? () {
+              ref.read(mobileMachineViewModelProvider.notifier).clearAllFilters();
+            }
+          : null,
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(operatorMachineProvider);
-    final notifier = ref.read(operatorMachineProvider.notifier);
+  Widget _buildMachineCard(BuildContext context, MachineModel machine, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: OperatorMachineCard(machine: machine),
+    );
+  }
 
-    return GestureDetector(
-      onTap: () => _searchFocusNode.unfocus(),
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: MobileHeader(
-          title: 'My Machines',
-          showDropdown: false,
-          showFilterButton: true,
-          showSearch: true,
-          showAddButton: false,
-          elevation: 0.0,
-          backgroundColor: Color(0xFFE0F2FE),
-          foregroundColor: Color(0xFFE0F2FE),
-          onDateRangeChanged: (range) {
-            // Handle date filtering if needed
-          },
+  Widget _buildSkeletonCard(BuildContext context, int index) {
+    return Container(
+      height: 120,
+      margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.backgroundBorder.withValues(alpha: 0.3),
         ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Info Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.teal.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.teal.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.teal.shade700),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Machines Summary',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Active: ${state.activeMachinesCount} | Disabled: ${state.archivedMachinesCount}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.teal.shade700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Main Container
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Refresh Button
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.teal),
-                              onPressed: _handleRefresh,
-                              tooltip: 'Refresh',
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      // Machine List
-                      Expanded(child: _buildContent(state, notifier)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.grey,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 16, color: AppColors.grey),
+                const SizedBox(height: 8),
+                Container(height: 14, width: 150, color: AppColors.grey),
+                const Spacer(),
+                Container(height: 24, width: 80, color: AppColors.grey),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildContent(
-    OperatorMachineState state,
-    OperatorMachineNotifier notifier,
-  ) {
-    if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(mobileMachineViewModelProvider);
+    final notifier = ref.read(mobileMachineViewModelProvider.notifier);
 
-    if (state.errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-              const SizedBox(height: 16),
-              Text(
-                state.errorMessage!,
-                style: TextStyle(color: Colors.red.shade700, fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  notifier.clearError();
-                  if (_teamId != null) {
-                    notifier.initialize(_teamId!);
-                  }
-                },
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
+    return MobileScaffoldContainer(
+      onTap: () => _searchFocusNode.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: MobileListHeader(
+          title: 'My Machines',
+          showAddButton: false, // Operators cannot add machines
+          filterBarConfig: MobileFilterBarConfig(
+            onSearchChanged: notifier.setSearchQuery,
+            onStatusFilterChanged: notifier.setStatusFilter,
+            onDateFilterChanged: notifier.setDateFilter,
+            currentStatusFilter: state.selectedStatusFilter,
+            currentDateFilter: state.dateFilter,
+            isLoading: state.isLoading,
+            searchHint: 'Search machines...',
+            searchFocusNode: _searchFocusNode,
           ),
         ),
-      );
-    }
-
-    if (state.filteredMachines.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              state.searchQuery.isNotEmpty
-                  ? Icons.search_off
-                  : Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.searchQuery.isNotEmpty
-                  ? 'No machines found matching "${state.searchQuery}"'
-                  : 'No machines available in your team.\nContact your admin for machine assignment.',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: MobileListContent<MachineModel>(
+            isLoading: state.isLoading,
+            isInitialLoad: state.machines.isEmpty,
+            hasError: state.hasError,
+            errorMessage: state.errorMessage,
+            items: state.filteredMachines,
+            displayedItems: state.displayedMachines,
+            hasMoreToLoad: state.hasMoreToLoad,
+            remainingCount: state.remainingCount,
+            emptyStateConfig: _getEmptyStateConfig(state),
+            onRefresh: () async {
+              if (_teamId != null) {
+                await notifier.refresh(_teamId!);
+              }
+            },
+            onLoadMore: notifier.loadMore,
+            onRetry: () {
+              notifier.clearError();
+              if (_teamId != null) notifier.initialize(_teamId!);
+            },
+            itemBuilder: _buildMachineCard,
+            skeletonBuilder: _buildSkeletonCard,
+          ),
         ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      itemCount: state.displayedMachines.length + (state.hasMoreToLoad ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == state.displayedMachines.length) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(
-              child: ElevatedButton.icon(
-                onPressed: notifier.loadMore,
-                icon: const Icon(Icons.add_circle_outline, size: 18),
-                label: Text(
-                  'Load More (${state.remainingCount} remaining)',
-                  style: const TextStyle(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final machine = state.displayedMachines[index];
-        return OperatorMachineCard(machine: machine);
-      },
+      ),
     );
   }
 }
