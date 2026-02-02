@@ -18,7 +18,7 @@ class SearchBarWidget extends StatefulWidget {
     required this.onClear,
     required this.focusNode,
     this.hintText = 'Search....',
-    this.height = 48,
+    this.height = 40,
     this.borderRadius = 12,
     this.iconSize = 20,
   });

@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/activity_list_state.dart';
 import '../widgets/mobile/filter_section.dart';
 import '../widgets/mobile/activity_card.dart';
-import '../../core/widgets/filters/mobile_search_bar.dart';
-import '../widgets/mobile/date_filter_button.dart';
 import '../widgets/mobile/machine_selector.dart';
 import '../widgets/mobile/batch_selector.dart';
+import '../../core/widgets/filters/mobile_search_bar.dart';
+import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../models/activity_common.dart';
 
 /// Clean base screen that only handles UI rendering
@@ -84,10 +84,6 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       backgroundColor: Colors.teal,
-      actions: [
-        DateFilterButton(onFilterChanged: onDateFilterChanged),
-        const SizedBox(width: 8),
-      ],
     );
   }
 
@@ -96,6 +92,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Column(
         children: [
+          // ROW 1: Machine and Batch Selectors
           Row(
             children: [
               Expanded(
@@ -119,11 +116,22 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           ),
           const SizedBox(height: 12),
 
-          // Search bar
-          SearchBarWidget(
-            onSearchChanged: onSearchChanged,
-            onClear: onSearchCleared,
-            focusNode: _searchFocusNode,
+          // ROW 2: Search Bar and Date Filter
+          Row(
+            children: [
+              Expanded(
+                child: SearchBarWidget(
+                  onSearchChanged: onSearchChanged,
+                  onClear: onSearchCleared,
+                  focusNode: _searchFocusNode,
+                ),
+              ),
+              const SizedBox(width: 12),
+              MobileDateFilterButton(
+                onFilterChanged: onDateFilterChanged,
+                isLoading: state.isLoading,
+              ),
+            ],
           ),
           const SizedBox(height: 12),
 
