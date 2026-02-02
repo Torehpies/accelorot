@@ -6,6 +6,8 @@ import '../../core/widgets/mobile_common_widgets.dart';
 import '../../core/widgets/mobile_list_header.dart';
 import '../../core/widgets/mobile_list_content.dart';
 import '../../core/widgets/data_card.dart';
+import '../../core/widgets/filters/mobile_status_filter_button.dart';
+import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../helpers/machine_status_helper.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
@@ -119,7 +121,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     );
   }
 
-  Widget _buildSkeletonCard() {
+  Widget _buildSkeletonCard(BuildContext context, int index) {
     return Container(
       height: 120,
       margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
@@ -173,16 +175,25 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           showAddButton: true,
           onAddPressed: _handleAddMachine,
           addButtonColor: AppColors.green100,
-          filterBarConfig: MobileFilterBarConfig(
+          addButtonLabel: 'Add Machine',
+          searchConfig: SearchBarConfig(
             onSearchChanged: notifier.setSearchQuery,
-            onStatusFilterChanged: notifier.setStatusFilter,
-            onDateFilterChanged: notifier.setDateFilter,
-            currentStatusFilter: state.selectedStatusFilter,
-            currentDateFilter: state.dateFilter,
-            isLoading: state.isLoading,
             searchHint: 'Search machines...',
+            isLoading: state.isLoading,
             searchFocusNode: _searchFocusNode,
           ),
+          filterWidgets: [
+            MobileStatusFilterButton(
+              currentFilter: state.selectedStatusFilter,
+              onFilterChanged: notifier.setStatusFilter,
+              isLoading: state.isLoading,
+            ),
+            const SizedBox(width: 8),
+            MobileDateFilterButton(
+              onFilterChanged: notifier.setDateFilter,
+              isLoading: state.isLoading,
+            ),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.only(top: 8),
@@ -207,7 +218,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               if (_teamId != null) notifier.initialize(_teamId!);
             },
             itemBuilder: _buildMachineCard,
-            skeletonBuilder: (_, _) => _buildSkeletonCard(),
+            skeletonBuilder: _buildSkeletonCard,
           ),
         ),
       ),

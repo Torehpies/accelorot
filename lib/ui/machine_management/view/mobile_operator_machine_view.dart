@@ -1,10 +1,12 @@
-// lib/ui/machine_management/view/operator_machine_view.dart
+// lib/ui/machine_management/view/mobile_operator_machine_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets/mobile_common_widgets.dart';
 import '../../core/widgets/mobile_list_header.dart';
 import '../../core/widgets/mobile_list_content.dart';
+import '../../core/widgets/filters/mobile_status_filter_button.dart';
+import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
@@ -140,16 +142,24 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
         appBar: MobileListHeader(
           title: 'My Machines',
           showAddButton: false, // Operators cannot add machines
-          filterBarConfig: MobileFilterBarConfig(
+          searchConfig: SearchBarConfig(
             onSearchChanged: notifier.setSearchQuery,
-            onStatusFilterChanged: notifier.setStatusFilter,
-            onDateFilterChanged: notifier.setDateFilter,
-            currentStatusFilter: state.selectedStatusFilter,
-            currentDateFilter: state.dateFilter,
-            isLoading: state.isLoading,
             searchHint: 'Search machines...',
+            isLoading: state.isLoading,
             searchFocusNode: _searchFocusNode,
           ),
+          filterWidgets: [
+            MobileStatusFilterButton(
+              currentFilter: state.selectedStatusFilter,
+              onFilterChanged: notifier.setStatusFilter,
+              isLoading: state.isLoading,
+            ),
+            const SizedBox(width: 8),
+            MobileDateFilterButton(
+              onFilterChanged: notifier.setDateFilter,
+              isLoading: state.isLoading,
+            ),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.only(top: 8),

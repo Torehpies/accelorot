@@ -2,44 +2,32 @@
 
 import 'package:flutter/material.dart';
 import '../themes/app_theme.dart';
-import '../../../data/models/machine_model.dart';
-import '../../activity_logs/models/activity_common.dart';
 import 'filters/mobile_search_bar.dart';
-import 'filters/mobile_status_filter_button.dart';
-import 'filters/mobile_date_filter_button.dart';
 
-/// Configuration for filter bar
-class MobileFilterBarConfig {
+/// Configuration for search bar
+class SearchBarConfig {
   final void Function(String) onSearchChanged;
-  final void Function(MachineStatusFilter) onStatusFilterChanged;
-  final void Function(DateFilterRange) onDateFilterChanged;
-  final MachineStatusFilter currentStatusFilter;
-  final DateFilterRange currentDateFilter;
-  final bool isLoading;
   final String searchHint;
-  final bool showStatusFilter;
-  final bool showDateFilter;
+  final bool isLoading;
   final FocusNode? searchFocusNode;
 
-  const MobileFilterBarConfig({
+  const SearchBarConfig({
     required this.onSearchChanged,
-    required this.onStatusFilterChanged,
-    required this.onDateFilterChanged,
-    required this.currentStatusFilter,
-    required this.currentDateFilter,
-    this.isLoading = false,
     this.searchHint = 'Search...',
-    this.showStatusFilter = true,
-    this.showDateFilter = true,
+    this.isLoading = false,
     this.searchFocusNode,
   });
 }
 
-/// Internal filter bar component
+/// Internal filter bar component with generic filter widgets
 class _MobileFilterBar extends StatelessWidget {
-  final MobileFilterBarConfig config;
+  final SearchBarConfig searchConfig;
+  final List<Widget> filterWidgets;
 
-  const _MobileFilterBar({required this.config});
+  const _MobileFilterBar({
+    required this.searchConfig,
+    required this.filterWidgets,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,28 +35,21 @@ class _MobileFilterBar extends StatelessWidget {
       children: [
         Expanded(
           child: SearchBarWidget(
-            onSearchChanged: config.onSearchChanged,
-            onClear: () => config.onSearchChanged(''),
-            focusNode: config.searchFocusNode ?? FocusNode(),
-            hintText: config.searchHint,
+            onSearchChanged: searchConfig.onSearchChanged,
+            onClear: () => searchConfig.onSearchChanged(''),
+            focusNode: searchConfig.searchFocusNode ?? FocusNode(),
+            hintText: searchConfig.searchHint,
             height: 40,
             borderRadius: 12,
           ),
         ),
-        if (config.showStatusFilter) ...[
+        // Add custom filter widgets
+        if (filterWidgets.isNotEmpty) ...[
           const SizedBox(width: 8),
-          MobileStatusFilterButton(
-            currentFilter: config.currentStatusFilter,
-            onFilterChanged: config.onStatusFilterChanged,
-            isLoading: config.isLoading,
-          ),
-        ],
-        if (config.showDateFilter) ...[
-          const SizedBox(width: 8),
-          MobileDateFilterButton(
-            onFilterChanged: config.onDateFilterChanged,
-            isLoading: config.isLoading,
-          ),
+          ...filterWidgets.map((widget) => Padding(
+                padding: const EdgeInsets.only(left: 0),
+                child: widget,
+              )),
         ],
       ],
     );
@@ -82,7 +63,9 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onAddPressed;
   final Color? addButtonColor;
   final IconData? addButtonIcon;
-  final MobileFilterBarConfig? filterBarConfig;
+  final String? addButtonLabel;
+  final SearchBarConfig? searchConfig;
+  final List<Widget> filterWidgets;
 
   const MobileListHeader({
     super.key,
@@ -91,7 +74,9 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onAddPressed,
     this.addButtonColor,
     this.addButtonIcon,
-    this.filterBarConfig,
+    this.addButtonLabel,
+    this.searchConfig,
+    this.filterWidgets = const [],
   });
 
   @override
@@ -126,8 +111,11 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
                 children: [
                   _buildTitleRow(),
                   const SizedBox(height: 12),
-                  if (filterBarConfig != null)
-                    _MobileFilterBar(config: filterBarConfig!),
+                  if (searchConfig != null)
+                    _MobileFilterBar(
+                      searchConfig: searchConfig!,
+                      filterWidgets: filterWidgets,
+                    ),
                 ],
               ),
             ),
@@ -156,7 +144,7 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
               addButtonIcon ?? Icons.add,
               size: 18,
             ),
-            label: const Text('Add Machine'),
+            label: Text(addButtonLabel ?? 'Add Machine'),
             style: ElevatedButton.styleFrom(
               backgroundColor: addButtonColor ?? AppColors.green100,
               foregroundColor: Colors.white,

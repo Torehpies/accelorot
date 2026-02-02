@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
-import '../models/reports_state.dart';
 import '../../core/widgets/table/table_container.dart';
 import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
@@ -11,6 +10,7 @@ import '../../core/themes/web_text_styles.dart';
 import '../../activity_logs/models/activity_common.dart';
 import 'web_table_header.dart';
 import 'web_table_body.dart';
+import '../models/report_filters.dart';
 
 class ReportsTableContainer extends StatelessWidget {
   final List<Report> reports;
