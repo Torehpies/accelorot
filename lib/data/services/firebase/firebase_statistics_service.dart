@@ -11,43 +11,25 @@ class FirebaseStatisticsService implements StatisticsService {
   FirebaseStatisticsService({FirebaseFirestore? firestore})
     : _db = firestore ?? FirebaseFirestore.instance;
 
-  /// Get today's collection name (e.g. "2025-10-23")
-  String _getTodayCollection() {
-    final now = DateTime.now();
-    return "${now.year.toString().padLeft(4, '0')}-"
-        "${now.month.toString().padLeft(2, '0')}-"
-        "${now.day.toString().padLeft(2, '0')}";
-  }
-
   /// Reusable fetch function for all sensor types
   Future<List<Map<String, dynamic>>> _getSensorData({
-    required String machineId,
+    required String batchId,
     required String fieldName,
   }) async {
     try {
-      final dateKey = _getTodayCollection();
-      final snapshot = await _db.collection(dateKey).get();
+      final snapshot = await _db
+          .collection('batches')
+          .doc(batchId)
+          .collection('readings')
+          .orderBy('timestamp', descending: false)
+          .get();
 
       if (snapshot.docs.isEmpty) {
-        debugPrint('📭 No documents found in collection: $dateKey');
+        debugPrint('📭 No readings found for batch: $batchId');
         return [];
       }
 
-      // Filter only documents belonging to this machine
-      final filtered = snapshot.docs.where((doc) {
-        final data = doc.data();
-        return data['machine-id'] == machineId;
-      }).toList();
-
-      if (filtered.isEmpty) {
-        debugPrint('📭 No documents found for machine: $machineId');
-        return [];
-      }
-
-      // Sort by document ID (e.g. "01-15:24:38" → time order)
-      filtered.sort((a, b) => a.id.compareTo(b.id));
-
-      return filtered.map((doc) {
+      return snapshot.docs.map((doc) {
         final data = doc.data();
         return {
           'id': doc.id,
@@ -63,12 +45,12 @@ class FirebaseStatisticsService implements StatisticsService {
   }
 
   @override
-  Future<List<TemperatureModel>> getTemperatureData(String machineId) async {
+  Future<List<TemperatureModel>> getTemperatureData(String batchId) async {
     try {
-      debugPrint('🌡️ Fetching temperature data for machine: $machineId');
+      debugPrint('🌡️ Fetching temperature data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
-        fieldName: 'temp',
+        batchId: batchId,
+        fieldName: 'temperature',
       );
       debugPrint('🌡️ Found ${rawData.length} temperature readings');
 
@@ -81,11 +63,11 @@ class FirebaseStatisticsService implements StatisticsService {
   }
 
   @override
-  Future<List<MoistureModel>> getMoistureData(String machineId) async {
+  Future<List<MoistureModel>> getMoistureData(String batchId) async {
     try {
-      debugPrint('🌊 Fetching moisture data for machine: $machineId');
+      debugPrint('🌊 Fetching moisture data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
+        batchId: batchId,
         fieldName: 'moisture',
       );
       debugPrint('🌊 Found ${rawData.length} moisture readings');
@@ -99,11 +81,11 @@ class FirebaseStatisticsService implements StatisticsService {
   }
 
   @override
-  Future<List<OxygenModel>> getOxygenData(String machineId) async {
+  Future<List<OxygenModel>> getOxygenData(String batchId) async {
     try {
-      debugPrint('💨 Fetching oxygen data for machine: $machineId');
+      debugPrint('💨 Fetching oxygen data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
+        batchId: batchId,
         fieldName: 'oxygen',
       );
       debugPrint('💨 Found ${rawData.length} oxygen readings');
