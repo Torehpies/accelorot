@@ -27,11 +27,15 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
     if (widget.isLoading) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -44,10 +48,22 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
       elevation: 8,
       items: const [
         PopupMenuItem(value: DateFilterOption.today, child: Text('Today')),
-        PopupMenuItem(value: DateFilterOption.yesterday, child: Text('Yesterday')),
-        PopupMenuItem(value: DateFilterOption.last7Days, child: Text('Last 7 Days')),
-        PopupMenuItem(value: DateFilterOption.last30Days, child: Text('Last 30 Days')),
-        PopupMenuItem(value: DateFilterOption.custom, child: Text('Custom Date')),
+        PopupMenuItem(
+          value: DateFilterOption.yesterday,
+          child: Text('Yesterday'),
+        ),
+        PopupMenuItem(
+          value: DateFilterOption.last7Days,
+          child: Text('Last 7 Days'),
+        ),
+        PopupMenuItem(
+          value: DateFilterOption.last30Days,
+          child: Text('Last 30 Days'),
+        ),
+        PopupMenuItem(
+          value: DateFilterOption.custom,
+          child: Text('Custom Date'),
+        ),
       ],
     ).then((selected) {
       if (selected != null) {
@@ -101,7 +117,11 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
         );
 
         if (pickedDate != null) {
-          filterDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+          filterDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+          );
         } else {
           return;
         }
@@ -121,7 +141,7 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
 
   void _clearFilter() {
     if (widget.isLoading) return;
-    
+
     setState(() {
       _selectedOption = DateFilterOption.none;
       _selectedDate = null;
@@ -131,7 +151,7 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
 
   String _getDisplayText() {
     if (_selectedDate == null) return 'Date Filter';
-    
+
     switch (_selectedOption) {
       case DateFilterOption.today:
         return 'Today';
@@ -153,7 +173,9 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
     final isActive = _selectedDate != null;
 
     return MouseRegion(
-      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      cursor: widget.isLoading
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
       child: Opacity(
         opacity: widget.isLoading ? 0.5 : 1.0,
         child: InkWell(
@@ -172,14 +194,13 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
                 Icon(
                   Icons.calendar_today,
                   size: 16,
-                  color: isActive ? const Color(0xFF10B981) : WebColors.textLabel,
+                  color: isActive
+                      ? const Color(0xFF10B981)
+                      : WebColors.textLabel,
                 ),
                 if (isActive) ...[
                   const SizedBox(width: 8),
-                  Text(
-                    _getDisplayText(),
-                    style: WebTextStyles.bodyMedium,
-                  ),
+                  Text(_getDisplayText(), style: WebTextStyles.bodyMedium),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_drop_down,
@@ -206,11 +227,4 @@ class _WebMachineDateFilterState extends State<WebMachineDateFilter> {
   }
 }
 
-enum DateFilterOption {
-  none,
-  today,
-  yesterday,
-  last7Days,
-  last30Days,
-  custom,
-}
+enum DateFilterOption { none, today, yesterday, last7Days, last30Days, custom }

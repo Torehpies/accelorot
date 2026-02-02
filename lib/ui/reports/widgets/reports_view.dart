@@ -28,7 +28,7 @@ class _ReportsViewState extends ConsumerState<ReportsView> {
 
   Future<void> _initialize() async {
     if (_isInitialized) return;
-    
+
     final sessionService = SessionService();
     final userData = await sessionService.getCurrentUserData();
     final teamId = userData?['teamId'] as String?;
@@ -83,10 +83,7 @@ class _ReportsViewState extends ConsumerState<ReportsView> {
           ),
           title: const Text(
             'Reports',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.teal,
           elevation: 0,
@@ -150,9 +147,7 @@ class _ReportsViewState extends ConsumerState<ReportsView> {
                       Divider(height: 1, color: Colors.grey[200]),
 
                       // Reports List
-                      Expanded(
-                        child: _buildReportsList(state),
-                      ),
+                      Expanded(child: _buildReportsList(state)),
                     ],
                   ),
                 ),

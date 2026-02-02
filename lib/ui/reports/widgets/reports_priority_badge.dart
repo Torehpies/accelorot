@@ -8,10 +8,7 @@ import '../../core/themes/web_colors.dart';
 class ReportsPriorityBadge extends StatelessWidget {
   final String priority;
 
-  const ReportsPriorityBadge({
-    super.key,
-    required this.priority,
-  });
+  const ReportsPriorityBadge({super.key, required this.priority});
 
   Color get priorityColor {
     switch (priority.toLowerCase()) {
@@ -49,10 +46,7 @@ class ReportsPriorityBadge extends StatelessWidget {
       ),
       child: Text(
         displayText,
-        style: WebTextStyles.label.copyWith(
-          fontSize: 12,
-          color: priorityColor,
-        ),
+        style: WebTextStyles.label.copyWith(fontSize: 12, color: priorityColor),
         textAlign: TextAlign.center,
         overflow: TextOverflow.ellipsis,
       ),

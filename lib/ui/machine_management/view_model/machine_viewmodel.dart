@@ -53,7 +53,7 @@ class MachineViewModel extends _$MachineViewModel {
       }
 
       final userId = FirebaseAuth.instance.currentUser?.uid;
-      
+
       if (userId == null) {
         state = state.copyWith(
           status: LoadingStatus.error,
@@ -89,7 +89,7 @@ class MachineViewModel extends _$MachineViewModel {
 
       _currentTeamId = teamId;
       state = state.copyWith(isLoggedIn: true);
-      
+
       await loadMachines(teamId);
     } catch (e) {
       state = state.copyWith(

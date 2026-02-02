@@ -16,7 +16,7 @@ class SubstrateRepository {
 
   /// Get substrates for current team
   Future<List<Substrate>> getAllSubstrates() async {
-    return await _service.fetchTeamSubstrates(); 
+    return await _service.fetchTeamSubstrates();
   }
 
   /// Get a single substrate by ID

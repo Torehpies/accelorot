@@ -88,10 +88,7 @@ class ReportsTableContainer extends StatelessWidget {
             isLoading: isLoading,
           ),
         ),
-        SearchField(
-          onChanged: onSearchChanged,
-          isLoading: isLoading,
-        ),
+        SearchField(onChanged: onSearchChanged, isLoading: isLoading),
       ],
 
       // Table header with filters

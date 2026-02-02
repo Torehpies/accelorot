@@ -7,20 +7,16 @@ import '../widgets/mobile/filter_section.dart';
 import '../widgets/mobile/activity_card.dart';
 import '../../core/widgets/filters/mobile_search_bar.dart';
 import '../widgets/mobile/date_filter_button.dart';
-import '../widgets/mobile/machine_selector.dart'; 
+import '../widgets/mobile/machine_selector.dart';
 import '../widgets/mobile/batch_selector.dart';
 import '../models/activity_common.dart';
-
 
 /// Clean base screen that only handles UI rendering
 /// All business logic is in ViewModels
 abstract class BaseActivityScreen extends ConsumerStatefulWidget {
   final String? initialFilter;
 
-  const BaseActivityScreen({
-    super.key,
-    this.initialFilter,
-  });
+  const BaseActivityScreen({super.key, this.initialFilter});
 }
 
 /// Base state class - Pure UI logic only
@@ -50,7 +46,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   void onDateFilterChanged(DateFilterRange filter);
 
   void onBatchChanged(String? batchId);
-  
+
   void onMachineChanged(String? machineId);
 
   /// Optional: Callback for refresh
@@ -73,10 +69,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
     return GestureDetector(
       onTap: () => _searchFocusNode.unfocus(),
-      child: Scaffold(
-        appBar: _buildAppBar(state),
-        body: _buildBody(state),
-      ),
+      child: Scaffold(appBar: _buildAppBar(state), body: _buildBody(state)),
     );
   }
 
@@ -88,10 +81,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       ),
       title: Text(
         getScreenTitle(),
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       backgroundColor: Colors.teal,
       actions: [
@@ -121,6 +111,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
                   selectedBatchId: state.selectedBatchId,
                   selectedMachineId: state.selectedMachineId,
                   onChanged: onBatchChanged,
+                  onMachineAutoSelect: onMachineChanged,
                   isCompact: true,
                 ),
               ),
@@ -181,9 +172,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
   Widget _buildContent(ActivityListState state) {
     // Loading
     if (state.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.teal),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.teal));
     }
 
     // Not logged in

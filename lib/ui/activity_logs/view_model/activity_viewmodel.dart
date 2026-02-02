@@ -27,9 +27,8 @@ enum ActivityScreenType {
 
 @riverpod
 class ActivityViewModel extends _$ActivityViewModel {
-  
   // ===== CONFIGURATION MAP FOR ALL SCREEN TYPES =====
-  
+
   static final Map<ActivityScreenType, ActivityFilterConfig> _configs = {
     ActivityScreenType.substrates: SubstratesConfig.config,
     ActivityScreenType.alerts: AlertsConfig.config,
@@ -54,16 +53,17 @@ class ActivityViewModel extends _$ActivityViewModel {
     _filterService = ActivityFilterService();
     _screenType = params.screenType;
     _config = _configs[_screenType]!;
-    
+
     final initialState = ActivityListState(
       selectedFilter: params.initialFilter ?? 'All',
-      isManualFilter: params.initialFilter != null && params.initialFilter != 'All',
+      isManualFilter:
+          params.initialFilter != null && params.initialFilter != 'All',
       focusedMachineId: params.focusedMachineId,
     );
-    
+
     // Initialize asynchronously
     Future.microtask(() => _initialize(params.focusedMachineId));
-    
+
     return initialState;
   }
 
@@ -88,16 +88,16 @@ class ActivityViewModel extends _$ActivityViewModel {
     switch (_screenType) {
       case ActivityScreenType.substrates:
         return await _aggregator.getSubstrates();
-      
+
       case ActivityScreenType.alerts:
         return await _aggregator.getAlerts();
-      
+
       case ActivityScreenType.reports:
         return await _aggregator.getReports();
-      
+
       case ActivityScreenType.cyclesRecom:
         return await _aggregator.getCyclesRecom();
-      
+
       case ActivityScreenType.allActivity:
         // Use the new caching method for allActivity screen
         final result = await _aggregator.getAllActivitiesWithCache();
@@ -109,10 +109,7 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== INITIALIZATION =====
 
   Future<void> _initialize(String? focusedMachineId) async {
-    state = state.copyWith(
-      status: LoadingStatus.loading,
-      errorMessage: null,
-    );
+    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
       final isLoggedIn = await _aggregator.isUserLoggedIn();
@@ -172,10 +169,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   /// Handle filter chip selection
   void onFilterChanged(String filter) {
-    state = state.copyWith(
-      selectedFilter: filter,
-      isManualFilter: true,
-    );
+    state = state.copyWith(selectedFilter: filter, isManualFilter: true);
     _applyFilters();
   }
 
@@ -209,7 +203,6 @@ class ActivityViewModel extends _$ActivityViewModel {
   void onMachineChanged(String? machineId) {
     state = state.copyWith(
       selectedMachineId: machineId,
-      selectedBatchId: null, 
       selectedFilter: 'All',
       isManualFilter: false,
     );
@@ -226,7 +219,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       dateFilter: state.dateFilter,
       config: _config,
       isManualFilter: state.isManualFilter,
-      selectedBatchId: state.selectedBatchId, 
+      selectedBatchId: state.selectedBatchId,
       selectedMachineId: state.selectedMachineId,
     );
 
@@ -260,7 +253,5 @@ class ActivityParams {
 
   @override
   int get hashCode =>
-      screenType.hashCode ^
-      initialFilter.hashCode ^
-      focusedMachineId.hashCode;
+      screenType.hashCode ^ initialFilter.hashCode ^ focusedMachineId.hashCode;
 }

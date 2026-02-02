@@ -7,10 +7,7 @@ import '../view_model/reports_notifier.dart';
 class EditReportModal extends ConsumerStatefulWidget {
   final Report report;
 
-  const EditReportModal({
-    super.key,
-    required this.report,
-  });
+  const EditReportModal({super.key, required this.report});
 
   @override
   ConsumerState<EditReportModal> createState() => _EditReportModalState();
@@ -53,7 +50,10 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
     super.dispose();
   }
 
-  InputDecoration _buildInputDecoration(String labelText, {bool readOnly = false}) {
+  InputDecoration _buildInputDecoration(
+    String labelText, {
+    bool readOnly = false,
+  }) {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(color: readOnly ? Colors.grey[400] : Colors.grey),
@@ -105,7 +105,9 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
     setState(() => _isSubmitting = true);
 
     try {
-      await ref.read(reportsProvider.notifier).updateReport(
+      await ref
+          .read(reportsProvider.notifier)
+          .updateReport(
             machineId: widget.report.machineId,
             reportId: widget.report.id,
             title: title,
@@ -242,8 +244,9 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
             // Created At (Read-only)
             TextField(
               controller: TextEditingController(
-                text: DateFormat('MM/dd/yyyy, hh:mm a')
-                    .format(widget.report.createdAt),
+                text: DateFormat(
+                  'MM/dd/yyyy, hh:mm a',
+                ).format(widget.report.createdAt),
               ),
               decoration: _buildInputDecoration('Created At', readOnly: true),
               enabled: false,
@@ -281,8 +284,9 @@ class _EditReportModalState extends ConsumerState<EditReportModal> {
                             width: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text('Update Report'),

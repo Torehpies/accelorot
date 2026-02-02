@@ -14,7 +14,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
   return auth.when(
     loading: () => RoutePath.loading.path,
     unauthenticated: () =>
-        currentPath == RoutePath.initial.path || 
+        currentPath == RoutePath.initial.path ||
             currentPath == RoutePath.signin.path ||
             currentPath == RoutePath.signup.path ||
             currentPath == RoutePath.forgotPassword.path
@@ -23,9 +23,8 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
     unverified: (_) => currentPath == RoutePath.verifyEmail.path
         ? null
         : RoutePath.verifyEmail.path,
-    missingUserDoc: (_) => currentPath == RoutePath.signup.path
-        ? null
-        : RoutePath.teamSelect.path,
+    missingUserDoc: (_) =>
+        currentPath == RoutePath.signup.path ? null : RoutePath.teamSelect.path,
     authenticated: (firebaseUser, userDoc, status, globalRole, teamRole) {
       switch (status) {
         case UserStatus.pending:
@@ -38,19 +37,19 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               : RoutePath.restricted.path;
         case UserStatus.active:
           if (globalRole == GlobalRole.superadmin) {
-					debugPrint("ROUTED TO SUPERADMIN");
+            debugPrint("ROUTED TO SUPERADMIN");
             if (currentPath.startsWith('/superadmin')) return null;
             return RoutePath.superAdminTeams.path;
           }
 
           if (globalRole == GlobalRole.user) {
             if (teamRole == TeamRole.admin) {
-					debugPrint("ROUTED TO ADMIN");
+              debugPrint("ROUTED TO ADMIN");
               if (currentPath.startsWith('/admin')) return null;
               return RoutePath.adminDashboard.path;
             }
             if (teamRole == TeamRole.operator) {
-					debugPrint("ROUTED TO OPERATOR");
+              debugPrint("ROUTED TO OPERATOR");
               if (currentPath.startsWith('/operator')) return null;
               return RoutePath.dashboard.path;
             }

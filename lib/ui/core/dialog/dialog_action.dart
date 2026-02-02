@@ -37,11 +37,7 @@ class DialogAction {
     required String label,
     required VoidCallback? onPressed,
   }) {
-    return DialogAction(
-      label: label,
-      onPressed: onPressed,
-      isPrimary: false,
-    );
+    return DialogAction(label: label, onPressed: onPressed, isPrimary: false);
   }
 
   /// Create a destructive action button (e.g., Delete, Remove)

@@ -12,8 +12,8 @@ class MachineAggregatorService {
   MachineAggregatorService({
     required MachineRepository machineRepo,
     FirebaseAuth? auth,
-  })  : _machineRepo = machineRepo,
-        _auth = auth ?? FirebaseAuth.instance;
+  }) : _machineRepo = machineRepo,
+       _auth = auth ?? FirebaseAuth.instance;
 
   // ===== USER MANAGEMENT =====
 
@@ -29,10 +29,10 @@ class MachineAggregatorService {
   Future<List<MachineModel>> getMachines(String teamId) async {
     try {
       final machines = await _machineRepo.getMachinesByTeam(teamId);
-      
+
       // Sort by creation date descending (newest first)
       machines.sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
-      
+
       return machines;
     } catch (e) {
       rethrow;

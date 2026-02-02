@@ -11,7 +11,6 @@ class SortDropdown extends StatelessWidget {
     required this.onChanged,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,16 +32,17 @@ class SortDropdown extends StatelessWidget {
         child: DropdownButton<SortOption>(
           value: sortOption,
           icon: Icon(Icons.sort, color: Colors.grey.shade600),
-          style: TextStyle(
-            color: Colors.grey.shade700,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
           items: [
             DropdownMenuItem(
               value: SortOption.newest,
               child: Row(
                 children: [
-                  Icon(Icons.arrow_downward, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.arrow_downward,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Newest'),
                 ],
@@ -52,7 +52,11 @@ class SortDropdown extends StatelessWidget {
               value: SortOption.oldest,
               child: Row(
                 children: [
-                  Icon(Icons.arrow_upward, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.arrow_upward,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Oldest'),
                 ],
@@ -62,7 +66,11 @@ class SortDropdown extends StatelessWidget {
               value: SortOption.priorityHighToLow,
               child: Row(
                 children: [
-                  Icon(Icons.priority_high, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.priority_high,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 8),
                   const Text('Priority'),
                 ],

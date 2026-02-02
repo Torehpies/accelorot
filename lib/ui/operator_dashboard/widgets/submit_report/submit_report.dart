@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../fields/report_type_field.dart';
 import '../../fields/report_title_field.dart';
@@ -7,15 +7,19 @@ import '../../fields/machine_selection_field.dart';
 import '../../fields/priority_field.dart';
 import '../../fields/description_field.dart';
 import '../../fields/submit_button.dart';
-import '../../../../data/providers/report_providers.dart'; 
-import '../../../../data/models/report.dart'; 
-import '../../fields/batch_selection_field.dart'; 
+import '../../../../data/providers/report_providers.dart';
+import '../../../../data/models/report.dart';
+import '../../fields/batch_selection_field.dart';
 
 class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
-  final String? preSelectedBatchId; 
+  final String? preSelectedBatchId;
 
-  const SubmitReport({super.key, this.preSelectedMachineId, this.preSelectedBatchId});
+  const SubmitReport({
+    super.key,
+    this.preSelectedMachineId,
+    this.preSelectedBatchId,
+  });
 
   @override
   ConsumerState<SubmitReport> createState() => _SubmitReportState();
@@ -38,7 +42,7 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
   void initState() {
     super.initState();
     _selectedMachineId = widget.preSelectedMachineId;
-    _selectedBatchId = widget.preSelectedBatchId; 
+    _selectedBatchId = widget.preSelectedBatchId;
   }
 
   @override
@@ -111,10 +115,10 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
     try {
       final reportRepo = ref.read(reportRepositoryProvider);
       await reportRepo.createReport(_selectedMachineId!, reportRequest);
-      
+
       await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return;
-      
+
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -157,10 +161,7 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
                 children: [
                   const Text(
                     'Submit Report',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
@@ -172,13 +173,12 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
               ),
               const SizedBox(height: 16),
 
-     
               MachineSelectionField(
                 selectedMachineId: _selectedMachineId,
                 onChanged: (value) {
                   setState(() {
                     _selectedMachineId = value;
-                    
+
                     if (widget.preSelectedMachineId == null) {
                       _selectedBatchId = null;
                     }
@@ -196,10 +196,9 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
                 onChanged: (value) {
                   setState(() => _selectedBatchId = value);
                 },
-                isLocked: widget.preSelectedBatchId != null, 
+                isLocked: widget.preSelectedBatchId != null,
               ),
               const SizedBox(height: 16),
-
 
               // Report Type
               ReportTypeField(

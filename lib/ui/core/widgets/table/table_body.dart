@@ -64,11 +64,8 @@ class _TableBodyState<T> extends State<TableBody<T>>
 
     return ListView.separated(
       itemCount: widget.items.length,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: WebColors.tableBorder,
-      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, thickness: 1, color: WebColors.tableBorder),
       itemBuilder: (context, index) {
         return widget.rowBuilder(widget.items[index]);
       },
@@ -79,11 +76,8 @@ class _TableBodyState<T> extends State<TableBody<T>>
   Widget _buildSkeletonRows() {
     return ListView.separated(
       itemCount: 8,
-      separatorBuilder: (context, index) => const Divider(
-        height: 1,
-        thickness: 1,
-        color: WebColors.tableBorder,
-      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, thickness: 1, color: WebColors.tableBorder),
       itemBuilder: (context, index) {
         return widget.skeletonRowBuilder?.call() ?? _buildDefaultSkeletonRow();
       },

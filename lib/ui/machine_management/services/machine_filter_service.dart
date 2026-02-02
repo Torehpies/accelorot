@@ -6,9 +6,7 @@ import '../../activity_logs/models/activity_common.dart';
 class FilterResult {
   final List<MachineModel> filteredMachines;
 
-  const FilterResult({
-    required this.filteredMachines,
-  });
+  const FilterResult({required this.filteredMachines});
 }
 
 class MachineFilterService {
@@ -67,13 +65,13 @@ class MachineFilterService {
         m.dateCreated.month,
         m.dateCreated.day,
       );
-      
+
       final filterStartDate = DateTime(
         dateFilter.startDate!.year,
         dateFilter.startDate!.month,
         dateFilter.startDate!.day,
       );
-      
+
       final filterEndDate = DateTime(
         dateFilter.endDate!.year,
         dateFilter.endDate!.month,
@@ -81,8 +79,8 @@ class MachineFilterService {
       );
 
       // Inclusive start, exclusive end: [startDate, endDate)
-      return !machineDate.isBefore(filterStartDate) && 
-             machineDate.isBefore(filterEndDate);
+      return !machineDate.isBefore(filterStartDate) &&
+          machineDate.isBefore(filterEndDate);
     }).toList();
   }
 
@@ -98,7 +96,7 @@ class MachineFilterService {
     final lowerQuery = query.toLowerCase();
     return machines.where((m) {
       return m.machineId.toLowerCase().contains(lowerQuery) ||
-             m.machineName.toLowerCase().contains(lowerQuery);
+          m.machineName.toLowerCase().contains(lowerQuery);
     }).toList();
   }
 

@@ -123,9 +123,7 @@ class _WebProfileScreenState extends State<WebProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       // ✅ UPDATED APPBAR
-      appBar: const AdminAppBar(
-        title: 'Profile',
-      ),
+      appBar: const AdminAppBar(title: 'Profile'),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

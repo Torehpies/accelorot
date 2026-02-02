@@ -34,7 +34,7 @@ class StatsCardRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Alerts Card
         Expanded(
           child: BaseStatsCard(
@@ -50,7 +50,7 @@ class StatsCardRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Operations & AI Card
         Expanded(
           child: BaseStatsCard(
@@ -66,7 +66,7 @@ class StatsCardRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Reports Card
         Expanded(
           child: BaseStatsCard(

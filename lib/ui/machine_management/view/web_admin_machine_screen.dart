@@ -47,8 +47,10 @@ class WebAdminMachineScreen extends ConsumerWidget {
                   onDateFilterChanged: notifier.onDateFilterChanged,
                   onSearchChanged: notifier.onSearchChanged,
                   onSort: notifier.onSort,
-                  onEdit: (machine) => _showEditDialog(context, machine, notifier),
-                  onView: (machine) => _showViewDetailsDialog(context, machine, notifier),
+                  onEdit: (machine) =>
+                      _showEditDialog(context, machine, notifier),
+                  onView: (machine) =>
+                      _showViewDetailsDialog(context, machine, notifier),
                   onPageChanged: notifier.onPageChanged,
                   onItemsPerPageChanged: notifier.onItemsPerPageChanged,
                   onAddMachine: () => _showAddMachineDialog(context, notifier),
@@ -64,41 +66,45 @@ class WebAdminMachineScreen extends ConsumerWidget {
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: false, // Prevent closing while creating
       builder: (context) => WebAdminAddDialog(
-        onCreate: ({
-          required String machineId,
-          required String machineName,
-        }) async {
-          await notifier.addMachine(
-            machineId: machineId,
-            machineName: machineName,
-            assignedUserIds: [],
-          );
-        },
+        onCreate:
+            ({required String machineId, required String machineName}) async {
+              await notifier.addMachine(
+                machineId: machineId,
+                machineName: machineName,
+                assignedUserIds: [],
+              );
+            },
       ),
     );
   }
 
-  void _showEditDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
+  void _showEditDialog(
+    BuildContext context,
+    MachineModel machine,
+    MachineViewModel notifier,
+  ) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: false, // Prevent closing while editing
       builder: (context) => WebAdminEditDialog(
         machine: machine,
-        onUpdate: ({
-          required String machineId,
-          required String machineName,
-        }) async {
-          await notifier.updateMachine(
-            machineId: machineId,
-            machineName: machineName,
-          );
-        },
+        onUpdate:
+            ({required String machineId, required String machineName}) async {
+              await notifier.updateMachine(
+                machineId: machineId,
+                machineName: machineName,
+              );
+            },
       ),
     );
   }
 
-  void _showViewDetailsDialog(BuildContext context, MachineModel machine, MachineViewModel notifier) {
+  void _showViewDetailsDialog(
+    BuildContext context,
+    MachineModel machine,
+    MachineViewModel notifier,
+  ) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
@@ -110,7 +116,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleArchive(BuildContext context, MachineModel machine, MachineViewModel notifier) async {
+  Future<void> _handleArchive(
+    BuildContext context,
+    MachineModel machine,
+    MachineViewModel notifier,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: WebColors.dialogBarrier,

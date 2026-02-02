@@ -53,9 +53,9 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
     }
 
     if (_selectedMachineId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a machine')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a machine')));
       return;
     }
 
@@ -66,10 +66,10 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
       if (userId == null) throw Exception('User not logged in');
 
       final batchRepo = ref.read(batchRepositoryProvider);
-      
+
       // Get existing active batch ID or create new one
       String? batchId = await batchRepo.getBatchId(userId, _selectedMachineId!);
-      
+
       if (batchId == null) {
         // Generate batch number
         final batchNumber = DateTime.now().millisecondsSinceEpoch % 1000000;
@@ -78,8 +78,8 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
           _selectedMachineId!,
           batchNumber,
           batchName: _batchNameController.text.trim(),
-          startNotes: _startNotesController.text.trim().isEmpty 
-              ? null 
+          startNotes: _startNotesController.text.trim().isEmpty
+              ? null
               : _startNotesController.text.trim(),
         );
       } else {
@@ -88,16 +88,15 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
       }
 
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Batch started successfully!'),
           backgroundColor: Colors.green,
         ),
       );
-      
-      Navigator.of(context).pop(true); 
 
+      Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,12 +189,20 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
                 enabled: !_isLoading,
                 decoration: InputDecoration(
                   hintText: 'e.g., October Vegetable Waste',
-                  prefixIcon: Icon(Icons.label_outline, color: Colors.teal[600]),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  prefixIcon: Icon(
+                    Icons.label_outline,
+                    color: Colors.teal[600],
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   errorText: _nameError,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
                 onChanged: (value) {
@@ -222,10 +229,15 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: 'Add any observations or notes...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    borderSide: BorderSide(
+                      color: Colors.teal.shade600,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -237,7 +249,10 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
                 children: [
                   TextButton(
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
-                    child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
@@ -248,7 +263,9 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Icon(Icons.play_arrow, size: 18),
@@ -259,7 +276,10 @@ class _BatchStartDialogState extends ConsumerState<BatchStartDialog> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ],

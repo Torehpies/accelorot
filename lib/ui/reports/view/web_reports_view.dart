@@ -23,39 +23,40 @@ class WebReportsView extends ConsumerWidget {
       child: state.hasError
           ? WebErrorState(message: state.errorMessage ?? 'An error occurred')
           : !state.isLoggedIn && !state.isLoading
-              ? const WebLoginRequired(message: 'Please log in to view reports')
-              : WebContentContainer(
-                  child: WebStatsTableLayout(
-                    statsRow: WebStatsRow(
-                      statsWithChange: viewModel.getStatsWithChange(),
-                      isLoading: state.isLoading,
-                    ),
-                    table: ReportsTableContainer(
-                      reports: state.paginatedReports,
-                      isLoading: state.isLoading,
-                      selectedStatus: state.selectedStatus,
-                      selectedCategory: state.selectedCategory,
-                      selectedPriority: state.selectedPriority,
-                      searchQuery: state.searchQuery,
-                      sortColumn: state.sortColumn,
-                      sortAscending: state.sortAscending,
-                      currentPage: state.currentPage,
-                      totalPages: state.totalPages,
-                      itemsPerPage: state.itemsPerPage,
-                      totalItems: state.filteredReports.length,
-                      onStatusChanged: viewModel.onStatusChanged,
-                      onCategoryChanged: viewModel.onCategoryChanged,
-                      onPriorityChanged: viewModel.onPriorityChanged,
-                      onDateFilterChanged: viewModel.onDateFilterChanged,
-                      onSearchChanged: viewModel.onSearchChanged,
-                      onSort: viewModel.onSort,
-                      onView: (report) => _showViewDialog(context, report),
-                      onEdit: (report) => _showEditDialog(context, report, viewModel),
-                      onPageChanged: viewModel.onPageChanged,
-                      onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
-                    ),
-                  ),
+          ? const WebLoginRequired(message: 'Please log in to view reports')
+          : WebContentContainer(
+              child: WebStatsTableLayout(
+                statsRow: WebStatsRow(
+                  statsWithChange: viewModel.getStatsWithChange(),
+                  isLoading: state.isLoading,
                 ),
+                table: ReportsTableContainer(
+                  reports: state.paginatedReports,
+                  isLoading: state.isLoading,
+                  selectedStatus: state.selectedStatus,
+                  selectedCategory: state.selectedCategory,
+                  selectedPriority: state.selectedPriority,
+                  searchQuery: state.searchQuery,
+                  sortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  currentPage: state.currentPage,
+                  totalPages: state.totalPages,
+                  itemsPerPage: state.itemsPerPage,
+                  totalItems: state.filteredReports.length,
+                  onStatusChanged: viewModel.onStatusChanged,
+                  onCategoryChanged: viewModel.onCategoryChanged,
+                  onPriorityChanged: viewModel.onPriorityChanged,
+                  onDateFilterChanged: viewModel.onDateFilterChanged,
+                  onSearchChanged: viewModel.onSearchChanged,
+                  onSort: viewModel.onSort,
+                  onView: (report) => _showViewDialog(context, report),
+                  onEdit: (report) =>
+                      _showEditDialog(context, report, viewModel),
+                  onPageChanged: viewModel.onPageChanged,
+                  onItemsPerPageChanged: viewModel.onItemsPerPageChanged,
+                ),
+              ),
+            ),
     );
   }
 
@@ -64,13 +65,15 @@ class WebReportsView extends ConsumerWidget {
       context: context,
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: true,
-      builder: (context) => ReportViewDetailsDialog(
-        report: report,
-      ),
+      builder: (context) => ReportViewDetailsDialog(report: report),
     );
   }
 
-  void _showEditDialog(BuildContext context, Report report, ReportsViewModel viewModel) {
+  void _showEditDialog(
+    BuildContext context,
+    Report report,
+    ReportsViewModel viewModel,
+  ) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,

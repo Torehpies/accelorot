@@ -48,7 +48,7 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
 
   void _copyToClipboard() {
     if (widget.value.isEmpty) return;
-    
+
     Clipboard.setData(ClipboardData(text: widget.value));
     ToastService.show(context, message: 'Copied!');
   }
@@ -76,10 +76,7 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
               // Label (left-aligned)
               Flexible(
                 flex: 2,
-                child: Text(
-                  widget.label,
-                  style: WebTextStyles.bodyMediumGray,
-                ),
+                child: Text(widget.label, style: WebTextStyles.bodyMediumGray),
               ),
               const SizedBox(width: 16),
               // Value (right-aligned) with optional copy indicator
@@ -93,7 +90,9 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
                         displayValue,
                         style: WebTextStyles.body.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: isEmptyValue ? WebColors.textMuted : WebColors.textPrimary,
+                          color: isEmptyValue
+                              ? WebColors.textMuted
+                              : WebColors.textPrimary,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -157,7 +156,7 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
 
   void _copyToClipboard() {
     if (widget.value.isEmpty) return;
-    
+
     Clipboard.setData(ClipboardData(text: widget.value));
     ToastService.show(context, message: 'Copied!');
   }
@@ -184,10 +183,7 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
               // Label with copy indicator
               Row(
                 children: [
-                  Text(
-                    widget.label,
-                    style: WebTextStyles.bodyMediumGray,
-                  ),
+                  Text(widget.label, style: WebTextStyles.bodyMediumGray),
                   if (_showCopyIcon && !isEmptyValue) ...[
                     const SizedBox(width: 8),
                     Icon(
@@ -204,7 +200,9 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
                 displayValue,
                 style: WebTextStyles.body.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: isEmptyValue ? WebColors.textMuted : WebColors.textPrimary,
+                  color: isEmptyValue
+                      ? WebColors.textMuted
+                      : WebColors.textPrimary,
                 ),
               ),
             ],
@@ -220,11 +218,7 @@ class ReadOnlySection extends StatelessWidget {
   final List<Widget> fields;
   final String? sectionTitle;
 
-  const ReadOnlySection({
-    super.key,
-    required this.fields,
-    this.sectionTitle,
-  });
+  const ReadOnlySection({super.key, required this.fields, this.sectionTitle});
 
   @override
   Widget build(BuildContext context) {
@@ -303,16 +297,12 @@ class InputField extends StatelessWidget {
           children: [
             Text(
               label,
-              style: WebTextStyles.label.copyWith(
-                color: WebColors.textLabel,
-              ),
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
             ),
             if (required)
               Text(
                 ' *',
-                style: WebTextStyles.label.copyWith(
-                  color: WebColors.error,
-                ),
+                style: WebTextStyles.label.copyWith(color: WebColors.error),
               ),
           ],
         ),
@@ -357,10 +347,7 @@ class InputField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: WebColors.greens,
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: WebColors.greens, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -368,10 +355,7 @@ class InputField extends StatelessWidget {
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: WebColors.error,
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: WebColors.error, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -419,16 +403,12 @@ class DropdownField<T> extends StatelessWidget {
           children: [
             Text(
               label,
-              style: WebTextStyles.label.copyWith(
-                color: WebColors.textLabel,
-              ),
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
             ),
             if (required)
               Text(
                 ' *',
-                style: WebTextStyles.label.copyWith(
-                  color: WebColors.error,
-                ),
+                style: WebTextStyles.label.copyWith(color: WebColors.error),
               ),
           ],
         ),
@@ -480,10 +460,7 @@ class DropdownField<T> extends StatelessWidget {
               items: items.map((item) {
                 return DropdownMenuItem<T>(
                   value: item.value,
-                  child: Text(
-                    item.label,
-                    style: WebTextStyles.body,
-                  ),
+                  child: Text(item.label, style: WebTextStyles.body),
                 );
               }).toList(),
               onChanged: enabled ? onChanged : null,
@@ -505,10 +482,7 @@ class DropdownItem<T> {
   final T value;
   final String label;
 
-  const DropdownItem({
-    required this.value,
-    required this.label,
-  });
+  const DropdownItem({required this.value, required this.label});
 }
 
 /// Date picker field matching InputField design
@@ -539,8 +513,20 @@ class DatePickerField extends StatelessWidget {
   });
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
@@ -580,16 +566,12 @@ class DatePickerField extends StatelessWidget {
           children: [
             Text(
               label,
-              style: WebTextStyles.label.copyWith(
-                color: WebColors.textLabel,
-              ),
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
             ),
             if (required)
               Text(
                 ' *',
-                style: WebTextStyles.label.copyWith(
-                  color: WebColors.error,
-                ),
+                style: WebTextStyles.label.copyWith(color: WebColors.error),
               ),
           ],
         ),
@@ -638,9 +620,7 @@ class DatePickerField extends StatelessWidget {
               ),
             ),
             child: Text(
-              selectedDate != null
-                  ? _formatDate(selectedDate!)
-                  : 'Select date',
+              selectedDate != null ? _formatDate(selectedDate!) : 'Select date',
               style: selectedDate != null
                   ? WebTextStyles.body
                   : WebTextStyles.bodyMediumGray,
@@ -709,16 +689,12 @@ class NumberStepperField extends StatelessWidget {
           children: [
             Text(
               label,
-              style: WebTextStyles.label.copyWith(
-                color: WebColors.textLabel,
-              ),
+              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
             ),
             if (required)
               Text(
                 ' *',
-                style: WebTextStyles.label.copyWith(
-                  color: WebColors.error,
-                ),
+                style: WebTextStyles.label.copyWith(color: WebColors.error),
               ),
           ],
         ),
@@ -804,9 +780,7 @@ class NumberStepperField extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16, top: 8),
                 child: Text(
                   errorText!,
-                  style: WebTextStyles.caption.copyWith(
-                    color: WebColors.error,
-                  ),
+                  style: WebTextStyles.caption.copyWith(color: WebColors.error),
                 ),
               ),
             if (helperText != null && errorText == null)

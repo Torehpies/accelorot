@@ -31,7 +31,7 @@ abstract class Substrate with _$Substrate {
   /// Create from Firestore document
   static Substrate fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     return Substrate(
       id: doc.id,
       title: data['title'] ?? '',

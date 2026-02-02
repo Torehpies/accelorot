@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class ArchiveConfirmationDialog extends StatelessWidget {
   final String machineName;
 
-  const ArchiveConfirmationDialog({
-    super.key,
-    required this.machineName,
-  });
+  const ArchiveConfirmationDialog({super.key, required this.machineName});
 
   static Future<bool?> show(BuildContext context, String machineName) {
     return showDialog<bool>(
@@ -54,10 +51,7 @@ class ArchiveConfirmationDialog extends StatelessWidget {
             // Message
             Text(
               'They will no longer have access to the system.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

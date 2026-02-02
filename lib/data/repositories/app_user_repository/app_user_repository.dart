@@ -15,4 +15,3 @@ abstract class AppUserRepository {
   });
   AppUser mapRawDataToDomain(Map<String, dynamic> rawData);
 }
-

@@ -24,7 +24,7 @@ void main() async {
   } on FirebaseException {
     // Handle or log Firebase initialization errors appropriately
   } catch (e) {
-		debugPrint(e.toString());
+    debugPrint(e.toString());
     // Handle or log general initialization errors appropriately
   }
 
@@ -36,12 +36,12 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-		final router = ref.watch(routerProvider);
+    final router = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'Accel-o-Rot',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
-			routerConfig: router,
+      routerConfig: router,
     );
   }
 }

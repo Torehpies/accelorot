@@ -18,7 +18,7 @@ class ActivityLogItem {
   final ActivityType type;
 
   final String? reportType;
-  
+
   // Optional metadata
   final String? machineId;
   final String? machineName;
@@ -34,7 +34,6 @@ class ActivityLogItem {
   final String? duration;
   final int? completedCycles;
   final int? totalRuntimeSeconds;
-
 
   // ===== FACTORY CONSTRUCTORS =====
 
@@ -52,7 +51,7 @@ class ActivityLogItem {
     final bool isReport = data['reportType'] != null;
     final bool isCycle = data['controllerType'] != null;
     final bool isAlert = data['sensorType'] != null;
-    
+
     ActivityType type;
     if (isCycle) {
       type = ActivityType.cycle;
@@ -157,7 +156,7 @@ class ActivityLogItem {
   });
 
   // ===== COMPUTED PROPERTIES =====
-  
+
   // Convenience getters
   bool get isCycle => type == ActivityType.cycle;
   bool get isRunning => status == 'running';
@@ -167,8 +166,6 @@ class ActivityLogItem {
   String get formattedTimestamp {
     return DateFormat('MM/dd/yyyy, hh:mm a').format(timestamp);
   }
-
-  
 
   /// Check if this is a report type activity
   bool get isReport => reportType?.toLowerCase() == 'reports';
@@ -188,14 +185,9 @@ class ActivityLogItem {
         (batchName?.toLowerCase().contains(lowerQuery) ?? false) ||
         (batchId?.toLowerCase().contains(lowerQuery) ?? false) ||
         (status?.toLowerCase().contains(lowerQuery) ?? false) ||
-        (controllerType?.toLowerCase().contains(lowerQuery) ?? false); 
+        (controllerType?.toLowerCase().contains(lowerQuery) ?? false);
   }
 }
 
 /// Enum for activity types
-enum ActivityType {
-  substrate,
-  alert,
-  report,
-  cycle,
-}
+enum ActivityType { substrate, alert, report, cycle }

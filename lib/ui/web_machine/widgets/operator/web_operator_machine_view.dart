@@ -10,10 +10,12 @@ class WebOperatorMachineView extends ConsumerStatefulWidget {
   const WebOperatorMachineView({super.key});
 
   @override
-  ConsumerState<WebOperatorMachineView> createState() => _WebOperatorMachineViewState();
+  ConsumerState<WebOperatorMachineView> createState() =>
+      _WebOperatorMachineViewState();
 }
 
-class _WebOperatorMachineViewState extends ConsumerState<WebOperatorMachineView> {
+class _WebOperatorMachineViewState
+    extends ConsumerState<WebOperatorMachineView> {
   final _searchFocusNode = FocusNode();
   String? _teamId;
   bool _isInitializing = true;
@@ -198,7 +200,9 @@ class _WebOperatorMachineViewState extends ConsumerState<WebOperatorMachineView>
               onPressed: () {
                 ref.read(operatorMachineProvider.notifier).clearError();
                 if (_teamId != null) {
-                  ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
+                  ref
+                      .read(operatorMachineProvider.notifier)
+                      .initialize(_teamId!);
                 }
               },
               icon: const Icon(Icons.refresh),

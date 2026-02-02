@@ -1,11 +1,7 @@
 import 'sensor_reading_model.dart';
 
 class MoistureModel extends SensorReadingModel {
-  MoistureModel({
-    required super.id,
-    required super.value,
-    super.timestamp,
-  });
+  MoistureModel({required super.id, required super.value, super.timestamp});
 
   String get quality {
     if (value >= 40 && value <= 60) return 'Excellent';

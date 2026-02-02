@@ -15,7 +15,7 @@ class WebShell extends StatelessWidget {
       navItems: operatorNavItems,
       // primaryColor: Colors.teal.shade700,
       // secondaryColor: Colors.teal.shade900,
-			color: AppColors.background,
+      color: AppColors.background,
       roleName: 'Operator',
       brandingWidget: WebBranding(),
       sidebarWidth: 250,

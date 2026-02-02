@@ -35,7 +35,7 @@ class PendingMemberRepositoryRemote extends PendingMemberRepository {
 
       return const Result.success(null);
     } on FirebaseException catch (e) {
-			debugPrint("ACCEPT INVITATION ERROR: $e");
+      debugPrint("ACCEPT INVITATION ERROR: $e");
       return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
       return const Result.failure(DataLayerError.unknownError());

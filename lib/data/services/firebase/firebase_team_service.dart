@@ -89,9 +89,9 @@ class FirebaseTeamService implements TeamService {
             .map((doc) => Team.fromJson({...doc.data(), 'id': doc.id}))
             .toList(),
       );
-			return result;
+      return result;
     } catch (e) {
-			return prefix.Result.error(Exception(e));
-		}
+      return prefix.Result.error(Exception(e));
+    }
   }
 }

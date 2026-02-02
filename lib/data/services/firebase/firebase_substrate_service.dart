@@ -18,9 +18,9 @@ class FirestoreSubstrateService implements SubstrateService {
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
     required BatchService batchService,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance,
-        _batchService = batchService;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _auth = auth ?? FirebaseAuth.instance,
+       _batchService = batchService;
 
   /// Get current authenticated user ID
   String? get currentUserId => _auth.currentUser?.uid;
@@ -96,7 +96,9 @@ class FirestoreSubstrateService implements SubstrateService {
 
         return {'success': true, 'substrates': substrates};
       } catch (e) {
-        debugPrint('⚠️ Error fetching substrates from batch ${batchDoc.id}: $e');
+        debugPrint(
+          '⚠️ Error fetching substrates from batch ${batchDoc.id}: $e',
+        );
         return {'success': false, 'substrates': <Substrate>[]};
       }
     });
@@ -112,7 +114,9 @@ class FirestoreSubstrateService implements SubstrateService {
       }
     }
 
-    debugPrint('📊 Fetched substrates from $successCount/${batches.length} batches ($failureCount failures)');
+    debugPrint(
+      '📊 Fetched substrates from $successCount/${batches.length} batches ($failureCount failures)',
+    );
     return allSubstrates;
   }
 
@@ -131,14 +135,16 @@ class FirestoreSubstrateService implements SubstrateService {
 
     try {
       // Get or create batch
-      String batchId = await _batchService.getBatchId(currentUserId!, machineId) ??
+      String batchId =
+          await _batchService.getBatchId(currentUserId!, machineId) ??
           await _batchService.createBatch(currentUserId!, machineId, 1);
 
       // Get teamId
       final teamId = await _batchService.getUserTeamId(currentUserId!);
 
       // Create document
-      final Timestamp timestamp = data['timestamp'] as Timestamp? ?? Timestamp.now();
+      final Timestamp timestamp =
+          data['timestamp'] as Timestamp? ?? Timestamp.now();
       final docId = '${timestamp.millisecondsSinceEpoch}_$currentUserId';
 
       // PATH: batches/{batchId}/substrates
@@ -166,63 +172,65 @@ class FirestoreSubstrateService implements SubstrateService {
     }
   }
 
-// Get a single substrate by ID
-@override
-Future<Substrate?> fetchSubstrateById(String substrateId) async {
-  if (currentUserId == null) {
-    throw Exception('User not authenticated');
-  }
-
-  try {
-    // Get user's teamId
-    final teamId = await _batchService.getUserTeamId(currentUserId!);
-
-    if (teamId == null || teamId.isEmpty) {
-      debugPrint('⚠️ User has no team assigned');
-      return null;
+  // Get a single substrate by ID
+  @override
+  Future<Substrate?> fetchSubstrateById(String substrateId) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
     }
 
-    // Get all machines belonging to this team
-    final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+    try {
+      // Get user's teamId
+      final teamId = await _batchService.getUserTeamId(currentUserId!);
 
-    if (teamMachineIds.isEmpty) {
-      debugPrint('ℹ️ No machines found for team: $teamId');
-      return null;
-    }
-
-    // Get all batches for those machines
-    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
-
-    if (batches.isEmpty) {
-      debugPrint('ℹ️ No batches found for team machines');
-      return null;
-    }
-
-    // Search each batch for the substrate
-    for (var batchDoc in batches) {
-      try {
-        final substrateDoc = await _firestore
-            .collection('batches')
-            .doc(batchDoc.id)
-            .collection('substrates')
-            .doc(substrateId)
-            .get();
-
-        if (substrateDoc.exists) {
-          debugPrint('✅ Found substrate: $substrateId in batch: ${batchDoc.id}');
-          return Substrate.fromFirestore(substrateDoc);
-        }
-      } catch (e) {
-        debugPrint('⚠️ Error checking batch ${batchDoc.id}: $e');
-        continue;
+      if (teamId == null || teamId.isEmpty) {
+        debugPrint('⚠️ User has no team assigned');
+        return null;
       }
-    }
 
-    debugPrint('ℹ️ Substrate not found: $substrateId');
-    return null;
-  } catch (e) {
-    debugPrint('❌ Error fetching substrate by ID: $e');
-    throw Exception('Failed to fetch substrate: $e');
+      // Get all machines belonging to this team
+      final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+
+      if (teamMachineIds.isEmpty) {
+        debugPrint('ℹ️ No machines found for team: $teamId');
+        return null;
+      }
+
+      // Get all batches for those machines
+      final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+
+      if (batches.isEmpty) {
+        debugPrint('ℹ️ No batches found for team machines');
+        return null;
+      }
+
+      // Search each batch for the substrate
+      for (var batchDoc in batches) {
+        try {
+          final substrateDoc = await _firestore
+              .collection('batches')
+              .doc(batchDoc.id)
+              .collection('substrates')
+              .doc(substrateId)
+              .get();
+
+          if (substrateDoc.exists) {
+            debugPrint(
+              '✅ Found substrate: $substrateId in batch: ${batchDoc.id}',
+            );
+            return Substrate.fromFirestore(substrateDoc);
+          }
+        } catch (e) {
+          debugPrint('⚠️ Error checking batch ${batchDoc.id}: $e');
+          continue;
+        }
+      }
+
+      debugPrint('ℹ️ Substrate not found: $substrateId');
+      return null;
+    } catch (e) {
+      debugPrint('❌ Error fetching substrate by ID: $e');
+      throw Exception('Failed to fetch substrate: $e');
+    }
   }
-}
 }

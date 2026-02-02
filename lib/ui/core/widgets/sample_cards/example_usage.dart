@@ -66,15 +66,15 @@ class _CompostListExampleState extends State<CompostListExample> {
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
       items = items
-          .where((item) =>
-              item['title']
-                  .toString()
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              item['machine']
-                  .toString()
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()))
+          .where(
+            (item) =>
+                item['title'].toString().toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                item['machine'].toString().toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+          )
           .toList();
     }
 
@@ -84,19 +84,21 @@ class _CompostListExampleState extends State<CompostListExample> {
   @override
   Widget build(BuildContext context) {
     final cards = _filteredItems
-        .map((item) => CompostCard(
-              title: item['title'],
-              icon: item['icon'],
-              iconColor: item['iconColor'],
-              machineName: item['machine'],
-              batchName: item['batch'],
-              userName: item['user'],
-              dateTime: item['dateTime'],
-              weight: item['weight'],
-              onTap: () {
-                // Handle card tap
-              },
-            ))
+        .map(
+          (item) => CompostCard(
+            title: item['title'],
+            icon: item['icon'],
+            iconColor: item['iconColor'],
+            machineName: item['machine'],
+            batchName: item['batch'],
+            userName: item['user'],
+            dateTime: item['dateTime'],
+            weight: item['weight'],
+            onTap: () {
+              // Handle card tap
+            },
+          ),
+        )
         .toList();
 
     return Scaffold(
@@ -181,15 +183,15 @@ class _MachineListExampleState extends State<MachineListExample> {
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
       machines = machines
-          .where((machine) =>
-              machine['name']
-                  .toString()
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              machine['id']
-                  .toString()
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()))
+          .where(
+            (machine) =>
+                machine['name'].toString().toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                machine['id'].toString().toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+          )
           .toList();
     }
 
@@ -199,17 +201,19 @@ class _MachineListExampleState extends State<MachineListExample> {
   @override
   Widget build(BuildContext context) {
     final cards = _filteredMachines
-        .map((machine) => MachineStatusCard(
-              machineName: machine['name'],
-              machineId: machine['id'],
-              assignedUser: machine['assignedUser'],
-              dateCreated: machine['dateCreated'],
-              status: machine['status'],
-              statusColor: machine['statusColor'],
-              onTap: () {
-                // Handle card tap
-              },
-            ))
+        .map(
+          (machine) => MachineStatusCard(
+            machineName: machine['name'],
+            machineId: machine['id'],
+            assignedUser: machine['assignedUser'],
+            dateCreated: machine['dateCreated'],
+            status: machine['status'],
+            statusColor: machine['statusColor'],
+            onTap: () {
+              // Handle card tap
+            },
+          ),
+        )
         .toList();
 
     return Scaffold(

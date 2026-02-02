@@ -22,23 +22,23 @@ final statisticsServiceProvider = Provider<StatisticsService>((ref) {
 // Statistics Repository provider
 final statisticsRepositoryProvider = Provider<StatisticsRepository>((ref) {
   final service = ref.watch(statisticsServiceProvider);
-  return StatisticsRepositoryRemote (statisticsService: service);
+  return StatisticsRepositoryRemote(statisticsService: service);
 });
 
 // Temperature data provider
-final temperatureDataProvider = FutureProvider.family<List<TemperatureModel>, String>((ref, machineId) async {
+final temperatureDataProvider = FutureProvider.family<List<TemperatureModel>, String>((ref, batchId) async {
   final repository = ref.watch(statisticsRepositoryProvider);
-  return repository.getTemperatureReadings(machineId);
+  return repository.getTemperatureReadings(batchId);
 });
 
 // Moisture data provider
-final moistureDataProvider = FutureProvider.family<List<MoistureModel>, String>((ref, machineId) async {
+final moistureDataProvider = FutureProvider.family<List<MoistureModel>, String>((ref, batchId) async {
   final repository = ref.watch(statisticsRepositoryProvider);
-  return repository.getMoistureReadings(machineId);
+  return repository.getMoistureReadings(batchId);
 });
 
 // Oxygen data provider
-final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((ref, machineId) async {
+final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((ref, batchId) async {
   final repository = ref.watch(statisticsRepositoryProvider);
-  return repository.getOxygenReadings(machineId);
+  return repository.getOxygenReadings(batchId);
 });

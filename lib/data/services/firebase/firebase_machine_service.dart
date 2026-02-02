@@ -110,11 +110,11 @@ class FirebaseMachineService implements MachineService {
       if (request.status != null) {
         final statusValue = _statusToString(request.status!);
         final isArchivedValue = _getIsArchivedFromStatus(request.status!);
-        
+
         updates['status'] = statusValue;
         updates['isArchived'] = isArchivedValue;
       }
-      
+
       if (request.assignedUserIds != null) {
         updates['assignedUserIds'] = request.assignedUserIds;
       }
@@ -122,7 +122,7 @@ class FirebaseMachineService implements MachineService {
       if (request.currentBatchId != null) {
         updates['currentBatchId'] = request.currentBatchId;
       }
-      
+
       if (request.metadata != null) {
         updates['metadata'] = request.metadata;
       }

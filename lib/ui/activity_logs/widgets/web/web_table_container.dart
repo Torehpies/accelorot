@@ -169,10 +169,9 @@ class WebTableContainer extends StatelessWidget {
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    const rightSectionEstimatedWidth =
-        380.0; // Date filter + Search + gaps 
+    const rightSectionEstimatedWidth = 380.0; // Date filter + Search + gaps
     const minGapBetweenSections = 24.0;
-    const containerCrampedThreshold = 800.0; 
+    const containerCrampedThreshold = 800.0;
 
     // Tier 2: Container too cramped (fallback)
     if (constraints.maxWidth < containerCrampedThreshold) {
@@ -202,8 +201,7 @@ class WebTableContainer extends StatelessWidget {
     const paddingPerDropdown = 30.0;
     const arrowWidth = 20.0;
     const clearButtonWidth = 20.0;
-    const internalGaps =
-        24.0;
+    const internalGaps = 24.0;
     const gapBetweenDropdowns = 12.0;
 
     // Estimate Machine dropdown width

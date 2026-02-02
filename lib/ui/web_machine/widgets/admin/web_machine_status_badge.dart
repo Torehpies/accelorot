@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class MachineStatusBadge extends StatelessWidget {
   final bool isArchived;
 
-  const MachineStatusBadge({
-    super.key,
-    required this.isArchived,
-  });
+  const MachineStatusBadge({super.key, required this.isArchived});
 
   @override
   Widget build(BuildContext context) {

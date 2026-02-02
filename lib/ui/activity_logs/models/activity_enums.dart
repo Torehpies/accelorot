@@ -168,7 +168,9 @@ enum ActivitySubType {
 /// Helper methods for working with activity enums
 class ActivityEnumHelpers {
   /// Get all sub-types that belong to a category
-  static List<ActivitySubType> getSubTypesForCategory(ActivityCategory category) {
+  static List<ActivitySubType> getSubTypesForCategory(
+    ActivityCategory category,
+  ) {
     switch (category) {
       case ActivityCategory.all:
         return ActivitySubType.values;

@@ -8,10 +8,7 @@ import '../../../machine_management/widgets/user_selector_dropdown.dart';
 class WebAddMachineModal extends ConsumerStatefulWidget {
   final String teamId;
 
-  const WebAddMachineModal({
-    super.key,
-    required this.teamId,
-  });
+  const WebAddMachineModal({super.key, required this.teamId});
 
   @override
   ConsumerState<WebAddMachineModal> createState() => _WebAddMachineModalState();
@@ -34,7 +31,9 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
 
   Future<void> _loadUsers() async {
     try {
-      final operators = await ref.read(operatorRepositoryProvider).getOperators(widget.teamId);
+      final operators = await ref
+          .read(operatorRepositoryProvider)
+          .getOperators(widget.teamId);
       if (mounted) {
         setState(() {
           _users = operators.where((o) => !o.isArchived).toList();
@@ -81,10 +80,7 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
         borderRadius: BorderRadius.circular(8),
       ),
       disabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(
-          color: Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       filled: readOnly,
@@ -98,7 +94,9 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
     setState(() => _isSubmitting = true);
 
     try {
-      await ref.read(adminMachineProvider.notifier).addMachine(
+      await ref
+          .read(adminMachineProvider.notifier)
+          .addMachine(
             teamId: widget.teamId,
             machineId: _machineIdController.text.trim(),
             machineName: _machineNameController.text.trim(),
@@ -107,7 +105,7 @@ class _WebAddMachineModalState extends ConsumerState<WebAddMachineModal> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        
+
         // Show success dialog
         showDialog(
           context: context,
@@ -350,10 +348,7 @@ class _SuccessDialog extends StatelessWidget {
             const SizedBox(height: 8),
             const Text(
               'Your changes has been made successfully.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ),
+              style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -372,10 +367,7 @@ class _SuccessDialog extends StatelessWidget {
                 ),
                 child: const Text(
                   'Got it',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                 ),
               ),
             ),

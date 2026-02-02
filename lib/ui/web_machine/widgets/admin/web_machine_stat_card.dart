@@ -71,11 +71,7 @@ class MachineStatCard extends StatelessWidget {
                   color: iconBgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: iconColor,
-                ),
+                child: Icon(icon, size: 20, color: iconColor),
               ),
             ],
           ),
@@ -100,7 +96,7 @@ class MachineStatCard extends StatelessWidget {
 
           const SizedBox(height: 5),
 
-          // Percentage + Subtitle Row 
+          // Percentage + Subtitle Row
           Row(
             children: [
               Text(

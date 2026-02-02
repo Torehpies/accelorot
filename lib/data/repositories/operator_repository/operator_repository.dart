@@ -17,5 +17,5 @@ abstract class OperatorRepository {
     required String teamId,
     required String requestorId,
     required String pendingDocId,
-    });
-  }
+  });
+}

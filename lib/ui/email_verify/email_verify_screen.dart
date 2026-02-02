@@ -124,7 +124,7 @@ class EmailVerifyScreen extends ConsumerWidget {
                             ? null
                             : notifier.resendVerificationEmail,
                         isLoading: state.isResending,
-												enabled: !canResend,
+                        enabled: !canResend,
                       ),
                       const SizedBox(height: 16),
 

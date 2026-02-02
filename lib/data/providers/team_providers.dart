@@ -42,7 +42,15 @@ PendingMembersService pendingMembersService(Ref ref) {
 
 @riverpod
 Future<Team> currentTeam(Ref ref) async {
-	final teamUser = ref.watch(appUserProvider).value;
-	final teamId = teamUser?.teamId;
+  final teamUser = ref.watch(appUserProvider).value;
+  final teamId = teamUser?.teamId;
   return ref.read(teamServiceProvider).getTeam(teamId!);
+}
+
+// Stream provider to reactively get current user's teamId
+@riverpod
+Stream<String?> currentUserTeamId(Ref ref) async* {
+  await for (final user in ref.watch(appUserProvider.future).asStream()) {
+    yield user?.teamId;
+  }
 }

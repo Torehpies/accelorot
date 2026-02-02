@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/action_icon_button.dart';
 
 class PendingMemberActionButtons extends StatelessWidget {
   final PendingMembersNotifier notifier;
@@ -17,13 +18,13 @@ class PendingMemberActionButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: Icon(Icons.check),
+        actionIconButton(
+          icon: Icons.check,
           onPressed: () => _showAcceptDialog(context),
           tooltip: 'Accept Member',
         ),
-        IconButton(
-          icon: Icon(Icons.cancel_outlined),
+        actionIconButton(
+          icon: Icons.cancel_outlined,
           onPressed: () => _showDeclineDialog(context),
           tooltip: 'Decline Member',
         ),

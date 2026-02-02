@@ -11,20 +11,13 @@ import '../../change_password_dialog/widgets/change_password_dialog.dart';
 import '../../core/ui/confirm_dialog.dart';
 
 class MobileSettingsView extends ConsumerWidget {
-  final bool showAppBar;
-  
-  const MobileSettingsView({super.key, this.showAppBar = true});
+  const MobileSettingsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
 
     return Scaffold(
-      appBar: showAppBar ? AppBar(
-        title: const Text('Settings'),
-        backgroundColor: const Color(0xFF4CAF50),
-        foregroundColor: Colors.white,
-      ) : null,
       body: settingsState.map(
         initial: (_) => const Center(child: CircularProgressIndicator()),
         loading: (_) => const Center(child: CircularProgressIndicator()),
