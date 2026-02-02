@@ -113,7 +113,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     }
   }
 
-  // ===================== MOBILE LAYOUT (<600px) - MINIMIZED =====================
+  // ===================== MOBILE LAYOUT (<600px) =====================
   Widget _buildMobileLayout(BuildContext context, double screenWidth) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -160,7 +160,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
         const SizedBox(height: AppSpacing.lg),
 
-        // MINIMIZED Grid for mobile
+        // Grid for mobile
         _buildMobileGrid(screenWidth),
       ],
     );
@@ -177,7 +177,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         curve: Curves.easeInOut,
         width: double.infinity,
         padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 6 : 5,
+          vertical: isHovered ? 8 : 5,
           horizontal: 8,
         ),
         decoration: BoxDecoration(
@@ -237,8 +237,9 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                 ),
               ],
             ),
+            // Description on hover for mobile
             if (isHovered && _impactDescriptions.containsKey(text)) ...[
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.only(left: 22.0),
                 child: Text(
@@ -248,7 +249,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                     color: const Color(0xFF666666),
                     height: 1.3,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -362,6 +363,24 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           color: isGreen ? Colors.white : const Color(0xFF666666),
                         ),
                       ),
+                      // Additional info on hover for mobile
+                      if (isHovered) ...[
+                        const SizedBox(height: 2),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Text(
+                            _getMobileStatDescription(index),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 6,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   )
                 else
@@ -393,6 +412,24 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           ),
                         ),
                       ),
+                      // Additional info on hover for mobile
+                      if (isHovered) ...[
+                        const SizedBox(height: 2),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Text(
+                            _getMobileStatDescription(index),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 6,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -403,7 +440,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     );
   }
 
-  // ===================== TABLET LAYOUT (600-1024px) - MINIMIZED =====================
+  // ===================== TABLET LAYOUT (600-1024px) =====================
   Widget _buildTabletLayout(BuildContext context, double screenWidth) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -450,7 +487,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
         const SizedBox(height: AppSpacing.lg),
 
-        // MINIMIZED Grid for tablet
+        // Grid for tablet
         _buildTabletGrid(screenWidth),
       ],
     );
@@ -467,7 +504,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         curve: Curves.easeInOut,
         width: double.infinity,
         padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 8 : 7,
+          vertical: isHovered ? 10 : 7,
           horizontal: 10,
         ),
         decoration: BoxDecoration(
@@ -527,8 +564,9 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                 ),
               ],
             ),
+            // Description on hover for tablet
             if (isHovered && _impactDescriptions.containsKey(text)) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Padding(
                 padding: const EdgeInsets.only(left: 28.0),
                 child: Text(
@@ -538,7 +576,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                     color: const Color(0xFF666666),
                     height: 1.4,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -612,7 +650,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(6.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -651,6 +689,24 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           color: isGreen ? Colors.white : const Color(0xFF666666),
                         ),
                       ),
+                      // Additional info on hover for tablet
+                      if (isHovered) ...[
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            _getTabletStatDescription(index),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.3,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   )
                 else
@@ -681,6 +737,24 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           ),
                         ),
                       ),
+                      // Additional info on hover for tablet
+                      if (isHovered) ...[
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            _getTabletStatDescription(index),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.3,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -1304,6 +1378,38 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         ),
       ),
     );
+  }
+
+  // Helper method to get mobile stat description
+  String _getMobileStatDescription(int index) {
+    switch (index) {
+      case 0:
+        return 'Traditional composting takes months. Our technology accelerates the process significantly.';
+      case 1:
+        return 'Biodegradable waste makes up over half of all municipal solid waste in the Philippines.';
+      case 2:
+        return 'Our system operates with minimal human intervention, automating the composting process.';
+      case 3:
+        return 'IoT technology provides real-time monitoring and adjustments for optimal composting.';
+      default:
+        return 'Sustainable waste management solution for communities.';
+    }
+  }
+
+  // Helper method to get tablet stat description
+  String _getTabletStatDescription(int index) {
+    switch (index) {
+      case 0:
+        return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
+      case 1:
+        return 'Over 50% of municipal solid waste is organic material that can be composted instead of going to landfills.';
+      case 2:
+        return 'IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring.';
+      case 3:
+        return 'Smart technology automates temperature, moisture, and aeration for optimal composting conditions.';
+      default:
+        return 'Sustainable waste management solution that empowers communities and reduces environmental impact.';
+    }
   }
 
   void _safeSetState(VoidCallback callback) {
