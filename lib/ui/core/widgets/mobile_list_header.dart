@@ -182,11 +182,20 @@ class MobileListHeader extends StatelessWidget implements PreferredSizeWidget {
               addButtonIcon ?? Icons.add,
               size: 18,
             ),
-            label: Text(addButtonLabel ?? 'Add Machine'),
+            label: Text(
+              addButtonLabel ?? 'Add Machine',
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.2,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: addButtonColor ?? AppColors.green100,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
