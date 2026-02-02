@@ -231,7 +231,7 @@ class _MobileHeader extends StatelessWidget {
         boxShadow: isScrolled && !isMenuOpen
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 16,
                   offset: const Offset(0, 4),
                 )
@@ -324,7 +324,7 @@ class _MenuItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: isActive ? Colors.green.withOpacity(0.1) : null,
+          color: isActive ? Colors.green.withValues(alpha: 0.1) : null,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

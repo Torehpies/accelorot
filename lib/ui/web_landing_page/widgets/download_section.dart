@@ -43,7 +43,7 @@ class DownloadSection extends StatelessWidget {
               child: Icon(
                 Icons.eco_outlined,
                 size: 220,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
               ),
             ),
             Positioned(
@@ -52,7 +52,7 @@ class DownloadSection extends StatelessWidget {
               child: Icon(
                 Icons.eco_outlined,
                 size: 180,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
               ),
             ),
             Center(

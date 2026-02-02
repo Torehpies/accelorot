@@ -36,7 +36,7 @@ class IntroSection extends StatelessWidget {
             ),
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
               ),
             ),
             Container(
@@ -104,7 +104,7 @@ class IntroSection extends StatelessWidget {
               TextSpan(
                 text: 'Organic Waste\n',
                 style: TextStyle(
-                  color: AppColors.green100.withOpacity(0.8), // FIXED: comma instead of semicolon, proper opacity method
+                  color: AppColors.green100.withValues(alpha: 0.8), // FIXED: comma instead of semicolon, proper opacity method
                   fontWeight: FontWeight.bold,
                 ),
               ),

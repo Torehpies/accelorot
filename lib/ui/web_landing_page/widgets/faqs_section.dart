@@ -159,7 +159,7 @@ class _FaqCard extends StatelessWidget {
               child: Icon(
                 Icons.keyboard_arrow_down,
                 size: 24,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
               ),
             ),
             onTap: onToggle,

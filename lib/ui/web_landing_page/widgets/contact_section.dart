@@ -373,7 +373,6 @@ class _SocialIcon extends StatelessWidget {
     if (svgAsset != null) {
       iconChild = SvgPicture.asset(
         svgAsset!,
-        color: Colors.white,
         width: 20,
         height: 20,
       );

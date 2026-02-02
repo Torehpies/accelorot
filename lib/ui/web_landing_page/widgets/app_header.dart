@@ -42,13 +42,13 @@ class AppHeader extends StatelessWidget {
         boxShadow: isScrolled
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 16,
                   spreadRadius: 0,
                   offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   spreadRadius: 0,
                   offset: const Offset(0, 2),
