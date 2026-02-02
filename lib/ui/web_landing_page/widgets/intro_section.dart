@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
-import '../../core/ui/second_button.dart';
 import '../widgets/tem_mois_oxy_card.dart';
 
 class IntroSection extends StatelessWidget {
@@ -25,27 +24,34 @@ class IntroSection extends StatelessWidget {
         final isTablet = constraints.maxWidth >= 768 && constraints.maxWidth < 1024;
         final isDesktop = constraints.maxWidth >= 1024;
 
-        return Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE0F2FE),
-                Color(0xFFCCFBF1),
-              ],
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/bg.png',
+                fit: BoxFit.cover,
+                cacheHeight: 1000,
+                cacheWidth: 1000,
+              ),
             ),
-          ),
-          padding: EdgeInsets.fromLTRB(
-            isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
-            isMobile ? AppSpacing.xxxl * 2 : (isTablet ? AppSpacing.xxxl * 2.5 : AppSpacing.xxxl * 3),
-            isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
-            isMobile ? AppSpacing.xxxl * 3 : (isTablet ? AppSpacing.xxxl * 4 : AppSpacing.xxxl * 7),
-          ),
-          child: isDesktop 
-              ? _buildDesktopLayout(context)
-              : _buildMobileTabletLayout(context, isMobile, isTablet),
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(
+                isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
+                isMobile ? AppSpacing.xxxl * 2 : (isTablet ? AppSpacing.xxxl * 2.5 : AppSpacing.xxxl * 3),
+                isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
+                isMobile ? AppSpacing.xxxl * 3 : (isTablet ? AppSpacing.xxxl * 4 : AppSpacing.xxxl * 7),
+              ),
+              child: isDesktop 
+                  ? _buildDesktopLayout(context)
+                  : _buildMobileTabletLayout(context, isMobile, isTablet),
+            ),
+          ],
         );
       },
     );
@@ -56,13 +62,11 @@ class IntroSection extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // LEFT CONTENT - Text and CTAs
         Expanded(
           flex: 5,
           child: _buildLeftContent(context, false, false),
         ),
         const SizedBox(width: AppSpacing.xxxl),
-        // RIGHT CONTENT - Cards
         Expanded(
           flex: 3,
           child: _buildRightCards(context, false),
@@ -71,15 +75,12 @@ class IntroSection extends StatelessWidget {
     );
   }
 
-  // Mobile/Tablet layout (stacked - left content BEFORE right content)
   Widget _buildMobileTabletLayout(BuildContext context, bool isMobile, bool isTablet) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // LEFT CONTENT FIRST (appears on top on mobile/tablet)
         _buildLeftContent(context, isMobile, isTablet),
         SizedBox(height: isMobile ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 2.5),
-        // RIGHT CONTENT SECOND (appears below on mobile/tablet)
         _buildRightCards(context, isMobile),
       ],
     );
@@ -94,6 +95,7 @@ class IntroSection extends StatelessWidget {
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           text: TextSpan(
             style: WebTextStyles.h1.copyWith(
+              color: Colors.white,
               fontSize: isMobile ? 32 : (isTablet ? 40 : 48),
               height: 1.2,
             ),
@@ -101,9 +103,12 @@ class IntroSection extends StatelessWidget {
               const TextSpan(text: 'Transform Your\n'),
               TextSpan(
                 text: 'Organic Waste\n',
-                style: TextStyle(color: WebColors.iconsPrimary),
+                style: TextStyle(
+                  color: AppColors.green100.withOpacity(0.8), // FIXED: comma instead of semicolon, proper opacity method
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const TextSpan(text: 'into Rich\nCompost'),
+              const TextSpan(text: 'into Rich Compost'),
             ],
           ),
         ),
@@ -114,6 +119,7 @@ class IntroSection extends StatelessWidget {
           'and produce quality compost in just 2 weeks.',
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           style: WebTextStyles.subtitle.copyWith(
+            color: Colors.white,
             fontSize: isMobile ? 14 : (isTablet ? 15 : 16),
             height: 1.6,
           ),
@@ -132,11 +138,29 @@ class IntroSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
+                  // Learn More button with white text
                   SizedBox(
                     height: 50,
-                    child: SecondaryButton(
-                      text: 'Learn More',
+                    child: OutlinedButton(
                       onPressed: onLearnMore,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? 24 : 32,
+                        ),
+                      ),
+                      child: const Text(
+                        'Learn More',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -152,11 +176,27 @@ class IntroSection extends StatelessWidget {
                       onPressed: onGetStarted,
                     ),
                   ),
+                  // Learn More button with white text
                   SizedBox(
                     height: 50,
-                    child: SecondaryButton(
-                      text: 'Learn More',
+                    child: OutlinedButton(
                       onPressed: onLearnMore,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                      ),
+                      child: const Text(
+                        'Learn More',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -199,7 +239,7 @@ class IntroSection extends StatelessWidget {
               child: TemMoisOxyCard(
                 icon: Icons.air_outlined,
                 value: '21%',
-                label: 'Oxygen',
+                label: 'Aeration',
                 hoverInfo: 'Adequate aeration for aerobic decomposition',
                 position: 2,
               ),

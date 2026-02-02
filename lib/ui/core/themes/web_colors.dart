@@ -46,7 +46,8 @@ class WebColors {
   static const textButton = Color(0xFF10B981); // Primary button text (green)
   static const textTitle = Color(0xFF28A85A); // Titles (green)
   static const textbutton2 = Color(0xFFFFFFFF); // Links (blue)
-  static const greenPrimary = Color(0xFF28A85A);
+  static const greenPrimary = Color(0xFF28A85A); 
+  static const textColor = Color(0xFFFFFFFF);
 
 
   static const textForeground = Color(0xFF29333D); // Text (Foreground)

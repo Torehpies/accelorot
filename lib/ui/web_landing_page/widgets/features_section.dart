@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
@@ -76,6 +75,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
 
     return Container(
       width: double.infinity,
@@ -108,7 +108,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
           ),
           const SizedBox(height: AppSpacing.lg),
 
-          // CAROUSEL — image-only, arrows inside (no dots)
+          // CAROUSEL — image with arrows and indicators inside
           ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: screenWidth > 1400 ? 1000 : screenWidth * 0.85,
@@ -129,42 +129,84 @@ class FeaturesSectionState extends State<FeaturesSection> {
                   ),
                 ),
 
-                // LEFT ARROW — inside image, left edge, vertically centered
+                // LEFT ARROW — inside image, vertically centered
                 Positioned(
-                  left: 24,
-                  top: 0,
-                  bottom: 0,
-                  child: IconButton(
-                    onPressed: _currentIndex > 0 ? goToPrevious : null,
-                    icon: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 36,
-                      color: WebColors.greenAccent.withOpacity(_currentIndex > 0 ? 1.0 : 0.4),
-                    ),
-                    splashRadius: 28,
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
+                  left: isMobile ? 12 : 24,
+                  child: Center(
+                    child: Container(
+                      width: isMobile ? 40 : 48,
+                      height: isMobile ? 40 : 48,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF0F8FF), // Alice blue
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: _currentIndex > 0 ? goToPrevious : null,
+                        icon: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: isMobile ? 20 : 24,
+                          color: Colors.green,
+                        ),
+                        padding: EdgeInsets.zero,
+                        splashRadius: isMobile ? 20 : 24,
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                          overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
+                        ),
+                      ),
                     ),
                   ),
                 ),
 
-                // RIGHT ARROW — inside image, right edge, vertically centered
+                // RIGHT ARROW — inside image, vertically centered
                 Positioned(
-                  right: 24,
-                  top: 0,
-                  bottom: 0,
-                  child: IconButton(
-                    onPressed: _currentIndex < featureImages.length - 1 ? goToNext : null,
-                    icon: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 36,
-                      color: WebColors.greenAccent.withOpacity(_currentIndex < featureImages.length - 1 ? 1.0 : 0.4),
+                  right: isMobile ? 12 : 24,
+                  child: Center(
+                    child: Container(
+                      width: isMobile ? 40 : 48,
+                      height: isMobile ? 40 : 48,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF0F8FF), // Alice blue
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: _currentIndex < featureImages.length - 1 ? goToNext : null,
+                        icon: Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: isMobile ? 20 : 24,
+                          color: Colors.green,
+                        ),
+                        padding: EdgeInsets.zero,
+                        splashRadius: isMobile ? 20 : 24,
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                          overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
+                        ),
+                      ),
                     ),
-                    splashRadius: 28,
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                      overlayColor: MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
+                  ),
+                ),
+
+                // INDICATORS — positioned at bottom inside image
+                Positioned(
+                  bottom: isMobile ? 16 : 24,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      featureImages.length,
+                      (index) => Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: _currentIndex == index ? (isMobile ? 20 : 24) : 8,
+                        height: isMobile ? 6 : 8,
+                        decoration: BoxDecoration(
+                          color: _currentIndex == index 
+                              ? Colors.white.withValues(alpha: 0.9)  // Active indicator - bright white
+                              : Colors.white.withValues(alpha: 0.3), // Inactive indicator - muted/low opacity
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -203,7 +245,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
                 boxShadow: value > 0.95
                     ? [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
+                          color: Colors.black.withValues(alpha: 0.12),
                           blurRadius: 20,
                           spreadRadius: 0,
                           offset: const Offset(0, 8),
@@ -211,7 +253,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: Colors.black.withValues(alpha: 0.06),
                           blurRadius: 10,
                           spreadRadius: 0,
                           offset: const Offset(0, 4),

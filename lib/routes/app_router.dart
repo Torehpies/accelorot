@@ -36,6 +36,9 @@ import 'package:go_router/go_router.dart';
 //import 'package:flutter_application_1/ui/web_landing_page/view/web_landing_page_view.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
+// ADD THESE TWO IMPORTS:
+import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
+import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
 
 const int kDesktopBreakpoint = 1024;
 
@@ -57,6 +60,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/download',
         name: 'download',
         builder: (context, state) => const DownloadApp(),
+      ),
+      GoRoute(
+        path: '/terms-of-service',
+        name: 'terms-of-service',
+        builder: (context, state) => const TermsOfServicePage(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacy-policy',
+        builder: (context, state) => const PrivacyPolicyPage(),
       ),
       GoRoute(
         path: RoutePath.loading.path,
@@ -294,5 +307,4 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
-}
-);
+});

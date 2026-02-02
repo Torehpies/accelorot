@@ -13,161 +13,292 @@ class DownloadApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE0F2FE),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 🔙 Back to Home Link (top-left)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.lg,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: IconButton(
-                      onPressed: () => context.go('/'),
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                      padding: EdgeInsets.zero,
-                      tooltip: 'Back to Home',
-                      splashRadius: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Back to Home',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ],
-              ),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bg.png',
+              fit: BoxFit.cover,
+              cacheHeight: 1000,
+              cacheWidth: 1000,
             ),
-
-            // Main content
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isMobile = constraints.maxWidth < 900;
-                  final maxWidth = isMobile ? double.infinity : 1200.0;
-                  final horizontalPadding = isMobile ? AppSpacing.lg : AppSpacing.xxxl;
-
-                  Widget content = Column(
+          ),
+          // Dark overlay for text contrast
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.2),
+            ),
+          ),
+          // Content with responsive padding
+          SafeArea(
+            child: Column(
+              children: [
+                // 🔙 Back to Home Link (top-left) - WHITE TEXT
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.lg,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Left-side content (always appears first in DOM)
-                      Container(
-                        constraints: BoxConstraints(maxWidth: maxWidth),
-                        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                style: TextStyle(
-                                  fontFamily: 'dm-sans',
-                                  fontSize: isMobile ? 32 : 44,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.2,
-                                  color: Colors.black,
-                                ),
-                                children: [
-                                  TextSpan(text: 'Download the\n'),
-                                  TextSpan(
-                                    text: 'Accel-O-Rot App',
-                                    style: TextStyle(color: Color(0xFF22C55E)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            Text(
-                              'Get our AI-powered mobile app to monitor your composting system, '
-                              'receive real-time insights, and manage your organic waste efficiently.\n\n'
-                              'Available for Android.',
-                              style: TextStyle(
-                                fontSize: isMobile ? 14 : 16,
-                                height: 1.6,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xxxl),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 260),
-                              child: SizedBox(
-                                width: isMobile
-                                    ? MediaQuery.of(context).size.width * 0.8
-                                    : 260,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.download, size: 18),
-                                  label: const Text('Download Accel-O-Rot v1.0.0.apk'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xFF22C55E),
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    textStyle: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            if (isMobile) const SizedBox(height: AppSpacing.xxxl),
-                          ],
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: IconButton(
+                          onPressed: () => context.go('/'),
+                          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white),
+                          padding: EdgeInsets.zero,
+                          tooltip: 'Back to Home',
+                          splashRadius: 16,
                         ),
                       ),
-                      
-                      // Right-side content (appears after left content in DOM)
-                      if (isMobile)
-                        _PhonePreview()
-                      else
-                        Container(
-                          constraints: BoxConstraints(maxWidth: maxWidth),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: horizontalPadding,
-                            vertical: AppSpacing.lg,
-                          ),
-                          child: Center(child: _PhonePreview()),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Back to Home',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
                         ),
+                      ),
                     ],
-                  );
+                  ),
+                ),
 
-                  // Apply scrolling only on mobile
-                  if (isMobile) {
-                    content = SingleChildScrollView(
-                      child: content,
-                    );
-                  }
+                // Main content area
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 900;
+                      final maxWidth = isMobile ? double.infinity : 1200.0;
+                      final horizontalPadding = isMobile ? AppSpacing.lg : AppSpacing.xxxl;
 
-                  return content;
-                },
-              ),
+                      Widget content = isMobile 
+                        ? Column(
+                            children: [
+                              // Mobile: Text content first
+                              Container(
+                                constraints: BoxConstraints(maxWidth: maxWidth),
+                                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: const TextSpan(
+                                        style: TextStyle(
+                                          fontFamily: 'dm-sans',
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.2,
+                                          color: Colors.white,
+                                        ),
+                                        children: [
+                                          TextSpan(text: 'Download the\n'),
+                                          TextSpan(
+                                            text: 'Accel-O-Rot App',
+                                            style: TextStyle(
+                                              color: Color(0xFF22C55E),
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    Text(
+                                      'Get our AI-powered mobile app to monitor your composting system, '
+                                      'receive real-time insights, and manage your organic waste efficiently.\n\n'
+                                      'Available for Android.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        height: 1.6,
+                                        color: Colors.white.withValues(alpha: 0.9),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxxl),
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: 280),
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width * 0.85,
+                                        height: 56,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(
+                                                content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
+                                                backgroundColor: Color(0xFF22C55E),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF22C55E),
+                                            foregroundColor: Colors.white,
+                                            elevation: 2,
+                                            shadowColor: Colors.black.withValues(alpha: 0.25),
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: const [
+                                              Icon(Icons.download, size: 18),
+                                              SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
+                                                  'Download Accel-O-Rot\nv1.0.0.apk',
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    height: 1.3,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxxl),
+                                  ],
+                                ),
+                              ),
+                              _PhonePreview(),
+                            ],
+                          )
+                        : Padding(
+                            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Desktop: Phone preview on LEFT
+                                Expanded(
+                                  flex: 1,
+                                  child: Center(child: _PhonePreview()),
+                                ),
+                                const SizedBox(width: AppSpacing.xxxl),
+                                // Desktop: Text content on RIGHT
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      RichText(
+                                        textAlign: TextAlign.start,
+                                        text: const TextSpan(
+                                          style: TextStyle(
+                                            fontFamily: 'dm-sans',
+                                            fontSize: 44,
+                                            fontWeight: FontWeight.w800,
+                                            height: 1.2,
+                                            color: Colors.white,
+                                          ),
+                                          children: [
+                                            TextSpan(text: 'Download the\n'),
+                                            TextSpan(
+                                              text: 'Accel-O-Rot App',
+                                              style: TextStyle(
+                                                color: Color(0xFF22C55E),
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.lg),
+                                      Text(
+                                        'Get our AI-powered mobile app to monitor your composting system, '
+                                        'receive real-time insights, and manage your organic waste efficiently.\n\n'
+                                        'Available for Android.',
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          height: 1.6,
+                                          color: Colors.white.withValues(alpha: 0.9),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xxxl),
+                                      ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 280),
+                                        child: SizedBox(
+                                          width: 260,
+                                          height: 56,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                const SnackBar(
+                                                  content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
+                                                  backgroundColor: Color(0xFF22C55E),
+                                                ),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF22C55E),
+                                              foregroundColor: Colors.white,
+                                              elevation: 2,
+                                              shadowColor: Colors.black.withValues(alpha: 0.25),
+                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(Icons.download, size: 18),
+                                                SizedBox(width: 8),
+                                                Flexible(
+                                                  child: Text(
+                                                    'Download Accel-O-Rot\nv1.0.0.apk',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                      height: 1.3,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+
+                      // Apply scrolling only on mobile
+                      if (isMobile) {
+                        content = SingleChildScrollView(
+                          child: content,
+                        );
+                      }
+
+                      return content;
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Phone preview and other widgets remain unchanged
+// Phone preview and helper widgets
 class _PhonePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -182,7 +313,7 @@ class _PhonePreview extends StatelessWidget {
           BoxShadow(
             blurRadius: 50,
             offset: const Offset(0, 20),
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
           ),
         ],
       ),
@@ -219,7 +350,7 @@ class _PhonePreview extends StatelessWidget {
                             value: '15',
                             percentage: '13%',
                             icon: Icons.person_outline,
-                            color: Color(0xFF22C55E),
+                            color: const Color(0xFF22C55E),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -229,7 +360,7 @@ class _PhonePreview extends StatelessWidget {
                             value: '12',
                             percentage: '8%',
                             icon: Icons.settings_outlined,
-                            color: Color(0xFF3B82F6),
+                            color: const Color(0xFF3B82F6),
                           ),
                         ),
                       ],
@@ -331,7 +462,7 @@ class _PhonePreview extends StatelessWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
+                              children: const [
                                 _ChartBar(height: 0, label: 'Thu'),
                                 _ChartBar(height: 0, label: 'Fri'),
                                 _ChartBar(height: 0, label: 'Sat'),
@@ -370,7 +501,7 @@ class _PhonePreview extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          _ActivityItem(
+                          const _ActivityItem(
                             icon: Icons.air,
                             iconColor: Color(0xFF3B82F6),
                             title: 'Aerator',
@@ -379,7 +510,7 @@ class _PhonePreview extends StatelessWidget {
                             status: 'COMPLETE',
                           ),
                           const SizedBox(height: 10),
-                          _ActivityItem(
+                          const _ActivityItem(
                             icon: Icons.settings_input_component,
                             iconColor: Color(0xFF3B82F6),
                             title: 'Drum Controller',
@@ -388,7 +519,7 @@ class _PhonePreview extends StatelessWidget {
                             status: 'COMPLETE',
                           ),
                           const SizedBox(height: 10),
-                          _ActivityItem(
+                          const _ActivityItem(
                             icon: Icons.settings_input_component,
                             iconColor: Color(0xFF3B82F6),
                             title: 'Drum Controller',
@@ -397,7 +528,7 @@ class _PhonePreview extends StatelessWidget {
                             status: 'COMPLETE',
                           ),
                           const SizedBox(height: 10),
-                          _ActivityItem(
+                          const _ActivityItem(
                             icon: Icons.air,
                             iconColor: Color(0xFF3B82F6),
                             title: 'Aerator',
@@ -419,7 +550,6 @@ class _PhonePreview extends StatelessWidget {
   }
 }
 
-// Other helper widgets remain unchanged...
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -467,7 +597,7 @@ class _StatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(icon, size: 12, color: color),
@@ -558,7 +688,7 @@ class _ActivityItem extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: iconColor),

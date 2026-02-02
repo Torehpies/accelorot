@@ -18,7 +18,9 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
             currentPath == RoutePath.signin.path ||
             currentPath == RoutePath.signup.path ||
             currentPath == RoutePath.forgotPassword.path ||
-            currentPath == '/download'  // ADD THIS LINE
+            currentPath == '/download' ||
+            currentPath == '/privacy-policy' ||      // ADD THIS LINE
+            currentPath == '/terms-of-service'       // ADD THIS LINE
         ? null
         : RoutePath.signin.path,
     unverified: (_) => currentPath == RoutePath.verifyEmail.path

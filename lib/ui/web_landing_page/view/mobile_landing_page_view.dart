@@ -1,37 +1,35 @@
-// lib/ui/web_landing_page/views/mobile_landing_page_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
 import '../widgets/impact_section.dart';
 import '../widgets/download_section.dart';
 import '../widgets/contact_section.dart';
-import '../widgets/faqs_section.dart'; 
+import '../widgets/faqs_section.dart';
 import '../view_models/landing_page_view_model.dart';
-import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
-import '../../core/ui/primary_button.dart';
 
 class MobileLandingPageView extends StatefulWidget {
   const MobileLandingPageView({super.key});
 
   @override
-  State<MobileLandingPageView> createState() => _MobileLandingPageView();
+  State<MobileLandingPageView> createState() => _MobileLandingPageViewState();
 }
 
-class _MobileLandingPageView extends State<MobileLandingPageView> {
+class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   final ScrollController _scrollController = ScrollController();
   final LandingPageViewModel _viewModel = LandingPageViewModel();
+
+  static const double _headerHeight = 72;
 
   final _homeKey = GlobalKey();
   final _featuresKey = GlobalKey();
   final _howItWorksKey = GlobalKey();
   final _impactKey = GlobalKey();
-  final _bannerKey = GlobalKey();
-  final _faqKey = GlobalKey(); 
+  final _downloadKey = GlobalKey();
+  final _faqKey = GlobalKey();
   final _contactKey = GlobalKey();
 
   String _activeSection = 'home';
@@ -41,17 +39,17 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_handleScroll);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_handleScroll);
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _handleScroll() {
+  void _onScroll() {
     setState(() {
       _isScrolled = _scrollController.offset > 20;
     });
@@ -64,21 +62,21 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
       'features': _featuresKey,
       'how-it-works': _howItWorksKey,
       'impact': _impactKey,
-      'banner': _bannerKey,
+      'download': _downloadKey,
       'faq': _faqKey,
       'contact': _contactKey,
     };
 
     for (final entry in sections.entries) {
-      final ctx = entry.value.currentContext;
-      if (ctx == null) continue;
+      final context = entry.value.currentContext;
+      if (context == null) continue;
 
-      final box = ctx.findRenderObject() as RenderBox?;
+      final box = context.findRenderObject() as RenderBox?;
       if (box == null) continue;
 
       final offset = box.localToGlobal(Offset.zero).dy;
 
-      if (offset <= 140 && offset >= -200) {
+      if (offset <= _headerHeight + 40 && offset >= -200) {
         if (_activeSection != entry.key) {
           setState(() => _activeSection = entry.key);
         }
@@ -87,68 +85,45 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
     }
   }
 
-  void _scrollTo(GlobalKey key) {
-    final context = key.currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOut,
-      );
-      // Close menu after navigation
-      if (_isMenuOpen) {
-        setState(() => _isMenuOpen = false);
-      }
-    }
-  }
+  /// ✅ FIXED SCROLL
+  void _scrollToSection(String sectionId) {
+    final sectionMap = {
+      'home': _homeKey,
+      'features': _featuresKey,
+      'how-it-works': _howItWorksKey,
+      'impact': _impactKey,
+      'download': _downloadKey,
+      'faq': _faqKey,
+      'contact': _contactKey,
+    };
 
-  void _onBreadcrumbTap(String section) {
-    switch (section) {
-      case 'home':
-        _scrollTo(_homeKey);
-        break;
-      case 'features':
-        _scrollTo(_featuresKey);
-        break;
-      case 'how-it-works':
-        _scrollTo(_howItWorksKey);
-        break;
-      case 'impact':
-        _scrollTo(_impactKey);
-        break;
-      case 'banner':
-        _scrollTo(_bannerKey);
-        break;
-        case 'faq':
-        _scrollTo(_faqKey);
-        break;
-      case 'contact':
-        _scrollTo(_contactKey);
-        break;
-    }
-  }
+    final key = sectionMap[sectionId];
+    if (key?.currentContext == null) return;
 
-  // Navigation handlers
-  void _handleLogin() {
-    context.go('/login');
-  }
-
-  void _handleGetStarted() {
-    context.go('/signup');
-  }
-
-  void _handleDownload() {
-    context.go('/download');
-  }
-
-  void _handleLearnMore() {
-    _scrollTo(_featuresKey);
-  }
-
-  void _toggleMenu() {
     setState(() {
-      _isMenuOpen = !_isMenuOpen;
+      _activeSection = sectionId;
+      _isMenuOpen = false;
     });
+
+    Scrollable.ensureVisible(
+      key!.currentContext!,
+      duration: const Duration(milliseconds: 650),
+      curve: Curves.easeInOut,
+      alignment: 0,
+    );
+  }
+
+  void _handleLogin() => context.go('/login');
+  void _handleGetStarted() => context.go('/signup');
+  void _handleDownload() => context.go('/download');
+  void _handleLearnMore() => _scrollToSection('features');
+
+  Widget _section({required Key key, required Widget child}) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(top: _headerHeight),
+      child: child,
+    );
   }
 
   @override
@@ -156,73 +131,51 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
     return Scaffold(
       body: Stack(
         children: [
-          /// PAGE CONTENT
+          /// CONTENT
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               children: [
-                // Add spacing for fixed header
-                SizedBox(height: _isMenuOpen ? 480 : 72),
-
-                // HOME SECTION
-                Container(
+                _section(
                   key: _homeKey,
                   child: IntroSection(
                     onGetStarted: _handleGetStarted,
                     onLearnMore: _handleLearnMore,
                   ),
                 ),
-
-                // FEATURES SECTION
-                Container(
+                _section(
                   key: _featuresKey,
-                  child: FeaturesSection(
-                    features: _viewModel.features,
-                  ),
+                  child: FeaturesSection(features: _viewModel.features),
                 ),
-
-                // HOW IT WORKS SECTION
-                Container(
+                _section(
                   key: _howItWorksKey,
-                  child: HowItWorksSection(
-                    steps: _viewModel.steps,
-                  ),
+                  child: HowItWorksSection(steps: _viewModel.steps),
                 ),
-
-                // IMPACT SECTION
-                Container(
+                _section(
                   key: _impactKey,
-                  child: ImpactSection(
-                    stats: _viewModel.impactStats,
-                  ),
+                  child: ImpactSection(stats: _viewModel.impactStats),
                 ),
-
-                // BANNER SECTION
-                Container(
-                  key: _bannerKey,
-                  child: DownloadSection(
-                    onDownload: _handleDownload,
-                  ),
+                _section(
+                  key: _downloadKey,
+                  child: DownloadSection(onDownload: _handleDownload),
                 ),
-                // FAQ SECTION 
-                Container(
+                _section(
                   key: _faqKey,
                   child: const FaqSection(),
                 ),
-                // CONTACT SECTION
-                Container(
+                _section(
                   key: _contactKey,
                   child: ContactSection(
                     onGetStarted: _handleGetStarted,
                     onDownload: _handleDownload,
-                    onNavigateToSection: _onBreadcrumbTap,
+                    onNavigateToSection: _scrollToSection,
                   ),
                 ),
               ],
             ),
           ),
 
-          /// FIXED MOBILE HEADER WITH INLINE MENU
+          /// HEADER
           Positioned(
             top: 0,
             left: 0,
@@ -231,10 +184,11 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
               isScrolled: _isScrolled,
               isMenuOpen: _isMenuOpen,
               activeSection: _activeSection,
-              onBreadcrumbTap: _onBreadcrumbTap,
+              onBreadcrumbTap: _scrollToSection,
               onLogin: _handleLogin,
               onGetStarted: _handleGetStarted,
-              onToggleMenu: _toggleMenu,
+              onToggleMenu: () =>
+                  setState(() => _isMenuOpen = !_isMenuOpen),
             ),
           ),
         ],
@@ -242,6 +196,7 @@ class _MobileLandingPageView extends State<MobileLandingPageView> {
     );
   }
 }
+
 
 class _MobileHeader extends StatelessWidget {
   final bool isScrolled;
@@ -267,45 +222,29 @@ class _MobileHeader extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
+        color: isScrolled && !isMenuOpen ? Colors.white : null,
         gradient: isScrolled && !isMenuOpen
             ? null
             : const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFE0F2FE),
-                  Color(0xFFCCFBF1),
-                ],
+                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
               ),
-        color: isScrolled && !isMenuOpen ? Colors.white : null,
-        border: isScrolled && !isMenuOpen
-            ? const Border(
-                bottom: BorderSide(
-                  color: Color(0xFFE5E7EB),
-                  width: 1,
-                ),
-              )
-            : null,
         boxShadow: isScrolled && !isMenuOpen
             ? [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
                   blurRadius: 16,
-                  spreadRadius: 0,
                   offset: const Offset(0, 4),
-                ),
+                )
               ]
             : [],
       ),
       child: Column(
         children: [
-          // Header bar
           Container(
             height: 72,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                /// Logo
                 GestureDetector(
                   onTap: () => onBreadcrumbTap('home'),
                   child: Row(
@@ -316,120 +255,47 @@ class _MobileHeader extends StatelessWidget {
                         height: 32,
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      const Text(
                         'Accel-O-Rot',
-                        style: WebTextStyles.h3.copyWith(
-                          fontWeight: FontWeight.w800,
+                        style: TextStyle(
                           fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.green,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const Spacer(),
-
-                /// Hamburger/Close Menu Icon
                 IconButton(
-                  icon: Icon(
-                    isMenuOpen ? Icons.close : Icons.menu,
-                    size: 28,
-                  ),
+                  icon: Icon(isMenuOpen ? Icons.close : Icons.menu),
                   onPressed: onToggleMenu,
-                  color: const Color(0xFF374151),
                 ),
               ],
             ),
           ),
 
-          // Inline menu
           if (isMenuOpen)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: const Color(0xFFE5E7EB),
-                    width: 1,
-                  ),
-                ),
-              ),
+              color: Colors.white,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Navigation Items
-                  _MenuItem(
-                    label: 'Home',
-                    id: 'home',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                  const SizedBox(height: 4),
-                  _MenuItem(
-                    label: 'Features',
-                    id: 'features',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                  const SizedBox(height: 4),
-                  _MenuItem(
-                    label: 'How It Works',
-                    id: 'how-it-works',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                  const SizedBox(height: 4),
-                  _MenuItem(
-                    label: 'Impact',
-                    id: 'impact',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                  const SizedBox(height: 4),
-                  _MenuItem(
-                    label: 'Join Us',
-                    id: 'banner',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                   _MenuItem( 
-                    label: 'FAQ',
-                    id: 'faq',
-                    active: activeSection,
-                    onTap: onBreadcrumbTap,
-                  ),
-                  const SizedBox(height: 4),
-                  const SizedBox(height: 32),
-
-                  // Action Buttons
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextButton(
-                        onPressed: onLogin,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: WebColors.textBody,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 50,
-                        child: PrimaryButton(
-                          text: 'Get Started',
-                          onPressed: onGetStarted,
-                        ),
-                      ),
-                    ],
+                  _MenuItem('Home', 'home', activeSection, onBreadcrumbTap),
+                  _MenuItem('Features', 'features', activeSection, onBreadcrumbTap),
+                  _MenuItem('How It Works', 'how-it-works', activeSection, onBreadcrumbTap),
+                  _MenuItem('Impact', 'impact', activeSection, onBreadcrumbTap),
+                  _MenuItem('Downloads', 'download', activeSection, onBreadcrumbTap),
+                  _MenuItem('FAQ', 'faq', activeSection, onBreadcrumbTap),
+                  _MenuItem('Contact', 'contact', activeSection, onBreadcrumbTap),
+                  const SizedBox(height: 24),
+                  TextButton(onPressed: onLogin, child: const Text('Login')),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: onGetStarted,
+                    child: const Text('Get Started'),
                   ),
                 ],
               ),
@@ -440,35 +306,25 @@ class _MobileHeader extends StatelessWidget {
   }
 }
 
+
 class _MenuItem extends StatelessWidget {
   final String label;
   final String id;
   final String active;
   final Function(String) onTap;
 
-  const _MenuItem({
-    required this.label,
-    required this.id,
-    required this.active,
-    required this.onTap,
-  });
+  const _MenuItem(this.label, this.id, this.active, this.onTap);
 
   @override
   Widget build(BuildContext context) {
-    final bool isActive = active == id;
+    final isActive = active == id;
 
     return InkWell(
       onTap: () => onTap(id),
-      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: isActive
-              ? WebColors.success.withOpacity(0.1)
-              : Colors.transparent,
+          color: isActive ? Colors.green.withOpacity(0.1) : null,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -476,9 +332,7 @@ class _MenuItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive
-                ? WebColors.success
-                : const Color(0xFF374151),
+            color: isActive ? Colors.green : const Color(0xFF374151),
           ),
         ),
       ),

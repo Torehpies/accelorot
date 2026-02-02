@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/constants/spacing.dart';
+import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
 
 class ContactSection extends StatelessWidget {
@@ -23,7 +25,6 @@ class ContactSection extends StatelessWidget {
       debugPrint('Could not launch $urlString');
     }
   }
-
 
   Future<void> _launchGmailCompose() async {
     final email = 'accelorot.management@gmail.com';
@@ -46,14 +47,31 @@ class ContactSection extends StatelessWidget {
     }
   }
 
-  String _getNavigationId(String linkText) {
+  void _handleLinkNavigation(BuildContext context, String linkText) {
     switch (linkText) {
-      case 'Features': return 'features';
-      case 'How It Works': return 'how-it-works';
-      case 'Impact': return 'impact';
-      case 'Download': return 'download';
-      case 'FAQ': return 'faq';
-      default: return linkText.toLowerCase().replaceAll(' ', '-');
+      case 'Privacy Policy':
+        context.go('/privacy-policy');
+        break;
+      case 'Terms of Service':
+        context.go('/terms-of-service');
+        break;
+      case 'Features':
+        onNavigateToSection?.call('features');
+        break;
+      case 'How It Works':
+        onNavigateToSection?.call('how-it-works');
+        break;
+      case 'Impact':
+        onNavigateToSection?.call('impact');
+        break;
+      case 'Download':
+        onNavigateToSection?.call('download');
+        break;
+      case 'FAQ':
+        onNavigateToSection?.call('faq');
+        break;
+      default:
+        onNavigateToSection?.call(linkText.toLowerCase().replaceAll(' ', '-'));
     }
   }
 
@@ -96,7 +114,7 @@ class ContactSection extends StatelessWidget {
                                   Text(
                                     'Accel-O-Rot',
                                     style: h2Style.copyWith(
-                                      color: Colors.white,
+                                      color: WebColors.buttonsPrimary,
                                       fontWeight: FontWeight.w900,
                                       fontSize: 24,
                                     ),
@@ -113,7 +131,7 @@ class ContactSection extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.lg),
-                              // ✅ SOCIAL ICONS ROW (Facebook + X + Instagram via SVG)
+                              // Social icons
                               Row(
                                 children: [
                                   _SocialIcon(
@@ -124,13 +142,13 @@ class ContactSection extends StatelessWidget {
                                   const SizedBox(width: AppSpacing.sm),
                                   _SocialIcon(
                                     svgAsset: 'assets/icons/X_logo.svg',
-                                    onPressed: () => _launchUrl('https://twitter.com/your_x_handle'), // ← REPLACE
+                                    onPressed: () => _launchUrl('https://twitter.com/your_x_handle'),
                                     backgroundColor: const Color(0xFF000000),
                                   ),
                                   const SizedBox(width: AppSpacing.sm),
                                   _SocialIcon(
                                     svgAsset: 'assets/icons/Instagram_logo.svg',
-                                    onPressed: () => _launchUrl('https://instagram.com/your_instagram_handle'), // ← REPLACE
+                                    onPressed: () => _launchUrl('https://instagram.com/your_instagram_handle'),
                                     backgroundColor: const Color(0xFFE1306C),
                                   ),
                                 ],
@@ -156,7 +174,7 @@ class ContactSection extends StatelessWidget {
                               'Download',
                               'FAQ',
                             ],
-                            onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                            onLinkTap: (link) => _handleLinkNavigation(context, link),
                           ),
                           const SizedBox(height: AppSpacing.xxxl),
                           _FooterColumn(
@@ -165,19 +183,19 @@ class ContactSection extends StatelessWidget {
                               'Privacy Policy',
                               'Terms of Service',
                             ],
-                            onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                            onLinkTap: (link) => _handleLinkNavigation(context, link),
                           ),
                           const SizedBox(height: AppSpacing.xxxl),
                           _FooterColumn(
                             title: 'Contact Us',
-                            links: [],
+                            links: const [],
                             onLinkTap: null,
                             customContent: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 _ContactRow(
                                   icon: Icons.location_on_outlined,
-                                  text: 'Metro Manila, Caloocan City, Philippines',
+                                  text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
                                 ),
                                 const SizedBox(height: AppSpacing.md),
                                 _ContactRow(
@@ -188,7 +206,7 @@ class ContactSection extends StatelessWidget {
                                 const SizedBox(height: AppSpacing.md),
                                 _ContactRow(
                                   icon: Icons.phone_outlined,
-                                  text: '+63 000 000 0000',
+                                  text: '+63 951 000 7296',
                                 ),
                               ],
                             ),
@@ -213,7 +231,7 @@ class ContactSection extends StatelessWidget {
                                   'Download',
                                   'FAQ',
                                 ],
-                                onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                                onLinkTap: (link) => _handleLinkNavigation(context, link),
                               ),
                             ),
                           ),
@@ -227,7 +245,7 @@ class ContactSection extends StatelessWidget {
                                   'Privacy Policy',
                                   'Terms of Service',
                                 ],
-                                onLinkTap: (link) => onNavigateToSection?.call(_getNavigationId(link)),
+                                onLinkTap: (link) => _handleLinkNavigation(context, link),
                               ),
                             ),
                           ),
@@ -235,7 +253,7 @@ class ContactSection extends StatelessWidget {
                             flex: 1,
                             child: _FooterColumn(
                               title: 'Contact Us',
-                              links: [],
+                              links: const [],
                               onLinkTap: null,
                               customContent: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,

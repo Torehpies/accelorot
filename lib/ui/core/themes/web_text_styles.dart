@@ -82,8 +82,8 @@ class WebTextStyles {
     color: WebColors.textMuted,
   );
 
-  // Hero section heading
-  static const heroHeading = TextStyle(
+  // Intro section heading
+  static const introHeading = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 48,
     fontWeight: FontWeight.bold,
@@ -125,8 +125,7 @@ class WebTextStyles {
     height: 1.6,
   );
 
-  // New text styles for landing page cards
-  // Step card title - compact and bold
+  // Step card 
   static const stepCardTitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 16,
@@ -135,7 +134,6 @@ class WebTextStyles {
     height: 1.2,
   );
 
-  // Step card description - smaller body text
   static const stepCardDescription = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 13,
@@ -144,7 +142,6 @@ class WebTextStyles {
     height: 1.5,
   );
 
-  // Step number - large and light
   static const stepNumber = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 48,
@@ -152,8 +149,7 @@ class WebTextStyles {
     color: WebColors.greenAccent,
     height: 1.0,
   );
-
-  // Feature card title
+//features
   static const featureCardTitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 18,
@@ -162,7 +158,6 @@ class WebTextStyles {
     height: 1.3,
   );
 
-  // Feature card description
   static const featureCardDescription = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 14,
@@ -171,7 +166,7 @@ class WebTextStyles {
     height: 1.6,
   );
 
-  // Impact stat value - large number
+//impact
   static const impactStatValue = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 32,
@@ -180,7 +175,6 @@ class WebTextStyles {
     height: 1.2,
   );
 
-  // Impact stat label
   static const impactStatLabel = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 13,
@@ -188,8 +182,7 @@ class WebTextStyles {
     color: WebColors.textSecondary,
     height: 1.4,
   );
-
-  // Section subtitle - for "How it works" type sections
+//how_it_works
   static const sectionSubtitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 15,
@@ -197,8 +190,7 @@ class WebTextStyles {
     color: WebColors.textSecondary,
     height: 1.5,
   );
-
-  // FAQ section title (e.g., "Frequently Asked Questions")
+//faqs
   static const faqSectionTitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 32,
@@ -207,7 +199,6 @@ class WebTextStyles {
     height: 1.3,
   );
 
-  // FAQ section subtitle (description under title)
   static const faqSectionSubtitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 16,
@@ -216,11 +207,10 @@ class WebTextStyles {
     height: 1.5,
   );
 
-  // FAQ question text (in _FaqCard)
   static const faqQuestion = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 16,
-    fontWeight: FontWeight.w500, // normal weight when collapsed, bold when expanded (handled in widget)
+    fontWeight: FontWeight.w500, 
     color: WebColors.textHeading,
   );
 

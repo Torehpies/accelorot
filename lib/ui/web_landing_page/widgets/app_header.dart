@@ -30,51 +30,55 @@ class AppHeader extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       height: 88,
       decoration: BoxDecoration(
-  color: isScrolled ? Colors.white : const  Color(0xFFE0F2FE),// or any solid color you prefer for unscrolled state
-  border: isScrolled
-      ? const Border(
-          bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
-            width: 1,
-          ),
-        )
-      : null,
-  boxShadow: isScrolled
-      ? [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            spreadRadius: 0,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
-          ),
-        ]
-      : [],
-),
+        color: isScrolled ? Colors.white : const Color(0xFFE0F2FE),
+        border: isScrolled
+            ? const Border(
+                bottom: BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1,
+                ),
+              )
+            : null,
+        boxShadow: isScrolled
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [],
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
         child: Row(
           children: [
-            /// Logo
+            /// Logo - UPDATED to match ContactSection style
             GestureDetector(
               onTap: () => onBreadcrumbTap('home'),
               child: Row(
                 children: [
                   SvgPicture.asset(
                     'assets/images/Accel-O-Rot Logo.svg',
-                    width: 36,
-                    height: 36,
+                    width: 50, // Increased from 36 to match ContactSection
+                    height: 50, // Increased from 36 to match ContactSection
+                    fit: BoxFit.contain,
+                    semanticsLabel: 'Accel-O-Rot Logo',
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: AppSpacing.md), // Changed from 10 to AppSpacing.md
                   Text(
                     'Accel-O-Rot',
-                    style: WebTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.w800,
+                    style: WebTextStyles.h2.copyWith( // Changed from h3 to h2
+                      color: WebColors.buttonsPrimary, // Changed to green
+                      fontWeight: FontWeight.w900, // Changed from w800 to w900
+                      fontSize: 24, // Explicit font size
                     ),
                   ),
                 ],
