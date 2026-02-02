@@ -85,7 +85,6 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
     }
   }
 
-  /// ✅ FIXED SCROLL
   void _scrollToSection(String sectionId) {
     final sectionMap = {
       'home': _homeKey,
@@ -166,8 +165,6 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
                 _section(
                   key: _contactKey,
                   child: ContactSection(
-                    onGetStarted: _handleGetStarted,
-                    onDownload: _handleDownload,
                     onNavigateToSection: _scrollToSection,
                   ),
                 ),

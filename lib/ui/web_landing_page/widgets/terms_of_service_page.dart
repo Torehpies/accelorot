@@ -95,8 +95,7 @@ class TermsOfServicePage extends StatelessWidget {
                             // Section 1
                             _buildSection(
                               '1. Acceptance of Terms',
-                              'By accessing and using the Accel-O-Rot Smart Rotary Drum System and associated mobile application ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our Service.',
-                            ),
+                              'By accessing or using the Accel-O-Rot mobile application and associated digital services ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not access or use the Service. ',                          ),
 
                             // Section 2
                             _buildSection(
