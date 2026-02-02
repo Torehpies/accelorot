@@ -8,7 +8,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  syncfusion_flutter_charts: ^32.1.21
+  syncfusion_flutter_charts: ^28.1.33
   firebase_core: ^4.1.1
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
