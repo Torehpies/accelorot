@@ -38,12 +38,15 @@ class FirebaseStatisticsService implements StatisticsService {
 
       startDate = DateTime(startDate.year, startDate.month, startDate.day);
       final endDate = DateTime.now();
+      // Normalize endDate to midnight (start of today)
+      final endDateNormalized = DateTime(endDate.year, endDate.month, endDate.day);
 
-      debugPrint('📅 Scanning $batchId from ${startDate.toString().substring(0, 10)} to ${endDate.toString().substring(0, 10)}');
+      debugPrint('📅 Scanning $batchId from ${startDate.toString().substring(0, 10)} to ${endDateNormalized.toString().substring(0, 10)}');
 
       // Scan each date directly (bypasses phantom date documents)
+      // Use isBefore with endDate + 1 day to include today, but not tomorrow
       for (var day = startDate;
-           day.isBefore(endDate.add(const Duration(days: 1)));
+           !day.isAfter(endDateNormalized);
            day = day.add(const Duration(days: 1))) {
         
         final dateStr = day.toIso8601String().substring(0, 10);
