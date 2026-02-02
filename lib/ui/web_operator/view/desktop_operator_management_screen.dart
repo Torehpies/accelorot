@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/summary_header.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
@@ -38,11 +39,11 @@ class _DesktopOperatorManagementScreenState
   Widget build(BuildContext context) {
     super.build(context);
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: WebColors.primaryBorder, width: 1.5),
       ),
       child: Column(
         children: [
@@ -57,7 +58,6 @@ class _DesktopOperatorManagementScreenState
               child: Column(
                 children: [
                   TeamHeaderWithTabs(controller: _tabController),
-                  const SizedBox(height: 8),
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,

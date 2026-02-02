@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
+import 'package:flutter_application_1/ui/statistics/view/statistics_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/home_screen.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_navigator.dart';
 import '../../ui/profile_screen/widgets/profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../ui/machine_management/view/operator_machine_view.dart'; 
+import '../../ui/machine_management/view/operator_machine_view.dart';
 import '../../data/models/machine_model.dart';
 
 void logCurrentUser(BuildContext context) {
@@ -58,13 +58,9 @@ class _MainNavigationState extends State<MainNavigation> {
     super.initState();
     _screens = [
       HomeScreen(focusedMachine: widget.focusedMachine),
-      ActivityLogsNavigator(
-        key: _activityNavigatorKey,
-      ),
-      StatisticsScreen(
-
-      ),
-      OperatorMachineView(teamId: widget.focusedMachine?.teamId ?? ''), 
+      ActivityLogsNavigator(key: _activityNavigatorKey),
+      StatisticsScreen(),
+      OperatorMachineView(),
       const ProfileView(),
     ];
   }

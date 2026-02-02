@@ -7,7 +7,6 @@ import '../../core/themes/web_colors.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../../activity_logs/models/activity_common.dart';
 
-
 /// Stats row showing: Total, Active, Archived, Suspended with MoM changes
 class MachineStatsRow extends ConsumerWidget {
   const MachineStatsRow({super.key});
@@ -16,9 +15,10 @@ class MachineStatsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = ref.watch(machineViewModelProvider);
     final isLoading = viewModel.status == LoadingStatus.loading;
-    
+
     // Get stats with month-over-month changes
-    final statsWithChange = ref.read(machineViewModelProvider.notifier)
+    final statsWithChange = ref
+        .read(machineViewModelProvider.notifier)
         .getMachineStatsWithChange();
 
     return Row(
@@ -38,7 +38,7 @@ class MachineStatsRow extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Active Machines Card
         Expanded(
           child: BaseStatsCard(
@@ -54,7 +54,7 @@ class MachineStatsRow extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Archived Machines Card
         Expanded(
           child: BaseStatsCard(
@@ -70,7 +70,7 @@ class MachineStatsRow extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Suspended Machines Card
         Expanded(
           child: BaseStatsCard(
@@ -80,7 +80,8 @@ class MachineStatsRow extends ConsumerWidget {
             iconColor: WebColors.error,
             backgroundColor: const Color(0xFFFEE2E2), // red-100
             changeText: statsWithChange['suspended']?['change'],
-            subtext: '${statsWithChange['suspended']?['changeType']} this month',
+            subtext:
+                '${statsWithChange['suspended']?['changeType']} this month',
             isPositive: statsWithChange['suspended']?['isPositive'],
             isLoading: isLoading,
           ),

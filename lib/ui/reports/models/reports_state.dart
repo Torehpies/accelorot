@@ -80,7 +80,8 @@ abstract class ReportsState with _$ReportsState {
     @Default(ReportStatusFilter.all) ReportStatusFilter selectedStatus,
     @Default(ReportCategoryFilter.all) ReportCategoryFilter selectedCategory,
     @Default(ReportPriorityFilter.all) ReportPriorityFilter selectedPriority,
-    @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
+    @Default(DateFilterRange(type: DateFilterType.none))
+    DateFilterRange dateFilter,
     @Default('') String searchQuery,
 
     // Sorting
@@ -107,7 +108,8 @@ abstract class ReportsState with _$ReportsState {
 
   bool get isLoading => status == LoadingStatus.loading;
   bool get hasError => status == LoadingStatus.error;
-  bool get isEmpty => filteredReports.isEmpty && status == LoadingStatus.success;
+  bool get isEmpty =>
+      filteredReports.isEmpty && status == LoadingStatus.success;
 
   /// Get paginated reports for current page
   List<Report> get paginatedReports {

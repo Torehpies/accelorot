@@ -82,7 +82,7 @@ class WebTextStyles {
     color: WebColors.textMuted,
   );
 
-  // Hero section heading 
+  // Hero section heading
   static const heroHeading = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 48,
@@ -91,7 +91,7 @@ class WebTextStyles {
     height: 1.2,
   );
 
-  // Section heading with accent 
+  // Section heading with accent
   static const sectionHeadingLarge = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 40,
@@ -100,7 +100,7 @@ class WebTextStyles {
     height: 1.3,
   );
 
-  // Subtitle for hero 
+  // Subtitle for hero
   static const heroSubtitle = TextStyle(
     fontFamily: 'dm-sans',
     fontSize: 16,
@@ -114,7 +114,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
   );
 
   static const bodyText = TextStyle(
@@ -149,7 +149,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 48,
     fontWeight: FontWeight.w300,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
     height: 1.0,
   );
 
@@ -176,7 +176,7 @@ class WebTextStyles {
     fontFamily: 'dm-sans',
     fontSize: 32,
     fontWeight: FontWeight.bold,
-    color: WebColors.tealAccent,
+    color: WebColors.greenAccent,
     height: 1.2,
   );
 

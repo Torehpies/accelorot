@@ -15,18 +15,16 @@ class BatchRepositoryRemote implements BatchRepository {
   Future<String> createBatch(
     String userId,
     String machineId,
-    int batchNumber,{
+    int batchNumber, {
     String? batchName,
     String? startNotes,
-  }
-  ) =>
-      _batchService.createBatch(
-        userId,
-        machineId,
-        batchNumber,
-        batchName: batchName,
-        startNotes: startNotes,
-      );
+  }) => _batchService.createBatch(
+    userId,
+    machineId,
+    batchNumber,
+    batchName: batchName,
+    startNotes: startNotes,
+  );
 
   @override
   Future<void> updateBatchTimestamp(String batchId) =>
@@ -37,12 +35,11 @@ class BatchRepositoryRemote implements BatchRepository {
     String batchId, {
     required double finalWeight,
     String? completionNotes,
-  }) =>
-      _batchService.completeBatch(
-        batchId,
-        finalWeight: finalWeight,
-        completionNotes: completionNotes,
-      );
+  }) => _batchService.completeBatch(
+    batchId,
+    finalWeight: finalWeight,
+    completionNotes: completionNotes,
+  );
 
   @override
   Future<String?> getUserTeamId(String userId) =>
@@ -53,7 +50,9 @@ class BatchRepositoryRemote implements BatchRepository {
       _batchService.getTeamMachineIds(teamId);
 
   @override
-  Future<List<BatchModel>> getBatchesForMachines(List<String> machineIds) async {
+  Future<List<BatchModel>> getBatchesForMachines(
+    List<String> machineIds,
+  ) async {
     final docs = await _batchService.getBatchesForMachines(machineIds);
     return docs.map((doc) => BatchModel.fromFirestore(doc)).toList();
   }

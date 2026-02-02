@@ -13,8 +13,7 @@ class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});
 
   @override
-  ConsumerState<WebAdminHomeView> createState() =>
-      _WebAdminHomeViewState();
+  ConsumerState<WebAdminHomeView> createState() => _WebAdminHomeViewState();
 }
 
 class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
@@ -54,16 +53,21 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
     );
   }
 
-  Widget _buildDashboard(AdminHomeState state, AsyncValue<List<ActivityLogItem>> activitiesAsync) {
+  Widget _buildDashboard(
+    AdminHomeState state,
+    AsyncValue<List<ActivityLogItem>> activitiesAsync,
+  ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Responsive breakpoints
         final isLargeScreen = constraints.maxWidth > 1200;
         final isMediumScreen = constraints.maxWidth > 800;
-        
+
         // Calculate responsive heights based on available viewport
-        final topSectionHeight = isLargeScreen ? 400.0 : (isMediumScreen ? 360.0 : 320.0);
-        
+        final topSectionHeight = isLargeScreen
+            ? 400.0
+            : (isMediumScreen ? 360.0 : 320.0);
+
         return Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -72,97 +76,111 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
               // Main layout: Left side (Stats + Activity) + Right side (Report Status)
               SizedBox(
                 height: topSectionHeight,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Left column: Stats cards + Activity chart
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          children: [
-                            // Three stat cards
-                            SizedBox(
-                              height: 160,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: BaseStatsCard(
-                                      title: "Total Operators",
-                                      value: state.totalOperators,
-                                      icon: Icons.person_outline,
-                                      iconColor: const Color(0xFF22C55E),
-                                      backgroundColor: const Color(0xFF22C55E).withValues(alpha: 0.1),
-                                      changeText: '${state.operatorGrowthRate.abs().toStringAsFixed(0)}%',
-                                      subtext: 'compared this month',
-                                      isPositive: state.operatorGrowthRate >= 0,
-                                    ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Left column: Stats cards + Activity chart
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        children: [
+                          // Three stat cards
+                          SizedBox(
+                            height: 160,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: BaseStatsCard(
+                                    title: "Total Operators",
+                                    value: state.totalOperators,
+                                    icon: Icons.person_outline,
+                                    iconColor: const Color(0xFF22C55E),
+                                    backgroundColor: const Color(
+                                      0xFF22C55E,
+                                    ).withValues(alpha: 0.1),
+                                    changeText:
+                                        '${state.operatorGrowthRate.abs().toStringAsFixed(0)}%',
+                                    subtext: 'compared this month',
+                                    isPositive: state.operatorGrowthRate >= 0,
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: BaseStatsCard(
-                                      title: "Total Machines",
-                                      value: state.totalMachines,
-                                      icon: Icons.settings_outlined,
-                                      iconColor: const Color(0xFF3B82F6),
-                                      backgroundColor: const Color(0xFF3B82F6).withValues(alpha: 0.1),
-                                      changeText: '${state.machineGrowthRate.abs().toStringAsFixed(0)}%',
-                                      subtext: 'compared this month',
-                                      isPositive: state.machineGrowthRate >= 0,
-                                    ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: BaseStatsCard(
+                                    title: "Total Machines",
+                                    value: state.totalMachines,
+                                    icon: Icons.settings_outlined,
+                                    iconColor: const Color(0xFF3B82F6),
+                                    backgroundColor: const Color(
+                                      0xFF3B82F6,
+                                    ).withValues(alpha: 0.1),
+                                    changeText:
+                                        '${state.machineGrowthRate.abs().toStringAsFixed(0)}%',
+                                    subtext: 'compared this month',
+                                    isPositive: state.machineGrowthRate >= 0,
                                   ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: BaseStatsCard(
-                                      title: "Total Reports",
-                                      value: state.totalReports,
-                                      icon: Icons.description_outlined,
-                                      iconColor: const Color(0xFFF59E0B),
-                                      backgroundColor: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                                      changeText: '${state.reportGrowthRate.abs().toStringAsFixed(0)}%',
-                                      subtext: 'compared this month',
-                                      isPositive: state.reportGrowthRate >= 0,
-                                    ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: BaseStatsCard(
+                                    title: "Total Reports",
+                                    value: state.totalReports,
+                                    icon: Icons.description_outlined,
+                                    iconColor: const Color(0xFFF59E0B),
+                                    backgroundColor: const Color(
+                                      0xFFF59E0B,
+                                    ).withValues(alpha: 0.1),
+                                    changeText:
+                                        '${state.reportGrowthRate.abs().toStringAsFixed(0)}%',
+                                    subtext: 'compared this month',
+                                    isPositive: state.reportGrowthRate >= 0,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            // Activity Overview chart
-                            Expanded(
-                              child: activitiesAsync.when(
-                                data: (activities) {
-                                  final chartData = _groupActivitiesByDay(activities);
-                                  return ActivityChart(activities: chartData);
-                                },
-                                loading: () => const Center(child: CircularProgressIndicator()),
-                                error: (err, _) => Center(child: Text('Error: $err')),
+                          ),
+                          const SizedBox(height: 16),
+                          // Activity Overview chart
+                          Expanded(
+                            child: activitiesAsync.when(
+                              data: (activities) {
+                                final chartData = _groupActivitiesByDay(
+                                  activities,
+                                );
+                                return ActivityChart(activities: chartData);
+                              },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
                               ),
+                              error: (err, _) =>
+                                  Center(child: Text('Error: $err')),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      // Right column: Report Status (spans full height)
-                      Expanded(
-                        flex: 1,
-                        child: ReportDonutChart(reportStatus: state.reportStatus),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Right column: Report Status (spans full height)
+                    Expanded(
+                      flex: 1,
+                      child: ReportDonutChart(reportStatus: state.reportStatus),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                // Recent Activities table (full width, anchored to screen height)
-                Expanded(
-                  child: const RecentActivitiesTable(),
-                ),
-              ],
-            ),
-          );
+              ),
+              const SizedBox(height: 16),
+              // Recent Activities table (full width, anchored to screen height)
+              Expanded(child: const RecentActivitiesTable()),
+            ],
+          ),
+        );
       },
     );
   }
 
-  List<Map<String, dynamic>> _groupActivitiesByDay(List<ActivityLogItem> activities) {
+  List<Map<String, dynamic>> _groupActivitiesByDay(
+    List<ActivityLogItem> activities,
+  ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final result = <Map<String, dynamic>>[];
@@ -176,17 +194,14 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
       int count = 0;
       for (var activity in activities) {
         final aDate = activity.timestamp;
-        if (aDate.year == date.year && 
-            aDate.month == date.month && 
+        if (aDate.year == date.year &&
+            aDate.month == date.month &&
             aDate.day == date.day) {
           count++;
         }
       }
 
-      result.add({
-        'day': dayName,
-        'count': count,
-      });
+      result.add({'day': dayName, 'count': count});
     }
 
     return result;
@@ -194,15 +209,22 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
 
   String _getDayName(int weekday) {
     switch (weekday) {
-      case DateTime.monday: return 'Mon';
-      case DateTime.tuesday: return 'Tue';
-      case DateTime.wednesday: return 'Wed';
-      case DateTime.thursday: return 'Thu';
-      case DateTime.friday: return 'Fri';
-      case DateTime.saturday: return 'Sat';
-      case DateTime.sunday: return 'Sun';
-      default: return '';
+      case DateTime.monday:
+        return 'Mon';
+      case DateTime.tuesday:
+        return 'Tue';
+      case DateTime.wednesday:
+        return 'Wed';
+      case DateTime.thursday:
+        return 'Thu';
+      case DateTime.friday:
+        return 'Fri';
+      case DateTime.saturday:
+        return 'Sat';
+      case DateTime.sunday:
+        return 'Sun';
+      default:
+        return '';
     }
   }
 }
-

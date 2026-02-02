@@ -112,16 +112,30 @@ class _ChangePasswordConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
- title: const Text('Reset Password', style: TextStyle(fontWeight: FontWeight.bold)),
+      title: const Text(
+        'Reset Password',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Send reset link to:', style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            'Send reset link to:',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
           const SizedBox(height: 4),
-          Text(email, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500)),
+          Text(
+            email,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+          ),
           const SizedBox(height: 8),
-          Text('Check your inbox for the link.', style: TextStyle(color: Colors.grey[600])),
+          Text(
+            'Check your inbox for the link.',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
         ],
       ),
       actions: [

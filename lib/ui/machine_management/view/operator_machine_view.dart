@@ -4,14 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../view_model/operator_machine_notifier.dart';
 import '../widgets/operator_machine_card.dart';
 import '../../core/widgets/shared/mobile_header.dart';
+import '../../../services/sess_service.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
-  final String teamId;
-
-  const OperatorMachineView({
-    super.key,
-    required this.teamId,
-  });
+  const OperatorMachineView({super.key});
 
   @override
   ConsumerState<OperatorMachineView> createState() =>
@@ -20,11 +16,25 @@ class OperatorMachineView extends ConsumerStatefulWidget {
 
 class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   final _searchFocusNode = FocusNode();
+  String? _teamId;
 
   @override
   void initState() {
     super.initState();
-    ref.read(operatorMachineProvider.notifier).initialize(widget.teamId);
+    _loadTeamIdAndInit();
+  }
+
+  Future<void> _loadTeamIdAndInit() async {
+    final sessionService = SessionService();
+    final userData = await sessionService.getCurrentUserData();
+
+    _teamId = userData?['teamId'] as String?;
+
+    if (_teamId != null) {
+      ref.read(operatorMachineProvider.notifier).initialize(_teamId!);
+    }
+
+    if (mounted) setState(() {});
   }
 
   @override
@@ -34,7 +44,9 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   }
 
   Future<void> _handleRefresh() async {
-    await ref.read(operatorMachineProvider.notifier).refresh(widget.teamId);
+    if (_teamId != null) {
+      await ref.read(operatorMachineProvider.notifier).refresh(_teamId!);
+    }
   }
 
   @override
@@ -49,14 +61,14 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
         appBar: MobileHeader(
           title: 'My Machines',
           showDropdown: false,
-          showFilterButton: true, // ✅ Now uses correct parameter name
+          showFilterButton: true,
           showSearch: true,
           showAddButton: false,
           elevation: 0.0,
           backgroundColor: Color(0xFFE0F2FE),
           foregroundColor: Color(0xFFE0F2FE),
           onDateRangeChanged: (range) {
-            // ✅ Passes to notifier
+            // Handle date filtering if needed
           },
         ),
         body: Padding(
@@ -122,19 +134,26 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
                     children: [
                       // Refresh Button
                       Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.teal),
+                              icon: const Icon(
+                                Icons.refresh,
+                                color: Colors.teal,
+                              ),
                               onPressed: _handleRefresh,
                               tooltip: 'Refresh',
                             ),
                           ],
                         ),
                       ),
-                      
+
                       // Machine List
                       Expanded(child: _buildContent(state, notifier)),
                     ],
@@ -174,7 +193,9 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
               ElevatedButton.icon(
                 onPressed: () {
                   notifier.clearError();
-                  notifier.initialize(widget.teamId);
+                  if (_teamId != null) {
+                    notifier.initialize(_teamId!);
+                  }
                 },
                 icon: const Icon(Icons.refresh, size: 18),
                 label: const Text('Retry'),

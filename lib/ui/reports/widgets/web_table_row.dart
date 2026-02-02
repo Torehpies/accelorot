@@ -10,12 +10,14 @@ import 'reports_priority_badge.dart';
 
 class WebTableRow extends StatelessWidget {
   final Report report;
-  final VoidCallback onTap;
+  final VoidCallback onView;
+  final VoidCallback onEdit;
 
   const WebTableRow({
     super.key,
     required this.report,
-    required this.onTap,
+    required this.onView,
+    required this.onEdit,
   });
 
   Color get statusColor {
@@ -49,6 +51,8 @@ class WebTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericTableRow(
+      onTap: null,
+      hoverColor: WebColors.hoverBackground,
       cellSpacing: AppSpacing.md,
       cells: [
         // Title Column (flex: 2)
@@ -62,15 +66,17 @@ class WebTableRow extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        
-        // Category Column (flex: 2) - Badge
+
+        // Category Column (flex: 2)
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: TableBadge(text: report.reportTypeLabel),
+          child: Text(
+            report.reportTypeLabel,
+            style: WebTextStyles.body,
+            textAlign: TextAlign.center,
           ),
         ),
-        
+
         // Status Column (flex: 2) - Filled Chip
         TableCellWidget(
           flex: 2,
@@ -93,24 +99,34 @@ class WebTableRow extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Priority Column (flex: 2) - Outline Badge
         TableCellWidget(
           flex: 2,
-          child: Center(
-            child: ReportsPriorityBadge(priority: report.priority),
-          ),
+          child: Center(child: ReportsPriorityBadge(priority: report.priority)),
         ),
-        
-        // Actions Column (flex: 1)
+
+        // Actions Column (flex: 1) - View and Edit buttons
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: IconButton(
-              icon: const Icon(Icons.edit, size: 18),
-              color: WebColors.textLabel,
-              onPressed: onTap,
-              tooltip: 'Edit Report',
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.open_in_new, size: 18),
+                  color: WebColors.textLabel,
+                  onPressed: onView,
+                  tooltip: 'View Details',
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  color: WebColors.textLabel,
+                  onPressed: onEdit,
+                  tooltip: 'Edit Report',
+                ),
+              ],
             ),
           ),
         ),

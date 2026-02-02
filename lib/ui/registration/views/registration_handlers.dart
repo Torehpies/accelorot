@@ -8,9 +8,9 @@ import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-const int kDesktopBreakpoint = 1024;
 const double kMaxFormWidth = 450.0;
 
 class RegistrationFormContent extends ConsumerWidget {
@@ -19,7 +19,7 @@ class RegistrationFormContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+    final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
     final state = ref.watch(registrationProvider);
     final notifier = ref.read(registrationProvider.notifier);
@@ -66,7 +66,16 @@ class RegistrationFormContent extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (!isDesktop) Center(child: _buildLogo()),
+        if (!isDesktop)
+          Center(
+            child: SvgPicture.asset(
+              'assets/images/Accel-O-Rot Logo.svg',
+              width: 65,
+              height: 65,
+              fit: BoxFit.contain,
+              semanticsLabel: 'Accel-O-Rot Logo',
+            ),
+          ),
         const SizedBox(height: 10),
         Center(child: _buildTitle(theme)),
         SizedBox(height: isDesktop ? 10 : 32),
@@ -225,29 +234,6 @@ class RegistrationFormContent extends ConsumerWidget {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.teal.shade400, Colors.teal.shade700],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.teal.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: const Icon(Icons.trending_up, size: 36, color: Colors.white),
     );
   }
 

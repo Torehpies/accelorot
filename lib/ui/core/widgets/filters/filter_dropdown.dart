@@ -40,12 +40,16 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
     if (widget.isLoading) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -56,9 +60,7 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       color: WebColors.cardBackground,
-      constraints: const BoxConstraints(
-        maxHeight: 300,
-      ),
+      constraints: const BoxConstraints(maxHeight: 300),
       items: widget.items.map((item) {
         return PopupMenuItem<T>(
           value: item,
@@ -76,10 +78,12 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
   Widget build(BuildContext context) {
     final valueStr = _getDisplayText(widget.value).toLowerCase();
     final isActive = !valueStr.contains('all');
-    final iconColor = isActive ? WebColors.tealAccent : WebColors.textLabel;
+    final iconColor = isActive ? WebColors.greenAccent : WebColors.textLabel;
 
     return MouseRegion(
-      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      cursor: widget.isLoading
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: Opacity(
@@ -92,9 +96,11 @@ class _FilterDropdownState<T> extends State<FilterDropdown<T>> {
             child: Icon(
               Icons.filter_alt,
               size: 18,
-              color: _isHovered 
-                ? (isActive ? WebColors.tealAccent.withValues(alpha: 0.8) : WebColors.textSecondary)
-                : iconColor,
+              color: _isHovered
+                  ? (isActive
+                        ? WebColors.greenAccent.withValues(alpha: 0.8)
+                        : WebColors.textSecondary)
+                  : iconColor,
             ),
           ),
         ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+const int kTabletBreakpoint = 800;
+const int kDesktopBreakpoint = 1000;
+
 // --- 2. Theme Data Definition ---
 final ThemeData appTheme = ThemeData(
   useMaterial3: true,
@@ -14,11 +17,11 @@ final ThemeData appTheme = ThemeData(
       fontWeight: FontWeight.bold,
       color: AppColors.textPrimary,
     ),
-    titleLarge: TextStyle( 
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-    color: AppColors.textPrimary,
-  ),
+    titleLarge: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: AppColors.textPrimary,
+    ),
     titleMedium: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyLarge: TextStyle(fontSize: 16, color: AppColors.textPrimary),
     bodyMedium: TextStyle(color: AppColors.textPrimary),

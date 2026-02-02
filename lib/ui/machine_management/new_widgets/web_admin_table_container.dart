@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/widgets/table/base_table_container.dart';
+import '../../core/widgets/table/table_container.dart';
 import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
@@ -15,21 +15,21 @@ import 'web_table_body.dart';
 class WebAdminTableContainer extends StatelessWidget {
   final List<MachineModel> machines;
   final bool isLoading;
-  
+
   // Filter states
   final MachineStatusFilter selectedStatusFilter;
   final String searchQuery;
-  
+
   // Sort states
   final String? sortColumn;
   final bool sortAscending;
-  
+
   // Pagination states
   final int currentPage;
   final int totalPages;
   final int itemsPerPage;
   final int totalItems;
-  
+
   // Callbacks
   final ValueChanged<MachineStatusFilter> onStatusFilterChanged;
   final ValueChanged<DateFilterRange> onDateFilterChanged;
@@ -72,7 +72,7 @@ class WebAdminTableContainer extends StatelessWidget {
         'Machine List',
         style: WebTextStyles.sectionTitle,
       ),
-      
+
       // Right header: Date filter, Search, Add button
       rightHeaderWidgets: [
         SizedBox(
@@ -88,10 +88,7 @@ class WebAdminTableContainer extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: 220,
-                  maxWidth: 320,
-                ),
+                constraints: const BoxConstraints(minWidth: 220, maxWidth: 320),
                 child: SearchField(
                   hintText: 'Search...',
                   onChanged: onSearchChanged,
@@ -104,7 +101,7 @@ class WebAdminTableContainer extends StatelessWidget {
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Machine'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: WebColors.tealAccent,
+                  backgroundColor: WebColors.greenAccent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -119,7 +116,7 @@ class WebAdminTableContainer extends StatelessWidget {
           ),
         ),
       ],
-      
+
       // Table header with filters
       tableHeader: MachineTableHeader(
         selectedStatusFilter: selectedStatusFilter,
@@ -129,7 +126,7 @@ class WebAdminTableContainer extends StatelessWidget {
         onSort: onSort,
         isLoading: isLoading,
       ),
-      
+
       // Table body
       tableBody: MachineTableBody(
         machines: machines,
@@ -137,7 +134,7 @@ class WebAdminTableContainer extends StatelessWidget {
         onView: onView,
         isLoading: isLoading,
       ),
-      
+
       // Pagination
       paginationWidget: PaginationControls(
         currentPage: currentPage,

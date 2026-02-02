@@ -33,8 +33,12 @@ class _ProfileEditFormState extends ConsumerState<ProfileEditForm> {
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.profile.displayName);
-    _firstNameController = TextEditingController(text: widget.profile.firstName);
+    _usernameController = TextEditingController(
+      text: widget.profile.displayName,
+    );
+    _firstNameController = TextEditingController(
+      text: widget.profile.firstName,
+    );
     _lastNameController = TextEditingController(text: widget.profile.lastName);
     _emailController = TextEditingController(text: widget.profile.email);
     _roleController = TextEditingController(text: widget.profile.role);
@@ -56,7 +60,9 @@ class _ProfileEditFormState extends ConsumerState<ProfileEditForm> {
     setState(() => _isSubmitting = true);
 
     try {
-      await ref.read(profileProvider.notifier).updateProfile(
+      await ref
+          .read(profileProvider.notifier)
+          .updateProfile(
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
           );

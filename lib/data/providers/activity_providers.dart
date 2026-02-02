@@ -36,71 +36,83 @@ final activityFilterServiceProvider = Provider<ActivityFilterService>((ref) {
 // ===== ACTIVITY DATA PROVIDERS =====
 
 /// Provider for all activities (substrates + alerts + cycles + reports)
-final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   // Watch auth state to rebuild when user changes
   ref.watch(authStateChangesProvider);
-  
+
   final aggregator = ref.watch(activityAggregatorProvider);
   final result = await aggregator.getAllActivitiesWithCache();
   return result.items;
 });
 
 /// Provider for substrates only
-final substrateActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final substrateActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.getSubstrates();
 });
 
 /// Provider for alerts only
-final alertActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final alertActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.getAlerts();
 });
 
 /// Provider for cycles only
-final cycleActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final cycleActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.getCyclesRecom();
 });
 
 /// Provider for reports only
-final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.getReports();
 });
 
 /// Provider for activities filtered by user's team
-final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((ref) async {
+final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
+  ref,
+) async {
   // Watch auth state to rebuild when user changes
   ref.watch(authStateChangesProvider);
-  
+
   final aggregator = ref.watch(activityAggregatorProvider);
   final profileRepo = ref.watch(profileRepositoryProvider);
   final batchRepo = ref.watch(batchRepositoryProvider);
-  
+
   // Get user's team
   final profile = await profileRepo.getCurrentProfile();
   if (profile?.teamId == null) return [];
-  
+
   // Get team's machine IDs
   final machineIds = await batchRepo.getTeamMachineIds(profile!.teamId!);
-  
+
   // Get all activities
   final result = await aggregator.getAllActivitiesWithCache();
-  
+
   // Filter activities by team's machines or team membership
   return result.items.where((activity) {
     // For machine-based activities (substrates, cycles, some alerts)
     if (activity.machineId != null) {
       return machineIds.contains(activity.machineId);
     }
-    
+
     // For reports and other activities without machines
     // Include if they belong to the team (check teamId if available, or include all for now)
     if (activity.type == ActivityType.report) {
       return true; // Include all reports from team members
     }
-    
+
     // Include alerts and other activities without machineId
     return true;
   }).toList();

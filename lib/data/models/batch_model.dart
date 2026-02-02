@@ -17,8 +17,8 @@ abstract class BatchModel with _$BatchModel {
     required DateTime createdAt,
     required DateTime updatedAt,
     String? teamId,
-    String? batchName, // Added batch name field
-    String? startNotes, // Added start notes field
+    String? batchName,
+    String? startNotes,
     DateTime? completedAt,
     double? finalWeight,
     String? completionNotes,
@@ -30,7 +30,7 @@ abstract class BatchModel with _$BatchModel {
   /// Create from Firestore document
   factory BatchModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-    
+
     return BatchModel(
       id: doc.id,
       machineId: data['machineId'] ?? '',
@@ -40,8 +40,8 @@ abstract class BatchModel with _$BatchModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       teamId: data['teamId'],
-      batchName: data['batchName'], // Added
-      startNotes: data['startNotes'], // Added
+      batchName: data['batchName'],
+      startNotes: data['startNotes'],
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       finalWeight: (data['finalWeight'] as num?)?.toDouble(),
       completionNotes: data['completionNotes'] as String?,
@@ -58,7 +58,7 @@ abstract class BatchModel with _$BatchModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       if (teamId != null) 'teamId': teamId,
-      if (batchName != null) 'batchName': batchName, 
+      if (batchName != null) 'batchName': batchName,
       if (startNotes != null) 'startNotes': startNotes,
       if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
       if (finalWeight != null) 'finalWeight': finalWeight,
@@ -67,8 +67,8 @@ abstract class BatchModel with _$BatchModel {
   }
 
   /// Get formatted batch name
-  String get displayName => batchName ?? 'Batch #$batchNumber'; 
-  
+  String get displayName => batchName ?? 'Batch #$batchNumber';
+
   /// Get completion progress percentage // temporary logic
   double getProgress({int totalDays = 12}) {
     if (!isActive && completedAt != null) return 100.0;

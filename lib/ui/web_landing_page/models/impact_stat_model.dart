@@ -4,8 +4,5 @@ class ImpactStatModel {
   final String value;
   final String label;
 
-  ImpactStatModel({
-    required this.value,
-    required this.label,
-  });
+  ImpactStatModel({required this.value, required this.label});
 }

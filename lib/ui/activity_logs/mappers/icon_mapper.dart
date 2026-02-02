@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// Maps categories and types to IconData for UI display
 class ActivityIconMapper {
   // ===== SUBSTRATE ICONS =====
-  
+
   static IconData getIconForSubstrate(String category) {
     switch (category.toLowerCase()) {
       case 'greens':
@@ -20,7 +20,7 @@ class ActivityIconMapper {
   }
 
   // ===== ALERT ICONS =====
-  
+
   static IconData getIconForAlert(String sensorType) {
     final lower = sensorType.toLowerCase();
     if (lower.contains('temp')) {
@@ -35,7 +35,7 @@ class ActivityIconMapper {
   }
 
   // ===== REPORT ICONS =====
-  
+
   static IconData getIconForReport(String reportType) {
     switch (reportType.toLowerCase()) {
       case 'maintenance_issue':
@@ -50,7 +50,7 @@ class ActivityIconMapper {
   }
 
   // ===== CYCLE ICONS =====
-  
+
   static IconData getIconForCycle(String category) {
     switch (category.toLowerCase()) {
       case 'recoms':
@@ -63,7 +63,7 @@ class ActivityIconMapper {
   }
 
   // ===== GENERIC ICON FROM CODE POINT =====
-  
+
   /// Fallback method to get icon from code point (for legacy compatibility)
   static IconData getIconFromCodePoint(int codePoint) {
     switch (codePoint) {

@@ -1,7 +1,7 @@
 // lib/ui/core/widgets/shared/mobile_header.dart
 import 'package:flutter/material.dart';
-import '../../constants/spacing.dart'; 
-import '../../themes/app_theme.dart'; 
+import '../../constants/spacing.dart';
+import '../../themes/app_theme.dart';
 
 class MobileHeader extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -10,12 +10,12 @@ class MobileHeader extends StatefulWidget implements PreferredSizeWidget {
   final String? dropdownHint;
   final ValueChanged<String?>? onDropdownChanged;
   final DateTime? startDate; // used as initial date for picker
-  final ValueChanged<DateTimeRange?>? onDateRangeChanged; 
+  final ValueChanged<DateTimeRange?>? onDateRangeChanged;
   final String? searchQuery;
   final ValueChanged<String>? onSearchChanged;
   final bool showSearch;
   final bool showDropdown;
-  final bool showFilterButton; 
+  final bool showFilterButton;
   final bool showAddButton;
   final VoidCallback? onAddPressed;
   final double elevation;
@@ -49,7 +49,9 @@ class MobileHeader extends StatefulWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize {
     bool hasSecondRow = showSearch || showFilterButton || showAddButton;
-    return Size.fromHeight(hasSecondRow ? kToolbarHeight + 56.0 : kToolbarHeight);
+    return Size.fromHeight(
+      hasSecondRow ? kToolbarHeight + 56.0 : kToolbarHeight,
+    );
   }
 }
 
@@ -98,7 +100,8 @@ class _MobileHeaderState extends State<MobileHeader> {
 
   @override
   Widget build(BuildContext context) {
-    bool hasSecondRow = widget.showSearch || widget.showFilterButton || widget.showAddButton;
+    bool hasSecondRow =
+        widget.showSearch || widget.showFilterButton || widget.showAddButton;
 
     return Container(
       decoration: BoxDecoration(
@@ -142,9 +145,7 @@ class _MobileHeaderState extends State<MobileHeader> {
                           value: _dropdownValue.isEmpty ? null : _dropdownValue,
                           hint: Text(
                             widget.dropdownHint!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textSecondary),
                           ),
                           items: widget.dropdownItems,
@@ -189,10 +190,9 @@ class _MobileHeaderState extends State<MobileHeader> {
                           child: TextField(
                             controller: _searchController,
                             decoration: InputDecoration(
-                              hintText: 'Search ${widget.title.toLowerCase()}...',
-                              hintStyle: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              hintText:
+                                  'Search ${widget.title.toLowerCase()}...',
+                              hintStyle: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.textSecondary),
                               prefixIcon: Icon(
                                 Icons.search,
@@ -212,7 +212,9 @@ class _MobileHeaderState extends State<MobileHeader> {
                       ),
                     if (widget.showFilterButton)
                       Container(
-                        margin: EdgeInsets.only(left: widget.showSearch ? AppSpacing.sm : 0),
+                        margin: EdgeInsets.only(
+                          left: widget.showSearch ? AppSpacing.sm : 0,
+                        ),
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
@@ -233,7 +235,9 @@ class _MobileHeaderState extends State<MobileHeader> {
                     if (widget.showAddButton && widget.onAddPressed != null)
                       Container(
                         margin: EdgeInsets.only(
-                          left: (widget.showSearch || widget.showFilterButton) ? AppSpacing.sm : 0,
+                          left: (widget.showSearch || widget.showFilterButton)
+                              ? AppSpacing.sm
+                              : 0,
                         ),
                         width: 40,
                         height: 40,
@@ -243,11 +247,7 @@ class _MobileHeaderState extends State<MobileHeader> {
                         ),
                         child: IconButton(
                           onPressed: widget.onAddPressed,
-                          icon: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 18,
-                          ),
+                          icon: Icon(Icons.add, color: Colors.white, size: 18),
                           padding: EdgeInsets.zero,
                         ),
                       ),

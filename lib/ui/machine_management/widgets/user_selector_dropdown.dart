@@ -25,10 +25,7 @@ class UserSelectorDropdown extends StatelessWidget {
         decoration: BoxDecoration(
           color: enabled ? Colors.grey[50] : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.grey[300]!,
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey[300]!, width: 1),
         ),
         child: Row(
           children: [

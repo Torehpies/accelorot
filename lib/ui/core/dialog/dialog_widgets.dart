@@ -25,9 +25,7 @@ class DialogHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: WebColors.cardBorder),
-        ),
+        border: Border(bottom: BorderSide(color: WebColors.cardBorder)),
       ),
       child: Row(
         children: [
@@ -35,15 +33,9 @@ class DialogHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: WebTextStyles.sectionTitle,
-                ),
+                Text(title, style: WebTextStyles.sectionTitle),
                 const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: WebTextStyles.bodyMediumGray,
-                ),
+                Text(subtitle, style: WebTextStyles.bodyMediumGray),
               ],
             ),
           ),
@@ -65,10 +57,7 @@ class DialogHeader extends StatelessWidget {
 class DialogContent extends StatelessWidget {
   final Widget child;
 
-  const DialogContent({
-    super.key,
-    required this.child,
-  });
+  const DialogContent({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -85,23 +74,20 @@ class DialogContent extends StatelessWidget {
 class DialogFooter extends StatelessWidget {
   final List<DialogAction> actions;
 
-  const DialogFooter({
-    super.key,
-    required this.actions,
-  });
+  const DialogFooter({super.key, required this.actions});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: WebColors.cardBorder),
-        ),
+        border: Border(top: BorderSide(color: WebColors.cardBorder)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: actions.map((action) => _buildButton(context, action)).toList(),
+        children: actions
+            .map((action) => _buildButton(context, action))
+            .toList(),
       ),
     );
   }
@@ -115,15 +101,9 @@ class DialogFooter extends StatelessWidget {
           onPressed: action.onPressed,
           style: TextButton.styleFrom(
             foregroundColor: WebColors.buttonSecondary,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
-          child: Text(
-            action.label,
-            style: WebTextStyles.bodyMedium,
-          ),
+          child: Text(action.label, style: WebTextStyles.bodyMedium),
         ),
       );
     }
@@ -139,14 +119,9 @@ class DialogFooter extends StatelessWidget {
         backgroundColor: backgroundColor,
         foregroundColor: Colors.white,
         disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: action.isLoading
           ? const SizedBox(
@@ -159,9 +134,7 @@ class DialogFooter extends StatelessWidget {
             )
           : Text(
               action.label,
-              style: WebTextStyles.bodyMedium.copyWith(
-                color: Colors.white,
-              ),
+              style: WebTextStyles.bodyMedium.copyWith(color: Colors.white),
             ),
     );
   }

@@ -8,8 +8,13 @@ import '../../core/themes/web_colors.dart';
 
 class CtaSection extends StatelessWidget {
   final VoidCallback onGetStarted;
+  final VoidCallback? onDownload;
 
-  const CtaSection({super.key, required this.onGetStarted});
+  const CtaSection({
+    super.key,
+    required this.onGetStarted,
+    this.onDownload,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +24,7 @@ class CtaSection extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
+          // ================= CTA CONTAINER WITH GRADIENT =================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
@@ -29,7 +35,10 @@ class CtaSection extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
+                colors: [
+                  Color(0xFF84FAB0), // start green
+                  Color(0xFF8FD3F4), // end blue
+                ],
               ),
             ),
             child: Column(
@@ -48,11 +57,12 @@ class CtaSection extends StatelessWidget {
                   'Join the sustainable composting revolution with Accel-O-Rot\'s smart IoT\nsystem',
                   textAlign: TextAlign.center,
                   style: WebTextStyles.subtitle.copyWith(
-                    color: Color(0xFF111827),
+                    color: const Color(0xFF111827),
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
+                // ================= GET STARTED BUTTON =================
                 Container(
                   decoration: BoxDecoration(
                     color: WebColors.iconsPrimary,
@@ -97,37 +107,42 @@ class CtaSection extends StatelessWidget {
           // Footers
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxxl * 2,
+              vertical: AppSpacing.xl,
+            ),
             color: Colors.white,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 10),
                     SvgPicture.asset(
                       'assets/images/Accel-O-Rot Logo.svg',
-                      width: 60,
-                      height: 60,
+                      width: 50,
+                      height: 50,
                       fit: BoxFit.contain,
                       semanticsLabel: 'Accel-O-Rot Logo',
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: AppSpacing.md),
                     Text(
-                      'Accel-O-Rot',
+                      'ACCEL-O-ROT',
                       style: h2Style.copyWith(
                         color: WebColors.textTitle,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 24,
                       ),
                     ),
                   ],
                 ),
-                const Spacer(),
                 Flexible(
                   child: Text(
                     '© 2026 Accel-O-Rot. Accelerating sustainable composting through innovation.',
-                    style: WebTextStyles.caption,
+                    style: WebTextStyles.caption.copyWith(
+                      color: const Color(0xFF6B7280),
+                      fontSize: 13,
+                    ),
                     textAlign: TextAlign.right,
                   ),
                 ),
@@ -139,4 +154,3 @@ class CtaSection extends StatelessWidget {
     );
   }
 }
-

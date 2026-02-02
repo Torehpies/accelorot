@@ -19,28 +19,47 @@ class ActivityChart extends StatelessWidget {
     // Round up to nearest multiple of 5 for nice 5-step intervals
     final interval = ((maxCount > 0 ? maxCount : 5) / 5).ceil();
     final maxValue = interval * 5;
-    
-    final yAxisLabels = List.generate(6, (index) => maxValue - (index * interval));
+
+    final yAxisLabels = List.generate(
+      6,
+      (index) => maxValue - (index * interval),
+    );
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text('Activity Overview', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+              const Text(
+                'Activity Overview',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
               const Spacer(),
               Row(
                 children: const [
                   Icon(Icons.square, size: 12, color: Color(0xFF10B981)),
                   SizedBox(width: 6),
-                  Text('Number of Activities Per Day', style: TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
+                  Text(
+                    'Number of Activities Per Day',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                  ),
                 ],
               ),
             ],
@@ -54,7 +73,13 @@ class ActivityChart extends StatelessWidget {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: yAxisLabels.map((label) {
-                    return Text('$label', style: const TextStyle(fontSize: 10, color: Color(0xFF9CA3AF)));
+                    return Text(
+                      '$label',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    );
                   }).toList(),
                 ),
                 const SizedBox(width: 12),
@@ -80,7 +105,9 @@ class ActivityChart extends StatelessWidget {
                           final heightFactor = count / maxValue;
                           return Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -91,7 +118,10 @@ class ActivityChart extends StatelessWidget {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: const Color(0xFF10B981),
-                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(4),
+                                              ),
                                         ),
                                       ),
                                     ),
@@ -99,7 +129,10 @@ class ActivityChart extends StatelessWidget {
                                   const SizedBox(height: 8),
                                   Text(
                                     item['day'].toString(),
-                                    style: const TextStyle(fontSize: 10, color: Color(0xFF6B7280)),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF6B7280),
+                                    ),
                                   ),
                                 ],
                               ),

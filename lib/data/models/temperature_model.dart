@@ -1,11 +1,7 @@
 import 'sensor_reading_model.dart';
 
 class TemperatureModel extends SensorReadingModel {
-  TemperatureModel({
-    required super.id,
-    required super.value,
-    super.timestamp,
-  });
+  TemperatureModel({required super.id, required super.value, super.timestamp});
 
   String get quality {
     if (value >= 55 && value <= 65) return 'Optimal';

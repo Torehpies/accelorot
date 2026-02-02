@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 class FilterHeaderBar extends StatelessWidget {
   /// Left section widget (title, filter dropdowns, etc.)
   final Widget? leftWidget;
-  
+
   /// Right section widgets (search bar, date filter, etc.)
   final List<Widget>? rightWidgets;
-  
+
   /// Spacing between right widgets
   final double rightWidgetSpacing;
 
@@ -28,13 +28,11 @@ class FilterHeaderBar extends StatelessWidget {
       child: Row(
         children: [
           // Left section
-          if (leftWidget != null)
-            Expanded(child: leftWidget!),
-          
+          if (leftWidget != null) Expanded(child: leftWidget!),
+
           // Spacer
-          if (leftWidget != null && rightWidgets != null)
-            const Spacer(),
-          
+          if (leftWidget != null && rightWidgets != null) const Spacer(),
+
           // Right section widgets with spacing
           if (rightWidgets != null)
             ...rightWidgets!.map((widget) {

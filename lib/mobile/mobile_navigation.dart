@@ -6,7 +6,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/view/home_screen.dar
     show HomeScreen;
 import '../../ui/machine_management/view/operator_machine_view.dart';
 import '../../ui/profile_screen/widgets/profile_view.dart';
-import 'package:flutter_application_1/ui/mobile_statistics/statistics_screen.dart';
+import 'package:flutter_application_1/ui/statistics/view/statistics_screen.dart';
 
 class MobileNavigation extends StatefulWidget {
   const MobileNavigation({super.key});
@@ -26,7 +26,7 @@ class _MobileNavigationState extends State<MobileNavigation> {
       // viewingOperatorId will be fetched from auth inside screens
     ),
     const StatisticsScreen(),
-     const OperatorMachineView(teamId: '',),
+    const OperatorMachineView(),
     const ProfileView(),
   ];
 

@@ -403,14 +403,14 @@ class AuthService {
     }
   }
 
-	Future<void> refreshUser() async {
-		try {
-			User? user = _auth.currentUser;
-			if (user != null) {
-			await user.reload();
-			} 
-		} catch (e) {
-			debugPrint('Error refreshing user: $e');
-		}
-	}
+  Future<void> refreshUser() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await user.reload();
+      }
+    } catch (e) {
+      debugPrint('Error refreshing user: $e');
+    }
+  }
 }

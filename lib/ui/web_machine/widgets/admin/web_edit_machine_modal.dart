@@ -14,7 +14,8 @@ class WebEditMachineModal extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<WebEditMachineModal> createState() => _WebEditMachineModalState();
+  ConsumerState<WebEditMachineModal> createState() =>
+      _WebEditMachineModalState();
 }
 
 class _WebEditMachineModalState extends ConsumerState<WebEditMachineModal> {
@@ -63,10 +64,7 @@ class _WebEditMachineModalState extends ConsumerState<WebEditMachineModal> {
         borderRadius: BorderRadius.circular(8),
       ),
       disabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(
-          color: Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       filled: readOnly,
@@ -100,7 +98,9 @@ class _WebEditMachineModalState extends ConsumerState<WebEditMachineModal> {
     setState(() => _isSubmitting = true);
 
     try {
-      await ref.read(adminMachineProvider.notifier).updateMachine(
+      await ref
+          .read(adminMachineProvider.notifier)
+          .updateMachine(
             teamId: widget.teamId,
             machineId: widget.machine.machineId,
             machineName: name,
@@ -220,7 +220,10 @@ class _WebEditMachineModalState extends ConsumerState<WebEditMachineModal> {
 
             TextField(
               controller: TextEditingController(text: 'All Team Members'),
-              decoration: _buildInputDecoration('Assigned Users', readOnly: true),
+              decoration: _buildInputDecoration(
+                'Assigned Users',
+                readOnly: true,
+              ),
               enabled: false,
               readOnly: true,
               style: const TextStyle(color: Color(0xFF6B7280)),

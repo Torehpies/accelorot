@@ -1,5 +1,7 @@
 // lib/ui/machine_management/view_model/machine_viewmodel.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/machine_model.dart';
@@ -29,14 +31,14 @@ class MachineViewModel extends _$MachineViewModel {
     _aggregator = ref.read(machineAggregatorServiceProvider);
     _filterService = MachineFilterService();
 
+    Future.microtask(() => _initialize());
+
     return const MachineState();
   }
 
   // ===== INITIALIZATION =====
 
-  Future<void> initialize(String teamId) async {
-    _currentTeamId = teamId;
-
+  Future<void> _initialize() async {
     state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
@@ -50,7 +52,44 @@ class MachineViewModel extends _$MachineViewModel {
         return;
       }
 
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (userId == null) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'Unable to get user ID',
+        );
+        return;
+      }
+
+      // Fetch user document to get teamId
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!userDoc.exists) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'User profile not found',
+        );
+        return;
+      }
+
+      final userData = userDoc.data();
+      final teamId = userData?['teamId'] as String?;
+
+      if (teamId == null || teamId.isEmpty) {
+        state = state.copyWith(
+          status: LoadingStatus.error,
+          errorMessage: 'Team ID not found in user profile',
+        );
+        return;
+      }
+
+      _currentTeamId = teamId;
       state = state.copyWith(isLoggedIn: true);
+
       await loadMachines(teamId);
     } catch (e) {
       state = state.copyWith(
@@ -222,15 +261,15 @@ class MachineViewModel extends _$MachineViewModel {
     final total = state.machines.length;
 
     final active = state.machines
-        .where((m) => m.status == MachineStatus.active && !m.isArchived)
+        .where((m) => m.status == MachineStatus.active)
         .length;
 
-    final archived = state.machines.where((m) => m.isArchived).length;
+    final archived = state.machines
+        .where((m) => m.status == MachineStatus.inactive)
+        .length;
 
     final suspended = state.machines
-        .where(
-          (m) => m.status == MachineStatus.underMaintenance && !m.isArchived,
-        )
+        .where((m) => m.status == MachineStatus.underMaintenance)
         .length;
 
     return {
@@ -254,7 +293,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.status == MachineStatus.active && !m.isArchived && wasModified;
+      return m.status == MachineStatus.active && wasModified;
     }).length;
 
     // Archived: Count machines that are archived AND were modified in range
@@ -263,7 +302,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.isArchived && wasModified;
+      return m.status == MachineStatus.inactive && wasModified;
     }).length;
 
     // Suspended: Count machines under maintenance AND were modified in range
@@ -272,9 +311,7 @@ class MachineViewModel extends _$MachineViewModel {
           m.lastModified != null &&
           m.lastModified!.isAfter(start) &&
           m.lastModified!.isBefore(end);
-      return m.status == MachineStatus.underMaintenance &&
-          !m.isArchived &&
-          wasModified;
+      return m.status == MachineStatus.underMaintenance && wasModified;
     }).length;
 
     return {
@@ -324,11 +361,14 @@ class MachineViewModel extends _$MachineViewModel {
   // ===== MACHINE OPERATIONS =====
 
   Future<void> addMachine({
-    required String teamId,
     required String machineName,
     required String machineId,
     required List<String> assignedUserIds,
   }) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       final exists = await _aggregator.checkMachineExists(machineId);
       if (exists) {
@@ -338,7 +378,7 @@ class MachineViewModel extends _$MachineViewModel {
       final request = CreateMachineRequest(
         machineId: machineId,
         machineName: machineName,
-        teamId: teamId,
+        teamId: _currentTeamId!,
         assignedUserIds: assignedUserIds,
         status: MachineStatus.active,
       );
@@ -356,12 +396,15 @@ class MachineViewModel extends _$MachineViewModel {
   }
 
   Future<void> updateMachine({
-    required String teamId,
     required String machineId,
     String? machineName,
     MachineStatus? status,
     List<String>? assignedUserIds,
   }) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       final request = UpdateMachineRequest(
         machineId: machineId,
@@ -382,7 +425,11 @@ class MachineViewModel extends _$MachineViewModel {
     }
   }
 
-  Future<void> archiveMachine(String teamId, String machineId) async {
+  Future<void> archiveMachine(String machineId) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       await _aggregator.archiveMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));
@@ -396,7 +443,11 @@ class MachineViewModel extends _$MachineViewModel {
     }
   }
 
-  Future<void> restoreMachine(String teamId, String machineId) async {
+  Future<void> restoreMachine(String machineId) async {
+    if (_currentTeamId == null) {
+      throw Exception('Team ID not available');
+    }
+
     try {
       await _aggregator.restoreMachine(machineId);
       await Future.delayed(const Duration(milliseconds: 300));

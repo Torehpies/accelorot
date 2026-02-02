@@ -1,10 +1,6 @@
-// lib/ui/core/widgets/table/activity_table_row.dart
+// lib/ui/core/widgets/table/table_row.dart
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../../../data/models/activity_log_item.dart';
-import '../../../activity_logs/models/unified_activity_config.dart';
-import '../../../activity_logs/models/activity_enums.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
@@ -37,15 +33,14 @@ class GenericTableRow extends StatelessWidget {
       hoverColor: hoverColor ?? WebColors.hoverBackground,
       child: Container(
         constraints: BoxConstraints(minHeight: height ?? 52),
-        padding: padding ??
+        padding:
+            padding ??
             const EdgeInsets.symmetric(
               horizontal: AppSpacing.tableCellHorizontal,
               vertical: 8,
             ),
         // Removed the border decoration entirely - separator handles dividers
-        child: Row(
-          children: _buildCellsWithSpacing(),
-        ),
+        child: Row(children: _buildCellsWithSpacing()),
       ),
     );
   }
@@ -69,18 +64,11 @@ class TableCellWidget extends StatelessWidget {
   final int flex;
   final Widget child;
 
-  const TableCellWidget({
-    super.key,
-    required this.flex,
-    required this.child,
-  });
+  const TableCellWidget({super.key, required this.flex, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: flex,
-      child: child,
-    );
+    return Expanded(flex: flex, child: child);
   }
 }
 
@@ -88,10 +76,7 @@ class TableCellWidget extends StatelessWidget {
 class TableBadge extends StatelessWidget {
   final String text;
 
-  const TableBadge({
-    super.key,
-    required this.text,
-  });
+  const TableBadge({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -116,11 +101,7 @@ class TableChip extends StatelessWidget {
   final String text;
   final Color color;
 
-  const TableChip({
-    super.key,
-    required this.text,
-    required this.color,
-  });
+  const TableChip({super.key, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -165,12 +146,7 @@ class TableHeaderCell extends StatelessWidget {
     final isActive = sortable && sortColumn == currentSortColumn;
 
     if (!sortable) {
-      return Center(
-        child: Text(
-          label,
-          style: WebTextStyles.label,
-        ),
-      );
+      return Center(child: Text(label, style: WebTextStyles.label));
     }
 
     // Sortable header
@@ -184,7 +160,7 @@ class TableHeaderCell extends StatelessWidget {
             Text(
               label,
               style: isActive
-                  ? WebTextStyles.label.copyWith(color: WebColors.tealAccent)
+                  ? WebTextStyles.label.copyWith(color: WebColors.greenAccent)
                   : WebTextStyles.label,
             ),
             const SizedBox(width: 4),
@@ -193,105 +169,11 @@ class TableHeaderCell extends StatelessWidget {
                   ? (sortAscending ? Icons.arrow_upward : Icons.arrow_downward)
                   : Icons.unfold_more,
               size: 16,
-              color: isActive ? WebColors.tealAccent : WebColors.neutral,
+              color: isActive ? WebColors.greenAccent : WebColors.neutral,
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-// ============================================================================
-// MAIN ACTIVITY TABLE ROW COMPONENT
-// ============================================================================
-
-/// Displays: Title, Category Badge, Type Chip, Value, Date, and Actions
-class ActivityTableRow extends StatelessWidget {
-  final ActivityLogItem item;
-  final ValueChanged<ActivityLogItem> onViewDetails;
-
-  const ActivityTableRow({
-    super.key,
-    required this.item,
-    required this.onViewDetails,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final categoryName =
-        UnifiedActivityConfig.getCategoryNameFromActivityType(item.type);
-
-    // Parse the category string to enum, then get color
-    final subType = ActivitySubType.fromString(item.category);
-    final typeColor = UnifiedActivityConfig.getColorForSubType(subType);
-
-    return GenericTableRow(
-      onTap: null,
-      hoverColor: WebColors.hoverBackground,
-      cellSpacing: AppSpacing.md,
-      cells: [
-        // Title Column
-        TableCellWidget(
-          flex: 2,
-          child: Text(
-            item.title,
-            style: WebTextStyles.body,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-
-        // Category Badge
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: TableBadge(text: categoryName),
-          ),
-        ),
-
-        // Type Chip
-        TableCellWidget(
-          flex: 2,
-          child: Center(
-            child: TableChip(text: item.category, color: typeColor),
-          ),
-        ),
-
-        // Value Column
-        TableCellWidget(
-          flex: 2,
-          child: Text(
-            item.value,
-            style: WebTextStyles.body,
-            textAlign: TextAlign.center,
-          ),
-        ),
-
-        // Date Added Column
-        TableCellWidget(
-          flex: 2,
-          child: Text(
-            DateFormat('MM/dd/yyyy').format(item.timestamp),
-            style: WebTextStyles.body,
-            textAlign: TextAlign.center,
-          ),
-        ),
-
-        // Actions Column
-        TableCellWidget(
-          flex: 1,
-          child: Center(
-            child: IconButton(
-              icon: const Icon(Icons.open_in_new, size: 18),
-              color: WebColors.textLabel,
-              onPressed: () => onViewDetails(item),
-              tooltip: 'View Details',
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

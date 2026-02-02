@@ -80,7 +80,9 @@ class _PaginationControlsState extends State<PaginationControls>
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
         button.localToGlobal(
-            button.size.bottomRight(Offset.zero), ancestor: overlay),
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -91,14 +93,9 @@ class _PaginationControlsState extends State<PaginationControls>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 8,
       color: WebColors.cardBackground,
-      constraints: const BoxConstraints(
-        maxHeight: 300,
-      ),
+      constraints: const BoxConstraints(maxHeight: 300),
       items: [10, 25, 50, 100].map((value) {
-        return PopupMenuItem<int>(
-          value: value,
-          child: Text('$value'),
-        );
+        return PopupMenuItem<int>(value: value, child: Text('$value'));
       }).toList(),
     );
 
@@ -129,20 +126,23 @@ class _PaginationControlsState extends State<PaginationControls>
               const SizedBox(width: AppSpacing.sm),
               Builder(
                 builder: (context) => MouseRegion(
-                  cursor: (widget.isLoading ||
-                          widget.onItemsPerPageChanged == null)
+                  cursor:
+                      (widget.isLoading || widget.onItemsPerPageChanged == null)
                       ? SystemMouseCursors.basic
                       : SystemMouseCursors.click,
                   child: InkWell(
-                    onTap: (widget.isLoading ||
+                    onTap:
+                        (widget.isLoading ||
                             widget.onItemsPerPageChanged == null)
                         ? null
                         : () => _showItemsPerPageMenu(context),
                     borderRadius: BorderRadius.circular(8),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: widget.isLoading
                             ? WebColors.inputBackground.withValues(alpha: 0.5)
@@ -191,9 +191,10 @@ class _PaginationControlsState extends State<PaginationControls>
                 _buildNavButton(
                   icon: Icons.chevron_left,
                   label: 'Back',
-                  isEnabled: widget.currentPage > 1 && 
-                             widget.onPageChanged != null && 
-                             !widget.isLoading,
+                  isEnabled:
+                      widget.currentPage > 1 &&
+                      widget.onPageChanged != null &&
+                      !widget.isLoading,
                   onTap: () => widget.onPageChanged!(widget.currentPage - 1),
                   isNext: false,
                 ),
@@ -205,10 +206,7 @@ class _PaginationControlsState extends State<PaginationControls>
                   _buildPageButton(1),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      '...',
-                      style: WebTextStyles.bodyMediumGray,
-                    ),
+                    child: Text('...', style: WebTextStyles.bodyMediumGray),
                   ),
                 ],
 
@@ -219,10 +217,7 @@ class _PaginationControlsState extends State<PaginationControls>
                 if (showRightEllipsis) ...[
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      '...',
-                      style: WebTextStyles.bodyMediumGray,
-                    ),
+                    child: Text('...', style: WebTextStyles.bodyMediumGray),
                   ),
                   _buildPageButton(widget.totalPages),
                 ],
@@ -233,9 +228,10 @@ class _PaginationControlsState extends State<PaginationControls>
                 _buildNavButton(
                   icon: Icons.chevron_right,
                   label: 'Next',
-                  isEnabled: widget.currentPage < widget.totalPages && 
-                             widget.onPageChanged != null && 
-                             !widget.isLoading,
+                  isEnabled:
+                      widget.currentPage < widget.totalPages &&
+                      widget.onPageChanged != null &&
+                      !widget.isLoading,
                   onTap: () => widget.onPageChanged!(widget.currentPage + 1),
                   isNext: true,
                 ),
@@ -277,8 +273,9 @@ class _PaginationControlsState extends State<PaginationControls>
               : Text(
                   '$page',
                   style: isActive
-                      ? WebTextStyles.bodyMedium
-                          .copyWith(color: WebColors.cardBackground)
+                      ? WebTextStyles.bodyMedium.copyWith(
+                          color: WebColors.cardBackground,
+                        )
                       : WebTextStyles.bodyMedium,
                 ),
         ),
@@ -301,7 +298,7 @@ class _PaginationControlsState extends State<PaginationControls>
         child: InkWell(
           onTap: isEnabled ? onTap : null,
           borderRadius: BorderRadius.circular(8),
-          hoverColor: isEnabled 
+          hoverColor: isEnabled
               ? WebColors.inputBackground
               : Colors.transparent,
           child: Padding(
@@ -313,8 +310,8 @@ class _PaginationControlsState extends State<PaginationControls>
                   Icon(
                     icon,
                     size: 18,
-                    color: isEnabled 
-                        ? WebColors.textSecondary 
+                    color: isEnabled
+                        ? WebColors.textSecondary
                         : WebColors.textMuted,
                   ),
                   const SizedBox(width: 6),
@@ -322,8 +319,8 @@ class _PaginationControlsState extends State<PaginationControls>
                 Text(
                   label,
                   style: WebTextStyles.bodyMedium.copyWith(
-                    color: isEnabled 
-                        ? WebColors.textSecondary 
+                    color: isEnabled
+                        ? WebColors.textSecondary
                         : WebColors.textMuted,
                   ),
                 ),
@@ -332,8 +329,8 @@ class _PaginationControlsState extends State<PaginationControls>
                   Icon(
                     icon,
                     size: 18,
-                    color: isEnabled 
-                        ? WebColors.textSecondary 
+                    color: isEnabled
+                        ? WebColors.textSecondary
                         : WebColors.textMuted,
                   ),
                 ],
@@ -346,10 +343,7 @@ class _PaginationControlsState extends State<PaginationControls>
   }
 
   /// Animated skeleton box with pulsing effect
-  Widget _buildSkeletonBox({
-    required double width,
-    required double height,
-  }) {
+  Widget _buildSkeletonBox({required double width, required double height}) {
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {

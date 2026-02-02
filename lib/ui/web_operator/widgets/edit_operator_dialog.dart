@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
@@ -16,17 +17,18 @@ abstract class EditOperatorForm with _$EditOperatorForm {
     @Default(UserStatus.active) UserStatus status,
   }) = _EditOperatorForm;
 
-  factory EditOperatorForm.fromOperator(dynamic operator) => EditOperatorForm(
-    firstName: operator.firstName,
-    lastName: operator.lastName,
-    email: operator.email,
-    status: operator.status as UserStatus,
-    id: operator.id,
-  );
+  factory EditOperatorForm.fromOperator(TeamMember operator) =>
+      EditOperatorForm(
+        firstName: operator.firstName,
+        lastName: operator.lastName,
+        email: operator.email,
+        status: operator.status,
+        id: operator.id,
+      );
 }
 
 class EditOperatorDialog extends StatefulWidget {
-  final dynamic operator;
+  final TeamMember operator;
   final Function(EditOperatorForm) onSave;
 
   const EditOperatorDialog({

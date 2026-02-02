@@ -71,7 +71,9 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Title',
                       style: WebTextStyles.label.copyWith(
-                        color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isTitleActive
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -87,9 +89,9 @@ class WebTableHeader extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Category Column with Dropdown (flex: 2)
             Expanded(
               flex: 2,
@@ -100,7 +102,9 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Category',
                       style: WebTextStyles.label.copyWith(
-                        color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isCategoryActive
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -116,9 +120,9 @@ class WebTableHeader extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Status Column with Dropdown (flex: 2)
             Expanded(
               flex: 2,
@@ -129,7 +133,9 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Status',
                       style: WebTextStyles.label.copyWith(
-                        color: isStatusActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isStatusActive
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -145,9 +151,9 @@ class WebTableHeader extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Priority Column with Dropdown (flex: 2)
             Expanded(
               flex: 2,
@@ -158,7 +164,9 @@ class WebTableHeader extends StatelessWidget {
                     Text(
                       'Priority:',
                       style: WebTextStyles.label.copyWith(
-                        color: isPriorityActive ? WebColors.tealAccent : WebColors.textLabel,
+                        color: isPriorityActive
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -174,18 +182,13 @@ class WebTableHeader extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: AppSpacing.md),
-            
+
             // Actions Column Header (flex: 1)
             const Expanded(
               flex: 1,
-              child: Center(
-                child: Text(
-                  'Actions',
-                  style: WebTextStyles.label,
-                ),
-              ),
+              child: Center(child: Text('Actions', style: WebTextStyles.label)),
             ),
           ],
         ),

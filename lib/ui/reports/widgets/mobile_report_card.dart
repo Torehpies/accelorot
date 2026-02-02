@@ -74,7 +74,7 @@ class MobileReportCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Expanded(
+                  Expanded(
                     child: Text(
                       report.title.isNotEmpty ? report.title : 'No Title',
                       style: const TextStyle(
@@ -87,32 +87,40 @@ class MobileReportCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(Icons.edit_outlined, size: 18, color: Colors.blueGrey[300]),
+                  Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: Colors.blueGrey[300],
+                  ),
                   const SizedBox(width: 8),
-                  Icon(Icons.open_in_new, size: 18, color: Colors.blueGrey[300]),
+                  Icon(
+                    Icons.open_in_new,
+                    size: 18,
+                    color: Colors.blueGrey[300],
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Category
               Text(
                 report.reportTypeLabel,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Status and Priority
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Status Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(6),
@@ -122,14 +130,17 @@ class MobileReportCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: statusTextColor, 
+                        color: statusTextColor,
                       ),
                     ),
                   ),
-                  
+
                   // Priority Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: priorityColor),
                       borderRadius: BorderRadius.circular(20),

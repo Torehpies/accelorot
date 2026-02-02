@@ -7,27 +7,26 @@ import 'contracts/statistics_repository.dart';
 class StatisticsRepositoryRemote implements StatisticsRepository {
   final StatisticsService _statisticsService;
 
-  StatisticsRepositoryRemote({
-    required StatisticsService statisticsService,
-  }) : _statisticsService = statisticsService;
+  StatisticsRepositoryRemote({required StatisticsService statisticsService})
+    : _statisticsService = statisticsService;
 
   @override
   Future<List<TemperatureModel>> getTemperatureReadings(
-    String machineId,
+    String batchId,
   ) async {
     // Service handles all error handling and returns typed models
-    return await _statisticsService.getTemperatureData(machineId);
+    return await _statisticsService.getTemperatureData(batchId);
   }
 
   @override
-  Future<List<MoistureModel>> getMoistureReadings(String machineId) async {
+  Future<List<MoistureModel>> getMoistureReadings(String batchId) async {
     // Service handles all error handling and returns typed models
-    return await _statisticsService.getMoistureData(machineId);
+    return await _statisticsService.getMoistureData(batchId);
   }
 
   @override
-  Future<List<OxygenModel>> getOxygenReadings(String machineId) async {
+  Future<List<OxygenModel>> getOxygenReadings(String batchId) async {
     // Service handles all error handling and returns typed models
-    return await _statisticsService.getOxygenData(machineId);
+    return await _statisticsService.getOxygenData(batchId);
   }
 }

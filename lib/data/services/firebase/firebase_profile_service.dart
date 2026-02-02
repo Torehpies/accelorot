@@ -7,11 +7,9 @@ class FirebaseProfileService implements ProfileService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  FirebaseProfileService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  FirebaseProfileService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   User? get _currentUser => _auth.currentUser;
 
@@ -26,7 +24,7 @@ class FirebaseProfileService implements ProfileService {
   Future<ProfileModel?> fetchUserProfile(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
-      
+
       if (!doc.exists) return null;
 
       return ProfileModel.fromFirestore(uid, doc.data()!);
@@ -56,11 +54,9 @@ class FirebaseProfileService implements ProfileService {
     final user = _currentUser;
     if (user == null) return Stream.value(null);
 
-    return _firestore
-        .collection('users')
-        .doc(user.uid)
-        .snapshots()
-        .map((snapshot) {
+    return _firestore.collection('users').doc(user.uid).snapshots().map((
+      snapshot,
+    ) {
       if (!snapshot.exists) return null;
       return ProfileModel.fromFirestore(user.uid, snapshot.data()!);
     });

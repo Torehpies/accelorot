@@ -1,193 +1,59 @@
-// lib/ui/core/widgets/table/activity_table_header.dart
+// lib/ui/core/widgets/table/table_header.dart
 
 import 'package:flutter/material.dart';
-import '../../../activity_logs/models/unified_activity_config.dart';
-import '../../../activity_logs/models/activity_enums.dart';
 import '../../constants/spacing.dart';
-import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
-import '../filters/filter_dropdown.dart';
-import 'table_row.dart';
 
-/// Table header row with sortable columns and filter dropdowns
+/// Generic table header that accepts custom column widgets
+/// Provides consistent styling and layout for any table header
 class TableHeader extends StatelessWidget {
-  final ActivityCategory selectedCategory;
-  final ActivitySubType selectedType;
-  final String? sortColumn;
-  final bool sortAscending;
-  final ValueChanged<ActivityCategory> onCategoryChanged;
-  final ValueChanged<ActivitySubType> onTypeChanged;
-  final ValueChanged<String> onSort;
+  final List<Widget> columns;
   final bool isLoading;
+  final EdgeInsets? padding;
+  final Color? backgroundColor;
 
   const TableHeader({
     super.key,
-    required this.selectedCategory,
-    required this.selectedType,
-    required this.sortColumn,
-    required this.sortAscending,
-    required this.onCategoryChanged,
-    required this.onTypeChanged,
-    required this.onSort,
+    required this.columns,
     this.isLoading = false,
+    this.padding,
+    this.backgroundColor,
   });
-
-  bool _isFilterActive(String filterValue) {
-    return !filterValue.toLowerCase().contains('all');
-  }
 
   @override
   Widget build(BuildContext context) {
-    final availableTypes = UnifiedActivityConfig.getSubTypesForCategory(selectedCategory);
-    
-    // Validate that selectedType is valid for selectedCategory
-    final validType = availableTypes.contains(selectedType) 
-        ? selectedType 
-        : ActivitySubType.all;
-
-    final isCategoryActive = _isFilterActive(selectedCategory.displayName);
-    final isTypeActive = _isFilterActive(validType.displayName);
-    final isTitleActive = sortColumn == 'title';
-
     return Opacity(
       opacity: isLoading ? 0.7 : 1.0,
       child: Container(
-        decoration: const BoxDecoration(
-          color: WebColors.pageBackground,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: backgroundColor ?? WebColors.pageBackground,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8),
             topRight: Radius.circular(8),
           ),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.tableCellHorizontal,
-          vertical: 8,
-        ),
-        child: Row(
-          children: [
-            // Title Column (sortable)
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Title',
-                      style: WebTextStyles.label.copyWith(
-                        color: isTitleActive ? WebColors.tealAccent : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    TableHeaderCell(
-                      label: '',
-                      sortable: true,
-                      sortColumn: 'title',
-                      currentSortColumn: sortColumn,
-                      sortAscending: sortAscending,
-                      onSort: isLoading ? null : () => onSort('title'),
-                    ),
-                  ],
-                ),
-              ),
+        padding:
+            padding ??
+            const EdgeInsets.symmetric(
+              horizontal: AppSpacing.tableCellHorizontal,
+              vertical: 8,
             ),
-            
-            const SizedBox(width: AppSpacing.md),
-            
-            // Category Column with Dropdown
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Category',
-                      style: WebTextStyles.label.copyWith(
-                        color: isCategoryActive ? WebColors.tealAccent : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<ActivityCategory>(
-                      label: 'Category',
-                      value: selectedCategory,
-                      items: ActivityCategory.values,
-                      displayName: (cat) => cat.displayName,
-                      onChanged: onCategoryChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(width: AppSpacing.md),
-            
-            // Type Column with Dropdown
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Type',
-                      style: WebTextStyles.label.copyWith(
-                        color: isTypeActive ? WebColors.tealAccent : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<ActivitySubType>(
-                      label: 'Type',
-                      value: validType,
-                      items: availableTypes,
-                      displayName: (type) => type.displayName,
-                      onChanged: onTypeChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            const SizedBox(width: AppSpacing.md),
-            
-            // Value Column Header
-            const Expanded(
-              flex: 2,
-              child: TableHeaderCell(label: 'Value'),
-            ),
-            
-            const SizedBox(width: AppSpacing.md),
-            
-            // Date Added Column (sortable)
-            Expanded(
-              flex: 2,
-              child: TableHeaderCell(
-                label: 'Date Added',
-                sortable: true,
-                sortColumn: 'date',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('date'),
-              ),
-            ),
-            
-            const SizedBox(width: AppSpacing.md),
-            
-            // Actions Column Header
-            const Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  'Actions',
-                  style: WebTextStyles.label,
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: Row(children: _buildColumnsWithSpacing()),
       ),
     );
+  }
+
+  /// Build columns with consistent spacing
+  List<Widget> _buildColumnsWithSpacing() {
+    if (columns.isEmpty) return [];
+
+    final List<Widget> spacedColumns = [];
+    for (int i = 0; i < columns.length; i++) {
+      spacedColumns.add(columns[i]);
+      if (i < columns.length - 1) {
+        spacedColumns.add(const SizedBox(width: AppSpacing.md));
+      }
+    }
+    return spacedColumns;
   }
 }

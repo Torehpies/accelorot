@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
 import 'package:flutter_application_1/utils/format.dart';
@@ -11,6 +12,10 @@ class PendingMemberRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet =
+        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -18,8 +23,28 @@ class PendingMemberRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(flex: 2, child: Center(child: Text(member.firstName))),
-          Expanded(flex: 2, child: Center(child: Text(member.lastName))),
+          Expanded(
+            flex: isTablet ? 1 : 2,
+            child: Center(
+              child: Text(
+                member.firstName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: isTablet ? 1 : 2,
+            child: Center(
+              child: Text(
+                member.lastName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ),
+          ),
           Expanded(
             flex: 3,
             child: SizedBox(
@@ -36,7 +61,14 @@ class PendingMemberRow extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
-            child: Center(child: Text(formatDateAndTime((member.requestedAt)))),
+            child: Center(
+              child: Text(
+                formatDateAndTime(member.requestedAt),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+              ),
+            ),
           ),
           Expanded(
             flex: 1,

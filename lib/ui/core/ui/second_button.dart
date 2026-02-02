@@ -23,9 +23,7 @@ class SecondaryButton extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: WebColors.textSecondary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -33,14 +31,11 @@ class SecondaryButton extends StatelessWidget {
           Text(
             text,
             style: WebTextStyles.bodyMedium.copyWith(
-							fontSize: 16,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          if (icon != null) ...[
-            const SizedBox(width: 8),
-            Icon(icon, size: 18),
-          ],
+          if (icon != null) ...[const SizedBox(width: 8), Icon(icon, size: 18)],
         ],
       ),
     );

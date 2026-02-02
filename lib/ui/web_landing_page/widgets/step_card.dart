@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../models/step_model.dart';
 
 class StepCard extends StatelessWidget {
   final StepModel step;
+
   const StepCard({
     super.key,
     required this.step,
@@ -16,52 +16,152 @@ class StepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
+      padding: EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: const Color(0xFF28A85A).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(38, 0, 0, 0), // 15% opacity
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+            spreadRadius: 1,
+          ),
+        ],
+        border: Border.all(
+          color: const Color.fromARGB(255, 240, 240, 240),
+          width: 1.5,
+        ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            '0${step.number}',
-            style: WebTextStyles.h1.copyWith(
-              fontSize: 48,
-              color: WebColors.textTitle.withValues(alpha: 0.5),
-              height: 1.0,
-              fontWeight: FontWeight.w300,
+          // CIRCLE BACKGROUND FOR STEP NUMBER
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 204, 251, 241),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color.fromARGB(255, 118, 230, 207),
+                width: 2.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(51, 0, 0, 0), // 20% opacity
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                '${step.number}',
+                style: WebTextStyles.stepNumber.copyWith(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF28A85A),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            step.title,
-            style: WebTextStyles.h3.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
+          
+          const SizedBox(height: AppSpacing.lg),
+          
+          // STEP TITLE - BELOW THE CIRCLE
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Flexible(
             child: Text(
-              step.description,
-              softWrap: true,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFF6B7280),
+              step.title,
+              textAlign: TextAlign.center,
+              style: WebTextStyles.stepCardTitle.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: AppSpacing.lg),
+          
+          // STEP DESCRIPTION - MULTI-LINE
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _getFirstLine(step.description),
+                    textAlign: TextAlign.center,
+                    style: WebTextStyles.stepCardDescription.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF666666),
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _getSecondLine(step.description),
+                    textAlign: TextAlign.center,
+                    style: WebTextStyles.stepCardDescription.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF666666),
+                      height: 1.6,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _getThirdLine(step.description),
+                    textAlign: TextAlign.center,
+                    style: WebTextStyles.stepCardDescription.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                      color: const Color(0xFF666666),
+                      height: 1.6,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  // Helper functions to split description into lines
+  String _getFirstLine(String description) {
+    final words = description.split(' ');
+    if (words.length >= 3) {
+      return words.sublist(0, 3).join(' ');
+    }
+    return description;
+  }
+
+  String _getSecondLine(String description) {
+    final words = description.split(' ');
+    if (words.length >= 6) {
+      return words.sublist(3, 6).join(' ');
+    } else if (words.length > 3) {
+      return words.sublist(3).join(' ');
+    }
+    return '';
+  }
+
+  String _getThirdLine(String description) {
+    final words = description.split(' ');
+    if (words.length >= 7) {
+      return words.sublist(6).join(' ');
+    }
+    return '';
   }
 }

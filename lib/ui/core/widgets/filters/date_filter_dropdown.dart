@@ -22,17 +22,23 @@ class DateFilterDropdown extends StatefulWidget {
 }
 
 class _DateFilterDropdownState extends State<DateFilterDropdown> {
-  DateFilterRange _currentFilter = const DateFilterRange(type: DateFilterType.none);
+  DateFilterRange _currentFilter = const DateFilterRange(
+    type: DateFilterType.none,
+  );
 
   void _showFilterMenu() {
     if (widget.isLoading) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
       ),
       Offset.zero & overlay.size,
     );
@@ -45,10 +51,22 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
       elevation: 8,
       items: [
         const PopupMenuItem(value: DateFilterType.today, child: Text('Today')),
-        const PopupMenuItem(value: DateFilterType.yesterday, child: Text('Yesterday')),
-        const PopupMenuItem(value: DateFilterType.last7Days, child: Text('Last 7 Days')),
-        const PopupMenuItem(value: DateFilterType.last30Days, child: Text('Last 30 Days')),
-        const PopupMenuItem(value: DateFilterType.custom, child: Text('Custom Date')),
+        const PopupMenuItem(
+          value: DateFilterType.yesterday,
+          child: Text('Yesterday'),
+        ),
+        const PopupMenuItem(
+          value: DateFilterType.last7Days,
+          child: Text('Last 7 Days'),
+        ),
+        const PopupMenuItem(
+          value: DateFilterType.last30Days,
+          child: Text('Last 30 Days'),
+        ),
+        const PopupMenuItem(
+          value: DateFilterType.custom,
+          child: Text('Custom Date'),
+        ),
       ],
     ).then((selected) {
       if (selected != null) {
@@ -106,7 +124,11 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
         );
 
         if (pickedDate != null) {
-          final selectedDay = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+          final selectedDay = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+          );
           newFilter = DateFilterRange(
             type: DateFilterType.custom,
             startDate: selectedDay,
@@ -130,7 +152,7 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
 
   void _clearFilter() {
     if (widget.isLoading) return;
-    
+
     setState(() {
       _currentFilter = const DateFilterRange(type: DateFilterType.none);
     });
@@ -162,7 +184,9 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
     final isActive = _currentFilter.isActive;
 
     return MouseRegion(
-      cursor: widget.isLoading ? SystemMouseCursors.basic : SystemMouseCursors.click,
+      cursor: widget.isLoading
+          ? SystemMouseCursors.basic
+          : SystemMouseCursors.click,
       child: Opacity(
         opacity: widget.isLoading ? 0.5 : 1.0,
         child: InkWell(
@@ -181,19 +205,16 @@ class _DateFilterDropdownState extends State<DateFilterDropdown> {
                 Icon(
                   Icons.calendar_today,
                   size: 16,
-                  color: isActive ? WebColors.tealAccent : WebColors.textLabel,
+                  color: isActive ? WebColors.greenAccent : WebColors.textLabel,
                 ),
                 if (isActive) ...[
                   const SizedBox(width: 8),
-                  Text(
-                    _getDisplayText(),
-                    style: WebTextStyles.bodyMedium,
-                  ),
+                  Text(_getDisplayText(), style: WebTextStyles.bodyMedium),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_drop_down,
                     size: 20,
-                    color: WebColors.tealAccent,
+                    color: WebColors.greenAccent,
                   ),
                   const SizedBox(width: 4),
                   InkWell(

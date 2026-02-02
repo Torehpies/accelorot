@@ -10,10 +10,7 @@ import '../../core/dialog/dialog_fields.dart';
 class SubstrateDetailDialog extends StatelessWidget {
   final Substrate substrate;
 
-  const SubstrateDetailDialog({
-    super.key,
-    required this.substrate,
-  });
+  const SubstrateDetailDialog({super.key, required this.substrate});
 
   @override
   Widget build(BuildContext context) {
@@ -24,45 +21,43 @@ class SubstrateDetailDialog extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ReadOnlyField(label: 'Title:', value: substrate.title),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(label: 'Category:', value: substrate.category),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Quantity:', 
-            value: '${substrate.quantity.toStringAsFixed(2)} kg',
+          // All substrate information in one gray section
+          ReadOnlySection(
+            fields: [
+              ReadOnlyField(label: 'Title', value: substrate.title),
+              ReadOnlyField(label: 'Category', value: substrate.category),
+              ReadOnlyField(
+                label: 'Quantity',
+                value: '${substrate.quantity.toStringAsFixed(2)} kg',
+              ),
+              ReadOnlyField(
+                label: 'Machine Name',
+                value: substrate.machineName ?? 'N/A',
+              ),
+              ReadOnlyField(
+                label: 'Submitted By',
+                value: substrate.operatorName ?? 'Unknown',
+              ),
+
+              // Description as multiline field
+              ReadOnlyMultilineField(
+                label: 'Description',
+                value: substrate.description,
+              ),
+
+              // Date Added
+              ReadOnlyField(
+                label: 'Date Added',
+                value: DateFormat(
+                  'MM/dd/yyyy, hh:mm a',
+                ).format(substrate.timestamp),
+              ),
+
+              // Batch ID if available
+              if (substrate.batchId != null)
+                ReadOnlyField(label: 'Batch ID', value: substrate.batchId!),
+            ],
           ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Machine Name:', 
-            value: substrate.machineName ?? 'N/A',
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyMultilineField(
-            label: 'Description:',
-            value: substrate.description,
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Submitted By:', 
-            value: substrate.operatorName ?? 'Unknown',
-          ),
-          const SizedBox(height: 8),
-          
-          ReadOnlyField(
-            label: 'Date Added:',
-            value: DateFormat('MM/dd/yyyy, hh:mm a').format(substrate.timestamp),
-          ),
-          
-          if (substrate.batchId != null) ...[
-            const SizedBox(height: 8),
-            ReadOnlyField(label: 'Batch ID:', value: substrate.batchId!),
-          ],
         ],
       ),
       actions: [

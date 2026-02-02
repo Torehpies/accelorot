@@ -37,7 +37,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
-
   }
 
   @override

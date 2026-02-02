@@ -1,10 +1,10 @@
 // lib/ui/landing_page/widgets/app_header.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import '../../core/ui/second_button.dart';
 
@@ -29,10 +29,7 @@ class AppHeader extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFE0F2FE),
-            Color(0xFFCCFBF1),
-          ],
+          colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
         ),
       ),
       child: Row(
@@ -41,7 +38,7 @@ class AppHeader extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-							const SizedBox(width: 10),
+              const SizedBox(width: 10),
               SvgPicture.asset(
                 'assets/images/Accel-O-Rot Logo.svg',
                 width: 40,
@@ -49,12 +46,12 @@ class AppHeader extends StatelessWidget {
                 // fit: BoxFit.contain,
                 semanticsLabel: 'Accel-O-Rot Logo',
               ),
-							const SizedBox(width: 10),
+              const SizedBox(width: 10),
               Text(
-                'Accel-O-Rot',
+                'ACCEL-O-ROT',
                 style: h2Style.copyWith(
-                  color: WebColors.textTitle,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900,
                   fontSize: 28,
                 ),
               ),
@@ -66,10 +63,7 @@ class AppHeader extends StatelessWidget {
             children: [
               SizedBox(
                 height: 50,
-                child: SecondaryButton(
-                  text: 'Login',
-                  onPressed: onLogin,
-                ),
+                child: SecondaryButton(text: 'Login', onPressed: onLogin),
               ),
               const SizedBox(width: AppSpacing.md),
               SizedBox(

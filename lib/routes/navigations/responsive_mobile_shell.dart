@@ -20,11 +20,11 @@ class ResponsiveMobileShell extends StatelessWidget {
     final selectedIndex = getSelectedIndex(context, navItems);
 
     return Scaffold(
-//      appBar: AppBar(
-//        title: Text(navItems[selectedIndex].label),
-//        backgroundColor: primaryColor,
-//        foregroundColor: Colors.white,
-//      ),
+      //      appBar: AppBar(
+      //        title: Text(navItems[selectedIndex].label),
+      //        backgroundColor: primaryColor,
+      //        foregroundColor: Colors.white,
+      //      ),
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
