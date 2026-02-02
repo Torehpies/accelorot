@@ -9,7 +9,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_manage
 import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/drum_control_card.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/aerator_card.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/activity_logs/activity_logs_card.dart';
+import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_activities_table.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
@@ -282,11 +282,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Expanded(
-                            child: ActivityLogsCard(
-                              focusedMachineId:
-                                  widget.focusedMachine?.machineId,
-                            ),
+                          const Expanded(
+                            child: RecentActivitiesTable(),
                           ),
                         ],
                       ),
