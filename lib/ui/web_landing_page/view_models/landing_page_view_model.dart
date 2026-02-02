@@ -58,31 +58,39 @@ class LandingPageViewModel extends ChangeNotifier {
 
   // Steps data
   List<StepModel> get steps => [
-    StepModel(
-      number: 1,
-      title: 'Add Materials',
-      description:
+  StepModel(
+    number: 1,
+    title: 'Add Organic Waste',
+    description:
         'Simply add your greens (nitrogen-rich), browns (carbon-rich), and starter compost into the rotary drum.',
-    ),
-    StepModel(
-      number: 2,
-      title: 'Monitor Sensors',
-      description:
-          'IoT sensors continuously track temperature, moisture, and air quality—adjusting conditions automatically.',
-    ),
-    StepModel(
-      number: 3,
-      title: 'AI Recommendations',
-      description:
-          'Receive intelligent suggestions on moisture levels, aeration frequency, and optimal harvest timing.',
-    ),
-    StepModel(
-      number: 4,
-      title: 'Harvest Quality Compost',
-      description:
-          'Receive alerts when pathogen-free, mature compost is ready in 14 days',
-    ),
-  ];
+    icon: Icons.recycling_outlined,
+    accentColor: const Color(0xFF22C55E),
+  ),
+  StepModel(
+    number: 2,
+    title: 'Smart Monitoring',
+    description:
+        'IoT sensors continuously track temperature, moisture, and air quality—adjusting conditions automatically.',
+    icon: Icons.monitor_heart_outlined,
+    accentColor: const Color(0xFF3B82F6),
+  ),
+  StepModel(
+    number: 3,
+    title: 'AI Recommendations',
+    description:
+        'Receive intelligent suggestions on moisture levels, aeration frequency, and optimal harvest timing.',
+    icon: Icons.psychology_outlined,
+    accentColor: const Color(0xFF8B5CF6),
+  ),
+  StepModel(
+    number: 4,
+    title: 'Harvest Quality Compost',
+    description:
+        'In just 14–21 days, collect mature, nutrient-rich compost safe for gardens and agriculture.',
+    icon: Icons.auto_awesome_outlined,
+    accentColor: const Color(0xFF22C55E),
+  ),
+];
 
   // Impact stats data
   List<ImpactStatModel> get impactStats => [
