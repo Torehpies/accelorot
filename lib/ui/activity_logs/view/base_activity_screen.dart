@@ -122,25 +122,30 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
           ],
         ),
 
-        // Body: Content cards directly (NO filter chips!)
-        body: MobileListContent<ActivityLogItem>(
-          isLoading: state.isLoading,
-          isInitialLoad: state.status == LoadingStatus.loading,
-          hasError: state.hasError,
-          errorMessage: state.errorMessage,
-          items: state.filteredActivities,
-          displayedItems: state.displayedActivities,
-          hasMoreToLoad: state.hasMoreToLoad,
-          remainingCount: state.remainingCount,
-          emptyStateConfig: _getEmptyStateConfig(state),
-          onRefresh: onRefresh,
-          onLoadMore: onLoadMore,
-          onRetry: onRefresh,
-          itemBuilder: (context, item, index) => ActivityCard(
-            item: item,
-            onTap: () => _onActivityTap(item),
+        // Body: Content cards with top padding for breathing room
+        body: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: MobileListContent<ActivityLogItem>(
+            isLoading: state.isLoading,
+            isInitialLoad: state.status == LoadingStatus.loading,
+            hasError: state.hasError,
+            errorMessage: state.errorMessage,
+            items: state.filteredActivities,
+            displayedItems: state.displayedActivities,
+            hasMoreToLoad: state.hasMoreToLoad,
+            remainingCount: state.remainingCount,
+            emptyStateConfig: _getEmptyStateConfig(state),
+            onRefresh: onRefresh,
+            onLoadMore: onLoadMore,
+            onRetry: onRefresh,
+            itemBuilder: (context, item, index) => ActivityCard(
+              item: item,
+              onTap: () => _onActivityTap(item),
+            ),
+            skeletonBuilder: (context, index) => const DataCardSkeleton(
+              bottomPadding: 12, // Match ActivityCard's bottom padding
+            ),
           ),
-          skeletonBuilder: (context, index) => const DataCardSkeleton(),
         ),
       ),
     );

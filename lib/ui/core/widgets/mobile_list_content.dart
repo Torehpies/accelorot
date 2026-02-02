@@ -58,7 +58,7 @@ class MobileListContent<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading && isInitialLoad) {
       return MobileLoadingState(
-        itemCount: 3,
+        itemCount: 5,
         skeletonBuilder: skeletonBuilder,
       );
     }

@@ -8,6 +8,7 @@ import '../../core/widgets/mobile_list_content.dart';
 import '../../core/widgets/data_card.dart';
 import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
+import '../../core/widgets/sample_cards/data_card_skeleton.dart';
 import '../helpers/machine_status_helper.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
@@ -121,46 +122,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     );
   }
 
-  Widget _buildSkeletonCard(BuildContext context, int index) {
-    return Container(
-      height: 120,
-      margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.backgroundBorder.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.grey,
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(height: 16, color: AppColors.grey),
-                const SizedBox(height: 8),
-                Container(height: 14, width: 150, color: AppColors.grey),
-                const Spacer(),
-                Container(height: 24, width: 80, color: AppColors.grey),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mobileMachineViewModelProvider);
@@ -218,7 +179,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
               if (_teamId != null) notifier.initialize(_teamId!);
             },
             itemBuilder: _buildMachineCard,
-            skeletonBuilder: _buildSkeletonCard,
+            skeletonBuilder: (context, index) => const DataCardSkeleton(),
           ),
         ),
       ),
