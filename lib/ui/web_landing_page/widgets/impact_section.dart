@@ -24,6 +24,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
   late AnimationController _swipeAnimationController;
   late Animation<double> _swipeAnimation;
   final Map<String, bool> _impactItemHover = {};
+  
+  // Map for impact item descriptions
+  final Map<String, String> _impactDescriptions = {
+    'Reduces landfill waste': 'Addresses the pressing environmental concern in the Philippines where over 50% of municipal solid waste is organic. Prevents methane emissions from landfills that contribute to climate change.',
+    'Produces nutrient-rich compost': 'Transforms organic waste into high-quality compost through accelerated decomposition. Improves soil health and reduces need for chemical fertilizers in agriculture.',
+    'Empowers communities': 'Supports Republic Act 9003 implementation by providing accessible composting technology. Reduces manual labor and makes sustainable waste management practical for households and communities.',
+  };
 
   @override
   void initState() {
@@ -36,6 +43,11 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       parent: _swipeAnimationController,
       curve: Curves.easeInOut,
     );
+    
+    // Initialize hover states
+    _impactItemHover['Reduces landfill waste'] = false;
+    _impactItemHover['Produces nutrient-rich compost'] = false;
+    _impactItemHover['Empowers communities'] = false;
   }
 
   @override
@@ -187,38 +199,60 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ] : null,
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(38, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 8,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 16,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(38, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 8,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: screenWidth < 400 ? 8 : 9,
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 400 ? 8 : 9,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 3),
+              Padding(
+                padding: const EdgeInsets.only(left: 22.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: screenWidth < 400 ? 6 : 7,
+                    color: const Color(0xFF666666),
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -260,7 +294,8 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       onEnter: (_) => _safeSetState(() => _expandedIndex = index),
       onExit: (_) => _safeSetState(() => _expandedIndex = null),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: isGreen 
             ? const Color.fromARGB(255, 74, 211, 126)
@@ -275,13 +310,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
           boxShadow: isHovered ? [
             BoxShadow(
               color: const Color.fromARGB(20, 0, 0, 0),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ] : [
             BoxShadow(
               color: const Color.fromARGB(10, 0, 0, 0),
-              blurRadius: 3,
+              blurRadius: 4,
               offset: const Offset(0, 1),
             ),
           ],
@@ -454,38 +489,60 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ] : null,
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 10,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(51, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 10,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: screenWidth < 800 ? 10 : 11,
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 800 ? 10 : 11,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.only(left: 28.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: screenWidth < 800 ? 8 : 9,
+                    color: const Color(0xFF666666),
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -526,7 +583,8 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       onEnter: (_) => _safeSetState(() => _expandedIndex = index),
       onExit: (_) => _safeSetState(() => _expandedIndex = null),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: isGreen 
             ? const Color.fromARGB(255, 74, 211, 126)
@@ -542,12 +600,12 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             BoxShadow(
               color: const Color.fromARGB(25, 0, 0, 0),
               blurRadius: 10,
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 4),
             ),
           ] : [
             BoxShadow(
               color: const Color.fromARGB(15, 0, 0, 0),
-              blurRadius: 5,
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
@@ -699,13 +757,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ),
 
-          // Right side: 4 stat cards - MOVED TO LEFT
+          // Right side: 4 stat cards
           Expanded(
             flex: isLargeDesktop ? 5 : 4,
             child: Padding(
               padding: EdgeInsets.only(
-                left: AppSpacing.md, // Reduced left padding to move cards left
-                right: isLargeDesktop ? AppSpacing.xxxl * 2 : AppSpacing.xxl * 2, // Increased right padding
+                left: AppSpacing.md,
+                right: isLargeDesktop ? AppSpacing.xxxl * 2 : AppSpacing.xxl * 2,
               ),
               child: SizedBox(
                 width: isLargeDesktop ? 460 : 420,
@@ -769,40 +827,62 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: isHovered ? 28 : 26,
-              height: isHovered ? 28 : 26,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Icon(
-                icon,
-                size: isHovered ? 16 : 14,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: isHovered ? 28 : 26,
+                  height: isHovered ? 28 : 26,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(51, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: isHovered ? 16 : 14,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: isHovered 
+                        ? (screenWidth > 1440 ? 14 : 13)
+                        : (screenWidth > 1440 ? 13 : 12),
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: isHovered 
-                    ? (screenWidth > 1440 ? 14 : 13)
-                    : (screenWidth > 1440 ? 13 : 12),
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 38.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: screenWidth > 1440 ? 11 : 10,
+                    color: const Color(0xFF666666),
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -863,98 +943,115 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     final col = index % 2;
     final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
 
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: isGreen 
-          ? const Color.fromARGB(255, 74, 211, 126)
-          : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isGreen ? Colors.transparent : const Color(0xFFE0E0E0),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(25, 0, 0, 0),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+    return MouseRegion(
+      onEnter: (_) => _safeSetState(() => _expandedIndex = index),
+      onExit: (_) => _safeSetState(() => _expandedIndex = null),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: 150,
+        decoration: BoxDecoration(
+          color: isGreen 
+            ? const Color.fromARGB(255, 74, 211, 126)
+            : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isGreen ? Colors.transparent : const Color(0xFFE0E0E0),
+            width: 1.5,
           ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (stat.label.toLowerCase().contains('week'))
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                      height: 0.9,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'weeks',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w600,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Composting Time',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isGreen ? Colors.white : const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text(
-                      stat.label,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isGreen ? Colors.white : const Color(0xFF666666),
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(25, 0, 0, 0),
+              blurRadius: 10,
+              spreadRadius: 1,
+              offset: Offset(0, 4),
+            ),
           ],
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (stat.label.toLowerCase().contains('week'))
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          stat.value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: isGreen ? Colors.white : WebColors.textTitle,
+                            height: 0.9,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'weeks',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w600,
+                          color: isGreen ? Colors.white : WebColors.textTitle,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Composting Time',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isGreen ? Colors.white : const Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          stat.value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            color: isGreen ? Colors.white : WebColors.textTitle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          stat.label,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: isGreen ? Colors.white : const Color(0xFF666666),
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1059,14 +1156,17 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                stat.value,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                  height: 0.9,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  stat.value,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: isLargeDesktop ? 44 : 40,
+                                    fontWeight: FontWeight.w800,
+                                    color: isGreen ? Colors.white : WebColors.textTitle,
+                                    height: 0.9,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -1093,13 +1193,19 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           )
                         else
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                stat.value,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  stat.value,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: isLargeDesktop ? 44 : 40,
+                                    fontWeight: FontWeight.w800,
+                                    color: isGreen ? Colors.white : WebColors.textTitle,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 10),
