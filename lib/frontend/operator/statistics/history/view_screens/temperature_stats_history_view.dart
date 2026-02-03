@@ -43,78 +43,83 @@ class _TemperatureStatsHistoryViewState
   }
 
   Future<void> _fetchTemperatureHistory() async {
-  try {
-    setState(() {
-      _isLoading = true;
-      _error = '';
-    });
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = '';
+      });
 
-    final now = DateTime.now();
-    final start = widget.range?.start ?? now.subtract(const Duration(days: 7));
-    final end = widget.range?.end ?? now;
+      final now = DateTime.now();
+      final start =
+          widget.range?.start ?? now.subtract(const Duration(days: 7));
+      final end = widget.range?.end ?? now;
 
-    final dataByDay = await FirestoreStatisticHistoryService.getDataForRange(
-      machineId: widget.machineId,
-      fieldName: 'temp',
-      start: start,
-      end: end,
-    );
+      final dataByDay = await FirestoreStatisticHistoryService.getDataForRange(
+        machineId: widget.machineId,
+        fieldName: 'temp',
+        start: start,
+        end: end,
+      );
 
-    final List<double> readings = [];
-    final List<String> labels = [];
-    DateTime? lastUpdate;
-    double? latestValidTemperature; // ✅ Track the latest actual reading
+      final List<double> readings = [];
+      final List<String> labels = [];
+      DateTime? lastUpdate;
+      double? latestValidTemperature; // ✅ Track the latest actual reading
 
-    final daysDiff = end.difference(start).inDays + 1;
+      final daysDiff = end.difference(start).inDays + 1;
 
-    for (int i = 0; i < daysDiff; i++) {
-      final currentDay = start.add(Duration(days: i));
-      final dateKey = '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
-      
-      labels.add(dateKey);
+      for (int i = 0; i < daysDiff; i++) {
+        final currentDay = start.add(Duration(days: i));
+        final dateKey =
+            '${currentDay.year}-${currentDay.month.toString().padLeft(2, '0')}-${currentDay.day.toString().padLeft(2, '0')}';
 
-      if (dataByDay.containsKey(dateKey) && dataByDay[dateKey]!.isNotEmpty) {
-        final dayValues = dataByDay[dateKey]!.map((d) => d['value'] as double).toList();
-        final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
-        readings.add(dailyAvg);
+        labels.add(dateKey);
 
-        // Update latest valid temperature
-        latestValidTemperature = dailyAvg;
+        if (dataByDay.containsKey(dateKey) && dataByDay[dateKey]!.isNotEmpty) {
+          final dayValues = dataByDay[dateKey]!
+              .map((d) => d['value'] as double)
+              .toList();
+          final dailyAvg = dayValues.reduce((a, b) => a + b) / dayValues.length;
+          readings.add(dailyAvg);
 
-        // Update lastUpdate timestamp
-        for (var d in dataByDay[dateKey]!) {
-          final ts = d['timestamp'] as DateTime?;
-          if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
-            lastUpdate = ts;
+          // Update latest valid temperature
+          latestValidTemperature = dailyAvg;
+
+          // Update lastUpdate timestamp
+          for (var d in dataByDay[dateKey]!) {
+            final ts = d['timestamp'] as DateTime?;
+            if (ts != null && (lastUpdate == null || ts.isAfter(lastUpdate))) {
+              lastUpdate = ts;
+            }
           }
+
+          debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
+        } else {
+          readings.add(0.0);
+          debugPrint('⚠️ $dateKey – no readings, using 0.0');
+          // Do NOT update latestValidTemperature — keep the last known real value
         }
-
-        debugPrint('📊 $dateKey – dailyAvg: $dailyAvg, readings: $dayValues');
-      } else {
-        readings.add(0.0);
-        debugPrint('⚠️ $dateKey – no readings, using 0.0');
-        // Do NOT update latestValidTemperature — keep the last known real value
       }
+
+      // Fallback: if no valid data at all, use 0.0
+      final currentTemp =
+          latestValidTemperature ?? (readings.isNotEmpty ? readings.last : 0.0);
+
+      setState(() {
+        _dailyReadings = readings;
+        _labels = labels;
+        _lastUpdated = lastUpdate;
+        _currentTemperature = currentTemp;
+        _isLoading = false;
+      });
+    } catch (e, stack) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+      debugPrint('❌ Error loading temperature history: $e\n$stack');
     }
-
-    // Fallback: if no valid data at all, use 0.0
-    final currentTemp = latestValidTemperature ?? (readings.isNotEmpty ? readings.last : 0.0);
-
-    setState(() {
-      _dailyReadings = readings;
-      _labels = labels;
-      _lastUpdated = lastUpdate;
-      _currentTemperature = currentTemp;
-      _isLoading = false;
-    });
-  } catch (e, stack) {
-    setState(() {
-      _error = e.toString();
-      _isLoading = false;
-    });
-    debugPrint('❌ Error loading temperature history: $e\n$stack');
   }
-}
 
   @override
   Widget build(BuildContext context) {

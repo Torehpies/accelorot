@@ -37,7 +37,6 @@ class OperatorDialogs {
     );
   }
 
-  
   static Future<bool?> showRemovePermanentlyConfirmation(
     BuildContext context,
     String operatorName,

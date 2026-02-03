@@ -1,11 +1,7 @@
 import 'sensor_reading_model.dart';
 
 class OxygenModel extends SensorReadingModel {
-  OxygenModel({
-    required super.id,
-    required super.value,
-    super.timestamp,
-  });
+  OxygenModel({required super.id, required super.value, super.timestamp});
 
   String get quality {
     if (value <= 1500) return 'Excellent';

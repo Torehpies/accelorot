@@ -6,7 +6,7 @@ class FirebaseOperatorService implements OperatorService {
   final FirebaseFirestore _firestore;
 
   FirebaseOperatorService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<List<OperatorModel>> fetchTeamOperators(String teamId) async {
@@ -20,8 +20,7 @@ class FirebaseOperatorService implements OperatorService {
     final List<OperatorModel> operators = [];
     for (var doc in membersSnapshot.docs) {
       final data = doc.data();
-      final userId = data['userId'] as String?;
-      if (userId == null) continue;
+      final userId = doc.id;
 
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) continue;
@@ -37,7 +36,7 @@ class FirebaseOperatorService implements OperatorService {
           uid: userId,
           name: name.isNotEmpty ? name : (data['name'] ?? 'Unknown') as String,
           email: (data['email'] ?? u['email'] ?? '') as String,
-          role: (data['role'] ?? u['role'] ?? 'Operator') as String,
+          role: (data['role'] ?? u['teamRole'] ?? 'Operator') as String,
           isArchived: (data['isArchived'] ?? false) as bool,
           hasLeft: (data['hasLeft'] ?? false) as bool,
           leftAt: (data['leftAt'] as Timestamp?)?.toDate(),
@@ -64,7 +63,10 @@ class FirebaseOperatorService implements OperatorService {
       final requestorId = data['requestorId'] as String?;
       if (requestorId == null) continue;
 
-      final userDoc = await _firestore.collection('users').doc(requestorId).get();
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(requestorId)
+          .get();
       if (!userDoc.exists) continue;
 
       final u = userDoc.data()!;
@@ -84,17 +86,26 @@ class FirebaseOperatorService implements OperatorService {
   }
 
   @override
-  Future<void> archiveOperator({required String teamId, required String operatorUid}) async {
+  Future<void> archiveOperator({
+    required String teamId,
+    required String operatorUid,
+  }) async {
     await _firestore
         .collection('teams')
         .doc(teamId)
         .collection('members')
         .doc(operatorUid)
-        .update({'isArchived': true, 'archivedAt': FieldValue.serverTimestamp()});
+        .update({
+          'isArchived': true,
+          'archivedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   @override
-  Future<void> restoreOperator({required String teamId, required String operatorUid}) async {
+  Future<void> restoreOperator({
+    required String teamId,
+    required String operatorUid,
+  }) async {
     await _firestore
         .collection('teams')
         .doc(teamId)
@@ -104,7 +115,10 @@ class FirebaseOperatorService implements OperatorService {
   }
 
   @override
-  Future<void> removeOperator({required String teamId, required String operatorUid}) async {
+  Future<void> removeOperator({
+    required String teamId,
+    required String operatorUid,
+  }) async {
     final batch = _firestore.batch();
 
     final memberRef = _firestore
@@ -152,7 +166,10 @@ class FirebaseOperatorService implements OperatorService {
     });
 
     final userRef = _firestore.collection('users').doc(requestorId);
-    batch.update(userRef, {'teamId': teamId, 'pendingTeamId': FieldValue.delete()});
+    batch.update(userRef, {
+      'teamId': teamId,
+      'pendingTeamId': FieldValue.delete(),
+    });
 
     final pendingRef = _firestore
         .collection('teams')

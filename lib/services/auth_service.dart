@@ -1,11 +1,11 @@
-//auth_service.dart
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/utils/google_auth_result.dart';
 import 'package:flutter_application_1/utils/login_result.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:developer';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -17,65 +17,14 @@ class AuthService {
     _initializeGoogleSignIn();
   }
 
-  Future<void> _initializeGoogleSignIn() async {
-    try {
-      await _googleSignIn.initialize();
-      _isGoogleSignInInitialized = true;
-    } catch (e) {
-      log('Failed to initialize Google Sign-In: $e');
-    }
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  User? get currentUser {
+    return _auth.currentUser;
   }
 
-  Future<void> _ensureGoogleSignInInitialized() async {
-    if (!_isGoogleSignInInitialized) {
-      await _initializeGoogleSignIn();
-    }
-  }
-
-  Future<GoogleAuthResult> signInWithGoogle() async {
-    if (kIsWeb) {
-      try {
-        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        final UserCredential credential = await _auth.signInWithPopup(
-          googleProvider,
-        );
-
-        if (credential.user?.uid != null) {
-          return GoogleLoginSuccess(credential.user!.uid);
-        }
-        return GoogleLoginFailure('Google sign-in but user id is empty.');
-      } on FirebaseAuthException catch (e) {
-        log('Firebase Web Sign In Error: ${e.code} - ${e.message}');
-        return GoogleLoginFailure('Google sign-in failed: $e');
-      } catch (error) {
-        log('Unexpected Web Sign-In Error: $error');
-        return GoogleLoginFailure('An unexpected error occured.');
-      }
-    } else {
-      await _ensureGoogleSignInInitialized();
-
-      try {
-        final GoogleSignInAccount googleUser = await _googleSignIn
-            .authenticate();
-
-        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
-        final credential = GoogleAuthProvider.credential(
-          idToken: googleAuth.idToken,
-        );
-        await _auth.signInWithCredential(credential);
-
-        return GoogleLoginSuccess(getCurrentUser()!.uid);
-      } on GoogleSignInException catch (e) {
-        log(
-          'Google Sign In error: code: ${e.code.name} description:${e.description}',
-        );
-        return GoogleLoginFailure('Google sign-in error occured.');
-      } catch (error) {
-        log('Unexpected Google Sign-In error: $error');
-        return GoogleLoginFailure('An unexpected error occured.');
-      }
-    }
-  }
+  bool get isUserLoggedIn =>
+      currentUser != null && (currentUser?.emailVerified ?? false);
 
   /// Silent sign in with Google
   Future<GoogleSignInAccount?> attemptSilentSignIn() async {
@@ -95,54 +44,111 @@ class AuthService {
     }
   }
 
-  Future<void> saveGoogleUserToFirestore({
-    required User user,
-    required String role,
-  }) async {
-    final userDoc = _firestore.collection('users').doc(getCurrentUser()?.uid);
-    final docSnapshot = await userDoc.get();
-
-    // Parse names from displayName (e.g., "John Doe" -> "John", "Doe")
-    final names = user.displayName?.split(' ');
-    final firstName = (names?.isNotEmpty ?? false)
-        ? names?.first
-        : (user.email?.split('@').first);
-    final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
-
-    if (!docSnapshot.exists) {
-      // New user: save full data set
-      await userDoc.set({
-        'uid': user.uid,
-        'email': user.email,
-        'firstname': firstName,
-        'lastname': lastName,
-        'role': role,
-        'createdAt': FieldValue.serverTimestamp(),
-        'isActive': true,
-        'emailVerified': true, // Google accounts are considered verified
+  // Clear pendingTeamId (e.g., if cancelled)
+  Future<void> clearPendingTeamId(String uid) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'pendingTeamId': FieldValue.delete(),
       });
-    } else {
-      // Existing user: ensure verification status is marked true
-      await userDoc.update({'isActive': true, 'emailVerified': true});
+    } catch (e) {
+      // ignore
     }
   }
 
-  Future<Map<String, dynamic>> sendEmailVerify() async {
+  // Get current user
+  User? getCurrentUser() {
+    return _auth.currentUser;
+  }
+
+  // Mark that referral overlay was shown for the given user (stored in users doc)
+
+  // Check whether referral overlay was already shown
+
+  // Get user data from Firestore
+  Future<DocumentSnapshot> getUserData(String uid) async {
+    return await _firestore.collection('users').doc(uid).get();
+  }
+
+  Future<
+    ({
+      bool isAdmin,
+      String? teamId,
+      String? pendingTeamId,
+      bool isArchived,
+      bool hasLeft,
+    })
+  >
+  getUserFlowStatus(String uid) async {
     try {
-      User? user = _auth.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-        return {'success': true, 'message': 'Verification email sent'};
-      } else if (user != null && user.emailVerified) {
-        return {'success': false, 'message': 'Email is already verified'};
-      } else {
-        return {'success': false, 'message': 'No user is currently signed in'};
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+
+      if (!userDoc.exists || userDoc.data() == null) {
+        return (
+          isAdmin: false,
+          teamId: null,
+          pendingTeamId: null,
+          isArchived: false,
+          hasLeft: false,
+        );
       }
+
+      final data = userDoc.data() as Map<String, dynamic>;
+      final String? teamId = data['teamId'] as String?;
+      final bool isAdmin = (data['role'] as String? ?? 'Operator') == 'Admin';
+
+      bool isArchived = false;
+      bool hasLeft = false;
+
+      if (teamId != null) {
+        try {
+          final memberDoc = await _firestore
+              .collection('teams')
+              .doc(teamId)
+              .collection('members')
+              .doc(uid)
+              .get();
+
+          if (memberDoc.exists && memberDoc.data() != null) {
+            final memberData = memberDoc.data()!;
+            isArchived = memberData['isArchived'] as bool? ?? false;
+            hasLeft = memberData['hasLeft'] as bool? ?? false;
+          }
+        } catch (e) {
+          log('Error fetching member status for $uid: $e');
+        }
+      }
+
+      return (
+        isAdmin: isAdmin,
+        teamId: teamId,
+        pendingTeamId: data['pendingTeamId'] as String?,
+        isArchived: isArchived,
+        hasLeft: hasLeft,
+      );
     } catch (e) {
+      log('Fatal error fetching user flow status for $uid: $e');
+      return (
+        isAdmin: false,
+        teamId: null,
+        pendingTeamId: null,
+        isArchived: false,
+        hasLeft: false,
+      );
+    }
+  }
+
+  // Get team status for a user: returns map with teamId and pendingTeamId (both may be null)
+  Future<Map<String, dynamic>> getUserTeamStatus(String uid) async {
+    try {
+      final doc = await getUserData(uid);
+      if (!doc.exists) return {'teamId': null, 'pendingTeamId': null};
+      final data = doc.data() as Map<String, dynamic>?;
       return {
-        'success': false,
-        'message': 'An error occurred: ${e.toString()}',
+        'teamId': data?['teamId'],
+        'pendingTeamId': data?['pendingTeamId'],
       };
+    } catch (e) {
+      return {'teamId': null, 'pendingTeamId': null};
     }
   }
 
@@ -150,66 +156,6 @@ class AuthService {
     User? user = _auth.currentUser;
     await user?.reload(); // Refresh user data
     return user?.emailVerified ?? false;
-  }
-
-  Future<LoginResult> signInUser({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      User? user = result.user;
-
-      if (user != null) {
-        if (!user.emailVerified) {
-          await _auth.signOut();
-          return LoginFailure(
-            'Email not verified. Please verify your email.',
-            needsVerification: true,
-          );
-        }
-        // Get user data from Firestore
-        DocumentSnapshot userDoc = await _firestore
-            .collection('users')
-            .doc(user.uid)
-            .get();
-
-        if (userDoc.exists) {
-          return LoginSuccess(user.displayName, user.uid);
-        } else {
-          return LoginFailure('User data not found.');
-        }
-      } else {
-        return LoginFailure('Failed to sign in.');
-      }
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'user-not-found':
-          message = 'No user found for that email.';
-          break;
-        case 'wrong-password':
-          message = 'Wrong password provided.';
-          break;
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        case 'user-disabled':
-          message = 'This user account has been disabled.';
-          break;
-        case 'too-many-requests':
-          message = 'Too many failed login attempts. Please try again later.';
-          break;
-        default:
-          message = e.message ?? 'An error occurred during sign in.';
-      }
-      return LoginFailure(message);
-    } catch (e) {
-      return LoginFailure('An unexpected error occurred: ${e.toString()}');
-    }
   }
 
   // Register user with email and password
@@ -277,51 +223,54 @@ class AuthService {
     }
   }
 
-  //verification email status
-  Future<void> updateEmailVerificationStatus(
-    String uid,
-    bool isVerified,
-  ) async {
-    try {
-      await _firestore.collection('users').doc(uid).update({
-        'emailVerified': isVerified,
+  Future<void> saveGoogleUserToFirestore({
+    required User user,
+    required String role,
+  }) async {
+    final userDoc = _firestore.collection('users').doc(getCurrentUser()?.uid);
+    final docSnapshot = await userDoc.get();
+
+    // Parse names from displayName (e.g., "John Doe" -> "John", "Doe")
+    final names = user.displayName?.split(' ');
+    final firstName = (names?.isNotEmpty ?? false)
+        ? names?.first
+        : (user.email?.split('@').first);
+    final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
+
+    if (!docSnapshot.exists) {
+      // New user: save full data set
+      await userDoc.set({
+        'uid': user.uid,
+        'email': user.email,
+        'firstname': firstName,
+        'lastname': lastName,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+        'isActive': true,
+        'emailVerified': true, // Google accounts are considered verified
       });
-    } catch (e) {
-      //irror
+    } else {
+      // Existing user: ensure verification status is marked true
+      await userDoc.update({'isActive': true, 'emailVerified': true});
     }
   }
 
-  // Sign out
-  Future<void> signOut() async {
-    await _auth.signOut();
-  }
-
-  // Get current user
-  User? getCurrentUser() {
-    return _auth.currentUser;
-  }
-
-  // Mark that referral overlay was shown for the given user (stored in users doc)
-
-  // Check whether referral overlay was already shown
-
-  // Get user data from Firestore
-  Future<DocumentSnapshot> getUserData(String uid) async {
-    return await _firestore.collection('users').doc(uid).get();
-  }
-
-  // Get team status for a user: returns map with teamId and pendingTeamId (both may be null)
-  Future<Map<String, dynamic>> getUserTeamStatus(String uid) async {
+  Future<Map<String, dynamic>> sendEmailVerify() async {
     try {
-      final doc = await getUserData(uid);
-      if (!doc.exists) return {'teamId': null, 'pendingTeamId': null};
-      final data = doc.data() as Map<String, dynamic>?;
-      return {
-        'teamId': data?['teamId'],
-        'pendingTeamId': data?['pendingTeamId'],
-      };
+      User? user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        return {'success': true, 'message': 'Verification email sent'};
+      } else if (user != null && user.emailVerified) {
+        return {'success': false, 'message': 'Email is already verified'};
+      } else {
+        return {'success': false, 'message': 'No user is currently signed in'};
+      }
     } catch (e) {
-      return {'teamId': null, 'pendingTeamId': null};
+      return {
+        'success': false,
+        'message': 'An error occurred: ${e.toString()}',
+      };
     }
   }
 
@@ -336,45 +285,132 @@ class AuthService {
     }
   }
 
-  // Clear pendingTeamId (e.g., if cancelled)
-  Future<void> clearPendingTeamId(String uid) async {
+  Future<LoginResult> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     try {
-      await _firestore.collection('users').doc(uid).update({
-        'pendingTeamId': FieldValue.delete(),
-      });
-    } catch (e) {
-      // ignore
-    }
-  }
+      final UserCredential credential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-  Future<Map<String, dynamic>> sendPasswordResetEmail(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-      return {
-        'success': true,
-        'message': 'Password reset email sent. Please check your inbox.',
-      };
+      return LoginSuccess(credential.user!.displayName, credential.user!.uid);
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
         case 'user-not-found':
-          message = 'No user found with this email address.';
+          message = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          message = 'Wrong password provided.';
           break;
         case 'invalid-email':
           message = 'The email address is not valid.';
           break;
+        case 'user-disabled':
+          message = 'This user account has been disabled.';
+          break;
         case 'too-many-requests':
-          message = 'Too many requests. Please try again later.';
+          message = 'Too many failed login attempts. Please try again later.';
           break;
         default:
-          message = e.message ?? 'Failed to send password reset email.';
+          message = e.message ?? 'An error occurred during sign in.';
       }
-      return {'success': false, 'message': message};
+      return LoginFailure(message);
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'An unexpected error occurred: ${e.toString()}',
-      };
+      return LoginFailure(e.toString());
+    }
+  }
+
+  Future<GoogleAuthResult> signInWithGoogle() async {
+    if (kIsWeb) {
+      try {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        final UserCredential credential = await _auth.signInWithPopup(
+          googleProvider,
+        );
+
+        if (credential.user?.uid != null) {
+          return GoogleLoginSuccess(credential.user!.uid);
+        }
+        return GoogleLoginFailure('Google sign-in but user id is empty.');
+      } on FirebaseAuthException catch (e) {
+        log('Firebase Web Sign In Error: ${e.code} - ${e.message}');
+        return GoogleLoginFailure('Google sign-in failed: $e');
+      } catch (error) {
+        log('Unexpected Web Sign-In Error: $error');
+        return GoogleLoginFailure('An unexpected error occured.');
+      }
+    } else {
+      await _ensureGoogleSignInInitialized();
+
+      try {
+        final GoogleSignInAccount googleUser = await _googleSignIn
+            .authenticate();
+
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
+        await _auth.signInWithCredential(credential);
+
+        return GoogleLoginSuccess(getCurrentUser()!.uid);
+      } on GoogleSignInException catch (e) {
+        log(
+          'Google Sign In error: code: ${e.code.name} description:${e.description}',
+        );
+        return GoogleLoginFailure('Google sign-in error occured.');
+      } catch (error) {
+        log('Unexpected Google Sign-In error: $error');
+        return GoogleLoginFailure('An unexpected error occured.');
+      }
+    }
+  }
+
+  // Sign out
+  Future<void> signOut() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+  }
+
+  //verification email status
+  Future<void> updateEmailVerificationStatus(
+    String uid,
+    bool isVerified,
+  ) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'emailVerified': isVerified,
+      });
+    } catch (e) {
+      //irror
+    }
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (!_isGoogleSignInInitialized) {
+      await _initializeGoogleSignIn();
+    }
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize();
+      _isGoogleSignInInitialized = true;
+    } catch (e) {
+      log('Failed to initialize Google Sign-In: $e');
+    }
+  }
+
+  Future<void> refreshUser() async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await user.reload();
+      }
+    } catch (e) {
+      debugPrint('Error refreshing user: $e');
     }
   }
 }

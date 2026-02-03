@@ -1,12 +1,11 @@
-// lib/frontend/admin/navigation/admin_main_navigation.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../../operator/profile/profile_screen.dart';
-import '../../../operator/machine_management/admin_machine/admin_machine_screen.dart';
+import '../../../../ui/profile_screen/widgets/profile_view.dart';
+import '../../../../ui/machine_management/view/mobile_admin_machine_view.dart'; 
 import '../operator_management/operator_management_screen.dart';
-import '../home_screen/admin_home_screen.dart';
+import '../../../../ui/admin_dashboard/view/mobile_admin_home_view.dart';
+import '../../../../ui/reports/view/mobile_reports_view.dart';
 
 class AdminMainNavigation extends StatefulWidget {
   const AdminMainNavigation({super.key});
@@ -28,22 +27,13 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
     });
   }
 
-  /// Navigate to a specific tab programmatically
-  void _navigateToTab(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  /// Build the list of screens with navigation callback
   List<Widget> _buildScreens() {
     return [
-      AdminHomeScreen(onNavigateToTab: _navigateToTab),
-      const OperatorManagementScreen(),
-      const AdminMachineScreen(),
-      const ProfileScreen(),
+      MobileAdminHomeView(),
+      const OperatorManagementScreen(teamId: '',),
+      const AdminMachineView(), 
+      const MobileReportsView(),
+      const ProfileView(),
     ];
   }
 
@@ -97,6 +87,7 @@ class _AdminMainNavigationState extends State<AdminMainNavigation> {
             label: "Operator",
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Machine"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Reports"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
