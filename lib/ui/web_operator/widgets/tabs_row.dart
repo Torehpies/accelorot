@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 
 class TabsRow extends StatelessWidget {
   final TabController? controller;
@@ -13,7 +14,7 @@ class TabsRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 40,
+      height: 32,
       child: Theme(
         data: theme.copyWith(
           tabBarTheme: theme.tabBarTheme.copyWith(dividerHeight: 0),
@@ -23,22 +24,15 @@ class TabsRow extends StatelessWidget {
           isScrollable: true,
           labelPadding: const EdgeInsets.only(right: 16),
           indicator: const UnderlineTabIndicator(
-            borderSide: BorderSide(width: 3, color: WebColors.greenAccent),
+            borderSide: BorderSide(width: 2, color: WebColors.greenAccent),
             insets: EdgeInsets.symmetric(horizontal: 16),
           ),
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           splashFactory: NoSplash.splashFactory,
-          labelColor: WebColors.textHeading,
-          unselectedLabelColor: WebColors.textMuted,
-          labelStyle: const TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontFamily: 'DM Sans',
-            fontSize: 18,
+          labelStyle: WebTextStyles.sectionTitle,
+          unselectedLabelStyle: WebTextStyles.sectionTitle.copyWith(
             fontWeight: FontWeight.w600,
+            color: WebColors.textMuted,
           ),
           tabs: const [
             Tab(
