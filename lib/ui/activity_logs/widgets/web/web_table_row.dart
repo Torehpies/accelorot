@@ -9,6 +9,7 @@ import '../../../core/constants/spacing.dart';
 import '../../../core/themes/web_text_styles.dart';
 import '../../../core/themes/web_colors.dart';
 import '../../../core/widgets/table/table_row.dart';
+import '../../../core/widgets/table/table_action_buttons.dart';
 
 /// Displays: Title, Category Badge, Type Chip, Value, Date, and Actions
 class ActivityTableRow extends StatelessWidget {
@@ -90,11 +91,14 @@ class ActivityTableRow extends StatelessWidget {
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: IconButton(
-              icon: const Icon(Icons.open_in_new, size: 18),
-              color: WebColors.textLabel,
-              onPressed: () => onViewDetails(item),
-              tooltip: 'View Details',
+            child: TableActionButtons(
+              actions: [
+                TableActionButton(
+                  icon: Icons.open_in_new,
+                  tooltip: 'View Details',
+                  onPressed: () => onViewDetails(item),
+                ),
+              ],
             ),
           ),
         ),

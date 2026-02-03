@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
-import 'package:flutter_application_1/utils/format.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/team_member_action_buttons.dart';
 
-class PendingMemberRow extends StatelessWidget {
-  final PendingMember member;
-  final PendingMembersNotifier notifier;
+class TeamMemberRow extends StatelessWidget {
+  final TeamMember member;
+  final TeamMembersNotifier notifier;
 
-  const PendingMemberRow({super.key, required this.member, required this.notifier});
+  const TeamMemberRow({super.key, required this.member, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
@@ -55,15 +55,11 @@ class PendingMemberRow extends StatelessWidget {
           ),
         ),
 
-        // Requested At (flex: 2)
+        // Status (flex: 1)
         TableCellWidget(
-          flex: 2,
-          child: Text(
-            formatDateAndTime(member.requestedAt),
-            style: WebTextStyles.body,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
+          flex: 1,
+          child: Center(
+            child: StatusBadge(status: member.status.value),
           ),
         ),
 
@@ -71,7 +67,7 @@ class PendingMemberRow extends StatelessWidget {
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: PendingMemberActionButtons(
+            child: TeamMemberActionButtons(
               notifier: notifier,
               member: member,
             ),
