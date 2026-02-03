@@ -8,14 +8,10 @@ import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
 
 class ContactSection extends StatelessWidget {
-  final VoidCallback onGetStarted;
-  final VoidCallback? onDownload;
-  final Function(String)? onNavigateToSection;
+  final ValueChanged<String>? onNavigateToSection;
 
   const ContactSection({
     super.key,
-    required this.onGetStarted,
-    this.onDownload,
     this.onNavigateToSection,
   });
 
@@ -35,7 +31,6 @@ class ContactSection extends StatelessWidget {
     );
 
     if (!await launchUrl(gmailUri)) {
-      // Fallback to standard mailto
       final mailtoUri = Uri(
         scheme: 'mailto',
         path: email,
@@ -131,25 +126,12 @@ class ContactSection extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.lg),
-                              // Social icons
                               Row(
                                 children: [
                                   _SocialIcon(
                                     iconData: Icons.facebook_outlined,
                                     onPressed: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
                                     backgroundColor: const Color(0xFF1877F2),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  _SocialIcon(
-                                    svgAsset: 'assets/icons/X_logo.svg',
-                                    onPressed: () => _launchUrl('https://twitter.com/your_x_handle'),
-                                    backgroundColor: const Color(0xFF000000),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  _SocialIcon(
-                                    svgAsset: 'assets/icons/Instagram_logo.svg',
-                                    onPressed: () => _launchUrl('https://instagram.com/your_instagram_handle'),
-                                    backgroundColor: const Color(0xFFE1306C),
                                   ),
                                 ],
                               ),
@@ -260,7 +242,7 @@ class ContactSection extends StatelessWidget {
                                 children: [
                                   _ContactRow(
                                     icon: Icons.location_on_outlined,
-                                    text: 'Metro Manila, Caloocan City, Philippines',
+                                    text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
                                   ),
                                   const SizedBox(height: AppSpacing.md),
                                   _ContactRow(
@@ -271,7 +253,7 @@ class ContactSection extends StatelessWidget {
                                   const SizedBox(height: AppSpacing.md),
                                   _ContactRow(
                                     icon: Icons.phone_outlined,
-                                    text: '+63 000 000 0000',
+                                    text: '+63 951 000 7296',
                                   ),
                                 ],
                               ),
@@ -305,7 +287,7 @@ class ContactSection extends StatelessWidget {
 class _FooterColumn extends StatelessWidget {
   final String title;
   final List<String> links;
-  final Function(String)? onLinkTap;
+  final ValueChanged<String>? onLinkTap;
   final Widget? customContent;
 
   const _FooterColumn({
@@ -340,7 +322,7 @@ class _FooterColumn extends StatelessWidget {
                   children: [
                     _FooterLink(
                       text: links[i],
-                      onTap: onLinkTap != null ? () => onLinkTap!(links[i]) : null,
+                      onTap: () => onLinkTap?.call(links[i]),
                     ),
                     if (i < links.length - 1) 
                       const SizedBox(height: AppSpacing.md),
@@ -354,34 +336,18 @@ class _FooterColumn extends StatelessWidget {
 }
 
 class _SocialIcon extends StatelessWidget {
-  final String? svgAsset;
-  final IconData? iconData;
+  final IconData iconData;
   final VoidCallback? onPressed;
   final Color backgroundColor;
 
   const _SocialIcon({
-    this.svgAsset,
-    this.iconData,
+    required this.iconData,
     this.onPressed,
     required this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget iconChild;
-
-    if (svgAsset != null) {
-      iconChild = SvgPicture.asset(
-        svgAsset!,
-        width: 20,
-        height: 20,
-      );
-    } else if (iconData != null) {
-      iconChild = Icon(iconData, color: Colors.white, size: 20);
-    } else {
-      iconChild = const Icon(Icons.link, color: Colors.white, size: 20);
-    }
-
     final child = Container(
       width: 40,
       height: 40,
@@ -389,7 +355,9 @@ class _SocialIcon extends StatelessWidget {
         color: backgroundColor,
         shape: BoxShape.circle,
       ),
-      child: Center(child: iconChild),
+      child: Center(
+        child: Icon(iconData, color: Colors.white, size: 20),
+      ),
     );
 
     if (onPressed != null) {

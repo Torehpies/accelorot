@@ -9,4 +9,6 @@ abstract class MachineRepository {
   Future<void> restoreMachine(String machineId);
   Future<bool> checkMachineExists(String machineId);
   Stream<List<MachineModel>> watchMachinesByTeam(String teamId);
+  Future<void> updateDrumActive(String machineId, bool isActive);
+  Future<void> updateAeratorActive(String machineId, bool isActive);
 }

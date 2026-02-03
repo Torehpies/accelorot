@@ -9,7 +9,7 @@ import '../widgets/web_stats_row.dart';
 import '../widgets/web_table_container.dart';
 import '../dialogs/report_view_details_dialog.dart';
 import '../dialogs/report_edit_details_dialog.dart';
-import '../../core/widgets/web_common_widgets.dart';
+import '../../core/widgets/web_base_container.dart';
 
 class WebReportsView extends ConsumerWidget {
   const WebReportsView({super.key});

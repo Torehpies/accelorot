@@ -37,6 +37,9 @@ class ActivityViewModel extends _$ActivityViewModel {
     ActivityScreenType.allActivity: AllActivityConfig.config,
   };
 
+  // ===== PAGINATION CONSTANT =====
+  static const int _loadMoreIncrement = 10;
+
   late final ActivityAggregatorService _aggregator;
   late final ActivityFilterService _filterService;
   late final ActivityFilterConfig _config;
@@ -59,6 +62,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       isManualFilter:
           params.initialFilter != null && params.initialFilter != 'All',
       focusedMachineId: params.focusedMachineId,
+      displayLimit: _loadMoreIncrement,
     );
 
     // Initialize asynchronously
@@ -167,27 +171,51 @@ class ActivityViewModel extends _$ActivityViewModel {
     await loadActivities(state.focusedMachineId);
   }
 
+  // ===== PAGINATION METHODS =====
+
+  /// Load more items
+  void loadMore() {
+    state = state.copyWith(
+      displayLimit: state.displayLimit + _loadMoreIncrement,
+    );
+  }
+
+  // ===== FILTER METHODS (WITH PAGINATION RESET) =====
+
   /// Handle filter chip selection
   void onFilterChanged(String filter) {
-    state = state.copyWith(selectedFilter: filter, isManualFilter: true);
+    state = state.copyWith(
+      selectedFilter: filter,
+      isManualFilter: true,
+      displayLimit: _loadMoreIncrement,
+    );
     _applyFilters();
   }
 
   /// Handle search query change
   void onSearchChanged(String query) {
-    state = state.copyWith(searchQuery: query.toLowerCase());
+    state = state.copyWith(
+      searchQuery: query.toLowerCase(),
+      displayLimit: _loadMoreIncrement,
+    );
     _applyFilters();
   }
 
   /// Handle search cleared
   void onSearchCleared() {
-    state = state.copyWith(searchQuery: '');
+    state = state.copyWith(
+      searchQuery: '',
+      displayLimit: _loadMoreIncrement,
+    );
     _applyFilters();
   }
 
   /// Handle date filter change
   void onDateFilterChanged(DateFilterRange dateFilter) {
-    state = state.copyWith(dateFilter: dateFilter);
+    state = state.copyWith(
+      dateFilter: dateFilter,
+      displayLimit: _loadMoreIncrement,
+    );
     _applyFilters();
   }
 
@@ -196,6 +224,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       selectedBatchId: batchId,
       selectedFilter: 'All',
       isManualFilter: false,
+      displayLimit: _loadMoreIncrement,
     );
     _applyFilters();
   }
@@ -205,6 +234,7 @@ class ActivityViewModel extends _$ActivityViewModel {
       selectedMachineId: machineId,
       selectedFilter: 'All',
       isManualFilter: false,
+      displayLimit: _loadMoreIncrement,
     );
     _applyFilters();
   }

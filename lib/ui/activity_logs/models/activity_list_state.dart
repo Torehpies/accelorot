@@ -13,7 +13,7 @@ abstract class ActivityListState with _$ActivityListState {
     // Data
     @Default([]) List<ActivityLogItem> allActivities,
     @Default([]) List<ActivityLogItem> filteredActivities,
-
+    
     // Filter state
     @Default('All') String selectedFilter,
     @Default('') String searchQuery,
@@ -23,14 +23,17 @@ abstract class ActivityListState with _$ActivityListState {
     @Default({}) Set<String> autoHighlightedFilters,
     String? selectedBatchId,
     String? selectedMachineId,
-
+    
     // UI state
     @Default(LoadingStatus.initial) LoadingStatus status,
     String? errorMessage,
     @Default(false) bool isLoggedIn,
-
+    
     // Screen configuration
     String? focusedMachineId,
+    
+    // Pagination
+    @Default(10) int displayLimit,
   }) = _ActivityListState;
 
   const ActivityListState._();
@@ -40,4 +43,17 @@ abstract class ActivityListState with _$ActivityListState {
   bool get hasError => status == LoadingStatus.error;
   bool get isEmpty =>
       filteredActivities.isEmpty && status == LoadingStatus.success;
+
+  /// Pagination getters
+  List<ActivityLogItem> get displayedActivities {
+    if (filteredActivities.length <= displayLimit) {
+      return filteredActivities;
+    }
+    return filteredActivities.take(displayLimit).toList();
+  }
+
+  bool get hasMoreToLoad => filteredActivities.length > displayLimit;
+
+  int get remainingCount =>
+      (filteredActivities.length - displayLimit).clamp(0, filteredActivities.length);
 }
