@@ -64,21 +64,16 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
         ),
         Tooltip(
           message: 'Add Operator',
-          child: ElevatedButton(
+          child: ElevatedButton.icon(
             onPressed: () {},
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Operator'),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.add),
-                SizedBox(width: 6),
-                Text('Add Operator'),
-              ],
             ),
           ),
         ),

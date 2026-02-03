@@ -42,7 +42,7 @@ class _DesktopOperatorManagementScreenState
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: WebColors.primaryBorder, width: 1.5),
+        border: Border.all(color: WebColors.cardBorder),
       ),
       child: Column(
         children: [
@@ -51,9 +51,6 @@ class _DesktopOperatorManagementScreenState
           const SizedBox(height: 10),
 
           // ── Tabbed table area ──
-          // Each tab renders its own BaseTableContainer which includes
-          // the TabsRow (tab bar) as leftHeaderWidget internally.
-          // TabBarView here just switches which tab's container is shown.
           Expanded(
             child: TabBarView(
               controller: _tabController,
