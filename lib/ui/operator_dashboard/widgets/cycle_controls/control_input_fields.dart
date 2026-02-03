@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 
-class DrumInputFields extends StatelessWidget {
+class ControlInputFields extends StatelessWidget {
   final String selectedCycle;
   final String selectedPeriod;
   final ValueChanged<String?> onCycleChanged;
   final ValueChanged<String?> onPeriodChanged;
   final bool isLocked; // Lock when running or paused
 
-  const DrumInputFields({
+  const ControlInputFields({
     super.key,
     required this.selectedCycle,
     required this.selectedPeriod,
@@ -20,13 +20,21 @@ class DrumInputFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define valid values
+    final validCycles = List.generate(24, (index) => '${index + 1}');
+    final validPeriods = ['10 minutes', '15 minutes', '20 minutes', '25 minutes', '30 minutes'];
+    
+    // Validate current selections
+    final currentCycle = validCycles.contains(selectedCycle) ? selectedCycle : '1';
+    final currentPeriod = validPeriods.contains(selectedPeriod) ? selectedPeriod : '10 minutes';
+    
     return Row(
       children: [
         Expanded(
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Cycles',
+              labelText: 'Period (Runtime)',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -35,16 +43,15 @@ class DrumInputFields extends StatelessWidget {
                 horizontal: 12,
                 vertical: 10,
               ),
-              enabled: !isLocked,
             ),
-            initialValue: selectedCycle,
-            onChanged: isLocked ? null : onCycleChanged,
-            items: const [
-              DropdownMenuItem(value: "50", child: Text("50")),
-              DropdownMenuItem(value: "100", child: Text("100")),
-              DropdownMenuItem(value: "150", child: Text("150")),
-              DropdownMenuItem(value: "200", child: Text("200")),
-            ],
+            initialValue: currentPeriod,
+            onChanged: isLocked ? null : onPeriodChanged,
+            items: validPeriods
+                .map((period) => DropdownMenuItem(
+                      value: period,
+                      child: Text(period.replaceAll(' minutes', ' min')),
+                    ))
+                .toList(),
           ),
         ),
         const SizedBox(width: 12),
@@ -52,7 +59,7 @@ class DrumInputFields extends StatelessWidget {
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Period',
+              labelText: 'Cycles per Day',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -61,15 +68,15 @@ class DrumInputFields extends StatelessWidget {
                 horizontal: 12,
                 vertical: 10,
               ),
-              enabled: !isLocked,
             ),
-            initialValue: selectedPeriod,
-            onChanged: isLocked ? null : onPeriodChanged,
-            items: const [
-              DropdownMenuItem(value: '15 minutes', child: Text('15 min')),
-              DropdownMenuItem(value: '30 minutes', child: Text('30 min')),
-              DropdownMenuItem(value: '1 hour', child: Text('1 hour')),
-            ],
+            initialValue: currentCycle,
+            onChanged: isLocked ? null : onCycleChanged,
+            items: validCycles
+                .map((cycle) => DropdownMenuItem(
+                      value: cycle,
+                      child: Text(cycle),
+                    ))
+                .toList(),
           ),
         ),
       ],

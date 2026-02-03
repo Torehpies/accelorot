@@ -6,6 +6,7 @@ import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/providers/machine_providers.dart';
@@ -359,21 +360,19 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
   int _getPeriodMinutes(String period) {
     switch (period) {
+      case '10 minutes':
+        return 10;
       case '15 minutes':
         return 15;
+      case '20 minutes':
+        return 20;
+      case '25 minutes':
+        return 25;
       case '30 minutes':
         return 30;
-      case '1 hour':
-        return 60;
-      case '2 hours':
-        return 120;
       default:
-        return 60;
+        return 15;
     }
-  }
-
-  String _getCyclesLabel(int cycles) {
-    return '$cycles Cycles';
   }
 
   @override
@@ -457,8 +456,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   }
 
   Widget _buildActiveState(bool batchCompleted) {
-    final canInteract = !batchCompleted && status == SystemStatus.idle;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -507,43 +504,24 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         ),
         const SizedBox(height: 12),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select Duration',
-                value: settings.period,
-                items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          setState(() {
-                            settings = settings.copyWith(period: value);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select No. of Cycles',
-                value: _getCyclesLabel(settings.cycles),
-                items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          final cycles = int.parse(value.split(' ')[0]);
-                          setState(() {
-                            settings = settings.copyWith(cycles: cycles);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-          ],
+        ControlInputFields(
+          selectedCycle: settings.cycles.toString(),
+          selectedPeriod: settings.period,
+          isLocked: status == SystemStatus.running,
+          onCycleChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(cycles: int.parse(value));
+              });
+            }
+          },
+          onPeriodChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(period: value);
+              });
+            }
+          },
         ),
         const SizedBox(height: 24),
 
@@ -585,48 +563,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required Function(String?)? onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: onChanged == null ? Colors.grey.shade100 : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Text(
-            label,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-          ),
-          isDense: true,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.grey.shade600,
-            size: 20,
-          ),
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF1a1a1a)),
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
     );
   }
 }
