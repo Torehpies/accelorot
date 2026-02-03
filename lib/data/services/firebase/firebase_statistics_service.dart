@@ -11,64 +11,102 @@ class FirebaseStatisticsService implements StatisticsService {
   FirebaseStatisticsService({FirebaseFirestore? firestore})
     : _db = firestore ?? FirebaseFirestore.instance;
 
-  /// Get today's collection name (e.g. "2025-10-23")
-  String _getTodayCollection() {
-    final now = DateTime.now();
-    return "${now.year.toString().padLeft(4, '0')}-"
-        "${now.month.toString().padLeft(2, '0')}-"
-        "${now.day.toString().padLeft(2, '0')}";
-  }
-
   /// Reusable fetch function for all sensor types
+  /// Path: batches/{batchId}/readings/{date}/time/{timeId}
   Future<List<Map<String, dynamic>>> _getSensorData({
-    required String machineId,
+    required String batchId,
     required String fieldName,
   }) async {
     try {
-      final dateKey = _getTodayCollection();
-      final snapshot = await _db.collection(dateKey).get();
+      if (batchId.isEmpty) return [];
 
-      if (snapshot.docs.isEmpty) {
-        debugPrint('📭 No documents found in collection: $dateKey');
+      final List<Map<String, dynamic>> allReadings = [];
+
+      // Get batch to find creation date
+      final batchDoc = await _db.collection('batches').doc(batchId).get();
+      if (!batchDoc.exists) {
+        debugPrint('⚠️ Batch not found: $batchId');
         return [];
       }
 
-      // Filter only documents belonging to this machine
-      final filtered = snapshot.docs.where((doc) {
-        final data = doc.data();
-        return data['machine-id'] == machineId;
-      }).toList();
-
-      if (filtered.isEmpty) {
-        debugPrint('📭 No documents found for machine: $machineId');
-        return [];
+      // Determine date range
+      DateTime startDate = DateTime.now().subtract(const Duration(days: 30));
+      final batchData = batchDoc.data();
+      if (batchData != null && batchData['createdAt'] is Timestamp) {
+        startDate = (batchData['createdAt'] as Timestamp).toDate();
       }
 
-      // Sort by document ID (e.g. "01-15:24:38" → time order)
-      filtered.sort((a, b) => a.id.compareTo(b.id));
+      startDate = DateTime(startDate.year, startDate.month, startDate.day);
+      final endDate = DateTime.now();
+      // Normalize endDate to midnight (start of today)
+      final endDateNormalized = DateTime(endDate.year, endDate.month, endDate.day);
 
-      return filtered.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'value': (data[fieldName] ?? 0).toDouble(),
-          'timestamp': _parseTimestamp(data['timestamp']),
-        };
-      }).toList();
+      debugPrint('📅 Scanning $batchId from ${startDate.toString().substring(0, 10)} to ${endDateNormalized.toString().substring(0, 10)}');
+
+      // Scan each date directly (bypasses phantom date documents)
+      // Use isBefore with endDate + 1 day to include today, but not tomorrow
+      for (var day = startDate;
+           !day.isAfter(endDateNormalized);
+           day = day.add(const Duration(days: 1))) {
+        
+        final dateStr = day.toIso8601String().substring(0, 10);
+
+        final timeSnapshot = await _db
+            .collection('batches')
+            .doc(batchId)
+            .collection('readings')
+            .doc(dateStr)
+            .collection('time')
+            .get();
+
+        if (timeSnapshot.docs.isNotEmpty) {
+          debugPrint('✅ $dateStr: ${timeSnapshot.docs.length} readings');
+
+          for (var timeDoc in timeSnapshot.docs) {
+            final data = timeDoc.data();
+            if (data.containsKey(fieldName)) {
+              allReadings.add({
+                'id': timeDoc.id,
+                'value': (data[fieldName] ?? 0).toDouble(),
+                'timestamp': _parseTimestamp(data['timestamp']),
+              });
+            }
+          }
+        } else {
+          // No readings for this day - add a zero value at midnight
+          debugPrint('⚪ $dateStr: No readings, adding zero value');
+          allReadings.add({
+            'id': '$dateStr-00-00-00',
+            'value': 0.0,
+            'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
+          });
+        }
+      }
+
+      debugPrint('📊 Total $fieldName: ${allReadings.length}');
+
+      allReadings.sort((a, b) {
+        final timeA = a['timestamp'] as DateTime?;
+        final timeB = b['timestamp'] as DateTime?;
+        if (timeA == null || timeB == null) return 0;
+        return timeA.compareTo(timeB);
+      });
+
+      return allReadings;
     } catch (e, stackTrace) {
-      debugPrint('❌ Error fetching $fieldName data: $e');
-      debugPrint('Stack trace: $stackTrace');
-      throw Exception('Failed to fetch $fieldName data: $e');
+      debugPrint('❌ Error fetching $fieldName: $e');
+      debugPrint('Stack: $stackTrace');
+      return [];
     }
   }
 
   @override
-  Future<List<TemperatureModel>> getTemperatureData(String machineId) async {
+  Future<List<TemperatureModel>> getTemperatureData(String batchId) async {
     try {
-      debugPrint('🌡️ Fetching temperature data for machine: $machineId');
+      debugPrint('🌡️ Fetching temperature data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
-        fieldName: 'temp',
+        batchId: batchId,
+        fieldName: 'temperature',
       );
       debugPrint('🌡️ Found ${rawData.length} temperature readings');
 
@@ -81,11 +119,11 @@ class FirebaseStatisticsService implements StatisticsService {
   }
 
   @override
-  Future<List<MoistureModel>> getMoistureData(String machineId) async {
+  Future<List<MoistureModel>> getMoistureData(String batchId) async {
     try {
-      debugPrint('🌊 Fetching moisture data for machine: $machineId');
+      debugPrint('🌊 Fetching moisture data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
+        batchId: batchId,
         fieldName: 'moisture',
       );
       debugPrint('🌊 Found ${rawData.length} moisture readings');
@@ -99,11 +137,11 @@ class FirebaseStatisticsService implements StatisticsService {
   }
 
   @override
-  Future<List<OxygenModel>> getOxygenData(String machineId) async {
+  Future<List<OxygenModel>> getOxygenData(String batchId) async {
     try {
-      debugPrint('💨 Fetching oxygen data for machine: $machineId');
+      debugPrint('💨 Fetching oxygen data for batch: $batchId');
       final rawData = await _getSensorData(
-        machineId: machineId,
+        batchId: batchId,
         fieldName: 'oxygen',
       );
       debugPrint('💨 Found ${rawData.length} oxygen readings');

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'confirm_completion_dialog.dart';
 import '../../models/compost_batch_model.dart';
 import '../../../../data/providers/batch_providers.dart';
 
@@ -57,6 +58,17 @@ class _BatchCompleteDialogState extends ConsumerState<BatchCompleteDialog> {
     try {
       final finalWeight = double.parse(_finalWeightController.text);
       final completionNotes = _completionNotesController.text.trim();
+
+      // Show final confirmation dialog
+      if (!mounted) return;
+      final confirm = await showConfirmCompletionDialog(context);
+
+      if (!confirm) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
 
       // Get batch repository
       final batchRepo = ref.read(batchRepositoryProvider);

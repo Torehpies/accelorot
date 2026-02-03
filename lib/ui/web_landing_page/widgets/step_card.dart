@@ -1,64 +1,39 @@
-// lib/ui/landing_page/widgets/step_card.dart
+// lib/ui/landing_page/models/step_model.dart
 
-import 'package:flutter/material.dart';
-import '../../core/constants/spacing.dart';
-import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
-import '../models/step_model.dart';
+class StepModel {
+  final int number;
+  final String title;
+  final String description;
 
-class StepCard extends StatelessWidget {
-  final StepModel step;
-  const StepCard({super.key, required this.step});
+  StepModel({
+    required this.number,
+    required this.title,
+    required this.description,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+  // Updated sample data based on the image content
+  static List<StepModel> getSampleSteps() {
+    return [
+      StepModel(
+        number: 1,
+        title: 'Add Organic Waste',
+        description: 'Simply add your greens (nitrogen-rich), browns (carbon-rich), and starter compost into the rotary drum.',
       ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF28A85A).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+      StepModel(
+        number: 2,
+        title: 'Smart Monitoring',
+        description: 'IoT sensors continuously track temperature, moisture, and air quality—adjusting conditions automatically.',
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '0${step.number}',
-            style: WebTextStyles.h1.copyWith(
-              fontSize: 48,
-              color: WebColors.textTitle.withValues(alpha: 0.5),
-              height: 1.0,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            step.title,
-            style: WebTextStyles.h3.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Flexible(
-            child: Text(
-              step.description,
-              softWrap: true,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: WebTextStyles.bodyMediumGray.copyWith(
-                fontSize: 13,
-                height: 1.5,
-                color: const Color(0xFF6B7280),
-              ),
-            ),
-          ),
-        ],
+      StepModel(
+        number: 3,
+        title: 'AI Recommendations',
+        description: 'Receive intelligent suggestions on moisture levels, aeration frequency, and optimal harvest timing.',
       ),
-    );
+      StepModel(
+        number: 4,
+        title: 'Harvest Quality Compost',
+        description: 'In just 14 days, collect mature, nutrient-rich compost safe for gardens and agriculture.',
+      ),
+    ];
   }
 }

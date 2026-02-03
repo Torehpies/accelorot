@@ -26,4 +26,10 @@ abstract class MachineService {
 
   /// Stream of machines for real-time updates
   Stream<List<MachineModel>> watchMachinesByTeam(String teamId);
+
+  /// Update drum active status
+  Future<void> updateDrumActive(String machineId, bool isActive);
+
+  /// Update aerator active status
+  Future<void> updateAeratorActive(String machineId, bool isActive);
 }

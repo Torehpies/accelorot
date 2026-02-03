@@ -191,4 +191,36 @@ class FirebaseMachineService implements MachineService {
               .toList(),
         );
   }
+
+  @override
+  Future<void> updateDrumActive(String machineId, bool isActive) async {
+    if (currentUserId == null) {
+      throw Exception('User must be authenticated');
+    }
+
+    try {
+      await _machinesCollection.doc(machineId).update({
+        'drumActive': isActive,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update drum status: $e');
+    }
+  }
+
+  @override
+  Future<void> updateAeratorActive(String machineId, bool isActive) async {
+    if (currentUserId == null) {
+      throw Exception('User must be authenticated');
+    }
+
+    try {
+      await _machinesCollection.doc(machineId).update({
+        'aeratorActive': isActive,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update aerator status: $e');
+    }
+  }
 }
