@@ -1391,16 +1391,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                               }),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Click to see more • Hover off to collapse',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: isGreen 
-                                  ? const Color.fromARGB(180, 255, 255, 255)
-                                  : const Color(0xFF999999),
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
+                          
                           ],
                         ),
                       ),
