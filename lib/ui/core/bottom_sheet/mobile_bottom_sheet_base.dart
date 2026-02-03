@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import '../themes/web_colors.dart';
 import '../themes/web_text_styles.dart';
 
-// =============================================================================
-// Action model
-// =============================================================================
-
-/// Describes a single footer button in the bottom sheet.
+/// Base layout for mobile bottom sheets, with header, scrollable body and sticky footer.
 class BottomSheetAction {
   final String label;
   final VoidCallback? onPressed;
@@ -162,7 +158,6 @@ class MobileBottomSheetBase extends StatelessWidget {
     );
   }
 
-  // ---------------------------------------------------------------------------
   Widget _buildButton(BottomSheetAction action) {
     // ── Secondary (text) ───────────────────────────────────────────────────
     if (!action.isPrimary && !action.isDestructive) {

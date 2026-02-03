@@ -21,13 +21,7 @@ typedef UpdateReportCallback = Future<void> Function({
   String? priority,
 });
 
-/// Editable form for an existing report.
-///
-/// • Readonly fields: ID, machine, creator (cannot change).
-/// • Editable fields: title, description, status, priority.
-/// • Tracks [_hasChanges] → shows confirmation dialog on Cancel.
-/// • Drag and dismiss disabled to prevent accidental data loss.
-/// • Shows toast on save success / error.
+/// Editable form for editing report details with validation and change tracking
 class ReportEditBottomSheet extends StatefulWidget {
   final Report report;
   final UpdateReportCallback onUpdate;
@@ -43,9 +37,6 @@ class ReportEditBottomSheet extends StatefulWidget {
 }
 
 class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
-  // ---------------------------------------------------------------------------
-  // Controllers & editable state
-  // ---------------------------------------------------------------------------
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late String _status;
@@ -54,9 +45,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
   bool _isLoading = false;
   String? _titleError;
 
-  // ---------------------------------------------------------------------------
-  // Init / dispose
-  // ---------------------------------------------------------------------------
   @override
   void initState() {
     super.initState();
@@ -75,9 +63,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Dirty check
-  // ---------------------------------------------------------------------------
   bool get _hasChanges {
     return _titleController.text.trim() != widget.report.title.trim() ||
         _descriptionController.text.trim() != widget.report.description.trim() ||
@@ -85,9 +70,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
         _priority != widget.report.priority;
   }
 
-  // ---------------------------------------------------------------------------
-  // Validation
-  // ---------------------------------------------------------------------------
   bool _validate() {
     setState(() => _titleError = null);
 
@@ -98,9 +80,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
     return true;
   }
 
-  // ---------------------------------------------------------------------------
-  // Actions
-  // ---------------------------------------------------------------------------
   Future<void> _save() async {
     if (!_validate()) return;
 
@@ -150,9 +129,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Dropdown item lists
-  // ---------------------------------------------------------------------------
   static const List<MobileDropdownItem<String>> _statusItems = [
     MobileDropdownItem(value: 'open', label: 'Open'),
     MobileDropdownItem(value: 'in_progress', label: 'In Progress'),
@@ -166,9 +142,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
     MobileDropdownItem(value: 'low', label: 'Low'),
   ];
 
-  // ---------------------------------------------------------------------------
-  // Build
-  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return MobileBottomSheetBase(
@@ -188,7 +161,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Readonly identity ──────────────────────────────────────────
+          // Readonly identity fields
           MobileReadOnlySection(
             sectionTitle: 'Identity',
             fields: [
@@ -199,7 +172,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 20),
 
-          // ── Editable: Title ────────────────────────────────────────────
+          // Editable title field
           MobileInputField(
             label: 'Title',
             controller: _titleController,
@@ -209,7 +182,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // ── Editable: Description ──────────────────────────────────────
+          // Editable description field
           MobileInputField(
             label: 'Description',
             controller: _descriptionController,
@@ -218,7 +191,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // ── Editable: Status & Priority row ────────────────────────────
+          // Status and priority dropdowns
           Row(
             children: [
               Expanded(
@@ -248,7 +221,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 8),
 
-          // ── Readonly: type (cannot change) ─────────────────────────────
+          // Readonly report type
           MobileReadOnlySection(
             sectionTitle: 'Report Type',
             fields: [

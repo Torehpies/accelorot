@@ -180,7 +180,6 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Label with copy indicator
               Row(
                 children: [
                   Text(widget.label, style: WebTextStyles.bodyMediumGray),

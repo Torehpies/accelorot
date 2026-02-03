@@ -11,11 +11,6 @@ class MobileDropdownItem<T> {
 
   const MobileDropdownItem({required this.value, required this.label});
 }
-
-/// Dropdown field for mobile bottom sheets.
-///
-/// Uses [DropdownButtonFormField] so it automatically inherits the
-/// rounded border + green focus colour from [appTheme.inputDecorationTheme].
 class MobileDropdownField<T> extends StatelessWidget {
   final String label;
   final T? value;

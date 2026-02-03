@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'mobile_toast.dart';
 import 'toast_type.dart';
 
-/// Manages toast overlay lifecycle: insertion, stacking, auto-dismiss.
-/// Toasts stack vertically from the top-center of the screen.
+/// Service to show mobile toasts using OverlayEntries.
 class MobileToastService {
   static final List<OverlayEntry> _activeToasts = [];
 
@@ -13,7 +12,6 @@ class MobileToastService {
   static const double _toastHeight = 56.0;    // approximate rendered height
   static const double _toastSpacing = 10.0;
 
-  /// Show a toast. Defaults to [ToastType.success].
   static void show(
     BuildContext context, {
     required String message,
@@ -61,13 +59,11 @@ class MobileToastService {
     if (!_activeToasts.contains(entry)) return;
     entry.remove();
     _activeToasts.remove(entry);
-    // Rebuild remaining so they can reposition if needed
     for (final e in _activeToasts) {
       e.markNeedsBuild();
     }
   }
 
-  /// Dismiss every active toast immediately.
   static void clearAll() {
     for (final entry in List.from(_activeToasts)) {
       entry.remove();

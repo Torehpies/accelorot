@@ -17,9 +17,7 @@ class ReportViewBottomSheet extends StatelessWidget {
     required this.onEdit,
   });
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
+  // Date and time formatting helper
   String _formatDateTime(DateTime dt) {
     final months = [
       'Jan','Feb','Mar','Apr','May','Jun',
@@ -31,9 +29,7 @@ class ReportViewBottomSheet extends StatelessWidget {
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $h:$min $ampm';
   }
 
-  // ---------------------------------------------------------------------------
   // Build
-  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return MobileBottomSheetBase(
@@ -47,7 +43,7 @@ class ReportViewBottomSheet extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Identity ─────────────────────────────────────────────────────
+          // Identity
           MobileReadOnlySection(
             sectionTitle: 'Identity',
             fields: [
@@ -58,7 +54,7 @@ class ReportViewBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ── Details ──────────────────────────────────────────────────────
+          // Details
           MobileReadOnlySection(
             sectionTitle: 'Details',
             fields: [
@@ -70,7 +66,7 @@ class ReportViewBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ── Description ──────────────────────────────────────────────────
+          // Description
           MobileReadOnlySection(
             sectionTitle: 'Description',
             fields: [
@@ -80,7 +76,7 @@ class ReportViewBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // ── Meta ─────────────────────────────────────────────────────────
+          // Meta
           MobileReadOnlySection(
             sectionTitle: 'Meta',
             fields: [
