@@ -27,9 +27,9 @@ class HowItWorksSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(
-        vertical: isMobile ? 40.0 : 60.0,
+        vertical: isMobile ? 32.0 : 60.0, // Reduced mobile padding
         horizontal: isMobile 
-            ? (isSmallMobile ? 16.0 : 20.0)
+            ? (isSmallMobile ? 12.0 : 16.0) // Reduced horizontal padding
             : isTablet
               ? 32.0
               : 48.0,
@@ -60,8 +60,8 @@ class HowItWorksSection extends StatelessWidget {
                 textAlign: TextAlign.center,
                 text: TextSpan(
                   style: WebTextStyles.h2.copyWith(
-                    fontSize: isSmallMobile ? 24 
-                        : isMobile ? 28 
+                    fontSize: isSmallMobile ? 20  // Reduced for small mobile
+                        : isMobile ? 24           // Reduced for mobile
                         : isTablet ? 32 
                         : 36,
                     fontWeight: FontWeight.w700,
@@ -82,12 +82,12 @@ class HowItWorksSection extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: isMobile ? 16.0 : 24.0),
+              SizedBox(height: isMobile ? 12.0 : 24.0), // Reduced spacing for mobile
 
               // Subtitle - Neutral color with slight green tint
               Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 16.0 : 0,
+                  horizontal: isMobile ? 12.0 : 0, // Reduced padding for mobile
                 ),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -101,18 +101,18 @@ class HowItWorksSection extends StatelessWidget {
                     'Our smart composting system transforms your organic waste into garden-ready compost with minimal effort. Just add waste and let technology handle the rest.',
                     textAlign: TextAlign.center,
                     style: WebTextStyles.subtitle.copyWith(
-                      fontSize: isSmallMobile ? 14 
-                          : isMobile ? 15 
+                      fontSize: isSmallMobile ? 12  // Reduced for small mobile
+                          : isMobile ? 13           // Reduced for mobile
                           : isTablet ? 16 
                           : 17,
                       color: Color(0xFF374151), // Dark gray with subtle green feel
-                      height: 1.5,
+                      height: 1.4, // Tighter line height for mobile
                     ),
                   ),
                 ),
               ),
 
-              SizedBox(height: isMobile ? 32.0 : 48.0),
+              SizedBox(height: isMobile ? 24.0 : 48.0), // Reduced spacing for mobile
 
               // RESPONSIVE LAYOUT - Tablet and Mobile optimized
               if (isSmallMobile)
@@ -120,7 +120,7 @@ class HowItWorksSection extends StatelessWidget {
                 Column(
                   children: steps.map((step) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 16.0),
+                      padding: EdgeInsets.only(bottom: 12.0), // Reduced padding
                       child: StepCard(
                         step: step,
                         isMobile: true,
@@ -136,9 +136,9 @@ class HowItWorksSection extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 1.2, // Taller for more text space
+                    crossAxisSpacing: 12.0, // Reduced spacing
+                    mainAxisSpacing: 12.0, // Reduced spacing
+                    childAspectRatio: 1.3, // Taller for more text space
                   ),
                   itemCount: steps.length,
                   itemBuilder: (context, index) {
@@ -336,31 +336,31 @@ class _StepCardState extends State<StepCard> {
       );
     }
 
-    // Tablet and Mobile view - optimized for text display
+    // Tablet and Mobile view - MINIMIZED FONT SIZES
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(
-          widget.isSmallMobile ? 12.0 :
-          widget.isMobile ? 14.0 :
+          widget.isSmallMobile ? 10.0 : // Smaller radius for mobile
+          widget.isMobile ? 12.0 :
           16.0,
         ),
         border: Border.all(
           color: Color(0xFFD1FAE5), // Light green border
-          width: 1.5,
+          width: 1.0, // Thinner border for mobile
         ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: 0.08), // Very subtle green shadow
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: accentColor.withValues(alpha: 0.06), // Even more subtle shadow for mobile
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
         padding: EdgeInsets.all(
-          widget.isSmallMobile ? 16.0 :
-          widget.isMobile ? 18.0 :
+          widget.isSmallMobile ? 12.0 : // Reduced padding for mobile
+          widget.isMobile ? 14.0 :
           widget.isLargeTablet ? 18.0 : 20.0,
         ),
         child: Column(
@@ -373,11 +373,11 @@ class _StepCardState extends State<StepCard> {
               children: [
                 // Icon box - Using accent color as accent
                 Container(
-                  width: widget.isSmallMobile ? 40.0 :
-                         widget.isMobile ? 44.0 :
+                  width: widget.isSmallMobile ? 32.0 : // Smaller for mobile
+                         widget.isMobile ? 36.0 :
                          widget.isLargeTablet ? 44.0 : 48.0,
-                  height: widget.isSmallMobile ? 40.0 :
-                         widget.isMobile ? 44.0 :
+                  height: widget.isSmallMobile ? 32.0 : // Smaller for mobile
+                         widget.isMobile ? 36.0 :
                          widget.isLargeTablet ? 44.0 : 48.0,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -389,30 +389,30 @@ class _StepCardState extends State<StepCard> {
                       ],
                     ),
                     borderRadius: BorderRadius.circular(
-                      widget.isSmallMobile ? 8.0 :
-                      widget.isMobile ? 10.0 :
+                      widget.isSmallMobile ? 6.0 : // Smaller radius
+                      widget.isMobile ? 8.0 :
                       12.0,
                     ),
                     border: Border.all(
-                      color: accentColor.withValues(alpha: 0.3), // Subtle accent border
-                      width: 1.0,
+                      color: accentColor.withValues(alpha: 0.2), // Even more subtle border for mobile
+                      width: 0.8, // Thinner border
                     ),
                   ),
                   child: Icon(
                     _getIcon(widget.step.number, widget.step.title),
                     color: accentColor, // ACCENT COLOR for icon
-                    size: widget.isSmallMobile ? 20.0 :
-                          widget.isMobile ? 22.0 :
+                    size: widget.isSmallMobile ? 16.0 : // Smaller icon for mobile
+                          widget.isMobile ? 18.0 :
                           widget.isLargeTablet ? 22.0 : 24.0,
                   ),
                 ),
                 
-                // Step number - Using accent color
+                // Step number - MINIMIZED for mobile
                 Text(
                   widget.step.number.toString().padLeft(2, '0'),
                   style: TextStyle(
-                    fontSize: widget.isSmallMobile ? 24.0 :
-                             widget.isMobile ? 28.0 :
+                    fontSize: widget.isSmallMobile ? 20.0 : // Smaller for mobile
+                             widget.isMobile ? 22.0 :
                              widget.isLargeTablet ? 28.0 : 30.0,
                     fontWeight: FontWeight.w700,
                     color: accentColor, // ACCENT COLOR for step number
@@ -422,17 +422,17 @@ class _StepCardState extends State<StepCard> {
             ),
 
             SizedBox(
-              height: widget.isSmallMobile ? 12.0 :
-                     widget.isMobile ? 16.0 :
+              height: widget.isSmallMobile ? 8.0 : // Reduced spacing
+                     widget.isMobile ? 10.0 :
                      18.0,
             ),
 
-            // Title - Neutral dark color with green tint
+            // Title - MINIMIZED for mobile
             Text(
               widget.step.title,
               style: TextStyle(
-                fontSize: widget.isSmallMobile ? 16.0 :
-                         widget.isMobile ? 17.0 :
+                fontSize: widget.isSmallMobile ? 14.0 : // Smaller for mobile
+                         widget.isMobile ? 15.0 :
                          widget.isLargeTablet ? 17.0 : 18.0,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF064E3B), // Dark green-gray
@@ -443,22 +443,22 @@ class _StepCardState extends State<StepCard> {
             ),
 
             SizedBox(
-              height: widget.isSmallMobile ? 8.0 :
-                     widget.isMobile ? 10.0 :
+              height: widget.isSmallMobile ? 4.0 : // Reduced spacing
+                     widget.isMobile ? 6.0 :
                      12.0,
             ),
 
-            // Description - Neutral medium gray with green tint
+            // Description - MINIMIZED for mobile
             Expanded(
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 child: Text(
                   widget.step.description,
                   style: TextStyle(
-                    fontSize: widget.isSmallMobile ? 13.5 :
-                             widget.isMobile ? 14.0 :
+                    fontSize: widget.isSmallMobile ? 11.5 : // Much smaller for mobile
+                             widget.isMobile ? 12.0 : // Smaller for mobile
                              widget.isLargeTablet ? 14.0 : 14.5,
-                    height: 1.5,
+                    height: 1.4, // Tighter line height for mobile
                     color: Color(0xFF374151), // Medium gray with green undertone
                   ),
                 ),
@@ -477,11 +477,6 @@ class _StepCardState extends State<StepCard> {
     if (isHarvestStep) {
       // Soil/fertilizer icon for harvest/patabang lupa
       return Icons.grass; // Grass/plant icon for fertile soil
-      // Alternative icons for patabang lupa:
-      // - Icons.spa (plant/spa)
-      // - Icons.park (park/nature)
-      // - Icons.eco (eco/leaf)
-      // - Icons.yard (yard/garden)
     }
     
     switch (stepNumber) {
