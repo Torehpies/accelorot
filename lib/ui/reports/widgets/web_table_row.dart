@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
 import '../../core/widgets/table/table_row.dart';
+import '../../core/widgets/table/table_action_buttons.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/constants/spacing.dart';
@@ -110,21 +111,17 @@ class WebTableRow extends StatelessWidget {
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  color: WebColors.textLabel,
-                  onPressed: onView,
+            child: TableActionButtons(
+              actions: [
+                TableActionButton(
+                  icon: Icons.open_in_new,
                   tooltip: 'View Details',
+                  onPressed: onView,
                 ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(Icons.edit, size: 18),
-                  color: WebColors.textLabel,
-                  onPressed: onEdit,
+                TableActionButton(
+                  icon: Icons.edit_outlined,
                   tooltip: 'Edit Report',
+                  onPressed: onEdit,
                 ),
               ],
             ),
