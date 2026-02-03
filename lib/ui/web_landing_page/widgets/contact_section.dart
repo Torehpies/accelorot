@@ -96,25 +96,32 @@ class ContactSection extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/images/Accel-O-Rot Logo.svg',
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.contain,
-                                    semanticsLabel: 'Accel-O-Rot Logo',
+                              // ✅ UPDATED: Logo with new filename and matching styling
+                              MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () => onNavigateToSection?.call('home'),
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/images/accel-o-rot.svg',
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.contain,
+                                        semanticsLabel: 'Accel-O-Rot Logo',
+                                      ),
+                                      const SizedBox(width: AppSpacing.md),
+                                      Text(
+                                        'Accel-O-Rot',
+                                        style: h2Style.copyWith(
+                                          color: WebColors.buttonsPrimary, 
+                                          fontWeight: FontWeight.w900, 
+                                          fontSize: 24,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: AppSpacing.md),
-                                  Text(
-                                    'Accel-O-Rot',
-                                    style: h2Style.copyWith(
-                                      color: WebColors.buttonsPrimary,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 24,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                               const SizedBox(height: AppSpacing.md),
                               Text(

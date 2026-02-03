@@ -19,7 +19,6 @@ class IntroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Determine layout breakpoints
         final isMobile = constraints.maxWidth < 768;
         final isTablet = constraints.maxWidth >= 768 && constraints.maxWidth < 1024;
         final isDesktop = constraints.maxWidth >= 1024;
@@ -30,13 +29,13 @@ class IntroSection extends StatelessWidget {
               child: Image.asset(
                 'assets/images/bg.png',
                 fit: BoxFit.cover,
-                cacheHeight: 1000,
-                cacheWidth: 1000,
+                cacheHeight: isMobile ? 600 : (isTablet ? 800 : 1200),
+                cacheWidth: isMobile ? 600 : (isTablet ? 1000 : 1800),
               ),
             ),
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.white.withValues(alpha: 0.3), 
               ),
             ),
             Container(
@@ -104,7 +103,7 @@ class IntroSection extends StatelessWidget {
               TextSpan(
                 text: 'Organic Waste\n',
                 style: TextStyle(
-                  color: AppColors.green100.withValues(alpha: 0.8), // FIXED: comma instead of semicolon, proper opacity method
+                  color: AppColors.green100, 
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -119,7 +118,7 @@ class IntroSection extends StatelessWidget {
           'and produce quality compost in just 2 weeks.',
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           style: WebTextStyles.subtitle.copyWith(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: 0.92), 
             fontSize: isMobile ? 14 : (isTablet ? 15 : 16),
             height: 1.6,
           ),
