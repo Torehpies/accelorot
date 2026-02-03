@@ -14,7 +14,8 @@ import '../../../data/models/report.dart';
 import '../view_model/mobile_reports_viewmodel.dart';
 import '../models/mobile_reports_state.dart';
 import '../models/report_filters.dart';
-import '../dialogs/edit_report_modal.dart';
+import '../bottom_sheets/report_view_bottom_sheet.dart';
+import '../bottom_sheets/report_edit_bottom_sheet.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
   const MobileReportsView({super.key});
@@ -40,15 +41,48 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     super.dispose();
   }
 
-  void _showReportDetails(Report report) {
+  // ---------------------------------------------------------------------------
+  // Bottom sheet flow:  tap card → View sheet → Edit button → Edit sheet
+  // ---------------------------------------------------------------------------
+
+  /// Opens the read-only view sheet.
+  void _showReportView(Report report) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => EditReportModal(report: report),
+      builder: (context) => ReportViewBottomSheet(
+        report: report,
+        onEdit: () {
+          // Close view sheet, then open edit sheet
+          Navigator.of(context).pop();
+          // Small delay so the view sheet finishes its exit animation
+          Future.delayed(const Duration(milliseconds: 250), () {
+            if (mounted) _showReportEdit(report);
+          });
+        },
+      ),
     );
   }
 
+  /// Opens the editable sheet (drag & dismiss disabled).
+  void _showReportEdit(Report report) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => ReportEditBottomSheet(
+        report: report,
+        onUpdate: ref.read(mobileReportsViewModelProvider.notifier).updateReport,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Empty state
+  // ---------------------------------------------------------------------------
   EmptyStateConfig _getEmptyStateConfig(MobileReportsState state) {
     String message;
 
@@ -57,7 +91,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     } else if (state.selectedCategory != ReportCategoryFilter.all) {
       message = 'No ${state.selectedCategory.displayName.toLowerCase()} reports';
     } else if (state.selectedPriority != ReportPriorityFilter.all) {
-      message = 'No ${state.selectedPriority.displayName.toLowerCase()} priority reports';
+      message =
+          'No ${state.selectedPriority.displayName.toLowerCase()} priority reports';
     } else {
       message = 'No reports available';
     }
@@ -72,12 +107,17 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
       actionLabel: state.hasActiveFilters ? 'Clear All Filters' : null,
       onAction: state.hasActiveFilters
           ? () {
-              ref.read(mobileReportsViewModelProvider.notifier).clearAllFilters();
+              ref
+                  .read(mobileReportsViewModelProvider.notifier)
+                  .clearAllFilters();
             }
           : null,
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Card builder
+  // ---------------------------------------------------------------------------
   Widget _buildReportCard(BuildContext context, Report report, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -92,11 +132,14 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
         userName: report.userName,
         statusColor: _getStatusColor(report),
         statusTextColor: const Color(0xFF424242),
-        onTap: () => _showReportDetails(report),
+        onTap: () => _showReportView(report),   // ← changed: opens view sheet
       ),
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Icon / colour helpers (unchanged)
+  // ---------------------------------------------------------------------------
   IconData _getReportIcon(Report report) {
     switch (report.reportType.toLowerCase()) {
       case 'maintenance_issue':
@@ -153,6 +196,9 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Main build
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mobileReportsViewModelProvider);

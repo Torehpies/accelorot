@@ -66,7 +66,7 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: _isHovered ? WebColors.hoverBackground : Colors.transparent,
+            color: _isHovered ? WebColors.badgeBackground : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Row(
@@ -174,7 +174,7 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           decoration: BoxDecoration(
-            color: _isHovered ? WebColors.hoverBackground : Colors.transparent,
+            color: _isHovered ? WebColors.badgeBackground : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Column(
@@ -225,7 +225,7 @@ class ReadOnlySection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: WebColors.badgeBackground,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
