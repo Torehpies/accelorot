@@ -104,11 +104,11 @@ class ContactSection extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       SvgPicture.asset(
-                                        'assets/images/accel-o-rot.svg',
-                                        width: 50,
-                                        height: 50,
+                                        'assets/images/Accelorot_logo.svg',
+                                        width: 60,
+                                        height: 60,
                                         fit: BoxFit.contain,
-                                        semanticsLabel: 'Accel-O-Rot Logo',
+                                        semanticsLabel: 'Accelorot_logo',
                                       ),
                                       const SizedBox(width: AppSpacing.md),
                                       Text(

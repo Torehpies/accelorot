@@ -105,11 +105,11 @@ class _AppHeaderState extends State<AppHeader> {
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           child: SvgPicture.asset(
-                            'assets/images/accel-o-rot.svg', // ✅ CHANGED FILENAME
+                            'assets/images/Accelorot_logo.svg',
                             width: logoSize,
                             height: logoSize,
                             fit: BoxFit.contain,
-                            semanticsLabel: 'Accel-O-Rot Logo',
+                            semanticsLabel: 'Accelorot_logo',
                           ),
                         ),
                         if (showAppName) ...[

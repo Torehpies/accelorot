@@ -263,7 +263,7 @@ class _MobileHeaderState extends State<_MobileHeader> {
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
                             child: SvgPicture.asset(
-                              'assets/images/accel-o-rot.svg', // ✅ CHANGED FILENAME
+                              'assets/images/Accelorot_logo.svg',
                               width: 32,
                               height: 32,
                             ),

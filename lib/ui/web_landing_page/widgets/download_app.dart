@@ -5,6 +5,8 @@ import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+
+
 class AppSpacing {
   static const double xs = 8.0;
   static const double sm = 12.0;
@@ -840,11 +842,11 @@ class _AppHeaderState extends State<_AppHeader> {
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           child: SvgPicture.asset(
-                            'assets/images/accel-o-rot.svg',
+                            'assets/images/Accelorot_logo.svg',
                             width: logoSize,
                             height: logoSize,
                             fit: BoxFit.contain,
-                            semanticsLabel: 'Accel-O-Rot Logo',
+                            semanticsLabel: 'Accelorot_logo',
                           ),
                         ),
                         if (showAppName) ...[

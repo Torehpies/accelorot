@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/themes/web_colors.dart';
 
 class TemMoisOxyCard extends StatefulWidget {
   final IconData icon;
@@ -145,33 +146,33 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFDEF9F4).withValues(
-                                alpha: isActive ? 1.0 : 0.9,
+                              WebColors.cardBackground.withValues(
+                                alpha: isActive ? 1.0 : 0.95,
                               ),
-                              const Color(0xFFC0F0E0).withValues(
-                                alpha: isActive ? 0.8 : 0.6,
+                              WebColors.lightGrayBackground.withValues(
+                                alpha: isActive ? 0.9 : 0.7,
                               ),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: Color.lerp(
-                              const Color(0xFFB2DFD3),
-                              const Color(0xFF10B981),
+                              WebColors.cardBorder,
+                              WebColors.textLabel,
                               glowIntensity * 0.3,
                             )!,
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981)
+                              color: WebColors.textLabel
                                   .withValues(alpha: shadowOpacity),
                               blurRadius: shadowBlur,
                               spreadRadius: 1,
                               offset: const Offset(0, 4),
                             ),
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -189,13 +190,13 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                               height: isMobile ? 36 : 44,
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? const Color(0xFF10B981).withValues(alpha: 0.08)
+                                    ? WebColors.info.withValues(alpha: 0.08)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
                                 boxShadow: [
                                   if (isActive)
                                     BoxShadow(
-                                      color: const Color(0xFF10B981).withValues(
+                                      color: WebColors.info.withValues(
                                         alpha: glowIntensity * 0.15,
                                       ),
                                       blurRadius: shadowBlur * 0.6,
@@ -206,14 +207,14 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                               child: Icon(
                                 widget.icon,
                                 size: iconSize,
-                                color: const Color(0xFF10B981),
+                                color: WebColors.info,
                               ),
                             ),
                             SizedBox(height: isMobile ? AppSpacing.sm : AppSpacing.md),
                             Text(
                               widget.value,
                               style: WebTextStyles.h2.copyWith(
-                                color: const Color(0xFF111827),
+                                color: WebColors.textPrimary,
                                 fontSize: valueSize,
                                 fontWeight: FontWeight.bold,
                                 height: 1.0,
@@ -223,7 +224,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                             Text(
                               widget.label,
                               style: WebTextStyles.caption.copyWith(
-                                color: const Color(0xFF6B7280),
+                                color: WebColors.textLabel,
                                 fontSize: labelSize,
                               ),
                             ),
@@ -244,7 +245,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                                           child: Text(
                                             widget.hoverInfo!,
                                             style: WebTextStyles.caption.copyWith(
-                                              color: const Color(0xFF6B7280),
+                                              color: WebColors.textMuted,
                                               fontSize: hoverInfoSize,
                                               height: 1.4,
                                             ),
