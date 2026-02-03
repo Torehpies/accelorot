@@ -29,7 +29,7 @@ enum RoutePath {
   superAdminTeams(path: '/superadmin/teams'),
   superAdminMachines(path: '/superadmin/machines'),
   superAdminProfile(path: '/superadmin/profile'),
-  
+
   // settings
   operatorSettings(path: '/operator/settings'),
   adminSettings(path: '/admin/settings'),

@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
+import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
-import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
-import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_row.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PendingMembersTab extends ConsumerStatefulWidget {
-  const PendingMembersTab({super.key});
+  final TabController tabController;
+
+  const PendingMembersTab({super.key, required this.tabController});
 
   @override
   ConsumerState<PendingMembersTab> createState() => _PendingMembersTabState();
@@ -24,139 +33,234 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     final state = ref.watch(pendingMembersProvider);
     final notifier = ref.read(pendingMembersProvider.notifier);
 
-    return Column(
-      children: [
-        Expanded(
-          child: _TableContent(state: state, notifier: notifier),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10),
+    final pageCount = state.hasNextPage
+        ? state.currentPage + 2
+        : state.currentPage + 1;
 
-          child: _PaginationSection(
-            currentPage: state.currentPage,
+    return BaseTableContainer(
+      // ── Left header: tab switcher (same controller, shared with TeamMembersTab) ──
+      leftHeaderWidget: TabsRow(controller: widget.tabController),
 
-            hasNextPage: state.hasNextPage,
-
-            notifier: notifier,
+      // ── Right header: date filter, search, add button ──
+      rightHeaderWidgets: [
+        SizedBox(
+          height: 32,
+          child: DateFilterDropdown(
+            isLoading: state.isLoading,
+            onFilterChanged: (filter) {
+              ref
+                  .read(operatorsDateFilterProvider.notifier)
+                  .setFilter(filter);
+            },
           ),
         ),
-
-        const SizedBox(height: 12),
+        SearchField(
+          isLoading: state.isLoading,
+          onChanged: (query) => notifier.setSearch(query),
+        ),
+        Tooltip(
+          message: 'Add Operator',
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Operator'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
       ],
-    );
-  }
-}
 
-class _TableContent extends StatelessWidget {
-  final PendingMembersState state;
-  final PendingMembersNotifier notifier;
-
-  const _TableContent({required this.state, required this.notifier});
-
-  @override
-  Widget build(BuildContext context) {
-    final isTablet =
-        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
-        MediaQuery.of(context).size.width < kDesktopBreakpoint;
-
-    if (state.isLoading && state.filteredMembers.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.filteredMembers.isEmpty && !state.isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No pending members found'),
-          ],
-        ),
-      );
-    }
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(width: 1, color: AppColors.grey),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Column(
-          children: [
-            // _StickyHeader(),
-            StickyHeader(
-              labels: [
-                'First Name',
-                'Last Name',
-                'Email',
-                'Requested At',
-                'Actions',
-              ],
-              flexValues: [isTablet ? 1 : 2, isTablet ? 1 : 2, 3, 2, 1],
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+      // ── Table header: sortable columns ──
+      tableHeader: TableHeader(
+        isLoading: state.isLoading,
+        columns: [
+          TableCellWidget(
+            flex: 2,
+            child: TableHeaderCell(
+              label: 'First Name',
+              sortable: true,
+              sortColumn: 'firstName',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('firstName'),
             ),
-            Expanded(
-              child: _MembersList(state: state, notifier: notifier),
+          ),
+          TableCellWidget(
+            flex: 2,
+            child: TableHeaderCell(
+              label: 'Last Name',
+              sortable: true,
+              sortColumn: 'lastName',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('lastName'),
             ),
-          ],
+          ),
+          TableCellWidget(
+            flex: 3,
+            child: TableHeaderCell(
+              label: 'Email',
+              sortable: true,
+              sortColumn: 'email',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('email'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 2,
+            child: TableHeaderCell(
+              label: 'Requested At',
+              sortable: true,
+              sortColumn: 'requestedAt',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('requestedAt'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 1,
+            child: const TableHeaderCell(label: 'Actions'),
+          ),
+        ],
+      ),
+
+      // ── Table body: rows + skeleton + empty state ──
+      tableBody: TableBody<PendingMember>(
+        items: state.filteredMembers,
+        isLoading: state.isLoading && state.members.isEmpty,
+        emptyStateWidget: const EmptyState(
+          title: 'No pending members found',
+          subtitle: 'Try adjusting your filters or search',
+          icon: Icons.person_search,
         ),
+        rowBuilder: (member) => PendingMemberRow(
+          member: member,
+          notifier: notifier,
+        ),
+        skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
-    );
-  }
-}
 
-class _MembersList extends StatelessWidget {
-  final PendingMembersState state;
-  final PendingMembersNotifier notifier;
-
-  const _MembersList({required this.state, required this.notifier});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: state.filteredMembers.length,
-      itemBuilder: (context, index) => PendingMemberRow(
-        member: state.filteredMembers[index],
-        notifier: notifier,
-      ),
-    );
-  }
-}
-
-class _PaginationSection extends ConsumerWidget {
-  final int currentPage;
-  final bool hasNextPage;
-  final PendingMembersNotifier notifier;
-
-  const _PaginationSection({
-    required this.currentPage,
-    required this.hasNextPage,
-    required this.notifier,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pageSize = ref.watch(pendingMembersProvider).pageSize;
-    final isLoading = ref.watch(pendingMembersProvider).isLoading;
-    final pageCount = hasNextPage ? currentPage + 2 : currentPage + 1;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: PaginationControls(
-        currentPage: currentPage + 1,
+      // ── Pagination ──
+      paginationWidget: PaginationControls(
+        currentPage: state.currentPage + 1,
         totalPages: pageCount,
-        itemsPerPage: pageSize,
-        isLoading: isLoading,
+        itemsPerPage: state.pageSize,
+        isLoading: state.isLoading,
         onPageChanged: (page) => notifier.goToPage(page - 1),
         onItemsPerPageChanged: notifier.setPageSize,
       ),
+    );
+  }
+}
+
+// ── Skeleton row matching [2, 2, 3, 2, 1] column layout ──
+Widget _buildSkeletonRow() {
+  return GenericTableRow(
+    cellSpacing: AppSpacing.md,
+    cells: [
+      // First Name
+      TableCellWidget(
+        flex: 2,
+        child: Center(child: _SkeletonBox(width: 100, height: 16)),
+      ),
+      // Last Name
+      TableCellWidget(
+        flex: 2,
+        child: Center(child: _SkeletonBox(width: 100, height: 16)),
+      ),
+      // Email
+      TableCellWidget(
+        flex: 3,
+        child: Center(child: _SkeletonBox(width: 180, height: 16)),
+      ),
+      // Requested At — date text block
+      TableCellWidget(
+        flex: 2,
+        child: Center(child: _SkeletonBox(width: 130, height: 16)),
+      ),
+      // Action icons (accept + decline)
+      TableCellWidget(
+        flex: 1,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(width: 24, height: 24, borderRadius: 12),
+              const SizedBox(width: 4),
+              _SkeletonBox(width: 24, height: 24, borderRadius: 12),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Simple pulsing skeleton box — matches the animation pattern used across the app
+class _SkeletonBox extends StatefulWidget {
+  final double width;
+  final double height;
+  final double borderRadius;
+
+  const _SkeletonBox({
+    required this.width,
+    required this.height,
+    this.borderRadius = 6,
+  });
+
+  @override
+  State<_SkeletonBox> createState() => _SkeletonBoxState();
+}
+
+class _SkeletonBoxState extends State<_SkeletonBox>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (context, child) {
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              WebColors.skeletonLoader,
+              WebColors.tableBorder,
+              _anim.value,
+            ),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          ),
+        );
+      },
     );
   }
 }
