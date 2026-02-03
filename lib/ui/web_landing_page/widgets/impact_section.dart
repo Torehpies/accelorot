@@ -24,6 +24,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
   late AnimationController _swipeAnimationController;
   late Animation<double> _swipeAnimation;
   final Map<String, bool> _impactItemHover = {};
+  
+  // Map for impact item descriptions
+  final Map<String, String> _impactDescriptions = {
+    'Reduces landfill waste': 'Addresses the pressing environmental concern in the Philippines where over 50% of municipal solid waste is organic. Prevents methane emissions from landfills that contribute to climate change.',
+    'Produces nutrient-rich compost': 'Transforms organic waste into high-quality compost through accelerated decomposition. Improves soil health and reduces need for chemical fertilizers in agriculture.',
+    'Empowers communities': 'Supports Republic Act 9003 implementation by providing accessible composting technology. Reduces manual labor and makes sustainable waste management practical for households and communities.',
+  };
 
   @override
   void initState() {
@@ -36,6 +43,11 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       parent: _swipeAnimationController,
       curve: Curves.easeInOut,
     );
+    
+    // Initialize hover states
+    _impactItemHover['Reduces landfill waste'] = false;
+    _impactItemHover['Produces nutrient-rich compost'] = false;
+    _impactItemHover['Empowers communities'] = false;
   }
 
   @override
@@ -49,7 +61,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     
     _swipeAnimationController.forward(from: 0).then((_) {
       setState(() {
-        _currentExpandedInfo = (_currentExpandedInfo + 1) % 3;
+        _currentExpandedInfo = (_currentExpandedInfo + 1) % 4;
       });
     });
   }
@@ -101,8 +113,10 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     }
   }
 
-  // ===================== MOBILE LAYOUT (<600px) - MINIMIZED =====================
+  // ===================== MOBILE LAYOUT (<600px) =====================
   Widget _buildMobileLayout(BuildContext context, double screenWidth) {
+    final isSmallMobile = screenWidth < 400;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -110,7 +124,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
           'MAKING A SUSTAINABLE IMPACT',
           textAlign: TextAlign.center,
           style: WebTextStyles.h2.copyWith(
-            fontSize: screenWidth < 400 ? 20 : 22,
+            fontSize: isSmallMobile ? 26 : 28,
             fontWeight: FontWeight.w700,
             color: WebColors.textTitle,
           ),
@@ -122,7 +136,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
             textAlign: TextAlign.center,
             style: WebTextStyles.sectionSubtitle.copyWith(
-              fontSize: screenWidth < 400 ? 10 : 11,
+              fontSize: isSmallMobile ? 14 : 15,
               height: 1.4,
             ),
           ),
@@ -137,9 +151,9 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             child: Column(
               children: [
                 _buildMobileImpactItem(Icons.delete_outline, 'Reduces landfill waste', screenWidth),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 _buildMobileImpactItem(Icons.restaurant_outlined, 'Produces nutrient-rich compost', screenWidth),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 _buildMobileImpactItem(Icons.eco_outlined, 'Empowers communities', screenWidth),
               ],
             ),
@@ -148,7 +162,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
         const SizedBox(height: AppSpacing.lg),
 
-        // MINIMIZED Grid for mobile
+        // Grid for mobile
         _buildMobileGrid(screenWidth),
       ],
     );
@@ -156,6 +170,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
   Widget _buildMobileImpactItem(IconData icon, String text, double screenWidth) {
     final isHovered = _impactItemHover[text] ?? false;
+    final isSmallMobile = screenWidth < 400;
     
     return MouseRegion(
       onEnter: (_) => _safeSetState(() => _impactItemHover[text] = true),
@@ -165,14 +180,14 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         curve: Curves.easeInOut,
         width: double.infinity,
         padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 6 : 5,
-          horizontal: 8,
+          vertical: isHovered ? 12 : 10,
+          horizontal: 12,
         ),
         decoration: BoxDecoration(
           color: isHovered 
             ? const Color.fromARGB(15, 118, 230, 207)
             : Colors.white,
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isHovered 
               ? WebColors.greenLight
@@ -187,38 +202,61 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ] : null,
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(38, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 8,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(38, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 12,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: isSmallMobile ? 14 : 15,
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 400 ? 8 : 9,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            // Description on hover for mobile
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.only(left: 32.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: isSmallMobile ? 10 : 11,
+                    color: const Color(0xFF666666),
+                    height: 1.3,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -230,17 +268,19 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       return const SizedBox();
     }
     
+    final isSmallMobile = screenWidth < 400;
+    
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: screenWidth < 400 ? 0 : AppSpacing.xs),
+      padding: EdgeInsets.symmetric(horizontal: screenWidth < 400 ? 0 : AppSpacing.sm),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.xs,
-          crossAxisSpacing: AppSpacing.xs,
-          childAspectRatio: screenWidth < 400 ? 1.1 : 1.2,
+          mainAxisSpacing: AppSpacing.sm,
+          crossAxisSpacing: AppSpacing.sm,
+          childAspectRatio: isSmallMobile ? 1.1 : 1.2,
         ),
         itemCount: widget.stats.length,
         itemBuilder: (context, index) {
@@ -251,6 +291,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
   }
 
   Widget _buildMobileStatCard(int index, ImpactStatModel stat, double screenWidth) {
+    final isSmallMobile = screenWidth < 400;
     final row = index ~/ 2;
     final col = index % 2;
     final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
@@ -260,12 +301,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       onEnter: (_) => _safeSetState(() => _expandedIndex = index),
       onExit: (_) => _safeSetState(() => _expandedIndex = null),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: isGreen 
             ? const Color.fromARGB(255, 74, 211, 126)
             : Colors.white,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isHovered
               ? (isGreen ? Colors.transparent : WebColors.greenLight)
@@ -275,20 +317,20 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
           boxShadow: isHovered ? [
             BoxShadow(
               color: const Color.fromARGB(20, 0, 0, 0),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ] : [
             BoxShadow(
               color: const Color.fromARGB(10, 0, 0, 0),
-              blurRadius: 3,
+              blurRadius: 4,
               offset: const Offset(0, 1),
             ),
           ],
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(4.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -301,32 +343,50 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         stat.value,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: screenWidth < 400 ? 18 : 20,
+                          fontSize: isSmallMobile ? 28 : 32,
                           fontWeight: FontWeight.w800,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                           height: 0.9,
                         ),
                       ),
-                      const SizedBox(height: 1),
+                      const SizedBox(height: 2),
                       Text(
                         'weeks',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: screenWidth < 400 ? 12 : 14,
+                          fontSize: isSmallMobile ? 20 : 22,
                           fontWeight: FontWeight.w600,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         'Composting Time',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 7,
+                          fontSize: isSmallMobile ? 11 : 12,
                           fontWeight: FontWeight.w500,
                           color: isGreen ? Colors.white : const Color(0xFF666666),
                         ),
                       ),
+                      // Additional info on hover for mobile
+                      if (isHovered) ...[
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                          child: Text(
+                            _getMobileStatDescription(index, stat),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallMobile ? 9 : 10,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   )
                 else
@@ -337,27 +397,45 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         stat.value,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: screenWidth < 400 ? 16 : 18,
+                          fontSize: isSmallMobile ? 24 : 28,
                           fontWeight: FontWeight.w800,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 6),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
                         child: Text(
                           stat.label,
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 7,
+                            fontSize: isSmallMobile ? 11 : 12,
                             fontWeight: FontWeight.w500,
                             color: isGreen ? Colors.white : const Color(0xFF666666),
                             height: 1.1,
                           ),
                         ),
                       ),
+                      // Additional info on hover for mobile
+                      if (isHovered) ...[
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            _getMobileStatDescription(index, stat),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallMobile ? 9 : 10,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.2,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -368,8 +446,10 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     );
   }
 
-  // ===================== TABLET LAYOUT (600-1024px) - MINIMIZED =====================
+  // ===================== TABLET LAYOUT (600-1024px) =====================
   Widget _buildTabletLayout(BuildContext context, double screenWidth) {
+    final isSmallTablet = screenWidth < 800;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -377,7 +457,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
           'Making a Sustainable Impact',
           textAlign: TextAlign.center,
           style: WebTextStyles.h2.copyWith(
-            fontSize: screenWidth < 800 ? 24 : 26,
+            fontSize: isSmallTablet ? 32 : 34,
             fontWeight: FontWeight.w700,
             color: WebColors.textTitle,
           ),
@@ -389,7 +469,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
             textAlign: TextAlign.center,
             style: WebTextStyles.sectionSubtitle.copyWith(
-              fontSize: screenWidth < 800 ? 12 : 13,
+              fontSize: isSmallTablet ? 16 : 17,
               height: 1.5,
             ),
           ),
@@ -399,14 +479,14 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: screenWidth < 800 ? 450 : 500,
+              maxWidth: screenWidth < 800 ? 500 : 550,
             ),
             child: Column(
               children: [
                 _buildTabletImpactItem(Icons.delete_outline, 'Reduces landfill waste', screenWidth),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 _buildTabletImpactItem(Icons.restaurant_outlined, 'Produces nutrient-rich compost', screenWidth),
-                const SizedBox(height: 6),
+                const SizedBox(height: 10),
                 _buildTabletImpactItem(Icons.eco_outlined, 'Empowers communities', screenWidth),
               ],
             ),
@@ -415,7 +495,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
         const SizedBox(height: AppSpacing.lg),
 
-        // MINIMIZED Grid for tablet
+        // Grid for tablet
         _buildTabletGrid(screenWidth),
       ],
     );
@@ -423,6 +503,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
   Widget _buildTabletImpactItem(IconData icon, String text, double screenWidth) {
     final isHovered = _impactItemHover[text] ?? false;
+    final isSmallTablet = screenWidth < 800;
     
     return MouseRegion(
       onEnter: (_) => _safeSetState(() => _impactItemHover[text] = true),
@@ -432,14 +513,14 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         curve: Curves.easeInOut,
         width: double.infinity,
         padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 8 : 7,
-          horizontal: 10,
+          vertical: isHovered ? 16 : 14,
+          horizontal: 16,
         ),
         decoration: BoxDecoration(
           color: isHovered 
             ? const Color.fromARGB(15, 118, 230, 207)
             : Colors.white,
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isHovered 
               ? WebColors.greenLight
@@ -454,38 +535,61 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ] : null,
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 10,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(51, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 14,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: isSmallTablet ? 14 : 15,
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 800 ? 10 : 11,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            // Description on hover for tablet
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: isSmallTablet ? 12 : 13,
+                    color: const Color(0xFF666666),
+                    height: 1.4,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -497,16 +601,18 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       return const SizedBox();
     }
     
+    final isSmallTablet = screenWidth < 800;
+    
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: screenWidth < 800 ? AppSpacing.sm : AppSpacing.md),
+      padding: EdgeInsets.symmetric(horizontal: screenWidth < 800 ? AppSpacing.md : AppSpacing.lg),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.sm,
-          crossAxisSpacing: AppSpacing.sm,
-          childAspectRatio: screenWidth < 800 ? 1.3 : 1.4,
+          mainAxisSpacing: AppSpacing.md,
+          crossAxisSpacing: AppSpacing.md,
+          childAspectRatio: isSmallTablet ? 1.3 : 1.4,
         ),
         itemCount: widget.stats.length,
         itemBuilder: (context, index) {
@@ -517,6 +623,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
   }
 
   Widget _buildTabletStatCard(int index, ImpactStatModel stat, double screenWidth) {
+    final isSmallTablet = screenWidth < 800;
     final row = index ~/ 2;
     final col = index % 2;
     final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
@@ -526,12 +633,13 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
       onEnter: (_) => _safeSetState(() => _expandedIndex = index),
       onExit: (_) => _safeSetState(() => _expandedIndex = null),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
           color: isGreen 
             ? const Color.fromARGB(255, 74, 211, 126)
             : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isHovered
               ? (isGreen ? Colors.transparent : WebColors.greenLight)
@@ -542,19 +650,19 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             BoxShadow(
               color: const Color.fromARGB(25, 0, 0, 0),
               blurRadius: 10,
-              offset: const Offset(0, 3),
+              offset: const Offset(0, 4),
             ),
           ] : [
             BoxShadow(
               color: const Color.fromARGB(15, 0, 0, 0),
-              blurRadius: 5,
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(6.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -567,32 +675,50 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         stat.value,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: isSmallTablet ? 36 : 40,
                           fontWeight: FontWeight.w800,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                           height: 0.9,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         'weeks',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: isSmallTablet ? 28 : 30,
                           fontWeight: FontWeight.w600,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 6),
                       Text(
                         'Composting Time',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: isSmallTablet ? 14 : 15,
                           fontWeight: FontWeight.w500,
                           color: isGreen ? Colors.white : const Color(0xFF666666),
                         ),
                       ),
+                      // Additional info on hover for tablet
+                      if (isHovered) ...[
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text(
+                            _getTabletStatDescription(index, stat),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallTablet ? 12 : 13,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.3,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   )
                 else
@@ -602,27 +728,45 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                       Text(
                         stat.value,
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: isSmallTablet ? 34 : 38,
                           fontWeight: FontWeight.w800,
                           color: isGreen ? Colors.white : WebColors.textTitle,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Text(
                           stat.label,
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: isSmallTablet ? 14 : 15,
                             fontWeight: FontWeight.w500,
                             color: isGreen ? Colors.white : const Color(0xFF666666),
                             height: 1.1,
                           ),
                         ),
                       ),
+                      // Additional info on hover for tablet
+                      if (isHovered) ...[
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text(
+                            _getTabletStatDescription(index, stat),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: isSmallTablet ? 12 : 13,
+                              color: isGreen ? Colors.white : const Color(0xFF888888),
+                              height: 1.3,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
               ],
@@ -642,7 +786,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     }
     
     return SizedBox(
-      height: 500,
+      height: 420,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -699,17 +843,17 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ),
 
-          // Right side: 4 stat cards - MOVED TO LEFT
+          // Right side: 4 stat cards
           Expanded(
             flex: isLargeDesktop ? 5 : 4,
             child: Padding(
               padding: EdgeInsets.only(
-                left: AppSpacing.md, // Reduced left padding to move cards left
-                right: isLargeDesktop ? AppSpacing.xxxl * 2 : AppSpacing.xxl * 2, // Increased right padding
+                left: AppSpacing.md,
+                right: isLargeDesktop ? AppSpacing.xxxl * 2 : AppSpacing.xxl * 2,
               ),
               child: SizedBox(
                 width: isLargeDesktop ? 460 : 420,
-                height: 420,
+                height: 350,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -769,40 +913,62 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             ),
           ],
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: isHovered ? 28 : 26,
-              height: isHovered ? 28 : 26,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Icon(
-                icon,
-                size: isHovered ? 16 : 14,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: isHovered ? 28 : 26,
+                  height: isHovered ? 28 : 26,
+                  decoration: BoxDecoration(
+                    color: isHovered
+                      ? WebColors.greenLight
+                      : const Color.fromARGB(51, 40, 168, 90),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: isHovered ? 16 : 14,
+                    color: isHovered 
+                      ? Colors.white 
+                      : const Color(0xFF28A85A),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: isHovered 
+                        ? (screenWidth > 1440 ? 14 : 13)
+                        : (screenWidth > 1440 ? 13 : 12),
+                      fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
+                      color: isHovered 
+                        ? WebColors.textTitle
+                        : const Color(0xFF444444),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: isHovered 
-                    ? (screenWidth > 1440 ? 14 : 13)
-                    : (screenWidth > 1440 ? 13 : 12),
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+            if (isHovered && _impactDescriptions.containsKey(text)) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 38.0),
+                child: Text(
+                  _impactDescriptions[text]!,
+                  style: TextStyle(
+                    fontSize: screenWidth > 1440 ? 11 : 10,
+                    color: const Color(0xFF666666),
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -863,98 +1029,115 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     final col = index % 2;
     final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
 
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: isGreen 
-          ? const Color.fromARGB(255, 74, 211, 126)
-          : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isGreen ? Colors.transparent : const Color(0xFFE0E0E0),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(25, 0, 0, 0),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+    return MouseRegion(
+      onEnter: (_) => _safeSetState(() => _expandedIndex = index),
+      onExit: (_) => _safeSetState(() => _expandedIndex = null),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: 130,
+        decoration: BoxDecoration(
+          color: isGreen 
+            ? const Color.fromARGB(255, 74, 211, 126)
+            : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isGreen ? Colors.transparent : const Color(0xFFE0E0E0),
+            width: 1.5,
           ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (stat.label.toLowerCase().contains('week'))
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                      height: 0.9,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'weeks',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w600,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Composting Time',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isGreen ? Colors.white : const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text(
-                      stat.label,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isGreen ? Colors.white : const Color(0xFF666666),
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(25, 0, 0, 0),
+              blurRadius: 10,
+              spreadRadius: 1,
+              offset: Offset(0, 4),
+            ),
           ],
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (stat.label.toLowerCase().contains('week'))
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          stat.value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: isGreen ? Colors.white : WebColors.textTitle,
+                            height: 0.9,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'weeks',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: isGreen ? Colors.white : WebColors.textTitle,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Composting Time',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isGreen ? Colors.white : const Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          stat.value,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: isGreen ? Colors.white : WebColors.textTitle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                        child: Text(
+                          stat.label,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isGreen ? Colors.white : const Color(0xFF666666),
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -987,6 +1170,11 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         'title': 'Smart Technology',
         'description': 'Our IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring and automated adjustments for optimal composting conditions and efficiency.'
       },
+      {
+        'icon': Icons.security_outlined,
+        'title': 'Safe & Quality Container',
+        'description': 'Our containers are designed with food-grade materials that prevent contamination and ensure hygienic composting conditions. Built with durable, corrosion-resistant components that maintain structural integrity while containing odors and pathogens effectively.'
+      },
     ];
 
     return MouseRegion(
@@ -1002,18 +1190,18 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
             final currentInfo = expandedInfos[_currentExpandedInfo];
             
             return Transform.translate(
-              offset: Offset(0, -20 * math.sin(_swipeAnimation.value * math.pi)),
+              offset: Offset(0, -8 * math.sin(_swipeAnimation.value * math.pi)),
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 200),
                 opacity: 1.0 - (_swipeAnimation.value * 0.3),
                 child: Container(
                   width: double.infinity,
-                  height: 420,
+                  height: 340,
                   decoration: BoxDecoration(
                     color: isGreen 
                       ? const Color.fromARGB(255, 74, 211, 126)
                       : Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isGreen ? Colors.transparent : WebColors.greenLight,
                       width: 2.0,
@@ -1021,21 +1209,22 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                     boxShadow: [
                       BoxShadow(
                         color: const Color.fromARGB(35, 0, 0, 0),
-                        blurRadius: 18,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 6),
+                        blurRadius: 16,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 55,
-                          height: 55,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Icon section
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Container(
+                          width: 44,
+                          height: 44,
                           decoration: BoxDecoration(
                             color: isGreen 
                               ? const Color.fromARGB(90, 255, 255, 255)
@@ -1043,153 +1232,175 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isGreen ? Colors.white : WebColors.greenLight,
-                              width: 1.8,
+                              width: 1.5,
                             ),
                           ),
                           child: Icon(
                             currentInfo['icon'] as IconData,
-                            size: 26,
+                            size: 20,
                             color: isGreen ? Colors.white : WebColors.greenLight,
                           ),
                         ),
-                        const SizedBox(height: 18),
-                        
-                        if (stat.label.toLowerCase().contains('week'))
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                stat.value,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                  height: 0.9,
-                                ),
+                      ),
+                      
+                      // Stat value section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (stat.label.toLowerCase().contains('week'))
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      stat.value,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: isLargeDesktop ? 32 : 28,
+                                        fontWeight: FontWeight.w800,
+                                        color: isGreen ? Colors.white : WebColors.textTitle,
+                                        height: 0.9,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'weeks',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isLargeDesktop ? 22 : 20,
+                                      fontWeight: FontWeight.w600,
+                                      color: isGreen ? Colors.white : WebColors.textTitle,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Composting Time',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isLargeDesktop ? 13 : 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isGreen ? Colors.white : WebColors.textTitle,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      stat.value,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: isLargeDesktop ? 32 : 28,
+                                        fontWeight: FontWeight.w800,
+                                        color: isGreen ? Colors.white : WebColors.textTitle,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    stat.label,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: isLargeDesktop ? 13 : 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isGreen ? Colors.white : WebColors.textTitle,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'weeks',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 32 : 28,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                'Composting Time',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 18 : 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              Text(
-                                stat.value,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                stat.label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 18 : 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        
-                        const SizedBox(height: 18),
-                        
-                        Divider(
+                          ],
+                        ),
+                      ),
+                      
+                      // Divider
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                        child: Divider(
                           color: isGreen 
                             ? const Color.fromARGB(120, 255, 255, 255)
                             : const Color(0xFFE0E0E0),
-                          thickness: 1.5,
+                          thickness: 1.0,
                         ),
-                        
-                        const SizedBox(height: 18),
-                        
-                        Text(
+                      ),
+                      
+                      // Title section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
                           currentInfo['title'],
                           textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: isLargeDesktop ? 20 : 18,
+                            fontSize: isLargeDesktop ? 15 : 14,
                             fontWeight: FontWeight.w700,
                             color: isGreen ? Colors.white : WebColors.textTitle,
                           ),
                         ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        Expanded(
+                      ),
+                      
+                      // Description section - now with fixed height and proper scrolling
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                           child: SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
                             child: Text(
                               currentInfo['description'],
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: isLargeDesktop ? 14 : 13,
+                                fontSize: isLargeDesktop ? 12 : 11,
                                 fontWeight: FontWeight.normal,
                                 color: isGreen 
                                   ? const Color.fromARGB(230, 255, 255, 255)
                                   : const Color(0xFF666666),
-                                height: 1.6,
+                                height: 1.4,
                               ),
                             ),
                           ),
                         ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(3, (i) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              width: i == _currentExpandedInfo ? 24 : 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: i == _currentExpandedInfo 
-                                  ? (isGreen ? Colors.white : WebColors.greenLight)
-                                  : (isGreen 
-                                      ? const Color.fromARGB(100, 255, 255, 255)
-                                      : const Color(0xFFE0E0E0)),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            );
-                          }),
+                      ),
+                      
+                      // Navigation dots and instruction
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(4, (i) {
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                                  width: i == _currentExpandedInfo ? 16 : 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: i == _currentExpandedInfo 
+                                      ? (isGreen ? Colors.white : WebColors.greenLight)
+                                      : (isGreen 
+                                          ? const Color.fromARGB(100, 255, 255, 255)
+                                          : const Color(0xFFE0E0E0)),
+                                    borderRadius: BorderRadius.circular(2.5),
+                                  ),
+                                );
+                              }),
+                            ),
+                            const SizedBox(height: 4),
+                          
+                          ],
                         ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        Text(
-                          'Click to see more • Hover off to collapse',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isGreen 
-                              ? const Color.fromARGB(180, 255, 255, 255)
-                              : const Color(0xFF999999),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -1198,6 +1409,70 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         ),
       ),
     );
+  }
+
+  // Helper method to get mobile stat description - FIXED with correct descriptions
+  String _getMobileStatDescription(int index, ImpactStatModel stat) {
+    // First, try to determine the description based on the stat content
+    if (stat.label.toLowerCase().contains('week') || stat.value == '2') {
+      // This is the 2-week composting container
+      return 'Traditional composting takes months. Our technology accelerates the process significantly.';
+    } else if (stat.label.toLowerCase().contains('waste') || stat.value.contains('50%')) {
+      // This is the 50% organic waste container
+      return 'Biodegradable waste makes up over half of all municipal solid waste in the Philippines.';
+    } else if (stat.label.toLowerCase().contains('operation') || stat.label.toLowerCase().contains('24/7')) {
+      // This is the 24/7 operation container
+      return 'Our system operates with minimal human intervention, automating the composting process.';
+    } else if (stat.label.toLowerCase().contains('efficiency') || stat.value.contains('100%')) {
+      // This is the efficiency/safe container container
+      return 'IoT technology provides real-time monitoring and adjustments for optimal composting.';
+    }
+    
+    // Fallback based on index if content doesn't match
+    switch (index) {
+      case 0: // Top-left (green) - should be 50% organic waste
+        return 'Biodegradable waste makes up over half of all municipal solid waste in the Philippines.';
+      case 1: // Top-right (white) - should be 2-week composting
+        return 'Traditional composting takes months. Our technology accelerates the process significantly.';
+      case 2: // Bottom-left (white) - should be 24/7 operation
+        return 'Our system operates with minimal human intervention, automating the composting process.';
+      case 3: // Bottom-right (green) - should be efficiency/safe container
+        return 'IoT technology provides real-time monitoring and adjustments for optimal composting.';
+      default:
+        return 'Sustainable waste management solution for communities.';
+    }
+  }
+
+  // Helper method to get tablet stat description - FIXED with correct descriptions
+  String _getTabletStatDescription(int index, ImpactStatModel stat) {
+    // First, try to determine the description based on the stat content
+    if (stat.label.toLowerCase().contains('week') || stat.value == '2') {
+      // This is the 2-week composting container
+      return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
+    } else if (stat.label.toLowerCase().contains('waste') || stat.value.contains('50%')) {
+      // This is the 50% organic waste container
+      return 'Over 50% of municipal solid waste is organic material that can be composted instead of going to landfills.';
+    } else if (stat.label.toLowerCase().contains('operation') || stat.label.toLowerCase().contains('24/7')) {
+      // This is the 24/7 operation container
+      return 'IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring.';
+    } else if (stat.label.toLowerCase().contains('efficiency') || stat.value.contains('100%')) {
+      // This is the efficiency/safe container container
+      return 'Smart technology automates temperature, moisture, and aeration for optimal composting conditions.';
+    }
+    
+    // Fallback based on index if content doesn't match
+    switch (index) {
+      case 0: // Top-left (green) - should be 50% organic waste
+        return 'Over 50% of municipal solid waste is organic material that can be composted instead of going to landfills.';
+      case 1: // Top-right (white) - should be 2-week composting
+        return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
+      case 2: // Bottom-left (white) - should be 24/7 operation
+        return 'IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring.';
+      case 3: // Bottom-right (green) - should be efficiency/safe container
+        return 'Smart technology automates temperature, moisture, and aeration for optimal composting conditions.';
+      default:
+        return 'Sustainable waste management solution that empowers communities and reduces environmental impact.';
+    }
   }
 
   void _safeSetState(VoidCallback callback) {

@@ -86,7 +86,7 @@ class LandingPageViewModel extends ChangeNotifier {
     number: 4,
     title: 'Harvest Quality Compost',
     description:
-        'In just 14–21 days, collect mature, nutrient-rich compost safe for gardens and agriculture.',
+        'In just 14 days, collect mature, nutrient-rich compost safe for gardens and agriculture.',
     icon: Icons.auto_awesome_outlined,
     accentColor: const Color(0xFF22C55E),
   ),

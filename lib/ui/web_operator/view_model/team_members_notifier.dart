@@ -97,6 +97,22 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     _loadPage(0);
   }
 
+  // ===== SORT =====
+
+  void onSort(String column) {
+    final isAscending =
+        state.sortColumn == column ? !state.sortAscending : true;
+
+    state = state.copyWith(
+      sortColumn: column,
+      sortAscending: isAscending,
+    );
+
+    _applyFilters();
+  }
+
+  // ===== UPDATE =====
+
   Future<void> updateOperator(EditOperatorForm form) async {
     state = state.copyWith(isLoading: true);
     try {
@@ -117,6 +133,8 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         return m;
       }).toList();
 
+      final updatedFilteredMembers = _applySearchAndSort(updatedMembers);
+
       final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
         ..[state.currentPage] = updatedMembers;
 
@@ -135,6 +153,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       state = state.copyWith(
         pagesByIndex: updatedPages,
         members: updatedMembers,
+        filteredMembers: updatedFilteredMembers,
         items: updatedItems,
         lastFetchedAt: DateTime.now(),
       );
@@ -162,10 +181,14 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     }
   }
 
+  // ===== CACHE =====
+
   bool _isCacheFresh(DateTime? lastFetchedAt) {
     if (lastFetchedAt == null) return false;
     return DateTime.now().difference(lastFetchedAt) < _cacheTtl;
   }
+
+  // ===== PAGING =====
 
   Future<void> _loadPage(int pageIndex) async {
     if (state.isLoading) return;
@@ -185,7 +208,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
-      final filteredMembers = _applySearchFilter(cachedPage);
+      final filteredMembers = _applySearchAndSort(cachedPage);
       final newItems = pageIndex == 0
           ? cachedPage
           : [...state.items, ...cachedPage];
@@ -210,7 +233,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       dateFilter: state.dateFilter,
     );
 
-    final filteredMembers = _applySearchFilter(pageMembers);
+    final filteredMembers = _applySearchAndSort(pageMembers);
     final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
       ..[pageIndex] = pageMembers;
 
@@ -229,6 +252,8 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       lastFetchedAt: DateTime.now(),
     );
   }
+
+  // ===== SEARCH =====
 
   void setSearch(String query) {
     state = state.copyWith(searchQuery: query);
@@ -249,30 +274,62 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     _loadPage(0);
   }
 
-  void _applyFilters() {
-    final query = state.searchQuery.toLowerCase();
-    final filtered = state.members.where((member) {
-      final matchesSearch =
-          query.isEmpty ||
-          member.email.toLowerCase().contains(query) ||
-          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
-            query,
-          );
-      return matchesSearch;
-    }).toList();
+  // ===== FILTER + SORT CORE =====
 
+  /// Called whenever search query or sort changes — filters + sorts current members
+  void _applyFilters() {
+    final filtered = _applySearchAndSort(state.members);
     state = state.copyWith(filteredMembers: filtered);
   }
 
-  List<TeamMember> _applySearchFilter(List<TeamMember> members) {
-    if (state.searchQuery.isEmpty) return members;
-
+  /// Single pipeline: search filter → sort. Used everywhere we need the final list.
+  List<TeamMember> _applySearchAndSort(List<TeamMember> members) {
+    // 1. Search filter
+    List<TeamMember> result = members;
     final query = state.searchQuery.toLowerCase();
-    return members.where((member) {
-      return member.email.toLowerCase().contains(query) ||
-          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
-            query,
-          );
-    }).toList();
+    if (query.isNotEmpty) {
+      result = result.where((member) {
+        return member.email.toLowerCase().contains(query) ||
+            '${member.firstName} ${member.lastName}'
+                .toLowerCase()
+                .contains(query);
+      }).toList();
+    }
+
+    // 2. Sort
+    if (state.sortColumn != null) {
+      result = _sortMembers(result, state.sortColumn!, state.sortAscending);
+    }
+
+    return result;
+  }
+
+  List<TeamMember> _sortMembers(
+    List<TeamMember> members,
+    String column,
+    bool ascending,
+  ) {
+    final sorted = List<TeamMember>.from(members);
+    sorted.sort((a, b) {
+      int cmp;
+      switch (column) {
+        case 'firstName':
+          cmp = a.firstName.toLowerCase().compareTo(b.firstName.toLowerCase());
+          break;
+        case 'lastName':
+          cmp = a.lastName.toLowerCase().compareTo(b.lastName.toLowerCase());
+          break;
+        case 'email':
+          cmp = a.email.toLowerCase().compareTo(b.email.toLowerCase());
+          break;
+        case 'status':
+          cmp = a.status.value.toLowerCase().compareTo(b.status.value.toLowerCase());
+          break;
+        default:
+          cmp = 0;
+      }
+      return ascending ? cmp : -cmp;
+    });
+    return sorted;
   }
 }

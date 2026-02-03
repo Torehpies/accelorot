@@ -20,5 +20,7 @@ abstract class TeamMembersState with _$TeamMembersState {
     @Default(DateFilterRange(type: DateFilterType.none))
     DateFilterRange dateFilter,
     @Default('') String searchQuery,
+    String? sortColumn,
+    @Default(true) bool sortAscending,
   }) = _TeamMembersState;
 }
