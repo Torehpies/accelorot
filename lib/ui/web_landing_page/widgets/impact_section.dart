@@ -61,7 +61,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     
     _swipeAnimationController.forward(from: 0).then((_) {
       setState(() {
-        _currentExpandedInfo = (_currentExpandedInfo + 1) % 3;
+        _currentExpandedInfo = (_currentExpandedInfo + 1) % 4;
       });
     });
   }
@@ -375,7 +375,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 6.0),
                           child: Text(
-                            _getMobileStatDescription(index),
+                            _getMobileStatDescription(index, stat),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: isSmallMobile ? 9 : 10,
@@ -424,7 +424,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
-                            _getMobileStatDescription(index),
+                            _getMobileStatDescription(index, stat),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: isSmallMobile ? 9 : 10,
@@ -707,7 +707,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: Text(
-                            _getTabletStatDescription(index),
+                            _getTabletStatDescription(index, stat),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: isSmallTablet ? 12 : 13,
@@ -755,7 +755,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: Text(
-                            _getTabletStatDescription(index),
+                            _getTabletStatDescription(index, stat),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: isSmallTablet ? 12 : 13,
@@ -1170,6 +1170,11 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
         'title': 'Smart Technology',
         'description': 'Our IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring and automated adjustments for optimal composting conditions and efficiency.'
       },
+      {
+        'icon': Icons.security_outlined,
+        'title': 'Safe & Quality Container',
+        'description': 'Our containers are designed with food-grade materials that prevent contamination and ensure hygienic composting conditions. Built with durable, corrosion-resistant components that maintain structural integrity while containing odors and pathogens effectively.'
+      },
     ];
 
     return MouseRegion(
@@ -1374,7 +1379,7 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (i) {
+                              children: List.generate(4, (i) {
                                 return Container(
                                   margin: const EdgeInsets.symmetric(horizontal: 2),
                                   width: i == _currentExpandedInfo ? 16 : 5,
@@ -1406,32 +1411,64 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     );
   }
 
-  // Helper method to get mobile stat description
-  String _getMobileStatDescription(int index) {
+  // Helper method to get mobile stat description - FIXED with correct descriptions
+  String _getMobileStatDescription(int index, ImpactStatModel stat) {
+    // First, try to determine the description based on the stat content
+    if (stat.label.toLowerCase().contains('week') || stat.value == '2') {
+      // This is the 2-week composting container
+      return 'Traditional composting takes months. Our technology accelerates the process significantly.';
+    } else if (stat.label.toLowerCase().contains('waste') || stat.value.contains('50%')) {
+      // This is the 50% organic waste container
+      return 'Biodegradable waste makes up over half of all municipal solid waste in the Philippines.';
+    } else if (stat.label.toLowerCase().contains('operation') || stat.label.toLowerCase().contains('24/7')) {
+      // This is the 24/7 operation container
+      return 'Our system operates with minimal human intervention, automating the composting process.';
+    } else if (stat.label.toLowerCase().contains('efficiency') || stat.value.contains('100%')) {
+      // This is the efficiency/safe container container
+      return 'IoT technology provides real-time monitoring and adjustments for optimal composting.';
+    }
+    
+    // Fallback based on index if content doesn't match
     switch (index) {
-      case 0:
-        return 'Traditional composting takes months. Our technology accelerates the process significantly.';
-      case 1:
+      case 0: // Top-left (green) - should be 50% organic waste
         return 'Biodegradable waste makes up over half of all municipal solid waste in the Philippines.';
-      case 2:
+      case 1: // Top-right (white) - should be 2-week composting
+        return 'Traditional composting takes months. Our technology accelerates the process significantly.';
+      case 2: // Bottom-left (white) - should be 24/7 operation
         return 'Our system operates with minimal human intervention, automating the composting process.';
-      case 3:
+      case 3: // Bottom-right (green) - should be efficiency/safe container
         return 'IoT technology provides real-time monitoring and adjustments for optimal composting.';
       default:
         return 'Sustainable waste management solution for communities.';
     }
   }
 
-  // Helper method to get tablet stat description
-  String _getTabletStatDescription(int index) {
+  // Helper method to get tablet stat description - FIXED with correct descriptions
+  String _getTabletStatDescription(int index, ImpactStatModel stat) {
+    // First, try to determine the description based on the stat content
+    if (stat.label.toLowerCase().contains('week') || stat.value == '2') {
+      // This is the 2-week composting container
+      return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
+    } else if (stat.label.toLowerCase().contains('waste') || stat.value.contains('50%')) {
+      // This is the 50% organic waste container
+      return 'Over 50% of municipal solid waste is organic material that can be composted instead of going to landfills.';
+    } else if (stat.label.toLowerCase().contains('operation') || stat.label.toLowerCase().contains('24/7')) {
+      // This is the 24/7 operation container
+      return 'IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring.';
+    } else if (stat.label.toLowerCase().contains('efficiency') || stat.value.contains('100%')) {
+      // This is the efficiency/safe container container
+      return 'Smart technology automates temperature, moisture, and aeration for optimal composting conditions.';
+    }
+    
+    // Fallback based on index if content doesn't match
     switch (index) {
-      case 0:
-        return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
-      case 1:
+      case 0: // Top-left (green) - should be 50% organic waste
         return 'Over 50% of municipal solid waste is organic material that can be composted instead of going to landfills.';
-      case 2:
+      case 1: // Top-right (white) - should be 2-week composting
+        return 'Traditional composting takes 3-6 months. Our technology reduces this to just 2 weeks through optimized conditions.';
+      case 2: // Bottom-left (white) - should be 24/7 operation
         return 'IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring.';
-      case 3:
+      case 3: // Bottom-right (green) - should be efficiency/safe container
         return 'Smart technology automates temperature, moisture, and aeration for optimal composting conditions.';
       default:
         return 'Sustainable waste management solution that empowers communities and reduces environmental impact.';
