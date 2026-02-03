@@ -1,6 +1,8 @@
+// lib/ui/web_operator/widgets/team_member_action_buttons.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/action_icon_button.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/view_operator_dialog.dart';
 
@@ -16,19 +18,19 @@ class TeamMemberActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        actionIconButton(
-          icon: Icons.edit_outlined,
-          onPressed: () => _showEditDialog(context, notifier, member),
-          tooltip: 'Edit Member',
-        ),
-        actionIconButton(
-          icon: Icons.visibility_outlined,
-          onPressed: () => _showViewDialog(context, notifier, member),
+    return TableActionButtons(
+      actions: [
+        // View first (swapped to match reports consistency)
+        TableActionButton(
+          icon: Icons.open_in_new,
           tooltip: 'View Member',
+          onPressed: () => _showViewDialog(context, notifier, member),
+        ),
+        // Edit second
+        TableActionButton(
+          icon: Icons.edit_outlined,
+          tooltip: 'Edit Member',
+          onPressed: () => _showEditDialog(context, notifier, member),
         ),
       ],
     );

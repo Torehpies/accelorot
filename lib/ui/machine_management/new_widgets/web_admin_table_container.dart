@@ -7,7 +7,6 @@ import '../../core/widgets/shared/pagination_controls.dart';
 import '../../core/widgets/filters/search_field.dart';
 import '../../core/widgets/filters/date_filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../../../ui/activity_logs/models/activity_common.dart';
 import 'web_table_header.dart';
 import 'web_table_body.dart';
@@ -101,7 +100,6 @@ class WebAdminTableContainer extends StatelessWidget {
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text('Add Machine'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: WebColors.greenAccent,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,

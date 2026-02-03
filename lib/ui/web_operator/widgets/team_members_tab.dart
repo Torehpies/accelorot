@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
-import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
-import 'package:flutter_application_1/ui/core/widgets/sticky_header.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_state.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/member_row.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
+import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
+import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/team_member_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamMembersTab extends ConsumerStatefulWidget {
-  const TeamMembersTab({super.key});
+  final TabController tabController;
+
+  const TeamMembersTab({super.key, required this.tabController});
 
   @override
   ConsumerState<TeamMembersTab> createState() => _TeamMembersTabState();
@@ -24,130 +33,236 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+
     final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
 
-    return Column(
-      children: [
-        Expanded(
-          child: _TableContent(state: state, notifier: notifier),
+    final pageCount = state.hasNextPage
+        ? state.currentPage + 2
+        : state.currentPage + 1;
+
+    return BaseTableContainer(
+      // ── Left header: tab switcher ──
+      leftHeaderWidget: TabsRow(controller: widget.tabController),
+
+      // ── Right header: date filter, search, add button ──
+      rightHeaderWidgets: [
+        SizedBox(
+          height: 32,
+          child: DateFilterDropdown(
+            isLoading: state.isLoading,
+            onFilterChanged: (filter) {
+              ref
+                  .read(operatorsDateFilterProvider.notifier)
+                  .setFilter(filter);
+            },
+          ),
         ),
-        const SizedBox(height: 12),
-        _PaginationSection(
-          currentPage: state.currentPage,
-          hasNextPage: state.hasNextPage,
+        SearchField(
+          isLoading: state.isLoading,
+          onChanged: (query) => notifier.setSearch(query),
+        ),
+        Tooltip(
+          message: 'Add Operator',
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Operator'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+      ],
+
+      // ── Table header: sortable columns ──
+      tableHeader: TableHeader(
+        isLoading: state.isLoading,
+        columns: [
+          TableCellWidget(
+            flex: 2,
+            child: TableHeaderCell(
+              label: 'First Name',
+              sortable: true,
+              sortColumn: 'firstName',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('firstName'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 2,
+            child: TableHeaderCell(
+              label: 'Last Name',
+              sortable: true,
+              sortColumn: 'lastName',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('lastName'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 3,
+            child: TableHeaderCell(
+              label: 'Email',
+              sortable: true,
+              sortColumn: 'email',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('email'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 1,
+            child: TableHeaderCell(
+              label: 'Status',
+              sortable: true,
+              sortColumn: 'status',
+              currentSortColumn: state.sortColumn,
+              sortAscending: state.sortAscending,
+              onSort: () => notifier.onSort('status'),
+            ),
+          ),
+          TableCellWidget(
+            flex: 1,
+            child: const TableHeaderCell(label: 'Actions'),
+          ),
+        ],
+      ),
+
+      // ── Table body: rows + skeleton + empty state ──
+      tableBody: TableBody<TeamMember>(
+        items: state.filteredMembers,
+        isLoading: state.isLoading && state.members.isEmpty,
+        emptyStateWidget: const EmptyState(
+          title: 'No members found',
+          subtitle: 'Try adjusting your filters or search',
+          icon: Icons.person_search,
+        ),
+        rowBuilder: (member) => TeamMemberRow(
+          member: member,
           notifier: notifier,
         ),
-        const SizedBox(height: 12),
-      ],
-    );
-  }
-}
-
-class _TableContent extends StatelessWidget {
-  final TeamMembersState state;
-  final TeamMembersNotifier notifier;
-
-  const _TableContent({required this.state, required this.notifier});
-
-  @override
-  Widget build(BuildContext context) {
-    final isTablet =
-        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
-        MediaQuery.of(context).size.width < kDesktopBreakpoint;
-    if (state.isLoading && state.members.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(width: 1, color: AppColors.grey),
-        borderRadius: BorderRadius.circular(8),
+        skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Column(
-          children: [
-            StickyHeader(
-              labels: ['First Name', 'Last Name', 'Email', 'Status', 'Actions'],
-              flexValues: [isTablet ? 1 : 2, isTablet ? 1 : 2, 3, 1, 1],
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            ),
-            Expanded(
-              child: _MembersList(state: state, notifier: notifier),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class _MembersList extends StatelessWidget {
-  final TeamMembersState state;
-  final TeamMembersNotifier notifier;
-
-  const _MembersList({required this.state, required this.notifier});
-
-  @override
-  Widget build(BuildContext context) {
-    if (state.isLoading && state.members.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.filteredMembers.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('No members found', style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: state.filteredMembers.length,
-      itemBuilder: (context, index) => TeamMemberRow(
-        member: state.filteredMembers[index],
-        notifier: notifier,
-      ),
-    );
-  }
-}
-
-class _PaginationSection extends ConsumerWidget {
-  final int currentPage;
-  final bool hasNextPage;
-  final TeamMembersNotifier notifier;
-
-  const _PaginationSection({
-    required this.currentPage,
-    required this.hasNextPage,
-    required this.notifier,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final pageSize = ref.watch(teamMembersProvider).pageSize;
-    final hasNext = ref.watch(teamMembersProvider).hasNextPage;
-    final current = currentPage;
-    final pageCount = hasNext ? current + 2 : current + 1;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: PaginationControls(
-        currentPage: current + 1, // 1-based
+      // ── Pagination ──
+      paginationWidget: PaginationControls(
+        currentPage: state.currentPage + 1,
         totalPages: pageCount,
-        itemsPerPage: pageSize,
-        isLoading: ref.watch(teamMembersProvider).isLoading,
+        itemsPerPage: state.pageSize,
+        isLoading: state.isLoading,
         onPageChanged: (page) => notifier.goToPage(page - 1),
         onItemsPerPageChanged: notifier.setPageSize,
       ),
+    );
+  }
+}
+
+// ── Skeleton row matching [2, 2, 3, 1, 1] column layout ──
+Widget _buildSkeletonRow() {
+  return GenericTableRow(
+    cellSpacing: AppSpacing.md,
+    cells: [
+      // First Name
+      TableCellWidget(
+        flex: 2,
+        child: Center(child: _SkeletonBox(width: 100, height: 16)),
+      ),
+      // Last Name
+      TableCellWidget(
+        flex: 2,
+        child: Center(child: _SkeletonBox(width: 100, height: 16)),
+      ),
+      // Email
+      TableCellWidget(
+        flex: 3,
+        child: Center(child: _SkeletonBox(width: 180, height: 16)),
+      ),
+      // Status badge shape
+      TableCellWidget(
+        flex: 1,
+        child: Center(
+          child: _SkeletonBox(width: 70, height: 24, borderRadius: 5),
+        ),
+      ),
+      // Action icons
+      TableCellWidget(
+        flex: 1,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SkeletonBox(width: 24, height: 24, borderRadius: 12),
+              const SizedBox(width: 4),
+              _SkeletonBox(width: 24, height: 24, borderRadius: 12),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Simple pulsing skeleton box — matches the animation pattern used across the app
+class _SkeletonBox extends StatefulWidget {
+  final double width;
+  final double height;
+  final double borderRadius;
+
+  const _SkeletonBox({
+    required this.width,
+    required this.height,
+    this.borderRadius = 6,
+  });
+
+  @override
+  State<_SkeletonBox> createState() => _SkeletonBoxState();
+}
+
+class _SkeletonBoxState extends State<_SkeletonBox>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (context, child) {
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              WebColors.skeletonLoader,
+              WebColors.tableBorder,
+              _anim.value,
+            ),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          ),
+        );
+      },
     );
   }
 }
