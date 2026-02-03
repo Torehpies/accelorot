@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
@@ -19,9 +18,10 @@ import 'package:flutter_application_1/ui/core/ui/loading_screen.dart';
 import 'package:flutter_application_1/ui/email_verify/email_verify_screen.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/view/responsive_dashboard.dart';
 import 'package:flutter_application_1/ui/login/views/login_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/view/admin_machine_view.dart';
+import 'package:flutter_application_1/ui/machine_management/view/mobile_admin_machine_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
+import 'package:flutter_application_1/ui/statistics/view/web_statistics_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
@@ -128,7 +128,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kTabletBreakpoint;
+              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
 
           if (isDesktop) {
             return WebShell(child: child);
@@ -157,19 +157,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: RoutePath.statistics.path,
             name: RoutePath.statistics.name,
             pageBuilder: (context, state) => NoTransitionPage(
-              child: const ResponsiveStatistics(),
+              child: const WebStatisticsScreen(),
               key: state.pageKey,
             ),
           ),
           GoRoute(
             path: RoutePath.operatorMachines.path,
             name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) {
-              return NoTransitionPage(
-                child: OperatorMachineScreens(),
-                key: state.pageKey,
-              );
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: const OperatorMachineScreens(),
+              key: state.pageKey,
+            ),
           ),
           GoRoute(
             path: RoutePath.operatorSettings.path,
@@ -193,7 +191,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kTabletBreakpoint;
+              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
           if (isDesktop) {
             return AdminWebShell(child: child);
           } else {
@@ -263,7 +261,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kTabletBreakpoint;
+              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
           if (isDesktop) {
             return SuperAdminWebShell(child: child);
           } else {

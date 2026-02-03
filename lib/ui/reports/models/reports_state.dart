@@ -3,74 +3,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../data/models/report.dart';
 import '../../activity_logs/models/activity_common.dart';
+import 'report_filters.dart';
 
 part 'reports_state.freezed.dart';
-
-/// Report status filter options
-enum ReportStatusFilter {
-  all,
-  open,
-  inProgress,
-  completed,
-  onHold;
-
-  String get displayName {
-    switch (this) {
-      case ReportStatusFilter.all:
-        return 'All Status';
-      case ReportStatusFilter.open:
-        return 'Open';
-      case ReportStatusFilter.inProgress:
-        return 'In Progress';
-      case ReportStatusFilter.completed:
-        return 'Completed';
-      case ReportStatusFilter.onHold:
-        return 'On Hold';
-    }
-  }
-}
-
-/// Report category filter options
-enum ReportCategoryFilter {
-  all,
-  maintenance,
-  observation,
-  safety;
-
-  String get displayName {
-    switch (this) {
-      case ReportCategoryFilter.all:
-        return 'All Categories';
-      case ReportCategoryFilter.maintenance:
-        return 'Maintenance';
-      case ReportCategoryFilter.observation:
-        return 'Observation';
-      case ReportCategoryFilter.safety:
-        return 'Safety';
-    }
-  }
-}
-
-/// Report priority filter options
-enum ReportPriorityFilter {
-  all,
-  high,
-  medium,
-  low;
-
-  String get displayName {
-    switch (this) {
-      case ReportPriorityFilter.all:
-        return 'All Priorities';
-      case ReportPriorityFilter.high:
-        return 'High';
-      case ReportPriorityFilter.medium:
-        return 'Medium';
-      case ReportPriorityFilter.low:
-        return 'Low';
-    }
-  }
-}
 
 /// State for reports view
 @freezed
@@ -83,19 +18,15 @@ abstract class ReportsState with _$ReportsState {
     @Default(DateFilterRange(type: DateFilterType.none))
     DateFilterRange dateFilter,
     @Default('') String searchQuery,
-
     // Sorting
     String? sortColumn,
     @Default(true) bool sortAscending,
-
     // Data
     @Default([]) List<Report> allReports,
     @Default([]) List<Report> filteredReports,
-
     // Pagination
     @Default(1) int currentPage,
     @Default(10) int itemsPerPage,
-
     // UI state
     @Default(LoadingStatus.initial) LoadingStatus status,
     String? errorMessage,
