@@ -145,7 +145,8 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return MobileBottomSheetBase(
-      title: 'Edit Report',
+      title: widget.report.title,
+      subtitle: 'Edit Report',
       showCloseButton: false,      // use Cancel button instead
       actions: [
         BottomSheetAction.secondary(
@@ -161,18 +162,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Readonly identity fields
-          MobileReadOnlySection(
-            sectionTitle: 'Identity',
-            fields: [
-              MobileReadOnlyField(label: 'Report ID', value: widget.report.id),
-              MobileReadOnlyField(label: 'Machine', value: widget.report.machineName),
-              MobileReadOnlyField(label: 'Created by', value: widget.report.userName),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Editable title field
+          // ── Editable fields at the top ───────────────────────────────────
           MobileInputField(
             label: 'Title',
             controller: _titleController,
@@ -182,7 +172,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // Editable description field
           MobileInputField(
             label: 'Description',
             controller: _descriptionController,
@@ -219,13 +208,16 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
 
-          // Readonly report type
+          // ── Read-only info section at the bottom ─────────────────────────
           MobileReadOnlySection(
-            sectionTitle: 'Report Type',
+            sectionTitle: 'Additional Information',
             fields: [
+              MobileReadOnlyField(label: 'Report ID', value: widget.report.id),
+              MobileReadOnlyField(label: 'Machine', value: widget.report.machineName),
               MobileReadOnlyField(label: 'Type', value: widget.report.reportTypeLabel),
+              MobileReadOnlyField(label: 'Created by', value: widget.report.userName),
             ],
           ),
         ],

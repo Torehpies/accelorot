@@ -5,6 +5,10 @@ import '../themes/web_colors.dart';
 import '../themes/web_text_styles.dart';
 
 /// Base layout for mobile bottom sheets, with header, scrollable body and sticky footer.
+/// 
+/// Supports two header patterns:
+/// 1. Legacy: Single title only
+/// 2. New: Title (data) + subtitle (context) - matches web dialog pattern
 class BottomSheetAction {
   final String label;
   final VoidCallback? onPressed;
@@ -56,6 +60,7 @@ class BottomSheetAction {
 
 class MobileBottomSheetBase extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final Widget body;
   final List<BottomSheetAction> actions;
   final bool showCloseButton;
@@ -64,6 +69,7 @@ class MobileBottomSheetBase extends StatelessWidget {
   const MobileBottomSheetBase({
     super.key,
     required this.title,
+    this.subtitle,
     required this.body,
     required this.actions,
     this.showCloseButton = true,
@@ -106,12 +112,36 @@ class MobileBottomSheetBase extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    title,
-                    style: WebTextStyles.sectionTitle,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title (actual data or legacy label)
+                      Text(
+                        title.isEmpty ? '—' : title,
+                        style: WebTextStyles.sectionTitle.copyWith(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: title.isEmpty
+                              ? WebColors.textMuted
+                              : WebColors.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      // Subtitle (context label)
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle!,
+                          style: WebTextStyles.bodyMediumGray.copyWith(
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
                 if (showCloseButton)

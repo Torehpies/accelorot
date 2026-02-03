@@ -29,107 +29,48 @@ class ReportViewBottomSheet extends StatelessWidget {
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $h:$min $ampm';
   }
 
-  // Build
   @override
   Widget build(BuildContext context) {
     return MobileBottomSheetBase(
-      title: 'Report Details',
+      title: report.title,
+      subtitle: 'Report Details',
       actions: [
         BottomSheetAction.primary(
           label: 'Edit',
           onPressed: onEdit,
         ),
       ],
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Identity
-          MobileReadOnlySection(
-            sectionTitle: 'Identity',
-            fields: [
-              MobileReadOnlyField(label: 'Report ID', value: report.id),
-              MobileReadOnlyField(label: 'Machine', value: report.machineName),
-              MobileReadOnlyField(label: 'Machine ID', value: report.machineId),
-            ],
+      body: MobileReadOnlySection(
+        sectionTitle: null, // No section title - flat display
+        fields: [
+          MobileReadOnlyField(label: 'Report ID', value: report.id),
+          MobileReadOnlyField(label: 'Machine', value: report.machineName),
+          MobileReadOnlyField(label: 'Machine ID', value: report.machineId),
+          MobileReadOnlyField(label: 'Type', value: report.reportTypeLabel),
+          MobileReadOnlyField(label: 'Priority', value: report.priorityLabel),
+          MobileReadOnlyField(label: 'Status', value: report.statusLabel),
+          MobileReadOnlyField(label: 'Description', value: report.description),
+          MobileReadOnlyField(label: 'Created by', value: report.userName),
+          MobileReadOnlyField(
+            label: 'Created at',
+            value: _formatDateTime(report.createdAt),
           ),
-          const SizedBox(height: 16),
-
-          // Details
-          MobileReadOnlySection(
-            sectionTitle: 'Details',
-            fields: [
-              MobileReadOnlyField(label: 'Title', value: report.title),
-              MobileReadOnlyField(label: 'Type', value: report.reportTypeLabel),
-              MobileReadOnlyField(label: 'Priority', value: report.priorityLabel),
-              MobileReadOnlyField(label: 'Status', value: report.statusLabel),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Description
-          MobileReadOnlySection(
-            sectionTitle: 'Description',
-            fields: [
-              // Full-width text block
-              _DescriptionBlock(text: report.description),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Meta
-          MobileReadOnlySection(
-            sectionTitle: 'Meta',
-            fields: [
-              MobileReadOnlyField(label: 'Created by', value: report.userName),
-              MobileReadOnlyField(
-                label: 'Created at',
-                value: _formatDateTime(report.createdAt),
-              ),
-              if (report.updatedAt != null)
-                MobileReadOnlyField(
-                  label: 'Updated at',
-                  value: _formatDateTime(report.updatedAt!),
-                ),
-              if (report.resolvedAt != null) ...[
-                MobileReadOnlyField(
-                  label: 'Resolved at',
-                  value: _formatDateTime(report.resolvedAt!),
-                ),
-                MobileReadOnlyField(
-                  label: 'Resolved by',
-                  value: report.resolvedBy ?? '—',
-                ),
-              ],
-            ],
-          ),
+          if (report.updatedAt != null)
+            MobileReadOnlyField(
+              label: 'Updated at',
+              value: _formatDateTime(report.updatedAt!),
+            ),
+          if (report.resolvedAt != null) ...[
+            MobileReadOnlyField(
+              label: 'Resolved at',
+              value: _formatDateTime(report.resolvedAt!),
+            ),
+            MobileReadOnlyField(
+              label: 'Resolved by',
+              value: report.resolvedBy ?? '—',
+            ),
+          ],
         ],
-      ),
-    );
-  }
-}
-
-class _DescriptionBlock extends StatelessWidget {
-  final String text;
-
-  // ignore: unused_element_parameter
-  const _DescriptionBlock({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final isEmpty = text.trim().isEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        isEmpty ? '—' : text,
-        style: TextStyle(
-          fontFamily: 'dm-sans',
-          fontSize: 14,
-          color: isEmpty
-              ? const Color(0xFF9CA3AF) // muted
-              : const Color(0xFF374151),
-          height: 1.6,
-        ),
       ),
     );
   }
