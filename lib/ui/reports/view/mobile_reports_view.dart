@@ -1,14 +1,20 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+// lib/ui/reports/view/mobile_reports_view.dart
 
-import '../view_model/reports_viewmodel.dart';
-import '../widgets/mobile_report_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/widgets/mobile_common_widgets.dart';
+import '../../core/widgets/mobile_list_header.dart';
+import '../../core/widgets/mobile_list_content.dart';
+import '../../core/widgets/data_card.dart';
+import '../../core/widgets/filters/mobile_dropdown_filter_button.dart';
+import '../../core/widgets/filters/mobile_date_filter_button.dart';
+import '../../core/widgets/sample_cards/data_card_skeleton.dart';
+import '../../core/themes/app_theme.dart';
+import '../../../data/models/report.dart';
+import '../view_model/mobile_reports_viewmodel.dart';
+import '../models/mobile_reports_state.dart';
+import '../models/report_filters.dart';
 import '../dialogs/edit_report_modal.dart';
-import '../../core/themes/web_colors.dart';
-import '../../core/widgets/base_stats_card.dart';
-import '../../core/widgets/filters/search_field.dart';
-import '../../core/widgets/filters/date_filter_dropdown.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
   const MobileReportsView({super.key});
@@ -18,281 +24,195 @@ class MobileReportsView extends ConsumerStatefulWidget {
 }
 
 class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
-  final PageController _statsController = PageController(viewportFraction: 0.9);
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
-  void dispose() {
-    _statsController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(mobileReportsViewModelProvider.notifier).initialize();
+    });
   }
 
   @override
-  Widget build(BuildContext context) {
-    final reportsState = ref.watch(reportsViewModelProvider);
-    final viewModel = ref.read(reportsViewModelProvider.notifier);
+  void dispose() {
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
-    final stats = viewModel.getStatsWithChange();
-    final statCards = _buildStatCards(stats, reportsState.isLoading);
+  void _showReportDetails(Report report) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditReportModal(report: report),
+    );
+  }
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: MobileHeader(
-        title: 'Reports',
-        showDropdown: false,
-        showFilterButton: true,
-        showSearch: true,
-        showAddButton: false,
-        elevation: 0.0,
-        backgroundColor: Color(0xFFE0F2FE),
-        foregroundColor: Color(0xFFE0F2FE),
-        onDateRangeChanged: (range) {},
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
+  EmptyStateConfig _getEmptyStateConfig(MobileReportsState state) {
+    String message;
 
-            SizedBox(
-              height: 160,
-              child: PageView.builder(
-                controller: _statsController,
-                padEnds: false,
-                itemCount: statCards.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: statCards[index],
-                  );
-                },
-              ),
-            ),
+    if (state.selectedStatus != ReportStatusFilter.all) {
+      message = 'No ${state.selectedStatus.displayName.toLowerCase()} reports';
+    } else if (state.selectedCategory != ReportCategoryFilter.all) {
+      message = 'No ${state.selectedCategory.displayName.toLowerCase()} reports';
+    } else if (state.selectedPriority != ReportPriorityFilter.all) {
+      message = 'No ${state.selectedPriority.displayName.toLowerCase()} priority reports';
+    } else {
+      message = 'No reports available';
+    }
 
-            const SizedBox(height: 24),
+    if (state.hasActiveFilters) {
+      message = 'No reports match your filters';
+    }
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Report List',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        // Date Filter Button
-                        SizedBox(
-                          width: 42,
-                          height: 42,
-                          child: DateFilterDropdown(
-                            onFilterChanged: (filter) =>
-                                viewModel.onDateFilterChanged(filter),
-                            isLoading: reportsState.isLoading,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Search Bar
-                        Expanded(
-                          child: SearchField(
-                            hintText: 'Search...',
-                            width: double.infinity,
-                            isLoading: reportsState.isLoading,
-                            onChanged: (val) => viewModel.onSearchChanged(val),
-                          ),
-                        ),
-                      ],
-                    ),
+    return EmptyStateConfig(
+      icon: Icons.inbox_outlined,
+      message: message,
+      actionLabel: state.hasActiveFilters ? 'Clear All Filters' : null,
+      onAction: state.hasActiveFilters
+          ? () {
+              ref.read(mobileReportsViewModelProvider.notifier).clearAllFilters();
+            }
+          : null,
+    );
+  }
 
-                    const SizedBox(height: 16),
-                    const Divider(height: 1),
-
-                    // 5. Report List
-                    if (reportsState.isLoading &&
-                        reportsState.allReports.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    else if (reportsState.paginatedReports.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.inbox,
-                                size: 48,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'No reports found',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        itemCount: reportsState.paginatedReports.length,
-                        itemBuilder: (context, index) {
-                          final report = reportsState.paginatedReports[index];
-                          return MobileReportCard(
-                            report: report,
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) =>
-                                    EditReportModal(report: report),
-                              );
-                            },
-                          );
-                        },
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    // 6. Pagination Controls (Mobile Optimized)
-                    if (!reportsState.isLoading &&
-                        reportsState.filteredReports.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Back Button
-                            TextButton.icon(
-                              onPressed: reportsState.currentPage > 1
-                                  ? () => viewModel.onPageChanged(
-                                      reportsState.currentPage - 1,
-                                    )
-                                  : null,
-                              icon: const Icon(Icons.chevron_left, size: 20),
-                              label: const Text('Back'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.black54,
-                                disabledForegroundColor: Colors.black26,
-                              ),
-                            ),
-
-                            // Page Info
-                            Text(
-                              'Page ${reportsState.currentPage} of ${reportsState.totalPages}',
-                              style: const TextStyle(
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-
-                            // Next Button
-                            TextButton.icon(
-                              onPressed:
-                                  reportsState.currentPage <
-                                      reportsState.totalPages
-                                  ? () => viewModel.onPageChanged(
-                                      reportsState.currentPage + 1,
-                                    )
-                                  : null,
-                              // Swap icon and label for Next button naturally?
-                              // TextButton.icon puts icon left. Let's use Directionality or Row if needed.
-                              // For simplicity, standard TextButton.icon is fine, or manual Row.
-                              // Let's align icon to right for "Next >" feel.
-                              label: const Text('Next'),
-                              icon: const Icon(Icons.chevron_right, size: 20),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.black54,
-                                disabledForegroundColor: Colors.black26,
-                              ), // Icon will be on left by default, which is ok, or we flip it.
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+  Widget _buildReportCard(BuildContext context, Report report, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DataCard<Report>(
+        data: report,
+        icon: _getReportIcon(report),
+        iconBgColor: _getReportIconColor(report),
+        title: report.title,
+        description: report.description,
+        category: report.statusLabel,
+        status: 'Created ${_formatDate(report.createdAt)}',
+        userName: report.userName,
+        statusColor: _getStatusColor(report),
+        statusTextColor: const Color(0xFF424242),
+        onTap: () => _showReportDetails(report),
       ),
     );
   }
 
-  List<Widget> _buildStatCards(
-    Map<String, Map<String, dynamic>> stats,
-    bool isLoading,
-  ) {
-    return [
-      BaseStatsCard(
-        title: 'Completed Reports',
-        value: stats['completed']?['count'] ?? 0,
-        icon: Icons.check_circle_outline,
-        iconColor: WebColors.success,
-        backgroundColor: const Color(0xFFD1FAE5),
-        changeText: stats['completed']?['change'],
-        subtext: 'completed reports this month',
-        isPositive: stats['completed']?['isPositive'],
-        isLoading: isLoading,
+  IconData _getReportIcon(Report report) {
+    switch (report.reportType.toLowerCase()) {
+      case 'maintenance_issue':
+        return Icons.build_circle_outlined;
+      case 'safety_concern':
+        return Icons.warning_amber_rounded;
+      case 'observation':
+        return Icons.visibility_outlined;
+      default:
+        return Icons.description_outlined;
+    }
+  }
+
+  Color _getReportIconColor(Report report) {
+    switch (report.priority.toLowerCase()) {
+      case 'high':
+        return const Color(0xFFEF4444);
+      case 'medium':
+        return const Color(0xFFF59E0B);
+      case 'low':
+        return const Color(0xFF10B981);
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  Color _getStatusColor(Report report) {
+    switch (report.status.toLowerCase()) {
+      case 'completed':
+        return const Color(0xFFD1FAE5);
+      case 'in_progress':
+        return const Color(0xFFFEF3C7);
+      case 'open':
+        return const Color(0xFFDBEAFE);
+      case 'on_hold':
+        return const Color(0xFFFEE2E2);
+      default:
+        return AppColors.grey;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'today';
+    } else if (difference.inDays == 1) {
+      return 'yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(mobileReportsViewModelProvider);
+    final notifier = ref.read(mobileReportsViewModelProvider.notifier);
+
+    return MobileScaffoldContainer(
+      onTap: () => _searchFocusNode.unfocus(),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: MobileListHeader(
+          title: 'Reports',
+          showAddButton: false,
+          searchConfig: SearchBarConfig(
+            onSearchChanged: notifier.setSearchQuery,
+            searchHint: 'Search reports...',
+            isLoading: state.isLoading,
+            searchFocusNode: _searchFocusNode,
+          ),
+          filterWidgets: [
+            MobileDropdownFilterButton<ReportStatusFilter>(
+              icon: Icons.tune,
+              currentFilter: state.selectedStatus,
+              options: ReportStatusFilter.values,
+              onFilterChanged: notifier.setStatusFilter,
+              isLoading: state.isLoading,
+            ),
+            const SizedBox(width: 8),
+            MobileDateFilterButton(
+              onFilterChanged: notifier.setDateFilter,
+              isLoading: state.isLoading,
+            ),
+          ],
+        ),
+        body: Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: MobileListContent<Report>(
+              isLoading: state.isLoading,
+              isInitialLoad: state.reports.isEmpty,
+              hasError: state.hasError,
+              errorMessage: state.errorMessage,
+              items: state.filteredReports,
+              displayedItems: state.displayedReports,
+              hasMoreToLoad: state.hasMoreToLoad,
+              remainingCount: state.remainingCount,
+              emptyStateConfig: _getEmptyStateConfig(state),
+              onRefresh: () async {
+                await notifier.refresh();
+              },
+              onLoadMore: notifier.loadMore,
+              onRetry: () {
+                notifier.clearError();
+                notifier.initialize();
+              },
+              itemBuilder: _buildReportCard,
+              skeletonBuilder: (context, index) => const DataCardSkeleton(),
+            ),
+          ),
+        ),
       ),
-      BaseStatsCard(
-        title: 'Open Reports',
-        value: stats['open']?['count'] ?? 0,
-        icon: Icons.folder_open,
-        iconColor: WebColors.info,
-        backgroundColor: const Color(0xFFDBEAFE),
-        changeText: stats['open']?['change'],
-        subtext: 'opened reports this month',
-        isPositive: stats['open']?['isPositive'],
-        isLoading: isLoading,
-      ),
-      BaseStatsCard(
-        title: 'In Progress Reports',
-        value: stats['inProgress']?['count'] ?? 0,
-        icon: Icons.pending_actions,
-        iconColor: WebColors.warning,
-        backgroundColor: const Color(0xFFFEF3C7),
-        changeText: stats['inProgress']?['change'],
-        subtext: 'reports started this month',
-        isPositive: stats['inProgress']?['isPositive'],
-        isLoading: isLoading,
-      ),
-      BaseStatsCard(
-        title: 'On Hold Reports',
-        value: stats['onHold']?['count'] ?? 0,
-        icon: Icons.pause_circle_outline,
-        iconColor: WebColors.error,
-        backgroundColor: const Color(0xFFFEE2E2),
-        changeText: stats['onHold']?['change'],
-        subtext: 'closed reports this month',
-        isPositive: stats['onHold']?['isPositive'],
-        isLoading: isLoading,
-      ),
-    ];
+    );
   }
 }

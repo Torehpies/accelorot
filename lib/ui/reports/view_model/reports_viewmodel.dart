@@ -7,6 +7,7 @@ import '../services/report_aggregator_service.dart';
 import '../services/report_filter_service.dart';
 import '../models/reports_state.dart';
 import '../../activity_logs/models/activity_common.dart';
+import '../models/report_filters.dart';
 
 part 'reports_viewmodel.g.dart';
 
