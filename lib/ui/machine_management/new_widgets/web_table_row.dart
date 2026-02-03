@@ -7,6 +7,7 @@ import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/widgets/table/table_row.dart';
+import '../../core/widgets/table/table_action_buttons.dart';
 
 /// Single machine row in table
 /// Supports both admin and operator views via nullable onEdit callback
@@ -46,6 +47,21 @@ class MachineTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Build actions list conditionally based on onEdit
+    final actions = [
+      TableActionButton(
+        icon: Icons.open_in_new,
+        tooltip: 'View Details',
+        onPressed: onView,
+      ),
+      if (onEdit != null)
+        TableActionButton(
+          icon: Icons.edit_outlined,
+          tooltip: 'Edit Machine',
+          onPressed: onEdit,
+        ),
+    ];
+
     return GenericTableRow(
       onTap: null,
       hoverColor: WebColors.hoverBackground,
@@ -106,31 +122,11 @@ class MachineTableRow extends StatelessWidget {
           ),
         ),
 
-        // Actions Column (View and Edit icons)
+        // Actions Column
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.open_in_new, size: 18),
-                  color: WebColors.textLabel,
-                  onPressed: onView,
-                  tooltip: 'View Details',
-                ),
-                // Only show edit button if callback is provided
-                if (onEdit != null) ...[
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    color: WebColors.textLabel,
-                    onPressed: onEdit,
-                    tooltip: 'Edit Machine',
-                  ),
-                ],
-              ],
-            ),
+            child: TableActionButtons(actions: actions),
           ),
         ),
       ],

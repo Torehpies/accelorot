@@ -1,8 +1,8 @@
 // lib/ui/reports/services/report_filter_service.dart
 
 import '../../../data/models/report.dart';
-import '../models/reports_state.dart';
 import '../../activity_logs/models/activity_common.dart';
+import '../models/report_filters.dart';
 
 /// Service to handle all report filtering logic
 class ReportFilterService {

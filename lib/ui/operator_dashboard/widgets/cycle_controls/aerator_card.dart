@@ -6,14 +6,17 @@ import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
+import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
 class AeratorCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
+  final String? machineId;
 
-  const AeratorCard({super.key, this.currentBatch});
+  const AeratorCard({super.key, this.currentBatch, this.machineId});
 
   @override
   ConsumerState<AeratorCard> createState() => _AeratorCardState();
@@ -30,14 +33,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
 
-  // Add this to track the last loaded batch ID
-  //String? _lastLoadedBatchId;
-
   @override
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      // _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
@@ -46,17 +45,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   void didUpdateWidget(AeratorCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Check if batch ID changed (new batch selected or created)
     final currentBatchId = widget.currentBatch?.id;
     final oldBatchId = oldWidget.currentBatch?.id;
 
     if (currentBatchId != oldBatchId) {
-      // Batch changed - reset and reload
       _stopTimer();
       _cycleTimer?.cancel();
 
       if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-        // No active batch - clear everything
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -64,12 +60,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _completedCycles = 0;
           _startTime = null;
           _cycleDoc = null;
-          //_lastLoadedBatchId = null;
         });
       } else {
-        // New active batch - load its cycle
-        //_lastLoadedBatchId = widget.currentBatch!.id;
-        // Use Future.delayed to ensure the widget is fully built
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
             _loadExistingCycle();
@@ -79,7 +71,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     } else if (widget.currentBatch != null &&
         oldWidget.currentBatch?.isActive == true &&
         !widget.currentBatch!.isActive) {
-      // Same batch but became inactive
       _stopTimer();
       _cycleTimer?.cancel();
 
@@ -106,8 +97,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         setState(() {
           _cycleDoc = cycle;
           settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 50,
-            period: cycle.duration ?? '1 hour',
+            cycles: cycle.cycles ?? 1,
+            period: cycle.duration ?? '10 minutes',
           );
           _completedCycles = cycle.completedCycles ?? 0;
 
@@ -128,7 +119,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           }
         });
       } else if (mounted) {
-        // No existing cycle - reset to idle state for new batch
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -185,6 +175,16 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       return;
     }
 
+    if (widget.machineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No machine selected'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -198,8 +198,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
+      final machineRepository = ref.read(machineRepositoryProvider);
 
-      // Start aerator in Firebase
       await cycleRepository.startAerator(
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
@@ -208,7 +208,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         duration: settings.period,
       );
 
-      // Reload the cycle to get the ID
+      await machineRepository.updateAeratorActive(widget.machineId!, true);
+
       final cycle = await cycleRepository.getAerator(
         batchId: widget.currentBatch!.id,
       );
@@ -222,6 +223,15 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       });
 
       _simulateCycles();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator started'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -234,18 +244,57 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     }
   }
 
+  Future<void> _handleStop() async {
+    if (widget.machineId == null) return;
+
+    try {
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      await machineRepository.updateAeratorActive(widget.machineId!, false);
+
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        await _completeCycleInFirebase();
+      }
+
+      setState(() {
+        status = SystemStatus.stopped;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator stopped'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to stop: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _simulateCycles() {
     final periodMinutes = _getPeriodMinutes(settings.period);
 
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (
-      timer,
-    ) async {
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
       if (mounted && status == SystemStatus.running) {
         setState(() {
           _completedCycles++;
         });
 
-        // Update progress in Firebase
         if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -263,7 +312,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _stopTimer();
           timer.cancel();
 
-          // Complete cycle in Firebase
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
@@ -291,21 +339,19 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
   int _getPeriodMinutes(String period) {
     switch (period) {
+      case '10 minutes':
+        return 10;
       case '15 minutes':
         return 15;
+      case '20 minutes':
+        return 20;
+      case '25 minutes':
+        return 25;
       case '30 minutes':
         return 30;
-      case '1 hour':
-        return 60;
-      case '2 hours':
-        return 120;
       default:
-        return 60;
+        return 10;
     }
-  }
-
-  String _getCyclesLabel(int cycles) {
-    return '$cycles Cycles';
   }
 
   @override
@@ -331,7 +377,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Scale fonts based on card width (not screen width)
           final cardWidth = constraints.maxWidth;
           final cardHeight = constraints.maxHeight;
           final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0);
@@ -341,7 +386,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           final badgeFontSize = (baseFontSize * 0.6).clamp(9.0, 12.0);
           
           return Padding(
-            padding: EdgeInsets.all(cardWidth * 0.06), // 6% of card width
+            padding: EdgeInsets.all(cardWidth * 0.06),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,8 +467,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     double labelFontSize,
     double bodyFontSize,
   ) {
-    final canInteract = !batchCompleted && status == SystemStatus.idle;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,138 +523,65 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         ),
         SizedBox(height: cardHeight * 0.025),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select Duration',
-                value: settings.period,
-                items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                screenWidth: cardWidth,
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          setState(() {
-                            settings = settings.copyWith(period: value);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-            SizedBox(width: cardWidth * 0.03),
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select No. of Cycles',
-                value: _getCyclesLabel(settings.cycles),
-                items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                screenWidth: cardWidth,
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          final cycles = int.parse(value.split(' ')[0]);
-                          setState(() {
-                            settings = settings.copyWith(cycles: cycles);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-          ],
+        ControlInputFields(
+          selectedCycle: settings.cycles.toString(),
+          selectedPeriod: settings.period,
+          isLocked: status == SystemStatus.running,
+          onCycleChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(cycles: int.parse(value));
+              });
+            }
+          },
+          onPeriodChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(period: value);
+              });
+            }
+          },
         ),
         SizedBox(height: cardHeight * 0.04),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: canInteract ? _handleStart : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: batchCompleted
-                  ? Colors.grey.shade400
-                  : const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: cardHeight * 0.025),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        if (status == SystemStatus.idle || status == SystemStatus.stopped)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: batchCompleted ? null : _handleStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF14B8A6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+                disabledBackgroundColor: Colors.grey.shade300,
               ),
-              elevation: 0,
-              disabledBackgroundColor: Colors.grey.shade300,
             ),
-            child: Text(
-              batchCompleted
-                  ? 'Completed'
-                  : (status == SystemStatus.idle
-                        ? 'Start'
-                        : status.displayName),
-              style: TextStyle(
-                fontSize: labelFontSize,
-                fontWeight: FontWeight.w600,
+          )
+        else if (status == SystemStatus.running)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _handleStop,
+              icon: const Icon(Icons.stop),
+              label: const Text('Stop'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
               ),
             ),
           ),
-        ),
       ],
     );
   }
-
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required double screenWidth,
-    required Function(String?)? onChanged,
-  }) {
-    // Calculate font size based on card width
-    final dropdownFontSize = (screenWidth / 30).clamp(10.0, 13.0);
-    
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.03,
-        vertical: screenWidth * 0.025,
-      ),
-      decoration: BoxDecoration(
-        color: onChanged == null ? Colors.grey.shade100 : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Text(
-            label,
-            style: TextStyle(
-              fontSize: dropdownFontSize,
-              color: Colors.grey.shade600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          isDense: true,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.grey.shade600,
-            size: (screenWidth / 20).clamp(16.0, 20.0),
-          ),
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: TextStyle(
-                  fontSize: dropdownFontSize,
-                  color: const Color(0xFF1a1a1a),
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
 }
-

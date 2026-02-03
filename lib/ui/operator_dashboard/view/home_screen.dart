@@ -282,7 +282,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   // Swipeable cycle cards
                   // Swipeable cycle cards
-                  SwipeableCycleCards(currentBatch: _activeBatchModel),
+                  SwipeableCycleCards(
+                    currentBatch: _activeBatchModel,
+                    machineId: _selectedMachineId,
+                  ),
                   const SizedBox(height: 16),
 
                   // Activity logs

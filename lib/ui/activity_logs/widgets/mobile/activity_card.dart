@@ -1,151 +1,58 @@
-// lib/ui/activity_logs/widgets/activity_card.dart
+// lib/ui/activity_logs/widgets/mobile/activity_card.dart
 
 import 'package:flutter/material.dart';
+import '../../../core/widgets/data_card.dart';
 import '../../../../data/models/activity_log_item.dart';
 
+/// Activity card that uses DataCard for consistent styling across the app
+/// This is a semantic wrapper that handles ActivityLogItem → DataCard field mapping
 class ActivityCard extends StatelessWidget {
   final ActivityLogItem item;
+  final VoidCallback? onTap;
 
-  const ActivityCard({super.key, required this.item});
+  const ActivityCard({
+    super.key,
+    required this.item,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title and Status + Value
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: item.statusColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    // Show cycle progress
-                    if (item.isCycle && item.cycles != null)
-                      Text(
-                        '${item.completedCycles ?? 0}/${item.cycles}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      )
-                    else
-                      Text(
-                        item.value,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Icon and Description
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(item.icon, size: 40, color: Colors.teal),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    item.description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Category, Machine, Batch, Operator and Timestamp
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Show machine info
-                      Text(
-                        'Machine: ${item.machineName ?? item.machineId ?? '-'}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black45,
-                        ),
-                      ),
-                      // Show batch info
-                      if (item.batchId != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            'Batch: ${item.batchId}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black45,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      // Show operator info
-                      if (item.operatorName != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            'By: ${item.operatorName}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black45,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Text(
-                  item.formattedTimestamp,
-                  style: const TextStyle(fontSize: 12, color: Colors.black45),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DataCard<ActivityLogItem>(
+        // Icon styling - circular background with status color
+        icon: item.icon,
+        iconColor: Colors.white,
+        iconBgColor: item.statusColor.withValues(alpha: 0.2),
+        
+        // Content
+        title: item.title,
+        description: item.description,
+        
+        // Category badge (top-right corner)
+        category: item.category,
+        
+        // Status pill (bottom-left) - Shows cycle progress or regular value
+        status: _getStatusText(),
+        statusColor: item.statusColor.withValues(alpha: 0.15),
+        statusTextColor: item.statusColor,
+        
+        // User info (bottom-right)
+        userName: item.operatorName,
+        
+        // Data and interaction
+        data: item,
+        onTap: onTap,
       ),
     );
+  }
+
+  /// Get the status text - either cycle progress (X/Y) or regular value
+  String _getStatusText() {
+    if (item.isCycle && item.cycles != null) {
+      return '${item.completedCycles ?? 0}/${item.cycles}';
+    }
+    return item.value;
   }
 }

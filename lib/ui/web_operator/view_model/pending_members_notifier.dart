@@ -32,6 +32,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
   static const _cacheTtl = Duration(minutes: 1);
 
+  // ===== ACCEPT / DECLINE =====
+
   Future<void> acceptRequest(PendingMember member) async {
     state = state.copyWith(isLoading: true, isError: false, error: null);
 
@@ -104,6 +106,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     };
   }
 
+  // ===== PAGING NAVIGATION =====
+
   Future<void> goToPage(int pageIndex) => _loadPage(pageIndex);
 
   Future<void> loadNextPage() async {
@@ -149,6 +153,22 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     _loadPage(0);
   }
 
+  // ===== SORT =====
+
+  void onSort(String column) {
+    final isAscending =
+        state.sortColumn == column ? !state.sortAscending : true;
+
+    state = state.copyWith(
+      sortColumn: column,
+      sortAscending: isAscending,
+    );
+
+    _applyFilters();
+  }
+
+  // ===== ACCEPT / DECLINE HANDLERS =====
+
   void _handleAcceptError(Exception error) {
     state = state.copyWith(isLoading: false, isError: true, error: error);
   }
@@ -157,7 +177,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final currentMembers = List<PendingMember>.from(state.members)
       ..removeWhere((m) => m.id == member.id);
 
-    final filteredMembers = _applySearchFilter(currentMembers);
+    final filteredMembers = _applySearchAndSort(currentMembers);
 
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
@@ -183,7 +203,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     final currentMembers = List<PendingMember>.from(state.members)
       ..removeWhere((m) => m.id == member.id);
 
-    final filteredMembers = _applySearchFilter(currentMembers);
+    final filteredMembers = _applySearchAndSort(currentMembers);
 
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex);
     updatedPages[state.currentPage] = currentMembers;
@@ -211,10 +231,10 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   }
 
   void _handleSuccess(int pageIndex, List<PendingMember> members) {
-    final filteredMembers = _applySearchFilter(members); // ✅ Apply search
+    final filteredMembers = _applySearchAndSort(members);
 
     final updatedPages = Map<int, List<PendingMember>>.from(state.pagesByIndex)
-      ..[pageIndex] = members; // Store unfiltered for pagination
+      ..[pageIndex] = members;
 
     final newItems = pageIndex == 0
         ? filteredMembers
@@ -222,8 +242,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     state = state.copyWith(
       items: newItems,
-      members: members, // Raw data
-      filteredMembers: filteredMembers, // Filtered data for UI
+      members: members,
+      filteredMembers: filteredMembers,
       currentPage: pageIndex,
       isLoading: false,
       isError: false,
@@ -234,10 +254,14 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     );
   }
 
+  // ===== CACHE =====
+
   bool _isCacheFresh(DateTime? lastFetchedAt) {
     if (lastFetchedAt == null) return false;
     return DateTime.now().difference(lastFetchedAt) < _cacheTtl;
   }
+
+  // ===== PAGING LOAD =====
 
   Future<void> _loadPage(int pageIndex) async {
     if (state.isLoading) return;
@@ -258,7 +282,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final cachedPage = state.pagesByIndex[pageIndex];
     if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
-      final filteredMembers = _applySearchFilter(cachedPage);
+      final filteredMembers = _applySearchAndSort(cachedPage);
       final newItems = pageIndex == 0
           ? filteredMembers
           : [...state.items, ...filteredMembers];
@@ -292,6 +316,8 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     };
   }
 
+  // ===== SEARCH =====
+
   void setSearch(String query) {
     state = state.copyWith(searchQuery: query);
     _applyFilters();
@@ -311,30 +337,62 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     _loadPage(0);
   }
 
-  void _applyFilters() {
-    final query = state.searchQuery.toLowerCase();
-    final filtered = state.members.where((member) {
-      final matchesSearch =
-          query.isEmpty ||
-          member.email.toLowerCase().contains(query) ||
-          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
-            query,
-          );
-      return matchesSearch;
-    }).toList();
+  // ===== FILTER + SORT CORE =====
 
+  /// Called whenever search query or sort changes — filters + sorts current members
+  void _applyFilters() {
+    final filtered = _applySearchAndSort(state.members);
     state = state.copyWith(filteredMembers: filtered);
   }
 
-  List<PendingMember> _applySearchFilter(List<PendingMember> members) {
-    if (state.searchQuery.isEmpty) return members;
-
+  /// Single pipeline: search filter → sort. Used everywhere we need the final list.
+  List<PendingMember> _applySearchAndSort(List<PendingMember> members) {
+    // 1. Search filter
+    List<PendingMember> result = members;
     final query = state.searchQuery.toLowerCase();
-    return members.where((member) {
-      return member.email.toLowerCase().contains(query) ||
-          '${member.firstName} ${member.lastName}'.toLowerCase().contains(
-            query,
-          );
-    }).toList();
+    if (query.isNotEmpty) {
+      result = result.where((member) {
+        return member.email.toLowerCase().contains(query) ||
+            '${member.firstName} ${member.lastName}'
+                .toLowerCase()
+                .contains(query);
+      }).toList();
+    }
+
+    // 2. Sort
+    if (state.sortColumn != null) {
+      result = _sortMembers(result, state.sortColumn!, state.sortAscending);
+    }
+
+    return result;
+  }
+
+  List<PendingMember> _sortMembers(
+    List<PendingMember> members,
+    String column,
+    bool ascending,
+  ) {
+    final sorted = List<PendingMember>.from(members);
+    sorted.sort((a, b) {
+      int cmp;
+      switch (column) {
+        case 'firstName':
+          cmp = a.firstName.toLowerCase().compareTo(b.firstName.toLowerCase());
+          break;
+        case 'lastName':
+          cmp = a.lastName.toLowerCase().compareTo(b.lastName.toLowerCase());
+          break;
+        case 'email':
+          cmp = a.email.toLowerCase().compareTo(b.email.toLowerCase());
+          break;
+        case 'requestedAt':
+          cmp = a.requestedAt.compareTo(b.requestedAt);
+          break;
+        default:
+          cmp = 0;
+      }
+      return ascending ? cmp : -cmp;
+    });
+    return sorted;
   }
 }

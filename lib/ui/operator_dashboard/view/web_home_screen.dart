@@ -26,14 +26,11 @@ class WebHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
-  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-  //  GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
 
-  // Add this to force widget rebuilds
   int _rebuildKey = 0;
 
   @override
@@ -49,7 +46,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       setState(() {
         _activeBatchModel = batch;
         _selectedBatchId = batch?.id;
-        // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
 
         if (batch != null) {
@@ -72,7 +68,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   }
 
   Future<void> _autoSelectBatchForMachine(String machineId) async {
-    // Wait for provider to refresh
     await Future.delayed(const Duration(milliseconds: 500));
 
     final batchesAsync = ref.read(userTeamBatchesProvider);
@@ -82,7 +77,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
           .toList();
 
       if (machineBatches.isNotEmpty) {
-        // Sort by createdAt to get newest
         machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final latestBatch = machineBatches.first;
 
@@ -114,10 +108,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     );
 
     if (result == true && mounted) {
-      // Refresh the activity logs after batch is created
       ref.invalidate(allActivitiesProvider);
 
-      // Force rebuild by incrementing key
       setState(() {
         _rebuildKey++;
       });
@@ -256,56 +248,62 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return Container(
-              constraints: const BoxConstraints(maxWidth: 1400),
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.02, // 2% responsive padding
-                vertical: screenHeight * 0.02,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left side - Batch Tracker and Recent Activity
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        CompostingProgressCard(
-                          currentBatch: _currentBatch,
-                          onBatchStarted: _handleBatchStarted,
-                          onBatchCompleted: _handleBatchCompleted,
-                          preSelectedMachineId:
-                              widget.focusedMachine?.machineId,
-                          onBatchChanged: _updateActiveBatch,
-                        ),
-                        SizedBox(height: screenHeight * 0.02),
-                        Expanded(
-                          child: const RecentActivitiesTable(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: screenWidth * 0.015),
-                  // Right side - Drum Controller and Aerator Cards
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: DrumControlCard(
-                            currentBatch: _activeBatchModel,
+            return Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.02,
+                  vertical: screenHeight * 0.02,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left side - Batch Tracker and Recent Activity
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CompostingProgressCard(
+                            currentBatch: _currentBatch,
+                            onBatchStarted: _handleBatchStarted,
+                            onBatchCompleted: _handleBatchCompleted,
+                            preSelectedMachineId:
+                                widget.focusedMachine?.machineId,
+                            onBatchChanged: _updateActiveBatch,
                           ),
-                        ),
-                        SizedBox(height: screenHeight * 0.02),
-                        Expanded(
-                          child: AeratorCard(currentBatch: _activeBatchModel),
-                        ),
-                      ],
+                          SizedBox(height: screenHeight * 0.02),
+                          const Expanded(
+                            child: RecentActivitiesTable(),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    SizedBox(width: screenWidth * 0.015),
+                    // Right side - Drum Controller and Aerator Cards
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: ControlInputCard(
+                              currentBatch: _activeBatchModel,
+                              machineId: _selectedMachineId,
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          Expanded(
+                            child: AeratorCard(
+                              currentBatch: _activeBatchModel,
+                              machineId: _selectedMachineId,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

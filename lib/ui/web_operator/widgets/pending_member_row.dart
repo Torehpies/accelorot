@@ -1,86 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
+import 'package:flutter_application_1/ui/core/constants/spacing.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
+import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
 import 'package:flutter_application_1/utils/format.dart';
 
 class PendingMemberRow extends StatelessWidget {
-  final dynamic member;
+  final PendingMember member;
   final PendingMembersNotifier notifier;
 
-  const PendingMemberRow({super.key, this.member, required this.notifier});
+  const PendingMemberRow({super.key, required this.member, required this.notifier});
 
   @override
   Widget build(BuildContext context) {
-    final isTablet =
-        MediaQuery.of(context).size.width >= kTabletBreakpoint &&
-        MediaQuery.of(context).size.width < kDesktopBreakpoint;
+    return GenericTableRow(
+      hoverColor: const Color(0xFFF9FAFB),
+      cellSpacing: AppSpacing.md,
+      cells: [
+        // First Name (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Text(
+            member.firstName,
+            style: WebTextStyles.body,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey[200]!, width: 1)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            flex: isTablet ? 1 : 2,
-            child: Center(
-              child: Text(
-                member.firstName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-              ),
+        // Last Name (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Text(
+            member.lastName,
+            style: WebTextStyles.body,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+
+        // Email (flex: 3)
+        TableCellWidget(
+          flex: 3,
+          child: Text(
+            member.email,
+            style: WebTextStyles.body,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+
+        // Requested At (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Text(
+            formatDateAndTime(member.requestedAt),
+            style: WebTextStyles.body,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+
+        // Actions (flex: 1)
+        TableCellWidget(
+          flex: 1,
+          child: Center(
+            child: PendingMemberActionButtons(
+              notifier: notifier,
+              member: member,
             ),
           ),
-          Expanded(
-            flex: isTablet ? 1 : 2,
-            child: Center(
-              child: Text(
-                member.lastName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              width: 220,
-              child: Center(
-                child: Text(
-                  member.email,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: false,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                formatDateAndTime(member.requestedAt),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: PendingMemberActionButtons(
-                notifier: notifier,
-                member: member,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

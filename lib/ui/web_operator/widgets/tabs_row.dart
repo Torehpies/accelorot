@@ -1,5 +1,8 @@
+// lib/ui/web_operator/widgets/tabs_row.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 
 class TabsRow extends StatelessWidget {
   final TabController? controller;
@@ -11,7 +14,7 @@ class TabsRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SizedBox(
-      height: 40,
+      height: 32,
       child: Theme(
         data: theme.copyWith(
           tabBarTheme: theme.tabBarTheme.copyWith(dividerHeight: 0),
@@ -21,36 +24,27 @@ class TabsRow extends StatelessWidget {
           isScrollable: true,
           labelPadding: const EdgeInsets.only(right: 16),
           indicator: const UnderlineTabIndicator(
-            borderSide: BorderSide(width: 3, color: AppColors.green100),
+            borderSide: BorderSide(width: 2, color: WebColors.greenAccent),
             insets: EdgeInsets.symmetric(horizontal: 16),
           ),
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           splashFactory: NoSplash.splashFactory,
-          labelColor: theme.colorScheme.onSurface,
-          unselectedLabelColor: Colors.grey,
-          labelStyle: theme.textTheme.titleMedium!.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelStyle: theme.textTheme.titleMedium!.copyWith(
-            fontWeight: FontWeight.w500,
+          labelStyle: WebTextStyles.sectionTitle,
+          unselectedLabelStyle: WebTextStyles.sectionTitle.copyWith(
+            fontWeight: FontWeight.w600,
+            color: WebColors.textMuted,
           ),
           tabs: const [
             Tab(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Members',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
+                child: Text('Members'),
               ),
             ),
             Tab(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'For Approval',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
+                child: Text('For Approval'),
               ),
             ),
           ],

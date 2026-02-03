@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/mobile_pending_members_tab.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/mobile_summary_cards.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/mobile_team_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,27 +36,34 @@ class _MobileOperatorManagementScreenState
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-      ),
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          TeamHeaderWithTabs(controller: _tabController),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.65,
-            child: TabBarView(
-              controller: _tabController,
-              children: const [
-                MobileTeamMembersTab(),
-                MobilePendingMembersTab(),
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        const MobileSummaryCards(),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: Colors.white,
+            ),
+            margin: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                TeamHeaderWithTabs(controller: _tabController),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: const [
+                      MobileTeamMembersTab(),
+                      MobilePendingMembersTab(),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

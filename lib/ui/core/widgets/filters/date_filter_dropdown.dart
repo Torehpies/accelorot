@@ -6,7 +6,6 @@ import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
 import '../../../activity_logs/models/activity_common.dart';
 
-/// Web-optimized date filter dropdown that matches Machine/Batch selector style
 class DateFilterDropdown extends StatefulWidget {
   final ValueChanged<DateFilterRange> onFilterChanged;
   final bool isLoading;

@@ -6,20 +6,23 @@ import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
+import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
-class DrumControlCard extends ConsumerStatefulWidget {
+class ControlInputCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
+  final String? machineId;
 
-  const DrumControlCard({super.key, this.currentBatch});
+  const ControlInputCard({super.key, this.currentBatch, this.machineId});
 
   @override
-  ConsumerState<DrumControlCard> createState() => _DrumControlCardState();
+  ConsumerState<ControlInputCard> createState() => _ControlInputCardState();
 }
 
-class _DrumControlCardState extends ConsumerState<DrumControlCard> {
+class _ControlInputCardState extends ConsumerState<ControlInputCard> {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
 
@@ -29,7 +32,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
-  //String? _lastLoadedBatchId;
 
   @override
   void initState() {
@@ -39,8 +41,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   void _initializeFromBatch() {
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      //_lastLoadedBatchId = widget.currentBatch!.id;
-      // Schedule load after build completes
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadExistingCycle();
@@ -61,12 +61,11 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       _completedCycles = 0;
       _startTime = null;
       _cycleDoc = null;
-      //_lastLoadedBatchId = null;
     });
   }
 
   @override
-  void didUpdateWidget(DrumControlCard oldWidget) {
+  void didUpdateWidget(ControlInputCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final currentBatchId = widget.currentBatch?.id;
@@ -76,13 +75,10 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       '🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId',
     );
 
-    // Batch changed
     if (currentBatchId != oldBatchId) {
       debugPrint('✅ Batch ID changed - reinitializing');
       _initializeFromBatch();
-    }
-    // Same batch became inactive
-    else if (widget.currentBatch != null &&
+    } else if (widget.currentBatch != null &&
         oldWidget.currentBatch?.isActive == true &&
         !widget.currentBatch!.isActive) {
       debugPrint('⚠️ Batch completed');
@@ -123,8 +119,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         setState(() {
           _cycleDoc = cycle;
           settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 50,
-            period: cycle.duration ?? '1 hour',
+            cycles: cycle.cycles ?? 1,
+            period: cycle.duration ?? '10 minutes',
           );
           _completedCycles = cycle.completedCycles ?? 0;
 
@@ -145,7 +141,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
           }
         });
       } else if (mounted) {
-        // No existing cycle - reset to idle state
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -160,7 +155,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     }
   }
 
-  // ...rest of the existing methods remain the same...
   @override
   void dispose() {
     _stopTimer();
@@ -203,6 +197,16 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       return;
     }
 
+    if (widget.machineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No machine selected'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -216,6 +220,7 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
+      final machineRepository = ref.read(machineRepositoryProvider);
 
       await cycleRepository.startDrumController(
         batchId: widget.currentBatch!.id,
@@ -224,6 +229,8 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         cycles: settings.cycles,
         duration: settings.period,
       );
+
+      await machineRepository.updateDrumActive(widget.machineId!, true);
 
       final cycle = await cycleRepository.getDrumController(
         batchId: widget.currentBatch!.id,
@@ -238,6 +245,15 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       });
 
       _simulateCycles();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Drum controller started'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -250,12 +266,52 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     }
   }
 
+  Future<void> _handleStop() async {
+    if (widget.machineId == null) return;
+
+    try {
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      await machineRepository.updateDrumActive(widget.machineId!, false);
+
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        await _completeCycleInFirebase();
+      }
+
+      setState(() {
+        status = SystemStatus.stopped;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Drum controller stopped'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to stop: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _simulateCycles() {
     final periodMinutes = _getPeriodMinutes(settings.period);
 
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (
-      timer,
-    ) async {
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
       if (mounted && status == SystemStatus.running) {
         setState(() {
           _completedCycles++;
@@ -307,21 +363,19 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
 
   int _getPeriodMinutes(String period) {
     switch (period) {
+      case '10 minutes':
+        return 10;
       case '15 minutes':
         return 15;
+      case '20 minutes':
+        return 20;
+      case '25 minutes':
+        return 25;
       case '30 minutes':
         return 30;
-      case '1 hour':
-        return 60;
-      case '2 hours':
-        return 120;
       default:
-        return 60;
+        return 10;
     }
-  }
-
-  String _getCyclesLabel(int cycles) {
-    return '$cycles Cycles';
   }
 
   @override
@@ -347,17 +401,16 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Scale fonts based on card width (not screen width)
           final cardWidth = constraints.maxWidth;
           final cardHeight = constraints.maxHeight;
-          final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0); // Dynamic scaling
+          final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0);
           final titleFontSize = baseFontSize;
           final labelFontSize = (baseFontSize * 0.8).clamp(10.0, 16.0);
           final bodyFontSize = (baseFontSize * 0.65).clamp(9.0, 13.0);
           final badgeFontSize = (baseFontSize * 0.6).clamp(9.0, 12.0);
           
           return Padding(
-            padding: EdgeInsets.all(cardWidth * 0.06), // 6% of card width
+            padding: EdgeInsets.all(cardWidth * 0.06),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,8 +491,6 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
     double labelFontSize,
     double bodyFontSize,
   ) {
-    final canInteract = !batchCompleted && status == SystemStatus.idle;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,137 +547,65 @@ class _DrumControlCardState extends ConsumerState<DrumControlCard> {
         ),
         SizedBox(height: cardHeight * 0.025),
 
-        Row(
-          children: [
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select Duration',
-                value: settings.period,
-                items: ['15 minutes', '30 minutes', '1 hour', '2 hours'],
-                screenWidth: cardWidth,
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          setState(() {
-                            settings = settings.copyWith(period: value);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-            SizedBox(width: cardWidth * 0.03),
-            Expanded(
-              child: _buildDropdown(
-                label: 'Select No. of Cycles',
-                value: _getCyclesLabel(settings.cycles),
-                items: ['50 Cycles', '100 Cycles', '150 Cycles', '200 Cycles'],
-                screenWidth: cardWidth,
-                onChanged: canInteract
-                    ? (value) {
-                        if (value != null) {
-                          final cycles = int.parse(value.split(' ')[0]);
-                          setState(() {
-                            settings = settings.copyWith(cycles: cycles);
-                          });
-                        }
-                      }
-                    : null,
-              ),
-            ),
-          ],
+        ControlInputFields(
+          selectedCycle: settings.cycles.toString(),
+          selectedPeriod: settings.period,
+          isLocked: status == SystemStatus.running,
+          onCycleChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(cycles: int.parse(value));
+              });
+            }
+          },
+          onPeriodChanged: (value) {
+            if (value != null) {
+              setState(() {
+                settings = settings.copyWith(period: value);
+              });
+            }
+          },
         ),
         SizedBox(height: cardHeight * 0.04),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: canInteract ? _handleStart : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: batchCompleted
-                  ? Colors.grey.shade400
-                  : const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(vertical: cardHeight * 0.025),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-              disabledBackgroundColor: Colors.grey.shade300,
-            ),
-            child: Text(
-              batchCompleted
-                  ? 'Completed'
-                  : (status == SystemStatus.idle
-                        ? 'Start'
-                        : status.displayName),
-              style: TextStyle(
-                fontSize: labelFontSize,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required double screenWidth,
-    required Function(String?)? onChanged,
-  }) {
-    // Calculate font size based on card width
-    final dropdownFontSize = (screenWidth / 30).clamp(10.0, 13.0);
-    
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.03,
-        vertical: screenWidth * 0.025,
-      ),
-      decoration: BoxDecoration(
-        color: onChanged == null ? Colors.grey.shade100 : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Text(
-            label,
-            style: TextStyle(
-              fontSize: dropdownFontSize,
-              color: Colors.grey.shade600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          isDense: true,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.grey.shade600,
-            size: (screenWidth / 20).clamp(16.0, 20.0),
-          ),
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: TextStyle(
-                  fontSize: dropdownFontSize,
-                  color: const Color(0xFF1a1a1a),
+        if (status == SystemStatus.idle || status == SystemStatus.stopped)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: batchCompleted ? null : _handleStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF14B8A6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                elevation: 0,
+                disabledBackgroundColor: Colors.grey.shade300,
               ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
+            ),
+          )
+        else if (status == SystemStatus.running)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _handleStop,
+              icon: const Icon(Icons.stop),
+              label: const Text('Stop'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
