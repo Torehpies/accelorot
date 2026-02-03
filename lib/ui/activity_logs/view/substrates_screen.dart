@@ -15,9 +15,9 @@ class SubstratesScreen extends BaseActivityScreen {
 
 class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   ActivityParams get _params => ActivityParams(
-    screenType: ActivityScreenType.substrates,
-    initialFilter: widget.initialFilter,
-  );
+        screenType: ActivityScreenType.substrates,
+        initialFilter: widget.initialFilter,
+      );
 
   @override
   ActivityListState getState() {
@@ -25,18 +25,8 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   }
 
   @override
-  String getScreenTitle() => 'Substrate Logs';
-
-  @override
-  List<String> getFilters() {
-    return const ['All', 'Greens', 'Browns', 'Compost'];
-  }
-
-  @override
-  void onFilterChanged(String filter) {
-    ref
-        .read(activityViewModelProvider(_params).notifier)
-        .onFilterChanged(filter);
+  ActivityViewModel getViewModel() {
+    return ref.read(activityViewModelProvider(_params).notifier);
   }
 
   @override
@@ -75,5 +65,10 @@ class _SubstratesScreenState extends BaseActivityScreenState<SubstratesScreen> {
   @override
   Future<void> onRefresh() async {
     await ref.read(activityViewModelProvider(_params).notifier).refresh();
+  }
+
+  @override
+  void onLoadMore() {
+    ref.read(activityViewModelProvider(_params).notifier).loadMore();
   }
 }

@@ -188,10 +188,6 @@ class MoistureStatisticCard extends StatelessWidget {
                               reservedSize: 30,
                               interval: 1,
                               getTitlesWidget: (double value, TitleMeta meta) {
-                                // Only show label if value is close to an integer (start of day)
-                                if ((value - value.round()).abs() > 0.01) {
-                                  return const SizedBox.shrink();
-                                }
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
@@ -207,17 +203,20 @@ class MoistureStatisticCard extends StatelessWidget {
                         lineBarsData: [
                           LineChartBarData(
                             spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
-                            isCurved: true,
+                            isCurved: false, // Sharp angular lines instead of curves
                             color: const Color(0xFF0369A1),
                             barWidth: 2.5,
                             isStrokeCapRound: true,
                             dotData: FlDotData(
                               show: true,
                               checkToShowDot: (spot, barData) {
+                                // Only show dots for markers that have non-zero values
                                 final downsampledData = _downsampleData(chartData);
                                 final index = barData.spots.indexOf(spot);
                                 if (index >= 0 && index < downsampledData.length) {
-                                  return downsampledData[index]['isMarker'] == true;
+                                  final isMarker = downsampledData[index]['isMarker'] == true;
+                                  final hasValue = (downsampledData[index]['value'] as double) > 0;
+                                  return isMarker && hasValue;
                                 }
                                 return false;
                               },

@@ -15,9 +15,9 @@ class ReportsScreen extends BaseActivityScreen {
 
 class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   ActivityParams get _params => ActivityParams(
-    screenType: ActivityScreenType.reports,
-    initialFilter: widget.initialFilter,
-  );
+        screenType: ActivityScreenType.reports,
+        initialFilter: widget.initialFilter,
+      );
 
   @override
   ActivityListState getState() {
@@ -25,18 +25,8 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   }
 
   @override
-  String getScreenTitle() => 'Reports';
-
-  @override
-  List<String> getFilters() {
-    return const ['All', 'Maintenance', 'Observation', 'Safety'];
-  }
-
-  @override
-  void onFilterChanged(String filter) {
-    ref
-        .read(activityViewModelProvider(_params).notifier)
-        .onFilterChanged(filter);
+  ActivityViewModel getViewModel() {
+    return ref.read(activityViewModelProvider(_params).notifier);
   }
 
   @override
@@ -75,5 +65,10 @@ class _ReportsScreenState extends BaseActivityScreenState<ReportsScreen> {
   @override
   Future<void> onRefresh() async {
     await ref.read(activityViewModelProvider(_params).notifier).refresh();
+  }
+
+  @override
+  void onLoadMore() {
+    ref.read(activityViewModelProvider(_params).notifier).loadMore();
   }
 }

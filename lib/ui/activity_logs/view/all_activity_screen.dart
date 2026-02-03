@@ -24,18 +24,8 @@ class _AllActivityScreenState
   }
 
   @override
-  String getScreenTitle() => 'All Activity Logs';
-
-  @override
-  List<String> getFilters() {
-    return const ['All', 'Substrate', 'Alerts', 'Cycles', 'Reports'];
-  }
-
-  @override
-  void onFilterChanged(String filter) {
-    ref
-        .read(activityViewModelProvider(_params).notifier)
-        .onFilterChanged(filter);
+  ActivityViewModel getViewModel() {
+    return ref.read(activityViewModelProvider(_params).notifier);
   }
 
   @override
@@ -74,5 +64,10 @@ class _AllActivityScreenState
     ref
         .read(activityViewModelProvider(_params).notifier)
         .onMachineChanged(machineId);
+  }
+
+  @override
+  void onLoadMore() {
+    ref.read(activityViewModelProvider(_params).notifier).loadMore();
   }
 }

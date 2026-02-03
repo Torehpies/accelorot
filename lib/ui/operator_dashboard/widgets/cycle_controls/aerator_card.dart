@@ -8,12 +8,14 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_contro
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
+import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 
 class AeratorCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
+  final String? machineId;
 
-  const AeratorCard({super.key, this.currentBatch});
+  const AeratorCard({super.key, this.currentBatch, this.machineId});
 
   @override
   ConsumerState<AeratorCard> createState() => _AeratorCardState();
@@ -185,6 +187,16 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       return;
     }
 
+    if (widget.machineId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No machine selected'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -198,6 +210,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
+      final machineRepository = ref.read(machineRepositoryProvider);
 
       // Start aerator in Firebase
       await cycleRepository.startAerator(
@@ -207,6 +220,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         cycles: settings.cycles,
         duration: settings.period,
       );
+
+      // Update machine aeratorActive status
+      await machineRepository.updateAeratorActive(widget.machineId!, true);
 
       // Reload the cycle to get the ID
       final cycle = await cycleRepository.getAerator(
@@ -222,11 +238,63 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       });
 
       _simulateCycles();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator started'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to start: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleStop() async {
+    if (widget.machineId == null) return;
+
+    try {
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      // Update machine aeratorActive status
+      await machineRepository.updateAeratorActive(widget.machineId!, false);
+
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        await _completeCycleInFirebase();
+      }
+
+      setState(() {
+        status = SystemStatus.stopped;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator stopped'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to stop: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -479,32 +547,43 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         ),
         const SizedBox(height: 24),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: canInteract ? _handleStart : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: batchCompleted
-                  ? Colors.grey.shade400
-                  : const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        if (status == SystemStatus.idle || status == SystemStatus.stopped)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: batchCompleted ? null : _handleStart,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Start'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF14B8A6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+                disabledBackgroundColor: Colors.grey.shade300,
               ),
-              elevation: 0,
-              disabledBackgroundColor: Colors.grey.shade300,
             ),
-            child: Text(
-              batchCompleted
-                  ? 'Completed'
-                  : (status == SystemStatus.idle
-                        ? 'Start'
-                        : status.displayName),
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          )
+        else if (status == SystemStatus.running)
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _handleStop,
+              icon: const Icon(Icons.stop),
+              label: const Text('Stop'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
             ),
           ),
-        ),
       ],
     );
   }

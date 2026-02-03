@@ -187,10 +187,6 @@ class TemperatureStatisticCard extends StatelessWidget {
                               reservedSize: 30,
                               interval: 1,
                               getTitlesWidget: (double value, TitleMeta meta) {
-                                // Only show label if value is close to an integer (start of day)
-                                if ((value - value.round()).abs() > 0.01) {
-                                  return const SizedBox.shrink();
-                                }
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
@@ -203,21 +199,28 @@ class TemperatureStatisticCard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
+                        // Add min/max boundaries with padding to contain the line
+                        minX: _downsampleData(chartData).isEmpty ? 0 : _downsampleData(chartData).first['day'] as double,
+                        maxX: _downsampleData(chartData).isEmpty ? 6 : (_downsampleData(chartData).last['day'] as double),
+                        minY: 0,
+                        maxY: _getMaxYValue(chartData),
                         lineBarsData: [
                           LineChartBarData(
                             spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
-                            isCurved: true,
+                            isCurved: false, // Sharp angular lines instead of curves
                             color: const Color(0xFFC2410C),
-                            barWidth: 2.5, // Balanced thickness for visibility
+                            barWidth: 2.5,
                             isStrokeCapRound: true,
                             dotData: FlDotData(
                               show: true,
                               checkToShowDot: (spot, barData) {
-                                // Only show dots for markers
+                                // Only show dots for markers that have non-zero values
                                 final downsampledData = _downsampleData(chartData);
                                 final index = barData.spots.indexOf(spot);
                                 if (index >= 0 && index < downsampledData.length) {
-                                  return downsampledData[index]['isMarker'] == true;
+                                  final isMarker = downsampledData[index]['isMarker'] == true;
+                                  final hasValue = (downsampledData[index]['value'] as double) > 0;
+                                  return isMarker && hasValue;
                                 }
                                 return false;
                               },
@@ -378,5 +381,14 @@ class TemperatureStatisticCard extends StatelessWidget {
 
   double _calculateProgress(double temperature) {
     return (temperature.clamp(0.0, 80.0) / 80.0);
+  }
+
+  // Calculate max Y value with some padding to prevent curve overshooting
+  double _getMaxYValue(List<Map<String, dynamic>> data) {
+    if (data.isEmpty) return 100.0;
+    
+    final maxValue = data.map((d) => d['value'] as double).reduce((a, b) => a > b ? a : b);
+    // Add 10% padding to the top
+    return maxValue * 1.1;
   }
 }

@@ -5,16 +5,15 @@ import '../widgets/mobile/activity_section_card.dart';
 import '../widgets/mobile/navigation_section_card.dart';
 import '../widgets/mobile/batch_filter_section.dart';
 import '../models/activity_filter_model.dart';
-import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
+import '../../core/themes/app_theme.dart';
 
 class ActivityLogsScreen extends StatelessWidget {
-  const ActivityLogsScreen({super.key}); // Removed focusedMachineId
+  const ActivityLogsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      appBar: MobileHeader(title: 'Activity Logs'),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

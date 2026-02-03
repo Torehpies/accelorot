@@ -1,4 +1,3 @@
-// lib/ui/web_landing_page/web_landing_page.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/app_header.dart';
@@ -172,9 +171,8 @@ class _WebLandingPageState extends State<WebLandingPageView> {
                 Container(key: _downloadKey, child: DownloadSection(onDownload: _handleDownload)), // Key matches navigation logic
                 Container(key: _faqKey, child: const FaqSection()),
                 
+                // ✅ FIXED: Only pass onNavigateToSection
                 ContactSection(
-                  onGetStarted: _handleGetStarted,
-                  onDownload: _handleDownload,
                   onNavigateToSection: _scrollToSection,
                 ),
               ],

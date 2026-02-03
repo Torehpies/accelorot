@@ -9,7 +9,7 @@ import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_operator_table_container.dart';
 import '../dialogs/web_operator_view_details_dialog.dart';
 import '../models/machine_state.dart';
-import '../../core/widgets/web_common_widgets.dart';
+import '../../core/widgets/web_base_container.dart';
 
 class WebOperatorMachineScreen extends ConsumerWidget {
   const WebOperatorMachineScreen({super.key});
