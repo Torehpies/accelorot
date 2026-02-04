@@ -116,11 +116,12 @@ class HowItWorksSection extends StatelessWidget {
 
               // RESPONSIVE LAYOUT - Tablet and Mobile optimized
               if (isSmallMobile)
-                // Very small mobile: Single column with full description
+                // Very small mobile: Single column with full description - FIXED HEIGHT
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: steps.map((step) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 12.0), // Reduced padding
+                      padding: EdgeInsets.only(bottom: 16.0),
                       child: StepCard(
                         step: step,
                         isMobile: true,
@@ -130,15 +131,15 @@ class HowItWorksSection extends StatelessWidget {
                   }).toList(),
                 )
               else if (isMobile)
-                // Mobile: 2 columns with better text display
+                // Mobile: 2 columns with INCREASED height for descriptions
                 GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 12.0, // Reduced spacing
-                    mainAxisSpacing: 12.0, // Reduced spacing
-                    childAspectRatio: 1.3, // Taller for more text space
+                    crossAxisSpacing: 12.0,
+                    mainAxisSpacing: 12.0,
+                    childAspectRatio: 0.95, // INCREASED from 1.3 to 0.95 for more height
                   ),
                   itemCount: steps.length,
                   itemBuilder: (context, index) {
@@ -158,7 +159,7 @@ class HowItWorksSection extends StatelessWidget {
                     crossAxisCount: isLargeTablet ? 4 : 2,
                     crossAxisSpacing: isLargeTablet ? 16.0 : 20.0,
                     mainAxisSpacing: isLargeTablet ? 16.0 : 20.0,
-                    childAspectRatio: isLargeTablet ? 1.0 : 1.3, // Taller for 2-column
+                    childAspectRatio: isLargeTablet ? 1.0 : 1.1, // INCREASED from 1.3 to 1.1 for more height
                   ),
                   itemCount: steps.length,
                   itemBuilder: (context, index) {
@@ -336,22 +337,124 @@ class _StepCardState extends State<StepCard> {
       );
     }
 
-    // Tablet and Mobile view - MINIMIZED FONT SIZES
+    // Very Small Mobile view - SINGLE COLUMN with FIXED HEIGHT
+    if (widget.isSmallMobile) {
+      return Container(
+        height: 220, // FIXED HEIGHT for small mobile to show full description
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(
+            color: Color(0xFFD1FAE5),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: 0.06),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row with icon and step number
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon box
+                  Container(
+                    width: 32.0,
+                    height: 32.0,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          accentColor.withValues(alpha: 0.1),
+                          accentColor.withValues(alpha: 0.05),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(6.0),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.2),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Icon(
+                      _getIcon(widget.step.number, widget.step.title),
+                      color: accentColor,
+                      size: 16.0,
+                    ),
+                  ),
+                  
+                  // Step number
+                  Text(
+                    widget.step.number.toString().padLeft(2, '0'),
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w700,
+                      color: accentColor,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8.0),
+
+              // Title
+              Text(
+                widget.step.title,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF064E3B),
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 4.0),
+
+              // Description - FULL HEIGHT with proper wrapping
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Text(
+                    widget.step.description,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      height: 1.4,
+                      color: Color(0xFF374151),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Mobile and Tablet view - MINIMIZED FONT SIZES with SCROLLABLE DESCRIPTION
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(
-          widget.isSmallMobile ? 10.0 : // Smaller radius for mobile
-          widget.isMobile ? 12.0 :
-          16.0,
+          widget.isMobile ? 12.0 : 16.0,
         ),
         border: Border.all(
-          color: Color(0xFFD1FAE5), // Light green border
-          width: 1.0, // Thinner border for mobile
+          color: Color(0xFFD1FAE5),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: 0.06), // Even more subtle shadow for mobile
+            color: accentColor.withValues(alpha: 0.06),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -359,9 +462,7 @@ class _StepCardState extends State<StepCard> {
       ),
       child: Padding(
         padding: EdgeInsets.all(
-          widget.isSmallMobile ? 12.0 : // Reduced padding for mobile
-          widget.isMobile ? 14.0 :
-          widget.isLargeTablet ? 18.0 : 20.0,
+          widget.isMobile ? 14.0 : 20.0,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,14 +472,10 @@ class _StepCardState extends State<StepCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Icon box - Using accent color as accent
+                // Icon box
                 Container(
-                  width: widget.isSmallMobile ? 32.0 : // Smaller for mobile
-                         widget.isMobile ? 36.0 :
-                         widget.isLargeTablet ? 44.0 : 48.0,
-                  height: widget.isSmallMobile ? 32.0 : // Smaller for mobile
-                         widget.isMobile ? 36.0 :
-                         widget.isLargeTablet ? 44.0 : 48.0,
+                  width: widget.isMobile ? 36.0 : 48.0,
+                  height: widget.isMobile ? 36.0 : 48.0,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -389,53 +486,43 @@ class _StepCardState extends State<StepCard> {
                       ],
                     ),
                     borderRadius: BorderRadius.circular(
-                      widget.isSmallMobile ? 6.0 : // Smaller radius
-                      widget.isMobile ? 8.0 :
-                      12.0,
+                      widget.isMobile ? 8.0 : 12.0,
                     ),
                     border: Border.all(
-                      color: accentColor.withValues(alpha: 0.2), // Even more subtle border for mobile
-                      width: 0.8, // Thinner border
+                      color: accentColor.withValues(alpha: 0.2),
+                      width: 0.8,
                     ),
                   ),
                   child: Icon(
                     _getIcon(widget.step.number, widget.step.title),
-                    color: accentColor, // ACCENT COLOR for icon
-                    size: widget.isSmallMobile ? 16.0 : // Smaller icon for mobile
-                          widget.isMobile ? 18.0 :
-                          widget.isLargeTablet ? 22.0 : 24.0,
+                    color: accentColor,
+                    size: widget.isMobile ? 18.0 : 24.0,
                   ),
                 ),
                 
-                // Step number - MINIMIZED for mobile
+                // Step number
                 Text(
                   widget.step.number.toString().padLeft(2, '0'),
                   style: TextStyle(
-                    fontSize: widget.isSmallMobile ? 20.0 : // Smaller for mobile
-                             widget.isMobile ? 22.0 :
-                             widget.isLargeTablet ? 28.0 : 30.0,
+                    fontSize: widget.isMobile ? 22.0 : 30.0,
                     fontWeight: FontWeight.w700,
-                    color: accentColor, // ACCENT COLOR for step number
+                    color: accentColor,
                   ),
                 ),
               ],
             ),
 
             SizedBox(
-              height: widget.isSmallMobile ? 8.0 : // Reduced spacing
-                     widget.isMobile ? 10.0 :
-                     18.0,
+              height: widget.isMobile ? 10.0 : 18.0,
             ),
 
-            // Title - MINIMIZED for mobile
+            // Title
             Text(
               widget.step.title,
               style: TextStyle(
-                fontSize: widget.isSmallMobile ? 14.0 : // Smaller for mobile
-                         widget.isMobile ? 15.0 :
-                         widget.isLargeTablet ? 17.0 : 18.0,
+                fontSize: widget.isMobile ? 15.0 : 18.0,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF064E3B), // Dark green-gray
+                color: Color(0xFF064E3B),
                 height: 1.2,
               ),
               maxLines: 2,
@@ -443,23 +530,19 @@ class _StepCardState extends State<StepCard> {
             ),
 
             SizedBox(
-              height: widget.isSmallMobile ? 4.0 : // Reduced spacing
-                     widget.isMobile ? 6.0 :
-                     12.0,
+              height: widget.isMobile ? 6.0 : 12.0,
             ),
 
-            // Description - MINIMIZED for mobile
+            // Description - SCROLLABLE for mobile to prevent cutoff
             Expanded(
               child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 child: Text(
                   widget.step.description,
                   style: TextStyle(
-                    fontSize: widget.isSmallMobile ? 11.5 : // Much smaller for mobile
-                             widget.isMobile ? 12.0 : // Smaller for mobile
-                             widget.isLargeTablet ? 14.0 : 14.5,
-                    height: 1.4, // Tighter line height for mobile
-                    color: Color(0xFF374151), // Medium gray with green undertone
+                    fontSize: widget.isMobile ? 12.0 : 14.5,
+                    height: 1.4,
+                    color: Color(0xFF374151),
                   ),
                 ),
               ),
