@@ -58,7 +58,7 @@ class MoistureStatisticCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'sample text description...',
+                        'Compost moisture content',
                         style: TextStyle(
                           fontSize: 11,
                           color: Color(0xFF9CA3AF),
@@ -269,10 +269,9 @@ class MoistureStatisticCard extends StatelessWidget {
 
   List<Widget> _buildMoreInfo() {
     final items = [
-      'sample text here',
-      'sample text here',
-      'sample text here',
-      'sample text here',
+      'Optimal for microbial decomposition',
+      'Too dry slows breakdown process',
+      'Too wet causes anaerobic conditions',
     ];
     
     return items.map((item) => Padding(
