@@ -106,7 +106,7 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
             ),
           ),
           TableCellWidget(
-            flex: 3,
+            flex: 2,
             child: TableHeaderCell(
               label: 'Email',
               sortable: true,
