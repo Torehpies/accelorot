@@ -4,7 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/ui/primary_button.dart';
+import '../../core/ui/primary_button.dart'; 
+import '../../core/ui/header_button.dart'; 
 
 class AppHeader extends StatefulWidget {
   final VoidCallback onLogin;
@@ -40,7 +41,6 @@ class _AppHeaderState extends State<AppHeader> {
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isVerySmall = screenWidth < 320;
 
-    // Adaptive padding based on screen size
     final horizontalPadding = isVerySmall
         ? AppSpacing.sm
         : (isMobile ? AppSpacing.md : (isTablet ? AppSpacing.lg : AppSpacing.xxxl));
@@ -101,20 +101,25 @@ class _AppHeaderState extends State<AppHeader> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Logo with hover tint
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          child: SvgPicture.asset(
-                            'assets/images/Accelorot_logo.svg',
+                          child: Image.asset(
+                            'assets/images/Accelorot Logo.png',
                             width: logoSize,
                             height: logoSize,
                             fit: BoxFit.contain,
-                            semanticsLabel: 'Accelorot_logo',
+                            errorBuilder: (context, error, stackTrace) {
+                              return SvgPicture.asset(
+                                'assets/images/Accelorot_logo.svg',
+                                width: logoSize,
+                                height: logoSize,
+                                fit: BoxFit.contain,
+                              );
+                            },
                           ),
                         ),
                         if (showAppName) ...[
                           const SizedBox(width: AppSpacing.xs),
-                          // App name with hover effect
                           Flexible(
                             child: AnimatedDefaultTextStyle(
                               duration: const Duration(milliseconds: 200),
@@ -125,7 +130,7 @@ class _AppHeaderState extends State<AppHeader> {
                                 fontWeight: FontWeight.w900,
                                 fontSize: appNameFontSize,
                               ),
-                              child: Text(
+                              child: const Text(
                                 'Accel-O-Rot',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -142,7 +147,6 @@ class _AppHeaderState extends State<AppHeader> {
 
             // Navigation handling based on screen size
             if (isMobile) ...[
-              // Mobile actions: Hamburger menu + compact primary button
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -171,7 +175,6 @@ class _AppHeaderState extends State<AppHeader> {
                 ],
               ),
             ] else ...[
-              // Desktop/Tablet navigation - fully responsive with proper shrinking
               Flexible(
                 flex: 3,
                 child: SingleChildScrollView(
@@ -231,26 +234,16 @@ class _AppHeaderState extends State<AppHeader> {
                   ),
                 ),
               ),
-              // Action buttons
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(
-                    onPressed: widget.onLogin,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isTablet ? 8 : 12,
-                        vertical: 8,
-                      ),
-                    ),
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 16,
-                        color: widget.isScrolled 
-                            ? const Color(0xFF374151) 
-                            : const Color(0xFF1F2937),
-                      ),
+                  // ✅ ONLY THIS BUTTON IS NOW HeaderButton
+                  SizedBox(
+                    width: 100,
+                    height: isTablet ? 38 : 42,
+                    child: HeaderButton(
+                      text: 'Login',
+                      onPressed: widget.onLogin,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -272,7 +265,8 @@ class _AppHeaderState extends State<AppHeader> {
   }
 }
 
-class _BreadcrumbItem extends StatelessWidget {
+// Keep _BreadcrumbItem unchanged
+class _BreadcrumbItem extends StatefulWidget {
   final String label;
   final String id;
   final String active;
@@ -288,28 +282,42 @@ class _BreadcrumbItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bool isActive = active == id;
-    final double paddingVertical = fontSize < 16 ? 6 : 8;
-    final double paddingHorizontal = fontSize < 16 ? 4 : 6;
+  State<_BreadcrumbItem> createState() => _BreadcrumbItemState();
+}
 
-    return GestureDetector(
-      onTap: () => onTap(id),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: paddingVertical,
-          horizontal: paddingHorizontal,
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive
-                ? WebColors.success
-                : const Color(0xFF6B7280),
+class _BreadcrumbItemState extends State<_BreadcrumbItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isActive = widget.active == widget.id;
+    final double paddingVertical = widget.fontSize < 16 ? 6 : 8;
+    final double paddingHorizontal = widget.fontSize < 16 ? 4 : 6;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () => widget.onTap(widget.id),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: paddingVertical,
+            horizontal: paddingHorizontal,
+          ),
+          child: Text(
+            widget.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: widget.fontSize,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color: isActive
+                  ? WebColors.success
+                  : _isHovered
+                      ? WebColors.success
+                      : const Color(0xFF6B7280),
+            ),
           ),
         ),
       ),

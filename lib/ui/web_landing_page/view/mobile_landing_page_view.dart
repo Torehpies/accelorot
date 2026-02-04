@@ -118,9 +118,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   void _handleLearnMore() => _scrollToSection('features');
 
   Widget _section({required Key key, required Widget child}) {
-    return Padding(
+    return SizedBox(
       key: key,
-      padding: const EdgeInsets.only(top: _headerHeight),
       child: child,
     );
   }
@@ -135,6 +134,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
             controller: _scrollController,
             child: Column(
               children: [
+                // Add top padding for the first section to account for header
+                SizedBox(height: _headerHeight),
                 _section(
                   key: _homeKey,
                   child: IntroSection(

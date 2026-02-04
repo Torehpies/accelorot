@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/ui/primary_button.dart';
+import '../../core/ui/tap_button.dart';
 import '../widgets/tem_mois_oxy_card.dart';
 
 class IntroSection extends StatelessWidget {
@@ -20,11 +22,13 @@ class IntroSection extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 768;
-        final isTablet = constraints.maxWidth >= 768 && constraints.maxWidth < 1024;
+        final isTablet =
+            constraints.maxWidth >= 768 && constraints.maxWidth < 1024;
         final isDesktop = constraints.maxWidth >= 1024;
 
         return Stack(
           children: [
+            /// Background Image (now visible without overlay)
             Positioned.fill(
               child: Image.asset(
                 'assets/images/bg.png',
@@ -33,20 +37,33 @@ class IntroSection extends StatelessWidget {
                 cacheWidth: isMobile ? 600 : (isTablet ? 1000 : 1800),
               ),
             ),
-            Positioned.fill(
-              child: Container(
-                color: Colors.white.withValues(alpha: 0.3), 
-              ),
-            ),
+
+            /// Content
             Container(
               width: double.infinity,
               padding: EdgeInsets.fromLTRB(
-                isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
-                isMobile ? AppSpacing.xxxl * 2 : (isTablet ? AppSpacing.xxxl * 2.5 : AppSpacing.xxxl * 3),
-                isMobile ? AppSpacing.xl : (isTablet ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 3),
-                isMobile ? AppSpacing.xxxl * 3 : (isTablet ? AppSpacing.xxxl * 4 : AppSpacing.xxxl * 7),
+                isMobile
+                    ? AppSpacing.xl
+                    : (isTablet
+                        ? AppSpacing.xxxl * 2
+                        : AppSpacing.xxxl * 3),
+                isMobile
+                    ? AppSpacing.xxxl * 2
+                    : (isTablet
+                        ? AppSpacing.xxxl * 2.5
+                        : AppSpacing.xxxl * 3),
+                isMobile
+                    ? AppSpacing.xl
+                    : (isTablet
+                        ? AppSpacing.xxxl * 2
+                        : AppSpacing.xxxl * 3),
+                isMobile
+                    ? AppSpacing.xxxl * 3
+                    : (isTablet
+                        ? AppSpacing.xxxl * 4
+                        : AppSpacing.xxxl * 7),
               ),
-              child: isDesktop 
+              child: isDesktop
                   ? _buildDesktopLayout(context)
                   : _buildMobileTabletLayout(context, isMobile, isTablet),
             ),
@@ -56,7 +73,7 @@ class IntroSection extends StatelessWidget {
     );
   }
 
-  // Desktop layout (side-by-side)
+  // ───────────────────────────────── Desktop Layout
   Widget _buildDesktopLayout(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,28 +85,45 @@ class IntroSection extends StatelessWidget {
         const SizedBox(width: AppSpacing.xxxl),
         Expanded(
           flex: 3,
-          child: _buildRightCards(context, false),
+          child: _buildRightCards(context),
         ),
       ],
     );
   }
 
-  Widget _buildMobileTabletLayout(BuildContext context, bool isMobile, bool isTablet) {
+  // ───────────────────────────────── Mobile / Tablet Layout
+  Widget _buildMobileTabletLayout(
+    BuildContext context,
+    bool isMobile,
+    bool isTablet,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildLeftContent(context, isMobile, isTablet),
-        SizedBox(height: isMobile ? AppSpacing.xxxl * 2 : AppSpacing.xxxl * 2.5),
-        _buildRightCards(context, isMobile),
+        SizedBox(
+          height: isMobile
+              ? AppSpacing.xxxl * 2
+              : AppSpacing.xxxl * 2.5,
+        ),
+        _buildRightCards(context),
       ],
     );
   }
 
-  Widget _buildLeftContent(BuildContext context, bool isMobile, bool isTablet) {
+  // ───────────────────────────────── Left Content
+  Widget _buildLeftContent(
+    BuildContext context,
+    bool isMobile,
+    bool isTablet,
+  ) {
     return Column(
-      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         if (!isMobile) const SizedBox(height: AppSpacing.xl),
+
+        /// Heading
         RichText(
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           text: TextSpan(
@@ -103,7 +137,7 @@ class IntroSection extends StatelessWidget {
               TextSpan(
                 text: 'Organic Waste\n',
                 style: TextStyle(
-                  color: AppColors.green100, 
+                  color: AppColors.green100,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -111,20 +145,25 @@ class IntroSection extends StatelessWidget {
             ],
           ),
         ),
+
         const SizedBox(height: AppSpacing.xl),
+
+        /// Subtitle
         Text(
           'Accelerate decomposition with our IoT-enabled rotary drum system.\n'
           'Monitor in real-time, automate processes,\n'
           'and produce quality compost in just 2 weeks.',
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           style: WebTextStyles.subtitle.copyWith(
-            color: Colors.white.withValues(alpha: 0.92), 
+            color: Colors.white.withValues(alpha: 0.92),
             fontSize: isMobile ? 14 : (isTablet ? 15 : 16),
             height: 1.6,
           ),
         ),
+
         const SizedBox(height: AppSpacing.xxxl),
-        // Buttons layout
+
+        /// Buttons
         isMobile
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -137,29 +176,12 @@ class IntroSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  // Learn More button with white text
                   SizedBox(
                     height: 50,
-                    child: OutlinedButton(
+                    width: double.infinity,
+                    child: TapButton(
+                      text: 'Learn More',
                       onPressed: onLearnMore,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 24 : 32,
-                        ),
-                      ),
-                      child: const Text(
-                        'Learn More',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -169,33 +191,19 @@ class IntroSection extends StatelessWidget {
                 runSpacing: AppSpacing.md,
                 children: [
                   SizedBox(
-                    height: 50,
+                    height: 56,
+                    width: 220,
                     child: PrimaryButton(
                       text: 'Start Composting →',
                       onPressed: onGetStarted,
                     ),
                   ),
-                  // Learn More button with white text
                   SizedBox(
-                    height: 50,
-                    child: OutlinedButton(
+                    height: 56,
+                    width: 170,
+                    child: TapButton(
+                      text: 'Learn More',
                       onPressed: onLearnMore,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                      ),
-                      child: const Text(
-                        'Learn More',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -204,19 +212,22 @@ class IntroSection extends StatelessWidget {
     );
   }
 
-  Widget _buildRightCards(BuildContext context, bool isMobile) {
+  // ───────────────────────────────── Right Cards
+  Widget _buildRightCards(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
-          children: const [
+          children: [
             Expanded(
               child: TemMoisOxyCard(
                 icon: Icons.thermostat_outlined,
                 value: '45°C',
                 label: 'Temperature',
-                hoverInfo: 'Optimal range: 40-60°C for thermophilic composting',
+                hoverInfo:
+                    'Optimal range: 40–60°C for thermophilic composting',
                 position: 0,
+                iconColor: const Color(0xFFF44336), // Warm red for heat
               ),
             ),
             SizedBox(width: AppSpacing.lg),
@@ -225,22 +236,26 @@ class IntroSection extends StatelessWidget {
                 icon: Icons.water_drop_outlined,
                 value: '58%',
                 label: 'Moisture',
-                hoverInfo: 'Ideal moisture level for efficient decomposition',
+                hoverInfo:
+                    'Ideal moisture level for efficient decomposition',
                 position: 1,
+                iconColor: const Color(0xFF2196F3), // Blue for water
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.lg),
+        SizedBox(height: AppSpacing.lg),
         Row(
-          children: const [
+          children: [
             Expanded(
               child: TemMoisOxyCard(
                 icon: Icons.air_outlined,
                 value: '21%',
                 label: 'Aeration',
-                hoverInfo: 'Adequate aeration for aerobic decomposition',
+                hoverInfo:
+                    'Adequate aeration for aerobic decomposition',
                 position: 2,
+                iconColor: const Color(0xFF03A9F4), // Light blue for air
               ),
             ),
             SizedBox(width: AppSpacing.lg),
@@ -251,6 +266,7 @@ class IntroSection extends StatelessWidget {
                 label: 'Complete',
                 hoverInfo: '2-week composting cycle',
                 position: 3,
+                iconColor: AppColors.green100, // Green for success/completion
               ),
             ),
           ],

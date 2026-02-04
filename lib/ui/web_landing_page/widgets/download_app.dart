@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart';
+import '../../core/ui/header_button.dart'; 
 import 'package:flutter_svg/flutter_svg.dart';
 
 
@@ -33,12 +34,6 @@ class DownloadApp extends StatelessWidget {
               cacheHeight: 1000,
               cacheWidth: 1000,
               colorBlendMode: BlendMode.modulate,
-            ),
-          ),
-          // Light overlay for better text visibility
-          Positioned.fill(
-            child: Container(
-              color: Colors.white.withValues(alpha: 0.3),
             ),
           ),
           // Content with responsive padding
@@ -112,7 +107,8 @@ class DownloadApp extends StatelessWidget {
                                       child: SizedBox(
                                         width: MediaQuery.of(context).size.width * 0.85,
                                         height: 56,
-                                        child: ElevatedButton(
+                                        child: PrimaryButton(
+                                          text: 'Download APK v1.0.0',
                                           onPressed: () {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(
@@ -121,34 +117,6 @@ class DownloadApp extends StatelessWidget {
                                               ),
                                             );
                                           },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF22C55E),
-                                            foregroundColor: Colors.white,
-                                            elevation: 2,
-                                            shadowColor: Colors.black.withValues(alpha: 0.25),
-                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: const [
-                                              Icon(Icons.download, size: 18),
-                                              SizedBox(width: 8),
-                                              Flexible(
-                                                child: Text(
-                                                  'Download Accel-O-Rot\nv1.0.0.apk',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 14, 
-                                                    fontWeight: FontWeight.w600,
-                                                    height: 1.3,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                                         ),
                                       ),
                                     ),
@@ -217,7 +185,8 @@ class DownloadApp extends StatelessWidget {
                                         child: SizedBox(
                                           width: 260,
                                           height: 56,
-                                          child: ElevatedButton(
+                                          child: PrimaryButton(
+                                            text: 'Download APK v1.0.0',
                                             onPressed: () {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 const SnackBar(
@@ -226,34 +195,6 @@ class DownloadApp extends StatelessWidget {
                                                 ),
                                               );
                                             },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(0xFF22C55E),
-                                              foregroundColor: Colors.white,
-                                              elevation: 2,
-                                              shadowColor: Colors.black.withValues(alpha: 0.25),
-                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: const [
-                                                Icon(Icons.download, size: 18),
-                                                SizedBox(width: 8),
-                                                Flexible(
-                                                  child: Text(
-                                                    'Download Accel-O-Rot\nv1.0.0.apk',
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      height: 1.3,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
                                           ),
                                         ),
                                       ),
@@ -753,7 +694,7 @@ class _ActivityItem extends StatelessWidget {
   }
 }
 
-// App Header Widget
+// App Header Widget - UPDATED WITH HEADERBUTTON
 class _AppHeader extends StatefulWidget {
   final Function(String) onBreadcrumbTap;
   final String activeSection;
@@ -841,12 +782,19 @@ class _AppHeaderState extends State<_AppHeader> {
                       children: [
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          child: SvgPicture.asset(
-                            'assets/images/Accelorot_logo.svg',
+                          child: Image.asset(
+                            'assets/images/Accelorot Logo.png',
                             width: logoSize,
                             height: logoSize,
                             fit: BoxFit.contain,
-                            semanticsLabel: 'Accelorot_logo',
+                            errorBuilder: (context, error, stackTrace) {
+                              return SvgPicture.asset(
+                                'assets/images/Accelorot_logo.svg',
+                                width: logoSize,
+                                height: logoSize,
+                                fit: BoxFit.contain,
+                              );
+                            },
                           ),
                         ),
                         if (showAppName) ...[
@@ -970,22 +918,13 @@ class _AppHeaderState extends State<_AppHeader> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isTablet ? 8 : 12,
-                        vertical: 8,
-                      ),
-                    ),
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        fontSize: isTablet ? 14 : 16,
-                        color: widget.isScrolled 
-                            ? const Color(0xFF374151) 
-                            : const Color(0xFF1F2937),
-                      ),
+                  // ✅ NOW USING HeaderButton INSTEAD OF TextButton
+                  SizedBox(
+                    width: 100,
+                    height: isTablet ? 38 : 42,
+                    child: HeaderButton(
+                      text: 'Login',
+                      onPressed: () {},
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -1009,7 +948,8 @@ class _AppHeaderState extends State<_AppHeader> {
   }
 }
 
-class _BreadcrumbItem extends StatelessWidget {
+// Keep _BreadcrumbItem unchanged with hover functionality
+class _BreadcrumbItem extends StatefulWidget {
   final String label;
   final String id;
   final String active;
@@ -1025,28 +965,42 @@ class _BreadcrumbItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final bool isActive = active == id;
-    final double paddingVertical = fontSize < 16 ? 6 : 8;
-    final double paddingHorizontal = fontSize < 16 ? 4 : 6;
+  State<_BreadcrumbItem> createState() => _BreadcrumbItemState();
+}
 
-    return GestureDetector(
-      onTap: () => onTap(id),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: paddingVertical,
-          horizontal: paddingHorizontal,
-        ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive
-                ? WebColors.success
-                : const Color(0xFF6B7280),
+class _BreadcrumbItemState extends State<_BreadcrumbItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isActive = widget.active == widget.id;
+    final double paddingVertical = widget.fontSize < 16 ? 6 : 8;
+    final double paddingHorizontal = widget.fontSize < 16 ? 4 : 6;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () => widget.onTap(widget.id),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            vertical: paddingVertical,
+            horizontal: paddingHorizontal,
+          ),
+          child: Text(
+            widget.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: widget.fontSize,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color: isActive
+                  ? WebColors.success
+                  : _isHovered
+                      ? WebColors.success
+                      : const Color(0xFF6B7280),
+            ),
           ),
         ),
       ),
