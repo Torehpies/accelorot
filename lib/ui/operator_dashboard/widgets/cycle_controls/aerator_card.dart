@@ -97,7 +97,20 @@ Future<void> _loadExistingCycle() async {
   }
 
   try {
-    // Check if machine has aeratorActive = true in Firestore
+    // Load the cycle document first
+    final cycleRepository = ref.read(cycleRepositoryProvider);
+    final cycles = await cycleRepository.getAerators(
+      batchId: widget.currentBatch!.id,
+    );
+    final cycle = cycles.isEmpty ? null : cycles.first;
+
+    debugPrint('📊 Aerator loaded: ${cycle != null ? "Found" : "Not found"}');
+    
+    if (cycle != null) {
+      debugPrint('📊 Cycle status: ${cycle.status}');
+    }
+
+    // Check machine aeratorActive status
     final machineRepository = ref.read(machineRepositoryProvider);
     final machine = await machineRepository.getMachineById(widget.machineId!);
     
@@ -106,9 +119,9 @@ Future<void> _loadExistingCycle() async {
       return;
     }
 
-    // aeratorActive is false in Firestore, don't proceed
-    if (!machine.aeratorActive) {
-      debugPrint('⚠️ Aerator is not active in Firestore (aeratorActive: false)');
+    // If no cycle exists and aeratorActive is false, reset to idle
+    if (cycle == null && !machine.aeratorActive) {
+      debugPrint('⚠️ No cycle and aerator is not active - resetting to idle');
       if (mounted) {
         setState(() {
           settings.reset();
@@ -117,18 +130,14 @@ Future<void> _loadExistingCycle() async {
           _completedCycles = 0;
           _startTime = null;
           _cycleDoc = null;
+          _isPaused = false;
+          _accumulatedSeconds = 0;
         });
       }
       return;
     }
 
-    // Load the cycle document
-    final cycleRepository = ref.read(cycleRepositoryProvider);
-    final cycles = await cycleRepository.getAerators(
-      batchId: widget.currentBatch!.id,
-    );
-    final cycle = cycles.isEmpty ? null : cycles.first;
-
+    // If cycle exists, restore state based on cycle status
     if (mounted && cycle != null) {
       setState(() {
         _cycleDoc = cycle;
@@ -285,6 +294,9 @@ Future<void> _loadExistingCycle() async {
 
       await machineRepository.updateAeratorActive(widget.machineId!, true);
 
+      // Wait a bit for Firestore to propagate
+      await Future.delayed(const Duration(milliseconds: 500));
+
       final cycles = await cycleRepository.getAerators(
         batchId: widget.currentBatch!.id,
       );
@@ -295,6 +307,8 @@ Future<void> _loadExistingCycle() async {
         status = SystemStatus.running;
         _startTime = DateTime.now();
         _completedCycles = 0;
+        _isPaused = false;
+        _accumulatedSeconds = 0;
         _startTimer();
       });
 
@@ -742,9 +756,10 @@ Future<void> _loadExistingCycle() async {
         // Button logic
         if (status == SystemStatus.running && !_isPaused)
           // Running: Show Pause and Stop
-          Row(
+          Column(
             children: [
-              Expanded(
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _handlePause,
                   icon: const Icon(Icons.pause),
@@ -760,8 +775,9 @@ Future<void> _loadExistingCycle() async {
                   ),
                 ),
               ),
-              SizedBox(width: cardWidth * 0.04),
-              Expanded(
+              SizedBox(height: cardHeight * 0.02),
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _handleStop,
                   icon: const Icon(Icons.stop),
@@ -781,15 +797,16 @@ Future<void> _loadExistingCycle() async {
           )
         else if (_isPaused)
           // Paused: Show Resume and Stop
-          Row(
+          Column(
             children: [
-              Expanded(
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _handleResume,
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Resume'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF14B8A6),  // Teal
+                    backgroundColor: const Color(0xFFF59E0B),  // Orange
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -799,8 +816,9 @@ Future<void> _loadExistingCycle() async {
                   ),
                 ),
               ),
-              SizedBox(width: cardWidth * 0.04),
-              Expanded(
+              SizedBox(height: cardHeight * 0.02),
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _handleStop,
                   icon: const Icon(Icons.stop),
