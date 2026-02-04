@@ -83,6 +83,19 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(addOperatorProvider);
+    // Listen for state updates
+    ref.listen(addOperatorProvider, (previous, next) {
+      if (previous?.isLoading == true && next.isLoading == false) {
+        if (next.operator != null) {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+            AppSnackbar.success(context, 'Operator added successfully!');
+          }
+        } else if (next.error != null) {
+          AppSnackbar.error(context, next.error!);
+        }
+      }
+    });
     return AlertDialog(
       backgroundColor: Colors.white,
       title: const Text(
@@ -220,17 +233,6 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                             firstname: firstnameController.text,
                             lastname: lastnameController.text,
                           );
-                      if (context.mounted) {
-                        if (state.operator != null) {
-                          Navigator.of(context).pop();
-                          AppSnackbar.success(
-                            context,
-                            'Operator added successfully!',
-                          );
-                        } else if (state.error != null) {
-                          AppSnackbar.error(context, state.error!);
-                        }
-                      }
                     }
                   }
                 },
