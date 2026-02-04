@@ -22,5 +22,7 @@ abstract class PendingMembersState with _$PendingMembersState {
     @Default(DateFilterRange(type: DateFilterType.none))
     DateFilterRange dateFilter,
     @Default('') String searchQuery,
+    String? sortColumn,
+    @Default(true) bool sortAscending,
   }) = _PendingMembersState;
 }

@@ -1,14 +1,10 @@
-
 import 'package:equatable/equatable.dart';
 
 class SettingsModel extends Equatable {
   final AccountSettings account;
   final NotificationSettings notifications;
 
-  const SettingsModel({
-    required this.account,
-    required this.notifications,
-  });
+  const SettingsModel({required this.account, required this.notifications});
 
   factory SettingsModel.initial() {
     return const SettingsModel(
@@ -25,12 +21,9 @@ class SettingsModel extends Equatable {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'account': account.toMap(),
-      'notifications': notifications.toMap(),
-    };
+    return {'account': account.toMap(), 'notifications': notifications.toMap()};
   }
-  
+
   SettingsModel copyWith({
     AccountSettings? account,
     NotificationSettings? notifications,
@@ -55,8 +48,8 @@ class AccountSettings extends Equatable {
   });
 
   const AccountSettings.initial()
-      : twoFactorEnabled = false,
-        emailUpdates = true;
+    : twoFactorEnabled = false,
+      emailUpdates = true;
 
   factory AccountSettings.fromMap(Map<String, dynamic> map) {
     return AccountSettings(
@@ -66,16 +59,10 @@ class AccountSettings extends Equatable {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'twoFactorEnabled': twoFactorEnabled,
-      'emailUpdates': emailUpdates,
-    };
+    return {'twoFactorEnabled': twoFactorEnabled, 'emailUpdates': emailUpdates};
   }
 
-  AccountSettings copyWith({
-    bool? twoFactorEnabled,
-    bool? emailUpdates,
-  }) {
+  AccountSettings copyWith({bool? twoFactorEnabled, bool? emailUpdates}) {
     return AccountSettings(
       twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
       emailUpdates: emailUpdates ?? this.emailUpdates,
@@ -112,16 +99,16 @@ class NotificationSettings extends Equatable {
   });
 
   const NotificationSettings.initial()
-      : pushEnabled = true,
-        emailReportsEnabled = true,
-        tempThreshold = 70.0,
-        moistureThreshold = 50.0,
-        oxygenThreshold = 15.0,
-        filterErrors = true,
-        filterWarnings = true,
-        temperatureAlertsEnabled = true,
-        moistureAlertsEnabled = true,
-        oxygenAlertsEnabled = true;
+    : pushEnabled = true,
+      emailReportsEnabled = true,
+      tempThreshold = 70.0,
+      moistureThreshold = 50.0,
+      oxygenThreshold = 15.0,
+      filterErrors = true,
+      filterWarnings = true,
+      temperatureAlertsEnabled = true,
+      moistureAlertsEnabled = true,
+      oxygenAlertsEnabled = true;
 
   factory NotificationSettings.fromMap(Map<String, dynamic> map) {
     return NotificationSettings(
@@ -174,23 +161,25 @@ class NotificationSettings extends Equatable {
       oxygenThreshold: oxygenThreshold ?? this.oxygenThreshold,
       filterErrors: filterErrors ?? this.filterErrors,
       filterWarnings: filterWarnings ?? this.filterWarnings,
-      temperatureAlertsEnabled: temperatureAlertsEnabled ?? this.temperatureAlertsEnabled,
-      moistureAlertsEnabled: moistureAlertsEnabled ?? this.moistureAlertsEnabled,
+      temperatureAlertsEnabled:
+          temperatureAlertsEnabled ?? this.temperatureAlertsEnabled,
+      moistureAlertsEnabled:
+          moistureAlertsEnabled ?? this.moistureAlertsEnabled,
       oxygenAlertsEnabled: oxygenAlertsEnabled ?? this.oxygenAlertsEnabled,
     );
   }
 
   @override
   List<Object?> get props => [
-        pushEnabled,
-        emailReportsEnabled,
-        tempThreshold,
-        moistureThreshold,
-        oxygenThreshold,
-        filterErrors,
-        filterWarnings,
-        temperatureAlertsEnabled,
-        moistureAlertsEnabled,
-        oxygenAlertsEnabled,
-      ];
+    pushEnabled,
+    emailReportsEnabled,
+    tempThreshold,
+    moistureThreshold,
+    oxygenThreshold,
+    filterErrors,
+    filterWarnings,
+    temperatureAlertsEnabled,
+    moistureAlertsEnabled,
+    oxygenAlertsEnabled,
+  ];
 }
