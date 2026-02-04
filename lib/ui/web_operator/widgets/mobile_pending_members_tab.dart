@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
-import 'package:flutter_application_1/ui/core/ui/data_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/utils/format.dart';
+import 'package:flutter_application_1/ui/web_operator/bottom_sheets/pending_member_view_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobilePendingMembersTab extends ConsumerStatefulWidget {
@@ -100,41 +99,10 @@ class _MembersList extends StatelessWidget {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (context) => DataBottomSheet<PendingMember>(
-                data: member,
-                title: '${member.lastName}, ${member.firstName}',
-                avatarIcon: Icons.person,
-                avatarColor: AppColors.green100,
-                details: [
-                  MapEntry('Email', member.email),
-                  MapEntry(
-                    'Requested At',
-                    formatDateAndTime(member.requestedAt),
-                  ),
-                ],
-                primaryActionLabel: "Accept",
-                onPrimaryAction: (pendingMember) =>
-                    _showAcceptDialog(context, member),
-                primaryActionIcon: Icons.check,
-                actions: [
-                  OutlinedButton.icon(
-                    onPressed: () => _showDeclineDialog(context, member),
-                    icon: Icon(Icons.cancel),
-                    label: Text('Decline'),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 17,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
+              builder: (context) => PendingMemberViewSheet(
+                member: member,
+                onAccept: () => _showAcceptDialog(context, member),
+                onDecline: () => _showDeclineDialog(context, member),
               ),
             );
           },
@@ -147,6 +115,7 @@ class _MembersList extends StatelessWidget {
     BuildContext context,
     PendingMember member,
   ) async {
+    Navigator.of(context).pop();
     final confirmed = await showConfirmDialog(
       context: context,
       title: 'Accept Request',
@@ -161,6 +130,7 @@ class _MembersList extends StatelessWidget {
     BuildContext context,
     PendingMember member,
   ) async {
+    Navigator.of(context).pop();
     final confirmed = await showConfirmDialog(
       context: context,
       title: 'Decline Request',
