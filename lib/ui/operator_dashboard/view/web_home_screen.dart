@@ -296,7 +296,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            child: DrumControlCard(
+                            child: ControlInputCard(
                               currentBatch: _activeBatchModel,
                               machineId: _selectedMachineId,
                             ),
