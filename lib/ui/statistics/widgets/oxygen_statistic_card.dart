@@ -58,7 +58,7 @@ class OxygenStatisticCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'sample text description...',
+                        'Gas concentration level',
                         style: TextStyle(
                           fontSize: 11,
                           color: Color(0xFF9CA3AF),
@@ -269,10 +269,9 @@ class OxygenStatisticCard extends StatelessWidget {
 
   List<Widget> _buildMoreInfo() {
     final items = [
-      'sample text here',
-      'sample text here',
-      'sample text here',
-      'sample text here',
+      'Monitors anaerobic decomposition',
+      'High levels indicate poor aeration',
+      'Ensures proper composting conditions',
     ];
     
     return items.map((item) => Padding(

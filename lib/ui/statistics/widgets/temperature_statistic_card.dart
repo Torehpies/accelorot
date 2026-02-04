@@ -59,7 +59,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'sample text description...',
+                        'Internal compost pile temperature',
                         style: TextStyle(
                           fontSize: 11,
                           color: Color(0xFF9CA3AF),
@@ -273,10 +273,9 @@ class TemperatureStatisticCard extends StatelessWidget {
 
   List<Widget> _buildMoreInfo() {
     final items = [
-      'sample text here',
-      'sample text here',
-      'sample text here',
-      'sample text here',
+      'Indicates microbial activity level',
+      'Peak heat shows thermophilic phase',
+      'Ensures pathogen elimination',
     ];
 
     return items
