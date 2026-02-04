@@ -499,4 +499,295 @@ Future<List<CycleRecommendation>> getAerators({
       throw Exception('Failed to fetch cycle: $e');
     }
   }
+
+  // ===== STOP DRUM CONTROLLER (Manual stop, not completion) =====
+
+  @override
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final drumSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (drumSnapshot.docs.isEmpty) {
+        throw Exception('No drum controller found to stop');
+      }
+
+      final drumDocId = drumSnapshot.docs.first.id;
+
+      // Set status to 'stopped' (not 'completed')
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .doc(drumDocId)
+          .update({
+        'status': 'stopped',
+        'totalRuntimeSeconds': totalRuntimeSeconds,
+        'stoppedAt': FieldValue.serverTimestamp(),
+        'pausedAt': FieldValue.delete(),
+        'accumulatedRuntimeSeconds': FieldValue.delete(),
+      });
+
+      debugPrint('✅ Drum controller stopped successfully');
+    } catch (e) {
+      debugPrint('❌ Error stopping drum controller: $e');
+      rethrow;
+    }
+  }
+
+  // ===== STOP AERATOR (Manual stop, not completion) =====
+
+  @override
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final aeratorSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (aeratorSnapshot.docs.isEmpty) {
+        throw Exception('No aerator found to stop');
+      }
+
+      final aeratorDocId = aeratorSnapshot.docs.first.id;
+
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .doc(aeratorDocId)
+          .update({
+        'status': 'stopped',
+        'totalRuntimeSeconds': totalRuntimeSeconds,
+        'stoppedAt': FieldValue.serverTimestamp(),
+        'pausedAt': FieldValue.delete(),
+        'accumulatedRuntimeSeconds': FieldValue.delete(),
+      });
+
+      debugPrint('✅ Aerator stopped successfully');
+    } catch (e) {
+      debugPrint('❌ Error stopping aerator: $e');
+      rethrow;
+    }
+  }
+
+  // ===== PAUSE DRUM CONTROLLER =====
+
+  @override
+  Future<void> pauseDrumController({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final drumSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (drumSnapshot.docs.isEmpty) {
+        throw Exception('No drum controller found to pause');
+      }
+
+      final drumDocId = drumSnapshot.docs.first.id;
+
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .doc(drumDocId)
+          .update({
+        'status': 'paused',
+        'pausedAt': FieldValue.serverTimestamp(),
+        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+      });
+
+      debugPrint('✅ Drum controller paused successfully');
+    } catch (e) {
+      debugPrint('❌ Error pausing drum controller: $e');
+      rethrow;
+    }
+  }
+
+  // ===== RESUME DRUM CONTROLLER =====
+
+  @override
+  Future<void> resumeDrumController({required String batchId}) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final drumSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (drumSnapshot.docs.isEmpty) {
+        throw Exception('No drum controller found to resume');
+      }
+
+      final drumDocId = drumSnapshot.docs.first.id;
+
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .doc(drumDocId)
+          .update({
+        'status': 'running',
+        'pausedAt': FieldValue.delete(),
+      });
+
+      debugPrint('✅ Drum controller resumed successfully');
+    } catch (e) {
+      debugPrint('❌ Error resuming drum controller: $e');
+      rethrow;
+    }
+  }
+
+  // ===== PAUSE AERATOR =====
+
+  @override
+  Future<void> pauseAerator({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final aeratorSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (aeratorSnapshot.docs.isEmpty) {
+        throw Exception('No aerator found to pause');
+      }
+
+      final aeratorDocId = aeratorSnapshot.docs.first.id;
+
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .doc(aeratorDocId)
+          .update({
+        'status': 'paused',
+        'pausedAt': FieldValue.serverTimestamp(),
+        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+      });
+
+      debugPrint('✅ Aerator paused successfully');
+    } catch (e) {
+      debugPrint('❌ Error pausing aerator: $e');
+      rethrow;
+    }
+  }
+
+  // ===== RESUME AERATOR =====
+
+  @override
+  Future<void> resumeAerator({required String batchId}) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final aeratorSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (aeratorSnapshot.docs.isEmpty) {
+        throw Exception('No aerator found to resume');
+      }
+
+      final aeratorDocId = aeratorSnapshot.docs.first.id;
+
+      await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .doc(aeratorDocId)
+          .update({
+        'status': 'running',
+        'pausedAt': FieldValue.delete(),
+      });
+
+      debugPrint('✅ Aerator resumed successfully');
+    } catch (e) {
+      debugPrint('❌ Error resuming aerator: $e');
+      rethrow;
+    }
+  }
 }

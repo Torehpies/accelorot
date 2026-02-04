@@ -47,5 +47,35 @@ abstract class CycleService {
   /// Complete aerator
   Future<void> completeAerator({required String batchId});
 
+  /// Stop drum controller (different from complete - for manual stop)
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  });
+
+  /// Stop aerator (different from complete - for manual stop)
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  });
+
+  /// Pause drum controller
+  Future<void> pauseDrumController({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  });
+
+  /// Resume drum controller
+  Future<void> resumeDrumController({required String batchId});
+
+  /// Pause aerator
+  Future<void> pauseAerator({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  });
+
+  /// Resume aerator
+  Future<void> resumeAerator({required String batchId});
+
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
 }

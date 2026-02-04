@@ -69,6 +69,50 @@ class CycleRepository {
   Future<void> completeAerator({required String batchId}) =>
       _cycleService.completeAerator(batchId: batchId);
 
+  /// Stop drum controller (manual stop, not completion)
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) => _cycleService.stopDrumController(
+    batchId: batchId,
+    totalRuntimeSeconds: totalRuntimeSeconds,
+  );
+
+  /// Stop aerator (manual stop, not completion)
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) => _cycleService.stopAerator(
+    batchId: batchId,
+    totalRuntimeSeconds: totalRuntimeSeconds,
+  );
+
+  /// Pause drum controller
+  Future<void> pauseDrumController({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) => _cycleService.pauseDrumController(
+    batchId: batchId,
+    accumulatedRuntimeSeconds: accumulatedRuntimeSeconds,
+  );
+
+  /// Resume drum controller
+  Future<void> resumeDrumController({required String batchId}) =>
+      _cycleService.resumeDrumController(batchId: batchId);
+
+  /// Pause aerator
+  Future<void> pauseAerator({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) => _cycleService.pauseAerator(
+    batchId: batchId,
+    accumulatedRuntimeSeconds: accumulatedRuntimeSeconds,
+  );
+
+  /// Resume aerator
+  Future<void> resumeAerator({required String batchId}) =>
+      _cycleService.resumeAerator(batchId: batchId);
+
   /// Get a single cycle by ID
   Future<CycleRecommendation?> getCycle(String id) =>
       _cycleService.fetchCycleById(id);

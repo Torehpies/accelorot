@@ -25,6 +25,10 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     DateTime? completedAt,
     int? totalRuntimeSeconds,
     DateTime? timestamp,
+    
+    // Pause-related fields
+    DateTime? pausedAt,
+    int? accumulatedRuntimeSeconds,
   }) = _CycleRecommendation;
 
   const CycleRecommendation._();
@@ -50,6 +54,8 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       totalRuntimeSeconds: data['totalRuntimeSeconds'],
       timestamp: (data['timestamp'] as Timestamp?)?.toDate(),
+      pausedAt: (data['pausedAt'] as Timestamp?)?.toDate(),
+      accumulatedRuntimeSeconds: data['accumulatedRuntimeSeconds'] as int?,
     );
   }
 
@@ -69,6 +75,9 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
       if (totalRuntimeSeconds != null)
         'totalRuntimeSeconds': totalRuntimeSeconds,
+      if (pausedAt != null) 'pausedAt': Timestamp.fromDate(pausedAt!),
+      if (accumulatedRuntimeSeconds != null)
+        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
     };
   }
 

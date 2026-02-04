@@ -32,6 +32,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   Timer? _timer;
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
+  
+  // Pause state tracking
+  bool _isPaused = false;
+  int _accumulatedSeconds = 0;
 
   @override
   void initState() {
@@ -134,20 +138,55 @@ Future<void> _loadExistingCycle() async {
         );
         _completedCycles = cycle.completedCycles ?? 0;
 
-        if (cycle.status == 'running') {
+        // Handle different statuses
+        if (cycle.status == 'paused') {
+          debugPrint('📊 Aerator is paused');
+          status = SystemStatus.idle;
+          _isPaused = true;
+          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? 0;
+          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          _startTime = null;
+        } else if (cycle.status == 'running' && machine.aeratorActive) {
+          debugPrint('📊 Aerator is running');
           status = SystemStatus.running;
+          _isPaused = false;
           _startTime = cycle.startedAt;
+          
+          // Resume with accumulated time if exists
+          if (cycle.accumulatedRuntimeSeconds != null) {
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
+          }
+          
           if (_startTime != null) {
             _startTimer();
             _simulateCycles();
           }
+        } else if (cycle.status == 'stopped') {
+          debugPrint('📊 Aerator was stopped - ready to restart');
+          status = SystemStatus.idle;
+          _isPaused = false;
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _accumulatedSeconds = 0;
         } else if (cycle.status == 'completed') {
+          debugPrint('📊 Aerator is completed');
           status = SystemStatus.stopped;
+          _isPaused = false;
           if (cycle.totalRuntimeSeconds != null) {
             _uptime = _formatDuration(
               Duration(seconds: cycle.totalRuntimeSeconds!),
             );
           }
+        } else {
+          debugPrint('⚠️ Unknown aerator state - resetting to idle');
+          settings.reset();
+          status = SystemStatus.idle;
+          _isPaused = false;
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _accumulatedSeconds = 0;
         }
       });
     } else if (mounted) {
@@ -158,6 +197,8 @@ Future<void> _loadExistingCycle() async {
         _completedCycles = 0;
         _startTime = null;
         _cycleDoc = null;
+        _isPaused = false;
+        _accumulatedSeconds = 0;
       });
     }
   } catch (e) {
@@ -176,8 +217,10 @@ Future<void> _loadExistingCycle() async {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted && _startTime != null) {
         final elapsed = DateTime.now().difference(_startTime!);
+        final totalSeconds = _accumulatedSeconds + elapsed.inSeconds;
+        
         setState(() {
-          _uptime = _formatDuration(elapsed);
+          _uptime = _formatDuration(Duration(seconds: totalSeconds));
         });
       }
     });
@@ -282,27 +325,41 @@ Future<void> _loadExistingCycle() async {
 
     try {
       final machineRepository = ref.read(machineRepositoryProvider);
+      final cycleRepository = ref.read(cycleRepositoryProvider);
 
+      // Set aeratorActive to false (stops hardware)
       await machineRepository.updateAeratorActive(widget.machineId!, false);
+
+      // Update cycle status to 'stopped' (NOT 'completed')
+      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+        final elapsed = _startTime != null 
+            ? DateTime.now().difference(_startTime!).inSeconds 
+            : 0;
+        final totalAccumulated = _accumulatedSeconds + elapsed;
+
+        await cycleRepository.stopAerator(
+          batchId: widget.currentBatch!.id,
+          totalRuntimeSeconds: totalAccumulated,
+        );
+      }
 
       _stopTimer();
       _cycleTimer?.cancel();
 
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
-        await _completeCycleInFirebase();
-      }
-
       setState(() {
-        status = SystemStatus.stopped;
+        status = SystemStatus.idle;  // Back to idle (ready to start fresh)
         _uptime = '00:00:00';
         _completedCycles = 0;
         _startTime = null;
+        _isPaused = false;
+        _accumulatedSeconds = 0;
+        _cycleDoc = null;  // Clear cycle doc reference
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator stopped'),
+            content: Text('Aerator stopped - controller reset'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -312,6 +369,104 @@ Future<void> _loadExistingCycle() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to stop: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handlePause() async {
+    if (widget.currentBatch == null || widget.machineId == null) return;
+
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      // Calculate current runtime
+      final elapsed = _startTime != null 
+          ? DateTime.now().difference(_startTime!).inSeconds 
+          : 0;
+      final totalAccumulated = _accumulatedSeconds + elapsed;
+
+      // Set aeratorActive to false (stops hardware)
+      await machineRepository.updateAeratorActive(widget.machineId!, false);
+
+      // Update cycle document to 'paused' status
+      await cycleRepository.pauseAerator(
+        batchId: widget.currentBatch!.id,
+        accumulatedRuntimeSeconds: totalAccumulated,
+      );
+
+      // Stop local timers
+      _stopTimer();
+      _cycleTimer?.cancel();
+
+      setState(() {
+        _isPaused = true;
+        _accumulatedSeconds = totalAccumulated;
+        status = SystemStatus.idle;  // Show as idle visually
+        _startTime = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator paused'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pause aerator: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleResume() async {
+    if (widget.currentBatch == null || widget.machineId == null) return;
+
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      final machineRepository = ref.read(machineRepositoryProvider);
+
+      // Set aeratorActive to true (restarts hardware)
+      await machineRepository.updateAeratorActive(widget.machineId!, true);
+
+      // Update cycle document to 'running' status
+      await cycleRepository.resumeAerator(
+        batchId: widget.currentBatch!.id,
+      );
+
+      // Restart timer with accumulated time
+      setState(() {
+        _isPaused = false;
+        status = SystemStatus.running;
+        _startTime = DateTime.now();  // New start time for this segment
+      });
+
+      _startTimer();
+      _simulateCycles();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aerator resumed'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to resume aerator: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -331,10 +486,13 @@ Future<void> _loadExistingCycle() async {
         if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
+            final elapsed = DateTime.now().difference(_startTime!).inSeconds;
+            final totalRuntime = _accumulatedSeconds + elapsed;
+            
             await cycleRepository.updateAeratorProgress(
               batchId: widget.currentBatch!.id,
               completedCycles: _completedCycles,
-              totalRuntime: DateTime.now().difference(_startTime!),
+              totalRuntime: Duration(seconds: totalRuntime),
             );
           } catch (e) {
             debugPrint('Failed to update aerator progress: $e');
@@ -563,7 +721,7 @@ Future<void> _loadExistingCycle() async {
         ControlInputFields(
           selectedCycle: settings.cycles.toString(),
           selectedPeriod: settings.period,
-          isLocked: status == SystemStatus.running,
+          isLocked: status == SystemStatus.running || _isPaused,  // Lock during running or paused
           onCycleChanged: (value) {
             if (value != null) {
               setState(() {
@@ -581,7 +739,87 @@ Future<void> _loadExistingCycle() async {
         ),
         SizedBox(height: cardHeight * 0.04),
 
-        if (status == SystemStatus.idle || status == SystemStatus.stopped)
+        // Button logic
+        if (status == SystemStatus.running && !_isPaused)
+          // Running: Show Pause and Stop
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _handlePause,
+                  icon: const Icon(Icons.pause),
+                  label: const Text('Pause'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF59E0B),  // Orange
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              SizedBox(width: cardWidth * 0.04),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _handleStop,
+                  icon: const Icon(Icons.stop),
+                  label: const Text('Stop'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),  // Red
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else if (_isPaused)
+          // Paused: Show Resume and Stop
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _handleResume,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Resume'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF14B8A6),  // Teal
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              SizedBox(width: cardWidth * 0.04),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _handleStop,
+                  icon: const Icon(Icons.stop),
+                  label: const Text('Stop'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),  // Red
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else
+          // Idle/Stopped: Show Start
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -597,24 +835,6 @@ Future<void> _loadExistingCycle() async {
                 ),
                 elevation: 0,
                 disabledBackgroundColor: Colors.grey.shade300,
-              ),
-            ),
-          )
-        else if (status == SystemStatus.running)
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _handleStop,
-              icon: const Icon(Icons.stop),
-              label: const Text('Stop'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
               ),
             ),
           ),
