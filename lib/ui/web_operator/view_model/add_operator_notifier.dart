@@ -1,4 +1,5 @@
 import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/operator_providers.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_operator_service.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
@@ -18,8 +19,10 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
     return const AddOperatorState(isLoading: false);
   }
 
-	/// SIPIR - Added operators are unverified email
-	/// meaning they have to verify their email first
+  /// SIPIR - Added operators are unverified
+  /// meaning they have to verify their email first
+	/// but their status will be at active
+
   Future<void> addOperator({
     required String email,
     required String password,
@@ -29,6 +32,11 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
   }) async {
     // Start loading
     state = state.copyWith(isLoading: true, error: null);
+
+    final teamUser = ref.read(appUserProvider).value;
+    final teamId = teamUser?.teamId;
+    if (teamId == null) return;
+
     final result = await _service.addOperator(
       email: email,
       password: password,
@@ -36,7 +44,7 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
       lastname: lastname,
       globalRole: GlobalRole.user.value,
       teamRole: TeamRole.operator.value,
-      status: UserStatus.unverified.value,
+      status: UserStatus.active.value,
       teamId: teamId,
     );
     // Handle success and errors
