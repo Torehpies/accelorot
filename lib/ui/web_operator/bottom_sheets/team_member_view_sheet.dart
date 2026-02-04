@@ -47,6 +47,7 @@ class TeamMemberViewSheet extends StatelessWidget {
       body: MobileReadOnlySection(
         sectionTitle: null,
         fields: [
+          MobileReadOnlyField(label: 'Member ID', value: member.id),
           MobileReadOnlyField(label: 'Email', value: member.email),
           MobileReadOnlyField(
             label: 'Status',

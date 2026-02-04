@@ -1,4 +1,4 @@
-// lib/frontend/operator/dashboard/add_waste/quick_actions_sheet.dart
+// lib/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart
 
 import 'package:flutter/material.dart';
 
