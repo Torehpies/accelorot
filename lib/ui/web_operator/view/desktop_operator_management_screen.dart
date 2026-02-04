@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/summary_header.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
@@ -37,30 +37,16 @@ class _DesktopOperatorManagementScreenState
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Container(
-      margin: const EdgeInsets.all(12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: WebColors.cardBorder),
-      ),
-      child: Column(
-        children: [
-          // ── Stats cards row ──
-          const SummaryHeader(),
-          const SizedBox(height: 10),
-
-          // ── Tabbed table area ──
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                TeamMembersTab(tabController: _tabController),
-                PendingMembersTab(tabController: _tabController),
-              ],
-            ),
-          ),
-        ],
+    return WebContentContainer(
+      child: WebStatsTableLayout(
+        statsRow: const SummaryHeader(),
+        table: TabBarView(
+          controller: _tabController,
+          children: [
+            TeamMembersTab(tabController: _tabController),
+            PendingMembersTab(tabController: _tabController),
+          ],
+        ),
       ),
     );
   }

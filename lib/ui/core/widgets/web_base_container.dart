@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/web_common_widgets.dart
+// lib/ui/core/widgets/web_base_container.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';

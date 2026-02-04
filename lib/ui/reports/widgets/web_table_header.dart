@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import '../../core/widgets/filters/filter_dropdown.dart';
+import '../../core/widgets/table/table_header.dart';
 import '../../core/widgets/table/table_row.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/constants/spacing.dart';
 import '../models/report_filters.dart';
 
 class WebTableHeader extends StatelessWidget {
@@ -43,156 +43,116 @@ class WebTableHeader extends StatelessWidget {
     final isCategoryActive = _isFilterActive(selectedCategory.displayName);
     final isStatusActive = _isFilterActive(selectedStatus.displayName);
     final isPriorityActive = _isFilterActive(selectedPriority.displayName);
-    final isTitleActive = sortColumn == 'title';
 
-    return Opacity(
-      opacity: isLoading ? 0.7 : 1.0,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: WebColors.pageBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8),
-            topRight: Radius.circular(8),
+    return TableHeader(
+      isLoading: isLoading,
+      columns: [
+        // Title Column (sortable, flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: TableHeaderCell(
+            label: 'Title',
+            sortable: true,
+            sortColumn: 'title',
+            currentSortColumn: sortColumn,
+            sortAscending: sortAscending,
+            onSort: () => onSort('title'),
           ),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.tableCellHorizontal,
-          vertical: 8,
+
+        // Category Column with Dropdown (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Category',
+                  style: WebTextStyles.label.copyWith(
+                    color: isCategoryActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilterDropdown<ReportCategoryFilter>(
+                  label: 'Category',
+                  value: selectedCategory,
+                  items: ReportCategoryFilter.values,
+                  displayName: (cat) => cat.displayName,
+                  onChanged: onCategoryChanged,
+                  isLoading: isLoading,
+                ),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          children: [
-            // Title Column (sortable, flex: 2)
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Title',
-                      style: WebTextStyles.label.copyWith(
-                        color: isTitleActive
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    TableHeaderCell(
-                      label: '',
-                      sortable: true,
-                      sortColumn: 'title',
-                      currentSortColumn: sortColumn,
-                      sortAscending: sortAscending,
-                      onSort: isLoading ? null : () => onSort('title'),
-                    ),
-                  ],
+
+        // Status Column with Dropdown (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Status',
+                  style: WebTextStyles.label.copyWith(
+                    color: isStatusActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
+                  ),
                 ),
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Category Column with Dropdown (flex: 2)
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Category',
-                      style: WebTextStyles.label.copyWith(
-                        color: isCategoryActive
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<ReportCategoryFilter>(
-                      label: 'Category',
-                      value: selectedCategory,
-                      items: ReportCategoryFilter.values,
-                      displayName: (cat) => cat.displayName,
-                      onChanged: onCategoryChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
+                const SizedBox(width: 8),
+                FilterDropdown<ReportStatusFilter>(
+                  label: 'Status',
+                  value: selectedStatus,
+                  items: ReportStatusFilter.values,
+                  displayName: (status) => status.displayName,
+                  onChanged: onStatusChanged,
+                  isLoading: isLoading,
                 ),
-              ),
+              ],
             ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Status Column with Dropdown (flex: 2)
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Status',
-                      style: WebTextStyles.label.copyWith(
-                        color: isStatusActive
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<ReportStatusFilter>(
-                      label: 'Status',
-                      value: selectedStatus,
-                      items: ReportStatusFilter.values,
-                      displayName: (status) => status.displayName,
-                      onChanged: onStatusChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Priority Column with Dropdown (flex: 2)
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Priority:',
-                      style: WebTextStyles.label.copyWith(
-                        color: isPriorityActive
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<ReportPriorityFilter>(
-                      label: 'Priority',
-                      value: selectedPriority,
-                      items: ReportPriorityFilter.values,
-                      displayName: (priority) => priority.displayName,
-                      onChanged: onPriorityChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Actions Column Header (flex: 1)
-            const Expanded(
-              flex: 1,
-              child: Center(child: Text('Actions', style: WebTextStyles.label)),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        // Priority Column with Dropdown (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Priority',
+                  style: WebTextStyles.label.copyWith(
+                    color: isPriorityActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FilterDropdown<ReportPriorityFilter>(
+                  label: 'Priority',
+                  value: selectedPriority,
+                  items: ReportPriorityFilter.values,
+                  displayName: (priority) => priority.displayName,
+                  onChanged: onPriorityChanged,
+                  isLoading: isLoading,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Actions Column Header (flex: 1)
+        const TableCellWidget(
+          flex: 1,
+          child: TableHeaderCell(label: 'Actions'),
+        ),
+      ],
     );
   }
 }
