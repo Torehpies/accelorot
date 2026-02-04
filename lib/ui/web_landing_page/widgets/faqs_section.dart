@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // ADDED
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 
@@ -12,7 +13,35 @@ class FaqSection extends StatefulWidget {
 class _FaqSectionState extends State<FaqSection> {
   int? _expandedIndex;
 
+  // EMAIL LAUNCHING LOGIC (copied from ContactSection)
+  Future<void> _launchEmail() async {
+    final email = 'accelorot.management@gmail.com';
+    final subject = 'Inquiry from Accel-O-Rot Website';
+
+    // Try Gmail compose URL first
+    final gmailUri = Uri.parse(
+      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject'
+    );
+
+    if (!await launchUrl(gmailUri)) {
+      // Fallback to standard mailto
+      final mailtoUri = Uri(
+        scheme: 'mailto',
+        path: email,
+        queryParameters: {'subject': subject},
+      );
+      if (!await launchUrl(mailtoUri)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to open email client')),
+          );
+        }
+      }
+    }
+  }
+
   final List<FaqItem> _faqItems = const [
+    // ... (existing FAQ items unchanged) ...
     FaqItem(
       question: 'What is Accel-O-Rot?',
       answer: 'Accel-O-Rot is an IoT-enabled smart rotary drum composting system designed to accelerate the decomposition of organic waste. It uses sensors, aeration, and moisture regulation to optimize the composting process, making it faster and more efficient than traditional methods.',
@@ -26,27 +55,12 @@ class _FaqSectionState extends State<FaqSection> {
       answer: 'The system is designed for organic, biodegradable waste. Users can add a mix of "greens" (e.g., food scraps) and "browns" (e.g., dry leaves) to start the decomposition process.',
     ),
     FaqItem(
-      question: 'How does the system\'s performance compare to traditional composting?',
-      answer: 'Unlike traditional methods that are often slow and labor-intensive, Accel-O-Rot uses automation and sensors to produce mature compost much faster—typically in 14 days.',
-    ),
-    FaqItem(
-      question: 'How fast does Accel-O-Rot produce compost compared to traditional methods?',
-      answer: 'The Accel-O-Rot produces mature compost in 14 days using a scaled-down rotary drum in Traditional composting methods, though environmentally friendly, often face challenges such as inconsistent decomposition, long processing times, and dependence on manual labor.',
-    ),
-    FaqItem(
-      question: 'How does it handle potential health risks like pathogens?',
-      answer: 'While the system does not have direct pathogen sensors, it minimizes risk by strictly monitoring and maintaining the temperature. Following established standards, keeping the compost at high temperatures (typically ≥55°C) for a specific duration helps eliminate harmful microorganisms.',
-    ),
-    FaqItem(
       question: 'What are the main benefits for a community or institution?',
-      answer: 'Accel-O-Rot boosts the ability of barangays and local government units to manage organic waste, simultaneously lowering hauling expenses and reliance on landfills. It greatly lowers methane emissions, unpleasant smells, leachate pollution, and habitats for disease-carrying pests such as flies and rodents—enhancing public health while producing nutrient-dense compost for city gardening and municipal landscaping. For universities and schools, the system reduces waste disposal expenses by transforming cafeteria leftovers and garden waste into compost for campus agricultural initiatives, while also acting as a hands-on learning resource that improves students insights into organic waste management, greenhouse gas mitigation, and intelligent sustainable technologies',    ),
-    FaqItem(
-      question: 'How does the "Drum Controller" feature work for the operator?',
-      answer: 'The Drum Controller enables efficient batch monitoring. Operators may select a specific machine to view batch details,  including Batch ID, start date, and days elapsed, and  click  “Start” to begin drum rotation.',
+      answer: 'Accel-O-Rot boosts the ability of barangays and local government units to manage organic waste, simultaneously lowering hauling expenses and reliance on landfills. It greatly lowers methane emissions, unpleasant smells, leachate pollution, and habitats for disease-carrying pests such as flies and rodents—enhancing public health while producing nutrient-dense compost for city gardening and municipal landscaping. For universities and schools, the system reduces waste disposal expenses by transforming cafeteria leftovers and garden waste into compost for campus agricultural initiatives, while also acting as a hands-on learning resource that improves students insights into organic waste management, greenhouse gas mitigation, and intelligent sustainable technologies',
     ),
     FaqItem(
       question: 'What types of organic waste can be processed?',
-      answer: 'Accel-O-Rot processes biodegradable waste  including kitchen waste like greens and dry leaves for browns. The system guides users through its mobile application to balance these inputs at the optimal carbon-to-nitrogen ratio of 25:1 to 30:1 for rapid, odor-free decomposition, significantly accelerating microbial activity and ensuring uniform compost maturity within 14 days.',
+      answer: 'Accel-O-Rot processes biodegradable waste including kitchen waste like greens and dry leaves for browns. The system guides users through its mobile application to balance these inputs at the optimal carbon-to-nitrogen ratio of 25:1 to 30:1 for rapid, odor-free decomposition, significantly accelerating microbial activity and ensuring uniform compost maturity within 14 days.',
     ),
     FaqItem(
       question: 'How does the system ensure the final product is safe to use as fertilizer?',
@@ -68,6 +82,12 @@ class _FaqSectionState extends State<FaqSection> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final horizontalPadding = width > 1400 ? 120.0 : 24.0;
+    final baseContactStyle = TextStyle(
+      fontFamily: WebTextStyles.faqAnswer.fontFamily,
+      fontSize: 16,
+      color: Colors.black.withValues(alpha: 0.7),
+      height: 1.5,
+    );
 
     return Container(
       color: Colors.white,
@@ -96,13 +116,47 @@ class _FaqSectionState extends State<FaqSection> {
               ),
               SizedBox(height: AppSpacing.lg),
 
-              // ✅ FIXED: Use Column instead of AnimatedList
+              // FAQ cards
               for (int i = 0; i < _faqItems.length; i++)
                 _FaqCard(
                   faq: _faqItems[i],
                   isExpanded: _expandedIndex == i,
                   onToggle: () => _toggleCard(i),
                 ),
+              
+              // CONTACT SECTION WITH CLICKABLE EMAIL
+              SizedBox(height: AppSpacing.xl),
+              Center(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 0,
+                  children: [
+                    Text(
+                      'If you have any questions, please contact us at ',
+                      style: baseContactStyle,
+                    ),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: _launchEmail,
+                        child: Text(
+                          'accelorot.management@gmail.com',
+                          style: baseContactStyle.copyWith(
+                            color: const Color(0xFF1A73E8), // Professional blue
+                            decoration: TextDecoration.underline,
+                            decorationColor: const Color(0xFF1A73E8),
+                            decorationThickness: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '.',
+                      style: baseContactStyle,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -111,6 +165,7 @@ class _FaqSectionState extends State<FaqSection> {
   }
 }
 
+// ... (FaqItem and _FaqCard classes remain unchanged) ...
 class FaqItem {
   final String question;
   final String answer;

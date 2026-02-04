@@ -73,7 +73,7 @@ class _WebLandingPageState extends State<WebLandingPageView> {
     if (currentPosition >= faqPos) {
       newSection = 'faq';
     } else if (currentPosition >= downloadPos) { 
-      newSection = 'download'; // ✅ CRITICAL FIX: Match breadcrumb ID 'download' (was 'banner')
+      newSection = 'download'; 
     } else if (currentPosition >= impactPos) {
       newSection = 'impact';
     } else if (currentPosition >= howItWorksPos) {
