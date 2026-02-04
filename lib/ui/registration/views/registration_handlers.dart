@@ -255,7 +255,7 @@ class RegistrationFormContent extends ConsumerWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 22, 22, 22),
+            color: const Color.fromARGB(255, 59, 59, 59),
           ),
         ),
         const SizedBox(height: 4),
