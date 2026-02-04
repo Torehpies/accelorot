@@ -1,8 +1,7 @@
-// lib/ui/reports/bottom_sheets/report_edit_bottom_sheet.dart
-
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
@@ -11,7 +10,6 @@ import '../../core/dialog/mobile_confirmation_dialog.dart';
 import '../../core/toast/mobile_toast_service.dart';
 import '../../core/toast/toast_type.dart';
 
-/// Callback signature matching [MobileReportsViewModel.updateReport].
 typedef UpdateReportCallback = Future<void> Function({
   required String machineId,
   required String reportId,
@@ -21,7 +19,6 @@ typedef UpdateReportCallback = Future<void> Function({
   String? priority,
 });
 
-/// Editable form for editing report details with validation and change tracking
 class ReportEditBottomSheet extends StatefulWidget {
   final Report report;
   final UpdateReportCallback onUpdate;
@@ -123,7 +120,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       if (result == ConfirmResult.confirmed && mounted) {
         Navigator.of(context).pop();
       }
-      // cancelled → stay on the sheet
     } else {
       Navigator.of(context).pop();
     }
@@ -147,7 +143,7 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
     return MobileBottomSheetBase(
       title: widget.report.title,
       subtitle: 'Edit Report',
-      showCloseButton: false,      // use Cancel button instead
+      showCloseButton: false,
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
@@ -162,7 +158,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Editable fields at the top ───────────────────────────────────
           MobileInputField(
             label: 'Title',
             controller: _titleController,
@@ -180,7 +175,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 16),
 
-          // Status and priority dropdowns
           Row(
             children: [
               Expanded(
@@ -210,7 +204,6 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
           ),
           const SizedBox(height: 24),
 
-          // ── Read-only info section at the bottom ─────────────────────────
           MobileReadOnlySection(
             sectionTitle: 'Additional Information',
             fields: [
