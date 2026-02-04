@@ -84,42 +84,28 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     }
   }
 
-  Future<void> _loadExistingCycle() async {
-    if (widget.currentBatch == null) return;
+Future<void> _loadExistingCycle() async {
+  if (widget.currentBatch == null) return;
 
-    try {
-      final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycles = await cycleRepository.getAerators(
-        batchId: widget.currentBatch!.id,
-      );
-      final cycle = cycles.isEmpty ? null : cycles.first;
+  if (widget.machineId == null) {
+    debugPrint('⚠️ No machine ID provided');
+    return;
+  }
 
-      if (mounted && cycle != null) {
-        setState(() {
-          _cycleDoc = cycle;
-          settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 1,
-            period: cycle.duration ?? '10 minutes',
-          );
-          _completedCycles = cycle.completedCycles ?? 0;
+  try {
+    // Check if machine has aeratorActive = true in Firestore
+    final machineRepository = ref.read(machineRepositoryProvider);
+    final machine = await machineRepository.getMachineById(widget.machineId!);
+    
+    if (machine == null) {
+      debugPrint('❌ Machine not found');
+      return;
+    }
 
-          if (cycle.status == 'running') {
-            status = SystemStatus.running;
-            _startTime = cycle.startedAt;
-            if (_startTime != null) {
-              _startTimer();
-              _simulateCycles();
-            }
-          } else if (cycle.status == 'completed') {
-            status = SystemStatus.stopped;
-            if (cycle.totalRuntimeSeconds != null) {
-              _uptime = _formatDuration(
-                Duration(seconds: cycle.totalRuntimeSeconds!),
-              );
-            }
-          }
-        });
-      } else if (mounted) {
+    // aeratorActive is false in Firestore, don't proceed
+    if (!machine.aeratorActive) {
+      debugPrint('⚠️ Aerator is not active in Firestore (aeratorActive: false)');
+      if (mounted) {
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -129,10 +115,55 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _cycleDoc = null;
         });
       }
-    } catch (e) {
-      debugPrint('Error loading aerator cycle: $e');
+      return;
     }
+
+    // Load the cycle document
+    final cycleRepository = ref.read(cycleRepositoryProvider);
+    final cycles = await cycleRepository.getAerators(
+      batchId: widget.currentBatch!.id,
+    );
+    final cycle = cycles.isEmpty ? null : cycles.first;
+
+    if (mounted && cycle != null) {
+      setState(() {
+        _cycleDoc = cycle;
+        settings = DrumRotationSettings(
+          cycles: cycle.cycles ?? 1,
+          period: cycle.duration ?? '10 minutes',
+        );
+        _completedCycles = cycle.completedCycles ?? 0;
+
+        if (cycle.status == 'running') {
+          status = SystemStatus.running;
+          _startTime = cycle.startedAt;
+          if (_startTime != null) {
+            _startTimer();
+            _simulateCycles();
+          }
+        } else if (cycle.status == 'completed') {
+          status = SystemStatus.stopped;
+          if (cycle.totalRuntimeSeconds != null) {
+            _uptime = _formatDuration(
+              Duration(seconds: cycle.totalRuntimeSeconds!),
+            );
+          }
+        }
+      });
+    } else if (mounted) {
+      setState(() {
+        settings.reset();
+        status = SystemStatus.idle;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+        _cycleDoc = null;
+      });
+    }
+  } catch (e) {
+    debugPrint('Error loading aerator cycle: $e');
   }
+}
 
   @override
   void dispose() {

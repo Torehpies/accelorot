@@ -95,53 +95,35 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
     }
   }
 
-  Future<void> _loadExistingCycle() async {
-    if (widget.currentBatch == null) {
-      debugPrint('⚠️ No current batch to load');
+Future<void> _loadExistingCycle() async {
+  if (widget.currentBatch == null) {
+    debugPrint('⚠️ No current batch to load');
+    return;
+  }
+
+  if (widget.machineId == null) {
+    debugPrint('⚠️ No machine ID provided');
+    return;
+  }
+
+  debugPrint(
+    '📥 Loading drum controller for batch: ${widget.currentBatch!.id}',
+  );
+
+  try {
+    // Check if machine has drumActive = true in Firestore
+    final machineRepository = ref.read(machineRepositoryProvider);
+    final machine = await machineRepository.getMachineById(widget.machineId!);
+    
+    if (machine == null) {
+      debugPrint('❌ Machine not found');
       return;
     }
 
-    debugPrint(
-      '📥 Loading drum controller for batch: ${widget.currentBatch!.id}',
-    );
-
-    try {
-      final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycles = await cycleRepository.getDrumControllers(
-        batchId: widget.currentBatch!.id,
-      );
-      final cycle = cycles.isEmpty ? null : cycles.first;
-
-      debugPrint(
-        '📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}',
-      );
-
-      if (mounted && cycle != null) {
-        setState(() {
-          _cycleDoc = cycle;
-          settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 1,
-            period: cycle.duration ?? '10 minutes',
-          );
-          _completedCycles = cycle.completedCycles ?? 0;
-
-          if (cycle.status == 'running') {
-            status = SystemStatus.running;
-            _startTime = cycle.startedAt;
-            if (_startTime != null) {
-              _startTimer();
-              _simulateCycles();
-            }
-          } else if (cycle.status == 'completed') {
-            status = SystemStatus.stopped;
-            if (cycle.totalRuntimeSeconds != null) {
-              _uptime = _formatDuration(
-                Duration(seconds: cycle.totalRuntimeSeconds!),
-              );
-            }
-          }
-        });
-      } else if (mounted) {
+    // If drumActive is false in Firestore, don't proceed
+    if (!machine.drumActive) {
+      debugPrint('⚠️ Drum is not active in Firestore (drumActive: false)');
+      if (mounted) {
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -151,10 +133,59 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
           _cycleDoc = null;
         });
       }
-    } catch (e) {
-      debugPrint('❌ Error loading drum controller cycle: $e');
+      return;
     }
+
+    // Load the cycle document
+    final cycleRepository = ref.read(cycleRepositoryProvider);
+    final cycles = await cycleRepository.getDrumControllers(
+      batchId: widget.currentBatch!.id,
+    );
+    final cycle = cycles.isEmpty ? null : cycles.first;
+
+    debugPrint(
+      '📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}',
+    );
+
+    if (mounted && cycle != null) {
+      setState(() {
+        _cycleDoc = cycle;
+        settings = DrumRotationSettings(
+          cycles: cycle.cycles ?? 1,
+          period: cycle.duration ?? '10 minutes',
+        );
+        _completedCycles = cycle.completedCycles ?? 0;
+
+        if (cycle.status == 'running') {
+          status = SystemStatus.running;
+          _startTime = cycle.startedAt;
+          if (_startTime != null) {
+            _startTimer();
+            _simulateCycles();
+          }
+        } else if (cycle.status == 'completed') {
+          status = SystemStatus.stopped;
+          if (cycle.totalRuntimeSeconds != null) {
+            _uptime = _formatDuration(
+              Duration(seconds: cycle.totalRuntimeSeconds!),
+            );
+          }
+        }
+      });
+    } else if (mounted) {
+      setState(() {
+        settings.reset();
+        status = SystemStatus.idle;
+        _uptime = '00:00:00';
+        _completedCycles = 0;
+        _startTime = null;
+        _cycleDoc = null;
+      });
+    }
+  } catch (e) {
+    debugPrint('❌ Error loading drum controller cycle: $e');
   }
+}
 
   @override
   void dispose() {
