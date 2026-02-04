@@ -378,82 +378,86 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cardWidth = constraints.maxWidth;
-          final cardHeight = constraints.maxHeight;
+          final cardHeight = constraints.maxHeight.isFinite ? constraints.maxHeight : 500.0;
           final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0);
           final titleFontSize = baseFontSize;
           final labelFontSize = (baseFontSize * 0.8).clamp(10.0, 16.0);
           final bodyFontSize = (baseFontSize * 0.65).clamp(9.0, 13.0);
           final badgeFontSize = (baseFontSize * 0.6).clamp(9.0, 12.0);
           
-          return Padding(
-            padding: EdgeInsets.all(cardWidth * 0.06),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        'Aerator',
-                        style: TextStyle(
-                          fontSize: titleFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1a1a1a),
-                          letterSpacing: -0.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(width: cardWidth * 0.02),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: cardWidth * 0.03,
-                        vertical: cardWidth * 0.015,
-                      ),
-                      decoration: BoxDecoration(
-                        color: batchCompleted
-                            ? const Color(0xFFF3F4F6)
-                            : (hasActiveBatch
-                                  ? const Color(0xFFD1FAE5)
-                                  : const Color(0xFFFEF3C7)),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        batchCompleted
-                            ? 'Completed'
-                            : (hasActiveBatch ? 'Active' : 'Inactive'),
-                        style: TextStyle(
-                          fontSize: badgeFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: batchCompleted
-                              ? const Color(0xFF6B7280)
-                              : (hasActiveBatch
-                                    ? const Color(0xFF065F46)
-                                    : const Color(0xFF92400E)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: cardWidth * 0.06),
+          final useInternalScroll = constraints.maxHeight.isFinite;
 
-                if (!hasActiveBatch && !batchCompleted)
-                  const EmptyState()
-                else
+          Widget content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Flexible(
-                    child: _buildActiveState(
-                      batchCompleted,
-                      cardWidth,
-                      cardHeight,
-                      labelFontSize,
-                      bodyFontSize,
+                    child: Text(
+                      'Aerator',
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1a1a1a),
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-              ],
-            ),
+                  SizedBox(width: cardWidth * 0.02),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: cardWidth * 0.03,
+                      vertical: cardWidth * 0.015,
+                    ),
+                    decoration: BoxDecoration(
+                      color: batchCompleted
+                          ? const Color(0xFFF3F4F6)
+                          : (hasActiveBatch
+                                ? const Color(0xFFD1FAE5)
+                                : const Color(0xFFFEF3C7)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      batchCompleted
+                          ? 'Completed'
+                          : (hasActiveBatch ? 'Active' : 'Inactive'),
+                      style: TextStyle(
+                        fontSize: badgeFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: batchCompleted
+                            ? const Color(0xFF6B7280)
+                            : (hasActiveBatch
+                                  ? const Color(0xFF065F46)
+                                  : const Color(0xFF92400E)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: cardWidth * 0.06),
+
+              if (!hasActiveBatch && !batchCompleted)
+                const EmptyState()
+              else
+                _buildActiveState(
+                  batchCompleted,
+                  cardWidth,
+                  cardHeight,
+                  labelFontSize,
+                  bodyFontSize,
+                ),
+            ],
+          );
+
+          return Padding(
+            padding: EdgeInsets.all(cardWidth * 0.06),
+            child: useInternalScroll
+                ? SingleChildScrollView(child: content)
+                : content,
           );
         },
       ),
