@@ -89,9 +89,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycle = await cycleRepository.getAerator(
+      final cycles = await cycleRepository.getAerators(
         batchId: widget.currentBatch!.id,
       );
+      final cycle = cycles.isEmpty ? null : cycles.first;
 
       if (mounted && cycle != null) {
         setState(() {
@@ -210,9 +211,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
 
       await machineRepository.updateAeratorActive(widget.machineId!, true);
 
-      final cycle = await cycleRepository.getAerator(
+      final cycles = await cycleRepository.getAerators(
         batchId: widget.currentBatch!.id,
       );
+      final cycle = cycles.isEmpty ? null : cycles.first;
 
       setState(() {
         _cycleDoc = cycle;

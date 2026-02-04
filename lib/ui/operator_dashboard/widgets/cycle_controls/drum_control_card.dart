@@ -107,9 +107,10 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycle = await cycleRepository.getDrumController(
+      final cycles = await cycleRepository.getDrumControllers(
         batchId: widget.currentBatch!.id,
       );
+      final cycle = cycles.isEmpty ? null : cycles.first;
 
       debugPrint(
         '📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}',
@@ -232,9 +233,10 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
 
       await machineRepository.updateDrumActive(widget.machineId!, true);
 
-      final cycle = await cycleRepository.getDrumController(
+      final cycles = await cycleRepository.getDrumControllers(
         batchId: widget.currentBatch!.id,
       );
+      final cycle = cycles.isEmpty ? null : cycles.first;
 
       setState(() {
         _cycleDoc = cycle;

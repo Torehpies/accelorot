@@ -9,12 +9,12 @@ class CycleRepository {
   Future<List<CycleRecommendation>> getTeamCycles() =>
       _cycleService.fetchTeamCycles();
 
-  Future<CycleRecommendation?> getDrumController({required String batchId}) =>
-      _cycleService.getDrumController(batchId: batchId);
+  Future<List<CycleRecommendation>> getDrumControllers({
+    required String batchId,
+  }) => _cycleService.getDrumControllers(batchId: batchId);
 
-  Future<CycleRecommendation?> getAerator({required String batchId}) =>
-      _cycleService.getAerator(batchId: batchId);
-
+  Future<List<CycleRecommendation>> getAerators({required String batchId}) =>
+      _cycleService.getAerators(batchId: batchId);
   Future<String> startDrumController({
     required String batchId,
     required String machineId,

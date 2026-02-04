@@ -83,153 +83,100 @@ class FirestoreCycleService implements CycleService {
     }
   }
 
-  Future<List<CycleRecommendation>> _fetchTeamCycles(String teamId) async {
-    final List<CycleRecommendation> allCycles = [];
+Future<List<CycleRecommendation>> _fetchTeamCycles(String teamId) async {
+  final List<CycleRecommendation> allCycles = [];
 
-    final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+  final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+  if (teamMachineIds.isEmpty) return [];
 
-    if (teamMachineIds.isEmpty) {
-      debugPrint('ℹ️ No machines found for team: $teamId');
-      return [];
-    }
+  final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+  if (batches.isEmpty) return [];
 
-    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+  final futures = batches.map((batchDoc) async {
+    final batchId = batchDoc.id;
+    
+    // Get ALL drum controllers for this batch
+    final drumControllers = await getDrumControllers(batchId: batchId);
+    
+    // Get ALL aerators for this batch
+    final aerators = await getAerators(batchId: batchId);
+    
+    return [...drumControllers, ...aerators];
+  });
 
-    if (batches.isEmpty) {
-      debugPrint('ℹ️ No batches found for team machines');
-      return [];
-    }
+  final results = await Future.wait(futures);
 
-    final futures = batches.map((batchDoc) async {
-      try {
-        final cyclesSnapshot = await _firestore
-            .collection('batches')
-            .doc(batchDoc.id)
-            .collection('cyclesRecom')
-            .get();
-
-        final cycles = <CycleRecommendation>[];
-
-        for (var cycleDoc in cyclesSnapshot.docs) {
-          // Get drum_controller
-          final drumSnapshot = await _firestore
-              .collection('batches')
-              .doc(batchDoc.id)
-              .collection('cyclesRecom')
-              .doc(cycleDoc.id)
-              .collection('drum_controller')
-              .limit(1)
-              .get();
-
-          if (drumSnapshot.docs.isNotEmpty) {
-            cycles.add(
-              CycleRecommendation.fromFirestore(drumSnapshot.docs.first),
-            );
-          }
-
-          // Get aerator
-          final aeratorSnapshot = await _firestore
-              .collection('batches')
-              .doc(batchDoc.id)
-              .collection('cyclesRecom')
-              .doc(cycleDoc.id)
-              .collection('aerator')
-              .limit(1)
-              .get();
-
-          if (aeratorSnapshot.docs.isNotEmpty) {
-            cycles.add(
-              CycleRecommendation.fromFirestore(aeratorSnapshot.docs.first),
-            );
-          }
-        }
-
-        return {'success': true, 'cycles': cycles};
-      } catch (e) {
-        debugPrint('⚠️ Error fetching cycles from batch ${batchDoc.id}: $e');
-        return {'success': false, 'cycles': <CycleRecommendation>[]};
-      }
-    });
-
-    final results = await Future.wait(futures);
-
-    for (var result in results) {
-      if (result['success'] as bool) {
-        allCycles.addAll(result['cycles'] as List<CycleRecommendation>);
-      }
-    }
-
-    return allCycles;
+  for (var result in results) {
+    allCycles.addAll(result);
   }
+
+  // Sort by timestamp descending (latest first)
+  allCycles.sort((a, b) => 
+    (b.startedAt ?? DateTime(1970)).compareTo(a.startedAt ?? DateTime(1970))
+  );
+
+  return allCycles;
+}
 
   // ===== GET DRUM CONTROLLER =====
 
   @override
-  Future<CycleRecommendation?> getDrumController({
-    required String batchId,
-  }) async {
-    try {
-      // DON'T create - only check if exists
-      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+Future<List<CycleRecommendation>> getDrumControllers({
+  required String batchId,
+}) async {
+  try {
+    final cycleDocId = await _getExistingMainCycleDocId(batchId);
+    if (cycleDocId == null) return [];
 
-      // If no cycle doc exists, return null
-      if (cycleDocId == null) {
-        debugPrint('ℹ️ No cycle document found for batch $batchId');
-        return null;
-      }
+    final drumSnapshot = await _firestore
+        .collection('batches')
+        .doc(batchId)
+        .collection('cyclesRecom')
+        .doc(cycleDocId)
+        .collection('drum_controller')
+        .orderBy('startedAt', descending: true) // Latest first
+        .get();
 
-      // Get drum controller
-      final drumSnapshot = await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('drum_controller')
-          .limit(1)
-          .get();
+    if (drumSnapshot.docs.isEmpty) return [];
 
-      if (drumSnapshot.docs.isEmpty) return null;
-
-      return CycleRecommendation.fromFirestore(drumSnapshot.docs.first);
-    } catch (e) {
-      debugPrint('❌ Error getting drum controller: $e');
-      return null;
-    }
+    return drumSnapshot.docs
+        .map((doc) => CycleRecommendation.fromFirestore(doc))
+        .toList();
+  } catch (e) {
+    debugPrint('Error getting drum controllers: $e');
+    return [];
   }
+}
 
   // ===== GET AERATOR =====
 
   @override
-  Future<CycleRecommendation?> getAerator({required String batchId}) async {
-    try {
-      // DON'T create - only check if exists
-      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+Future<List<CycleRecommendation>> getAerators({
+  required String batchId,
+}) async {
+  try {
+    final cycleDocId = await _getExistingMainCycleDocId(batchId);
+    if (cycleDocId == null) return [];
 
-      // If no cycle doc exists, return null
-      if (cycleDocId == null) {
-        debugPrint('ℹ️ No cycle document found for batch $batchId');
-        return null;
-      }
+    final aeratorSnapshot = await _firestore
+        .collection('batches')
+        .doc(batchId)
+        .collection('cyclesRecom')
+        .doc(cycleDocId)
+        .collection('aerator')
+        .orderBy('startedAt', descending: true)
+        .get();
 
-      // Get aerator
-      final aeratorSnapshot = await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('aerator')
-          .limit(1)
-          .get();
+    if (aeratorSnapshot.docs.isEmpty) return [];
 
-      if (aeratorSnapshot.docs.isEmpty) return null;
-
-      return CycleRecommendation.fromFirestore(aeratorSnapshot.docs.first);
-    } catch (e) {
-      debugPrint('❌ Error getting aerator: $e');
-      return null;
-    }
+    return aeratorSnapshot.docs
+        .map((doc) => CycleRecommendation.fromFirestore(doc))
+        .toList();
+  } catch (e) {
+    debugPrint('Error getting aerators: $e');
+    return [];
   }
-
+}
   // ===== START DRUM CONTROLLER =====
 
   @override
