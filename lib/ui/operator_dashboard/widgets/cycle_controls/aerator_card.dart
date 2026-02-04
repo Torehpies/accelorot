@@ -33,14 +33,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   Timer? _cycleTimer;
   CycleRecommendation? _cycleDoc;
 
-  // Add this to track the last loaded batch ID
-  //String? _lastLoadedBatchId;
-
   @override
   void initState() {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
-      // _lastLoadedBatchId = widget.currentBatch!.id;
       _loadExistingCycle();
     }
   }
@@ -49,17 +45,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   void didUpdateWidget(AeratorCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Check if batch ID changed (new batch selected or created)
     final currentBatchId = widget.currentBatch?.id;
     final oldBatchId = oldWidget.currentBatch?.id;
 
     if (currentBatchId != oldBatchId) {
-      // Batch changed - reset and reload
       _stopTimer();
       _cycleTimer?.cancel();
 
       if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-        // No active batch - clear everything
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -67,12 +60,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _completedCycles = 0;
           _startTime = null;
           _cycleDoc = null;
-          //_lastLoadedBatchId = null;
         });
       } else {
-        // New active batch - load its cycle
-        //_lastLoadedBatchId = widget.currentBatch!.id;
-        // Use Future.delayed to ensure the widget is fully built
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
             _loadExistingCycle();
@@ -82,7 +71,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     } else if (widget.currentBatch != null &&
         oldWidget.currentBatch?.isActive == true &&
         !widget.currentBatch!.isActive) {
-      // Same batch but became inactive
       _stopTimer();
       _cycleTimer?.cancel();
 
@@ -109,8 +97,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         setState(() {
           _cycleDoc = cycle;
           settings = DrumRotationSettings(
-            cycles: cycle.cycles ?? 50,
-            period: cycle.duration ?? '1 hour',
+            cycles: cycle.cycles ?? 1,
+            period: cycle.duration ?? '10 minutes',
           );
           _completedCycles = cycle.completedCycles ?? 0;
 
@@ -131,7 +119,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           }
         });
       } else if (mounted) {
-        // No existing cycle - reset to idle state for new batch
         setState(() {
           settings.reset();
           status = SystemStatus.idle;
@@ -213,7 +200,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       final machineRepository = ref.read(machineRepositoryProvider);
 
-      // Start aerator in Firebase
       await cycleRepository.startAerator(
         batchId: widget.currentBatch!.id,
         machineId: widget.currentBatch!.machineId,
@@ -222,10 +208,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
         duration: settings.period,
       );
 
-      // Update machine aeratorActive status
       await machineRepository.updateAeratorActive(widget.machineId!, true);
 
-      // Reload the cycle to get the ID
       final cycle = await cycleRepository.getAerator(
         batchId: widget.currentBatch!.id,
       );
@@ -266,7 +250,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     try {
       final machineRepository = ref.read(machineRepositoryProvider);
 
-      // Update machine aeratorActive status
       await machineRepository.updateAeratorActive(widget.machineId!, false);
 
       _stopTimer();
@@ -306,15 +289,12 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   void _simulateCycles() {
     final periodMinutes = _getPeriodMinutes(settings.period);
 
-    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (
-      timer,
-    ) async {
+    _cycleTimer = Timer.periodic(Duration(minutes: periodMinutes), (timer) async {
       if (mounted && status == SystemStatus.running) {
         setState(() {
           _completedCycles++;
         });
 
-        // Update progress in Firebase
         if (widget.currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -332,7 +312,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           _stopTimer();
           timer.cancel();
 
-          // Complete cycle in Firebase
           if (widget.currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
@@ -371,7 +350,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
       case '30 minutes':
         return 30;
       default:
-        return 15;
+        return 10;
     }
   }
 
@@ -396,67 +375,104 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Aerator',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1a1a1a),
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: batchCompleted
-                        ? const Color(0xFFF3F4F6)
-                        : (hasActiveBatch
-                              ? const Color(0xFFD1FAE5)
-                              : const Color(0xFFFEF3C7)),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    batchCompleted
-                        ? 'Completed'
-                        : (hasActiveBatch ? 'Active' : 'Inactive'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: batchCompleted
-                          ? const Color(0xFF6B7280)
-                          : (hasActiveBatch
-                                ? const Color(0xFF065F46)
-                                : const Color(0xFF92400E)),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cardWidth = constraints.maxWidth;
+          final cardHeight = constraints.maxHeight.isFinite ? constraints.maxHeight : 500.0;
+          final baseFontSize = (cardWidth / 25).clamp(12.0, 20.0);
+          final titleFontSize = baseFontSize;
+          final labelFontSize = (baseFontSize * 0.8).clamp(10.0, 16.0);
+          final bodyFontSize = (baseFontSize * 0.65).clamp(9.0, 13.0);
+          final badgeFontSize = (baseFontSize * 0.6).clamp(9.0, 12.0);
+          
+          final useInternalScroll = constraints.maxHeight.isFinite;
+
+          Widget content = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Aerator',
+                      style: TextStyle(
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1a1a1a),
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                  SizedBox(width: cardWidth * 0.02),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: cardWidth * 0.03,
+                      vertical: cardWidth * 0.015,
+                    ),
+                    decoration: BoxDecoration(
+                      color: batchCompleted
+                          ? const Color(0xFFF3F4F6)
+                          : (hasActiveBatch
+                                ? const Color(0xFFD1FAE5)
+                                : const Color(0xFFFEF3C7)),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      batchCompleted
+                          ? 'Completed'
+                          : (hasActiveBatch ? 'Active' : 'Inactive'),
+                      style: TextStyle(
+                        fontSize: badgeFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: batchCompleted
+                            ? const Color(0xFF6B7280)
+                            : (hasActiveBatch
+                                  ? const Color(0xFF065F46)
+                                  : const Color(0xFF92400E)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: cardWidth * 0.06),
 
-            if (!hasActiveBatch && !batchCompleted)
-              const EmptyState()
-            else
-              _buildActiveState(batchCompleted),
-          ],
-        ),
+              if (!hasActiveBatch && !batchCompleted)
+                const EmptyState()
+              else
+                _buildActiveState(
+                  batchCompleted,
+                  cardWidth,
+                  cardHeight,
+                  labelFontSize,
+                  bodyFontSize,
+                ),
+            ],
+          );
+
+          return Padding(
+            padding: EdgeInsets.all(cardWidth * 0.06),
+            child: useInternalScroll
+                ? SingleChildScrollView(child: content)
+                : content,
+          );
+        },
       ),
     );
   }
 
-  Widget _buildActiveState(bool batchCompleted) {
+  Widget _buildActiveState(
+    bool batchCompleted,
+    double cardWidth,
+    double cardHeight,
+    double labelFontSize,
+    double bodyFontSize,
+  ) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -465,44 +481,51 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
               child: InfoItem(
                 label: 'Machine Name',
                 value: widget.currentBatch!.machineId,
+                fontSize: bodyFontSize,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: cardWidth * 0.04),
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
                 value: widget.currentBatch!.displayName,
+                fontSize: bodyFontSize,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: cardHeight * 0.03),
 
         Row(
           children: [
             Expanded(
-              child: InfoItem(label: 'Uptime', value: _uptime),
+              child: InfoItem(
+                label: 'Uptime',
+                value: _uptime,
+                fontSize: bodyFontSize,
+              ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: cardWidth * 0.04),
             Expanded(
               child: InfoItem(
                 label: 'No. of Cycles',
                 value: _completedCycles.toString(),
+                fontSize: bodyFontSize,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: cardHeight * 0.04),
 
-        const Text(
+        Text(
           'Set Controller',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1a1a1a),
+            color: const Color(0xFF1a1a1a),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: cardHeight * 0.025),
 
         ControlInputFields(
           selectedCycle: settings.cycles.toString(),
@@ -523,7 +546,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
             }
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: cardHeight * 0.04),
 
         if (status == SystemStatus.idle || status == SystemStatus.stopped)
           SizedBox(
