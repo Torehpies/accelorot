@@ -110,7 +110,6 @@ class PrivacyPolicyPage extends StatelessWidget {
                             _buildBulletList([
                               'Name and contact information (email, phone number)',
                               'Organization or barangay affiliation',
-                              'Account credentials',
                               'Device location (with your consent)',
                             ]),
                             _buildSubsection(

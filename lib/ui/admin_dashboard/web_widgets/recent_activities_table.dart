@@ -27,54 +27,74 @@ class RecentActivitiesTable extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Recent Activities',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxHeight < 400;
+
+          if (isCompact) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   _buildHeaderTitleRow(ref),
+                  const SizedBox(height: 20),
+                  _buildHeader(),
+                  const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                  const SizedBox(height: 8),
+                  activitiesAsync.when(
+                    data: (activities) => _buildContent(
+                      activities,
+                      batches,
+                      shrinkWrap: true,
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (_, stack) => const Center(
+                      child: Text(
+                        'Failed to load activities',
+                        style: TextStyle(color: Color(0xFF9CA3AF)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh, size: 16),
-                onPressed: () => ref.invalidate(userTeamActivitiesProvider),
-                tooltip: 'Refresh',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+            );
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeaderTitleRow(ref),
+              const SizedBox(height: 20),
+              _buildHeader(),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              const SizedBox(height: 8),
+              Expanded(
+                child: activitiesAsync.when(
+                  data: (activities) => _buildContent(activities, batches),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, stack) => const Center(
+                    child: Text(
+                      'Failed to load activities',
+                      style: TextStyle(color: Color(0xFF9CA3AF)),
+                    ),
+                  ),
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          _buildHeader(),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-          const SizedBox(height: 8),
-          Expanded(
-            child: activitiesAsync.when(
-              data: (activities) => _buildContent(activities, batches),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, stack) => const Center(
-                child: Text(
-                  'Failed to load activities',
-                  style: TextStyle(color: Color(0xFF9CA3AF)),
-                ),
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildContent(
     List<ActivityLogItem> activities,
-    List<dynamic> batches,
-  ) {
+    List<dynamic> batches, {
+    bool shrinkWrap = false,
+  }) {
     if (activities.isEmpty) {
       return const Center(
         child: Text(
@@ -87,7 +107,10 @@ class RecentActivitiesTable extends ConsumerWidget {
     return ListView.separated(
       itemCount: activities.length,
       padding: EdgeInsets.zero,
-      physics: const ClampingScrollPhysics(),
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap
+          ? const NeverScrollableScrollPhysics()
+          : const ClampingScrollPhysics(),
       itemBuilder: (context, index) {
         final activity = activities[index];
         return _buildRow(activity, batches);
@@ -145,6 +168,29 @@ class RecentActivitiesTable extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderTitleRow(WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Recent Activities',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, size: 16),
+          onPressed: () => ref.invalidate(userTeamActivitiesProvider),
+          tooltip: 'Refresh',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      ],
     );
   }
 

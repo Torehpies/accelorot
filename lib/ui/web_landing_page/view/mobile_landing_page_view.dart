@@ -118,9 +118,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   void _handleLearnMore() => _scrollToSection('features');
 
   Widget _section({required Key key, required Widget child}) {
-    return Padding(
+    return SizedBox(
       key: key,
-      padding: const EdgeInsets.only(top: _headerHeight),
       child: child,
     );
   }
@@ -135,6 +134,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
             controller: _scrollController,
             child: Column(
               children: [
+                // Add top padding for the first section to account for header
+                SizedBox(height: _headerHeight),
                 _section(
                   key: _homeKey,
                   child: IntroSection(
@@ -195,7 +196,7 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
 }
 
 
-class _MobileHeader extends StatelessWidget {
+class _MobileHeader extends StatefulWidget {
   final bool isScrolled;
   final bool isMenuOpen;
   final String activeSection;
@@ -215,17 +216,24 @@ class _MobileHeader extends StatelessWidget {
   });
 
   @override
+  State<_MobileHeader> createState() => _MobileHeaderState();
+}
+
+class _MobileHeaderState extends State<_MobileHeader> {
+  bool _isLogoHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
-        color: isScrolled && !isMenuOpen ? Colors.white : null,
-        gradient: isScrolled && !isMenuOpen
+        color: widget.isScrolled && !widget.isMenuOpen ? Colors.white : null,
+        gradient: widget.isScrolled && !widget.isMenuOpen
             ? null
             : const LinearGradient(
                 colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
               ),
-        boxShadow: isScrolled && !isMenuOpen
+        boxShadow: widget.isScrolled && !widget.isMenuOpen
             ? [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.08),
@@ -242,37 +250,52 @@ class _MobileHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => onBreadcrumbTap('home'),
-                  child: Row(
-                    children: [
-                      SvgPicture.asset(
-                        'assets/images/Accel-O-Rot Logo.svg',
-                        width: 32,
-                        height: 32,
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (_) => setState(() => _isLogoHovered = true),
+                  onExit: (_) => setState(() => _isLogoHovered = false),
+                  child: GestureDetector(
+                    onTap: () => widget.onBreadcrumbTap('home'),
+                    child: AnimatedScale(
+                      duration: const Duration(milliseconds: 200),
+                      scale: _isLogoHovered ? 1.05 : 1.0,
+                      child: Row(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            child: SvgPicture.asset(
+                              'assets/images/Accelorot_logo.svg',
+                              width: 32,
+                              height: 32,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: _isLogoHovered 
+                                  ? Colors.green 
+                                  : Colors.green,
+                            ),
+                            child: const Text('Accel-O-Rot'),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Accel-O-Rot',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.green,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: Icon(isMenuOpen ? Icons.close : Icons.menu),
-                  onPressed: onToggleMenu,
+                  icon: Icon(widget.isMenuOpen ? Icons.close : Icons.menu),
+                  onPressed: widget.onToggleMenu,
                 ),
               ],
             ),
           ),
 
-          if (isMenuOpen)
+          if (widget.isMenuOpen)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -280,18 +303,18 @@ class _MobileHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _MenuItem('Home', 'home', activeSection, onBreadcrumbTap),
-                  _MenuItem('Features', 'features', activeSection, onBreadcrumbTap),
-                  _MenuItem('How It Works', 'how-it-works', activeSection, onBreadcrumbTap),
-                  _MenuItem('Impact', 'impact', activeSection, onBreadcrumbTap),
-                  _MenuItem('Downloads', 'download', activeSection, onBreadcrumbTap),
-                  _MenuItem('FAQ', 'faq', activeSection, onBreadcrumbTap),
-                  _MenuItem('Contact', 'contact', activeSection, onBreadcrumbTap),
+                  _MenuItem('Home', 'home', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('Features', 'features', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('How It Works', 'how-it-works', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('Impact', 'impact', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('Downloads', 'download', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('FAQ', 'faq', widget.activeSection, widget.onBreadcrumbTap),
+                  _MenuItem('Contact', 'contact', widget.activeSection, widget.onBreadcrumbTap),
                   const SizedBox(height: 24),
-                  TextButton(onPressed: onLogin, child: const Text('Login')),
+                  TextButton(onPressed: widget.onLogin, child: const Text('Login')),
                   const SizedBox(height: 12),
                   ElevatedButton(
-                    onPressed: onGetStarted,
+                    onPressed: widget.onGetStarted,
                     child: const Text('Get Started'),
                   ),
                 ],
