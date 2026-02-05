@@ -37,185 +37,196 @@ class FirestoreAlertService implements AlertService {
       // Get user's teamId
       final teamId = await _batchService.getUserTeamId(currentUserId!);
 
-      // Team is required - no solo fallback
       if (teamId == null || teamId.isEmpty) {
         debugPrint('⚠️ User has no team assigned');
         return [];
       }
 
-      // Fetch team-wide alerts
-      final allAlerts = await _fetchTeamAlerts(teamId);
+      // 1. Get all machines for the team
+      final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
 
-      // Sort by timestamp descending (newest first)
+      if (teamMachineIds.isEmpty) {
+        debugPrint('ℹ️ No machines found for team: $teamId');
+        return [];
+      }
+
+      // 2. Get all batches for these machines
+      final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+
+      if (batches.isEmpty) {
+        return [];
+      }
+
+      final List<Alert> allAlerts = [];
+
+      // 3. For each batch, fetch its alerts
+      await Future.wait(batches.map((batchDoc) async {
+        try {
+          // Extract dates to handle phantom documents
+          // We can't list the 'date' documents because they might not exist (phantom)
+          final data = batchDoc.data() as Map<String, dynamic>;
+          final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+          final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
+          final machineId = data['machineId'] as String?;
+
+          final batchAlerts = await fetchAlertsForBatch(
+            batchDoc.id, 
+            start: createdAt, 
+            end: completedAt,
+            machineId: machineId,
+          );
+          allAlerts.addAll(batchAlerts);
+        } catch (e) {
+          debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
+        }
+      }));
+
+      // Sort by timestamp descending
       allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-      debugPrint('✅ Fetched ${allAlerts.length} alerts');
+      debugPrint('✅ Fetched ${allAlerts.length} alerts for team');
       return allAlerts;
     } catch (e) {
-      debugPrint('❌ Error fetching alerts: $e');
+      debugPrint('❌ Error fetching team alerts: $e');
       throw Exception('Failed to fetch alerts: $e');
     }
   }
 
-  /// Fetch alerts for team users (multi-step query)
-  Future<List<Alert>> _fetchTeamAlerts(String teamId) async {
-    final List<Alert> allAlerts = [];
-    int successCount = 0;
-    int failureCount = 0;
-
-    // Get all machines belonging to this team
-    final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
-
-    if (teamMachineIds.isEmpty) {
-      debugPrint('ℹ️ No machines found for team: $teamId');
-      return [];
-    }
-
-    // Get all batches for those machines
-    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
-
-    if (batches.isEmpty) {
-      debugPrint('ℹ️ No batches found for team machines');
-      return [];
-    }
-
-    // Fetch alerts from each batch's subcollection in parallel
-    final futures = batches.map((batchDoc) async {
-      try {
-        final alertsSnapshot = await _firestore
-            .collection('batches')
-            .doc(batchDoc.id)
-            .collection('alerts')
-            .orderBy('timestamp', descending: true)
-            .get();
-
-        final alerts = alertsSnapshot.docs
-            .map((doc) => Alert.fromFirestore(doc))
-            .toList();
-
-        return {'success': true, 'alerts': alerts};
-      } catch (e) {
-        debugPrint('⚠️ Error fetching alerts from batch ${batchDoc.id}: $e');
-        return {'success': false, 'alerts': <Alert>[]};
-      }
-    });
-
-    final results = await Future.wait(futures);
-
-    for (var result in results) {
-      if (result['success'] as bool) {
-        allAlerts.addAll(result['alerts'] as List<Alert>);
-        successCount++;
-      } else {
-        failureCount++;
-      }
-    }
-
-    debugPrint(
-      '📊 Fetched alerts from $successCount/${batches.length} batches ($failureCount failures)',
-    );
-    return allAlerts;
-  }
-
   @override
-  Future<List<Alert>> fetchAlertsForBatch(String batchId) async {
-    if (currentUserId == null) {
-      throw Exception('User not authenticated');
-    }
-
+  Future<List<Alert>> fetchAlertsForBatch(
+    String batchId, {
+    DateTime? start,
+    DateTime? end,
+    String? machineId,
+  }) async {
     try {
-      // PATH: batches/{batchId}/alerts
-      final snapshot = await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('alerts')
-          .orderBy('timestamp', descending: true)
-          .get();
+      // If dates or machineId are not provided, we must fetch the batch
+      if (start == null || machineId == null) {
+        final batchDoc = await _firestore.collection('batches').doc(batchId).get();
+        if (!batchDoc.exists) return [];
+        final data = batchDoc.data() as Map<String, dynamic>;
+        
+        start ??= (data['createdAt'] as Timestamp?)?.toDate();
+        end ??= (data['completedAt'] as Timestamp?)?.toDate();
+        machineId ??= data['machineId'] as String?;
+      }
 
-      final alerts = snapshot.docs
-          .map((doc) => Alert.fromFirestore(doc))
-          .toList();
+      if (start == null) return []; // Should not happen for valid batches
 
-      debugPrint('✅ Fetched ${alerts.length} alerts for batch: $batchId');
-      return alerts;
+      final endDate = end ?? DateTime.now();
+      // Pad by 1 day to handle timezone diffs between ESP and App
+      final List<String> datePaths = _generateDatePaths(
+        start.subtract(const Duration(days: 1)), 
+        endDate.add(const Duration(days: 1))
+      );
+
+      final List<Alert> allBatchAlerts = [];
+
+      // Parallel fetch of all potential date paths
+      await Future.wait(datePaths.map((dateStr) async {
+        try {
+          // PATH: batches/{batchId}/alerts/{dateStr}/time
+          final timeSnapshot = await _firestore
+              .collection('batches')
+              .doc(batchId)
+              .collection('alerts')
+              .doc(dateStr)
+              .collection('time')
+              .get();
+              
+          if (timeSnapshot.docs.isNotEmpty) {
+             final alerts = timeSnapshot.docs.map((d) {
+               final alert = Alert.fromFirestore(d);
+               // Inject machineId if provided and missing in alert
+               if (machineId != null && alert.machineId.isEmpty) {
+                 return alert.copyWith(machineId: machineId!);
+               }
+               return alert;
+             });
+             allBatchAlerts.addAll(alerts);
+          }
+        } catch (e) {
+          // Ignore errors for non-existent paths
+        }
+      }));
+
+      // Sort local results
+      allBatchAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      
+      return allBatchAlerts;
     } catch (e) {
       debugPrint('❌ Error fetching batch alerts: $e');
       throw Exception('Failed to fetch batch alerts: $e');
     }
   }
 
-  @override
-  Stream<List<Alert>> streamAlerts(String batchId) {
-    // PATH: batches/{batchId}/alerts
-    return _firestore
-        .collection('batches')
-        .doc(batchId)
-        .collection('alerts')
-        .orderBy('timestamp', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => Alert.fromFirestore(doc)).toList(),
-        );
+  /// Helper to generate yyyy-MM-dd strings
+  List<String> _generateDatePaths(DateTime start, DateTime end) {
+    final List<String> paths = [];
+    // Remove time components for strict day comparison
+    DateTime current = DateTime(start.year, start.month, start.day);
+    final DateTime last = DateTime(end.year, end.month, end.day);
+
+    while (!current.isAfter(last)) {
+       final month = current.month.toString().padLeft(2, '0');
+       final day = current.day.toString().padLeft(2, '0');
+       paths.add("${current.year}-$month-$day");
+       current = current.add(const Duration(days: 1));
+    }
+    return paths;
   }
 
-  // Fetch a single alert by ID
+  @override
+  Stream<List<Alert>> streamAlerts(String batchId) {
+    // Note: True real-time streaming of dynamically created "date" collections 
+    // is complex without collectionGroup. 
+    // For simplicity, we convert the fetch to a Stream that emits regularly or just once.
+    // If real-time is critical, we'd need a different architecture or indices.
+    // For now, we just fetch once and emit.
+    return Stream.fromFuture(fetchAlertsForBatch(batchId));
+  }
+
   @override
   Future<Alert?> fetchAlertById(String alertId) async {
-    if (currentUserId == null) {
+     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
 
     try {
-      // Get user's teamId
+      // Since we can't use collectionGroup easily, and we don't know the batchId,
+      // we have to search for it. This is inefficient but "simple" in terms of NoOps.
+      
       final teamId = await _batchService.getUserTeamId(currentUserId!);
+      if (teamId == null) return null;
 
-      if (teamId == null || teamId.isEmpty) {
-        debugPrint('⚠️ User has no team assigned');
-        return null;
-      }
-
-      // Get all machines belonging to this team
       final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+      if (teamMachineIds.isEmpty) return null;
 
-      if (teamMachineIds.isEmpty) {
-        debugPrint('ℹ️ No machines found for team: $teamId');
-        return null;
-      }
-
-      // Get all batches for those machines
       final batches = await _batchService.getBatchesForMachines(teamMachineIds);
-
-      if (batches.isEmpty) {
-        debugPrint('ℹ️ No batches found for team machines');
-        return null;
-      }
-
-      // Search each batch for the alert
+      
       for (var batchDoc in batches) {
-        try {
-          final alertDoc = await _firestore
-              .collection('batches')
-              .doc(batchDoc.id)
-              .collection('alerts')
-              .doc(alertId)
-              .get();
+         // Optimization: We could check if the alertId (e.g. sensor-HH-MM-SS) matches a time?
+         // But alertId structure isn't guaranteed unique across days if just time.
+         // ESP code: sensorType + "-" + HH-MM-SS.
+         // So uniqueness is highly probable but finding the DATE is hard.
+         // Just fetch all alerts for the batch effectively.
+         
+         final data = batchDoc.data() as Map<String, dynamic>;
+         final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+         final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
 
-          if (alertDoc.exists) {
-            debugPrint('✅ Found alert: $alertId in batch: ${batchDoc.id}');
-            return Alert.fromFirestore(alertDoc);
-          }
-        } catch (e) {
-          debugPrint('⚠️ Error checking batch ${batchDoc.id}: $e');
-          continue;
-        }
+         final alerts = await fetchAlertsForBatch(batchDoc.id, start: createdAt, end: completedAt);
+         try {
+           return alerts.firstWhere((a) => a.id == alertId);
+         } catch (_) {
+           continue;
+         }
       }
-
-      debugPrint('ℹ️ Alert not found: $alertId');
+      
       return null;
     } catch (e) {
-      debugPrint('❌ Error fetching alert by ID: $e');
-      throw Exception('Failed to fetch alert: $e');
+       debugPrint('❌ Error fetching alert by ID: $e');
+       return null;
     }
   }
 }
