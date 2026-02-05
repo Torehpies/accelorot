@@ -1,5 +1,8 @@
 // lib/data/services/contracts/operator_service.dart
 
+import 'package:flutter_application_1/data/utils/result.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+
 import '../../models/operator_model.dart';
 
 abstract class OperatorService {
@@ -31,5 +34,16 @@ abstract class OperatorService {
     required String teamId,
     required String requestorId,
     required String pendingDocId,
+  });
+
+  Future<Result<AppUser>> addOperator({
+    required String email,
+    required String password,
+    required String firstname,
+    required String lastname,
+    String? globalRole,
+    String? teamRole,
+    String? status,
+    String? teamId,
   });
 }

@@ -17,6 +17,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/web_operator/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/widgets/add_operator_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/team_member_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,9 +58,7 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
           child: DateFilterDropdown(
             isLoading: state.isLoading,
             onFilterChanged: (filter) {
-              ref
-                  .read(operatorsDateFilterProvider.notifier)
-                  .setFilter(filter);
+              ref.read(operatorsDateFilterProvider.notifier).setFilter(filter);
             },
           ),
         ),
@@ -70,7 +69,12 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
         Tooltip(
           message: 'Add Operator',
           child: ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => AddOperatorDialog(),
+              );
+            },
             icon: const Icon(Icons.add, size: 18),
             label: const Text('Add Operator'),
             style: ElevatedButton.styleFrom(
@@ -166,10 +170,8 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
           subtitle: 'Try adjusting your filters or search',
           icon: Icons.person_search,
         ),
-        rowBuilder: (member) => TeamMemberRow(
-          member: member,
-          notifier: notifier,
-        ),
+        rowBuilder: (member) =>
+            TeamMemberRow(member: member, notifier: notifier),
         skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
 
@@ -289,3 +291,4 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     );
   }
 }
+
