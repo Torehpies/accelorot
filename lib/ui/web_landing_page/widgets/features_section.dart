@@ -136,9 +136,17 @@ class FeaturesSectionState extends State<FeaturesSection> {
                     child: Container(
                       width: isMobile ? 40 : 48,
                       height: isMobile ? 40 : 48,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF0F8FF), // Alice blue
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F8FF), // Alice blue
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: IconButton(
                         onPressed: _currentIndex > 0 ? goToPrevious : null,
@@ -165,9 +173,17 @@ class FeaturesSectionState extends State<FeaturesSection> {
                     child: Container(
                       width: isMobile ? 40 : 48,
                       height: isMobile ? 40 : 48,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF0F8FF), // Alice blue
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F8FF), // Alice blue
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: IconButton(
                         onPressed: _currentIndex < featureImages.length - 1 ? goToNext : null,

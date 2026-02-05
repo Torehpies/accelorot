@@ -27,14 +27,11 @@ class WebHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
-  //final GlobalKey<ActivityLogsCardState> _activityLogsKey =
-  //  GlobalKey<ActivityLogsCardState>();
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
 
-  // Add this to force widget rebuilds
   int _rebuildKey = 0;
 
   @override
@@ -50,7 +47,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       setState(() {
         _activeBatchModel = batch;
         _selectedBatchId = batch?.id;
-        // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
 
         if (batch != null) {
@@ -73,7 +69,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   }
 
   Future<void> _autoSelectBatchForMachine(String machineId) async {
-    // Wait for provider to refresh
     await Future.delayed(const Duration(milliseconds: 500));
 
     final batchesAsync = ref.read(userTeamBatchesProvider);
@@ -83,7 +78,6 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
           .toList();
 
       if (machineBatches.isNotEmpty) {
-        // Sort by createdAt to get newest
         machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         final latestBatch = machineBatches.first;
 
@@ -115,10 +109,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     );
 
     if (result == true && mounted) {
-      // Refresh the activity logs after batch is created
       ref.invalidate(allActivitiesProvider);
 
-      // Force rebuild by incrementing key
       setState(() {
         _rebuildKey++;
       });
@@ -195,75 +187,144 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
     }
   }
 
+  Widget _buildFixedLayout(BuildContext context, double screenHeight, double screenWidth) {
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 1400),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.02,
+          vertical: screenHeight * 0.02,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left side - Batch Tracker and Recent Activity
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CompostingProgressCard(
+                    currentBatch: _currentBatch,
+                    onBatchStarted: _handleBatchStarted,
+                    onBatchCompleted: _handleBatchCompleted,
+                    preSelectedMachineId: widget.focusedMachine?.machineId,
+                    onBatchChanged: _updateActiveBatch,
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  const Expanded(
+                    child: RecentActivitiesTable(),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: screenWidth * 0.015),
+            // Right side - Drum Controller and Aerator Cards
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: ControlInputCard(
+                      currentBatch: _activeBatchModel,
+                      machineId: _selectedMachineId,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  Expanded(
+                    child: AeratorCard(
+                      currentBatch: _activeBatchModel,
+                      machineId: _selectedMachineId,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrollableLayout(BuildContext context, double screenHeight, double screenWidth) {
+    return SingleChildScrollView(
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1400),
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.02,
+            vertical: 20, // Fixed vertical padding for scrollable view
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left side
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    CompostingProgressCard(
+                      currentBatch: _currentBatch,
+                      onBatchStarted: _handleBatchStarted,
+                      onBatchCompleted: _handleBatchCompleted,
+                      preSelectedMachineId: widget.focusedMachine?.machineId,
+                      onBatchChanged: _updateActiveBatch,
+                    ),
+                    const SizedBox(height: 20),
+                    // Constrain table height in scrollable view
+                    const SizedBox(
+                      height: 500, 
+                      child: RecentActivitiesTable(),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: screenWidth * 0.015),
+              // Right side - NO EXPANDED, Natural sizes
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ControlInputCard(
+                      currentBatch: _activeBatchModel,
+                      machineId: _selectedMachineId,
+                    ),
+                    const SizedBox(height: 20),
+                    AeratorCard(
+                      currentBatch: _activeBatchModel,
+                      machineId: _selectedMachineId,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > kTabletBreakpoint;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return Center(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                padding: EdgeInsets.symmetric(
-                  horizontal: isDesktop ? 32 : 24,
-                  vertical: 24,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Left side - Batch Tracker and Recent Activity
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 360,
-                            child: CompostingProgressCard(
-                              currentBatch: _currentBatch,
-                              onBatchStarted: _handleBatchStarted,
-                              onBatchCompleted: _handleBatchCompleted,
-                              preSelectedMachineId:
-                                  widget.focusedMachine?.machineId,
-                              onBatchChanged: _updateActiveBatch,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Expanded(
-                            child: RecentActivitiesTable(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    // Right side - Drum Controller and Aerator Cards
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: ControlInputCard(
-                              currentBatch: _activeBatchModel,
-                              machineId: _selectedMachineId,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Expanded(
-                            child: AeratorCard(
-                              currentBatch: _activeBatchModel,
-                              machineId: _selectedMachineId,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            // Check if we should use scrollable layout (screen too small)
+            final isCompactHeight = constraints.maxHeight < 800;
+            
+            if (isCompactHeight) {
+                return _buildScrollableLayout(context, screenHeight, screenWidth);
+            }
+            
+            return _buildFixedLayout(context, screenHeight, screenWidth);
           },
         ),
       ),
