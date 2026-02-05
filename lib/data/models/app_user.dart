@@ -17,7 +17,7 @@ abstract class AppUser with _$AppUser {
     String? teamId,
     String? requestTeamId,
     @Default(UserStatus.unverified) UserStatus status,
-    @TimestampConverter() required DateTime createdAt,
+    @TimestampConverter() DateTime? createdAt,
   }) = _AppUser;
 
   factory AppUser.fromJson(Map<String, dynamic> json) =>
