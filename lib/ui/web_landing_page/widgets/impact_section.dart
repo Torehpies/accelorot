@@ -179,8 +179,6 @@ class _ImpactSectionState extends State<ImpactSection> {
           ),
         ],
       ),
-      textDirection: TextDirection.ltr,
-      maxLines: 3,
     );
   }
 
@@ -448,23 +446,24 @@ class _ImpactSectionState extends State<ImpactSection> {
                                       _impactDescriptions[data.title] ?? '',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(
-                                      fontSize: isMobile
-                                          ? 10
-                                          : isTablet
-                                              ? 11
-                                              : 13,
-                                      height: 1.4,
-                                      color: data.textColor.withValues(alpha: 0.9),
-                                    ),
+                                        fontSize: isMobile
+                                            ? 10
+                                            : isTablet
+                                                ? 11
+                                                : 13,
+                                        height: 1.4,
+                                        color: data.textColor.withValues(alpha: 0.9),
+                                      ),
                                       maxLines: 5,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                              ],
+                                ],
+                              )
                             ),
                           ),
-                          ),
                         ],
+
                       )
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,6 +553,7 @@ class _ImpactSectionState extends State<ImpactSection> {
             ],
           ),
         ),
+      ),
       );
   }
 
