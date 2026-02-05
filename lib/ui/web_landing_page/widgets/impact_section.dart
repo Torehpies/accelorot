@@ -208,7 +208,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                 : AppSpacing.xl,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF3F8E3F),
+        color: WebColors.buttonsPrimary,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Stack(
@@ -227,7 +227,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                       style: TextStyle(
                         fontSize: titleSize,
                         fontWeight: FontWeight.w800,
-                        height: 1.15,
+                        height: (titleSize + 18) / titleSize,
                       ),
                       children: const [
                         TextSpan(
