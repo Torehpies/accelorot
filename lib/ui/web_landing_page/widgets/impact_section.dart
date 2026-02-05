@@ -83,7 +83,7 @@ class _ImpactSectionState extends State<ImpactSection> {
     if (screenWidth < 600) {
       return const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.lg,
+        vertical: AppSpacing.xl,
       );
     } else if (screenWidth < 1024) {
       return const EdgeInsets.symmetric(
@@ -179,6 +179,8 @@ class _ImpactSectionState extends State<ImpactSection> {
           ),
         ],
       ),
+      textDirection: TextDirection.ltr,
+      maxLines: 3,
     );
   }
 
@@ -552,8 +554,7 @@ class _ImpactSectionState extends State<ImpactSection> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   String _imageForIndex(int index) {

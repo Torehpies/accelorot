@@ -9,12 +9,17 @@ import '../../core/widgets/data_card.dart';
 import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
+import '../../core/dialog/mobile_confirmation_dialog.dart';
+import '../../core/toast/mobile_toast_service.dart';
+import '../../core/toast/toast_type.dart';
 import '../helpers/machine_status_helper.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../view_model/mobile_machine_viewmodel.dart';
 import '../models/mobile_machine_state.dart';
+import '../bottom_sheets/mobile_admin_machine_view_sheet.dart';
+import '../bottom_sheets/mobile_admin_machine_edit_sheet.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -52,14 +57,79 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
     if (mounted) setState(() {});
   }
 
-  void _navigateToDetails(MachineModel machine) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            MachineDetailsView(machine: machine, teamId: machine.teamId),
+  void _showMachineDetails(MachineModel machine) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MobileAdminMachineViewSheet(
+        machine: machine,
+        onEdit: () {
+          // Close view sheet, then open edit sheet
+          Navigator.of(context).pop();
+          // Small delay so the view sheet finishes its exit animation
+          Future.delayed(const Duration(milliseconds: 250), () {
+            if (mounted) _showEditSheet(machine);
+          });
+        },
+        onArchive: () {
+          Navigator.pop(context); // Close view sheet
+          _handleArchive(machine); // Show confirmation
+        },
       ),
     );
+  }
+
+  void _showEditSheet(MachineModel machine) {
+    if (_teamId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => MobileAdminMachineEditSheet(
+        machine: machine,
+        teamId: _teamId!,
+        onUpdate: ref.read(mobileMachineViewModelProvider.notifier).updateMachine,
+      ),
+    );
+  }
+
+  Future<void> _handleArchive(MachineModel machine) async {
+    if (_teamId == null) return;
+
+    final result = await MobileConfirmationDialog.show(
+      context,
+      title: 'Archive Machine',
+      message: 'Are you sure you want to archive "${machine.machineName}"?',
+      confirmLabel: 'Archive',
+    );
+
+    if (result == ConfirmResult.confirmed && mounted) {
+      try {
+        await ref
+            .read(mobileMachineViewModelProvider.notifier)
+            .archiveMachine(_teamId!, machine.machineId);
+
+        if (mounted) {
+          MobileToastService.show(
+            context,
+            message: 'Machine archived successfully',
+            type: ToastType.success,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          MobileToastService.show(
+            context,
+            message: 'Failed to archive machine',
+            type: ToastType.error,
+          );
+        }
+      }
+    }
   }
 
   void _handleAddMachine() {
@@ -117,7 +187,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         userName: 'All Team Members',
         statusColor: machine.statusBgColor,
         statusTextColor: const Color(0xFF424242),
-        onTap: () => _navigateToDetails(machine),
+        onTap: () => _showMachineDetails(machine),
       ),
     );
   }
@@ -183,25 +253,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class MachineDetailsView extends StatelessWidget {
-  final MachineModel machine;
-  final String teamId;
-
-  const MachineDetailsView({
-    super.key,
-    required this.machine,
-    required this.teamId,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(machine.machineName)),
-      body: Center(child: Text('Machine Details for ${machine.machineName}')),
     );
   }
 }

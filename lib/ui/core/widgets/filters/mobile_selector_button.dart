@@ -5,20 +5,18 @@ import 'package:flutter/services.dart';
 import '../../themes/app_theme.dart';
 import '../../themes/app_text_styles.dart';
 
-/// Generic mobile selector button for entities (Machine, Batch, etc.)
-/// Displays as a dropdown with icon, text, and arrow
-/// Shows badge dot when a specific item is selected (not "All")
+/// Mobile selector button for entities; shows selected item and status badge (e.g. Archived/Completed)
 class MobileSelectorButton<T> extends StatefulWidget {
   final IconData icon;
-  final String allLabel; // e.g., "All Machines"
+  final String allLabel;
   final String? selectedItemId;
   final List<T> items;
   final String Function(T) itemId;
   final String Function(T) displayName;
-  final String? Function(T)? statusBadge; // e.g., "Archived", "Completed"
+  final String? Function(T)? statusBadge;
   final ValueChanged<String?> onChanged;
   final bool isLoading;
-  final String? emptyMessage; // e.g., "No machines available"
+  final String? emptyMessage;
 
   const MobileSelectorButton({
     super.key,
@@ -44,20 +42,13 @@ class _MobileSelectorButtonState<T> extends State<MobileSelectorButton<T>> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if a specific item is selected (not "All")
+    // Active, display, and visual state
     final isActive = widget.selectedItemId != null;
-
-    // Get display text
     final displayText = _getDisplayText();
-
-    // Colors based on active state
-    final iconColor =
-        isActive ? AppColors.green100 : AppColors.textSecondary;
+    final iconColor = isActive ? AppColors.green100 : AppColors.textSecondary;
     final borderColor = AppColors.grey;
     final borderWidth = 1.5;
-    final backgroundColor =
-        _isHovered ? AppColors.grey : AppColors.background2;
-
+    final backgroundColor = _isHovered ? AppColors.grey : AppColors.background2;
     final isEmpty = widget.items.isEmpty;
     final isDisabled = isEmpty || widget.isLoading;
 
@@ -162,14 +153,13 @@ class _MobileSelectorButtonState<T> extends State<MobileSelectorButton<T>> {
       return widget.allLabel;
     }
 
-    // Find selected item
+    // Find selected item or fallback to all label
     try {
       final selectedItem = widget.items.firstWhere(
         (item) => widget.itemId(item) == widget.selectedItemId,
       );
       return widget.displayName(selectedItem);
     } catch (e) {
-      // If selected item not found in list, show "All"
       return widget.allLabel;
     }
   }
@@ -196,13 +186,9 @@ class _MobileSelectorButtonState<T> extends State<MobileSelectorButton<T>> {
       Offset.zero & overlay.size,
     );
 
-    // Build menu items
+    // Build menu items (includes "All" and each item)
     final List<PopupMenuEntry<String?>> menuItems = [];
-
-    // Add "All" option
     menuItems.add(_buildMenuItem(null, widget.allLabel, null));
-
-    // Add all items
     for (final item in widget.items) {
       menuItems.add(_buildMenuItem(
         widget.itemId(item),
@@ -259,7 +245,7 @@ class _MobileSelectorButtonState<T> extends State<MobileSelectorButton<T>> {
             ),
           ),
 
-          // Badge (e.g., "Archived", "Completed")
+          // Badge
           if (badge != null) ...[
             const SizedBox(width: 8),
             Container(
