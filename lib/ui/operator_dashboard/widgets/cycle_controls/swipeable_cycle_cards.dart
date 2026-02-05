@@ -67,7 +67,7 @@ class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
                     width: cardWidth,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 12),
-                      child: DrumControlCard(
+                      child: ControlInputCard(
                         currentBatch: widget.currentBatch,
                         machineId: widget.machineId,
                       ),

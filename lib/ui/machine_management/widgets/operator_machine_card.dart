@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../ui/web_machine/shared/machine_detail_row.dart';
-import 'machine_view_dialog.dart';
 
 class OperatorMachineCard extends StatelessWidget {
   final MachineModel machine;
+  final VoidCallback? onTap;
 
-  const OperatorMachineCard({super.key, required this.machine});
-
-  void _showMachineDetails(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => MachineViewDialog(machine: machine),
-    );
-  }
+  const OperatorMachineCard({
+    super.key,
+    required this.machine,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +19,7 @@ class OperatorMachineCard extends StatelessWidget {
     final isArchived = machine.isArchived;
 
     return InkWell(
-      onTap: () => _showMachineDetails(context),
+      onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Card(
         elevation: 0,

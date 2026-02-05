@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../models/drum_rotation_settings.dart';
 import '../../models/system_status.dart';
-import 'drum_input_fields.dart';
+import 'control_input_fields.dart';
 import 'system_action_buttons.dart';
 import 'info_item.dart';
 
@@ -159,7 +159,7 @@ class _ActiveStateState extends State<ActiveState> {
         const SizedBox(height: 12),
 
         // Input fields
-        DrumInputFields(
+        ControlInputFields(
           selectedCycle: widget.settings.cycles.toString(),
           selectedPeriod: widget.settings.period,
           isLocked: _isSettingsLocked,

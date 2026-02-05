@@ -1,17 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-
+import 'package:json_annotation/json_annotation.dart';
 class TimestampConverter implements JsonConverter<DateTime, Object> {
   const TimestampConverter();
-
   @override
   DateTime fromJson(Object json) {
     if (json is Timestamp) {
       return json.toDate();
+    } else if (json is String) {
+      return DateTime.parse(json);
     }
-    throw UnsupportedError('TimestampConverter: Unsupported type');
+    throw UnsupportedError('Unsupported type: ${json.runtimeType}');
   }
-
   @override
-  Object toJson(DateTime date) => Timestamp.fromDate(date);
+  Object toJson(DateTime date) {
+    return Timestamp.fromDate(date);
+  }
 }

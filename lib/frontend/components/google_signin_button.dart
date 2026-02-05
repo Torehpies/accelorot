@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 /// A standardized button for signing in using Google.
 ///
@@ -29,7 +30,8 @@ class GoogleSignInButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
           elevation: 1,
-          padding: EdgeInsets.zero, // Remove default padding to center image
+          padding: EdgeInsets.zero,
+					side: BorderSide.none
         ),
         child: isLoading
             ? const SizedBox(
@@ -42,10 +44,12 @@ class GoogleSignInButton extends StatelessWidget {
                   ), // Using blue for Google-like loader
                 ),
               )
-            : Image.asset(
-                'assets/images/google_logo_sq.png',
-                height: buttonSize,
+            : SvgPicture.asset(
+                'assets/images/google_logo.svg',
                 width: buttonSize,
+                height: buttonSize,
+                fit: BoxFit.contain,
+                semanticsLabel: 'Google Logo',
               ),
       ),
     );
