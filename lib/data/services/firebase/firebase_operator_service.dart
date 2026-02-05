@@ -1,4 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/data/models/app_user.dart';
+import 'package:flutter_application_1/data/utils/result.dart' as app_result;
 import '../../models/operator_model.dart';
 import '../../services/contracts/operator_service.dart';
 
@@ -200,5 +204,46 @@ class FirebaseOperatorService implements OperatorService {
     batch.delete(pendingRef);
 
     await batch.commit();
+  }
+
+  @override
+  Future<app_result.Result<AppUser>> addOperator({
+    required String email,
+    required String password,
+    required String firstname,
+    required String lastname,
+    String? globalRole,
+    String? teamRole,
+    String? status,
+    String? teamId,
+  }) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        return app_result.Result.error(Exception('Not signed in'));
+      }
+
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+        'createUserWithProfile',
+      );
+      final response = await callable.call({
+        'email': email,
+        'password': password,
+        'firstname': firstname,
+        'lastname': lastname,
+        'globalRole': globalRole,
+        'teamRole': teamRole,
+        'status': status,
+        'teamId': teamId,
+      });
+      // Deserialize response into AppUser
+      final data = response.data as Map<String, dynamic>;
+      final appUser = AppUser.fromJson(
+        data,
+      ); // Uses the provided `AppUser.fromJson`
+      return app_result.Result.ok(appUser);
+    } catch (e) {
+      return app_result.Result.error(Exception('Error: ${e.toString()}'));
+    }
   }
 }

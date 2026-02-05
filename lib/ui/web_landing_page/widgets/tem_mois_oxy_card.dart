@@ -1,8 +1,7 @@
-// lib/ui/landing_page/widgets/tem_mois_oxy_card.dart
-
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
+import '../../core/themes/web_colors.dart';
 
 class TemMoisOxyCard extends StatefulWidget {
   final IconData icon;
@@ -10,6 +9,7 @@ class TemMoisOxyCard extends StatefulWidget {
   final String label;
   final String? hoverInfo;
   final int position;
+  final Color iconColor;
 
   const TemMoisOxyCard({
     super.key,
@@ -18,6 +18,7 @@ class TemMoisOxyCard extends StatefulWidget {
     required this.label,
     this.hoverInfo,
     this.position = 0,
+    this.iconColor = WebColors.textPrimary, 
   });
 
   @override
@@ -31,7 +32,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
   late Animation<Offset> _slideAnimation;
   late Animation<double> _glowAnimation;
   bool _isHovered = false;
-  bool _isTapped = false; // For mobile touch feedback
+  bool _isTapped = false;
 
   @override
   void initState() {
@@ -42,10 +43,8 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
       vsync: this,
     );
 
-    // Staggered entrance animation based on position
     final delayFraction = (widget.position * 0.15).clamp(0.0, 0.45);
 
-    // Fade-in animation with stagger
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -57,7 +56,6 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
       ),
     );
 
-    // Slide-up animation with slight bounce
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.4), end: Offset.zero).animate(
       CurvedAnimation(
@@ -70,7 +68,6 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
       ),
     );
 
-    // Continuous glow pulse animation
     _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -97,7 +94,6 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Determine if this is a mobile/small screen
         final isMobile = constraints.maxWidth < 200;
         final isActive = _isHovered || _isTapped;
 
@@ -114,10 +110,8 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                 child: AnimatedBuilder(
                   animation: Listenable.merge([_glowAnimation]),
                   builder: (context, child) {
-                    // Zoom scale: 1.0 normal, 1.02 on hover/tap
                     final scale = isActive ? 1.02 : 1.0;
 
-                    // Glow logic
                     final glowIntensity = isActive
                         ? 0.4 + (_glowAnimation.value * 0.3)
                         : 0.0 + (_glowAnimation.value * 0.1);
@@ -125,7 +119,6 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                     final shadowOpacity = glowIntensity * 0.15;
                     final shadowBlur = 8.0 + (glowIntensity * 8.0);
 
-                    // Responsive sizing
                     final iconSize = isMobile ? 24.0 : 28.0;
                     final valueSize = isMobile ? 22.0 : 28.0;
                     final labelSize = isMobile ? 11.0 : 13.0;
@@ -145,33 +138,33 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFDEF9F4).withValues(
-                                alpha: isActive ? 1.0 : 0.9,
+                              WebColors.cardBackground.withValues(
+                                alpha: isActive ? 1.0 : 0.95,
                               ),
-                              const Color(0xFFC0F0E0).withValues(
-                                alpha: isActive ? 0.8 : 0.6,
+                              WebColors.lightGrayBackground.withValues(
+                                alpha: isActive ? 0.9 : 0.7,
                               ),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(isMobile ? 12 : 16),
                           border: Border.all(
                             color: Color.lerp(
-                              const Color(0xFFB2DFD3),
-                              const Color(0xFF10B981),
+                              WebColors.cardBorder,
+                              WebColors.textLabel,
                               glowIntensity * 0.3,
                             )!,
                             width: 1,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981)
+                              color: WebColors.textLabel
                                   .withValues(alpha: shadowOpacity),
                               blurRadius: shadowBlur,
                               spreadRadius: 1,
                               offset: const Offset(0, 4),
                             ),
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -189,13 +182,13 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                               height: isMobile ? 36 : 44,
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? const Color(0xFF10B981).withValues(alpha: 0.08)
+                                    ? widget.iconColor.withValues(alpha: 0.08)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(isMobile ? 8 : 10),
                                 boxShadow: [
                                   if (isActive)
                                     BoxShadow(
-                                      color: const Color(0xFF10B981).withValues(
+                                      color: widget.iconColor.withValues(
                                         alpha: glowIntensity * 0.15,
                                       ),
                                       blurRadius: shadowBlur * 0.6,
@@ -203,17 +196,16 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                                     ),
                                 ],
                               ),
-                              child: Icon(
-                                widget.icon,
+                              child: Icon(widget.icon,
                                 size: iconSize,
-                                color: const Color(0xFF10B981),
+                                color: widget.iconColor, 
                               ),
                             ),
                             SizedBox(height: isMobile ? AppSpacing.sm : AppSpacing.md),
                             Text(
                               widget.value,
                               style: WebTextStyles.h2.copyWith(
-                                color: const Color(0xFF111827),
+                                color: WebColors.textPrimary,
                                 fontSize: valueSize,
                                 fontWeight: FontWeight.bold,
                                 height: 1.0,
@@ -223,11 +215,10 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                             Text(
                               widget.label,
                               style: WebTextStyles.caption.copyWith(
-                                color: const Color(0xFF6B7280),
+                                color: WebColors.textLabel,
                                 fontSize: labelSize,
                               ),
                             ),
-                            // Show additional info on hover or tap
                             if (widget.hoverInfo != null)
                               AnimatedSize(
                                 duration: const Duration(milliseconds: 400),
@@ -244,7 +235,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                                           child: Text(
                                             widget.hoverInfo!,
                                             style: WebTextStyles.caption.copyWith(
-                                              color: const Color(0xFF6B7280),
+                                              color: WebColors.textMuted,
                                               fontSize: hoverInfoSize,
                                               height: 1.4,
                                             ),

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
 import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.dart';
-//import 'package:flutter_application_1/ui/machine_management/view/web_operator_machine_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
@@ -37,8 +37,6 @@ import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landin
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
-
-const int kDesktopBreakpoint = 1024;
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -126,7 +124,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
             return WebShell(child: child);
@@ -189,7 +187,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return AdminWebShell(child: child);
           } else {
@@ -259,7 +257,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) {
           final isDesktop =
-              MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+              MediaQuery.of(context).size.width >= kTabletBreakpoint;
           if (isDesktop) {
             return SuperAdminWebShell(child: child);
           } else {
