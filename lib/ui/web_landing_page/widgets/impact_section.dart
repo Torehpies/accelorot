@@ -33,7 +33,7 @@ class _ImpactSectionState extends State<ImpactSection> {
     _ImpactCardData(
       title: 'Reduces landfill waste',
       icon: Icons.delete_outline,
-      backgroundColor: WebColors.substratesBackground,
+      backgroundColor:  WebColors.substratesBackground,
       textColor: WebColors.textPrimary,
     ),
     _ImpactCardData(
@@ -186,19 +186,25 @@ class _ImpactSectionState extends State<ImpactSection> {
     return MediaQuery.of(context).size.height * 0.78;
   }
 
+  double _impactDescriptionSize(double screenWidth) {
+    if (screenWidth < 600) {
+      return 11.0;
+    } else if (screenWidth < 1024) {
+      return 12.0;
+    } else {
+      return screenWidth > 1440 ? 17.0 : 16.0;
+    }
+  }
+
   Widget _buildImpactIntroCard(double screenWidth, {bool isCompact = false}) {
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
     final titleSize = isMobile
-        ? 28.0
+        ? 30.0
         : isTablet
-            ? 32.0
+            ? 34.0
             : (screenWidth > 1440 ? 64.0 : 58.0);
-    final subtitleSize = isMobile
-        ? 11.0
-        : isTablet
-            ? 12.0
-            : (screenWidth > 1440 ? 17.0 : 16.0);
+    final subtitleSize = _impactDescriptionSize(screenWidth) + (isMobile ? 1 : isTablet ? 1 : 0);
     return Container(
       padding: EdgeInsets.all(
         isMobile
@@ -208,8 +214,15 @@ class _ImpactSectionState extends State<ImpactSection> {
                 : AppSpacing.xl,
       ),
       decoration: BoxDecoration(
-        color: WebColors.buttonsPrimary,
         borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF10B981),
+            Color(0xFF22C55E),
+          ],
+        ),
       ),
       child: Stack(
         children: [
@@ -217,8 +230,8 @@ class _ImpactSectionState extends State<ImpactSection> {
             padding: const EdgeInsets.only(left: AppSpacing.lg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Spacer(),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: RichText(
@@ -227,7 +240,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                       style: TextStyle(
                         fontSize: titleSize,
                         fontWeight: FontWeight.w800,
-                        height: (titleSize + 18) / titleSize,
+                        height: (titleSize + 10) / titleSize,
                       ),
                       children: const [
                         TextSpan(
@@ -246,13 +259,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: isMobile
-                      ? AppSpacing.lg
-                      : isTablet
-                          ? AppSpacing.xl
-                          : AppSpacing.xxxl,
-                ),
+                SizedBox(height: isMobile ? AppSpacing.md : isTablet ? AppSpacing.lg : AppSpacing.xxxl),
                 Text(
                   'In the Philippines, over 50% of Municipal Solid Waste is organic.\nAccel-O-Rot helps manage waste responsible',
                   textAlign: TextAlign.left,
@@ -262,7 +269,6 @@ class _ImpactSectionState extends State<ImpactSection> {
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
-                const Spacer(),
               ],
             ),
           ),
@@ -352,18 +358,24 @@ class _ImpactSectionState extends State<ImpactSection> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
-    final isHovered = _expandedImpactIndex == index;
+    final descriptionSize = _impactDescriptionSize(screenWidth);
+    final isHovered = _expandedImpactIndex == displayIndex;
     final isIllustration = index == 0;
+    final hoverColor =
+        Color.lerp(_impactCards.first.backgroundColor, Colors.white, 0.2)!;
     return MouseRegion(
       onEnter: (_) => setState(() {
-        _expandedImpactIndex = index >= 1 ? index : null;
+        _expandedImpactIndex = displayIndex;
+      }),
+      onExit: (_) => setState(() {
+        _expandedImpactIndex = null;
       }),
       child: GestureDetector(
-        onTap: () => setState(() => _expandedImpactIndex = index),
+        onTap: () => setState(() => _expandedImpactIndex = displayIndex),
         child: Container(
           padding: EdgeInsets.all(isCompact ? AppSpacing.md : AppSpacing.lg),
           decoration: BoxDecoration(
-            color: data.backgroundColor,
+            color: isHovered ? hoverColor : data.backgroundColor,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Stack(
@@ -379,23 +391,35 @@ class _ImpactSectionState extends State<ImpactSection> {
                             child: Center(
                               child: FractionallySizedBox(
                                 widthFactor: isMobile
-                                    ? 0.55
+                                    ? 0.7
                                     : isTablet
-                                        ? 0.65
+                                        ? 0.75
                                         : 0.85,
                                 heightFactor: isMobile
-                                    ? 0.55
+                                    ? 0.7
                                     : isTablet
-                                        ? 0.65
+                                        ? 0.75
                                         : 0.85,
-                                child: AspectRatio(
-                                  aspectRatio: 1,
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      _imageForIndex(displayIndex),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final maxWidth = constraints.maxWidth;
+                                    final maxHeight = constraints.maxHeight;
+                                    final heightBounded =
+                                        maxHeight != double.infinity && maxHeight > 0;
+                                    final diameter =
+                                        heightBounded ? (maxWidth < maxHeight ? maxWidth : maxHeight) : maxWidth;
+                                    return Center(
+                                      child: SizedBox.square(
+                                        dimension: diameter,
+                                        child: ClipOval(
+                                          child: Image.asset(
+                                            _imageForIndex(displayIndex),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -422,9 +446,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                                         ? Alignment.centerRight
                                         : Alignment.centerLeft,
                                     child: Text(
-                                      index == 0
-                                          ? data.title.toUpperCase()
-                                          : data.title,
+                                      data.title.toUpperCase(),
                                       textAlign: index == 0 ? TextAlign.right : TextAlign.left,
                                       style: TextStyle(
                                       fontSize: isMobile
@@ -446,11 +468,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                                       _impactDescriptions[data.title] ?? '',
                                       textAlign: TextAlign.justify,
                                       style: TextStyle(
-                                        fontSize: isMobile
-                                            ? 10
-                                            : isTablet
-                                                ? 11
-                                                : 13,
+                                        fontSize: descriptionSize,
                                         height: 1.4,
                                         color: data.textColor.withValues(alpha: 0.9),
                                       ),
@@ -471,7 +489,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                         children: [
                           Row(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
                                 width: isMobile
@@ -485,30 +503,41 @@ class _ImpactSectionState extends State<ImpactSection> {
                                         ? 28
                                         : 42,
                                 decoration: BoxDecoration(
-                                  color: data.textColor.withValues(alpha: 0.12),
+                                  color: Colors.transparent,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
                                   data.icon ?? Icons.eco_outlined,
                                   size: isMobile
-                                      ? 12
+                                      ? 16
                                       : isTablet
-                                          ? 16
-                                          : 24,
+                                          ? 20
+                                          : 36,
                                   color: const Color(0xFF3F8E3F),
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Text(
-                                  data.title,
+                                  data.title.toUpperCase(),
                                   style: TextStyle(
-                                    fontSize: isMobile
-                                        ? 13
-                                        : isTablet
-                                            ? 15
-                                            : 20,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: (() {
+                                      final baseSize = isMobile
+                                          ? 13.0
+                                          : isTablet
+                                              ? 15.0
+                                          : ((data.title == 'Produces nutrient-rich compost' ||
+                                                  data.title == 'Empowers communities')
+                                              ? 16.0
+                                              : data.title == 'Reduces landfill waste'
+                                                  ? 18.0
+                                                  : 20.0);
+                                      if (index != 0 && isHovered) {
+                                        return baseSize - 2.0;
+                                      }
+                                      return baseSize;
+                                    })(),
+                                    fontWeight: FontWeight.w800,
                                     color: data.textColor,
                                   ),
                                   maxLines: 2,
@@ -529,7 +558,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                                       child: Text(
                                         _impactDescriptions[data.title] ?? '',
                                         style: TextStyle(
-                                          fontSize: isCompact ? 13 : 14,
+                                          fontSize: descriptionSize,
                                           height: 1.4,
                                           color: data.textColor.withValues(alpha: 0.9),
                                         ),
@@ -542,14 +571,7 @@ class _ImpactSectionState extends State<ImpactSection> {
                         ],
                       ),
               ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Icon(
-                  Icons.south_east,
-                  size: isCompact ? 18 : 22,
-                  color: const Color(0xFF1B1B1B),
-                ),
-              ),
+              const SizedBox.shrink(),
             ],
           ),
         ),
