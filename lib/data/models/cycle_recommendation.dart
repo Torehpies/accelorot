@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 part 'cycle_recommendation.freezed.dart';
 
@@ -46,11 +47,11 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       if (value is double) {
         // Check for NaN or Infinity
         if (value.isNaN) {
-          print('⚠️ NaN detected in field: $fieldName (doc: ${doc.id})');
+          foundation.debugPrint('⚠️ NaN detected in field: $fieldName (doc: ${doc.id})');
           return null;
         }
         if (value.isInfinite) {
-          print('⚠️ Infinity detected in field: $fieldName (doc: ${doc.id})');
+          foundation.debugPrint('⚠️ Infinity detected in field: $fieldName (doc: ${doc.id})');
           return null;
         }
         return value.toInt();

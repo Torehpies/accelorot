@@ -139,7 +139,7 @@ class FirestoreAlertService implements AlertService {
                final alert = Alert.fromFirestore(d);
                // Inject machineId if provided and missing in alert
                if (machineId != null && alert.machineId.isEmpty) {
-                 return alert.copyWith(machineId: machineId!);
+                 return alert.copyWith(machineId: machineId);
                }
                return alert;
              });
@@ -179,10 +179,7 @@ class FirestoreAlertService implements AlertService {
   @override
   Stream<List<Alert>> streamAlerts(String batchId) {
     // Note: True real-time streaming of dynamically created "date" collections 
-    // is complex without collectionGroup. 
-    // For simplicity, we convert the fetch to a Stream that emits regularly or just once.
-    // If real-time is critical, we'd need a different architecture or indices.
-    // For now, we just fetch once and emit.
+    
     return Stream.fromFuture(fetchAlertsForBatch(batchId));
   }
 
@@ -193,8 +190,6 @@ class FirestoreAlertService implements AlertService {
     }
 
     try {
-      // Since we can't use collectionGroup easily, and we don't know the batchId,
-      // we have to search for it. This is inefficient but "simple" in terms of NoOps.
       
       final teamId = await _batchService.getUserTeamId(currentUserId!);
       if (teamId == null) return null;
@@ -205,11 +200,7 @@ class FirestoreAlertService implements AlertService {
       final batches = await _batchService.getBatchesForMachines(teamMachineIds);
       
       for (var batchDoc in batches) {
-         // Optimization: We could check if the alertId (e.g. sensor-HH-MM-SS) matches a time?
-         // But alertId structure isn't guaranteed unique across days if just time.
-         // ESP code: sensorType + "-" + HH-MM-SS.
-         // So uniqueness is highly probable but finding the DATE is hard.
-         // Just fetch all alerts for the batch effectively.
+
          
          final data = batchDoc.data() as Map<String, dynamic>;
          final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
