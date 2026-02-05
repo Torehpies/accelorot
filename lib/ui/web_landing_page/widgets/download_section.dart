@@ -1,12 +1,12 @@
-// lib/ui/web_landing_page/widgets/banner_section.dart
+// lib/ui/web_landing_page/widgets/download_section.dart
 import 'package:flutter/material.dart';
 
 class DownloadSection extends StatelessWidget {
-  final VoidCallback onDownload; 
+  final VoidCallback onDownload;
 
   const DownloadSection({
     super.key,
-    required this.onDownload, 
+    required this.onDownload,
   });
 
   @override
@@ -25,7 +25,7 @@ class DownloadSection extends StatelessWidget {
           vertical: 0,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(8),
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -34,6 +34,18 @@ class DownloadSection extends StatelessWidget {
               Color(0xFF22C55E),
             ],
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
@@ -84,25 +96,41 @@ class DownloadSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 48),
-                  // ✅ CENTERED DOWNLOAD BUTTON (only one button now)
+                  // Updated button with consistent styling
                   SizedBox(
-                    width: 260, // Consistent width for single button
-                    child: OutlinedButton(
+                    width: 260,
+                    height: 56,
+                    child: ElevatedButton(
                       onPressed: onDownload,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white70),
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.white),
+                        foregroundColor: WidgetStateProperty.all(const Color(0xFF22C55E)),
+                        padding: WidgetStateProperty.all(
+                          const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        elevation: WidgetStateProperty.resolveWith<double>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.hovered)) {
+                              return 8;
+                            }
+                            return 0;
+                          },
+                        ),
+                        shadowColor: WidgetStateProperty.all(
+                          Colors.black.withValues(alpha: 0.2),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.download_rounded, size: 20),
-                          SizedBox(width: 12),
-                          Text('Download APk', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
-                        ],
+                      child: const Text(
+                        'Download APK',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),

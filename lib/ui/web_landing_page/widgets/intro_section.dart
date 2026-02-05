@@ -152,7 +152,7 @@ class IntroSection extends StatelessWidget {
         Text(
           'Accelerate decomposition with our IoT-enabled rotary drum system.\n'
           'Monitor in real-time, automate processes,\n'
-          'and produce quality compost in just 2 weeks.',
+          'and produce quality compost within 2 weeks.',
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
           style: WebTextStyles.subtitle.copyWith(
             color: Colors.white.withValues(alpha: 0.92),

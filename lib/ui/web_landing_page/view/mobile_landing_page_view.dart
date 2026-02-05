@@ -99,17 +99,23 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
     final key = sectionMap[sectionId];
     if (key?.currentContext == null) return;
 
+    // Close menu first
     setState(() {
       _activeSection = sectionId;
       _isMenuOpen = false;
     });
 
-    Scrollable.ensureVisible(
-      key!.currentContext!,
-      duration: const Duration(milliseconds: 650),
-      curve: Curves.easeInOut,
-      alignment: 0,
-    );
+    // Small delay to let menu close animation finish
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (key?.currentContext != null) {
+        Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(milliseconds: 650),
+          curve: Curves.easeInOut,
+          alignment: 0,
+        );
+      }
+    });
   }
 
   void _handleLogin() => context.go('/login');
@@ -276,8 +282,8 @@ class _MobileHeaderState extends State<_MobileHeader> {
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               color: _isLogoHovered 
-                                  ? Colors.green 
-                                  : Colors.green,
+                                  ? const Color(0xFF22C55E)
+                                  : const Color(0xFF22C55E),
                             ),
                             child: const Text('Accel-O-Rot'),
                           ),
@@ -311,11 +317,32 @@ class _MobileHeaderState extends State<_MobileHeader> {
                   _MenuItem('FAQ', 'faq', widget.activeSection, widget.onBreadcrumbTap),
                   _MenuItem('Contact', 'contact', widget.activeSection, widget.onBreadcrumbTap),
                   const SizedBox(height: 24),
-                  TextButton(onPressed: widget.onLogin, child: const Text('Login')),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: TextButton(
+                      onPressed: widget.onLogin,
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF22C55E),
+                      ),
+                      child: const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: widget.onGetStarted,
-                    child: const Text('Get Started'),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: widget.onGetStarted,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF22C55E),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text('Get Started', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
                   ),
                 ],
               ),
@@ -344,7 +371,7 @@ class _MenuItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: isActive ? Colors.green.withValues(alpha: 0.1) : null,
+          color: isActive ? const Color(0xFF22C55E).withValues(alpha: 0.1) : null,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -352,7 +379,7 @@ class _MenuItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? Colors.green : const Color(0xFF374151),
+            color: isActive ? const Color(0xFF22C55E) : const Color(0xFF374151),
           ),
         ),
       ),

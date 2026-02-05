@@ -67,189 +67,195 @@ class _DesktopLoginViewState extends State<DesktopLoginView>
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Left Side: Animated Onboarding Illustration
+        // Left Side: Animated Onboarding Illustration with rounded edges
         Expanded(
           flex: 3,
           child: RepaintBoundary(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFFE8F5E9), // Light green
-                    const Color(0xFFDCEDC8), // Slightly darker green
-                  ],
-                ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(48),
+                bottomRight: Radius.circular(48),
               ),
-              child: Stack(
-                children: [
-                  // Animated decorative background blobs
-                  Positioned(
-                    top: -80,
-                    right: -80,
-                    child: _AnimatedDecorativeBlob(
-                      animation: _blobController,
-                      size: 300,
-                      color: AppColors.green100.withValues(alpha: 0.15),
-                      offset: 0,
-                    ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFE8F5E9), // Light green
+                      Color(0xFFDCEDC8), // Slightly darker green
+                    ],
                   ),
-                  Positioned(
-                    bottom: -100,
-                    left: -100,
-                    child: _AnimatedDecorativeBlob(
-                      animation: _blobController,
-                      size: 350,
-                      color: AppColors.green100.withValues(alpha: 0.1),
-                      offset: 0.5,
-                    ),
-                  ),
-
-                  // Animated clouds
-                  Positioned(
-                    top: 60,
-                    left: -40,
-                    child: _FloatingCloud(
-                      animation: _cloudController,
-                      size: 100,
-                      color: const Color(0xFFF0F8FF).withValues(alpha: 0.7), // AliceBlue
-                      offset: 0.0,
-                    ),
-                  ),
-                  Positioned(
-                    top: 120,
-                    right: -60,
-                    child: _FloatingCloud(
-                      animation: _cloudController,
-                      size: 140,
-                      color: const Color(0xFFE6F7FF).withValues(alpha: 0.8), // Light sky blue
-                      offset: 0.3,
-                    ),
-                  ),
-                  Positioned(
-                    top: 200,
-                    left: 40,
-                    child: _FloatingCloud(
-                      animation: _cloudController,
-                      size: 90,
-                      color: const Color(0xFFE3F2FD).withValues(alpha: 0.75), // Very light blue
-                      offset: 0.6,
-                    ),
-                  ),
-
-                  // Floating leaves
-                  Positioned(
-                    top: 100,
-                    left: 40,
-                    child: _FloatingLeaf(
-                      animation: _floatingController,
-                      rotationAnimation: _rotationController,
-                      size: 30,
-                      offset: 0,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 200,
-                    right: 60,
-                    child: _FloatingLeaf(
-                      animation: _floatingController,
-                      rotationAnimation: _rotationController,
-                      size: 40,
-                      offset: 0.5,
-                    ),
-                  ),
-                  Positioned(
-                    top: 250,
-                    right: 100,
-                    child: _FloatingLeaf(
-                      animation: _floatingController,
-                      rotationAnimation: _rotationController,
-                      size: 25,
-                      offset: 0.3,
-                    ),
-                  ),
-                  Positioned(
-                    top: 400,
-                    left: 80,
-                    child: _FloatingLeaf(
-                      animation: _floatingController,
-                      rotationAnimation: _rotationController,
-                      size: 35,
-                      offset: 0.7,
-                    ),
-                  ),
-
-                  // Main content
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(40.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Animated composting illustration
-                          _AnimatedCompostingIllustration(
-                            floatingAnimation: _floatingController,
-                            scaleAnimation: _scaleController,
-                          ),
-
-                          const SizedBox(height: 60),
-
-                          // Title with fade-in
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: const Duration(milliseconds: 800),
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - value)),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              'Nurture Nature',
-                              style: TextStyle(
-                                color: Color(0xFF2D3748),
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Subtitle with delayed fade-in
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: const Duration(milliseconds: 1000),
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - value)),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              'Turn waste into wonder. Join\nthe smart composting\nrevolution today.',
-                              style: TextStyle(
-                                color: Color(0xFF4A5568),
-                                fontSize: 16,
-                                height: 1.6,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
+                ),
+                child: Stack(
+                  children: [
+                    // Animated decorative background blobs with rounded edges
+                    Positioned(
+                      top: -80,
+                      right: -80,
+                      child: _AnimatedDecorativeBlob(
+                        animation: _blobController,
+                        size: 300,
+                        color: AppColors.green100.withValues(alpha: 0.15),
+                        offset: 0,
                       ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      bottom: -100,
+                      left: -100,
+                      child: _AnimatedDecorativeBlob(
+                        animation: _blobController,
+                        size: 350,
+                        color: AppColors.green100.withValues(alpha: 0.1),
+                        offset: 0.5,
+                      ),
+                    ),
+
+                    // Animated clouds with rounded edges
+                    Positioned(
+                      top: 60,
+                      left: -40,
+                      child: _FloatingCloud(
+                        animation: _cloudController,
+                        size: 100,
+                        color: const Color(0xFFF0F8FF).withValues(alpha: 0.7),
+                        offset: 0.0,
+                      ),
+                    ),
+                    Positioned(
+                      top: 120,
+                      right: -60,
+                      child: _FloatingCloud(
+                        animation: _cloudController,
+                        size: 140,
+                        color: const Color(0xFFE6F7FF).withValues(alpha: 0.8),
+                        offset: 0.3,
+                      ),
+                    ),
+                    Positioned(
+                      top: 200,
+                      left: 40,
+                      child: _FloatingCloud(
+                        animation: _cloudController,
+                        size: 90,
+                        color: const Color(0xFFE3F2FD).withValues(alpha: 0.75),
+                        offset: 0.6,
+                      ),
+                    ),
+
+                    // Floating leaves
+                    Positioned(
+                      top: 100,
+                      left: 40,
+                      child: _FloatingLeaf(
+                        animation: _floatingController,
+                        rotationAnimation: _rotationController,
+                        size: 30,
+                        offset: 0,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 200,
+                      right: 60,
+                      child: _FloatingLeaf(
+                        animation: _floatingController,
+                        rotationAnimation: _rotationController,
+                        size: 40,
+                        offset: 0.5,
+                      ),
+                    ),
+                    Positioned(
+                      top: 250,
+                      right: 100,
+                      child: _FloatingLeaf(
+                        animation: _floatingController,
+                        rotationAnimation: _rotationController,
+                        size: 25,
+                        offset: 0.3,
+                      ),
+                    ),
+                    Positioned(
+                      top: 400,
+                      left: 80,
+                      child: _FloatingLeaf(
+                        animation: _floatingController,
+                        rotationAnimation: _rotationController,
+                        size: 35,
+                        offset: 0.7,
+                      ),
+                    ),
+
+                    // Main content
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Animated composting illustration
+                            _AnimatedCompostingIllustration(
+                              floatingAnimation: _floatingController,
+                              scaleAnimation: _scaleController,
+                            ),
+
+                            const SizedBox(height: 60),
+
+                            // Title with fade-in
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 800),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Nurture Nature',
+                                style: TextStyle(
+                                  color: Color(0xFF2D3748),
+                                  fontSize: 36,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            // Subtitle with delayed fade-in
+                            TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.0, end: 1.0),
+                              duration: const Duration(milliseconds: 1000),
+                              builder: (context, value, child) {
+                                return Opacity(
+                                  opacity: value,
+                                  child: Transform.translate(
+                                    offset: Offset(0, 20 * (1 - value)),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Turn waste into wonder. Join\nthe smart composting\nrevolution today.',
+                                style: TextStyle(
+                                  color: Color(0xFF4A5568),
+                                  fontSize: 16,
+                                  height: 1.6,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -263,7 +269,7 @@ class _DesktopLoginViewState extends State<DesktopLoginView>
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: kMaxFormWidth),
                 child: const Padding(
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(40.0),
                   child: LoginForm(),
                 ),
               ),
@@ -300,7 +306,7 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Background leaves with staggered animation
+                // Background leaves with staggered animation and rounded edges
                 Positioned(
                   top: 60,
                   left: 60,
@@ -334,13 +340,13 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
                   ),
                 ),
 
-                // Composting drum
+                // Composting drum with rounded edges
                 Positioned(
                   bottom: 40,
                   child: _CompostDrum(),
                 ),
 
-                // Animated sprouts
+                // Animated sprouts with rounded edges
                 Positioned(
                   bottom: 130,
                   child: Row(
@@ -361,7 +367,7 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
                   ),
                 ),
 
-                // Animated particles
+                // Animated particles with rounded edges
                 ..._buildFloatingParticles(floatingAnimation),
               ],
             ),
@@ -387,14 +393,12 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
               offset: Offset(0, floatY),
               child: Opacity(
                 opacity: opacity * 0.5,
-                child: SizedBox( // FIXED: Replaced Container with SizedBox for pure shape
+                child: Container(
                   width: 8,
                   height: 8,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: AppColors.green100,
-                      shape: BoxShape.circle,
-                    ),
+                  decoration: BoxDecoration(
+                    color: AppColors.green100,
+                    shape: BoxShape.circle, // Already rounded
                   ),
                 ),
               ),
@@ -406,7 +410,7 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
   }
 }
 
-// Animated Leaf
+// Animated Leaf with rounded edges
 class _AnimatedLeaf extends StatelessWidget {
   final Animation<double> animation;
   final double rotationOffset;
@@ -434,9 +438,12 @@ class _AnimatedLeaf extends StatelessWidget {
           angle: rotation,
           child: Transform.scale(
             scale: scale,
-            child: CustomPaint(
-              size: Size(width, height),
-              painter: _LeafPainter(color),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(width * 0.5), // Increased radius
+              child: CustomPaint(
+                size: Size(width, height),
+                painter: _LeafPainter(color),
+              ),
             ),
           ),
         );
@@ -445,7 +452,7 @@ class _AnimatedLeaf extends StatelessWidget {
   }
 }
 
-// Animated Sprout
+// Animated Sprout with rounded edges
 class _AnimatedSprout extends StatelessWidget {
   final Animation<double> animation;
   final double height;
@@ -469,26 +476,28 @@ class _AnimatedSprout extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Leaf top - FIXED: Using SizedBox + DecoratedBox instead of Container
-              SizedBox(
-                width: 10,
-                height: 10,
-                child: DecoratedBox(
+              // Leaf top with rounded edges
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8), // Increased radius
+                child: Container(
+                  width: 10,
+                  height: 10,
                   decoration: BoxDecoration(
                     color: AppColors.green100,
-                    shape: BoxShape.circle,
+                    shape: BoxShape.circle, // Already rounded
                   ),
                 ),
               ),
-              const SizedBox(width: 3), // Pure spacing - correctly using SizedBox
-              // Stem - FIXED: Using SizedBox + DecoratedBox instead of Container
-              SizedBox(
-                width: 3,
-                height: 30, // Will be overridden by parent constraints
-                child: DecoratedBox(
+              const SizedBox(height: 3),
+              // Stem with rounded edges
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4), // Increased radius
+                child: Container(
+                  width: 3,
+                  height: height,
                   decoration: BoxDecoration(
                     color: AppColors.green100,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
@@ -500,15 +509,18 @@ class _AnimatedSprout extends StatelessWidget {
   }
 }
 
-// Composting drum (static)
+// Composting drum with rounded edges
 class _CompostDrum extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SizedBox( // FIXED: Using SizedBox instead of Container for pure sizing
-      width: 160,
-      height: 100,
-      child: CustomPaint(
-        painter: _DrumPainter(),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24), // Increased radius
+      child: SizedBox(
+        width: 160,
+        height: 100,
+        child: CustomPaint(
+          painter: _DrumPainter(),
+        ),
       ),
     );
   }
@@ -587,7 +599,7 @@ class _LeafPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Animated decorative blob
+// Animated decorative blob with rounded edges (already circular)
 class _AnimatedDecorativeBlob extends StatelessWidget {
   final Animation<double> animation;
   final double size;
@@ -610,14 +622,12 @@ class _AnimatedDecorativeBlob extends StatelessWidget {
 
         return Transform.scale(
           scale: scale,
-          child: SizedBox( // FIXED: Using SizedBox instead of Container for pure shape
+          child: Container(
             width: size,
             height: size,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-              ),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, // Already rounded
+              color: color,
             ),
           ),
         );
@@ -665,7 +675,7 @@ class _FloatingLeaf extends StatelessWidget {
   }
 }
 
-// Floating cloud decoration
+// Floating cloud decoration with rounded edges
 class _FloatingCloud extends StatelessWidget {
   final Animation<double> animation;
   final double size;
@@ -695,9 +705,12 @@ class _FloatingCloud extends StatelessWidget {
           offset: Offset(driftX, floatY),
           child: Transform.scale(
             scale: scale,
-            child: CustomPaint(
-              size: Size(size, size * 0.6),
-              painter: _CloudPainter(color),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(size * 0.5), // Increased radius
+              child: CustomPaint(
+                size: Size(size, size * 0.6),
+                painter: _CloudPainter(color),
+              ),
             ),
           ),
         );
@@ -723,7 +736,7 @@ class _CloudPainter extends CustomPainter {
     final centerY = size.height / 2;
     final radius = size.height * 0.45;
 
-    // Main body circles
+    // Main body circles (already rounded by nature)
     canvas.drawCircle(Offset(centerX * 0.6, centerY), radius, paint);
     canvas.drawCircle(Offset(centerX, centerY * 0.8), radius * 1.2, paint);
     canvas.drawCircle(Offset(centerX * 1.4, centerY), radius, paint);

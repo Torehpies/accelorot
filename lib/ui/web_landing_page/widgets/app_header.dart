@@ -1,11 +1,11 @@
+// lib/ui/web_landing_page/widgets/app_header.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/spacing.dart';
-import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/ui/primary_button.dart'; 
-import '../../core/ui/header_button.dart'; 
+import '../buttons/button_one.dart';
 
 class AppHeader extends StatefulWidget {
   final VoidCallback onLogin;
@@ -47,7 +47,7 @@ class _AppHeaderState extends State<AppHeader> {
 
     final headerHeight = isMobile ? 64.0 : 88.0;
     final logoSize = isVerySmall ? 32.0 : (isMobile ? 40.0 : 50.0);
-    final appNameFontSize = isVerySmall ? 16.0 : (isMobile ? 20.0 : 24.0);
+    final appNameLogoWidth = isVerySmall ? 80.0 : (isMobile ? 100.0 : 130.0);
     final showAppName = screenWidth > 280;
 
     return AnimatedContainer(
@@ -55,7 +55,7 @@ class _AppHeaderState extends State<AppHeader> {
       height: headerHeight,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: widget.isScrolled ? Colors.white : const Color(0xFFE0F2FE),
+        color: Colors.white,
         border: widget.isScrolled
             ? const Border(
                 bottom: BorderSide(
@@ -86,7 +86,7 @@ class _AppHeaderState extends State<AppHeader> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Logo section with hover effect
+            // Logo + Name SVG section with hover effect
             Flexible(
               flex: 1,
               child: MouseRegion(
@@ -121,19 +121,16 @@ class _AppHeaderState extends State<AppHeader> {
                         if (showAppName) ...[
                           const SizedBox(width: AppSpacing.xs),
                           Flexible(
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 200),
-                              style: WebTextStyles.h2.copyWith(
-                                color: _isLogoHovered 
-                                    ? WebColors.success 
+                            child: SvgPicture.asset(
+                              'assets/images/Accelorot_name.svg',
+                              width: appNameLogoWidth,
+                              height: logoSize,
+                              fit: BoxFit.contain,
+                              colorFilter: ColorFilter.mode(
+                                _isLogoHovered
+                                    ? const Color(0xFF22C55E)
                                     : WebColors.buttonsPrimary,
-                                fontWeight: FontWeight.w900,
-                                fontSize: appNameFontSize,
-                              ),
-                              child: const Text(
-                                'Accel-O-Rot',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                BlendMode.srcIn,
                               ),
                             ),
                           ),
@@ -144,8 +141,6 @@ class _AppHeaderState extends State<AppHeader> {
                 ),
               ),
             ),
-
-            // Navigation handling based on screen size
             if (isMobile) ...[
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -230,6 +225,14 @@ class _AppHeaderState extends State<AppHeader> {
                         onTap: widget.onBreadcrumbTap,
                         fontSize: isTablet ? 15 : 16,
                       ),
+                      _Chevron(size: isTablet ? 18 : 20),
+                      _BreadcrumbItem(
+                        label: 'Contact',
+                        id: 'contact',
+                        active: widget.activeSection,
+                        onTap: widget.onBreadcrumbTap,
+                        fontSize: isTablet ? 15 : 16,
+                      ),
                     ],
                   ),
                 ),
@@ -237,11 +240,10 @@ class _AppHeaderState extends State<AppHeader> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ✅ ONLY THIS BUTTON IS NOW HeaderButton
                   SizedBox(
                     width: 100,
                     height: isTablet ? 38 : 42,
-                    child: HeaderButton(
+                    child: ButtonOne(
                       text: 'Login',
                       onPressed: widget.onLogin,
                     ),
@@ -265,7 +267,6 @@ class _AppHeaderState extends State<AppHeader> {
   }
 }
 
-// Keep _BreadcrumbItem unchanged
 class _BreadcrumbItem extends StatefulWidget {
   final String label;
   final String id;
@@ -313,10 +314,10 @@ class _BreadcrumbItemState extends State<_BreadcrumbItem> {
               fontSize: widget.fontSize,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               color: isActive
-                  ? WebColors.success
+                  ? const Color(0xFF22C55E) // Green when active
                   : _isHovered
-                      ? WebColors.success
-                      : const Color(0xFF6B7280),
+                      ? const Color(0xFF22C55E) // Green on hover
+                      : const Color(0xFF6B7280), // Gray otherwise
             ),
           ),
         ),
