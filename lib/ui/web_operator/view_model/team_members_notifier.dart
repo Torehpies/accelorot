@@ -1,8 +1,11 @@
+// lib/ui/web_operator/view_model/team_members_notifier.dart
+
 import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
+import 'package:flutter_application_1/ui/web_operator/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_search_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
@@ -100,14 +103,19 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   // ===== SORT =====
 
   void onSort(String column) {
-    final isAscending =
-        state.sortColumn == column ? !state.sortAscending : true;
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
 
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
 
+    _applyFilters();
+  }
+
+  // ===== STATUS FILTERING =====
+  
+  void setStatusFilter(TeamMemberStatusFilter filter) {
+    state = state.copyWith(statusFilter: filter);
     _applyFilters();
   }
 
@@ -282,21 +290,28 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     state = state.copyWith(filteredMembers: filtered);
   }
 
-  /// Single pipeline: search filter → sort. Used everywhere we need the final list.
+  /// Single pipeline: search filter → status filter → sort. Used everywhere we need the final list.
   List<TeamMember> _applySearchAndSort(List<TeamMember> members) {
-    // 1. Search filter
     List<TeamMember> result = members;
+    
+    // 1. Search filter
     final query = state.searchQuery.toLowerCase();
     if (query.isNotEmpty) {
       result = result.where((member) {
         return member.email.toLowerCase().contains(query) ||
-            '${member.firstName} ${member.lastName}'
-                .toLowerCase()
-                .contains(query);
+            '${member.firstName} ${member.lastName}'.toLowerCase().contains(query);
       }).toList();
     }
 
-    // 2. Sort
+    // 2. Status filter
+    if (state.statusFilter != TeamMemberStatusFilter.all) {
+      final targetStatus = _getStatusValue(state.statusFilter);
+      result = result.where((member) {
+        return member.status.value.toLowerCase() == targetStatus;
+      }).toList();
+    }
+
+    // 3. Sort
     if (state.sortColumn != null) {
       result = _sortMembers(result, state.sortColumn!, state.sortAscending);
     }
@@ -323,7 +338,9 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
           cmp = a.email.toLowerCase().compareTo(b.email.toLowerCase());
           break;
         case 'status':
-          cmp = a.status.value.toLowerCase().compareTo(b.status.value.toLowerCase());
+          cmp = a.status.value.toLowerCase().compareTo(
+            b.status.value.toLowerCase(),
+          );
           break;
         default:
           cmp = 0;
@@ -331,5 +348,19 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       return ascending ? cmp : -cmp;
     });
     return sorted;
+  }
+
+  // Helper method to convert enum to status value
+  String _getStatusValue(TeamMemberStatusFilter filter) {
+    switch (filter) {
+      case TeamMemberStatusFilter.active:
+        return 'active';
+      case TeamMemberStatusFilter.removed:
+        return 'removed';
+      case TeamMemberStatusFilter.archived:
+        return 'archived';
+      case TeamMemberStatusFilter.all:
+        return '';
+    }
   }
 }

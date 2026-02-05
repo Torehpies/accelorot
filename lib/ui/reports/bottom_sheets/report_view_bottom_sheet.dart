@@ -1,12 +1,10 @@
-// lib/ui/reports/bottom_sheets/report_view_bottom_sheet.dart
-
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 
-/// Read-only view of a single report
 class ReportViewBottomSheet extends StatelessWidget {
   final Report report;
   final VoidCallback onEdit;
@@ -41,7 +39,7 @@ class ReportViewBottomSheet extends StatelessWidget {
         ),
       ],
       body: MobileReadOnlySection(
-        sectionTitle: null, // No section title - flat display
+        sectionTitle: null,
         fields: [
           MobileReadOnlyField(label: 'Report ID', value: report.id),
           MobileReadOnlyField(label: 'Machine', value: report.machineName),

@@ -1,0 +1,172 @@
+// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_add_sheet.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
+import '../../core/bottom_sheet/fields/mobile_input_field.dart';
+import '../../core/toast/mobile_toast_service.dart';
+import '../../core/toast/toast_type.dart';
+
+typedef CreateMachineCallback = Future<void> Function({
+  required String machineId,
+  required String machineName,
+});
+
+class MobileAdminMachineAddSheet extends StatefulWidget {
+  final String teamId;
+  final CreateMachineCallback onCreate;
+
+  const MobileAdminMachineAddSheet({
+    super.key,
+    required this.teamId,
+    required this.onCreate,
+  });
+
+  @override
+  State<MobileAdminMachineAddSheet> createState() =>
+      _MobileAdminMachineAddSheetState();
+}
+
+class _MobileAdminMachineAddSheetState
+    extends State<MobileAdminMachineAddSheet> {
+  final _nameController = TextEditingController();
+  final _idController = TextEditingController();
+
+  bool _isLoading = false;
+  String? _nameError;
+  String? _idError;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _idController.dispose();
+    super.dispose();
+  }
+
+  void _validateName() {
+    setState(() {
+      final name = _nameController.text.trim();
+      if (name.isEmpty) {
+        _nameError = 'Machine name is required';
+      } else {
+        _nameError = null;
+      }
+    });
+  }
+
+  void _validateId() {
+    setState(() {
+      final id = _idController.text.trim();
+      if (id.isEmpty) {
+        _idError = 'Machine ID is required';
+      } else if (id.contains(' ')) {
+        _idError = 'Machine ID cannot contain spaces';
+      } else {
+        _idError = null;
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    _validateName();
+    _validateId();
+
+    final name = _nameController.text.trim();
+    final id = _idController.text.trim();
+
+    if (_nameError != null || _idError != null) {
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await widget.onCreate(machineId: id, machineName: name);
+
+      if (mounted) {
+        MobileToastService.show(
+          context,
+          message: 'Machine created successfully',
+          type: ToastType.success,
+        );
+        await Future.delayed(const Duration(milliseconds: 600));
+        if (mounted) Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMessage = e.toString();
+        if (errorMessage.contains('already exists')) {
+          setState(() {
+            _idError = 'This Machine ID already exists';
+            _isLoading = false;
+          });
+        } else {
+          setState(() => _isLoading = false);
+          MobileToastService.show(
+            context,
+            message: 'Failed to create machine',
+            type: ToastType.error,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MobileBottomSheetBase(
+      title: 'New Machine',
+      subtitle: 'Add Machine',
+      showCloseButton: false,
+      actions: [
+        BottomSheetAction.secondary(
+          label: 'Cancel',
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+        ),
+        BottomSheetAction.primary(
+          label: 'Create Machine',
+          onPressed: _isLoading ? null : _save,
+          isLoading: _isLoading,
+        ),
+      ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          MobileInputField(
+            label: 'Machine Name',
+            controller: _nameController,
+            required: true,
+            errorText: _nameError,
+            hintText: 'Enter machine name',
+            maxLength: 50,
+            onChanged: (_) => _validateName(),
+          ),
+          const SizedBox(height: 16),
+
+          MobileInputField(
+            label: 'Machine ID',
+            controller: _idController,
+            required: true,
+            errorText: _idError,
+            hintText: 'Enter unique machine ID',
+            helperText: 'Must be unique and cannot contain spaces',
+            maxLength: 30,
+            inputFormatters: [
+              FilteringTextInputFormatter.deny(RegExp(r'\s')),
+            ],
+            onChanged: (_) => _validateId(),
+          ),
+          const SizedBox(height: 16),
+
+          MobileInputField(
+            label: 'Assigned Users',
+            controller: TextEditingController(text: 'All Team Members'),
+            helperText: 'All team members will have access to this machine',
+            enabled: false,
+          ),
+        ],
+      ),
+    );
+  }
+}
