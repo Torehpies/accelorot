@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/add_operator_notifier.dart';
 import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
@@ -232,7 +235,14 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                             password: passwordController.text,
                             firstname: firstnameController.text,
                             lastname: lastnameController.text,
-                          );
+                          )
+                          .then((_) {
+                            // Refresh Tabs
+                            ref.read(teamMembersProvider.notifier).refresh();
+                            ref.read(pendingMembersProvider.notifier).refresh();
+                            // Refresh Summary Header
+                            ref.invalidate(currentTeamProvider);
+                          });
                     }
                   }
                 },
