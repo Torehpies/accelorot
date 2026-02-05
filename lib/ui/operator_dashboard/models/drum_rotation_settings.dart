@@ -9,16 +9,16 @@ class DrumRotationSettings {
   Duration totalRuntime;
 
   DrumRotationSettings({
-    this.cycles = 50,
-    this.period = "1 hour",
+    this.cycles = 1,
+    this.period = "10 minutes",
     this.lastCycleCompleted,
     this.totalRuntime = Duration.zero,
   });
 
   // Reset to defaults (used when starting new batch)
   void reset() {
-    cycles = 50;
-    period = "1 hour";
+    cycles = 1;
+    period = "10 minutes";
     lastCycleCompleted = null;
     totalRuntime = Duration.zero;
   }
@@ -50,8 +50,8 @@ class DrumRotationSettings {
 
   factory DrumRotationSettings.fromMap(Map<String, dynamic> map) {
     return DrumRotationSettings(
-      cycles: map['cycles'] ?? 50,
-      period: map['period'] ?? "1 hour",
+      cycles: map['cycles'] ?? 1,
+      period: map['period'] ?? "10 minutes",
       lastCycleCompleted: map['lastCycleCompleted'] != null
           ? DateTime.parse(map['lastCycleCompleted'])
           : null,

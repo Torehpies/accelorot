@@ -14,6 +14,7 @@ import '../../../services/sess_service.dart';
 import '../view_model/mobile_machine_viewmodel.dart';
 import '../models/mobile_machine_state.dart';
 import '../widgets/operator_machine_card.dart';
+import '../bottom_sheets/mobile_operator_machine_view_sheet.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
   const OperatorMachineView({super.key});
@@ -49,6 +50,15 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     }
 
     if (mounted) setState(() {});
+  }
+
+  void _showMachineDetails(MachineModel machine) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MobileOperatorMachineViewSheet(machine: machine),
+    );
   }
 
   EmptyStateConfig _getEmptyStateConfig(MobileMachineState state) {
@@ -87,7 +97,10 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
   Widget _buildMachineCard(BuildContext context, MachineModel machine, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: OperatorMachineCard(machine: machine),
+      child: OperatorMachineCard(
+        machine: machine,
+        onTap: () => _showMachineDetails(machine),
+      ),
     );
   }
 
