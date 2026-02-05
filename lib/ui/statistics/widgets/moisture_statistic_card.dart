@@ -7,6 +7,7 @@ class MoistureStatisticCard extends StatelessWidget {
   final double currentMoisture;
   final List<MoistureModel> readings;
   final DateTime? lastUpdated;
+  
 
   const MoistureStatisticCard({
     super.key,
@@ -14,6 +15,8 @@ class MoistureStatisticCard extends StatelessWidget {
     required this.readings,
     this.lastUpdated,
   });
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +95,7 @@ class MoistureStatisticCard extends StatelessWidget {
                 ],
               ),
             ),
+            
 
             Padding(
               padding: const EdgeInsets.all(16),
@@ -109,19 +113,35 @@ class MoistureStatisticCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: _calculateProgress(currentMoisture),
-                      backgroundColor: const Color(
-                        0xFFE0F2FE,
-                      ), // Very light blue
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF0369A1),
-                      ), // Darker Blue
-                      minHeight: 12,
-                    ),
+                  // Progress Bar with Range Indicators
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: _calculateProgress(currentMoisture),
+                          backgroundColor: const Color(
+                            0xFFE0F2FE,
+                          ), // Very light blue
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFF0369A1),
+                          ), // Darker Blue
+                          minHeight: 12,
+                        ),
+                      ),
+                      // Green range indicator overlay
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: CustomPaint(
+                            painter: RangeIndicatorPainter(
+                              minPercent: 40,
+                              maxPercent: 60,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 
@@ -370,5 +390,43 @@ class MoistureStatisticCard extends StatelessWidget {
 
   double _calculateProgress(double moisture) {
     return (moisture.clamp(0.0, 100.0) / 100.0);
+  }
+}
+
+class RangeIndicatorPainter extends CustomPainter {
+  final double minPercent;
+  final double maxPercent;
+
+  RangeIndicatorPainter({
+    required this.minPercent,
+    required this.maxPercent,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF22C55E)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final minX = (minPercent / 100) * size.width;
+    final maxX = (maxPercent / 100) * size.width;
+
+    // Draw vertical lines at min and max
+    canvas.drawLine(
+      Offset(minX, 0),
+      Offset(minX, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(maxX, 0),
+      Offset(maxX, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(RangeIndicatorPainter oldDelegate) {
+    return oldDelegate.minPercent != minPercent || oldDelegate.maxPercent != maxPercent;
   }
 }

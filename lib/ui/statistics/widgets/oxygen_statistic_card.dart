@@ -100,7 +100,7 @@ class OxygenStatisticCard extends StatelessWidget {
                 children: [
                   // Ideal Range Label
                   const Text(
-                    'Ideal Range: 65 ppm - 70 ppm',
+                    'Ideal Range: 1500 ppm - 2500 ppm',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -109,19 +109,35 @@ class OxygenStatisticCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: _calculateProgress(currentOxygen),
-                      backgroundColor: const Color(
-                        0xFFF3E8FF,
-                      ), // Very light purple
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF6D28D9),
-                      ), // Darker Purple
-                      minHeight: 12,
-                    ),
+                  // Progress Bar with Range Indicators
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: _calculateProgress(currentOxygen),
+                          backgroundColor: const Color(
+                            0xFFF3E8FF,
+                          ), // Very light purple
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFF6D28D9),
+                          ), // Darker Purple
+                          minHeight: 12,
+                        ),
+                      ),
+                      // Green range indicator overlay (65 ppm - 70 ppm out of 5000 ppm max)
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: CustomPaint(
+                            painter: RangeIndicatorPainter(
+                              minPercent: (1500 / 5000) * 100,
+                              maxPercent: (2500 / 5000) * 100,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 
@@ -370,5 +386,43 @@ class OxygenStatisticCard extends StatelessWidget {
 
   double _calculateProgress(double oxygen) {
     return (oxygen.clamp(0.0, 5000.0) / 5000.0);
+  }
+}
+
+class RangeIndicatorPainter extends CustomPainter {
+  final double minPercent;
+  final double maxPercent;
+
+  RangeIndicatorPainter({
+    required this.minPercent,
+    required this.maxPercent,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF22C55E)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final minX = (minPercent / 100) * size.width;
+    final maxX = (maxPercent / 100) * size.width;
+
+    // Draw vertical lines at min and max
+    canvas.drawLine(
+      Offset(minX, 0),
+      Offset(minX, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(maxX, 0),
+      Offset(maxX, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(RangeIndicatorPainter oldDelegate) {
+    return oldDelegate.minPercent != minPercent || oldDelegate.maxPercent != maxPercent;
   }
 }

@@ -110,17 +110,33 @@ class TemperatureStatisticCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: _calculateProgress(currentTemperature),
-                      backgroundColor: const Color(0xFFFFEDD5),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFFC2410C),
+                  // Progress Bar with Range Indicators
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: _calculateProgress(currentTemperature),
+                          backgroundColor: const Color(0xFFFFEDD5),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFFC2410C),
+                          ),
+                          minHeight: 12,
+                        ),
                       ),
-                      minHeight: 12,
-                    ),
+                      // Green range indicator overlay (55°C - 70°C out of 80°C max)
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: CustomPaint(
+                            painter: RangeIndicatorPainter(
+                              minPercent: (55 / 100) * 100,
+                              maxPercent: (70 / 100) * 100,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
 
@@ -379,7 +395,7 @@ class TemperatureStatisticCard extends StatelessWidget {
   }
 
   double _calculateProgress(double temperature) {
-    return (temperature.clamp(0.0, 80.0) / 80.0);
+    return (temperature.clamp(0.0, 100.0) / 100.0);
   }
 
   // Calculate max Y value with some padding to prevent curve overshooting
@@ -389,5 +405,43 @@ class TemperatureStatisticCard extends StatelessWidget {
     final maxValue = data.map((d) => d['value'] as double).reduce((a, b) => a > b ? a : b);
     // Add 10% padding to the top
     return maxValue * 1.1;
+  }
+}
+
+class RangeIndicatorPainter extends CustomPainter {
+  final double minPercent;
+  final double maxPercent;
+
+  RangeIndicatorPainter({
+    required this.minPercent,
+    required this.maxPercent,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF22C55E)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final minX = (minPercent / 100) * size.width;
+    final maxX = (maxPercent / 100) * size.width;
+
+    // Draw vertical lines at min and max
+    canvas.drawLine(
+      Offset(minX, 0),
+      Offset(minX, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(maxX, 0),
+      Offset(maxX, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(RangeIndicatorPainter oldDelegate) {
+    return oldDelegate.minPercent != minPercent || oldDelegate.maxPercent != maxPercent;
   }
 }
