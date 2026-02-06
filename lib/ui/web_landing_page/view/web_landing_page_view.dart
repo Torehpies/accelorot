@@ -1,6 +1,7 @@
+// lib/ui/web_landing_page/views/web_landing_page_view.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/app_header.dart';
+import '../widgets/web_header.dart';
 import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
@@ -186,13 +187,14 @@ class _WebLandingPageState extends State<WebLandingPageView> {
             top: 0,
             left: 0,
             right: 0,
-            child: AppHeader(
+            child: WebHeader(
               onLogin: _handleLogin,
               onGetStarted: _handleGetStarted,
               onDownload: _handleDownload,
               onBreadcrumbTap: _scrollToSection,
               activeSection: _activeSection,
               isScrolled: _isScrolled,
+              showActions: true,
             ),
           ),
         ],

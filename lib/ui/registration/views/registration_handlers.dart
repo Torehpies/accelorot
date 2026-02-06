@@ -111,7 +111,6 @@ class RegistrationFormContent extends ConsumerWidget {
             ),
           ],
         ),
-
         SizedBox(
           height: 65,
           child: TextField(
@@ -125,7 +124,6 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateEmail,
           ),
         ),
-
         SizedBox(
           height: 65,
           child: TextField(
@@ -148,7 +146,6 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updatePassword,
           ),
         ),
-
         SizedBox(
           height: 65,
           child: TextField(
@@ -171,7 +168,6 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateConfirmPassword,
           ),
         ),
-
         SizedBox(
           height: 65,
           child: state.teams.when(
@@ -196,15 +192,29 @@ class RegistrationFormContent extends ConsumerWidget {
         ),
         SizedBox(
           width: double.infinity,
-          child: PrimaryButton(
-            text: state.isFormValid ? 'Register' : 'Please complete all fields',
-            isLoading: state.isRegistrationLoading,
-            onPressed: notifier.registerUser,
-            enabled: state.isFormValid && !state.isRegistrationLoading,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                '*Please complete all Fields',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              PrimaryButton(
+                text: 'Register',
+                isLoading: state.isRegistrationLoading,
+                onPressed: notifier.registerUser,
+                enabled: state.isFormValid && !state.isRegistrationLoading,
+              ),
+            ],
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         const OrDivider(),
         const SizedBox(height: 10),
 
@@ -245,7 +255,7 @@ class RegistrationFormContent extends ConsumerWidget {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: AppColors.green100,
+            color: const Color.fromARGB(255, 59, 59, 59),
           ),
         ),
         const SizedBox(height: 4),

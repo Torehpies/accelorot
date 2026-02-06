@@ -33,10 +33,11 @@ import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
 //import 'package:flutter_application_1/ui/web_landing_page/view/web_landing_page_view.dart';
-import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page.dart';
+import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -50,7 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
-        builder: (context, state) => const ResponsiveLandingPage(),
+        builder: (context, state) => const ResponsiveLandingPageView(),
       ),
       GoRoute(
         path: '/download',

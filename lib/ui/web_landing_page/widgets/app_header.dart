@@ -1,30 +1,19 @@
-// lib/ui/web_landing_page/widgets/app_header.dart
+// lib/ui/core/widgets/app_header.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/ui/primary_button.dart'; 
-import '../buttons/button_one.dart';
 
 class AppHeader extends StatefulWidget {
-  final VoidCallback onLogin;
-  final VoidCallback onGetStarted;
-  final VoidCallback onDownload;
-  final Function(String) onBreadcrumbTap;
-  final String activeSection;
-  final bool isScrolled;
+  final VoidCallback? onHomeTap;
   final VoidCallback? onMenuTap;
+  final bool isScrolled;
 
   const AppHeader({
     super.key,
-    required this.onLogin,
-    required this.onGetStarted,
-    required this.onDownload,
-    required this.onBreadcrumbTap,
-    required this.activeSection,
-    required this.isScrolled,
+    this.onHomeTap,
     this.onMenuTap,
+    this.isScrolled = true,
   });
 
   @override
@@ -37,17 +26,15 @@ class _AppHeaderState extends State<AppHeader> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 768;
-    final isTablet = screenWidth >= 768 && screenWidth < 1024;
     final isVerySmall = screenWidth < 320;
 
     final horizontalPadding = isVerySmall
         ? AppSpacing.sm
-        : (isMobile ? AppSpacing.md : (isTablet ? AppSpacing.lg : AppSpacing.xxxl));
+        : AppSpacing.md;
 
-    final headerHeight = isMobile ? 64.0 : 88.0;
-    final logoSize = isVerySmall ? 32.0 : (isMobile ? 40.0 : 50.0);
-    final appNameLogoWidth = isVerySmall ? 80.0 : (isMobile ? 100.0 : 130.0);
+    final headerHeight = 64.0;
+    final logoSize = isVerySmall ? 32.0 : 40.0;
+    final appNameLogoWidth = isVerySmall ? 80.0 : 100.0;
     final showAppName = screenWidth > 280;
 
     return AnimatedContainer(
@@ -86,7 +73,7 @@ class _AppHeaderState extends State<AppHeader> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Logo + Name SVG section with hover effect
+            // Logo + Name SVG section
             Flexible(
               flex: 1,
               child: MouseRegion(
@@ -94,7 +81,7 @@ class _AppHeaderState extends State<AppHeader> {
                 onEnter: (_) => setState(() => _isLogoHovered = true),
                 onExit: (_) => setState(() => _isLogoHovered = false),
                 child: GestureDetector(
-                  onTap: () => widget.onBreadcrumbTap('home'),
+                  onTap: widget.onHomeTap,
                   child: AnimatedScale(
                     duration: const Duration(milliseconds: 200),
                     scale: _isLogoHovered ? 1.05 : 1.0,
@@ -103,19 +90,11 @@ class _AppHeaderState extends State<AppHeader> {
                       children: [
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          child: Image.asset(
-                            'assets/images/Accelorot Logo.png',
+                          child: SvgPicture.asset(
+                            'assets/images/Accelorot_logo.svg',
                             width: logoSize,
                             height: logoSize,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return SvgPicture.asset(
-                                'assets/images/Accelorot_logo.svg',
-                                width: logoSize,
-                                height: logoSize,
-                                fit: BoxFit.contain,
-                              );
-                            },
                           ),
                         ),
                         if (showAppName) ...[
@@ -141,206 +120,22 @@ class _AppHeaderState extends State<AppHeader> {
                 ),
               ),
             ),
-            if (isMobile) ...[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.onMenuTap != null) ...[
-                    IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: WebColors.textPrimary,
-                        size: isVerySmall ? 24 : 28,
-                      ),
-                      onPressed: widget.onMenuTap,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      tooltip: 'Open menu',
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
-                  SizedBox(
-                    width: isVerySmall ? 90 : 110,
-                    height: 32,
-                    child: PrimaryButton(
-                      text: isVerySmall ? 'Start' : 'Get Started',
-                      onPressed: widget.onGetStarted,
-                    ),
-                  ),
-                ],
-              ),
-            ] else ...[
-              Flexible(
-                flex: 3,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const ClampingScrollPhysics(),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _BreadcrumbItem(
-                        label: 'Home',
-                        id: 'home',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'Features',
-                        id: 'features',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'How It Works',
-                        id: 'how-it-works',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'Impact',
-                        id: 'impact',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'Downloads',
-                        id: 'download',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'FAQs',
-                        id: 'faq',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                      _Chevron(size: isTablet ? 18 : 20),
-                      _BreadcrumbItem(
-                        label: 'Contact',
-                        id: 'contact',
-                        active: widget.activeSection,
-                        onTap: widget.onBreadcrumbTap,
-                        fontSize: isTablet ? 15 : 16,
-                      ),
-                    ],
-                  ),
+            
+            // Hamburger menu icon
+            if (widget.onMenuTap != null)
+              IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: WebColors.textPrimary,
+                  size: isVerySmall ? 24 : 28,
                 ),
+                onPressed: widget.onMenuTap,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                tooltip: 'Open menu',
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    height: isTablet ? 38 : 42,
-                    child: ButtonOne(
-                      text: 'Login',
-                      onPressed: widget.onLogin,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  SizedBox(
-                    width: 140,
-                    height: isTablet ? 38 : 42,
-                    child: PrimaryButton(
-                      text: 'Get Started',
-                      onPressed: widget.onGetStarted,
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BreadcrumbItem extends StatefulWidget {
-  final String label;
-  final String id;
-  final String active;
-  final Function(String) onTap;
-  final double fontSize;
-
-  const _BreadcrumbItem({
-    required this.label,
-    required this.id,
-    required this.active,
-    required this.onTap,
-    this.fontSize = 16,
-  });
-
-  @override
-  State<_BreadcrumbItem> createState() => _BreadcrumbItemState();
-}
-
-class _BreadcrumbItemState extends State<_BreadcrumbItem> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isActive = widget.active == widget.id;
-    final double paddingVertical = widget.fontSize < 16 ? 6 : 8;
-    final double paddingHorizontal = widget.fontSize < 16 ? 4 : 6;
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: GestureDetector(
-        onTap: () => widget.onTap(widget.id),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            vertical: paddingVertical,
-            horizontal: paddingHorizontal,
-          ),
-          child: Text(
-            widget.label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: widget.fontSize,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              color: isActive
-                  ? const Color(0xFF22C55E) // Green when active
-                  : _isHovered
-                      ? const Color(0xFF22C55E) // Green on hover
-                      : const Color(0xFF6B7280), // Gray otherwise
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Chevron extends StatelessWidget {
-  final double size;
-
-  const _Chevron({this.size = 16});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: size < 20 ? 6 : 10,
-      ),
-      child: Icon(
-        Icons.chevron_right,
-        size: size,
-        color: const Color(0xFF9CA3AF),
       ),
     );
   }

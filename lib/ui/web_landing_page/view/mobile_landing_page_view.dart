@@ -1,7 +1,8 @@
+// lib/ui/mobile_landing_page/views/mobile_landing_page_view.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+import '../widgets/app_header.dart';
 import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
@@ -22,7 +23,7 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   final ScrollController _scrollController = ScrollController();
   final LandingPageViewModel _viewModel = LandingPageViewModel();
 
-  static const double _headerHeight = 72;
+  static const double _headerHeight = 64;
 
   final _homeKey = GlobalKey();
   final _featuresKey = GlobalKey();
@@ -99,77 +100,87 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
     final key = sectionMap[sectionId];
     if (key?.currentContext == null) return;
 
-    // Close menu first
     setState(() {
       _activeSection = sectionId;
       _isMenuOpen = false;
     });
 
-    // Small delay to let menu close animation finish
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (key?.currentContext != null) {
-        Scrollable.ensureVisible(
-          key!.currentContext!,
-          duration: const Duration(milliseconds: 650),
-          curve: Curves.easeInOut,
-          alignment: 0,
-        );
-      }
-    });
-  }
-
-  void _handleLogin() => context.go('/login');
-  void _handleGetStarted() => context.go('/signup');
-  void _handleDownload() => context.go('/download');
-  void _handleLearnMore() => _scrollToSection('features');
-
-  Widget _section({required Key key, required Widget child}) {
-    return SizedBox(
-      key: key,
-      child: child,
+    Scrollable.ensureVisible(
+      key!.currentContext!,
+      duration: const Duration(milliseconds: 650),
+      curve: Curves.easeInOut,
+      alignment: 0,
     );
   }
+
+  void _handleLogin() {
+    setState(() => _isMenuOpen = false);
+    context.go('/login');
+  }
+
+  void _handleGetStarted() {
+    setState(() => _isMenuOpen = false);
+    context.go('/signup');
+  }
+
+  void _handleDownload() => context.go('/download');
+  void _handleLearnMore() => _scrollToSection('features');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          /// CONTENT
+          /// MAIN CONTENT - Scrollable
           SingleChildScrollView(
             controller: _scrollController,
             child: Column(
               children: [
-                // Add top padding for the first section to account for header
+                // Header spacing
                 SizedBox(height: _headerHeight),
-                _section(
+                
+                // HOME SECTION
+                Container(
                   key: _homeKey,
                   child: IntroSection(
                     onGetStarted: _handleGetStarted,
                     onLearnMore: _handleLearnMore,
                   ),
                 ),
-                _section(
+                
+                // FEATURES SECTION
+                Container(
                   key: _featuresKey,
                   child: FeaturesSection(features: _viewModel.features),
                 ),
-                _section(
+                
+                // HOW IT WORKS SECTION
+                Container(
                   key: _howItWorksKey,
                   child: HowItWorksSection(steps: _viewModel.steps),
                 ),
-                _section(
+                
+                // IMPACT SECTION
+                Container(
                   key: _impactKey,
                   child: ImpactSection(stats: _viewModel.impactStats),
                 ),
-                _section(
+                
+                // DOWNLOAD SECTION
+                Container(
                   key: _downloadKey,
                   child: DownloadSection(onDownload: _handleDownload),
                 ),
-                _section(
+                
+                // FAQ SECTION
+                Container(
                   key: _faqKey,
                   child: const FaqSection(),
                 ),
-                _section(
+                
+                // CONTACT SECTION
+                Container(
                   key: _contactKey,
                   child: ContactSection(
                     onNavigateToSection: _scrollToSection,
@@ -179,20 +190,33 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
             ),
           ),
 
-          /// HEADER
+          /// FIXED HEADER AT TOP
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: _MobileHeader(
-              isScrolled: _isScrolled,
-              isMenuOpen: _isMenuOpen,
-              activeSection: _activeSection,
-              onBreadcrumbTap: _scrollToSection,
-              onLogin: _handleLogin,
-              onGetStarted: _handleGetStarted,
-              onToggleMenu: () =>
-                  setState(() => _isMenuOpen = !_isMenuOpen),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppHeader(
+                  onHomeTap: () {
+                    _scrollToSection('home');
+                    if (_isMenuOpen) setState(() => _isMenuOpen = false);
+                  },
+                  onMenuTap: () => setState(() => _isMenuOpen = !_isMenuOpen),
+                  isScrolled: _isScrolled,
+                ),
+                
+                /// Menu dropdown with proper constraints and scrolling
+                if (_isMenuOpen)
+                  _MobileMenu(
+                    activeSection: _activeSection,
+                    onBreadcrumbTap: _scrollToSection,
+                    onLogin: _handleLogin,
+                    onGetStarted: _handleGetStarted,
+                    onToggleMenu: () => setState(() => _isMenuOpen = false),
+                  ),
+              ],
             ),
           ),
         ],
@@ -201,19 +225,14 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   }
 }
 
-
-class _MobileHeader extends StatefulWidget {
-  final bool isScrolled;
-  final bool isMenuOpen;
+class _MobileMenu extends StatelessWidget {
   final String activeSection;
   final Function(String) onBreadcrumbTap;
   final VoidCallback onLogin;
   final VoidCallback onGetStarted;
   final VoidCallback onToggleMenu;
 
-  const _MobileHeader({
-    required this.isScrolled,
-    required this.isMenuOpen,
+  const _MobileMenu({
     required this.activeSection,
     required this.onBreadcrumbTap,
     required this.onLogin,
@@ -222,156 +241,140 @@ class _MobileHeader extends StatefulWidget {
   });
 
   @override
-  State<_MobileHeader> createState() => _MobileHeaderState();
-}
-
-class _MobileHeaderState extends State<_MobileHeader> {
-  bool _isLogoHovered = false;
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      decoration: BoxDecoration(
-        color: widget.isScrolled && !widget.isMenuOpen ? Colors.white : null,
-        gradient: widget.isScrolled && !widget.isMenuOpen
-            ? null
-            : const LinearGradient(
-                colors: [Color(0xFFE0F2FE), Color(0xFFCCFBF1)],
-              ),
-        boxShadow: widget.isScrolled && !widget.isMenuOpen
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                )
-              ]
-            : [],
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 72,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  onEnter: (_) => setState(() => _isLogoHovered = true),
-                  onExit: (_) => setState(() => _isLogoHovered = false),
-                  child: GestureDetector(
-                    onTap: () => widget.onBreadcrumbTap('home'),
-                    child: AnimatedScale(
-                      duration: const Duration(milliseconds: 200),
-                      scale: _isLogoHovered ? 1.05 : 1.0,
-                      child: Row(
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            child: SvgPicture.asset(
-                              'assets/images/Accelorot_logo.svg',
-                              width: 32,
-                              height: 32,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 200),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: _isLogoHovered 
-                                  ? const Color(0xFF22C55E)
-                                  : const Color(0xFF22C55E),
-                            ),
-                            child: const Text('Accel-O-Rot'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(widget.isMenuOpen ? Icons.close : Icons.menu),
-                  onPressed: widget.onToggleMenu,
-                ),
-              ],
-            ),
-          ),
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Maximum height for menu dropdown - leave room for header and some content visibility
+    final maxMenuHeight = screenHeight - 120;
 
-          if (widget.isMenuOpen)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _MenuItem('Home', 'home', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('Features', 'features', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('How It Works', 'how-it-works', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('Impact', 'impact', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('Downloads', 'download', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('FAQ', 'faq', widget.activeSection, widget.onBreadcrumbTap),
-                  _MenuItem('Contact', 'contact', widget.activeSection, widget.onBreadcrumbTap),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: TextButton(
-                      onPressed: widget.onLogin,
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF22C55E),
-                      ),
-                      child: const Text('Login', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: widget.onGetStarted,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF22C55E),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Get Started', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                ],
-              ),
+    return Material(
+      elevation: 8,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: double.infinity,
+        // 👈 CRITICAL FIX: Use max height constraint to prevent cropping
+        constraints: BoxConstraints(
+          maxHeight: maxMenuHeight,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-        ],
+          ],
+        ),
+        // 👈 CRITICAL FIX: SingleChildScrollView allows menu to scroll when it exceeds max height
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Navigation Items
+              _buildMenuItem('Home', 'home', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Features', 'features', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('How It Works', 'how-it-works', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Impact', 'impact', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Downloads', 'download', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('FAQ', 'faq', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Contact', 'contact', activeSection, onBreadcrumbTap, onToggleMenu),
+              
+              const Divider(height: 32, thickness: 1, color: Color(0xFFE5E7EB)),
+              
+              // Legal Links
+              _buildLegalLink(
+                context,
+                'Privacy Policy',
+                () {
+                  onToggleMenu();
+                  context.go('/privacy-policy');
+                },
+              ),
+              _buildLegalLink(
+                context,
+                'Terms of Service',
+                () {
+                  onToggleMenu();
+                  context.go('/terms-of-service');
+                },
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Action Buttons
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: onLogin,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF22C55E),
+                    side: const BorderSide(color: Color(0xFF22C55E), width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: onGetStarted,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF22C55E),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Get Started',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
 
-
-class _MenuItem extends StatelessWidget {
-  final String label;
-  final String id;
-  final String active;
-  final Function(String) onTap;
-
-  const _MenuItem(this.label, this.id, this.active, this.onTap);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMenuItem(
+    String label,
+    String id,
+    String active,
+    Function(String) onTap,
+    VoidCallback onToggleMenu,
+  ) {
     final isActive = active == id;
-
     return InkWell(
-      onTap: () => onTap(id),
+      onTap: () {
+        onTap(id);
+        onToggleMenu();
+      },
+      borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF22C55E).withValues(alpha: 0.1) : null,
+          color: isActive ? const Color(0xFFDCFCE7) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -379,7 +382,26 @@ class _MenuItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF22C55E) : const Color(0xFF374151),
+            color: isActive ? const Color(0xFF22C55E) : const Color(0xFF4B5563),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegalLink(BuildContext context, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF6B7280),
           ),
         ),
       ),
