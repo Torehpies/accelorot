@@ -2,7 +2,7 @@ import '../../../data/models/moisture_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'progress_bar.dart';
+import '../../core/widgets/progress_bar.dart';
 
 class MoistureStatisticCard extends StatelessWidget {
   final double currentMoisture;
