@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-/// OperatorDialogShell provides a reusable dialog scaffold for operator dialogs (add/edit/view/etc.)
+/// DialogShell provides a reusable dialog scaffold for all app dialogs (add/edit/view/operator/etc.)
 ///
 /// Usage:
-/// OperatorDialogShell(
+/// DialogShell(
 ///   title: Text('Dialog Title'),
 ///   content: Column(
 ///     children: [Text('Body')],
 ///   ),
 ///   actions: [TextButton(onPressed: ..., child: Text('Cancel'))],
 /// )
-class OperatorDialogShell extends StatelessWidget {
+class DialogShell extends StatelessWidget {
   final Widget title;
   final Widget content;
   final List<Widget> actions;
@@ -18,15 +18,15 @@ class OperatorDialogShell extends StatelessWidget {
   final EdgeInsetsGeometry contentPadding;
   final Color? backgroundColor;
 
-  const OperatorDialogShell({
-    super.key,
+  const DialogShell({
+    Key? key,
     required this.title,
     required this.content,
     required this.actions,
     this.width = 400,
     this.contentPadding = const EdgeInsets.all(0),
     this.backgroundColor,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

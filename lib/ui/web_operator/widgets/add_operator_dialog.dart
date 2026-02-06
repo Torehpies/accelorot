@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/operator_dialog_shell.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
@@ -99,7 +99,7 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
         }
       }
     });
-    return OperatorDialogShell(
+    return DialogShell(
       title: const Text(
         'Add Operator',
         style: TextStyle(fontWeight: FontWeight.bold),

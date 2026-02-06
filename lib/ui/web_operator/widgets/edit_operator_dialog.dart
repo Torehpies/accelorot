@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/operator_dialog_shell.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
@@ -48,7 +48,7 @@ class _EditOperatorDialogState extends State<EditOperatorDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return OperatorDialogShell(
+    return DialogShell(
       title: const Text(
         'Edit Operator',
         style: TextStyle(fontWeight: FontWeight.bold),

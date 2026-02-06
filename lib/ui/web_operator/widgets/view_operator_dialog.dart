@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/operator_dialog_shell.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
@@ -11,7 +11,7 @@ class ViewOperatorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OperatorDialogShell(
+    return DialogShell(
       title: const Text(
         'Operator Details',
         style: TextStyle(fontWeight: FontWeight.bold),
