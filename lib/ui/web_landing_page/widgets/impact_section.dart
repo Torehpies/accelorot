@@ -100,7 +100,7 @@ class _ImpactSectionState extends State<ImpactSection> {
 
   // ===================== MOBILE LAYOUT (<600px) =====================
   Widget _buildMobileLayout(double screenWidth) {
-    final cardsHeight = _sectionHeight(context);
+    final cardsHeight = MediaQuery.of(context).size.height * 0.55;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,7 +188,7 @@ class _ImpactSectionState extends State<ImpactSection> {
 
   double _impactDescriptionSize(double screenWidth) {
     if (screenWidth < 600) {
-      return 11.0;
+      return 10.0;
     } else if (screenWidth < 1024) {
       return 12.0;
     } else {
@@ -206,6 +206,11 @@ class _ImpactSectionState extends State<ImpactSection> {
             : (screenWidth > 1440 ? 64.0 : 58.0);
     final subtitleSize = _impactDescriptionSize(screenWidth) + (isMobile ? 1 : isTablet ? 1 : 0);
     return Container(
+      constraints: isMobile
+          ? const BoxConstraints(
+              minHeight: 240,
+            )
+          : null,
       padding: EdgeInsets.all(
         isMobile
             ? AppSpacing.sm
@@ -226,50 +231,54 @@ class _ImpactSectionState extends State<ImpactSection> {
       ),
       child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: RichText(
-                    textAlign: TextAlign.left,
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: titleSize,
-                        fontWeight: FontWeight.w800,
-                        height: (titleSize + 10) / titleSize,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isMobile) const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RichText(
+                      textAlign: TextAlign.left,
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: titleSize,
+                          fontWeight: FontWeight.w800,
+                          height: (titleSize + 10) / titleSize,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'MAKING A\n',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          TextSpan(
+                            text: 'SUSTAINABLE\n',
+                            style: TextStyle(color: Color(0xFF1B5E20)),
+                          ),
+                          TextSpan(
+                            text: 'IMPACT',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
                       ),
-                      children: const [
-                        TextSpan(
-                          text: 'MAKING A\n',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        TextSpan(
-                          text: 'SUSTAINABLE\n',
-                          style: TextStyle(color: Color(0xFF1B5E20)),
-                        ),
-                        TextSpan(
-                          text: 'IMPACT',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-                SizedBox(height: isMobile ? AppSpacing.md : isTablet ? AppSpacing.lg : AppSpacing.xxxl),
-                Text(
-                  'In the Philippines, over 50% of Municipal Solid Waste is organic.\nAccel-O-Rot helps manage waste responsible',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: subtitleSize,
-                    height: 1.35,
-                    color: Colors.white.withValues(alpha: 0.9),
+                  SizedBox(height: isMobile ? AppSpacing.md : isTablet ? AppSpacing.lg : AppSpacing.xxxl),
+                  Text(
+                    'In the Philippines, over 50% of Municipal Solid Waste is organic.\nAccel-O-Rot helps manage waste responsible',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: subtitleSize,
+                      height: 1.35,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Positioned(
@@ -523,10 +532,10 @@ class _ImpactSectionState extends State<ImpactSection> {
                                   style: TextStyle(
                                     fontSize: (() {
                                       final baseSize = isMobile
-                                          ? 13.0
+                                          ? 11.0
                                           : isTablet
-                                              ? 15.0
-                                          : ((data.title == 'Produces nutrient-rich compost' ||
+                                              ? 13.0
+                                              : ((data.title == 'Produces nutrient-rich compost' ||
                                                   data.title == 'Empowers communities')
                                               ? 16.0
                                               : data.title == 'Reduces landfill waste'
