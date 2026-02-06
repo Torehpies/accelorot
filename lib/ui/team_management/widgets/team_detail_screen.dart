@@ -17,6 +17,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
+import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,7 +67,8 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
         ? state.currentPage + 2
         : state.currentPage + 1;
 
-    return BaseTableContainer(
+    return WebContentContainer(
+      child: BaseTableContainer(
       // -- Left header: tab switcher --
       leftHeaderWidget: TabsRow(
         controller: _tabController,
@@ -199,6 +201,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
         isLoading: state.isLoading,
         onPageChanged: (page) => notifier.goToPage(page - 1),
         onItemsPerPageChanged: notifier.setPageSize,
+      ),
       ),
     );
   }
