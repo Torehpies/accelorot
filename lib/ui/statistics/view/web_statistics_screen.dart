@@ -10,6 +10,7 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../activity_logs/widgets/mobile/machine_selector.dart';
+import '../../core/widgets/web_base_container.dart';
 
 class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
@@ -33,8 +34,8 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
       future: sessionService.getCurrentUserData(),
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return WebScaffoldContainer(
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -42,9 +43,8 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
         final teamId = userData?['teamId'] as String?;
 
         if (teamId == null) {
-          return Scaffold(
-            backgroundColor: const Color(0xFFF9FAFB),
-            body: const Center(
+          return WebScaffoldContainer(
+            child: const Center(
               child: Text(
                 'No team assigned. Please contact your administrator.',
               ),
@@ -54,11 +54,8 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
 
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
-        return Scaffold(
-          backgroundColor: const Color(
-            0xFFDFF2FF,
-          ), // Light blue to match navigation
-          body: machinesAsync.when(
+        return WebScaffoldContainer(
+          child: machinesAsync.when(
             data: (machines) {
               final activeMachines = machines
                   .where((m) => !m.isArchived && m.id != null)
@@ -99,17 +96,19 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
                 });
               }
 
-              return RefreshIndicator(
-                onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(allMachines, ref),
-                      const SizedBox(height: 32),
-                      _buildStatisticsCards(),
-                    ],
+              return WebContentContainer(
+                child: RefreshIndicator(
+                  onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(allMachines, ref),
+                        const SizedBox(height: 32),
+                        _buildStatisticsCards(),
+                      ],
+                    ),
                   ),
                 ),
               );
