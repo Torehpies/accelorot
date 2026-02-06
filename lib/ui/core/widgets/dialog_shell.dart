@@ -19,14 +19,14 @@ class DialogShell extends StatelessWidget {
   final Color? backgroundColor;
 
   const DialogShell({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.actions,
     this.width = 400,
     this.contentPadding = const EdgeInsets.all(0),
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
