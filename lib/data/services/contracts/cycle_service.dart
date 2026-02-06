@@ -3,7 +3,9 @@ import '../../models/cycle_recommendation.dart';
 /// Abstract interface for cycle recommendation data operations
 abstract class CycleService {
   /// Fetch all cycle recommendations for the current user's team
-  Future<List<CycleRecommendation>> fetchTeamCycles();
+  /// [limit] - Maximum number of cycles to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> fetchTeamCycles({int? limit, DateTime? cutoffDate});
 
   /// Get drum controller for a batch
   Future<List<CycleRecommendation>> getDrumControllers({required String batchId});

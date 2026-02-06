@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../contracts/report_service.dart';
 import '../../models/report.dart';
 
@@ -34,17 +35,17 @@ class FirebaseReportService implements ReportService {
   }
 
   @override
-  Future<List<Report>> fetchTeamReports() async {
+  Future<List<Report>> fetchTeamReports({int? limit}) async {
     try {
       final teamId = await _getTeamId();
-      return fetchReportsByTeam(teamId);
+      return fetchReportsByTeam(teamId, limit: limit);
     } catch (e) {
       throw Exception('Failed to fetch team reports: $e');
     }
   }
 
   @override
-  Future<List<Report>> fetchReportsByTeam(String teamId) async {
+  Future<List<Report>> fetchReportsByTeam(String teamId, {int? limit}) async {
     try {
       // Get all machines for the team
       final machinesSnapshot = await _firestore
@@ -52,7 +53,7 @@ class FirebaseReportService implements ReportService {
           .where('teamId', isEqualTo: teamId)
           .get();
 
-      final reports = <Report>[];
+      var reports = <Report>[];
 
       // Fetch reports from each machine's subcollection
       for (final machineDoc in machinesSnapshot.docs) {
@@ -60,8 +61,14 @@ class FirebaseReportService implements ReportService {
         reports.addAll(machineReports);
       }
 
-      // Sort by createdAt descending
+      // Sort by createdAt descending (newest first)
       reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      // Apply limit if specified
+      if (limit != null && reports.length > limit) {
+        reports = reports.sublist(0, limit);
+        debugPrint('📄 Limited reports: ${reports.length} items');
+      }
 
       return reports;
     } catch (e) {

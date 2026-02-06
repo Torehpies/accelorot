@@ -33,6 +33,9 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
     // Entity cache
     @Default({}) Map<String, dynamic> entityCache,
 
+    // Full counts for stats cards (not affected by pagination)
+    @Default({}) Map<String, int> fullCategoryCounts,
+
     // Pagination
     @Default(1) int currentPage,
     @Default(10) int itemsPerPage,

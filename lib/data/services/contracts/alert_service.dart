@@ -6,7 +6,9 @@ import '../../models/alert.dart';
 abstract class AlertService {
   /// Fetch all alerts for the current user's team
   /// Handles authentication and team resolution internally
-  Future<List<Alert>> fetchTeamAlerts();
+  /// [limit] - Maximum number of alerts to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch alerts newer than this date (null = no filter)
+  Future<List<Alert>> fetchTeamAlerts({int? limit, DateTime? cutoffDate});
 
   /// Fetch alerts for a specific batch
   /// @param batchId - the batch identifier

@@ -136,24 +136,67 @@ class ActivityAggregatorService {
     return result.items;
   }
 
+  /// Get counts only for stats cards (without fetching full entities)
+  /// [filterRecentDays] - Only count items from last N days (null = count all)
+  Future<Map<String, int>> getActivityCounts({int? filterRecentDays}) async {
+    debugPrint('📊 Fetching activity counts (filterRecentDays: ${filterRecentDays ?? "all"})');
+    
+    final DateTime? cutoffDate = filterRecentDays != null
+        ? DateTime.now().subtract(Duration(days: filterRecentDays))
+        : null;
+
+    final results = await Future.wait([
+      _substrateRepo.getAllSubstrates(),
+      _alertRepo.getTeamAlerts(cutoffDate: cutoffDate), // No limit for counts
+      _cycleRepo.getTeamCycles(cutoffDate: cutoffDate), // No limit for counts
+      _reportRepo.getTeamReports(), // No limit for counts
+    ]);
+
+    final substrates = results[0] as List;
+    final alerts = results[1] as List;
+    final cycles = results[2] as List;
+    final reports = results[3] as List;
+
+    debugPrint('📊 Counts: substrates=${substrates.length}, alerts=${alerts.length}, cycles=${cycles.length}, reports=${reports.length}');
+
+    return {
+      'substrates': substrates.length,
+      'alerts': alerts.length,
+      'operations': cycles.length, // operations = cycles
+      'reports': reports.length,
+    };
+  }
+
   /// Fetch all activities and build an entity cache for instant dialog loading
-  Future<ActivityResult> getAllActivitiesWithCache() async {
+  /// [limit] - Maximum number of items to fetch per category (null = fetch all)
+  /// [filterRecentDays] - Only fetch items from last N days (null = no time filter)
+  Future<ActivityResult> getAllActivitiesWithCache({
+    int? limit,
+    int? filterRecentDays,
+  }) async {
     final totalStopwatch = Stopwatch()..start();
     
     debugPrint('📊 ===== ACTIVITY FETCH START =====');
+    debugPrint('   📋 Limit per category: ${limit ?? "unlimited"}');
+    debugPrint('   📅 Filter recent days: ${filterRecentDays ?? "no filter"}');
     
     try {
       final cache = <String, dynamic>{};
       final allItems = <ActivityLogItem>[];
 
-      // Fetch all data in parallel
+      // Calculate cutoff date if filtering by recent days
+      final DateTime? cutoffDate = filterRecentDays != null
+          ? DateTime.now().subtract(Duration(days: filterRecentDays))
+          : null;
+
+      // Fetch all data in parallel with pagination/filtering
       final parallelStopwatch = Stopwatch()..start();
       
       final results = await Future.wait([
-        _substrateRepo.getAllSubstrates(),
-        _alertRepo.getTeamAlerts(),
-        _cycleRepo.getTeamCycles(),
-        _reportRepo.getTeamReports(),
+        _substrateRepo.getAllSubstrates(), // Substrates: fetch all (usually small dataset)
+        _alertRepo.getTeamAlerts(limit: limit, cutoffDate: cutoffDate), // Alerts: paginated + 2-day filter
+        _cycleRepo.getTeamCycles(limit: limit, cutoffDate: cutoffDate), // Cycles: paginated + 2-day filter
+        _reportRepo.getTeamReports(limit: limit), // Reports: paginated only
       ]);
       
       parallelStopwatch.stop();

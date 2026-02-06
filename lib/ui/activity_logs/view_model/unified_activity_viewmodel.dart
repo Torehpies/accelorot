@@ -72,17 +72,28 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     try {
       state = state.copyWith(status: LoadingStatus.loading);
 
-      // Fetch activities and build entity cache
+      // Fetch full counts for stats cards (with 2-day filter for alerts/cycles)
+      final countsStopwatch = Stopwatch()..start();
+      final fullCounts = await _aggregator.getActivityCounts(
+        filterRecentDays: 2, // Stats cards show "last 2 days" for alerts/cycles
+      );
+      countsStopwatch.stop();
+      debugPrint('📊 Full counts fetched: ${countsStopwatch.elapsedMilliseconds}ms');
+
+      // Fetch activities with pagination (per-page limit) and 2-day filtering for alerts/cycles
       final fetchStopwatch = Stopwatch()..start();
-      final result = await _aggregator.getAllActivitiesWithCache();
+      final result = await _aggregator.getAllActivitiesWithCache(
+        limit: state.itemsPerPage, // Only fetch what's needed for current page
+        filterRecentDays: 2,  // Fetch only last 2 days for alerts and cycles
+      );
       fetchStopwatch.stop();
       debugPrint('📦 Data fetched in ViewModel: ${fetchStopwatch.elapsedMilliseconds}ms');
 
       final stateStopwatch = Stopwatch()..start();
       state = state.copyWith(
         allActivities: result.items,
-        entityCache:
-            result.entityCache, // Store cache for instant dialog loading
+        entityCache: result.entityCache, // Store cache for instant dialog loading
+        fullCategoryCounts: fullCounts, // Store full counts for stats cards
         status: LoadingStatus.success,
       );
       stateStopwatch.stop();
@@ -284,8 +295,15 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   // ===== STATS CALCULATIONS =====
 
-  /// Get count for each category
+  /// Get count for each category from stored full counts
   Map<String, int> getCategoryCounts() {
+    // Use stored full counts (fetched separately for stats cards)
+    // If not available, fall back to counting from allActivities
+    if (state.fullCategoryCounts.isNotEmpty) {
+      return state.fullCategoryCounts;
+    }
+    
+    // Fallback: count from allActivities (limited data)
     return {
       'substrates': state.allActivities
           .where((item) => item.type == ActivityType.substrate)
@@ -303,113 +321,34 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Get category counts with month-over-month change percentage
+  /// Note: Stats cards now show "last 2 days" counts, not month-over-month changes
   Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
-    final now = DateTime.now();
+    // Get counts from stored full counts (last 2 days for alerts/cycles, all-time for others)
+    final counts = getCategoryCounts();
 
-    // Current month: from start of this month to now
-    final currentMonthStart = DateTime(now.year, now.month, 1);
-    final currentMonthEnd = now;
-
-    // Previous month: full month
-    final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd = DateTime(
-      now.year,
-      now.month,
-      1,
-    ).subtract(const Duration(microseconds: 1));
-
-    // Get ALL-TIME counts (for display)
-    final allTimeCounts = getCategoryCounts();
-
-    // Get counts for current month (for comparison)
-    final currentCounts = _getCountsForDateRange(
-      currentMonthStart,
-      currentMonthEnd,
-    );
-
-    // Get counts for previous month (for comparison)
-    final previousCounts = _getCountsForDateRange(
-      previousMonthStart,
-      previousMonthEnd,
-    );
-
+    // For now, we just show the counts without change percentages
+    // since we're showing "last 2 days" counts instead of monthly trends
     return {
-      'substrates': _buildChangeData(
-        allTimeCounts['substrates']!,
-        currentCounts['substrates']!,
-        previousCounts['substrates']!,
-      ),
-      'alerts': _buildChangeData(
-        allTimeCounts['alerts']!,
-        currentCounts['alerts']!,
-        previousCounts['alerts']!,
-      ),
-      'operations': _buildChangeData(
-        allTimeCounts['operations']!,
-        currentCounts['operations']!,
-        previousCounts['operations']!,
-      ),
-      'reports': _buildChangeData(
-        allTimeCounts['reports']!,
-        currentCounts['reports']!,
-        previousCounts['reports']!,
-      ),
-    };
-  }
-
-  /// Helper: Get counts for a specific date range
-  Map<String, int> _getCountsForDateRange(DateTime start, DateTime end) {
-    final activitiesInRange = state.allActivities.where((item) {
-      return item.timestamp.isAfter(start) && item.timestamp.isBefore(end);
-    }).toList();
-
-    return {
-      'substrates': activitiesInRange
-          .where((item) => item.type == ActivityType.substrate)
-          .length,
-      'alerts': activitiesInRange
-          .where((item) => item.type == ActivityType.alert)
-          .length,
-      'operations': activitiesInRange
-          .where((item) => item.type == ActivityType.cycle)
-          .length,
-      'reports': activitiesInRange
-          .where((item) => item.type == ActivityType.report)
-          .length,
-    };
-  }
-
-  /// Helper: Build change data with percentage and positive/negative indicator
-  Map<String, dynamic> _buildChangeData(
-    int allTimeCount,
-    int currentMonthCount,
-    int previousMonthCount,
-  ) {
-    String changeText;
-    bool isPositive = true;
-
-    if (previousMonthCount == 0 && currentMonthCount > 0) {
-      // New this month
-      changeText = 'New';
-      isPositive = true;
-    } else if (previousMonthCount == 0 && currentMonthCount == 0) {
-      // No data yet
-      changeText = 'No log yet';
-      isPositive = true; // Neutral
-    } else {
-      // Calculate percentage change (current month vs previous month)
-      final percentageChange =
-          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
-              .round();
-      isPositive = percentageChange >= 0;
-      final sign = isPositive ? '+' : '';
-      changeText = '$sign$percentageChange%';
-    }
-
-    return {
-      'count': allTimeCount,
-      'change': changeText,
-      'isPositive': isPositive,
+      'substrates': {
+        'count': counts['substrates'] ?? 0,
+        'change': null, // No change calculation needed
+        'isPositive': true,
+      },
+      'alerts': {
+        'count': counts['alerts'] ?? 0,
+        'change': null, // No change calculation needed
+        'isPositive': true,
+      },
+      'operations': {
+        'count': counts['operations'] ?? 0,
+        'change': null, // No change calculation needed
+        'isPositive': true,
+      },
+      'reports': {
+        'count': counts['reports'] ?? 0,
+        'change': null, // No change calculation needed
+        'isPositive': true,
+      },
     };
   }
 }

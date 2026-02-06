@@ -6,8 +6,11 @@ class CycleRepository {
 
   CycleRepository(this._cycleService);
 
-  Future<List<CycleRecommendation>> getTeamCycles() =>
-      _cycleService.fetchTeamCycles();
+  Future<List<CycleRecommendation>> getTeamCycles({
+    int? limit,
+    DateTime? cutoffDate,
+  }) =>
+      _cycleService.fetchTeamCycles(limit: limit, cutoffDate: cutoffDate);
 
   Future<List<CycleRecommendation>> getDrumControllers({
     required String batchId,

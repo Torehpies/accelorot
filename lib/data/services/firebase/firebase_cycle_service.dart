@@ -55,7 +55,7 @@ class FirestoreCycleService implements CycleService {
   // ===== FETCH TEAM CYCLES =====
 
   @override
-  Future<List<CycleRecommendation>> fetchTeamCycles() async {
+  Future<List<CycleRecommendation>> fetchTeamCycles({int? limit, DateTime? cutoffDate}) async {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -68,12 +68,30 @@ class FirestoreCycleService implements CycleService {
         return [];
       }
 
-      final allCycles = await _fetchTeamCycles(teamId);
+      var allCycles = await _fetchTeamCycles(teamId);
+      
+      // Sort by timestamp descending (newest first)
       allCycles.sort(
         (a, b) => (b.timestamp ?? DateTime.now()).compareTo(
           a.timestamp ?? DateTime.now(),
         ),
       );
+
+      // Apply cutoff filter if specified (e.g., last 2 days)
+      if (cutoffDate != null) {
+        final originalCount = allCycles.length;
+        allCycles = allCycles.where((cycle) {
+          final timestamp = cycle.timestamp ?? cycle.startedAt;
+          return timestamp != null && timestamp.isAfter(cutoffDate);
+        }).toList();
+        debugPrint('🔍 Filtered cycles by date: $originalCount → ${allCycles.length}');
+      }
+
+      // Apply limit if specified
+      if (limit != null && allCycles.length > limit) {
+        allCycles = allCycles.sublist(0, limit);
+        debugPrint('📄 Limited cycles: ${allCycles.length} items');
+      }
 
       debugPrint('✅ Fetched ${allCycles.length} cycles');
       return allCycles;

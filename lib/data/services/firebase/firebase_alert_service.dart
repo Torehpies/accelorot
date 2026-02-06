@@ -28,7 +28,7 @@ class FirestoreAlertService implements AlertService {
   // ===== FETCH OPERATIONS =====
 
   @override
-  Future<List<Alert>> fetchTeamAlerts() async {
+  Future<List<Alert>> fetchTeamAlerts({int? limit, DateTime? cutoffDate}) async {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -88,11 +88,26 @@ class FirestoreAlertService implements AlertService {
         allAlerts.addAll(batchAlerts);
       }
 
-      // Sort by timestamp descending
+      // Sort by timestamp descending (newest first)
       allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-      debugPrint('✅ Fetched ${allAlerts.length} alerts for team (Parallel Batch Strategy)');
-      return allAlerts;
+      // Apply cutoff filter if specified (e.g., last 2 days)
+      var filteredAlerts = allAlerts;
+      if (cutoffDate != null) {
+        filteredAlerts = allAlerts.where((alert) => 
+          alert.timestamp.isAfter(cutoffDate)
+        ).toList();
+        debugPrint('🔍 Filtered alerts by date: ${allAlerts.length} → ${filteredAlerts.length}');
+      }
+
+      // Apply limit if specified
+      if (limit != null && filteredAlerts.length > limit) {
+        filteredAlerts = filteredAlerts.sublist(0, limit);
+        debugPrint('📄 Limited alerts: ${filteredAlerts.length} items');
+      }
+
+      debugPrint('✅ Fetched ${filteredAlerts.length} alerts for team (Parallel Batch Strategy)');
+      return filteredAlerts;
     } catch (e) {
       debugPrint('❌ Error fetching team alerts: $e');
       throw Exception('Failed to fetch alerts: $e');
@@ -146,7 +161,7 @@ class FirestoreAlertService implements AlertService {
                  // Inject machineId if provided and missing in alert
                  // Critical for data integrity since alert docs don't have it
                  if (machineId != null && alert.machineId.isEmpty) {
-                   return alert.copyWith(machineId: machineId!);
+                   return alert.copyWith(machineId: machineId);
                  }
                  return alert;
                }).toList();

@@ -11,7 +11,13 @@ class AlertRepository {
   AlertRepository(this._alertService);
 
   /// Fetch all alerts for the current user's team
-  Future<List<Alert>> getTeamAlerts() => _alertService.fetchTeamAlerts();
+  /// [limit] - Maximum number of alerts to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch alerts newer than this date (null = no filter)
+  Future<List<Alert>> getTeamAlerts({
+    int? limit,
+    DateTime? cutoffDate,
+  }) =>
+      _alertService.fetchTeamAlerts(limit: limit, cutoffDate: cutoffDate);
 
   /// Fetch alerts for a specific batch
   Future<List<Alert>> getAlertsForBatch(String batchId) =>
