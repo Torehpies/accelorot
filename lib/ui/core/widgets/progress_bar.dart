@@ -33,8 +33,8 @@ class SimpleRangeProgressBar extends StatelessWidget {
 
   IconData get statusIcon {
     if (isInIdealRange) return Icons.check_circle;
-    if (isBelowIdeal) return Icons.arrow_upward;
-    return Icons.arrow_downward;
+    if (isBelowIdeal) return Icons.arrow_downward;
+    return Icons.arrow_upward;
   }
 
   String get statusText {
@@ -82,10 +82,10 @@ class SimpleRangeProgressBar extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.12),
+                color: statusColor.withAlpha((0.12 * 255).round()),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: statusColor.withOpacity(0.4),
+                  color: statusColor.withAlpha((0.4 * 255).round()),
                   width: 1.5,
                 ),
               ),
@@ -157,7 +157,7 @@ class SimpleRangeProgressBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withAlpha((0.04 * 255).round()),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -188,7 +188,7 @@ class SimpleRangeProgressBar extends StatelessWidget {
                               gradient: LinearGradient(
                                 colors: [
                                   primaryColor,
-                                  primaryColor.withOpacity(0.85),
+                                  primaryColor.withAlpha((0.85 * 255).round()),
                                 ],
                               ),
                             ),
@@ -272,7 +272,7 @@ class _RangeMarker extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF22C55E).withOpacity(0.15),
+            color: const Color(0xFF22C55E).withAlpha((0.15 * 255).round()),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -303,7 +303,7 @@ class IdealRangeHighlightPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF22C55E).withOpacity(0.15)
+      ..color = const Color(0xFF22C55E).withAlpha((0.15 * 255).round())
       ..style = PaintingStyle.fill;
 
     final minX = (minPercent / 100) * size.width;
