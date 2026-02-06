@@ -435,9 +435,6 @@ class OxygenStatisticCard extends StatelessWidget {
     }
   }
 
-  double _calculateProgress(double oxygen) {
-    return (oxygen.clamp(0.0, 5000.0) / 5000.0);
-  }
 }
 
 class RangeIndicatorPainter extends CustomPainter {

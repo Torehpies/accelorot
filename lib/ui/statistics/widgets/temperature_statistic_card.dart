@@ -441,9 +441,6 @@ class TemperatureStatisticCard extends StatelessWidget {
     }
   }
 
-  double _calculateProgress(double temperature) {
-    return (temperature.clamp(0.0, 100.0) / 100.0);
-  }
 }
 
 class RangeIndicatorPainter extends CustomPainter {

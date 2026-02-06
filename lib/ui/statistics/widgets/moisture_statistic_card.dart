@@ -434,9 +434,6 @@ class MoistureStatisticCard extends StatelessWidget {
     }
   }
 
-  double _calculateProgress(double moisture) {
-    return (moisture.clamp(0.0, 100.0) / 100.0);
-  }
 }
 
 class RangeIndicatorPainter extends CustomPainter {
