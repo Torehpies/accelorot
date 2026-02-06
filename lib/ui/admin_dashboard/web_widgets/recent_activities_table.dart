@@ -126,7 +126,7 @@ class RecentActivitiesTable extends ConsumerWidget {
       child: Row(
         children: const [
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Text(
               'Description',
               style: TextStyle(
@@ -137,6 +137,29 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 2,
+            child: Text(
+              'Machine',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Batch',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
             child: Text(
               'Category',
               style: TextStyle(
@@ -147,6 +170,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 2,
             child: Text(
               'Status',
               style: TextStyle(
@@ -157,6 +181,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 1,
             child: Text(
               'Date',
               style: TextStyle(
@@ -207,13 +232,15 @@ class RecentActivitiesTable extends ConsumerWidget {
       }
     }
 
+    final machineText = activity.machineName ?? activity.machineId ?? '';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -243,85 +270,6 @@ class RecentActivitiesTable extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-
-                      // Machine and Batch info row
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          if (activity.machineName != null ||
-                              activity.machineId != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.blue.shade200,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.precision_manufacturing,
-                                    size: 10,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    activity.machineName ??
-                                        activity.machineId ??
-                                        '',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.blue.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (batchDisplayName != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.purple.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.purple.shade200,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.inventory_2_outlined,
-                                    size: 10,
-                                    color: Colors.purple.shade700,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    batchDisplayName,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.purple.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
                       // Operator name
                       Text(
                         activity.operatorName != null &&
@@ -340,12 +288,32 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 2,
+            child: Text(
+              machineText,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              batchDisplayName ?? '',
+              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            flex: 2,
             child: Text(
               _getCategoryText(activity),
               style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
             ),
           ),
           Expanded(
+            flex: 2,
             child: Text(
               _getStatusText(activity),
               style: const TextStyle(
@@ -356,6 +324,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 1,
             child: Text(
               _formatDate(activity.timestamp),
               style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),

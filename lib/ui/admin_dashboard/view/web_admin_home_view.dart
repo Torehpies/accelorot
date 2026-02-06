@@ -69,7 +69,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
             : (isMediumScreen ? 360.0 : 320.0);
 
         return Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -139,7 +139,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
                           // Activity Overview chart
                           Expanded(
                             child: activitiesAsync.when(
@@ -159,7 +159,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     // Right column: Report Status (spans full height)
                     Expanded(
                       flex: 1,
@@ -168,7 +168,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               // Recent Activities table (full width, anchored to screen height)
               Expanded(child: const RecentActivitiesTable()),
             ],
