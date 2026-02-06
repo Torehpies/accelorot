@@ -42,10 +42,16 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
     final state = ref.watch(teamDetailProvider(teamId));
 
     return Scaffold(
-      appBar: AppBar(title: Text('Team Details - ${widget.team.teamName}'), backgroundColor: Colors.transparent,),
+      appBar: AppBar(
+        title: Text('Team Details - ${widget.team.teamName}'),
+        backgroundColor: Colors.transparent,
+      ),
       body: Column(
         children: [
-          TeamHeaderWithTabs(controller: _tabController),
+          TeamHeaderWithTabs(
+            controller: _tabController,
+            tabTitles: ['Admins', 'Operators'],
+          ),
           Expanded(
             child: state.isLoading
                 ? Center(child: CircularProgressIndicator())

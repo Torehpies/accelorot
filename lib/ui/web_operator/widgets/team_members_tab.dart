@@ -1,5 +1,3 @@
-// lib/ui/web_operator/widgets/team_members_tab.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
@@ -49,7 +47,10 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
 
     return BaseTableContainer(
       // ── Left header: tab switcher ──
-      leftHeaderWidget: TabsRow(controller: widget.tabController),
+      leftHeaderWidget: TabsRow(
+        controller: widget.tabController,
+        tabTitles: ['Members', 'For Approval'],
+      ),
 
       // ── Right header: date filter, search, add button ──
       rightHeaderWidgets: [
@@ -291,4 +292,3 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     );
   }
 }
-
