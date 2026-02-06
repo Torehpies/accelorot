@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/widgets/operator_dialog_shell.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
@@ -10,24 +11,20 @@ class ViewOperatorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.background2,
+    return OperatorDialogShell(
       title: const Text(
         'Operator Details',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      content: SizedBox(
-        width: 400,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('View in-depth information about this operator.'),
-            const Divider(thickness: 1, height: 24),
-            const SizedBox(height: 5),
-            _buildDetailsFields(context),
-          ],
-        ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('View in-depth information about this operator.'),
+          const Divider(thickness: 1, height: 24),
+          const SizedBox(height: 5),
+          _buildDetailsFields(context),
+        ],
       ),
       actions: [
         ElevatedButton(
