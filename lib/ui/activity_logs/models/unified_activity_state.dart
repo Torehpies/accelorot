@@ -30,11 +30,23 @@ abstract class UnifiedActivityState with _$UnifiedActivityState {
     @Default([]) List<ActivityLogItem> allActivities,
     @Default([]) List<ActivityLogItem> filteredActivities,
 
+    // ✅ Category-specific lists (for parallel loading without race conditions)
+    @Default([]) List<ActivityLogItem> substrateActivities,
+    @Default([]) List<ActivityLogItem> alertActivities,
+    @Default([]) List<ActivityLogItem> cycleActivities,
+    @Default([]) List<ActivityLogItem> reportActivities,
+
     // Entity cache
     @Default({}) Map<String, dynamic> entityCache,
 
     // Full counts for stats cards (not affected by pagination)
     @Default({}) Map<String, int> fullCategoryCounts,
+
+    // ✅ Individual loading states for progressive loading
+    @Default(LoadingStatus.initial) LoadingStatus substratesLoadingStatus,
+    @Default(LoadingStatus.initial) LoadingStatus alertsLoadingStatus,
+    @Default(LoadingStatus.initial) LoadingStatus cyclesLoadingStatus,
+    @Default(LoadingStatus.initial) LoadingStatus reportsLoadingStatus,
 
     // Pagination
     @Default(1) int currentPage,

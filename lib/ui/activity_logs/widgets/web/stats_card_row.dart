@@ -3,16 +3,27 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/base_stats_card.dart';
 import '../../../core/themes/web_colors.dart';
+import '../../models/activity_common.dart';
 
-/// Stats card row with month-over-month change tracking
+/// Stats card row with progressive loading support
 class StatsCardRow extends StatelessWidget {
   final Map<String, Map<String, dynamic>> countsWithChange;
-  final bool isLoading;
+  final bool isLoading; // Global loading (kept for backwards compatibility)
+
+  // ✅ Individual loading states for progressive loading
+  final LoadingStatus? substratesLoadingStatus;
+  final LoadingStatus? alertsLoadingStatus;
+  final LoadingStatus? cyclesLoadingStatus;
+  final LoadingStatus? reportsLoadingStatus;
 
   const StatsCardRow({
     super.key,
     required this.countsWithChange,
     this.isLoading = false,
+    this.substratesLoadingStatus,
+    this.alertsLoadingStatus,
+    this.cyclesLoadingStatus,
+    this.reportsLoadingStatus,
   });
 
   @override
@@ -27,10 +38,13 @@ class StatsCardRow extends StatelessWidget {
             icon: Icons.eco,
             iconColor: WebColors.substratesIcon,
             backgroundColor: WebColors.substratesBackground,
-            changeText: countsWithChange['substrates']?['change'],
+            changeText: '-100%', 
             subtext: 'added substrate this month',
-            isPositive: countsWithChange['substrates']?['isPositive'],
-            isLoading: isLoading,
+            isPositive: false, 
+            
+            isLoading:
+                substratesLoadingStatus == LoadingStatus.loading ||
+                (substratesLoadingStatus == null && isLoading),
           ),
         ),
         const SizedBox(width: 16),
@@ -46,7 +60,10 @@ class StatsCardRow extends StatelessWidget {
             changeText: countsWithChange['alerts']?['change'],
             subtext: 'last 2 days',
             isPositive: countsWithChange['alerts']?['isPositive'],
-            isLoading: isLoading,
+            
+            isLoading:
+                alertsLoadingStatus == LoadingStatus.loading ||
+                (alertsLoadingStatus == null && isLoading),
           ),
         ),
         const SizedBox(width: 16),
@@ -62,7 +79,9 @@ class StatsCardRow extends StatelessWidget {
             changeText: countsWithChange['operations']?['change'],
             subtext: 'last 2 days',
             isPositive: countsWithChange['operations']?['isPositive'],
-            isLoading: isLoading,
+            isLoading:
+                cyclesLoadingStatus == LoadingStatus.loading ||
+                (cyclesLoadingStatus == null && isLoading),
           ),
         ),
         const SizedBox(width: 16),
@@ -75,10 +94,13 @@ class StatsCardRow extends StatelessWidget {
             icon: Icons.description_outlined,
             iconColor: WebColors.reportsIcon,
             backgroundColor: WebColors.reportsBackground,
-            changeText: countsWithChange['reports']?['change'],
+            changeText: '-100%', 
             subtext: 'new reports this month',
-            isPositive: countsWithChange['reports']?['isPositive'],
-            isLoading: isLoading,
+            isPositive: false, 
+          
+            isLoading:
+                reportsLoadingStatus == LoadingStatus.loading ||
+                (reportsLoadingStatus == null && isLoading),
           ),
         ),
       ],

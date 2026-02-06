@@ -1,5 +1,6 @@
 // lib/ui/activity_logs/view_model/unified_activity_viewmodel.dart
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
@@ -8,6 +9,7 @@ import '../models/activity_enums.dart';
 import '../services/activity_aggregator_service.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../models/activity_common.dart';
+import '../mappers/activity_presentation_mapper.dart';
 
 part 'unified_activity_viewmodel.g.dart';
 
@@ -30,31 +32,57 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   Future<void> _initialize() async {
     final vmStopwatch = Stopwatch()..start();
     debugPrint('🚀 ViewModel initialization started');
-    
-    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
+
+    // ✅ Skip expensive auth check - route guard ensures user is authenticated
+    state = state.copyWith(
+      status: LoadingStatus.loading,
+      isLoggedIn: true,
+      errorMessage: null,
+    );
+
+    vmStopwatch.stop();
+    debugPrint(
+      '🏁 ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
+    );
+
+    // ✅ Launch progressive loading immediately (don't await - let it run in background)
+    unawaited(loadActivities());
+  }
+
+  // ===== DATA LOADING =====
+
+  /// Load all activities with progressive loading - each category updates UI as it arrives
+  Future<void> loadActivities() async {
+    final loadStopwatch = Stopwatch()..start();
+    debugPrint('🔄 loadActivities() called - Progressive Loading Mode');
 
     try {
-      final isLoggedIn = await _aggregator.isUserLoggedIn();
+      // Set all categories to loading state
+      state = state.copyWith(
+        status: LoadingStatus.loading,
+        substratesLoadingStatus: LoadingStatus.loading,
+        alertsLoadingStatus: LoadingStatus.loading,
+        cyclesLoadingStatus: LoadingStatus.loading,
+        reportsLoadingStatus: LoadingStatus.loading,
+      );
 
-      if (!isLoggedIn) {
-        state = state.copyWith(
-          status: LoadingStatus.success,
-          isLoggedIn: false,
-        );
-        vmStopwatch.stop();
-        debugPrint('⚠️ User not logged in - skipped fetch: ${vmStopwatch.elapsedMilliseconds}ms\n');
-        return;
-      }
+      // ✅ PROGRESSIVE LOADING: Launch all fetches in parallel (fire and forget)
+      // Each will update UI independently as it completes
+      unawaited(_fetchSubstratesProgressive());
+      unawaited(_fetchAlertsProgressive());
+      unawaited(_fetchCyclesProgressive());
+      unawaited(_fetchReportsProgressive());
 
-      state = state.copyWith(isLoggedIn: true);
-      await loadActivities();
-      
-      vmStopwatch.stop();
-      debugPrint('🏁 ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n');
+      loadStopwatch.stop();
+      debugPrint(
+        '✅ Progressive loading launched: ${loadStopwatch.elapsedMilliseconds}ms (fetches running in background)\n',
+      );
     } catch (e) {
-      vmStopwatch.stop();
-      debugPrint('❌ ViewModel initialization failed: ${vmStopwatch.elapsedMilliseconds}ms - Error: $e\n');
-      
+      loadStopwatch.stop();
+      debugPrint(
+        '❌ loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n',
+      );
+
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: e.toString(),
@@ -62,71 +90,242 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     }
   }
 
-  // ===== DATA LOADING =====
+  /// Fetch substrates and update UI immediately when done
+  Future<void> _fetchSubstratesProgressive() async {
+    final stopwatch = Stopwatch()..start();
 
-  /// Load all activities from aggregator service WITH entity cache
-  Future<void> loadActivities() async {
-    final loadStopwatch = Stopwatch()..start();
-    debugPrint('🔄 loadActivities() called');
-    
     try {
-      state = state.copyWith(status: LoadingStatus.loading);
+      debugPrint('🟢 Fetching substrates...');
+      final substrates = await _aggregator.getSubstratesRaw();
 
-      // Fetch full counts for stats cards (with 2-day filter for alerts/cycles)
-      final countsStopwatch = Stopwatch()..start();
-      final fullCounts = await _aggregator.getActivityCounts(
-        filterRecentDays: 2, // Stats cards show "last 2 days" for alerts/cycles
+      stopwatch.stop();
+      debugPrint(
+        '✅ Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrates.length} items)',
       );
-      countsStopwatch.stop();
-      debugPrint('📊 Full counts fetched: ${countsStopwatch.elapsedMilliseconds}ms');
 
-      // Fetch activities with pagination (per-page limit) and 2-day filtering for alerts/cycles
-      final fetchStopwatch = Stopwatch()..start();
-      final result = await _aggregator.getAllActivitiesWithCache(
-        limit: state.itemsPerPage, // Only fetch what's needed for current page
-        filterRecentDays: 2,  // Fetch only last 2 days for alerts and cycles
-      );
-      fetchStopwatch.stop();
-      debugPrint('📦 Data fetched in ViewModel: ${fetchStopwatch.elapsedMilliseconds}ms');
+      // ✅ Build category-specific list (NO race condition)
+      final substrateActivityList = <ActivityLogItem>[];
+      final newCache = Map<String, dynamic>.from(state.entityCache);
 
-      final stateStopwatch = Stopwatch()..start();
+      for (var substrate in substrates) {
+        newCache['substrate_${substrate.id}'] = substrate;
+        substrateActivityList.add(
+          ActivityPresentationMapper.fromSubstrate(substrate),
+        );
+      }
+
+      // Update state - UI will reflect immediately!
       state = state.copyWith(
-        allActivities: result.items,
-        entityCache: result.entityCache, // Store cache for instant dialog loading
-        fullCategoryCounts: fullCounts, // Store full counts for stats cards
-        status: LoadingStatus.success,
+        substrateActivities: substrateActivityList,
+        entityCache: newCache,
+        substratesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'substrates': substrates.length,
+        },
       );
-      stateStopwatch.stop();
-      debugPrint('📝 State updated: ${stateStopwatch.elapsedMilliseconds}ms');
 
-      // Apply filters to new data
-      final filterStopwatch = Stopwatch()..start();
+      _mergeAllActivities();
       _applyFilters();
-      filterStopwatch.stop();
-      debugPrint('🔍 Filters applied: ${filterStopwatch.elapsedMilliseconds}ms');
-      
-      loadStopwatch.stop();
-      debugPrint('✅ loadActivities() complete: ${loadStopwatch.elapsedMilliseconds}ms\n');
+      _checkIfAllLoaded();
     } catch (e) {
-      loadStopwatch.stop();
-      debugPrint('❌ loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n');
-      
-      state = state.copyWith(
-        status: LoadingStatus.error,
-        errorMessage: e.toString(),
+      stopwatch.stop();
+      debugPrint(
+        '❌ Substrates fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
       );
+
+      state = state.copyWith(substratesLoadingStatus: LoadingStatus.error);
     }
+  }
+
+  /// Fetch alerts and update UI immediately when done
+  Future<void> _fetchAlertsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('🟡 Fetching alerts...');
+      final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
+      final alerts = await _aggregator.getAlertsRaw(
+        cutoffDate: cutoffDate,
+        limit: null,
+      );
+
+      stopwatch.stop();
+      debugPrint(
+        '✅ Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alerts.length} items)',
+      );
+
+      // ✅ Build category-specific list (NO race condition)
+      final alertActivityList = <ActivityLogItem>[];
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      for (var alert in alerts) {
+        newCache['alert_${alert.id}'] = alert;
+        alertActivityList.add(ActivityPresentationMapper.fromAlert(alert));
+      }
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        alertActivities: alertActivityList,
+        entityCache: newCache,
+        alertsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'alerts': alerts.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        '❌ Alerts fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(alertsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch cycles and update UI immediately when done
+  Future<void> _fetchCyclesProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('🟣 Fetching cycles...');
+      final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
+      final cycles = await _aggregator.getCyclesRaw(
+        cutoffDate: cutoffDate,
+        limit: null,
+      );
+
+      stopwatch.stop();
+      debugPrint(
+        '✅ Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycles.length} items)',
+      );
+
+      // ✅ Build category-specific list (NO race condition)
+      final cycleActivityList = <ActivityLogItem>[];
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      for (var cycle in cycles) {
+        newCache['cycle_${cycle.id}'] = cycle;
+        cycleActivityList.add(
+          ActivityPresentationMapper.fromCycleRecommendation(cycle),
+        );
+      }
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        cycleActivities: cycleActivityList,
+        entityCache: newCache,
+        cyclesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'operations': cycles.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        '❌ Cycles fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(cyclesLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch reports and update UI immediately when done
+  Future<void> _fetchReportsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('🔵 Fetching reports...');
+      final reports = await _aggregator.getReportsRaw(limit: null);
+
+      stopwatch.stop();
+      debugPrint(
+        '✅ Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reports.length} items)',
+      );
+
+      // ✅ Build category-specific list (NO race condition)
+      final reportActivityList = <ActivityLogItem>[];
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      for (var report in reports) {
+        newCache['report_${report.id}'] = report;
+        reportActivityList.add(ActivityPresentationMapper.fromReport(report));
+      }
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        reportActivities: reportActivityList,
+        entityCache: newCache,
+        reportsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'reports': reports.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        '❌ Reports fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(reportsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Check if all categories are loaded and update global status
+  void _checkIfAllLoaded() {
+    final allLoaded =
+        state.substratesLoadingStatus == LoadingStatus.success &&
+        state.alertsLoadingStatus == LoadingStatus.success &&
+        state.cyclesLoadingStatus == LoadingStatus.success &&
+        state.reportsLoadingStatus == LoadingStatus.success;
+
+    if (allLoaded) {
+      state = state.copyWith(status: LoadingStatus.success);
+      debugPrint('🎉 All categories loaded successfully!');
+    }
+  }
+
+  /// Merge all category-specific lists into allActivities and sort by timestamp
+  void _mergeAllActivities() {
+    final merged = <ActivityLogItem>[
+      ...state.substrateActivities,
+      ...state.alertActivities,
+      ...state.cycleActivities,
+      ...state.reportActivities,
+    ];
+
+    // Sort by timestamp (newest first)
+    merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    state = state.copyWith(allActivities: merged);
   }
 
   /// Refresh data (for pull-to-refresh)
   Future<void> refresh() async {
     final refreshStopwatch = Stopwatch()..start();
     debugPrint('🔃 refresh() called');
-    
+
     await loadActivities();
-    
+
     refreshStopwatch.stop();
-    debugPrint('✅ refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n');
+    debugPrint(
+      '✅ refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n',
+    );
   }
 
   // ===== ENTITY CACHE LOOKUP =====
@@ -302,7 +501,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     if (state.fullCategoryCounts.isNotEmpty) {
       return state.fullCategoryCounts;
     }
-    
+
     // Fallback: count from allActivities (limited data)
     return {
       'substrates': state.allActivities
@@ -331,22 +530,22 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     return {
       'substrates': {
         'count': counts['substrates'] ?? 0,
-        'change': null, // No change calculation needed
+        'change': '', 
         'isPositive': true,
       },
       'alerts': {
         'count': counts['alerts'] ?? 0,
-        'change': null, // No change calculation needed
+        'change': '', 
         'isPositive': true,
       },
       'operations': {
         'count': counts['operations'] ?? 0,
-        'change': null, // No change calculation needed
+        'change': '', 
         'isPositive': true,
       },
       'reports': {
         'count': counts['reports'] ?? 0,
-        'change': null, // No change calculation needed
+        'change': '', 
         'isPositive': true,
       },
     };

@@ -8,8 +8,18 @@ abstract class CycleService {
   Future<List<CycleRecommendation>> fetchTeamCycles({int? limit, DateTime? cutoffDate});
 
   /// Get drum controller for a batch
-  Future<List<CycleRecommendation>> getDrumControllers({required String batchId});
-  Future<List<CycleRecommendation>> getAerators({required String batchId});
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> getDrumControllers({
+    required String batchId,
+    DateTime? cutoffDate,
+  });
+  
+  /// Get aerators for a batch
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> getAerators({
+    required String batchId,
+    DateTime? cutoffDate,
+  });
   
   /// Start drum controller
   Future<String> startDrumController({

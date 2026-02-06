@@ -55,7 +55,10 @@ class FirestoreCycleService implements CycleService {
   // ===== FETCH TEAM CYCLES =====
 
   @override
-  Future<List<CycleRecommendation>> fetchTeamCycles({int? limit, DateTime? cutoffDate}) async {
+  Future<List<CycleRecommendation>> fetchTeamCycles({
+    int? limit,
+    DateTime? cutoffDate,
+  }) async {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -68,8 +71,9 @@ class FirestoreCycleService implements CycleService {
         return [];
       }
 
-      var allCycles = await _fetchTeamCycles(teamId);
-      
+      // ✅ NEW: Pass cutoffDate to _fetchTeamCycles
+      var allCycles = await _fetchTeamCycles(teamId, cutoffDate: cutoffDate);
+
       // Sort by timestamp descending (newest first)
       allCycles.sort(
         (a, b) => (b.timestamp ?? DateTime.now()).compareTo(
@@ -77,15 +81,8 @@ class FirestoreCycleService implements CycleService {
         ),
       );
 
-      // Apply cutoff filter if specified (e.g., last 2 days)
-      if (cutoffDate != null) {
-        final originalCount = allCycles.length;
-        allCycles = allCycles.where((cycle) {
-          final timestamp = cycle.timestamp ?? cycle.startedAt;
-          return timestamp != null && timestamp.isAfter(cutoffDate);
-        }).toList();
-        debugPrint('🔍 Filtered cycles by date: $originalCount → ${allCycles.length}');
-      }
+      // ❌ REMOVED: No longer need in-memory date filtering
+      // Cutoff is now applied at the Firestore query level
 
       // Apply limit if specified
       if (limit != null && allCycles.length > limit) {
@@ -101,100 +98,135 @@ class FirestoreCycleService implements CycleService {
     }
   }
 
-Future<List<CycleRecommendation>> _fetchTeamCycles(String teamId) async {
-  final List<CycleRecommendation> allCycles = [];
+  Future<List<CycleRecommendation>> _fetchTeamCycles(
+    String teamId, {
+    DateTime? cutoffDate,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    final List<CycleRecommendation> allCycles = [];
 
-  final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
-  if (teamMachineIds.isEmpty) return [];
+    final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+    if (teamMachineIds.isEmpty) return [];
 
-  final batches = await _batchService.getBatchesForMachines(teamMachineIds);
-  if (batches.isEmpty) return [];
+    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+    if (batches.isEmpty) return [];
 
-  final futures = batches.map((batchDoc) async {
-    final batchId = batchDoc.id;
-    
-    // Get ALL drum controllers for this batch
-    final drumControllers = await getDrumControllers(batchId: batchId);
-    
-    // Get ALL aerators for this batch
-    final aerators = await getAerators(batchId: batchId);
-    
-    return [...drumControllers, ...aerators];
-  });
+    debugPrint(
+      '🟣 Fetching cycles from ${batches.length} batches in parallel...',
+    );
 
-  final results = await Future.wait(futures);
+    final futures = batches.map((batchDoc) async {
+      final batchId = batchDoc.id;
 
-  for (var result in results) {
-    allCycles.addAll(result);
+      // ✅ Parallel sub-queries per batch
+      final results = await Future.wait([
+        getDrumControllers(batchId: batchId, cutoffDate: cutoffDate),
+        getAerators(batchId: batchId, cutoffDate: cutoffDate),
+      ]);
+
+      return [...results[0], ...results[1]];
+    });
+
+    final results = await Future.wait(futures);
+
+    for (var result in results) {
+      allCycles.addAll(result);
+    }
+
+    // Sort by timestamp descending (latest first)
+    allCycles.sort(
+      (a, b) => (b.startedAt ?? DateTime(1970)).compareTo(
+        a.startedAt ?? DateTime(1970),
+      ),
+    );
+
+    stopwatch.stop();
+    debugPrint(
+      '✅ Fetched ${allCycles.length} cycles from ${batches.length} batches (Parallel Strategy) in ${stopwatch.elapsedMilliseconds}ms',
+    );
+
+    return allCycles;
   }
-
-  // Sort by timestamp descending (latest first)
-  allCycles.sort((a, b) => 
-    (b.startedAt ?? DateTime(1970)).compareTo(a.startedAt ?? DateTime(1970))
-  );
-
-  return allCycles;
-}
 
   // ===== GET DRUM CONTROLLER =====
 
   @override
-Future<List<CycleRecommendation>> getDrumControllers({
-  required String batchId,
-}) async {
-  try {
-    final cycleDocId = await _getExistingMainCycleDocId(batchId);
-    if (cycleDocId == null) return [];
+  Future<List<CycleRecommendation>> getDrumControllers({
+    required String batchId,
+    DateTime? cutoffDate, // ✅ NEW: Add cutoff parameter
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) return [];
 
-    final drumSnapshot = await _firestore
-        .collection('batches')
-        .doc(batchId)
-        .collection('cyclesRecom')
-        .doc(cycleDocId)
-        .collection('drum_controller')
-        .orderBy('startedAt', descending: true) // Latest first
-        .get();
+      var query = _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .orderBy('startedAt', descending: true); // Latest first
 
-    if (drumSnapshot.docs.isEmpty) return [];
+      // ✅ NEW: Apply timestamp filter at Firestore query level
+      if (cutoffDate != null) {
+        query = query.where(
+          'startedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
+        );
+      }
 
-    return drumSnapshot.docs
-        .map((doc) => CycleRecommendation.fromFirestore(doc))
-        .toList();
-  } catch (e) {
-    debugPrint('Error getting drum controllers: $e');
-    return [];
+      final drumSnapshot = await query.get();
+
+      if (drumSnapshot.docs.isEmpty) return [];
+
+      return drumSnapshot.docs
+          .map((doc) => CycleRecommendation.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting drum controllers: $e');
+      return [];
+    }
   }
-}
 
   // ===== GET AERATOR =====
 
   @override
-Future<List<CycleRecommendation>> getAerators({
-  required String batchId,
-}) async {
-  try {
-    final cycleDocId = await _getExistingMainCycleDocId(batchId);
-    if (cycleDocId == null) return [];
+  Future<List<CycleRecommendation>> getAerators({
+    required String batchId,
+    DateTime? cutoffDate, // ✅ NEW: Add cutoff parameter
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) return [];
 
-    final aeratorSnapshot = await _firestore
-        .collection('batches')
-        .doc(batchId)
-        .collection('cyclesRecom')
-        .doc(cycleDocId)
-        .collection('aerator')
-        .orderBy('startedAt', descending: true)
-        .get();
+      var query = _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .orderBy('startedAt', descending: true);
 
-    if (aeratorSnapshot.docs.isEmpty) return [];
+      // ✅ NEW: Apply timestamp filter at Firestore query level
+      if (cutoffDate != null) {
+        query = query.where(
+          'startedAt',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
+        );
+      }
 
-    return aeratorSnapshot.docs
-        .map((doc) => CycleRecommendation.fromFirestore(doc))
-        .toList();
-  } catch (e) {
-    debugPrint('Error getting aerators: $e');
-    return [];
+      final aeratorSnapshot = await query.get();
+
+      if (aeratorSnapshot.docs.isEmpty) return [];
+
+      return aeratorSnapshot.docs
+          .map((doc) => CycleRecommendation.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      debugPrint('Error getting aerators: $e');
+      return [];
+    }
   }
-}
   // ===== START DRUM CONTROLLER =====
 
   @override
@@ -556,12 +588,12 @@ Future<List<CycleRecommendation>> getAerators({
           .collection('drum_controller')
           .doc(drumDocId)
           .update({
-        'status': 'stopped',
-        'totalRuntimeSeconds': totalRuntimeSeconds,
-        'stoppedAt': FieldValue.serverTimestamp(),
-        'pausedAt': FieldValue.delete(),
-        'accumulatedRuntimeSeconds': FieldValue.delete(),
-      });
+            'status': 'stopped',
+            'totalRuntimeSeconds': totalRuntimeSeconds,
+            'stoppedAt': FieldValue.serverTimestamp(),
+            'pausedAt': FieldValue.delete(),
+            'accumulatedRuntimeSeconds': FieldValue.delete(),
+          });
 
       debugPrint('✅ Drum controller stopped successfully');
     } catch (e) {
@@ -607,12 +639,12 @@ Future<List<CycleRecommendation>> getAerators({
           .collection('aerator')
           .doc(aeratorDocId)
           .update({
-        'status': 'stopped',
-        'totalRuntimeSeconds': totalRuntimeSeconds,
-        'stoppedAt': FieldValue.serverTimestamp(),
-        'pausedAt': FieldValue.delete(),
-        'accumulatedRuntimeSeconds': FieldValue.delete(),
-      });
+            'status': 'stopped',
+            'totalRuntimeSeconds': totalRuntimeSeconds,
+            'stoppedAt': FieldValue.serverTimestamp(),
+            'pausedAt': FieldValue.delete(),
+            'accumulatedRuntimeSeconds': FieldValue.delete(),
+          });
 
       debugPrint('✅ Aerator stopped successfully');
     } catch (e) {
@@ -658,10 +690,10 @@ Future<List<CycleRecommendation>> getAerators({
           .collection('drum_controller')
           .doc(drumDocId)
           .update({
-        'status': 'paused',
-        'pausedAt': FieldValue.serverTimestamp(),
-        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
-      });
+            'status': 'paused',
+            'pausedAt': FieldValue.serverTimestamp(),
+            'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+          });
 
       debugPrint('✅ Drum controller paused successfully');
     } catch (e) {
@@ -703,10 +735,7 @@ Future<List<CycleRecommendation>> getAerators({
           .doc(cycleDocId)
           .collection('drum_controller')
           .doc(drumDocId)
-          .update({
-        'status': 'running',
-        'pausedAt': FieldValue.delete(),
-      });
+          .update({'status': 'running', 'pausedAt': FieldValue.delete()});
 
       debugPrint('✅ Drum controller resumed successfully');
     } catch (e) {
@@ -752,10 +781,10 @@ Future<List<CycleRecommendation>> getAerators({
           .collection('aerator')
           .doc(aeratorDocId)
           .update({
-        'status': 'paused',
-        'pausedAt': FieldValue.serverTimestamp(),
-        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
-      });
+            'status': 'paused',
+            'pausedAt': FieldValue.serverTimestamp(),
+            'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+          });
 
       debugPrint('✅ Aerator paused successfully');
     } catch (e) {
@@ -797,10 +826,7 @@ Future<List<CycleRecommendation>> getAerators({
           .doc(cycleDocId)
           .collection('aerator')
           .doc(aeratorDocId)
-          .update({
-        'status': 'running',
-        'pausedAt': FieldValue.delete(),
-      });
+          .update({'status': 'running', 'pausedAt': FieldValue.delete()});
 
       debugPrint('✅ Aerator resumed successfully');
     } catch (e) {

@@ -27,6 +27,11 @@ class WebActivityView extends ConsumerWidget {
                 statsRow: StatsCardRow(
                   countsWithChange: viewModel.getCategoryCountsWithChange(),
                   isLoading: state.isLoading,
+                  // ✅ Pass individual loading states for progressive loading
+                  substratesLoadingStatus: state.substratesLoadingStatus,
+                  alertsLoadingStatus: state.alertsLoadingStatus,
+                  cyclesLoadingStatus: state.cyclesLoadingStatus,
+                  reportsLoadingStatus: state.reportsLoadingStatus,
                 ),
                 table: WebTableContainer(
                   items: state.paginatedItems,

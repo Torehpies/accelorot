@@ -53,18 +53,29 @@ class ActivityAggregatorService {
     try {
       final substrates = await _substrateRepo.getAllSubstrates();
       final items = substrates
-          .map((substrate) => ActivityPresentationMapper.fromSubstrate(substrate))
+          .map(
+            (substrate) => ActivityPresentationMapper.fromSubstrate(substrate),
+          )
           .toList();
-      
+
       stopwatch.stop();
-      debugPrint('🟢 SUBSTRATES FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)');
-      
+      debugPrint(
+        '🟢 SUBSTRATES FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)',
+      );
+
       return items;
     } catch (e) {
       stopwatch.stop();
-      debugPrint('🔴 SUBSTRATES FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e');
+      debugPrint(
+        '🔴 SUBSTRATES FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e',
+      );
       rethrow;
     }
+  }
+
+  /// Fetch raw substrate entities (for progressive loading)
+  Future<List<dynamic>> getSubstratesRaw() async {
+    return await _substrateRepo.getAllSubstrates();
   }
 
   /// Fetch and transform alert activities
@@ -75,16 +86,25 @@ class ActivityAggregatorService {
       final items = alerts
           .map((alert) => ActivityPresentationMapper.fromAlert(alert))
           .toList();
-      
+
       stopwatch.stop();
-      debugPrint('🟡 ALERTS FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)');
-      
+      debugPrint(
+        '🟡 ALERTS FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)',
+      );
+
       return items;
     } catch (e) {
       stopwatch.stop();
-      debugPrint('🔴 ALERTS FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e');
+      debugPrint(
+        '🔴 ALERTS FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e',
+      );
       rethrow;
     }
+  }
+
+  /// Fetch raw alert entities (for progressive loading)
+  Future<List<dynamic>> getAlertsRaw({DateTime? cutoffDate, int? limit}) async {
+    return await _alertRepo.getTeamAlerts(cutoffDate: cutoffDate, limit: limit);
   }
 
   /// Fetch and transform report activities
@@ -95,16 +115,25 @@ class ActivityAggregatorService {
       final items = reports
           .map((report) => ActivityPresentationMapper.fromReport(report))
           .toList();
-      
+
       stopwatch.stop();
-      debugPrint('🔵 REPORTS FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)');
-      
+      debugPrint(
+        '🔵 REPORTS FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)',
+      );
+
       return items;
     } catch (e) {
       stopwatch.stop();
-      debugPrint('🔴 REPORTS FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e');
+      debugPrint(
+        '🔴 REPORTS FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e',
+      );
       rethrow;
     }
+  }
+
+  /// Fetch raw report entities (for progressive loading)
+  Future<List<dynamic>> getReportsRaw({int? limit}) async {
+    return await _reportRepo.getTeamReports(limit: limit);
   }
 
   /// Fetch and transform cycle & recommendation activities
@@ -114,19 +143,29 @@ class ActivityAggregatorService {
       final cycles = await _cycleRepo.getTeamCycles();
       final items = cycles
           .map(
-            (cycle) => ActivityPresentationMapper.fromCycleRecommendation(cycle),
+            (cycle) =>
+                ActivityPresentationMapper.fromCycleRecommendation(cycle),
           )
           .toList();
-      
+
       stopwatch.stop();
-      debugPrint('🟣 CYCLES FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)');
-      
+      debugPrint(
+        '🟣 CYCLES FETCH: ${stopwatch.elapsedMilliseconds}ms (${items.length} items)',
+      );
+
       return items;
     } catch (e) {
       stopwatch.stop();
-      debugPrint('🔴 CYCLES FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e');
+      debugPrint(
+        '🔴 CYCLES FETCH FAILED: ${stopwatch.elapsedMilliseconds}ms - Error: $e',
+      );
       rethrow;
     }
+  }
+
+  /// Fetch raw cycle entities (for progressive loading)
+  Future<List<dynamic>> getCyclesRaw({DateTime? cutoffDate, int? limit}) async {
+    return await _cycleRepo.getTeamCycles(cutoffDate: cutoffDate, limit: limit);
   }
 
   /// Fetch all activities from all sources and combine them
@@ -139,8 +178,10 @@ class ActivityAggregatorService {
   /// Get counts only for stats cards (without fetching full entities)
   /// [filterRecentDays] - Only count items from last N days (null = count all)
   Future<Map<String, int>> getActivityCounts({int? filterRecentDays}) async {
-    debugPrint('📊 Fetching activity counts (filterRecentDays: ${filterRecentDays ?? "all"})');
-    
+    debugPrint(
+      '📊 Fetching activity counts (filterRecentDays: ${filterRecentDays ?? "all"})',
+    );
+
     final DateTime? cutoffDate = filterRecentDays != null
         ? DateTime.now().subtract(Duration(days: filterRecentDays))
         : null;
@@ -157,7 +198,9 @@ class ActivityAggregatorService {
     final cycles = results[2] as List;
     final reports = results[3] as List;
 
-    debugPrint('📊 Counts: substrates=${substrates.length}, alerts=${alerts.length}, cycles=${cycles.length}, reports=${reports.length}');
+    debugPrint(
+      '📊 Counts: substrates=${substrates.length}, alerts=${alerts.length}, cycles=${cycles.length}, reports=${reports.length}',
+    );
 
     return {
       'substrates': substrates.length,
@@ -175,11 +218,11 @@ class ActivityAggregatorService {
     int? filterRecentDays,
   }) async {
     final totalStopwatch = Stopwatch()..start();
-    
+
     debugPrint('📊 ===== ACTIVITY FETCH START =====');
     debugPrint('   📋 Limit per category: ${limit ?? "unlimited"}');
     debugPrint('   📅 Filter recent days: ${filterRecentDays ?? "no filter"}');
-    
+
     try {
       final cache = <String, dynamic>{};
       final allItems = <ActivityLogItem>[];
@@ -191,16 +234,25 @@ class ActivityAggregatorService {
 
       // Fetch all data in parallel with pagination/filtering
       final parallelStopwatch = Stopwatch()..start();
-      
+
       final results = await Future.wait([
-        _substrateRepo.getAllSubstrates(), // Substrates: fetch all (usually small dataset)
-        _alertRepo.getTeamAlerts(limit: limit, cutoffDate: cutoffDate), // Alerts: paginated + 2-day filter
-        _cycleRepo.getTeamCycles(limit: limit, cutoffDate: cutoffDate), // Cycles: paginated + 2-day filter
+        _substrateRepo
+            .getAllSubstrates(), // Substrates: fetch all (usually small dataset)
+        _alertRepo.getTeamAlerts(
+          limit: limit,
+          cutoffDate: cutoffDate,
+        ), // Alerts: paginated + 2-day filter
+        _cycleRepo.getTeamCycles(
+          limit: limit,
+          cutoffDate: cutoffDate,
+        ), // Cycles: paginated + 2-day filter
         _reportRepo.getTeamReports(limit: limit), // Reports: paginated only
       ]);
-      
+
       parallelStopwatch.stop();
-      debugPrint('⚡ PARALLEL FETCH COMPLETE: ${parallelStopwatch.elapsedMilliseconds}ms');
+      debugPrint(
+        '⚡ PARALLEL FETCH COMPLETE: ${parallelStopwatch.elapsedMilliseconds}ms',
+      );
 
       final substrates = results[0] as List;
       final alerts = results[1] as List;
@@ -214,7 +266,9 @@ class ActivityAggregatorService {
         allItems.add(ActivityPresentationMapper.fromSubstrate(substrate));
       }
       substrateStopwatch.stop();
-      debugPrint('   🟢 Substrates processed: ${substrateStopwatch.elapsedMilliseconds}ms (${substrates.length} items)');
+      debugPrint(
+        '   🟢 Substrates processed: ${substrateStopwatch.elapsedMilliseconds}ms (${substrates.length} items)',
+      );
 
       // Process alerts
       final alertStopwatch = Stopwatch()..start();
@@ -223,7 +277,9 @@ class ActivityAggregatorService {
         allItems.add(ActivityPresentationMapper.fromAlert(alert));
       }
       alertStopwatch.stop();
-      debugPrint('   🟡 Alerts processed: ${alertStopwatch.elapsedMilliseconds}ms (${alerts.length} items)');
+      debugPrint(
+        '   🟡 Alerts processed: ${alertStopwatch.elapsedMilliseconds}ms (${alerts.length} items)',
+      );
 
       // Process cycles
       final cycleStopwatch = Stopwatch()..start();
@@ -232,7 +288,9 @@ class ActivityAggregatorService {
         allItems.add(ActivityPresentationMapper.fromCycleRecommendation(cycle));
       }
       cycleStopwatch.stop();
-      debugPrint('   🟣 Cycles processed: ${cycleStopwatch.elapsedMilliseconds}ms (${cycles.length} items)');
+      debugPrint(
+        '   🟣 Cycles processed: ${cycleStopwatch.elapsedMilliseconds}ms (${cycles.length} items)',
+      );
 
       // Process reports
       final reportStopwatch = Stopwatch()..start();
@@ -241,16 +299,20 @@ class ActivityAggregatorService {
         allItems.add(ActivityPresentationMapper.fromReport(report));
       }
       reportStopwatch.stop();
-      debugPrint('   🔵 Reports processed: ${reportStopwatch.elapsedMilliseconds}ms (${reports.length} items)');
+      debugPrint(
+        '   🔵 Reports processed: ${reportStopwatch.elapsedMilliseconds}ms (${reports.length} items)',
+      );
 
       // Sort by timestamp descending (newest first)
       final sortStopwatch = Stopwatch()..start();
       allItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       sortStopwatch.stop();
-      debugPrint('🔗 ITEMS SORTED: ${sortStopwatch.elapsedMilliseconds}ms (${allItems.length} total items)');
+      debugPrint(
+        '🔗 ITEMS SORTED: ${sortStopwatch.elapsedMilliseconds}ms (${allItems.length} total items)',
+      );
 
       debugPrint('💾 ENTITY CACHE BUILT: ${cache.length} entities cached');
-      
+
       totalStopwatch.stop();
       debugPrint('✅ TOTAL FETCH TIME: ${totalStopwatch.elapsedMilliseconds}ms');
       debugPrint('📊 ===== ACTIVITY FETCH END =====\n');
@@ -258,7 +320,9 @@ class ActivityAggregatorService {
       return ActivityResult(allItems, cache);
     } catch (e) {
       totalStopwatch.stop();
-      debugPrint('❌ TOTAL FETCH FAILED: ${totalStopwatch.elapsedMilliseconds}ms - Error: $e');
+      debugPrint(
+        '❌ TOTAL FETCH FAILED: ${totalStopwatch.elapsedMilliseconds}ms - Error: $e',
+      );
       debugPrint('📊 ===== ACTIVITY FETCH END (WITH ERROR) =====\n');
       rethrow;
     }

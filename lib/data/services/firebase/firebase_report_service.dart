@@ -53,23 +53,33 @@ class FirebaseReportService implements ReportService {
           .where('teamId', isEqualTo: teamId)
           .get();
 
-      var reports = <Report>[];
+      debugPrint(
+        '🔵 Fetching reports from ${machinesSnapshot.docs.length} machines in parallel...',
+      );
 
-      // Fetch reports from each machine's subcollection
-      for (final machineDoc in machinesSnapshot.docs) {
-        final machineReports = await fetchReportsForMachine(machineDoc.id);
-        reports.addAll(machineReports);
-      }
+      // ✅ PARALLEL FETCHING: Fetch reports from all machines simultaneously
+      final futures = machinesSnapshot.docs.map((machineDoc) {
+        return fetchReportsForMachine(machineDoc.id);
+      });
+
+      final results = await Future.wait(futures);
+
+      // Flatten results using expand
+      final reports = results.expand((list) => list).toList();
 
       // Sort by createdAt descending (newest first)
       reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       // Apply limit if specified
       if (limit != null && reports.length > limit) {
-        reports = reports.sublist(0, limit);
-        debugPrint('📄 Limited reports: ${reports.length} items');
+        final limitedReports = reports.sublist(0, limit);
+        debugPrint(
+          '✅ Fetched ${reports.length} reports, limited to ${limitedReports.length}',
+        );
+        return limitedReports;
       }
 
+      debugPrint('✅ Fetched ${reports.length} reports (Parallel Strategy)');
       return reports;
     } catch (e) {
       throw Exception('Failed to fetch reports by team: $e');
