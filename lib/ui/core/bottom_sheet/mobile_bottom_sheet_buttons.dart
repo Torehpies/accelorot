@@ -10,6 +10,7 @@ class BottomSheetAction {
   final bool isPrimary;
   final bool isDestructive;
   final bool isLoading;
+  final bool isDisabled;
 
   const BottomSheetAction({
     required this.label,
@@ -17,18 +18,21 @@ class BottomSheetAction {
     this.isPrimary = false,
     this.isDestructive = false,
     this.isLoading = false,
+    this.isDisabled = false,
   });
 
   factory BottomSheetAction.primary({
     required String label,
     required VoidCallback? onPressed,
     bool isLoading = false,
+    bool isDisabled = false,
   }) =>
       BottomSheetAction(
         label: label,
         onPressed: onPressed,
         isPrimary: true,
         isLoading: isLoading,
+        isDisabled: isDisabled,
       );
 
   factory BottomSheetAction.secondary({
@@ -41,12 +45,14 @@ class BottomSheetAction {
     required String label,
     required VoidCallback? onPressed,
     bool isLoading = false,
+    bool isDisabled = false,
   }) =>
       BottomSheetAction(
         label: label,
         onPressed: onPressed,
         isDestructive: true,
         isLoading: isLoading,
+        isDisabled: isDisabled,
       );
 }
 
@@ -90,31 +96,37 @@ class MobileBottomSheetButtons extends StatelessWidget {
   }
 
   Widget _buildButton(BottomSheetAction action, {bool isFullWidth = false}) {
-    // Secondary (text button)
+    // Secondary (outlined button)
     if (!action.isPrimary && !action.isDestructive) {
-      return TextButton(
+      return OutlinedButton(
         onPressed: action.onPressed,
-        style: TextButton.styleFrom(
-          foregroundColor: WebColors.buttonSecondary,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: WebColors.textPrimary,
+          side: const BorderSide(color: WebColors.cardBorder, width: 1),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           minimumSize: const Size(0, 48),
         ),
         child: Text(
           action.label,
-          style: WebTextStyles.bodyMedium,
+          style: WebTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       );
     }
 
     // Primary / Destructive (filled button)
     final bg = action.isDestructive ? WebColors.error : WebColors.success;
+    final disabledBg = WebColors.textMuted;
 
     return ElevatedButton(
-      onPressed: action.isLoading ? null : action.onPressed,
+      onPressed: (action.isLoading || action.isDisabled) ? null : action.onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: bg,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: bg.withValues(alpha: 0.5),
+        disabledBackgroundColor: disabledBg,
+        disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         minimumSize: const Size(0, 48),

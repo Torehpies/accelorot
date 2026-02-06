@@ -1,3 +1,5 @@
+// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_edit_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
@@ -138,12 +140,13 @@ class _MobileAdminMachineEditSheetState
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(

@@ -1,3 +1,5 @@
+// lib/ui/reports/bottom_sheets/report_edit_bottom_sheet.dart
+
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
@@ -147,12 +149,13 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(

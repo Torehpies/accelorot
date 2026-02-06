@@ -1,3 +1,5 @@
+// lib/ui/web_operator/bottom_sheets/team_member_edit_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
@@ -171,12 +173,13 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(
