@@ -39,6 +39,15 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               ? null
               : RoutePath.restricted.path;
         case UserStatus.active:
+          if (currentPath.startsWith('/team-details')) {
+            if (globalRole == GlobalRole.superadmin) {
+              return null;
+            } else {
+              return globalRole == GlobalRole.user && teamRole == TeamRole.admin
+                  ? RoutePath.adminDashboard.path
+                  : RoutePath.dashboard.path;
+            }
+          }
           if (globalRole == GlobalRole.superadmin) {
             debugPrint("ROUTED TO SUPERADMIN");
             if (currentPath.startsWith('/superadmin')) return null;
@@ -69,3 +78,4 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
     },
   );
 }
+
