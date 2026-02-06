@@ -33,7 +33,6 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     final vmStopwatch = Stopwatch()..start();
     debugPrint('🚀 ViewModel initialization started');
 
-    // ✅ Skip expensive auth check - route guard ensures user is authenticated
     state = state.copyWith(
       status: LoadingStatus.loading,
       isLoggedIn: true,
@@ -45,7 +44,6 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       '🏁 ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
     );
 
-    // ✅ Launch progressive loading immediately (don't await - let it run in background)
     unawaited(loadActivities());
   }
 
@@ -66,7 +64,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         reportsLoadingStatus: LoadingStatus.loading,
       );
 
-      // ✅ PROGRESSIVE LOADING: Launch all fetches in parallel (fire and forget)
+      // PROGRESSIVE LOADING: Launch all fetches in parallel (fire and forget)
       // Each will update UI independently as it completes
       unawaited(_fetchSubstratesProgressive());
       unawaited(_fetchAlertsProgressive());
@@ -296,7 +294,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     if (allLoaded) {
       state = state.copyWith(status: LoadingStatus.success);
-      debugPrint('🎉 All categories loaded successfully!');
+      debugPrint('loaded successfully!');
     }
   }
 
