@@ -63,7 +63,7 @@ class MoistureStatisticCard extends StatelessWidget {
                       const Text(
                         'Compost moisture content',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -106,7 +106,7 @@ class MoistureStatisticCard extends StatelessWidget {
                   const Text(
                     'Ideal Range: 40% - 60%',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF4B5563),
                     ),
@@ -126,7 +126,7 @@ class MoistureStatisticCard extends StatelessWidget {
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Color(0xFF0369A1),
                           ), // Darker Blue
-                          minHeight: 12,
+                          minHeight: 20,
                         ),
                       ),
                       // Green range indicator overlay
@@ -147,7 +147,7 @@ class MoistureStatisticCard extends StatelessWidget {
 
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 240,
                     child: LineChart(
                       LineChartData(
                         lineTouchData: LineTouchData(
@@ -199,8 +199,21 @@ class MoistureStatisticCard extends StatelessWidget {
                           topTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: 20,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                return Text(
+                                  '${value.toInt()}%',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
@@ -211,7 +224,7 @@ class MoistureStatisticCard extends StatelessWidget {
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     color: Color(0xFF9CA3AF),
                                   ),
                                 );
@@ -262,17 +275,17 @@ class MoistureStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   // Trend Text
-                  const Text(
-                    'Trending up by 5.2% this week',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-                  ),
-                  const SizedBox(height: 16),
+                  // const Text(
+                  //   'Trending up by 5.2% this week',
+                  //   style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                  // ),
+                  // const SizedBox(height: 16),
 
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
@@ -312,7 +325,7 @@ class MoistureStatisticCard extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Color(0xFF6B7280),
               ),
             ),

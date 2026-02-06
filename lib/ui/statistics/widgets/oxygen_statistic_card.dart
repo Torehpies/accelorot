@@ -60,7 +60,7 @@ class OxygenStatisticCard extends StatelessWidget {
                       const Text(
                         'Gas concentration level',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -102,7 +102,7 @@ class OxygenStatisticCard extends StatelessWidget {
                   const Text(
                     'Ideal Range: 1500 ppm - 2500 ppm',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF4B5563),
                     ),
@@ -122,7 +122,7 @@ class OxygenStatisticCard extends StatelessWidget {
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Color(0xFF6D28D9),
                           ), // Darker Purple
-                          minHeight: 12,
+                          minHeight: 20,
                         ),
                       ),
                       // Green range indicator overlay (65 ppm - 70 ppm out of 5000 ppm max)
@@ -143,7 +143,7 @@ class OxygenStatisticCard extends StatelessWidget {
 
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 240,
                     child: LineChart(
                       LineChartData(
                         lineTouchData: LineTouchData(
@@ -195,8 +195,21 @@ class OxygenStatisticCard extends StatelessWidget {
                           topTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 60,
+                              interval: 500,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                return Text(
+                                  '${value.toInt()} ppm',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
@@ -207,7 +220,7 @@ class OxygenStatisticCard extends StatelessWidget {
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     color: Color(0xFF9CA3AF),
                                   ),
                                 );
@@ -216,22 +229,27 @@ class OxygenStatisticCard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
+                        minY: 0,
+                        maxY: 5000,
                         lineBarsData: [
                           LineChartBarData(
-                            spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
-                            isCurved: false, // Sharp angular lines instead of curves
+                            spots: _downsampleData(chartData)
+                                .map((d) => FlSpot(d['day'] as double, d['value'] as double))
+                                .toList(),
+                            isCurved: false,
                             color: const Color(0xFF6D28D9),
                             barWidth: 2.5,
                             isStrokeCapRound: true,
                             dotData: FlDotData(
                               show: true,
                               checkToShowDot: (spot, barData) {
-                                // Only show dots for markers that have non-zero values
                                 final downsampledData = _downsampleData(chartData);
                                 final index = barData.spots.indexOf(spot);
                                 if (index >= 0 && index < downsampledData.length) {
-                                  final isMarker = downsampledData[index]['isMarker'] == true;
-                                  final hasValue = (downsampledData[index]['value'] as double) > 0;
+                                  final isMarker =
+                                      downsampledData[index]['isMarker'] == true;
+                                  final hasValue =
+                                      (downsampledData[index]['value'] as double) > 0;
                                   return isMarker && hasValue;
                                 }
                                 return false;
@@ -258,17 +276,17 @@ class OxygenStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   // Trend Text
-                  const Text(
-                    'Trending up by 5.2% this week',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-                  ),
-                  const SizedBox(height: 16),
+                  // const Text(
+                  //   'Trending up by 5.2% this week',
+                  //   style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                  // ),
+                  // const SizedBox(height: 16),
 
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
@@ -308,7 +326,7 @@ class OxygenStatisticCard extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Color(0xFF6B7280),
               ),
             ),

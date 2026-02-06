@@ -61,7 +61,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                       const Text(
                         'Internal compost pile temperature',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -103,7 +103,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                   const Text(
                     'Ideal Range: 55°C - 70°C',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF4B5563),
                     ),
@@ -121,7 +121,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Color(0xFFC2410C),
                           ),
-                          minHeight: 12,
+                          minHeight: 20,
                         ),
                       ),
                       // Green range indicator overlay (55°C - 70°C out of 80°C max)
@@ -142,7 +142,7 @@ class TemperatureStatisticCard extends StatelessWidget {
 
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 240,
                     child: LineChart(
                       LineChartData(
                         lineTouchData: LineTouchData(
@@ -194,8 +194,21 @@ class TemperatureStatisticCard extends StatelessWidget {
                           topTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: 10,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                return Text(
+                                  '${value.toInt()}°C',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
@@ -206,7 +219,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     color: Color(0xFF9CA3AF),
                                   ),
                                 );
@@ -219,7 +232,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                         minX: _downsampleData(chartData).isEmpty ? 0 : _downsampleData(chartData).first['day'] as double,
                         maxX: _downsampleData(chartData).isEmpty ? 6 : (_downsampleData(chartData).last['day'] as double),
                         minY: 0,
-                        maxY: _getMaxYValue(chartData),
+                        maxY: 100,
                         lineBarsData: [
                           LineChartBarData(
                             spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
@@ -262,17 +275,17 @@ class TemperatureStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   
                   // Trend Text
-                  const Text(
-                    'Trending up by 5.2% this week',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-                  ),
-                  const SizedBox(height: 16),
+                  // const Text(
+                  //   'Trending up by 5.2% this week',
+                  //   style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                  // ),
+                  // const SizedBox(height: 16),
 
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
@@ -314,7 +327,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                   child: Text(
                     item,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 13,
                       color: Color(0xFF6B7280),
                     ),
                   ),
