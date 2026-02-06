@@ -124,7 +124,7 @@ class OxygenStatisticCard extends StatelessWidget {
 
                   // Chart
                   SizedBox(
-                    height: 240,
+                    height: 300,
                     child: LineChart(
                       LineChartData(
                         lineTouchData: LineTouchData(
