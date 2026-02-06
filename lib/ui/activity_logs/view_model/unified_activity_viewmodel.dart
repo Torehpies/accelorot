@@ -1,5 +1,6 @@
 // lib/ui/activity_logs/view_model/unified_activity_viewmodel.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/unified_activity_state.dart';
@@ -27,6 +28,9 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   // ===== INITIALIZATION =====
 
   Future<void> _initialize() async {
+    final vmStopwatch = Stopwatch()..start();
+    debugPrint('🚀 ViewModel initialization started');
+    
     state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {
@@ -37,12 +41,20 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
           status: LoadingStatus.success,
           isLoggedIn: false,
         );
+        vmStopwatch.stop();
+        debugPrint('⚠️ User not logged in - skipped fetch: ${vmStopwatch.elapsedMilliseconds}ms\n');
         return;
       }
 
       state = state.copyWith(isLoggedIn: true);
       await loadActivities();
+      
+      vmStopwatch.stop();
+      debugPrint('🏁 ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n');
     } catch (e) {
+      vmStopwatch.stop();
+      debugPrint('❌ ViewModel initialization failed: ${vmStopwatch.elapsedMilliseconds}ms - Error: $e\n');
+      
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: e.toString(),
@@ -54,22 +66,40 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   /// Load all activities from aggregator service WITH entity cache
   Future<void> loadActivities() async {
+    final loadStopwatch = Stopwatch()..start();
+    debugPrint('🔄 loadActivities() called');
+    
     try {
       state = state.copyWith(status: LoadingStatus.loading);
 
       // Fetch activities and build entity cache
+      final fetchStopwatch = Stopwatch()..start();
       final result = await _aggregator.getAllActivitiesWithCache();
+      fetchStopwatch.stop();
+      debugPrint('📦 Data fetched in ViewModel: ${fetchStopwatch.elapsedMilliseconds}ms');
 
+      final stateStopwatch = Stopwatch()..start();
       state = state.copyWith(
         allActivities: result.items,
         entityCache:
             result.entityCache, // Store cache for instant dialog loading
         status: LoadingStatus.success,
       );
+      stateStopwatch.stop();
+      debugPrint('📝 State updated: ${stateStopwatch.elapsedMilliseconds}ms');
 
       // Apply filters to new data
+      final filterStopwatch = Stopwatch()..start();
       _applyFilters();
+      filterStopwatch.stop();
+      debugPrint('🔍 Filters applied: ${filterStopwatch.elapsedMilliseconds}ms');
+      
+      loadStopwatch.stop();
+      debugPrint('✅ loadActivities() complete: ${loadStopwatch.elapsedMilliseconds}ms\n');
     } catch (e) {
+      loadStopwatch.stop();
+      debugPrint('❌ loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n');
+      
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: e.toString(),
@@ -79,7 +109,13 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   /// Refresh data (for pull-to-refresh)
   Future<void> refresh() async {
+    final refreshStopwatch = Stopwatch()..start();
+    debugPrint('🔃 refresh() called');
+    
     await loadActivities();
+    
+    refreshStopwatch.stop();
+    debugPrint('✅ refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n');
   }
 
   // ===== ENTITY CACHE LOOKUP =====

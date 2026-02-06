@@ -59,32 +59,39 @@ class FirestoreAlertService implements AlertService {
 
       final List<Alert> allAlerts = [];
 
-      // 3. For each batch, fetch its alerts
-      await Future.wait(batches.map((batchDoc) async {
-        try {
-          // Extract dates to handle phantom documents
-          // We can't list the 'date' documents because they might not exist (phantom)
-          final data = batchDoc.data() as Map<String, dynamic>;
-          final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-          final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
-          final machineId = data['machineId'] as String?;
+      // 3. Parallel Fetch: Process all batches concurrently
+      // Use efficient Future.wait with type-safe results list
+      final List<List<Alert>> results = await Future.wait(
+        batches.map((batchDoc) async {
+          try {
+            final data = batchDoc.data() as Map<String, dynamic>;
+            final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+            final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
+            final machineId = data['machineId'] as String?;
 
-          final batchAlerts = await fetchAlertsForBatch(
-            batchDoc.id, 
-            start: createdAt, 
-            end: completedAt,
-            machineId: machineId,
-          );
-          allAlerts.addAll(batchAlerts);
-        } catch (e) {
-          debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
-        }
-      }));
+            // Fetch alerts for this specific batch
+            return await fetchAlertsForBatch(
+              batchDoc.id, 
+              start: createdAt, 
+              end: completedAt,
+              machineId: machineId,
+            );
+          } catch (e) {
+            debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
+            return <Alert>[];
+          }
+        }),
+      );
+      
+      // Flatten results
+      for (var batchAlerts in results) {
+        allAlerts.addAll(batchAlerts);
+      }
 
       // Sort by timestamp descending
       allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-      debugPrint('✅ Fetched ${allAlerts.length} alerts for team');
+      debugPrint('✅ Fetched ${allAlerts.length} alerts for team (Parallel Batch Strategy)');
       return allAlerts;
     } catch (e) {
       debugPrint('❌ Error fetching team alerts: $e');
@@ -120,35 +127,42 @@ class FirestoreAlertService implements AlertService {
         endDate.add(const Duration(days: 1))
       );
 
-      final List<Alert> allBatchAlerts = [];
-
       // Parallel fetch of all potential date paths
-      await Future.wait(datePaths.map((dateStr) async {
-        try {
-          // PATH: batches/{batchId}/alerts/{dateStr}/time
-          final timeSnapshot = await _firestore
-              .collection('batches')
-              .doc(batchId)
-              .collection('alerts')
-              .doc(dateStr)
-              .collection('time')
-              .get();
-              
-          if (timeSnapshot.docs.isNotEmpty) {
-             final alerts = timeSnapshot.docs.map((d) {
-               final alert = Alert.fromFirestore(d);
-               // Inject machineId if provided and missing in alert
-               if (machineId != null && alert.machineId.isEmpty) {
-                 return alert.copyWith(machineId: machineId);
-               }
-               return alert;
-             });
-             allBatchAlerts.addAll(alerts);
+      final List<List<Alert>> results = await Future.wait(
+        datePaths.map((dateStr) async {
+          try {
+            // PATH: batches/{batchId}/alerts/{dateStr}/time
+            final timeSnapshot = await _firestore
+                .collection('batches')
+                .doc(batchId)
+                .collection('alerts')
+                .doc(dateStr)
+                .collection('time')
+                .get();
+                
+            if (timeSnapshot.docs.isNotEmpty) {
+               return timeSnapshot.docs.map((d) {
+                 final alert = Alert.fromFirestore(d);
+                 // Inject machineId if provided and missing in alert
+                 // Critical for data integrity since alert docs don't have it
+                 if (machineId != null && alert.machineId.isEmpty) {
+                   return alert.copyWith(machineId: machineId!);
+                 }
+                 return alert;
+               }).toList();
+            }
+            return <Alert>[];
+          } catch (e) {
+            // Ignore errors for non-existent paths
+            return <Alert>[];
           }
-        } catch (e) {
-          // Ignore errors for non-existent paths
-        }
-      }));
+        }),
+      );
+
+      final List<Alert> allBatchAlerts = [];
+      for (var dayAlerts in results) {
+        allBatchAlerts.addAll(dayAlerts);
+      }
 
       // Sort local results
       allBatchAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -179,7 +193,8 @@ class FirestoreAlertService implements AlertService {
   @override
   Stream<List<Alert>> streamAlerts(String batchId) {
     // Note: True real-time streaming of dynamically created "date" collections 
-    
+    // is complex without collectionGroup. 
+    // For simplicity, we convert the fetch to a Stream that emits regularly or just once.
     return Stream.fromFuture(fetchAlertsForBatch(batchId));
   }
 
@@ -190,31 +205,44 @@ class FirestoreAlertService implements AlertService {
     }
 
     try {
-      
       final teamId = await _batchService.getUserTeamId(currentUserId!);
       if (teamId == null) return null;
 
       final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
       if (teamMachineIds.isEmpty) return null;
-
+      
       final batches = await _batchService.getBatchesForMachines(teamMachineIds);
       
-      for (var batchDoc in batches) {
+      // Parallel search of all batches to find the ID as fast as possible
+      final List<Alert?> foundAlerts = await Future.wait(
+        batches.map((batchDoc) async {
+           try {
+             final data = batchDoc.data() as Map<String, dynamic>;
+             final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+             final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
+             final machineId = data['machineId'] as String?;
 
-         
-         final data = batchDoc.data() as Map<String, dynamic>;
-         final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-         final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
-
-         final alerts = await fetchAlertsForBatch(batchDoc.id, start: createdAt, end: completedAt);
-         try {
-           return alerts.firstWhere((a) => a.id == alertId);
-         } catch (_) {
-           continue;
-         }
-      }
+             final alerts = await fetchAlertsForBatch(
+               batchDoc.id, 
+               start: createdAt, 
+               end: completedAt,
+               machineId: machineId
+             );
+             
+             return alerts.firstWhere((a) => a.id == alertId);
+           } catch (_) {
+             return null;
+           }
+        })
+      );
       
-      return null;
+      // Return first non-null match
+      try {
+        return foundAlerts.firstWhere((a) => a != null);
+      } catch (_) {
+        return null;
+      }
+
     } catch (e) {
        debugPrint('❌ Error fetching alert by ID: $e');
        return null;
