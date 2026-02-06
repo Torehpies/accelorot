@@ -57,151 +57,164 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(teamDetailProvider(_teamId));
     final notifier = ref.read(teamDetailProvider(_teamId).notifier);
-
     // Choose items based on active tab
     final items = _tabController.index == 0
         ? state.filteredAdmins
         : state.filteredMembers;
-
     final pageCount = state.hasNextPage
         ? state.currentPage + 2
         : state.currentPage + 1;
 
-    return WebContentContainer(
-      child: BaseTableContainer(
-      // -- Left header: tab switcher --
-      leftHeaderWidget: TabsRow(
-        controller: _tabController,
-        tabTitles: ['Admins', 'Operators'],
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+        title: Text(
+          widget.team.teamName,
+          style: WebTextStyles.h2,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        centerTitle: false,
       ),
-
-      // -- Right header: date filter, search, add button --
-      rightHeaderWidgets: [
-        SizedBox(
-          height: 32,
-          child: DateFilterDropdown(
-            isLoading: state.isLoading,
-            onFilterChanged: (filter) => notifier.setDateFilter(filter),
+      body: WebContentContainer(
+        child: BaseTableContainer(
+          leftHeaderWidget: TabsRow(
+            controller: _tabController,
+            tabTitles: ['Admins', 'Operators'],
           ),
-        ),
-        SearchField(
-          isLoading: state.isLoading,
-          onChanged: (query) => notifier.setSearch(query),
-        ),
-        Tooltip(
-          message: 'Add Member',
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // TODO: Show add member dialog
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Member'),
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          rightHeaderWidgets: [
+            SizedBox(
+              height: 32,
+              child: DateFilterDropdown(
+                isLoading: state.isLoading,
+                onFilterChanged: (filter) => notifier.setDateFilter(filter),
               ),
             ),
-          ),
-        ),
-      ],
-
-      // -- Table header: sortable columns --
-      tableHeader: TableHeader(
-        isLoading: state.isLoading,
-        columns: [
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'First Name',
-              sortable: true,
-              sortColumn: 'firstName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('firstName'),
+            SearchField(
+              isLoading: state.isLoading,
+              onChanged: (query) => notifier.setSearch(query),
             ),
-          ),
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Last Name',
-              sortable: true,
-              sortColumn: 'lastName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('lastName'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 3,
-            child: TableHeaderCell(
-              label: 'Email',
-              sortable: true,
-              sortColumn: 'email',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('email'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 1,
-            child: SizedBox(
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Status',
-                      style: WebTextStyles.label.copyWith(
-                        color: state.statusFilter != TeamMemberStatusFilter.all
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<TeamMemberStatusFilter>(
-                      label: 'Status',
-                      value: state.statusFilter,
-                      items: TeamMemberStatusFilter.values,
-                      displayName: (filter) => filter.displayName,
-                      onChanged: (filter) => notifier.setStatusFilter(filter),
-                      isLoading: state.isLoading,
-                    ),
-                  ],
+            Tooltip(
+              message: 'Add Member',
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // TODO: Show add member dialog
+                },
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Member'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ),
+          ],
+          tableHeader: TableHeader(
+            isLoading: state.isLoading,
+            columns: [
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'First Name',
+                  sortable: true,
+                  sortColumn: 'firstName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('firstName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'Last Name',
+                  sortable: true,
+                  sortColumn: 'lastName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('lastName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 3,
+                child: TableHeaderCell(
+                  label: 'Email',
+                  sortable: true,
+                  sortColumn: 'email',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('email'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 1,
+                child: SizedBox(
+                  child: Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Status',
+                          style: WebTextStyles.label.copyWith(
+                            color: state.statusFilter !=
+                                    TeamMemberStatusFilter.all
+                                ? WebColors.greenAccent
+                                : WebColors.textLabel,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterDropdown<TeamMemberStatusFilter>(
+                          label: 'Status',
+                          value: state.statusFilter,
+                          items: TeamMemberStatusFilter.values,
+                          displayName: (filter) => filter.displayName,
+                          onChanged: (filter) =>
+                              notifier.setStatusFilter(filter),
+                          isLoading: state.isLoading,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              TableCellWidget(
+                flex: 1,
+                child: const TableHeaderCell(label: 'Actions'),
+              ),
+            ],
           ),
-          TableCellWidget(
-            flex: 1,
-            child: const TableHeaderCell(label: 'Actions'),
+          tableBody: TableBody<TeamMember>(
+            items: items,
+            isLoading: state.isLoading && state.members.isEmpty,
+            emptyStateWidget: const EmptyState(
+              title: 'No members found',
+              subtitle: 'Try adjusting your filters or search',
+              icon: Icons.person_search,
+            ),
+            rowBuilder: (member) => _buildMemberRow(member),
+            skeletonRowBuilder: () => _buildSkeletonRow(),
           ),
-        ],
-      ),
-
-      // -- Table body: rows + skeleton + empty state --
-      tableBody: TableBody<TeamMember>(
-        items: items,
-        isLoading: state.isLoading && state.members.isEmpty,
-        emptyStateWidget: const EmptyState(
-          title: 'No members found',
-          subtitle: 'Try adjusting your filters or search',
-          icon: Icons.person_search,
+          paginationWidget: PaginationControls(
+            currentPage: state.currentPage + 1,
+            totalPages: pageCount,
+            itemsPerPage: state.pageSize,
+            isLoading: state.isLoading,
+            onPageChanged: (page) => notifier.goToPage(page - 1),
+            onItemsPerPageChanged: notifier.setPageSize,
+          ),
         ),
-        rowBuilder: (member) => _buildMemberRow(member),
-        skeletonRowBuilder: () => _buildSkeletonRow(),
-      ),
-
-      // -- Pagination --
-      paginationWidget: PaginationControls(
-        currentPage: state.currentPage + 1,
-        totalPages: pageCount,
-        itemsPerPage: state.pageSize,
-        isLoading: state.isLoading,
-        onPageChanged: (page) => notifier.goToPage(page - 1),
-        onItemsPerPageChanged: notifier.setPageSize,
-      ),
       ),
     );
   }
@@ -374,4 +387,3 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     );
   }
 }
-
