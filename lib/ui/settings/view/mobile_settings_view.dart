@@ -246,6 +246,6 @@ class SettingsContent extends ConsumerWidget {
           ],
         );
       },
-    );
+    ),   ); 
   }
 }
