@@ -33,10 +33,14 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
 }
 
 class _CompostingProgressCardState
-    extends ConsumerState<CompostingProgressCard> {
+    extends ConsumerState<CompostingProgressCard>
+    with AutomaticKeepAliveClientMixin {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatch;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -215,41 +219,26 @@ class _CompostingProgressCardState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     //  auto-update when selected batch changes
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
-    // Update active batch when selection changes
+    // Removed problematic auto-selection logic that was causing resets during zoom
+    // Now only updates if batch details changed (not selection)
     batchesAsync.whenData((batches) {
-      if (_selectedMachineId != null && _selectedBatchId == null) {
-        final machineBatches = batches
-            .where((b) => b.machineId == _selectedMachineId)
-            .toList();
-
-        if (machineBatches.isNotEmpty) {
-          Future.microtask(() {
-            if (mounted) {
-              machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-              final latestBatch = machineBatches.first;
-              setState(() {
-                _selectedBatchId = latestBatch.id;
-                _activeBatch = latestBatch;
-              });
-              widget.onBatchChanged?.call(latestBatch);
-            }
-          });
-        }
-      } else if (_selectedBatchId != null) {
-        final batch = batches.firstWhere(
-          (b) => b.id == _selectedBatchId,
-          orElse: () => batches.first,
-        );
-        if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
-          Future.microtask(() {
-            if (mounted) {
-              setState(() => _activeBatch = batch);
-              widget.onBatchChanged?.call(batch);
-            }
-          });
+      if (_selectedBatchId != null) {
+        final matchingBatches = batches.where((b) => b.id == _selectedBatchId).toList();
+        if (matchingBatches.isNotEmpty) {
+          final batch = matchingBatches.first;
+          if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
+            Future.microtask(() {
+              if (mounted) {
+                setState(() => _activeBatch = batch);
+                widget.onBatchChanged?.call(batch);
+              }
+            });
+          }
         }
       }
     });
@@ -337,7 +326,7 @@ class _CompostingProgressCardState
                         _selectedBatchId = null;
                         _activeBatch = null;
                       });
-                      // Notify parent immediately that batch is cleared
+                      // Notify parent that batch is cleared
                       widget.onBatchChanged?.call(null);
                       // Auto-select latest batch for new machine
                       if (machineId != null) {
