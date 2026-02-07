@@ -443,7 +443,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
          
               ConstrainedBox(
                 constraints: const BoxConstraints(
-                  minHeight: 240, // Minimum height 
+                  minHeight: 240, 
                 ),
                 child: hasActiveBatch || batchCompleted
                     ? _buildActiveState(
@@ -459,7 +459,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           );
 
           return Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(cardWidth * 0.06),
             child: useInternalScroll
                 ? SingleChildScrollView(child: content)
                 : content,

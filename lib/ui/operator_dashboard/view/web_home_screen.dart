@@ -225,14 +225,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: ControlInputCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.02),
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: AeratorCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
