@@ -69,11 +69,11 @@ class RegistrationFormContent extends ConsumerWidget {
         if (!isDesktop)
           Center(
             child: SvgPicture.asset(
-              'assets/images/Accel-O-Rot Logo.svg',
+              'assets/images/Accelorot_logo.svg',
               width: 65,
               height: 65,
               fit: BoxFit.contain,
-              semanticsLabel: 'Accel-O-Rot Logo',
+              semanticsLabel: 'Accelorot logo',
             ),
           ),
         const SizedBox(height: 10),
