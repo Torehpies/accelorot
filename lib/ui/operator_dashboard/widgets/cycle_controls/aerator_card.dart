@@ -459,7 +459,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
           );
 
           return Padding(
-            padding: EdgeInsets.all(cardWidth * 0.06),
+            padding: const EdgeInsets.all(20.0),
             child: useInternalScroll
                 ? SingleChildScrollView(child: content)
                 : content,
