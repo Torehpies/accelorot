@@ -31,19 +31,22 @@ class DialogShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+      backgroundColor:
+          backgroundColor ?? Theme.of(context).dialogBackgroundColor,
       title: title,
-      content: SizedBox(
-        width: width,
-        child: Padding(
-          padding: contentPadding,
-          child: content,
+      content: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * .90,
+        ),
+        child: SingleChildScrollView(
+          child: SizedBox(
+            width: width,
+            child: Padding(padding: contentPadding, child: content),
+          ),
         ),
       ),
       actions: actions,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }
