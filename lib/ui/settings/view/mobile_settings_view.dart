@@ -1,14 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/routes/route_path.dart';
+//import 'package:go_router/go_router.dart';
+//import 'package:flutter_application_1/routes/route_path.dart';
 import '../view_model/settings_notifier.dart';
 import '../view_model/settings_state.dart';
-import '../widgets/settings_section.dart';
+import '../widgets/settings_section.dart';     
 import '../widgets/settings_tile.dart';
 import '../../change_password_dialog/widgets/change_password_dialog.dart';
 import '../../core/ui/confirm_dialog.dart';
+import '../../profile_screen/view_model/profile_notifier.dart';
 
 class MobileSettingsView extends ConsumerWidget {
   const MobileSettingsView({super.key});
@@ -16,6 +17,7 @@ class MobileSettingsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
+    final profileState = ref.watch(profileProvider);
 
     return Scaffold(
       body: settingsState.map(
@@ -40,6 +42,10 @@ class MobileSettingsView extends ConsumerWidget {
         ),
         loaded: (state) {
           final settings = state.settings;
+          final displayName =
+              profileState.profile?.displayName ??
+              FirebaseAuth.instance.currentUser?.displayName;
+          final phoneNumber = FirebaseAuth.instance.currentUser?.phoneNumber;
           return ListView(
             children: [
               // Account Section
@@ -50,9 +56,22 @@ class MobileSettingsView extends ConsumerWidget {
                     icon: Icons.person,
                     title: 'Profile Information',
                     subtitle: FirebaseAuth.instance.currentUser?.email,
-                    onTap: () {
-                      context.push(RoutePath.profile.path);
-                    },
+                  ),
+                  SettingsTile(
+                    icon: Icons.badge_outlined,
+                    title: 'Name',
+                    subtitle: displayName ?? 'Not set',
+                    titleStyle: const TextStyle(fontSize: 12),
+                    subtitleStyle: const TextStyle(fontSize: 11),
+                    iconSize: 18,
+                  ),
+                  SettingsTile(
+                    icon: Icons.phone_outlined,
+                    title: 'Contact Number',
+                    subtitle: phoneNumber ?? 'Not set',
+                    titleStyle: const TextStyle(fontSize: 12),
+                    subtitleStyle: const TextStyle(fontSize: 11),
+                    iconSize: 18,
                   ),
                   SettingsTile(
                     icon: Icons.lock,

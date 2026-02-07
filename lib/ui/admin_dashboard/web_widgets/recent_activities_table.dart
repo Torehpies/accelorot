@@ -29,39 +29,6 @@ class RecentActivitiesTable extends ConsumerWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxHeight < 400;
-
-          if (isCompact) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   _buildHeaderTitleRow(ref),
-                  const SizedBox(height: 20),
-                  _buildHeader(),
-                  const Divider(height: 1, color: Color(0xFFE5E7EB)),
-                  const SizedBox(height: 8),
-                  activitiesAsync.when(
-                    data: (activities) => _buildContent(
-                      activities,
-                      batches,
-                      shrinkWrap: true,
-                    ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (_, stack) => const Center(
-                      child: Text(
-                        'Failed to load activities',
-                        style: TextStyle(color: Color(0xFF9CA3AF)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
