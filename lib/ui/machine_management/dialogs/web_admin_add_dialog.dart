@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/dialog/toast_service.dart';
+import '../../core/toast/toast_service.dart';
 
 class WebAdminAddDialog extends StatefulWidget {
   final Future<void> Function({

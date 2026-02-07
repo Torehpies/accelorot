@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../themes/web_text_styles.dart';
 import '../themes/web_colors.dart';
-import 'toast_service.dart';
+import '../toast/toast_service.dart';
 
 // ==================== READ ONLY ====================
 
@@ -249,7 +249,7 @@ class ReadOnlySection extends StatelessWidget {
 
 // ==================== INPUT FIELDS ====================
 
-/// Reusable input field for dialogs
+/// Reusable input field for dialogs - matches mobile design
 class InputField extends StatelessWidget {
   final String label;
   final TextEditingController? controller;
@@ -288,81 +288,75 @@ class InputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label with required indicator
-        Row(
-          children: [
-            Text(
-              label,
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            ),
-            if (required)
-              Text(
-                ' *',
-                style: WebTextStyles.label.copyWith(color: WebColors.error),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-
-        // Input field
-        TextField(
-          controller: controller,
-          enabled: enabled,
-          maxLines: maxLines,
-          maxLength: maxLength,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          onChanged: onChanged,
-          style: WebTextStyles.body,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: WebTextStyles.bodyMediumGray,
-            errorText: errorText,
-            helperText: helperText,
-            helperStyle: WebTextStyles.caption.copyWith(
-              color: WebColors.textLabel,
-            ),
-            prefixIcon: prefixIcon,
-            suffixText: suffix,
-            suffixStyle: WebTextStyles.body.copyWith(
-              color: WebColors.textLabel,
-            ),
-            filled: true,
-            fillColor: enabled ? WebColors.inputBackground : Colors.grey[200],
-            counterText: (maxLength != null && showCounter) ? null : '',
-            counterStyle: WebTextStyles.caption.copyWith(
-              color: WebColors.textMuted,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: WebColors.cardBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: WebColors.cardBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: WebColors.greens, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: WebColors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: WebColors.error, width: 2),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
+    return TextFormField(
+      controller: controller,
+      enabled: enabled,
+      maxLines: maxLines,
+      maxLength: maxLength,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      onChanged: onChanged,
+      style: WebTextStyles.body,
+      decoration: InputDecoration(
+        // Floating label with required indicator
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: WebColors.error),
+                ),
+            ],
           ),
         ),
-      ],
+        hintText: hintText,
+        hintStyle: WebTextStyles.bodyMediumGray,
+        errorText: errorText,
+        helperText: helperText,
+        helperStyle: WebTextStyles.caption.copyWith(
+          color: WebColors.textLabel,
+        ),
+        prefixIcon: prefixIcon,
+        suffixText: suffix,
+        suffixStyle: WebTextStyles.body.copyWith(
+          color: WebColors.textLabel,
+        ),
+        // Disabled state fill
+        filled: !enabled,
+        fillColor: enabled ? null : WebColors.inputBackground,
+        counterText: (maxLength != null && showCounter) ? null : '',
+        counterStyle: WebTextStyles.caption.copyWith(
+          color: WebColors.textMuted,
+        ),
+        // Rounded borders (matching mobile design)
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.greens, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+      ),
     );
   }
 }
@@ -394,84 +388,75 @@ class DropdownField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label with required indicator
-        Row(
-          children: [
-            Text(
-              label,
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            ),
-            if (required)
-              Text(
-                ' *',
-                style: WebTextStyles.label.copyWith(color: WebColors.error),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-
-        // Dropdown
-        InputDecorator(
-          decoration: InputDecoration(
-            hintText: hintText,
-            errorText: errorText,
-            helperText: helperText,
-            helperStyle: WebTextStyles.caption.copyWith(
-              color: WebColors.textLabel,
-            ),
-            filled: true,
-            fillColor: enabled ? WebColors.inputBackground : Colors.grey[200],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: WebColors.cardBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: WebColors.cardBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(
-                color: WebColors.greenAccent,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: WebColors.error),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              hint: hintText != null
-                  ? Text(hintText!, style: WebTextStyles.bodyMediumGray)
-                  : null,
-              isExpanded: true,
-              isDense: true,
-              items: items.map((item) {
-                return DropdownMenuItem<T>(
-                  value: item.value,
-                  child: Text(item.label, style: WebTextStyles.body),
-                );
-              }).toList(),
-              onChanged: enabled ? onChanged : null,
-              style: WebTextStyles.body,
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
-              ),
-            ),
+    return DropdownButtonFormField<T>(
+      value: value,
+      decoration: InputDecoration(
+        // Floating label with required indicator
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: WebColors.error),
+                ),
+            ],
           ),
         ),
-      ],
+        hintText: hintText,
+        hintStyle: WebTextStyles.bodyMediumGray,
+        errorText: errorText,
+        helperText: helperText,
+        helperStyle: WebTextStyles.caption.copyWith(
+          color: WebColors.textLabel,
+        ),
+        // Disabled state fill
+        filled: !enabled,
+        fillColor: enabled ? null : WebColors.inputBackground,
+        // Rounded borders (matching mobile design)
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.greens, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+      ),
+      hint: hintText != null
+          ? Text(hintText!, style: WebTextStyles.bodyMediumGray)
+          : null,
+      isExpanded: true,
+      items: items.map((item) {
+        return DropdownMenuItem<T>(
+          value: item.value,
+          child: Text(item.label, style: WebTextStyles.body),
+        );
+      }).toList(),
+      onChanged: enabled ? onChanged : null,
+      style: WebTextStyles.body,
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
+      ),
     );
   }
 }
@@ -539,7 +524,7 @@ class DatePickerField extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: WebColors.greenAccent,
+              primary: WebColors.greens,
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: WebColors.textPrimary,
@@ -557,76 +542,70 @@ class DatePickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Label with required indicator
-        Row(
-          children: [
-            Text(
-              label,
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            ),
-            if (required)
-              Text(
-                ' *',
-                style: WebTextStyles.label.copyWith(color: WebColors.error),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-
-        // Date field
-        InkWell(
-          onTap: enabled ? () => _selectDate(context) : null,
-          borderRadius: BorderRadius.circular(8),
-          child: InputDecorator(
-            decoration: InputDecoration(
-              errorText: errorText,
-              helperText: helperText,
-              helperStyle: WebTextStyles.caption.copyWith(
-                color: WebColors.textLabel,
-              ),
-              filled: true,
-              fillColor: enabled ? WebColors.inputBackground : Colors.grey[200],
-              suffixIcon: Icon(
-                Icons.calendar_today,
-                size: 18,
-                color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: WebColors.cardBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: WebColors.cardBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: WebColors.greenAccent,
-                  width: 2,
+    return TextFormField(
+      readOnly: true,
+      enabled: enabled,
+      onTap: enabled ? () => _selectDate(context) : null,
+      style: WebTextStyles.body,
+      decoration: InputDecoration(
+        // Floating label with required indicator
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
+            children: [
+              if (required)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: WebColors.error),
                 ),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: WebColors.error),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            child: Text(
-              selectedDate != null ? _formatDate(selectedDate!) : 'Select date',
-              style: selectedDate != null
-                  ? WebTextStyles.body
-                  : WebTextStyles.bodyMediumGray,
-            ),
+            ],
           ),
         ),
-      ],
+        hintText: 'Select date',
+        hintStyle: WebTextStyles.bodyMediumGray,
+        errorText: errorText,
+        helperText: helperText,
+        helperStyle: WebTextStyles.caption.copyWith(
+          color: WebColors.textLabel,
+        ),
+        suffixIcon: Icon(
+          Icons.calendar_today,
+          size: 18,
+          color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
+        ),
+        // Disabled state fill
+        filled: !enabled,
+        fillColor: enabled ? null : WebColors.inputBackground,
+        // Rounded borders (matching mobile design)
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: WebColors.cardBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.greens, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: WebColors.error, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+      ),
+      controller: TextEditingController(
+        text: selectedDate != null ? _formatDate(selectedDate!) : '',
+      ),
     );
   }
 }
@@ -679,25 +658,19 @@ class NumberStepperField extends StatelessWidget {
     final displayValue = value.toStringAsFixed(decimalPlaces);
     final canIncrement = value + step <= max;
     final canDecrement = value - step >= min;
+    final labelText = required ? '$label *' : label;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label with required indicator
-        Row(
-          children: [
-            Text(
-              label,
-              style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            ),
-            if (required)
-              Text(
-                ' *',
-                style: WebTextStyles.label.copyWith(color: WebColors.error),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
+        // Label
+        if (label.isNotEmpty) ...[
+          Text(
+            labelText,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+        ],
 
         // Stepper field
         Column(
@@ -705,9 +678,13 @@ class NumberStepperField extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: enabled ? WebColors.inputBackground : Colors.grey[200],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: WebColors.cardBorder),
+                color: enabled ? Colors.white : Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: errorText != null 
+                      ? Theme.of(context).colorScheme.error
+                      : Colors.grey.shade300,
+                ),
               ),
               child: Row(
                 children: [
@@ -717,8 +694,8 @@ class NumberStepperField extends StatelessWidget {
                     child: InkWell(
                       onTap: enabled && canDecrement ? _decrement : null,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        bottomLeft: Radius.circular(8),
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
                       ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
@@ -726,8 +703,8 @@ class NumberStepperField extends StatelessWidget {
                           Icons.remove,
                           size: 18,
                           color: enabled && canDecrement
-                              ? WebColors.textSecondary
-                              : WebColors.iconDisabled,
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade400,
                         ),
                       ),
                     ),
@@ -743,7 +720,7 @@ class NumberStepperField extends StatelessWidget {
                       child: Text(
                         unit != null ? '$displayValue $unit' : displayValue,
                         textAlign: TextAlign.center,
-                        style: WebTextStyles.body.copyWith(
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -756,8 +733,8 @@ class NumberStepperField extends StatelessWidget {
                     child: InkWell(
                       onTap: enabled && canIncrement ? _increment : null,
                       borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(8),
-                        bottomRight: Radius.circular(8),
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
                       ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
@@ -765,8 +742,8 @@ class NumberStepperField extends StatelessWidget {
                           Icons.add,
                           size: 18,
                           color: enabled && canIncrement
-                              ? WebColors.textSecondary
-                              : WebColors.iconDisabled,
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade400,
                         ),
                       ),
                     ),
@@ -779,7 +756,9 @@ class NumberStepperField extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16, top: 8),
                 child: Text(
                   errorText!,
-                  style: WebTextStyles.caption.copyWith(color: WebColors.error),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
             if (helperText != null && errorText == null)
@@ -787,8 +766,8 @@ class NumberStepperField extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16, top: 8),
                 child: Text(
                   helperText!,
-                  style: WebTextStyles.caption.copyWith(
-                    color: WebColors.textLabel,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ),
@@ -831,16 +810,14 @@ class ToggleField extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: WebTextStyles.label.copyWith(
-                      color: WebColors.textLabel,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   if (description != null) ...[
                     const SizedBox(height: 4),
                     Text(
                       description!,
-                      style: WebTextStyles.caption.copyWith(
-                        color: WebColors.textMuted,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -852,9 +829,6 @@ class ToggleField extends StatelessWidget {
             Switch(
               value: value,
               onChanged: enabled ? onChanged : null,
-              activeTrackColor: WebColors.greenAccent.withValues(alpha: 0.5),
-              inactiveThumbColor: Colors.grey[400],
-              inactiveTrackColor: Colors.grey[300],
             ),
           ],
         ),

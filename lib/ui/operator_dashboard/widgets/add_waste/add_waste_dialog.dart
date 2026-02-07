@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/dialog/base_dialog.dart';
 import '../../../core/dialog/dialog_action.dart';
 import '../../../core/dialog/dialog_fields.dart';
-import '../../../core/dialog/toast_service.dart';
+import '../../../core/toast/toast_service.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
 import '../../../../data/models/machine_model.dart';

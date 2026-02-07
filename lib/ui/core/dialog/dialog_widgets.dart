@@ -121,7 +121,9 @@ class DialogFooter extends StatelessWidget {
         disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // Updated from 8 to 10 to match mobile!
+        ),
       ),
       child: action.isLoading
           ? const SizedBox(

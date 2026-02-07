@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/dialog/toast_service.dart';
+import '../../core/toast/toast_service.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_admin_table_container.dart';
