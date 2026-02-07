@@ -289,7 +289,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
   void _showViewDialog(BuildContext context, dynamic member) {
     showDialog(
       context: context,
-      builder: (_) => ViewMemberDialog(operator: member),
+      builder: (_) => ViewMemberDialog(member: member),
     );
   }
 

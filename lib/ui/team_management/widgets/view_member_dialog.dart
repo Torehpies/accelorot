@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/widgets/read_only_field.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/utils/roles.dart';
 
 class ViewMemberDialog extends StatelessWidget {
-  final TeamMember operator;
+  final TeamMember member;
 
-  const ViewMemberDialog({super.key, required this.operator});
+  const ViewMemberDialog({super.key, required this.member});
 
   @override
   Widget build(BuildContext context) {
+    final label = member.teamRole == TeamRole.admin ? "Admin" : "Member";
     return DialogShell(
-      title: const Text(
-        'Operator Details',
+      title: Text(
+        '$label Details',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('View in-depth information about this operator.'),
+          Text('View in-depth information about this ${label.toLowerCase()}.'),
           const Divider(thickness: 1, height: 24),
           const SizedBox(height: 5),
           _buildDetailsFields(context),
@@ -40,90 +42,34 @@ class ViewMemberDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildReadOnlyField(
-                  context: context,
+                child: ReadOnlyField(
                   label: 'First Name',
-                  value: operator.firstName,
+                  value: member.firstName,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildReadOnlyField(
-                  context: context,
+                child: ReadOnlyField(
                   label: 'Last Name',
-                  value: operator.lastName,
+                  value: member.lastName,
                 ),
               ),
             ],
           ),
         ),
 
-        _buildReadOnlyField(
-          context: context,
-          label: 'Email',
-          value: operator.email,
-        ),
-        const SizedBox(height: 20),
+        ReadOnlyField(label: 'Email', value: member.email),
+        const SizedBox(height: 16),
 
-        _buildReadOnlyField(
-          context: context,
-          label: 'Operator ID',
-          value: operator.id,
-        ),
-        const SizedBox(height: 20),
+        ReadOnlyField(label: 'Status', value: toTitleCase(member.status.value)),
+        const SizedBox(height: 16),
 
-        _buildReadOnlyField(
-          context: context,
-          label: 'Status',
-          value: toTitleCase(operator.status.value),
-        ),
-        const SizedBox(height: 20),
-
-        _buildReadOnlyField(
-          context: context,
-          label: 'Added At',
-          value: formatDateAndTime(operator.addedAt),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReadOnlyField({
-    required BuildContext context,
-    required String label,
-    required String value,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
-          ),
-        ),
+        ReadOnlyField(label: 'Added At', value: formatDate(member.addedAt)),
       ],
     );
   }
