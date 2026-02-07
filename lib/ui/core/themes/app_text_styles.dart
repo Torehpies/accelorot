@@ -105,4 +105,57 @@ class AppTextStyles {
     color: AppColors.error,
     height: 1.3,
   );
+
+  // ===== INTRO SECTION (NEW) =====
+  
+  /// Intro hero heading - mobile (36px, bold)
+  static const introHeroMobile = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    height: 1.2,
+  );
+  
+  /// Intro hero heading - tablet (44px, bold)
+  static const introHeroTablet = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 44,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    height: 1.2,
+  );
+  
+  /// Intro hero heading - desktop (56px, bold)
+  static const introHeroDesktop = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 56,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    height: 1.2,
+  );
+  
+  /// Intro subtitle - mobile (16px)
+  static const introSubtitleMobile = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+  );
+  
+  /// Intro subtitle - tablet (17px)
+  static const introSubtitleTablet = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 17,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+  );
+  
+  /// Intro subtitle - desktop (18px)
+  static const introSubtitleDesktop = TextStyle(
+    fontFamily: 'dm-sans',
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
+    height: 1.6,
+  );
 }

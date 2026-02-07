@@ -4,7 +4,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/spacing.dart';
-import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
 
 class ContactSection extends StatelessWidget {
@@ -72,8 +71,6 @@ class ContactSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final h2Style = WebTextStyles.h2;
-
     return Container(
       color: const Color(0xFF25282B), // Full-width background
       width: double.infinity,
@@ -102,37 +99,16 @@ class ContactSection extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Logo matching header style
+                                  // Replaced logo with text-only SVG version
                                   MouseRegion(
                                     cursor: SystemMouseCursors.click,
                                     child: GestureDetector(
                                       onTap: () => onNavigateToSection?.call('home'),
-                                      child: Row(
-                                        children: [
-                                          Image.asset(
-                                            'assets/images/Accelorot Logo.png',
-                                            width: 50,
-                                            height: 50,
-                                            fit: BoxFit.contain,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return SvgPicture.asset(
-                                                'assets/images/Accelorot_logo.svg',
-                                                width: 50,
-                                                height: 50,
-                                                fit: BoxFit.contain,
-                                              );
-                                            },
-                                          ),
-                                          const SizedBox(width: AppSpacing.md),
-                                          Text(
-                                            'Accel-O-Rot',
-                                            style: h2Style.copyWith(
-                                              color: WebColors.buttonsPrimary,
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 24,
-                                            ),
-                                          ),
-                                        ],
+                                      child: SvgPicture.asset(
+                                        'assets/images/Accelorot_name.svg',
+                                        width: isMobile ? 150 : 180,
+                                        height: isMobile ? 40 : 50,
+                                        fit: BoxFit.contain,
                                       ),
                                     ),
                                   ),
@@ -144,16 +120,6 @@ class ContactSection extends StatelessWidget {
                                       fontSize: 14,
                                       height: 1.5,
                                     ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.lg),
-                                  Row(
-                                    children: [
-                                      _SocialIcon(
-                                        iconData: Icons.facebook_outlined,
-                                        onPressed: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
-                                        backgroundColor: const Color(0xFF1877F2),
-                                      ),
-                                    ],
                                   ),
                                 ],
                               ),
@@ -195,6 +161,13 @@ class ContactSection extends StatelessWidget {
                                 customContent: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // Facebook entry matching contact icon style
+                                    _ContactRow(
+                                      icon: Icons.facebook_outlined,
+                                      text: 'Accel-O-Rot',
+                                      onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                    ),
+                                    const SizedBox(height: AppSpacing.md),
                                     _ContactRow(
                                       icon: Icons.location_on_outlined,
                                       text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
@@ -260,6 +233,13 @@ class ContactSection extends StatelessWidget {
                                   customContent: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      // Facebook entry matching contact icon style
+                                      _ContactRow(
+                                        icon: Icons.facebook_outlined,
+                                        text: 'Accel-O-Rot',
+                                        onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                      ),
+                                      const SizedBox(height: AppSpacing.md),
                                       _ContactRow(
                                         icon: Icons.location_on_outlined,
                                         text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
@@ -353,45 +333,6 @@ class _FooterColumn extends StatelessWidget {
           ),
       ],
     );
-  }
-}
-
-class _SocialIcon extends StatelessWidget {
-  final IconData iconData;
-  final VoidCallback? onPressed;
-  final Color backgroundColor;
-
-  const _SocialIcon({
-    required this.iconData,
-    this.onPressed,
-    required this.backgroundColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final child = Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Icon(iconData, color: Colors.white, size: 20),
-      ),
-    );
-
-    if (onPressed != null) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onPressed,
-          child: child,
-        ),
-      );
-    }
-
-    return child;
   }
 }
 

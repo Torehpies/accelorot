@@ -87,7 +87,7 @@ class _ImpactSectionState extends State<ImpactSection> {
               'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
               textAlign: TextAlign.center,
               style: WebTextStyles.sectionSubtitle.copyWith(
-                fontSize: screenWidth < 400 ? 12 : 13,
+                fontSize: screenWidth < 450 ? 12 : 13,
                 height: 1.5,
               ),
             ),

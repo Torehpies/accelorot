@@ -237,11 +237,13 @@ class FirebaseOperatorService implements OperatorService {
         'teamId': teamId,
       });
       // Deserialize response into AppUser
-      final data = response.data as Map<String, dynamic>;
-      final appUser = AppUser.fromJson(
-        data,
-      ); // Uses the provided `AppUser.fromJson`
-      return app_result.Result.ok(appUser);
+      try {
+        final data = response.data as Map<String, dynamic>;
+        final appUser = AppUser.fromJson(data);
+        return app_result.Result.ok(appUser);
+      } catch (e) {
+        return app_result.Result.error(Exception('Error: ${e.toString()}'));
+      }
     } catch (e) {
       return app_result.Result.error(Exception('Error: ${e.toString()}'));
     }
