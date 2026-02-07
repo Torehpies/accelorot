@@ -62,6 +62,12 @@ class RegistrationFormContent extends ConsumerWidget {
       ),
     );
 
+    final fieldHeight = isDesktop ? 52.0 : 65.0;
+    final rowSpacing = isDesktop ? 12.0 : 16.0;
+    final titleSpacing = isDesktop ? 8.0 : 32.0;
+    final sectionSpacing = isDesktop ? 8.0 : 18.0;
+    final footerSpacing = isDesktop ? 4.0 : 6.0;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -78,14 +84,14 @@ class RegistrationFormContent extends ConsumerWidget {
           ),
         const SizedBox(height: 10),
         Center(child: _buildTitle(theme)),
-        SizedBox(height: isDesktop ? 10 : 32),
+        SizedBox(height: titleSpacing),
 
         Row(
           children: [
             // First Name Field
             Expanded(
               child: SizedBox(
-                height: 65,
+                height: fieldHeight,
                 child: TextField(
                   textInputAction: TextInputAction.next,
                   decoration: inputDecoration(
@@ -97,11 +103,11 @@ class RegistrationFormContent extends ConsumerWidget {
                 ),
               ),
             ),
-            SizedBox(width: 16),
+            SizedBox(width: rowSpacing),
             // Last Name Field
             Expanded(
               child: SizedBox(
-                height: 65,
+                height: fieldHeight,
                 child: TextField(
                   textInputAction: TextInputAction.next,
                   onChanged: notifier.updateLastName,
@@ -111,8 +117,9 @@ class RegistrationFormContent extends ConsumerWidget {
             ),
           ],
         ),
+        SizedBox(height: rowSpacing),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -124,8 +131,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateEmail,
           ),
         ),
+        SizedBox(height: rowSpacing),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             obscureText: state.obscurePassword,
             textInputAction: TextInputAction.next,
@@ -146,8 +154,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updatePassword,
           ),
         ),
+        SizedBox(height: rowSpacing),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             obscureText: state.obscureConfirmPassword,
             textInputAction: TextInputAction.done,
@@ -168,8 +177,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateConfirmPassword,
           ),
         ),
+        SizedBox(height: rowSpacing),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: state.teams.when(
             data: (teams) => teams.isEmpty
                 ? const Text('No teams available')
@@ -195,15 +205,17 @@ class RegistrationFormContent extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                '*Please complete all Fields',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              if (!state.isFormValid) ...[
+                const Text(
+                  '*Please complete all Fields',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+              ],
               PrimaryButton(
                 text: 'Register',
                 isLoading: state.isRegistrationLoading,
@@ -214,9 +226,9 @@ class RegistrationFormContent extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 18),
+        SizedBox(height: sectionSpacing),
         const OrDivider(),
-        const SizedBox(height: 10),
+        SizedBox(height: sectionSpacing),
 
         Center(
           child: GoogleSignInButton(
@@ -226,7 +238,7 @@ class RegistrationFormContent extends ConsumerWidget {
         ),
 
         // Sign In Link
-        const SizedBox(height: 6),
+        SizedBox(height: footerSpacing),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

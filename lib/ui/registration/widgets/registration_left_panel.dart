@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'dart:math' as math;
 
-class AuthLeftPanel extends StatefulWidget {
-  const AuthLeftPanel({super.key});
+import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+
+class RegistrationLeftPanel extends StatefulWidget {
+  const RegistrationLeftPanel({super.key});
 
   @override
-  State<AuthLeftPanel> createState() => _AuthLeftPanelState();
+  State<RegistrationLeftPanel> createState() => _RegistrationLeftPanelState();
 }
 
-class _AuthLeftPanelState extends State<AuthLeftPanel>
+class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
     with TickerProviderStateMixin {
   late AnimationController _floatingController;
   late AnimationController _rotationController;
@@ -356,7 +357,8 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
           animation: animation,
           builder: (context, child) {
             final floatY = math.sin((animation.value + offset) * math.pi * 2) * 10;
-            final opacity = (math.sin((animation.value + offset) * math.pi * 2) + 1) / 2;
+            final opacity =
+                (math.sin((animation.value + offset) * math.pi * 2) + 1) / 2;
 
             return Transform.translate(
               offset: Offset(0, floatY),
@@ -402,8 +404,10 @@ class _AnimatedLeaf extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final rotation = math.sin((animation.value + rotationOffset) * math.pi * 2) * 0.1;
-        final scale = 1.0 + (math.sin((animation.value + rotationOffset) * math.pi * 2) * 0.05);
+        final rotation =
+            math.sin((animation.value + rotationOffset) * math.pi * 2) * 0.1;
+        final scale = 1.0 +
+            (math.sin((animation.value + rotationOffset) * math.pi * 2) * 0.05);
 
         return Transform.rotate(
           angle: rotation,
@@ -437,7 +441,8 @@ class _AnimatedSprout extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final scale = 1.0 + (math.sin((animation.value + delay) * math.pi * 2) * 0.1);
+        final scale =
+            1.0 + (math.sin((animation.value + delay) * math.pi * 2) * 0.1);
 
         return Transform.scale(
           scale: scale,
@@ -584,7 +589,8 @@ class _AnimatedDecorativeBlob extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final scale = 1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.15);
+        final scale =
+            1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.15);
 
         return Transform.scale(
           scale: scale,
@@ -667,7 +673,8 @@ class _FloatingCloud extends StatelessWidget {
         // Slow horizontal drift
         final driftX = math.cos((animation.value + offset) * math.pi * 2) * 5;
         // Subtle scale pulsing
-        final scale = 0.95 + (math.sin((animation.value + offset * 2) * math.pi * 2) * 0.05);
+        final scale =
+            0.95 + (math.sin((animation.value + offset * 2) * math.pi * 2) * 0.05);
 
         return Transform.translate(
           offset: Offset(driftX, floatY),
