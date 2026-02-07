@@ -464,16 +464,21 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
               ),
               SizedBox(height: cardWidth * 0.06),
 
-              if (!hasActiveBatch && !batchCompleted)
-                const EmptyState()
-              else
-                _buildActiveState(
-                  batchCompleted,
-                  cardWidth,
-                  cardHeight,
-                  labelFontSize,
-                  bodyFontSize,
+        
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 240, 
                 ),
+                child: hasActiveBatch || batchCompleted
+                    ? _buildActiveState(
+                        batchCompleted,
+                        cardWidth,
+                        cardHeight,
+                        labelFontSize,
+                        bodyFontSize,
+                      )
+                    : const EmptyState(),
+              ),
             ],
           );
 

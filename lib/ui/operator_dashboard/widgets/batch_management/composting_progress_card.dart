@@ -195,13 +195,6 @@ class _CompostingProgressCardState
         .clamp(0, CompostingProgressCard.totalDays);
   }
 
-  double _getProgress() {
-    return (_getDaysPassed() / CompostingProgressCard.totalDays).clamp(
-      0.0,
-      1.0,
-    );
-  }
-
   String _formatDate(DateTime date) {
     final monthNames = [
       'Jan',
@@ -262,7 +255,6 @@ class _CompostingProgressCardState
     });
 
     final isActive = _activeBatch?.isActive ?? false;
-    final progress = _getProgress();
     final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
     final hasBatchSelected = _activeBatch != null;
     final hasMachineSelected = _selectedMachineId != null;
@@ -383,54 +375,12 @@ class _CompostingProgressCardState
             const SizedBox(height: 16),
 
             // Decomposition Progress section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Decomposition Progress',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1a1a1a),
-                  ),
-                ),
-                Text(
-                  '${(progress * 100).toInt()}%',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1a1a1a),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5E7EB),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: progress,
-                    child: Container(
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: batchIsCompleted
-                            ? const Color(0xFF6B7280)
-                            : const Color(0xFF10B981),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
+            const Text(
+              'Decomposition Progress',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1a1a1a),
               ),
             ),
             const SizedBox(height: 16),

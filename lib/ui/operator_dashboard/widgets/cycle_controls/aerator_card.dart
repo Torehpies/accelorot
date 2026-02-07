@@ -440,16 +440,21 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
               ),
               SizedBox(height: cardWidth * 0.06),
 
-              if (!hasActiveBatch && !batchCompleted)
-                const EmptyState()
-              else
-                _buildActiveState(
-                  batchCompleted,
-                  cardWidth,
-                  cardHeight,
-                  labelFontSize,
-                  bodyFontSize,
+         
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 240, // Minimum height 
                 ),
+                child: hasActiveBatch || batchCompleted
+                    ? _buildActiveState(
+                        batchCompleted,
+                        cardWidth,
+                        cardHeight,
+                        labelFontSize,
+                        bodyFontSize,
+                      )
+                    : const EmptyState(),
+              ),
             ],
           );
 
