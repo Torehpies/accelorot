@@ -119,4 +119,8 @@ class CycleRepository {
   /// Get a single cycle by ID
   Future<CycleRecommendation?> getCycle(String id) =>
       _cycleService.fetchCycleById(id);
+
+  /// Stream all cycles for the team with real-time updates
+  Stream<List<CycleRecommendation>> streamTeamCycles() =>
+      _cycleService.streamTeamCycles();
 }

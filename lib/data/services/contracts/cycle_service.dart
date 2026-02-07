@@ -90,4 +90,7 @@ abstract class CycleService {
   Future<void> resumeAerator({required String batchId});
 
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
+
+  /// Stream all cycles for the team's batches with real-time updates
+  Stream<List<CycleRecommendation>> streamTeamCycles();
 }

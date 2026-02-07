@@ -197,7 +197,7 @@ class FirestoreAlertService implements AlertService {
           }
         }),
       );
-
+ 
       // ✅ Flatten results efficiently using expand
       final allBatchAlerts = results.expand((alerts) => alerts).toList();
 
@@ -282,6 +282,88 @@ class FirestoreAlertService implements AlertService {
     } catch (e) {
       debugPrint('❌ Error fetching alert by ID: $e');
       return null;
+    }
+  }
+
+  // ===== STREAM OPERATIONS (REAL-TIME) =====
+
+  @override
+  Stream<List<Alert>> streamTeamAlerts({DateTime? cutoffDate}) async* {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      // Get user's teamId
+      final teamId = await _batchService.getUserTeamId(currentUserId!);
+
+      if (teamId == null || teamId.isEmpty) {
+        debugPrint('⚠️ User has no team assigned');
+        yield [];
+        return;
+      }
+
+      // Get team machines and batches (one-time, not streamed)
+      final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
+      if (teamMachineIds.isEmpty) {
+        debugPrint('ℹ️ No machines found for team: $teamId');
+        yield [];
+        return;
+      }
+
+      final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+      if (batches.isEmpty) {
+        debugPrint('ℹ️ No batches found for team machines');
+        yield [];
+        return;
+      }
+
+      final now = DateTime.now();
+      final cutoff = cutoffDate ?? now.subtract(const Duration(days: 2));
+
+      debugPrint('🔴 Streaming ${batches.length} batches for alerts (cutoff: $cutoff)');
+
+      // Stream alerts from all batches combined
+      // This will emit whenever ANY batch has an alert change
+      await for (final allAlerts in _streamAlertsForBatches(batches, cutoff, now)) {
+        debugPrint('📡 Stream update: ${allAlerts.length} alerts');
+        yield allAlerts;
+      }
+    } catch (e) {
+      debugPrint('❌ Error streaming team alerts: $e');
+      yield [];
+    }
+  }
+
+  /// Stream alerts from multiple batches combined
+  Stream<List<Alert>> _streamAlertsForBatches(
+    List<QueryDocumentSnapshot> batches,
+    DateTime cutoff,
+    DateTime now,
+  ) async* {
+    // Use periodic polling for simplicity (every 5 seconds)
+    await for (final _ in Stream.periodic(const Duration(seconds: 5))) {
+      final List<Alert> allAlerts = [];
+      
+      // Fetch current state from all batches in parallel
+      final futures = batches.map((batchDoc) async {
+        return await fetchAlertsForBatch(
+          batchDoc.id,
+          start: cutoff,
+          end: now,
+        );
+      });
+      
+      final results = await Future.wait(futures);
+      
+      for (final batchAlerts in results) {
+        allAlerts.addAll(batchAlerts);
+      }
+      
+      // Sort by timestamp
+      allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      
+      yield allAlerts;
     }
   }
 }

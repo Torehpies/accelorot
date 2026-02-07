@@ -9,6 +9,19 @@ import '../../../data/repositories/report_repository.dart';
 import '../../../data/repositories/cycle_repository.dart';
 import '../mappers/activity_presentation_mapper.dart';
 
+/// Cached data with timestamp for TTL validation
+class CachedData<T> {
+  final T data;
+  final DateTime timestamp;
+
+  CachedData(this.data, this.timestamp);
+
+  /// Check if cache has expired based on TTL
+  bool isExpired(Duration ttl) {
+    return DateTime.now().difference(timestamp) > ttl;
+  }
+}
+
 /// Result object containing both activity items and full entity cache
 class ActivityResult {
   final List<ActivityLogItem> items;
@@ -24,6 +37,11 @@ class ActivityAggregatorService {
   final ReportRepository _reportRepo;
   final CycleRepository _cycleRepo;
   final FirebaseAuth _auth;
+
+  // ===== MEMORY CACHE =====
+  static const _cacheTTL = Duration(minutes: 5);
+  final Map<String, CachedData<List<ActivityLogItem>>> _cache = {};
+  CachedData<ActivityResult>? _allActivitiesCache;
 
   ActivityAggregatorService({
     required SubstrateRepository substrateRepo,
@@ -49,14 +67,25 @@ class ActivityAggregatorService {
 
   /// Fetch and transform substrate activities
   Future<List<ActivityLogItem>> getSubstrates() async {
+    // Check cache first
+    final cached = _cache['substrates'];
+    if (cached != null && !cached.isExpired(_cacheTTL)) {
+      debugPrint('✅ Returning cached substrates (${cached.data.length} items)');
+      return cached.data;
+    }
+
     final stopwatch = Stopwatch()..start();
     try {
+      debugPrint('🔄 Fetching fresh substrates from Firebase...');
       final substrates = await _substrateRepo.getAllSubstrates();
       final items = substrates
           .map(
             (substrate) => ActivityPresentationMapper.fromSubstrate(substrate),
           )
           .toList();
+
+      // Update cache
+      _cache['substrates'] = CachedData(items, DateTime.now());
 
       stopwatch.stop();
       debugPrint(
@@ -80,12 +109,23 @@ class ActivityAggregatorService {
 
   /// Fetch and transform alert activities
   Future<List<ActivityLogItem>> getAlerts() async {
+    // Check cache first
+    final cached = _cache['alerts'];
+    if (cached != null && !cached.isExpired(_cacheTTL)) {
+      debugPrint('✅ Returning cached alerts (${cached.data.length} items)');
+      return cached.data;
+    }
+
     final stopwatch = Stopwatch()..start();
     try {
+      debugPrint('🔄 Fetching fresh alerts from Firebase...');
       final alerts = await _alertRepo.getTeamAlerts();
       final items = alerts
           .map((alert) => ActivityPresentationMapper.fromAlert(alert))
           .toList();
+
+      // Update cache
+      _cache['alerts'] = CachedData(items, DateTime.now());
 
       stopwatch.stop();
       debugPrint(
@@ -109,12 +149,23 @@ class ActivityAggregatorService {
 
   /// Fetch and transform report activities
   Future<List<ActivityLogItem>> getReports() async {
+    // Check cache first
+    final cached = _cache['reports'];
+    if (cached != null && !cached.isExpired(_cacheTTL)) {
+      debugPrint('✅ Returning cached reports (${cached.data.length} items)');
+      return cached.data;
+    }
+
     final stopwatch = Stopwatch()..start();
     try {
+      debugPrint('🔄 Fetching fresh reports from Firebase...');
       final reports = await _reportRepo.getTeamReports();
       final items = reports
           .map((report) => ActivityPresentationMapper.fromReport(report))
           .toList();
+
+      // Update cache
+      _cache['reports'] = CachedData(items, DateTime.now());
 
       stopwatch.stop();
       debugPrint(
@@ -138,8 +189,16 @@ class ActivityAggregatorService {
 
   /// Fetch and transform cycle & recommendation activities
   Future<List<ActivityLogItem>> getCyclesRecom() async {
+    // Check cache first
+    final cached = _cache['cycles'];
+    if (cached != null && !cached.isExpired(_cacheTTL)) {
+      debugPrint('✅ Returning cached cycles (${cached.data.length} items)');
+      return cached.data;
+    }
+
     final stopwatch = Stopwatch()..start();
     try {
+      debugPrint('🔄 Fetching fresh cycles from Firebase...');
       final cycles = await _cycleRepo.getTeamCycles();
       final items = cycles
           .map(
@@ -147,6 +206,9 @@ class ActivityAggregatorService {
                 ActivityPresentationMapper.fromCycleRecommendation(cycle),
           )
           .toList();
+
+      // Update cache
+      _cache['cycles'] = CachedData(items, DateTime.now());
 
       stopwatch.stop();
       debugPrint(
@@ -213,13 +275,21 @@ class ActivityAggregatorService {
   /// Fetch all activities and build an entity cache for instant dialog loading
   /// [limit] - Maximum number of items to fetch per category (null = fetch all)
   /// [filterRecentDays] - Only fetch items from last N days (null = no time filter)
+  /// [forceRefresh] - If true, bypass cache and fetch fresh data
   Future<ActivityResult> getAllActivitiesWithCache({
     int? limit,
     int? filterRecentDays,
+    bool forceRefresh = false,
   }) async {
+    // Check cache first (unless force refresh)
+    if (!forceRefresh && _allActivitiesCache != null && !_allActivitiesCache!.isExpired(_cacheTTL)) {
+      debugPrint('✅ Returning cached all activities (${_allActivitiesCache!.data.items.length} items)');
+      return _allActivitiesCache!.data;
+    }
     final totalStopwatch = Stopwatch()..start();
 
     debugPrint('📊 ===== ACTIVITY FETCH START =====');
+    debugPrint('   🔄 Force refresh: $forceRefresh');
     debugPrint('   📋 Limit per category: ${limit ?? "unlimited"}');
     debugPrint('   📅 Filter recent days: ${filterRecentDays ?? "no filter"}');
 
@@ -313,11 +383,16 @@ class ActivityAggregatorService {
 
       debugPrint('💾 ENTITY CACHE BUILT: ${cache.length} entities cached');
 
+      final result = ActivityResult(allItems, cache);
+      
+      // Update cache
+      _allActivitiesCache = CachedData(result, DateTime.now());
+
       totalStopwatch.stop();
       debugPrint('✅ TOTAL FETCH TIME: ${totalStopwatch.elapsedMilliseconds}ms');
       debugPrint('📊 ===== ACTIVITY FETCH END =====\n');
 
-      return ActivityResult(allItems, cache);
+      return result;
     } catch (e) {
       totalStopwatch.stop();
       debugPrint(
@@ -326,5 +401,21 @@ class ActivityAggregatorService {
       debugPrint('📊 ===== ACTIVITY FETCH END (WITH ERROR) =====\n');
       rethrow;
     }
+  }
+
+  // ===== CACHE MANAGEMENT =====
+
+  /// Clear all cached data (use for manual refresh/logout)
+  void clearCache() {
+    _cache.clear();
+    _allActivitiesCache = null;
+    debugPrint('🗑️ All activity cache cleared');
+  }
+
+  /// Clear specific category cache
+  void clearCategoryCache(String category) {
+    _cache.remove(category);
+    _allActivitiesCache = null; // Also clear combined cache
+    debugPrint('🗑️ Cache cleared for category: $category');
   }
 }

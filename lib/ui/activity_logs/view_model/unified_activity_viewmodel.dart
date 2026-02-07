@@ -94,23 +94,17 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching substrates...');
-      final substrates = await _aggregator.getSubstratesRaw();
+      // Use cached method instead of raw
+      final substrateActivityList = await _aggregator.getSubstrates();
 
       stopwatch.stop();
       debugPrint(
-        'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrates.length} items)',
+        'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrateActivityList.length} items)',
       );
 
-      // Build category-specific list (NO race condition)
-      final substrateActivityList = <ActivityLogItem>[];
+      // Build cache from returned items
       final newCache = Map<String, dynamic>.from(state.entityCache);
-
-      for (var substrate in substrates) {
-        newCache['substrate_${substrate.id}'] = substrate;
-        substrateActivityList.add(
-          ActivityPresentationMapper.fromSubstrate(substrate),
-        );
-      }
+      // Note: Cache building happens in aggregator, we just use the results
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -119,7 +113,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         substratesLoadingStatus: LoadingStatus.success,
         fullCategoryCounts: {
           ...state.fullCategoryCounts,
-          'substrates': substrates.length,
+          'substrates': substrateActivityList.length,
         },
       );
 
@@ -142,25 +136,16 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching alerts...');
-      final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
-      final alerts = await _aggregator.getAlertsRaw(
-        cutoffDate: cutoffDate,
-        limit: null,
-      );
+      // Use cached method instead of raw
+      final alertActivityList = await _aggregator.getAlerts();
 
       stopwatch.stop();
       debugPrint(
-        'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alerts.length} items)',
+        'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alertActivityList.length} items)',
       );
 
-      // Build category-specific list
-      final alertActivityList = <ActivityLogItem>[];
+      // Build cache
       final newCache = Map<String, dynamic>.from(state.entityCache);
-
-      for (var alert in alerts) {
-        newCache['alert_${alert.id}'] = alert;
-        alertActivityList.add(ActivityPresentationMapper.fromAlert(alert));
-      }
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -169,7 +154,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         alertsLoadingStatus: LoadingStatus.success,
         fullCategoryCounts: {
           ...state.fullCategoryCounts,
-          'alerts': alerts.length,
+          'alerts': alertActivityList.length,
         },
       );
 
@@ -192,27 +177,16 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching cycles...');
-      final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
-      final cycles = await _aggregator.getCyclesRaw(
-        cutoffDate: cutoffDate,
-        limit: null,
-      );
+      // Use cached method instead of raw
+      final cycleActivityList = await _aggregator.getCyclesRecom();
 
       stopwatch.stop();
       debugPrint(
-        'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycles.length} items)',
+        'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycleActivityList.length} items)',
       );
 
-      // Build category-specific list (NO race condition)
-      final cycleActivityList = <ActivityLogItem>[];
+      // Build cache
       final newCache = Map<String, dynamic>.from(state.entityCache);
-
-      for (var cycle in cycles) {
-        newCache['cycle_${cycle.id}'] = cycle;
-        cycleActivityList.add(
-          ActivityPresentationMapper.fromCycleRecommendation(cycle),
-        );
-      }
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -221,7 +195,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         cyclesLoadingStatus: LoadingStatus.success,
         fullCategoryCounts: {
           ...state.fullCategoryCounts,
-          'operations': cycles.length,
+          'operations': cycleActivityList.length,
         },
       );
 
@@ -244,21 +218,16 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('🔵 Fetching reports...');
-      final reports = await _aggregator.getReportsRaw(limit: null);
+      // Use cached method instead of raw
+      final reportActivityList = await _aggregator.getReports();
 
       stopwatch.stop();
       debugPrint(
-        'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reports.length} items)',
+        'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reportActivityList.length} items)',
       );
 
-
-      final reportActivityList = <ActivityLogItem>[];
+      // Build cache
       final newCache = Map<String, dynamic>.from(state.entityCache);
-
-      for (var report in reports) {
-        newCache['report_${report.id}'] = report;
-        reportActivityList.add(ActivityPresentationMapper.fromReport(report));
-      }
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -267,7 +236,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         reportsLoadingStatus: LoadingStatus.success,
         fullCategoryCounts: {
           ...state.fullCategoryCounts,
-          'reports': reports.length,
+          'reports': reportActivityList.length,
         },
       );
 
@@ -317,6 +286,9 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   Future<void> refresh() async {
     final refreshStopwatch = Stopwatch()..start();
     debugPrint('🔃 refresh() called');
+
+    // Clear cache to force fresh fetch
+    _aggregator.clearCache();
 
     await loadActivities();
 

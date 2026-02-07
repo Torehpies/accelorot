@@ -18,6 +18,10 @@ abstract class AlertService {
   /// @param batchId - the batch identifier
   Stream<List<Alert>> streamAlerts(String batchId);
 
+  /// Stream team alerts for real-time updates
+  /// [cutoffDate] - Only stream alerts newer than this date (null = no filter)
+  Stream<List<Alert>> streamTeamAlerts({DateTime? cutoffDate});
+
   /// Fetch a single alert by ID
   Future<Alert?> fetchAlertById(String alertId);
 }

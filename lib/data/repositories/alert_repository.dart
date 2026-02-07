@@ -23,9 +23,14 @@ class AlertRepository {
   Future<List<Alert>> getAlertsForBatch(String batchId) =>
       _alertService.fetchAlertsForBatch(batchId);
 
-  /// Stream alerts for real-time updates
+  /// Stream alerts for real-time updates (single batch)
   Stream<List<Alert>> streamAlerts(String batchId) =>
       _alertService.streamAlerts(batchId);
+
+  /// Stream all alerts for the team with real-time updates
+  /// [cutoffDate] - Only fetch alerts newer than this date (defaults to 2 days ago)
+  Stream<List<Alert>> streamTeamAlerts({DateTime? cutoffDate}) =>
+      _alertService.streamTeamAlerts(cutoffDate: cutoffDate);
 
   ///Fetch a single alert by ID
   Future<Alert?> getAlert(String id) => _alertService.fetchAlertById(id);
