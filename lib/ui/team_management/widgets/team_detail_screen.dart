@@ -17,6 +17,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
 import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
@@ -275,22 +276,20 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
                 TableActionButton(
                   icon: Icons.visibility,
                   tooltip: 'View',
-                  onPressed: () {
-                    // TODO: Navigate to member detail
-                  },
-                ),
-                TableActionButton(
-                  icon: Icons.edit,
-                  tooltip: 'Edit',
-                  onPressed: () {
-                    // TODO: Show edit member dialog
-                  },
+                  onPressed: () => _showViewDialog(context, member),
                 ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  void _showViewDialog(BuildContext context, dynamic member) {
+    showDialog(
+      context: context,
+      builder: (_) => ViewMemberDialog(operator: member),
     );
   }
 

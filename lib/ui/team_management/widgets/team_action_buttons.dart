@@ -18,13 +18,13 @@ class TeamActionButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // IconButton(
-        //   icon: Icon(Icons.info),
-        //   onPressed: () => _showViewDialog(context, team),
-        //   tooltip: 'View Team',
-        // ),
         IconButton(
-          icon: Icon(Icons.link),
+          icon: Icon(Icons.info),
+          onPressed: () => _showViewDialog(context, team),
+          tooltip: 'Quick View',
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_right),
           onPressed: () {
             context.pushNamed(
               'teamDetails',
