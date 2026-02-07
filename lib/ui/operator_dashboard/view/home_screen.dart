@@ -1,5 +1,6 @@
+// lib/ui/operator_dashboard/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/fabs/mobile_add_waste_fab.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine;
@@ -127,25 +129,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  Future<void> _handleFABPress() async {
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => QuickActionsSheet(
-        preSelectedMachineId: _selectedMachineId,
-        preSelectedBatchId: _selectedBatchId,
-      ),
-    );
-
-    // Handle result from the action sheets (AddWaste or SubmitReport)
-    if (result == true && mounted) {
-      ref.invalidate(allActivitiesProvider);
-      ref.invalidate(userTeamBatchesProvider);
-
-      if (_selectedMachineId != null) {
-        await _autoSelectBatchForMachine(_selectedMachineId!);
-      }
+  void _handleFABSuccess() async {
+    if (_selectedMachineId != null) {
+      await _autoSelectBatchForMachine(_selectedMachineId!);
     }
   }
 
@@ -202,21 +188,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 16, right: 16),
-        child: SizedBox(
-          width: 58,
-          height: 58,
-          child: FloatingActionButton(
-            onPressed: _handleFABPress,
-            backgroundColor: Colors.teal,
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.add, size: 28, color: Colors.white),
-          ),
-        ),
+      floatingActionButton: MobileAddWasteFAB(
+        preSelectedMachineId: _selectedMachineId,
+        preSelectedBatchId: _selectedBatchId,
+        onSuccess: _handleFABSuccess,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
