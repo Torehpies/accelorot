@@ -3,12 +3,8 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/qu
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
-
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/swipeable_cycle_cards.dart';
-
 import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_activities_table.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
@@ -132,64 +128,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _handleFABPress() async {
-    final action = await showModalBottomSheet<String>(
+    final result = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => const QuickActionsSheet(),
+      builder: (context) => QuickActionsSheet(
+        preSelectedMachineId: _selectedMachineId,
+        preSelectedBatchId: _selectedBatchId,
+      ),
     );
 
-    if (action == null || !mounted) return;
+    // Handle result from the action sheets (AddWaste or SubmitReport)
+    if (result == true && mounted) {
+      ref.invalidate(allActivitiesProvider);
+      ref.invalidate(userTeamBatchesProvider);
 
-    if (action == 'add_waste') {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => AddWasteProduct(
-          preSelectedMachineId: _selectedMachineId,
-          preSelectedBatchId: _selectedBatchId,
-        ),
-      );
-
-      if (result == true && mounted) {
-        ref.invalidate(allActivitiesProvider);
-        ref.invalidate(userTeamBatchesProvider);
-
-        if (_selectedMachineId != null) {
-          await _autoSelectBatchForMachine(_selectedMachineId!);
-        }
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Waste entry added successfully!'),
-              backgroundColor: Colors.teal,
-            ),
-          );
-        }
-      }
-    } else if (action == 'submit_report') {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => SubmitReport(
-          preSelectedMachineId: _selectedMachineId,
-          preSelectedBatchId: _selectedBatchId,
-        ),
-      );
-
-      if (result == true && mounted) {
-        ref.invalidate(allActivitiesProvider);
-        ref.invalidate(userTeamBatchesProvider);
-
-        if (_selectedMachineId != null) {
-          await _autoSelectBatchForMachine(_selectedMachineId!);
-        }
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Report submitted successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+      if (_selectedMachineId != null) {
+        await _autoSelectBatchForMachine(_selectedMachineId!);
       }
     }
   }
@@ -229,7 +184,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Swipeable cycle cards
                   // Swipeable cycle cards
                   SwipeableCycleCards(
                     currentBatch: _activeBatchModel,

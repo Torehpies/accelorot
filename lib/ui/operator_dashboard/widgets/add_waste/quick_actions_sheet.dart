@@ -1,9 +1,18 @@
 // lib/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
 
 class QuickActionsSheet extends StatelessWidget {
-  const QuickActionsSheet({super.key});
+  final String? preSelectedMachineId;
+  final String? preSelectedBatchId;
+
+  const QuickActionsSheet({
+    super.key,
+    this.preSelectedMachineId,
+    this.preSelectedBatchId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +57,20 @@ class QuickActionsSheet extends StatelessWidget {
             iconColor: Colors.teal,
             title: 'Add Waste Product',
             subtitle: 'Log waste material for composting',
-            onTap: () => Navigator.pop(context, 'add_waste'),
+            onTap: () {
+              Navigator.of(context).pop(); // Close quick actions immediately
+              showModalBottomSheet(     // Open add waste immediately
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                isDismissible: false,
+                enableDrag: false,
+                builder: (context) => AddWasteProduct(
+                  preSelectedMachineId: preSelectedMachineId,
+                  preSelectedBatchId: preSelectedBatchId,
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 12),
@@ -59,7 +81,20 @@ class QuickActionsSheet extends StatelessWidget {
             iconColor: Colors.blue,
             title: 'Submit Report',
             subtitle: 'Create maintenance or observation report',
-            onTap: () => Navigator.pop(context, 'submit_report'),
+            onTap: () {
+              Navigator.of(context).pop(); // Close quick actions immediately
+              showModalBottomSheet(     // Open submit report immediately
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                isDismissible: false,
+                enableDrag: false,
+                builder: (context) => SubmitReport(
+                  preSelectedMachineId: preSelectedMachineId,
+                  preSelectedBatchId: preSelectedBatchId,
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 8),

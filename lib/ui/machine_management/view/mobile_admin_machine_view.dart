@@ -65,9 +65,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         machine: machine,
         onEdit: () {
           Navigator.of(context).pop();
-          Future.delayed(const Duration(milliseconds: 250), () {
-            if (mounted) _showEditSheet(machine);
-          });
+          _showEditSheet(machine);
         },
         onArchive: () {
           Navigator.pop(context);
