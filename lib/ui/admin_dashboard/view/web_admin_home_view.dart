@@ -8,6 +8,7 @@ import '../../core/widgets/base_stats_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
 import '../web_widgets/recent_activities_table.dart';
+import '../../core/widgets/web_base_container.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});
@@ -23,32 +24,35 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
     final asyncState = ref.watch(adminHomeProvider);
     final activitiesAsync = ref.watch(userTeamActivitiesProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFDFF2FF),
-      body: asyncState.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
-        ),
-        error: (err, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error: $err',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.read(adminHomeProvider.notifier).refresh(),
-                child: const Text('Retry'),
-              ),
-            ],
+    return WebScaffoldContainer(
+      child: WebContentContainer(
+        innerPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        child: asyncState.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
           ),
+          error: (err, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Error: $err',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () =>
+                      ref.read(adminHomeProvider.notifier).refresh(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+          data: (state) => _buildDashboard(state, activitiesAsync),
         ),
-        data: (state) => _buildDashboard(state, activitiesAsync),
       ),
     );
   }

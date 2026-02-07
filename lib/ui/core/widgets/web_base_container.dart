@@ -23,8 +23,13 @@ class WebScaffoldContainer extends StatelessWidget {
 /// Wraps the bordered container pattern: Padding → Container(border) → Padding
 class WebContentContainer extends StatelessWidget {
   final Widget child;
+  final EdgeInsets? innerPadding;
 
-  const WebContentContainer({super.key, required this.child});
+  const WebContentContainer({
+    super.key,
+    required this.child,
+    this.innerPadding,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +40,10 @@ class WebContentContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: WebColors.primaryBorder, width: 1.5),
         ),
-        child: Padding(padding: const EdgeInsets.all(12), child: child),
+        child: Padding(
+          padding: innerPadding ?? const EdgeInsets.all(12),
+          child: child,
+        ),
       ),
     );
   }

@@ -16,6 +16,17 @@ class MobileSettingsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: const SettingsContent(),
+    );
+  }
+}
+
+class SettingsContent extends ConsumerWidget {
+  const SettingsContent({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
     final profileState = ref.watch(profileProvider);
 
@@ -94,149 +105,147 @@ class MobileSettingsView extends ConsumerWidget {
                 ],
               ),
 
-              // Notifications Section
-              SettingsSection(
-                title: 'NOTIFICATIONS',
-                children: [
-                  SettingsSwitchTile(
-                    icon: Icons.notifications,
-                    title: 'Push Notifications',
-                    subtitle: 'Receive app notifications',
-                    value: settings.notifications.pushEnabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .togglePushNotifications(value);
-                    },
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.email_outlined,
-                    title: 'Email Reports',
-                    subtitle: 'Get weekly reports via email',
-                    value: settings.notifications.emailReportsEnabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .toggleEmailReports(value);
-                    },
-                  ),
-                  const Divider(height: 1),
-                  const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: Text(
-                      'ALERT PREFERENCES',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
-                      ),
+            // Notifications Section
+            SettingsSection(
+              title: 'NOTIFICATIONS',
+              children: [
+                SettingsSwitchTile(
+                  icon: Icons.notifications,
+                  title: 'Push Notifications',
+                  subtitle: 'Receive app notifications',
+                  value: settings.notifications.pushEnabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .togglePushNotifications(value);
+                  },
+                ),
+                SettingsSwitchTile(
+                  icon: Icons.email_outlined,
+                  title: 'Email Reports',
+                  subtitle: 'Get weekly reports via email',
+                  value: settings.notifications.emailReportsEnabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleEmailReports(value);
+                  },
+                ),
+                const Divider(height: 1),
+                const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    'ALERT PREFERENCES',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
                     ),
                   ),
-                  SettingsSwitchTile(
-                    icon: Icons.thermostat,
-                    title: 'Temperature Alerts',
-                    value: settings.notifications.temperatureAlertsEnabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .toggleTemperatureAlerts(value);
-                    },
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.water_drop,
-                    title: 'Moisture Alerts',
-                    value: settings.notifications.moistureAlertsEnabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .toggleMoistureAlerts(value);
-                    },
-                  ),
-                  SettingsSwitchTile(
-                    icon: Icons.air,
-                    title: 'Oxygen Alerts',
-                    value: settings.notifications.oxygenAlertsEnabled,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .toggleOxygenAlerts(value);
-                    },
-                  ),
-                ],
-              ),
+                ),
+                SettingsSwitchTile(
+                  icon: Icons.thermostat,
+                  title: 'Temperature Alerts',
+                  value: settings.notifications.temperatureAlertsEnabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleTemperatureAlerts(value);
+                  },
+                ),
+                SettingsSwitchTile(
+                  icon: Icons.water_drop,
+                  title: 'Moisture Alerts',
+                  value: settings.notifications.moistureAlertsEnabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleMoistureAlerts(value);
+                  },
+                ),
+                SettingsSwitchTile(
+                  icon: Icons.air,
+                  title: 'Oxygen Alerts',
+                  value: settings.notifications.oxygenAlertsEnabled,
+                  onChanged: (value) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleOxygenAlerts(value);
+                  },
+                ),
+              ],
+            ),
 
-              // Appearance Section Removed
+            // Appearance Section Removed
 
-              // Data & Privacy Section
-              SettingsSection(
-                title: 'DATA & PRIVACY',
-                children: [
-                  SettingsTile(
-                    icon: Icons.delete_forever,
-                    title: 'Clear Cache',
-                    onTap: () async {
-                      final confirm = await showConfirmDialog(
-                        context: context,
-                        title: 'Clear Cache',
-                        message:
-                            'Are you sure you want to clear all cached data?',
-                        confirmText: 'Clear',
-                        cancelText: 'Cancel',
-                      );
-                      if (confirm == true) {
-                        // TODO: Implement cache clearing
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Cache cleared')),
-                          );
-                        }
+            // Data & Privacy Section
+            SettingsSection(
+              title: 'DATA & PRIVACY',
+              children: [
+                SettingsTile(
+                  icon: Icons.delete_forever,
+                  title: 'Clear Cache',
+                  onTap: () async {
+                    final confirm = await showConfirmDialog(
+                      context: context,
+                      title: 'Clear Cache',
+                      message: 'Are you sure you want to clear all cached data?',
+                      confirmText: 'Clear',
+                      cancelText: 'Cancel',
+                    );
+                    if (confirm == true) {
+                      // TODO: Implement cache clearing
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Cache cleared')),
+                        );
                       }
-                    },
-                  ),
-                ],
-              ),
+                    }
+                  },
+                ),
+              ],
+            ),
 
-              // About Section
-              SettingsSection(
-                title: 'ABOUT',
-                children: [
-                  SettingsTile(
-                    icon: Icons.info,
-                    title: 'Version',
-                    trailing: const Text(
-                      '0.0.0',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+            // About Section
+            SettingsSection(
+              title: 'ABOUT',
+              children: [
+                SettingsTile(
+                  icon: Icons.info,
+                  title: 'Version',
+                  trailing: const Text(
+                    '0.0.0',
+                    style: TextStyle(color: Colors.grey),
                   ),
-                  SettingsTile(
-                    icon: Icons.privacy_tip,
-                    title: 'Privacy Policy',
-                    onTap: () {
-                      // TODO: Show privacy policy
-                    },
-                  ),
-                  SettingsTile(
-                    icon: Icons.description,
-                    title: 'Terms of Service',
-                    onTap: () {
-                      // TODO: Show terms
-                    },
-                  ),
-                  SettingsTile(
-                    icon: Icons.help,
-                    title: 'Help & Support',
-                    onTap: () {
-                      // TODO: Show help
-                    },
-                  ),
-                ],
-              ),
+                ),
+                SettingsTile(
+                  icon: Icons.privacy_tip,
+                  title: 'Privacy Policy',
+                  onTap: () {
+                    // TODO: Show privacy policy
+                  },
+                ),
+                SettingsTile(
+                  icon: Icons.description,
+                  title: 'Terms of Service',
+                  onTap: () {
+                    // TODO: Show terms
+                  },
+                ),
+                SettingsTile(
+                  icon: Icons.help,
+                  title: 'Help & Support',
+                  onTap: () {
+                    // TODO: Show help
+                  },
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 10),
-            ],
-          );
-        },
-      ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
     );
   }
 }
