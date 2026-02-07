@@ -1,11 +1,8 @@
 // lib/ui/operator_dashboard/fields/plant_type_section.dart
-
 import 'package:flutter/material.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
-import 'waste_config.dart';
-import 'info_box.dart';
+import '../../core/bottom_sheet/fields/mobile_input_field.dart';
 
-class PlantTypeSection extends StatelessWidget {
+class PlantTypeSection extends StatefulWidget {
   final String? selectedWasteCategory;
   final String? selectedPlantType;
   final Function(String?) onPlantTypeChanged;
@@ -19,60 +16,49 @@ class PlantTypeSection extends StatelessWidget {
     this.errorText,
   });
 
-  String _getPlantNeedsInfo() {
-    if (selectedWasteCategory == null || selectedPlantType == null) return '';
-    final options = plantTypeOptions[selectedWasteCategory] ?? [];
-    final plant = options.firstWhere(
-      (option) => option['value'] == selectedPlantType,
-      orElse: () => {'needs': ''},
-    );
-    return plant['needs'] ?? '';
+  @override
+  State<PlantTypeSection> createState() => _PlantTypeSectionState();
+}
+
+class _PlantTypeSectionState extends State<PlantTypeSection> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.selectedPlantType ?? '');
   }
 
-  List<MobileDropdownItem<String>> _getPlantTypeItems() {
-    if (selectedWasteCategory == null) {
-      return [];
+  @override
+  void didUpdateWidget(PlantTypeSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller if plant type changed externally (e.g., category changed and cleared it)
+    if (widget.selectedPlantType != oldWidget.selectedPlantType) {
+      _controller.text = widget.selectedPlantType ?? '';
     }
-    final options = plantTypeOptions[selectedWasteCategory] ?? [];
-    return options.map((option) {
-      return MobileDropdownItem<String>(
-        value: option['value']!,
-        label: option['label']!,
-      );
-    }).toList();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final items = _getPlantTypeItems();
-    final isEnabled = selectedWasteCategory != null && items.isNotEmpty;
+    final isEnabled = widget.selectedWasteCategory != null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        MobileDropdownField<String>(
-          label: 'Target Plant Type',
-          value: selectedPlantType,
-          items: items.isEmpty
-              ? [const MobileDropdownItem(value: '', label: 'Select category first')]
-              : items,
-          required: true,
-          enabled: isEnabled,
-          onChanged: isEnabled ? onPlantTypeChanged : null,
-          errorText: errorText,
-          hintText: selectedWasteCategory == null 
-              ? 'Select category first' 
-              : 'Select target type',
-        ),
-        if (selectedWasteCategory != null && selectedPlantType != null) ...[
-          const SizedBox(height: 12),
-          InfoBox(
-            text: _getPlantNeedsInfo(),
-            color: Colors.blue,
-            emoji: '',
-          ),
-        ],
-      ],
+    return MobileInputField(
+      label: 'Target Plant Type',
+      controller: _controller,
+      required: true,
+      enabled: isEnabled,
+      onChanged: isEnabled ? widget.onPlantTypeChanged : null,
+      errorText: widget.errorText,
+      hintText: widget.selectedWasteCategory == null 
+          ? 'Select category first' 
+          : 'Enter plant type',
+      maxLength: 50,
     );
   }
 }

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../themes/web_colors.dart';
 import '../themes/web_text_styles.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class BottomSheetAction {
   final String label;
@@ -117,7 +118,7 @@ class MobileBottomSheetButtons extends StatelessWidget {
     }
 
     // Primary / Destructive (filled button)
-    final bg = action.isDestructive ? WebColors.error : WebColors.success;
+    final bg = action.isDestructive ? WebColors.error : AppColors.green100;
     final disabledBg = WebColors.textMuted;
 
     return ElevatedButton(

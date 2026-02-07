@@ -8,7 +8,6 @@ import '../../../operator_dashboard/fields/waste_category_section.dart';
 import '../../../operator_dashboard/fields/plant_type_section.dart';
 import '../../../operator_dashboard/fields/quantity_field.dart';
 import '../../../operator_dashboard/fields/description_field.dart';
-import '../../../operator_dashboard/fields/waste_config.dart';
 import '../../../operator_dashboard/fields/machine_selection_field.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
@@ -77,6 +76,16 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
     return null;
   }
 
+  String? _validatePlantType(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter plant type';
+    }
+    if (value.trim().length > 50) {
+      return 'Max 50 characters';
+    }
+    return null;
+  }
+
   bool _validateForm() {
     setState(() {
       _wasteCategoryError = null;
@@ -87,12 +96,13 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       if (_selectedWasteCategory == null) {
         _wasteCategoryError = 'Please select waste category';
       }
-      if (_selectedPlantType == null) {
-        _plantTypeError = 'Please select target plant type';
-      }
+      
+      _plantTypeError = _validatePlantType(_selectedPlantType);
+      
       if (_selectedMachineId == null) {
         _machineError = 'Please select a machine';
       }
+      
       _quantityError = _validateQuantity(_quantityController.text);
     });
 
@@ -100,16 +110,6 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
         _plantTypeError == null &&
         _machineError == null &&
         _quantityError == null;
-  }
-
-  String getPlantLabel(String? value) {
-    if (value == null) return '';
-    for (var options in plantTypeOptions.values) {
-      for (var plant in options) {
-        if (plant['value'] == value) return plant['label']!;
-      }
-    }
-    return '';
   }
 
   Future<void> _handleSubmit() async {
@@ -128,10 +128,13 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
 
     setState(() => _isLoading = true);
 
+    // Trim the plant type input
+    final plantTypeValue = _selectedPlantType!.trim();
+
     final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
-      plantType: _selectedPlantType!,
-      plantTypeLabel: getPlantLabel(_selectedPlantType),
+      plantType: plantTypeValue,        // Store the readable text
+      plantTypeLabel: plantTypeValue,   // Same as plantType
       quantity: double.parse(_quantityController.text),
       description: _descriptionController.text.trim(),
       machineId: _selectedMachineId!,
@@ -218,7 +221,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
             onCategoryChanged: (value) {
               setState(() {
                 _selectedWasteCategory = value;
-                _selectedPlantType = null;
+                _selectedPlantType = null; // Clear plant type when category changes
                 _wasteCategoryError = null;
               });
             },
