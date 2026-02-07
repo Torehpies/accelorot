@@ -31,7 +31,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   Future<void> _initialize() async {
     final vmStopwatch = Stopwatch()..start();
-    debugPrint('🚀 ViewModel initialization started');
+    debugPrint('ViewModel initialization started');
 
     state = state.copyWith(
       status: LoadingStatus.loading,
@@ -41,7 +41,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     vmStopwatch.stop();
     debugPrint(
-      '🏁 ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
+      'ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
     );
 
     unawaited(loadActivities());
@@ -73,12 +73,12 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
       loadStopwatch.stop();
       debugPrint(
-        '✅ Progressive loading launched: ${loadStopwatch.elapsedMilliseconds}ms (fetches running in background)\n',
+        'Progressive loading launched: ${loadStopwatch.elapsedMilliseconds}ms (fetches running in background)\n',
       );
     } catch (e) {
       loadStopwatch.stop();
       debugPrint(
-        '❌ loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n',
+        'loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n',
       );
 
       state = state.copyWith(
@@ -93,15 +93,15 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     final stopwatch = Stopwatch()..start();
 
     try {
-      debugPrint('🟢 Fetching substrates...');
+      debugPrint('Fetching substrates...');
       final substrates = await _aggregator.getSubstratesRaw();
 
       stopwatch.stop();
       debugPrint(
-        '✅ Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrates.length} items)',
+        'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrates.length} items)',
       );
 
-      // ✅ Build category-specific list (NO race condition)
+      // Build category-specific list (NO race condition)
       final substrateActivityList = <ActivityLogItem>[];
       final newCache = Map<String, dynamic>.from(state.entityCache);
 
@@ -129,7 +129,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     } catch (e) {
       stopwatch.stop();
       debugPrint(
-        '❌ Substrates fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+        'Substrates fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
       );
 
       state = state.copyWith(substratesLoadingStatus: LoadingStatus.error);
@@ -141,7 +141,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     final stopwatch = Stopwatch()..start();
 
     try {
-      debugPrint('🟡 Fetching alerts...');
+      debugPrint('Fetching alerts...');
       final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
       final alerts = await _aggregator.getAlertsRaw(
         cutoffDate: cutoffDate,
@@ -150,10 +150,10 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
       stopwatch.stop();
       debugPrint(
-        '✅ Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alerts.length} items)',
+        'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alerts.length} items)',
       );
 
-      // ✅ Build category-specific list (NO race condition)
+      // Build category-specific list
       final alertActivityList = <ActivityLogItem>[];
       final newCache = Map<String, dynamic>.from(state.entityCache);
 
@@ -179,7 +179,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     } catch (e) {
       stopwatch.stop();
       debugPrint(
-        '❌ Alerts fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+        'Alerts fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
       );
 
       state = state.copyWith(alertsLoadingStatus: LoadingStatus.error);
@@ -191,7 +191,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     final stopwatch = Stopwatch()..start();
 
     try {
-      debugPrint('🟣 Fetching cycles...');
+      debugPrint('Fetching cycles...');
       final cutoffDate = DateTime.now().subtract(const Duration(days: 2));
       final cycles = await _aggregator.getCyclesRaw(
         cutoffDate: cutoffDate,
@@ -200,10 +200,10 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
       stopwatch.stop();
       debugPrint(
-        '✅ Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycles.length} items)',
+        'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycles.length} items)',
       );
 
-      // ✅ Build category-specific list (NO race condition)
+      // Build category-specific list (NO race condition)
       final cycleActivityList = <ActivityLogItem>[];
       final newCache = Map<String, dynamic>.from(state.entityCache);
 
@@ -231,7 +231,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     } catch (e) {
       stopwatch.stop();
       debugPrint(
-        '❌ Cycles fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+        'Cycles fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
       );
 
       state = state.copyWith(cyclesLoadingStatus: LoadingStatus.error);
@@ -248,10 +248,10 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
       stopwatch.stop();
       debugPrint(
-        '✅ Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reports.length} items)',
+        'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reports.length} items)',
       );
 
-      // ✅ Build category-specific list (NO race condition)
+
       final reportActivityList = <ActivityLogItem>[];
       final newCache = Map<String, dynamic>.from(state.entityCache);
 
@@ -277,7 +277,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     } catch (e) {
       stopwatch.stop();
       debugPrint(
-        '❌ Reports fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+        'Reports fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
       );
 
       state = state.copyWith(reportsLoadingStatus: LoadingStatus.error);
@@ -322,7 +322,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     refreshStopwatch.stop();
     debugPrint(
-      '✅ refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n',
+      'refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n',
     );
   }
 
