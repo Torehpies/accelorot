@@ -157,7 +157,7 @@ class _BaseStatsCardState extends State<BaseStatsCard>
               ],
             )
           else if (widget.subtext != null)
-            // ✅ Show only subtext when changeText is empty/null
+  
             Text(
               widget.subtext!,
               style: const TextStyle(
