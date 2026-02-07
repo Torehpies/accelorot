@@ -16,6 +16,8 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
+import 'package:flutter_application_1/ui/machine_management/dialogs/web_admin_add_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/team_machine_actions_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
@@ -59,6 +61,8 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(teamDetailProvider(_teamId));
     final notifier = ref.read(teamDetailProvider(_teamId).notifier);
+    // Keep the machine actions provider alive while this screen is mounted.
+    ref.watch(teamMachineActionsProvider(_teamId));
     // Choose items based on active tab
     final items = _tabController.index == 0
         ? state.filteredAdmins
@@ -102,6 +106,24 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
             SearchField(
               isLoading: state.isLoading,
               onChanged: (query) => notifier.setSearch(query),
+            ),
+            Tooltip(
+              message: 'Add Machine',
+              child: ElevatedButton.icon(
+                onPressed: () => _showAddMachineDialog(context),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Machine'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
             ),
             Tooltip(
               message: 'Add Admin',
@@ -290,6 +312,25 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
     showDialog(
       context: context,
       builder: (_) => ViewMemberDialog(member: member),
+    );
+  }
+
+  void _showAddMachineDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: WebColors.dialogBarrier,
+      barrierDismissible: false,
+      builder: (context) => WebAdminAddDialog(
+        onCreate:
+            ({required String machineId, required String machineName}) async {
+              await ref
+                  .read(teamMachineActionsProvider(_teamId).notifier)
+                  .addMachine(
+                    machineId: machineId,
+                    machineName: machineName,
+                  );
+            },
+      ),
     );
   }
 
