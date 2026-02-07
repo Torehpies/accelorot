@@ -199,10 +199,12 @@ class TeamDetailNotifier extends _$TeamDetailNotifier {
     final filtered = _applySearchAndSort(state.members);
 
     state = state.copyWith(
-      filteredAdmins:
-          filtered.where((m) => m.teamRole == TeamRole.admin).toList(),
-      filteredMembers:
-          filtered.where((m) => m.teamRole != TeamRole.admin).toList(),
+      filteredAdmins: filtered
+          .where((m) => m.teamRole == TeamRole.admin)
+          .toList(),
+      filteredMembers: filtered
+          .where((m) => m.teamRole != TeamRole.admin)
+          .toList(),
     );
   }
 
@@ -215,9 +217,9 @@ class TeamDetailNotifier extends _$TeamDetailNotifier {
     if (query.isNotEmpty) {
       result = result.where((member) {
         return member.email.toLowerCase().contains(query) ||
-            '${member.firstName} ${member.lastName}'
-                .toLowerCase()
-                .contains(query);
+            '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+              query,
+            );
       }).toList();
     }
 
@@ -273,3 +275,4 @@ class TeamDetailNotifier extends _$TeamDetailNotifier {
     }
   }
 }
+

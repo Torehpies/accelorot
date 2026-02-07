@@ -16,6 +16,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
+import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
 import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
@@ -102,13 +103,16 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
               onChanged: (query) => notifier.setSearch(query),
             ),
             Tooltip(
-              message: 'Add Member',
+              message: 'Add Admin',
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // TODO: Show add member dialog
+                  showDialog(
+                    context: context,
+                    builder: (_) => AddAdminDialog(teamId: _teamId),
+                  );
                 },
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Member'),
+                label: const Text('Add Admin'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
@@ -168,8 +172,8 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
                         Text(
                           'Status',
                           style: WebTextStyles.label.copyWith(
-                            color: state.statusFilter !=
-                                    TeamMemberStatusFilter.all
+                            color:
+                                state.statusFilter != TeamMemberStatusFilter.all
                                 ? WebColors.greenAccent
                                 : WebColors.textLabel,
                           ),
