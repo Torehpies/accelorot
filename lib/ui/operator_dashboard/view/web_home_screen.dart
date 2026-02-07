@@ -330,7 +330,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _handleFABPress,
-        backgroundColor: Colors.teal[800],
+        backgroundColor: Colors.green,
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: const Icon(Icons.add, size: 32, color: Colors.white),
