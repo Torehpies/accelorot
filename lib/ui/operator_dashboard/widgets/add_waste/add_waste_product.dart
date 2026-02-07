@@ -1,3 +1,5 @@
+// lib/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/toast/mobile_toast_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

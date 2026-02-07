@@ -1,5 +1,7 @@
-// plant_type_section.dart
+// lib/ui/operator_dashboard/fields/plant_type_section.dart
+
 import 'package:flutter/material.dart';
+import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
 import 'waste_config.dart';
 import 'info_box.dart';
 
@@ -27,44 +29,49 @@ class PlantTypeSection extends StatelessWidget {
     return plant['needs'] ?? '';
   }
 
-  List<DropdownMenuItem<String>> _getPlantTypeItems() {
+  List<MobileDropdownItem<String>> _getPlantTypeItems() {
     if (selectedWasteCategory == null) {
-      return const [
-        DropdownMenuItem(
-          value: null,
-          enabled: false,
-          child: Text('Select category first'),
-        ),
-      ];
+      return [];
     }
     final options = plantTypeOptions[selectedWasteCategory] ?? [];
     return options.map((option) {
-      return DropdownMenuItem(
-        value: option['value'],
-        child: Text(option['label']!, style: const TextStyle(fontSize: 14)),
+      return MobileDropdownItem<String>(
+        value: option['value']!,
+        label: option['label']!,
       );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final items = _getPlantTypeItems();
+    final isEnabled = selectedWasteCategory != null && items.isNotEmpty;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (selectedWasteCategory != null && selectedPlantType != null) ...[
-          InfoBox(text: _getPlantNeedsInfo(), color: Colors.blue, emoji: ''),
-          const SizedBox(height: 12),
-        ],
-        DropdownButtonFormField<String>(
-          initialValue: selectedPlantType,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: 'Select target type',
-            prefixIcon: const Icon(Icons.local_florist_outlined, size: 18),
-            errorText: errorText,
-          ),
-          items: _getPlantTypeItems(),
-          onChanged: selectedWasteCategory == null ? null : onPlantTypeChanged,
+        MobileDropdownField<String>(
+          label: 'Target Plant Type',
+          value: selectedPlantType,
+          items: items.isEmpty
+              ? [const MobileDropdownItem(value: '', label: 'Select category first')]
+              : items,
+          required: true,
+          enabled: isEnabled,
+          onChanged: isEnabled ? onPlantTypeChanged : null,
+          errorText: errorText,
+          hintText: selectedWasteCategory == null 
+              ? 'Select category first' 
+              : 'Select target type',
         ),
+        if (selectedWasteCategory != null && selectedPlantType != null) ...[
+          const SizedBox(height: 12),
+          InfoBox(
+            text: _getPlantNeedsInfo(),
+            color: Colors.blue,
+            emoji: '',
+          ),
+        ],
       ],
     );
   }
