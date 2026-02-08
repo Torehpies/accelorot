@@ -37,10 +37,7 @@ class TabsRow extends StatelessWidget {
               tabTitles // Dynamically create tabs from `tabTitles`
                   .map(
                     (title) => Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(title),
-                      ),
+                      child: Text(title),
                     ),
                   )
                   .toList(),

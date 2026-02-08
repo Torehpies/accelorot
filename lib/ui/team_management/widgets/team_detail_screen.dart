@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
+import 'package:flutter_application_1/ui/core/widgets/responsive_button.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
@@ -15,8 +17,8 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart
 import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/models/team_member_filters.dart';
-import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_application_1/ui/machine_management/dialogs/web_admin_add_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_machine_actions_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
@@ -59,6 +61,10 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isTablet =
+        // MediaQuery.of(context).size.width >= kTabletBreakpoint &&
+        MediaQuery.of(context).size.width < kDesktopBreakpoint;
+
     final state = ref.watch(teamDetailProvider(_teamId));
     final notifier = ref.read(teamDetailProvider(_teamId).notifier);
     // Keep the machine actions provider alive while this screen is mounted.
@@ -104,50 +110,70 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
               ),
             ),
             SearchField(
+              width: isTablet ? 150 : 220,
               isLoading: state.isLoading,
               onChanged: (query) => notifier.setSearch(query),
             ),
-            Tooltip(
-              message: 'Add Machine',
-              child: ElevatedButton.icon(
-                onPressed: () => _showAddMachineDialog(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Machine'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
+            ResponsiveButton(
+              tooltipMessage: 'Add Machine',
+              label: const Text('Add Admin'),
+              icon: Icon(Icons.add),
+              onPressed: () => _showAddMachineDialog(context),
+              isTablet: isTablet,
             ),
-            Tooltip(
-              message: 'Add Admin',
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AddAdminDialog(teamId: _teamId),
-                  );
-                },
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Admin'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
+            ResponsiveButton(
+              tooltipMessage: 'Add Admin',
+              label: const Text('Add Admin'),
+              icon: Icon(Icons.add_moderator),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => AddAdminDialog(teamId: _teamId),
+                );
+              },
+              isTablet: isTablet,
             ),
+            // Tooltip(
+            //   message: 'Add Machine',
+            //   child: ElevatedButton.icon(
+            //     onPressed: () => _showAddMachineDialog(context),
+            //     icon: const Icon(Icons.add, size: 18),
+            //     label: const Text('Add Machine'),
+            //     style: ElevatedButton.styleFrom(
+            //       foregroundColor: Colors.white,
+            //       padding: const EdgeInsets.symmetric(
+            //         horizontal: 16,
+            //         vertical: 12,
+            //       ),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(8),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // Tooltip(
+            //   message: 'Add Admin',
+            //   child: ElevatedButton.icon(
+            //     onPressed: () {
+            //       showDialog(
+            //         context: context,
+            //         builder: (_) => AddAdminDialog(teamId: _teamId),
+            //       );
+            //     },
+            //     icon: const Icon(Icons.add_moderator, size: 18),
+            //     label: const Text('Add Admin'),
+            //     style: ElevatedButton.styleFrom(
+            //       foregroundColor: Colors.white,
+            //       padding: const EdgeInsets.symmetric(
+            //         horizontal: 16,
+            //         vertical: 12,
+            //       ),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(8),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
           tableHeader: TableHeader(
             isLoading: state.isLoading,
@@ -325,10 +351,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
             ({required String machineId, required String machineName}) async {
               await ref
                   .read(teamMachineActionsProvider(_teamId).notifier)
-                  .addMachine(
-                    machineId: machineId,
-                    machineName: machineName,
-                  );
+                  .addMachine(machineId: machineId, machineName: machineName);
             },
       ),
     );
