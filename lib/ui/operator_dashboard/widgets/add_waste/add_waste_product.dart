@@ -145,7 +145,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Waste entry added successfully!'),
-          backgroundColor: Colors.teal,
+          backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
@@ -276,7 +276,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
               SubmitButton(
                 onPressed: _handleSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
+                  backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
                 ),
               ),

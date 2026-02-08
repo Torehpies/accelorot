@@ -99,7 +99,7 @@ class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
               width: _currentPage == 0 ? 24 : 8,
               height: 8,
               decoration: BoxDecoration(
-                color: _currentPage == 0 ? Colors.teal : Colors.grey.shade300,
+                color: _currentPage == 0 ? Colors.green : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -109,7 +109,7 @@ class _SwipeableCycleCardsState extends State<SwipeableCycleCards> {
               width: _currentPage == 1 ? 24 : 8,
               height: 8,
               decoration: BoxDecoration(
-                color: _currentPage == 1 ? Colors.teal : Colors.grey.shade300,
+                color: _currentPage == 1 ? Colors.green : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
