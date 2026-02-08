@@ -6,11 +6,9 @@ abstract class CycleService {
   Future<List<CycleRecommendation>> fetchTeamCycles();
 
   /// Get drum controller for a batch
-  Future<CycleRecommendation?> getDrumController({required String batchId});
-
-  /// Get aerator for a batch
-  Future<CycleRecommendation?> getAerator({required String batchId});
-
+  Future<List<CycleRecommendation>> getDrumControllers({required String batchId});
+  Future<List<CycleRecommendation>> getAerators({required String batchId});
+  
   /// Start drum controller
   Future<String> startDrumController({
     required String batchId,
@@ -48,6 +46,36 @@ abstract class CycleService {
 
   /// Complete aerator
   Future<void> completeAerator({required String batchId});
+
+  /// Stop drum controller (different from complete - for manual stop)
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  });
+
+  /// Stop aerator (different from complete - for manual stop)
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  });
+
+  /// Pause drum controller
+  Future<void> pauseDrumController({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  });
+
+  /// Resume drum controller
+  Future<void> resumeDrumController({required String batchId});
+
+  /// Pause aerator
+  Future<void> pauseAerator({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  });
+
+  /// Resume aerator
+  Future<void> resumeAerator({required String batchId});
 
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
 }

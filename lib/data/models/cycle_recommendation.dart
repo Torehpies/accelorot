@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 part 'cycle_recommendation.freezed.dart';
 
@@ -25,6 +26,10 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     DateTime? completedAt,
     int? totalRuntimeSeconds,
     DateTime? timestamp,
+    
+    // Pause-related fields
+    DateTime? pausedAt,
+    int? accumulatedRuntimeSeconds,
   }) = _CycleRecommendation;
 
   const CycleRecommendation._();
@@ -35,6 +40,26 @@ abstract class CycleRecommendation with _$CycleRecommendation {
   static CycleRecommendation fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
+    // Helper to safely convert numeric values to int
+    int? toInt(dynamic value, String fieldName) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is double) {
+        // Check for NaN or Infinity
+        if (value.isNaN) {
+          debugPrint('⚠️ NaN detected in field: $fieldName (doc: ${doc.id})');
+          return null;
+        }
+        if (value.isInfinite) {
+          debugPrint('⚠️ Infinity detected in field: $fieldName (doc: ${doc.id})');
+          return null;
+        }
+        return value.toInt();
+      }
+      if (value is String) return int.tryParse(value);
+      return null;
+    }
+
     return CycleRecommendation(
       id: doc.id,
       category: data['category'] ?? 'cycles',
@@ -42,14 +67,16 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       machineId: data['machineId'],
       userId: data['userId'],
       batchId: data['batchId'],
-      cycles: data['cycles'],
+      cycles: toInt(data['cycles'], 'cycles'),
       duration: data['duration'],
-      completedCycles: data['completedCycles'],
+      completedCycles: toInt(data['completedCycles'], 'completedCycles'),
       status: data['status'],
       startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
-      totalRuntimeSeconds: data['totalRuntimeSeconds'],
+      totalRuntimeSeconds: toInt(data['totalRuntimeSeconds'], 'totalRuntimeSeconds'),
       timestamp: (data['timestamp'] as Timestamp?)?.toDate(),
+      pausedAt: (data['pausedAt'] as Timestamp?)?.toDate(),
+      accumulatedRuntimeSeconds: toInt(data['accumulatedRuntimeSeconds'], 'accumulatedRuntimeSeconds'),
     );
   }
 
@@ -69,6 +96,9 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       if (completedAt != null) 'completedAt': Timestamp.fromDate(completedAt!),
       if (totalRuntimeSeconds != null)
         'totalRuntimeSeconds': totalRuntimeSeconds,
+      if (pausedAt != null) 'pausedAt': Timestamp.fromDate(pausedAt!),
+      if (accumulatedRuntimeSeconds != null)
+        'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
     };
   }
 

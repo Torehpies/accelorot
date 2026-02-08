@@ -38,6 +38,9 @@ class ActivityPresentationMapper {
     // Use helper instead of alert.displayCategory (which we removed)
     final category = _getAlertDisplayCategory(alert.sensorType);
 
+    // Generate a descriptive title based on status and sensor type
+    final title = _getAlertTitle(alert.sensorType, alert.status);
+
     final description =
         'Sensor: ${_toProperCase(alert.sensorType)}\n'
         'Reading: ${alert.readingValue}\n'
@@ -45,7 +48,7 @@ class ActivityPresentationMapper {
 
     return ActivityLogItem(
       id: alert.id,
-      title: _toProperCase(alert.message),
+      title: title,
       value: '${alert.readingValue}',
       statusColor: ActivityColorMapper.getColorForAlert(alert.status),
       icon: ActivityIconMapper.getIconForAlert(alert.sensorType),
@@ -169,6 +172,13 @@ class ActivityPresentationMapper {
     if (lower.contains('moisture')) return 'Moisture';
     if (lower.contains('oxygen') || lower.contains('air')) return 'Air Quality';
     return 'Other';
+  }
+
+  /// Generate alert title based on sensor type and status
+  static String _getAlertTitle(String sensorType, String status) {
+    final sensor = _toProperCase(sensorType);
+    final statusText = status.toLowerCase() == 'above' ? 'Above' : 'Below';
+    return '$sensor $statusText Threshold';
   }
 
   /// Get display type for reports (moved from Report model)
