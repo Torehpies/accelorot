@@ -11,6 +11,7 @@ import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../activity_logs/widgets/mobile/machine_selector.dart';
 import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/stats_skeleton.dart';
 
 class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
@@ -100,7 +101,7 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
                 child: RefreshIndicator(
                   onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.fromLTRB(2, 32, 2, 100),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -202,7 +203,11 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
-            loading: () => _buildLoadingCard('Temperature'),
+            loading: () => const StatisticCardSkeleton(
+              accentColor: Colors.orange,
+              title: 'Temperature',
+              subtitle: '',
+            ),
             error: (error, stack) => _buildErrorCard('Temperature', error),
           ),
           moistureAsync.when(
@@ -211,7 +216,11 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
-            loading: () => _buildLoadingCard('Moisture'),
+            loading: () => const StatisticCardSkeleton(
+              accentColor: Colors.blue,
+              title: 'Moisture',
+              subtitle: '',
+            ),
             error: (error, stack) => _buildErrorCard('Moisture', error),
           ),
           oxygenAsync.when(
@@ -220,7 +229,11 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               readings: readings,
               lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
             ),
-            loading: () => _buildLoadingCard('Air Quality'),
+            loading: () => const StatisticCardSkeleton(
+              accentColor: Colors.purple,
+              title: 'Air Quality',
+              subtitle: '',
+            ),
             error: (error, stack) => _buildErrorCard('Air Quality', error),
           ),
         ];
@@ -288,30 +301,6 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     ref.invalidate(moistureDataProvider(batchId));
     ref.invalidate(oxygenDataProvider(batchId));
     await Future.delayed(const Duration(milliseconds: 500));
-  }
-
-  Widget _buildLoadingCard(String title) {
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(strokeWidth: 2),
-            const SizedBox(height: 12),
-            Text(
-              'Loading $title...',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildErrorCard(String title, Object error) {

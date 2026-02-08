@@ -13,7 +13,11 @@ class MobileTeamManagementView extends StatelessWidget {
           horizontal: 24.0,
           vertical: 32.0, // Reduced vertical padding from login view
         ),
-        child: const DesktopTeamManagementView(),
+        child: const Column(
+          children: [
+            Expanded(child: DesktopTeamManagementView()),
+          ],
+        ),
       ),
     );
   }
