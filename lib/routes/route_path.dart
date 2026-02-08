@@ -5,6 +5,7 @@ enum RoutePath {
   signup(path: '/signup'),
   //qrRefer(path: '/qr-refer'),
   pending(path: '/pending'),
+  approval(path: '/approval'),
   verifyEmail(path: '/verify-email'),
   teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
