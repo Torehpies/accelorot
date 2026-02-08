@@ -221,7 +221,7 @@ class _DesktopLoginViewState extends State<DesktopLoginView>
                                 );
                               },
                               child: const Text(
-                                'Turn waste into wonder.'
+                                'Turn waste into wonder\n.'
                                 'Join the smart composting\n'
                                 'revolution today.',
                                 style: TextStyle(

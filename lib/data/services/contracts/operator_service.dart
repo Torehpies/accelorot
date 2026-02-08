@@ -36,7 +36,7 @@ abstract class OperatorService {
     required String pendingDocId,
   });
 
-  Future<Result<AppUser>> addOperator({
+  Future<Result<AppUser>> addUser({
     required String email,
     required String password,
     required String firstname,

@@ -3,11 +3,23 @@ import '../../models/cycle_recommendation.dart';
 /// Abstract interface for cycle recommendation data operations
 abstract class CycleService {
   /// Fetch all cycle recommendations for the current user's team
-  Future<List<CycleRecommendation>> fetchTeamCycles();
+  /// [limit] - Maximum number of cycles to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> fetchTeamCycles({int? limit, DateTime? cutoffDate});
 
   /// Get drum controller for a batch
-  Future<List<CycleRecommendation>> getDrumControllers({required String batchId});
-  Future<List<CycleRecommendation>> getAerators({required String batchId});
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> getDrumControllers({
+    required String batchId,
+    DateTime? cutoffDate,
+  });
+  
+  /// Get aerators for a batch
+  /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  Future<List<CycleRecommendation>> getAerators({
+    required String batchId,
+    DateTime? cutoffDate,
+  });
   
   /// Start drum controller
   Future<String> startDrumController({
@@ -78,4 +90,7 @@ abstract class CycleService {
   Future<void> resumeAerator({required String batchId});
 
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
+
+  /// Stream all cycles for the team's batches with real-time updates
+  Stream<List<CycleRecommendation>> streamTeamCycles();
 }

@@ -6,8 +6,11 @@ class CycleRepository {
 
   CycleRepository(this._cycleService);
 
-  Future<List<CycleRecommendation>> getTeamCycles() =>
-      _cycleService.fetchTeamCycles();
+  Future<List<CycleRecommendation>> getTeamCycles({
+    int? limit,
+    DateTime? cutoffDate,
+  }) =>
+      _cycleService.fetchTeamCycles(limit: limit, cutoffDate: cutoffDate);
 
   Future<List<CycleRecommendation>> getDrumControllers({
     required String batchId,
@@ -116,4 +119,8 @@ class CycleRepository {
   /// Get a single cycle by ID
   Future<CycleRecommendation?> getCycle(String id) =>
       _cycleService.fetchCycleById(id);
+
+  /// Stream all cycles for the team with real-time updates
+  Stream<List<CycleRecommendation>> streamTeamCycles() =>
+      _cycleService.streamTeamCycles();
 }
