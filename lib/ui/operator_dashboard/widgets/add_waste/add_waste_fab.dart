@@ -24,7 +24,7 @@ class AddWasteFAB extends StatelessWidget {
               onAddHandled!();
             }
           },
-          backgroundColor: Colors.teal,
+          backgroundColor: Colors.green,
           elevation: 5,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),

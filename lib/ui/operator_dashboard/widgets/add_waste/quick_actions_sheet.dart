@@ -45,7 +45,7 @@ class QuickActionsSheet extends StatelessWidget {
           // Add Waste Product Option
           _ActionTile(
             icon: Icons.inventory_2,
-            iconColor: Colors.teal,
+            iconColor: Colors.green,
             title: 'Add Waste Product',
             subtitle: 'Log waste material for composting',
             onTap: () => Navigator.pop(context, 'add_waste'),

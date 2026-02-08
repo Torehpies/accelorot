@@ -1,15 +1,14 @@
-// lib/ui/core/ui/secondary_button.dart
-
+// lib/ui/web_landing_page/buttons/button_one.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/web_colors.dart'; 
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
-class ThirdButton extends StatelessWidget { 
+class ButtonOne extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool enabled;
 
-  const ThirdButton({
+  const ButtonOne({
     super.key,
     required this.text,
     this.onPressed,
@@ -19,42 +18,41 @@ class ThirdButton extends StatelessWidget {
 
   bool get _isDisabled => !enabled || isLoading;
 
-  @override 
+  @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: _isDisabled ? null : onPressed,
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return WebColors.blue50.withValues(alpha: 0.5);
+            return Colors.transparent;
           }
-          return WebColors.blue50;
+          if (states.contains(WidgetState.hovered)) {
+            return const Color(0xFFE5E7EB); // Gray on hover
+          }
+          return Colors.transparent; // Transparent by default
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) {
-            return WebColors.textMuted;
+            return AppColors.green100.withValues(alpha: 0.5);
           }
-          return WebColors.textPrimary; // Dark text
+          return AppColors.green100; // Green text
         }),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
         shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        side: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.pressed) || states.contains(WidgetState.hovered)) {
-            return BorderSide(color: WebColors.blue300, width: 1);
-          }
-          return BorderSide(color: WebColors.blue200, width: 1);
-        }),
+        animationDuration: kThemeChangeDuration,
+        elevation: WidgetStateProperty.all(0), // No shadow from button
       ),
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                color: WebColors.textPrimary, 
+                color: AppColors.green100,
                 strokeWidth: 2,
               ),
             )

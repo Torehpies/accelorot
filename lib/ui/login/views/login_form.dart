@@ -81,9 +81,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SvgPicture.asset(
-          'assets/images/Accel-O-Rot Logo.svg',
-          width: 65,
-          height: 65,
+          'assets/images/Accelorot_logo.svg',
+          width: 90,
+          height: 90,
           fit: BoxFit.contain,
           semanticsLabel: 'Accel-O-Rot Logo',
         ),

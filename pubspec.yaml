@@ -48,6 +48,8 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/images/bg.png
+    - assets/images/phone/
   fonts:
     - family: dm-sans
       fonts:

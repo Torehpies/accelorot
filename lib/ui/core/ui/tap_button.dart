@@ -1,90 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
-class TapButton extends StatelessWidget {
+class TapButton extends StatefulWidget {
   final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final bool enabled;
+  final VoidCallback onPressed;
+  final bool withShadow; // New parameter for shadow
 
   const TapButton({
     super.key,
     required this.text,
-    this.onPressed,
-    this.isLoading = false,
-    this.enabled = true,
+    required this.onPressed,
+    this.withShadow = false,
   });
 
-  bool get _isDisabled => !enabled || isLoading;
+  @override
+  State<TapButton> createState() => _TapButtonState();
+}
+
+class _TapButtonState extends State<TapButton> {
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
-    // Only show shadow when enabled and not loading
-    final bool showShadow = !_isDisabled;
-
-    return Container(
-      decoration: showShadow
-          ? BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.transparent, // subtle shadow
-                  offset: const Offset(0, 2),            // only downward
-                  blurRadius: 4,
-                  spreadRadius: 0,
-                ),
-              ],
-            )
-          : null,
-      child: ElevatedButton(
-        onPressed: _isDisabled ? null : onPressed,
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return Colors.transparent;
-            }
-            if (states.contains(WidgetState.hovered)) {
-              return AppColors.green100;
-            }
-            return Colors.transparent;
-          }),
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return Colors.white.withValues(alpha: 0.5);
-            }
-            return Colors.white;
-          }),
-          side: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return BorderSide(
-                color: AppColors.green100.withValues(alpha: 0.3),
-                width: 1.5,
-              );
-            }
-            return BorderSide(
-              color: AppColors.green100,
-              width: 1.5,
-            );
-          }),
-          padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: _isHovered 
+                ? Colors.white.withValues(alpha: 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.white,
+              width: 2,
+            ),
+            boxShadow: widget.withShadow
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Center(
+            child: Text(
+              widget.text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          animationDuration: kThemeChangeDuration,
-          elevation: WidgetStateProperty.all(0), // disable default shadow
         ),
-        child: isLoading
-            ? SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Text(text, style: const TextStyle(fontSize: 16)),
       ),
     );
   }

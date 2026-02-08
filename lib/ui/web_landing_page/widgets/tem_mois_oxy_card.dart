@@ -1,3 +1,4 @@
+// lib/ui/web_landing_page/widgets/tem_mois_oxy_card.dart
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
@@ -97,6 +98,13 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
         final isMobile = constraints.maxWidth < 200;
         final isActive = _isHovered || _isTapped;
 
+        // Increased sizes for better readability
+        final iconSize = isMobile ? 32.0 : 36.0;
+        final valueSize = isMobile ? 32.0 : 38.0;
+        final labelSize = isMobile ? 14.0 : 16.0;
+        final hoverInfoSize = isMobile ? 12.0 : 14.0;
+        final padding = isMobile ? AppSpacing.lg : AppSpacing.xl;
+
         return FadeTransition(
           opacity: _fadeAnimation,
           child: SlideTransition(
@@ -119,16 +127,9 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                     final shadowOpacity = glowIntensity * 0.15;
                     final shadowBlur = 8.0 + (glowIntensity * 8.0);
 
-                    final iconSize = isMobile ? 24.0 : 28.0;
-                    final valueSize = isMobile ? 22.0 : 28.0;
-                    final labelSize = isMobile ? 11.0 : 13.0;
-                    final hoverInfoSize = isMobile ? 10.0 : 12.0;
-                    final padding = isMobile ? AppSpacing.lg : AppSpacing.xl;
-
-                    return AnimatedScale(
+                    return Transform.scale(
                       scale: scale,
-                      duration: const Duration(milliseconds: 400),
-                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.center,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 400),
                         curve: Curves.easeOutCubic,
@@ -178,8 +179,8 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 400),
                               curve: Curves.easeOutCubic,
-                              width: isMobile ? 36 : 44,
-                              height: isMobile ? 36 : 44,
+                              width: isMobile ? 44 : 52,
+                              height: isMobile ? 44 : 52,
                               decoration: BoxDecoration(
                                 color: isActive
                                     ? widget.iconColor.withValues(alpha: 0.08)
@@ -196,7 +197,8 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                                     ),
                                 ],
                               ),
-                              child: Icon(widget.icon,
+                              child: Icon(
+                                widget.icon,
                                 size: iconSize,
                                 color: widget.iconColor, 
                               ),
@@ -217,6 +219,7 @@ class _TemMoisOxyCardState extends State<TemMoisOxyCard>
                               style: WebTextStyles.caption.copyWith(
                                 color: WebColors.textLabel,
                                 fontSize: labelSize,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             if (widget.hoverInfo != null)
