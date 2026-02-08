@@ -389,7 +389,7 @@ class DropdownField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         // Floating label with required indicator
         label: RichText(
