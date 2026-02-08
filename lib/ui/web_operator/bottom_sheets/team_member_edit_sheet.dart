@@ -11,8 +11,7 @@ import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
 import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
 import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateTeamMemberCallback = Future<void> Function(EditOperatorForm form);
 
@@ -116,22 +115,14 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
       await widget.onUpdate(form);
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Team member updated successfully',
-          type: ToastType.success,
-        );
+        AppSnackbar.success(context, 'Team member updated successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to update team member',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to update team member');
       }
     }
   }

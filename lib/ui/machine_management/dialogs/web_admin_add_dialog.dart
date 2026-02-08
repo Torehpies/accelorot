@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/toast/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 
 class WebAdminAddDialog extends StatefulWidget {
   final Future<void> Function({
@@ -78,7 +78,7 @@ class _WebAdminAddDialogState extends State<WebAdminAddDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ToastService.show(context, message: 'Machine created successfully');
+      AppSnackbar.success(context, 'Machine created successfully');
     } catch (e) {
       if (!mounted) return;
 
@@ -90,7 +90,7 @@ class _WebAdminAddDialogState extends State<WebAdminAddDialog> {
           _isSubmitting = false;
         });
       } else {
-        ToastService.show(context, message: 'Failed to create: $e');
+        AppSnackbar.error(context, 'Failed to create: $e');
         setState(() => _isSubmitting = false);
       }
     }

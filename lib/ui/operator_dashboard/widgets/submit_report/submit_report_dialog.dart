@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/dialog/base_dialog.dart';
 import '../../../core/dialog/dialog_action.dart';
 import '../../../core/dialog/dialog_fields.dart';
-import '../../../core/toast/toast_service.dart';
+import '../../../core/ui/app_snackbar.dart';
 import '../../../../data/providers/report_providers.dart';
 import '../../../../data/models/report.dart';
 import '../../../../data/models/machine_model.dart';
@@ -139,10 +139,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (!mounted) return;
-      ToastService.show(
-        context,
-        message: 'Please log in to submit a report',
-      );
+      AppSnackbar.error(context, 'Please log in to submit a report');
       return;
     }
 
@@ -163,20 +160,14 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
       await reportRepo.createReport(_selectedMachineId!, reportRequest);
 
       if (mounted) {
-        ToastService.show(
-          context,
-          message: 'Report submitted successfully',
-        );
+        AppSnackbar.success(context, 'Report submitted successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ToastService.show(
-          context,
-          message: 'Failed to submit report: ${e.toString()}',
-        );
+        AppSnackbar.error(context, 'Failed to submit report: ${e.toString()}');
       }
     }
   }

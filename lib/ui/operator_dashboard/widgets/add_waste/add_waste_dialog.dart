@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/dialog/base_dialog.dart';
 import '../../../core/dialog/dialog_action.dart';
 import '../../../core/dialog/dialog_fields.dart';
-import '../../../core/toast/toast_service.dart';
+import '../../../core/ui/app_snackbar.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
 import '../../../../data/models/machine_model.dart';
@@ -161,10 +161,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (!mounted) return;
-      ToastService.show(
-        context,
-        message: 'Please log in to add waste log',
-      );
+      AppSnackbar.error(context, 'Please log in to add waste log');
       return;
     }
 
@@ -189,20 +186,14 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
       await substrateRepo.addSubstrate(substrateData);
 
       if (mounted) {
-        ToastService.show(
-          context,
-          message: 'Waste entry added successfully',
-        );
+        AppSnackbar.success(context, 'Waste entry added successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ToastService.show(
-          context,
-          message: 'Failed to add waste: ${e.toString()}',
-        );
+        AppSnackbar.error(context, 'Failed to add waste: ${e.toString()}');
       }
     }
   }

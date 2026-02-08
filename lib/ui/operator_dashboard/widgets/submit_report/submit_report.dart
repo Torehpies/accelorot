@@ -13,8 +13,7 @@ import '../../../../data/models/report.dart';
 import '../../fields/batch_selection_field.dart';
 import '../../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
 import '../../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../../core/toast/mobile_toast_service.dart';
-import '../../../core/toast/toast_type.dart';
+import '../../../core/ui/app_snackbar.dart';
 
 class SubmitReport extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
@@ -100,11 +99,7 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (!mounted) return;
-      MobileToastService.show(
-        context,
-        message: 'Please log in to submit a report',
-        type: ToastType.error,
-      );
+      AppSnackbar.error(context, 'Please log in to submit a report');
       return;
     }
 
@@ -125,22 +120,14 @@ class _SubmitReportState extends ConsumerState<SubmitReport> {
       await reportRepo.createReport(_selectedMachineId!, reportRequest);
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Report submitted successfully',
-          type: ToastType.success,
-        );
+        AppSnackbar.success(context, 'Report submitted successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to submit report: ${e.toString()}',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to submit report: ${e.toString()}');
       }
     }
   }

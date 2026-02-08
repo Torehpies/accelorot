@@ -6,7 +6,7 @@ import '../../../data/models/report.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/toast/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 
 class ReportEditDetailsDialog extends StatefulWidget {
   final Report report;
@@ -104,7 +104,7 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
         _selectedStatus == widget.report.status &&
         _selectedPriority == widget.report.priority) {
       if (!mounted) return;
-      ToastService.show(context, message: 'No changes detected');
+      AppSnackbar.info(context, 'No changes detected');
       return;
     }
 
@@ -122,10 +122,10 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ToastService.show(context, message: 'Report updated successfully');
+      AppSnackbar.success(context, 'Report updated successfully');
     } catch (e) {
       if (!mounted) return;
-      ToastService.show(context, message: 'Failed to update: $e');
+      AppSnackbar.error(context, 'Failed to update: $e');
       setState(() => _isSubmitting = false);
     }
   }

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/toast/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_admin_table_container.dart';
@@ -164,11 +164,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
       try {
         await notifier.archiveMachine(machine.machineId);
         if (context.mounted) {
-          ToastService.show(context, message: 'Machine archived successfully');
+          AppSnackbar.success(context, 'Machine archived successfully');
         }
       } catch (e) {
         if (context.mounted) {
-          ToastService.show(context, message: 'Failed to archive: $e');
+          AppSnackbar.error(context, 'Failed to archive: $e');
         }
       }
     }

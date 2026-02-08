@@ -5,8 +5,7 @@ import 'package:flutter/services.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef CreateMachineCallback = Future<void> Function({
   required String machineId,
@@ -85,13 +84,8 @@ class _MobileAdminMachineAddSheetState
       await widget.onCreate(machineId: id, machineName: name);
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Machine created successfully',
-          type: ToastType.success,
-        );
-        await Future.delayed(const Duration(milliseconds: 600));
-        if (mounted) Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        AppSnackbar.success(context, 'Machine created successfully');
       }
     } catch (e) {
       if (mounted) {
@@ -103,11 +97,7 @@ class _MobileAdminMachineAddSheetState
           });
         } else {
           setState(() => _isLoading = false);
-          MobileToastService.show(
-            context,
-            message: 'Failed to create machine',
-            type: ToastType.error,
-          );
+          AppSnackbar.error(context, 'Failed to create machine');
         }
       }
     }

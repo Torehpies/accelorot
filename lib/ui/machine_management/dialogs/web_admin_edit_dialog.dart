@@ -5,7 +5,7 @@ import '../../../data/models/machine_model.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/toast/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 
 class WebAdminEditDialog extends StatefulWidget {
   final MachineModel machine;
@@ -67,7 +67,7 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     // Check if changed
     if (name == widget.machine.machineName) {
       if (!mounted) return;
-      ToastService.show(context, message: 'No changes detected');
+      AppSnackbar.info(context, 'No changes detected');
       return;
     }
 
@@ -81,10 +81,10 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ToastService.show(context, message: 'Machine updated successfully');
+      AppSnackbar.success(context, 'Machine updated successfully');
     } catch (e) {
       if (!mounted) return;
-      ToastService.show(context, message: 'Failed to update: $e');
+      AppSnackbar.error(context, 'Failed to update: $e');
       setState(() => _isSubmitting = false);
     }
   }

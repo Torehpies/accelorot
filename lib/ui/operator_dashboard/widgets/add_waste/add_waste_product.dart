@@ -1,7 +1,7 @@
 // lib/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/toast/mobile_toast_service.dart';
+import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../operator_dashboard/fields/waste_category_section.dart';
@@ -14,7 +14,6 @@ import '../../../../data/models/substrate.dart';
 import '../../../operator_dashboard/fields/batch_selection_field.dart';
 import 'package:flutter_application_1/ui/core/bottom_sheet/mobile_bottom_sheet_base.dart';
 import 'package:flutter_application_1/ui/core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import 'package:flutter_application_1/ui/core/toast/toast_type.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;
@@ -118,11 +117,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       if (!mounted) return;
-      MobileToastService.show(
-        context,
-        message: 'Please log in to add waste log',
-        type: ToastType.error,
-      );
+      AppSnackbar.error(context, 'Please log in to add waste log');
       return;
     }
 
@@ -147,22 +142,14 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       await substrateRepo.addSubstrate(substrateData);
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Waste entry added successfully',
-          type: ToastType.success,
-        );
+        AppSnackbar.success(context, 'Waste entry added successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to add waste: ${e.toString()}',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to add waste: ${e.toString()}');
       }
     }
   }

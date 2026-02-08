@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../themes/web_text_styles.dart';
 import '../themes/web_colors.dart';
-import '../toast/toast_service.dart';
+import '../ui/app_snackbar.dart';
 
 // Export dropdown components for convenience
 export '../fields/dropdown_field.dart' show WebDropdownField, DropdownItem;
@@ -53,7 +53,7 @@ class _ReadOnlyFieldState extends State<ReadOnlyField> {
     if (widget.value.isEmpty) return;
 
     Clipboard.setData(ClipboardData(text: widget.value));
-    ToastService.show(context, message: 'Copied!');
+    AppSnackbar.success(context, 'Copied!');
   }
 
   @override
@@ -161,7 +161,7 @@ class _ReadOnlyMultilineFieldState extends State<ReadOnlyMultilineField> {
     if (widget.value.isEmpty) return;
 
     Clipboard.setData(ClipboardData(text: widget.value));
-    ToastService.show(context, message: 'Copied!');
+    AppSnackbar.success(context, 'Copied!');
   }
 
   @override

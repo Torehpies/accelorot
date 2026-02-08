@@ -10,8 +10,7 @@ import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
 import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
 import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateMachineCallback = Future<void> Function({
   required String teamId,
@@ -90,23 +89,13 @@ class _MobileAdminMachineEditSheetState
       );
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Machine updated successfully',
-          type: ToastType.success,
-        );
-        // Small delay so the toast is visible before the sheet closes
-        await Future.delayed(const Duration(milliseconds: 600));
-        if (mounted) Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        AppSnackbar.success(context, 'Machine updated successfully');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to update machine',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to update machine');
       }
     }
   }
