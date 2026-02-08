@@ -188,11 +188,11 @@ class _ImpactSectionState extends State<ImpactSection> {
 
   double _impactDescriptionSize(double screenWidth) {
     if (screenWidth < 600) {
-      return 10.0;
-    } else if (screenWidth < 1024) {
       return 12.0;
+    } else if (screenWidth < 1024) {
+      return 14.0;
     } else {
-      return screenWidth > 1440 ? 17.0 : 16.0;
+      return screenWidth > 1440 ? 19.0 : 18.0;
     }
   }
 
@@ -296,8 +296,9 @@ class _ImpactSectionState extends State<ImpactSection> {
   }
 
   Widget _buildImpactCardsArea(double screenWidth, {required double height, bool isCompact = false}) {
+    final enableHover = screenWidth >= 1024;
     return MouseRegion(
-      onExit: (_) => setState(() => _expandedImpactIndex = null),
+      onExit: enableHover ? (_) => setState(() => _expandedImpactIndex = null) : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: screenWidth),
         child: SizedBox(
@@ -367,20 +368,38 @@ class _ImpactSectionState extends State<ImpactSection> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     final isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final enableHover = !isMobile && !isTablet;
     final descriptionSize = _impactDescriptionSize(screenWidth);
     final isHovered = _expandedImpactIndex == displayIndex;
     final isIllustration = index == 0;
     final hoverColor =
         Color.lerp(_impactCards.first.backgroundColor, Colors.white, 0.2)!;
     return MouseRegion(
-      onEnter: (_) => setState(() {
-        _expandedImpactIndex = displayIndex;
-      }),
-      onExit: (_) => setState(() {
-        _expandedImpactIndex = null;
-      }),
+      onEnter: enableHover
+          ? (_) => setState(() {
+              _expandedImpactIndex = displayIndex;
+            })
+          : null,
+      onExit: enableHover
+          ? (_) => setState(() {
+              _expandedImpactIndex = null;
+            })
+          : null,
       child: GestureDetector(
-        onTap: () => setState(() => _expandedImpactIndex = displayIndex),
+        onTapDown: enableHover
+            ? null
+            : (_) => setState(() {
+                _expandedImpactIndex = displayIndex;
+              }),
+        onTapCancel: enableHover
+            ? null
+            : () => setState(() {
+                _expandedImpactIndex = null;
+              }),
+        onTap: () => setState(() {
+          _expandedImpactIndex =
+              _expandedImpactIndex == displayIndex ? null : displayIndex;
+        }),
         child: Container(
           padding: EdgeInsets.all(isCompact ? AppSpacing.md : AppSpacing.lg),
           decoration: BoxDecoration(

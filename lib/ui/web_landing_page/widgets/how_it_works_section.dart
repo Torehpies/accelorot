@@ -305,7 +305,7 @@ class _StepCardState extends State<StepCard> {
                 Text(
                   widget.step.title,
                   style: TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 22.0,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF064E3B), // Dark green-gray
                     height: 1.2,
@@ -323,7 +323,7 @@ class _StepCardState extends State<StepCard> {
                     child: Text(
                       widget.step.description,
                       style: TextStyle(
-                        fontSize: 15.0,
+                        fontSize: 16.5,
                         height: 1.5,
                         color: Color(0xFF374151), // Medium gray with green undertone
                       ),
@@ -410,7 +410,7 @@ class _StepCardState extends State<StepCard> {
               Text(
                 widget.step.title,
                 style: TextStyle(
-                  fontSize: 14.0,
+                  fontSize: 15.0,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF064E3B),
                   height: 1.2,
@@ -428,7 +428,7 @@ class _StepCardState extends State<StepCard> {
                   child: Text(
                     widget.step.description,
                     style: TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12.5,
                       height: 1.4,
                       color: Color(0xFF374151),
                     ),
@@ -520,7 +520,7 @@ class _StepCardState extends State<StepCard> {
             Text(
               widget.step.title,
               style: TextStyle(
-                fontSize: widget.isMobile ? 15.0 : 18.0,
+                fontSize: widget.isMobile ? 16.0 : 20.0,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF064E3B),
                 height: 1.2,
@@ -540,7 +540,7 @@ class _StepCardState extends State<StepCard> {
                 child: Text(
                   widget.step.description,
                   style: TextStyle(
-                    fontSize: widget.isMobile ? 12.0 : 14.5,
+                    fontSize: widget.isMobile ? 13.0 : 16.0,
                     height: 1.4,
                     color: Color(0xFF374151),
                   ),
