@@ -2,14 +2,21 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class ReportDonutChart extends StatelessWidget {
+class ReportDonutChart extends StatefulWidget {
   final Map<String, int> reportStatus;
 
   const ReportDonutChart({super.key, required this.reportStatus});
 
   @override
+  State<ReportDonutChart> createState() => _ReportDonutChartState();
+}
+
+class _ReportDonutChartState extends State<ReportDonutChart> {
+  int? _hoveredIndex;
+
+  @override
   Widget build(BuildContext context) {
-    final total = reportStatus.values.reduce((a, b) => a + b);
+    final total = widget.reportStatus.values.reduce((a, b) => a + b);
     final colors = [
       const Color(0xFF065F46), // Dark green for Open
       const Color(0xFF059669), // Medium-dark green for In Progress
@@ -58,9 +65,26 @@ class ReportDonutChart extends StatelessWidget {
                         alignment: Alignment.center,
                         children: [
                           if (total > 0)
-                            CustomPaint(
-                              painter: DonutPainter(reportStatus, colors),
-                              size: Size(size, size),
+                            MouseRegion(
+                              onHover: (event) {
+                                final index = _hitTest(
+                                  event.localPosition,
+                                  Size(size, size),
+                                  widget.reportStatus,
+                                );
+                                if (index != _hoveredIndex) {
+                                  setState(() => _hoveredIndex = index);
+                                }
+                              },
+                              onExit: (_) => setState(() => _hoveredIndex = null),
+                              child: CustomPaint(
+                                painter: DonutPainter(
+                                  widget.reportStatus,
+                                  colors,
+                                  hoveredIndex: _hoveredIndex,
+                                ),
+                                size: Size(size, size),
+                              ),
                             )
                           else
                             const Center(
@@ -77,6 +101,22 @@ class ReportDonutChart extends StatelessWidget {
                               color: Color(0xFF111827),
                             ),
                           ),
+                          if (_hoveredIndex != null && total > 0)
+                            Positioned(
+                              bottom: 8,
+                              child: _HoverPill(
+                                label: widget.reportStatus.keys
+                                    .elementAt(_hoveredIndex!),
+                                value: widget.reportStatus.values
+                                    .elementAt(_hoveredIndex!)
+                                    .toString(),
+                                percentage: _percentForIndex(
+                                  _hoveredIndex!,
+                                  total,
+                                  widget.reportStatus,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     );
@@ -98,8 +138,9 @@ class ReportDonutChart extends StatelessWidget {
           Wrap(
             spacing: 16,
             runSpacing: 8,
-            children: reportStatus.entries.map((e) {
-              final color = colors[reportStatus.keys.toList().indexOf(e.key)];
+            children: widget.reportStatus.entries.map((e) {
+              final color =
+                  colors[widget.reportStatus.keys.toList().indexOf(e.key)];
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -132,8 +173,9 @@ class ReportDonutChart extends StatelessWidget {
 class DonutPainter extends CustomPainter {
   final Map<String, int> status;
   final List<Color> colors;
+  final int? hoveredIndex;
 
-  DonutPainter(this.status, this.colors);
+  DonutPainter(this.status, this.colors, {this.hoveredIndex});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -151,6 +193,7 @@ class DonutPainter extends CustomPainter {
       final value = status[status.keys.elementAt(i)]!;
       final sweepAngle = (value / total) * 2 * math.pi;
       paint.color = colors[i];
+      paint.strokeWidth = i == hoveredIndex ? strokeWidth * 1.08 : strokeWidth;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         startAngle,
@@ -169,4 +212,87 @@ class DonutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _HoverPill extends StatelessWidget {
+  final String label;
+  final String value;
+  final String percentage;
+
+  const _HoverPill({
+    required this.label,
+    required this.value,
+    required this.percentage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        '$label: $value ($percentage)',
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF374151),
+        ),
+      ),
+    );
+  }
+}
+
+String _percentForIndex(
+  int index,
+  int total,
+  Map<String, int> status,
+) {
+  if (total == 0) return '0%';
+  final value = status.values.elementAt(index);
+  final pct = (value / total) * 100;
+  return '${pct.toStringAsFixed(0)}%';
+}
+
+int? _hitTest(
+  Offset position,
+  Size size,
+  Map<String, int> status,
+) {
+  final center = Offset(size.width / 2, size.height / 2);
+  final radius = math.min(size.width, size.height) / 2 - 20;
+  final strokeWidth = radius * 0.50;
+  final innerRadius = radius - strokeWidth / 2;
+  final outerRadius = radius + strokeWidth / 2;
+
+  final dx = position.dx - center.dx;
+  final dy = position.dy - center.dy;
+  final distance = math.sqrt(dx * dx + dy * dy);
+  if (distance < innerRadius || distance > outerRadius) return null;
+
+  final angle = math.atan2(dy, dx);
+  double normalized = angle + math.pi / 2;
+  if (normalized < 0) normalized += 2 * math.pi;
+
+  final total = status.values.reduce((a, b) => a + b);
+  double start = 0;
+  for (int i = 0; i < status.length; i++) {
+    final value = status[status.keys.elementAt(i)]!;
+    final sweep = (value / total) * 2 * math.pi;
+    if (normalized >= start && normalized < start + sweep) {
+      return i;
+    }
+    start += sweep;
+  }
+  return null;
 }
