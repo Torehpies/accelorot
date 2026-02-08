@@ -693,21 +693,26 @@ Future<void> _loadExistingCycle() async {
               ),
               SizedBox(height: cardWidth * 0.06),
 
-              if (!hasActiveBatch && !batchCompleted)
-                const EmptyState()
-              else
-                _buildActiveState(
-                  batchCompleted,
-                  cardWidth,
-                  cardHeight,
-                  labelFontSize,
-                  bodyFontSize,
+        
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 240, 
                 ),
+                child: hasActiveBatch || batchCompleted
+                    ? _buildActiveState(
+                        batchCompleted,
+                        cardWidth,
+                        cardHeight,
+                        labelFontSize,
+                        bodyFontSize,
+                      )
+                    : const EmptyState(),
+              ),
             ],
           );
 
           return Padding(
-            padding: EdgeInsets.all(cardWidth * 0.06),
+            padding: const EdgeInsets.all(20.0),
             child: useInternalScroll
                 ? SingleChildScrollView(child: content)
                 : content,

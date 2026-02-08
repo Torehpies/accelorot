@@ -26,13 +26,20 @@ class WebHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
-class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
+class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
+    with AutomaticKeepAliveClientMixin {
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
 
   int _rebuildKey = 0;
+
+  // GlobalKey to preserve CompostingProgressCard across layout switches
+  final _compostCardKey = GlobalKey();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -205,6 +212,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   CompostingProgressCard(
+                    key: _compostCardKey,
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
@@ -225,14 +233,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: ControlInputCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.02),
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: AeratorCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
@@ -266,6 +276,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     CompostingProgressCard(
+                      key: _compostCardKey,
                       currentBatch: _currentBatch,
                       onBatchStarted: _handleBatchStarted,
                       onBatchCompleted: _handleBatchCompleted,
@@ -309,6 +320,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     

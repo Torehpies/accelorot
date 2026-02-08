@@ -8,33 +8,33 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.inventory_2_outlined,
-              size: 32,
-              color: Colors.grey.shade400,
+              size: 64,
+              color: Colors.grey.shade300,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             Text(
               'No Active Batch',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade700,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               'Start a composting batch to use drum rotation',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Colors.grey.shade500,
-                height: 1.3,
+                height: 1.4,
               ),
             ),
           ],
