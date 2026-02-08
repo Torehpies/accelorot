@@ -109,7 +109,7 @@ class BaseTableContainer extends StatelessWidget {
       child: Row(
         children: [
           // Left section - natural sizing, no Expanded wrapper
-          if (leftHeaderWidget != null) leftHeaderWidget!,
+          ?leftHeaderWidget,
 
           // Spacer eats all remaining space, pushes right section to edge
           if (leftHeaderWidget != null && rightHeaderWidgets != null)

@@ -32,7 +32,9 @@ class DialogShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor:
-          backgroundColor ?? Theme.of(context).dialogBackgroundColor,
+          backgroundColor ??
+          Theme.of(context).dialogTheme.backgroundColor ??
+          Theme.of(context).colorScheme.surface,
       title: title,
       content: ConstrainedBox(
         constraints: BoxConstraints(

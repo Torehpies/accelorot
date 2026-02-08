@@ -9,7 +9,6 @@ import '../models/activity_enums.dart';
 import '../services/activity_aggregator_service.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../models/activity_common.dart';
-import '../mappers/activity_presentation_mapper.dart';
 
 part 'unified_activity_viewmodel.g.dart';
 

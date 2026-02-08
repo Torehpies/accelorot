@@ -1,7 +1,6 @@
 // lib/ui/core/widgets/filters/search_field.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../../themes/web_text_styles.dart';
 import '../../themes/web_colors.dart';
 

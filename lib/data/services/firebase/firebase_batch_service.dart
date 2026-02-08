@@ -60,8 +60,8 @@ class FirestoreBatchService implements BatchService {
         'isActive': true,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        if (batchName != null) 'batchName': batchName,
-        if (startNotes != null) 'startNotes': startNotes,
+        'batchName': ?batchName,
+        'startNotes': ?startNotes,
       });
 
       // Update machine's currentBatchId
