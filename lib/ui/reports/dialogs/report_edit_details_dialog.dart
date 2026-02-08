@@ -63,6 +63,13 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
     super.dispose();
   }
 
+  bool get _hasChanges {
+    return _titleController.text.trim() != widget.report.title ||
+        _descriptionController.text.trim() != widget.report.description ||
+        _selectedStatus != widget.report.status ||
+        _selectedPriority != widget.report.priority;
+  }
+
   void _validateTitle() {
     setState(() {
       final title = _titleController.text.trim();
@@ -95,16 +102,6 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
 
     // Stop if validation errors
     if (_titleError != null || _descriptionError != null) {
-      return;
-    }
-
-    // Check if anything changed
-    if (title == widget.report.title &&
-        description == widget.report.description &&
-        _selectedStatus == widget.report.status &&
-        _selectedPriority == widget.report.priority) {
-      if (!mounted) return;
-      AppSnackbar.info(context, 'No changes detected');
       return;
     }
 
@@ -229,11 +226,9 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
         ),
         DialogAction.primary(
           label: 'Update Report',
-          onPressed:
-              _titleError == null && _descriptionError == null && !_isSubmitting
-              ? _handleSubmit
-              : null,
+          onPressed: _handleSubmit,
           isLoading: _isSubmitting,
+          isDisabled: !_hasChanges || _titleError != null || _descriptionError != null,
         ),
       ],
     );

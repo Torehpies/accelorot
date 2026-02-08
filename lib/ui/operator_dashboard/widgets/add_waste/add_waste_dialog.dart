@@ -68,6 +68,18 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
     super.dispose();
   }
 
+  bool get _hasValidInput {
+    if (_selectedWasteCategory == null ||
+        _selectedMachineId == null ||
+        _plantTypeController.text.trim().isEmpty ||
+        _quantityController.text.trim().isEmpty) {
+      return false;
+    }
+
+    final quantity = double.tryParse(_quantityController.text.trim());
+    return quantity != null && quantity > 0;
+  }
+
   String _capitalizeCategory(String category) {
     if (category.isEmpty) return category;
     return category[0].toUpperCase() + category.substring(1);
@@ -214,6 +226,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
           label: 'Add Waste',
           onPressed: _handleSubmit,
           isLoading: _isLoading,
+          isDisabled: !_hasValidInput,
         ),
       ],
       content: Column(

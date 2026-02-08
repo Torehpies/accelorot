@@ -66,6 +66,14 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
     super.dispose();
   }
 
+  bool get _hasValidInput {
+    return _selectedReportType != null &&
+        _selectedMachineId != null &&
+        _selectedPriority != null &&
+        _titleController.text.trim().isNotEmpty &&
+        _titleController.text.trim().length >= 5;
+  }
+
   Future<List<MachineModel>> _fetchTeamMachines() async {
     final sessionService = SessionService();
     final userData = await sessionService.getCurrentUserData();
@@ -188,6 +196,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
           label: 'Submit Report',
           onPressed: _handleSubmit,
           isLoading: _isLoading,
+          isDisabled: !_hasValidInput,
         ),
       ],
       content: Column(

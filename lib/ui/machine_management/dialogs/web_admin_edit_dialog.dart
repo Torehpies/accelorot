@@ -44,6 +44,10 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     super.dispose();
   }
 
+  bool get _hasChanges {
+    return _nameController.text.trim() != widget.machine.machineName;
+  }
+
   void _validateName() {
     setState(() {
       final name = _nameController.text.trim();
@@ -61,13 +65,6 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     // Validate
     if (name.isEmpty) {
       setState(() => _nameError = 'Machine name is required');
-      return;
-    }
-
-    // Check if changed
-    if (name == widget.machine.machineName) {
-      if (!mounted) return;
-      AppSnackbar.info(context, 'No changes detected');
       return;
     }
 
@@ -131,10 +128,9 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
         ),
         DialogAction.primary(
           label: 'Update Machine',
-          onPressed: _nameError == null && !_isSubmitting
-              ? _handleSubmit
-              : null,
+          onPressed: _handleSubmit,
           isLoading: _isSubmitting,
+          isDisabled: !_hasChanges || _nameError != null,
         ),
       ],
     );

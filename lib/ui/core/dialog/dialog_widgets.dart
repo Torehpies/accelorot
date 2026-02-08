@@ -124,7 +124,7 @@ class DialogFooter extends StatelessWidget {
         : WebColors.success;
 
     return ElevatedButton(
-      onPressed: action.isLoading ? null : action.onPressed,
+      onPressed: (action.isLoading || action.isDisabled) ? null : action.onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: Colors.white,

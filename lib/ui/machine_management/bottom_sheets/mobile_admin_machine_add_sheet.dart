@@ -59,8 +59,8 @@ class _MobileAdminMachineAddSheetState
       final id = _idController.text.trim();
       if (id.isEmpty) {
         _idError = 'Machine ID is required';
-      } else if (id.contains(' ')) {
-        _idError = 'Machine ID cannot contain spaces';
+      } else if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(id)) {
+        _idError = 'Only letters and numbers allowed';
       } else {
         _idError = null;
       }
@@ -140,10 +140,10 @@ class _MobileAdminMachineAddSheetState
             required: true,
             errorText: _idError,
             hintText: 'Enter unique machine ID',
-            helperText: 'Must be unique and cannot contain spaces',
+            helperText: 'Max 30 characters. Letters and numbers only',
             maxLength: 30,
             inputFormatters: [
-              FilteringTextInputFormatter.deny(RegExp(r'\s')),
+              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
             ],
             onChanged: (_) => _validateId(),
           ),
