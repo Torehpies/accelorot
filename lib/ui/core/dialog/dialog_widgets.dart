@@ -93,17 +93,27 @@ class DialogFooter extends StatelessWidget {
   }
 
   Widget _buildButton(BuildContext context, DialogAction action) {
-    // Secondary/Cancel button
     if (!action.isPrimary && !action.isDestructive) {
       return Padding(
         padding: const EdgeInsets.only(right: 12),
-        child: TextButton(
+        child: OutlinedButton(
           onPressed: action.onPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: WebColors.buttonSecondary,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: WebColors.textPrimary,
+            side: const BorderSide(color: WebColors.cardBorder, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            minimumSize: const Size(0, 48),
+            overlayColor: WebColors.textPrimary.withValues(alpha: 0.05),
           ),
-          child: Text(action.label, style: WebTextStyles.bodyMedium),
+          child: Text(
+            action.label,
+            style: WebTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       );
     }
@@ -119,24 +129,28 @@ class DialogFooter extends StatelessWidget {
         backgroundColor: backgroundColor,
         foregroundColor: Colors.white,
         disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        minimumSize: const Size(0, 48),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Updated from 8 to 10 to match mobile!
+          borderRadius: BorderRadius.circular(10),
         ),
       ),
       child: action.isLoading
           ? const SizedBox(
-              width: 20,
-              height: 20,
+              width: 18,
+              height: 18,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: 2.2,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
           : Text(
               action.label,
-              style: WebTextStyles.bodyMedium.copyWith(color: Colors.white),
+              style: WebTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
     );
   }

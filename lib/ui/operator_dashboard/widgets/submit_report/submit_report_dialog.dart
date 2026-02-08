@@ -207,7 +207,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
             future: _fetchTeamMachines(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Machine',
                   value: null,
                   items: const [],
@@ -219,7 +219,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
               }
 
               if (snapshot.hasError) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Machine',
                   value: null,
                   items: const [],
@@ -239,7 +239,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
                       ))
                   .toList();
 
-              return DropdownField<String>(
+              return WebDropdownField<String>(
                 label: 'Machine',
                 value: _selectedMachineId,
                 items: machineItems,
@@ -269,7 +269,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
               if (snapshot.connectionState == ConnectionState.waiting &&
                   _selectedMachineId != null &&
                   _selectedMachineId!.isNotEmpty) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Batch (Optional)',
                   value: null,
                   items: const [],
@@ -280,7 +280,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
               }
 
               if (snapshot.hasError) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Batch (Optional)',
                   value: null,
                   items: const [],
@@ -298,7 +298,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
                       ))
                   .toList();
 
-              return DropdownField<String>(
+              return WebDropdownField<String>(
                 label: 'Batch (Optional)',
                 value: _selectedBatchId,
                 items: batchItems,
@@ -317,7 +317,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
           const SizedBox(height: 16),
 
           // Report Type
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Report Type',
             value: _selectedReportType,
             items: const [
@@ -358,7 +358,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
           const SizedBox(height: 16),
 
           // Priority
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Priority',
             value: _selectedPriority,
             items: const [

@@ -1,6 +1,7 @@
 // lib/ui/operator_dashboard/widgets/quick_actions/quick_actions_dialog.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import '../../../core/dialog/base_dialog.dart';
 import '../../../core/dialog/dialog_action.dart';
 import '../../../core/themes/web_colors.dart';
@@ -35,7 +36,7 @@ class QuickActionsDialog extends StatelessWidget {
           // Add Waste Product Option
           _WebActionTile(
             icon: Icons.inventory_2,
-            iconColor: Colors.teal,
+            iconColor: AppColors.green100,
             title: 'Add Waste Product',
             subtitle: 'Log waste material for composting',
             onTap: () async {
@@ -52,7 +53,7 @@ class QuickActionsDialog extends StatelessWidget {
               );
 
               if (result == true && context.mounted) {
-                Navigator.of(context).pop(true); // Return success to FAB
+                Navigator.of(context).pop(true);
               }
             },
           ),
@@ -62,7 +63,7 @@ class QuickActionsDialog extends StatelessWidget {
           // Submit Report Option
           _WebActionTile(
             icon: Icons.description,
-            iconColor: Colors.blue,
+            iconColor: AppColors.error,
             title: 'Submit Report',
             subtitle: 'Create maintenance or observation report',
             onTap: () async {
@@ -79,7 +80,7 @@ class QuickActionsDialog extends StatelessWidget {
               );
 
               if (result == true && context.mounted) {
-                Navigator.of(context).pop(true); // Return success to FAB
+                Navigator.of(context).pop(true);
               }
             },
           ),

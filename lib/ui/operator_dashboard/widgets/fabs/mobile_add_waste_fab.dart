@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../quick_actions/quick_actions_sheet.dart';
 import '../../../../data/providers/activity_providers.dart';
 import '../../../../data/providers/batch_providers.dart';
+import '../../../core/themes/app_theme.dart';
 
 class MobileAddWasteFAB extends ConsumerWidget {
   final String? preSelectedMachineId;
@@ -50,7 +51,7 @@ class MobileAddWasteFAB extends ConsumerWidget {
         height: 58,
         child: FloatingActionButton(
           onPressed: () => _handleFABPress(context, ref),
-          backgroundColor: Colors.teal,
+          backgroundColor: AppColors.green100,
           elevation: 4,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),

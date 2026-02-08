@@ -166,7 +166,7 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
           const SizedBox(height: 16),
 
           // Editable: Status
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Status',
             value: _selectedStatus,
             items: const [
@@ -182,7 +182,7 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
           const SizedBox(height: 16),
 
           // Editable: Priority
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Priority',
             value: _selectedPriority,
             items: const [

@@ -1,6 +1,7 @@
 // lib/ui/operator_dashboard/widgets/add_waste/add_waste_dialog.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,15 +34,12 @@ class AddWasteDialog extends ConsumerStatefulWidget {
 }
 
 class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
-  static const double _minQuantity = 5.0;
-  static const double _maxQuantity = 25.0;
-
   String? _selectedWasteCategory;
   String? _selectedMachineId;
   String? _selectedBatchId;
   final _plantTypeController = TextEditingController();
   final _descriptionController = TextEditingController();
-  double _quantity = 5.0;
+  final _quantityController = TextEditingController();
 
   String? _quantityError;
   String? _wasteCategoryError;
@@ -66,6 +64,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
   void dispose() {
     _plantTypeController.dispose();
     _descriptionController.dispose();
+    _quantityController.dispose();
     super.dispose();
   }
 
@@ -106,9 +105,17 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
     }
   }
 
-  String? _validateQuantity(double value) {
-    if (value < _minQuantity) return 'Min: ${_minQuantity}kg';
-    if (value > _maxQuantity) return 'Max: ${_maxQuantity}kg';
+  String? _validateQuantity(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter quantity';
+    }
+    final quantity = double.tryParse(value.trim());
+    if (quantity == null) {
+      return 'Please enter a valid number';
+    }
+    if (quantity <= 0) {
+      return 'Quantity must be greater than 0';
+    }
     return null;
   }
 
@@ -139,7 +146,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
         _machineError = 'Please select a machine';
       }
       
-      _quantityError = _validateQuantity(_quantity);
+      _quantityError = _validateQuantity(_quantityController.text);
     });
 
     return _wasteCategoryError == null &&
@@ -164,12 +171,13 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
     setState(() => _isLoading = true);
 
     final plantTypeValue = _plantTypeController.text.trim();
+    final quantityValue = double.parse(_quantityController.text.trim());
 
     final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
       plantType: plantTypeValue,
       plantTypeLabel: plantTypeValue,
-      quantity: _quantity,
+      quantity: quantityValue,
       description: _descriptionController.text.trim(),
       machineId: _selectedMachineId!,
       operatorName: user.displayName ?? user.email ?? 'Operator',
@@ -225,7 +233,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
             future: _fetchTeamMachines(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Machine',
                   value: null,
                   items: const [],
@@ -237,7 +245,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
               }
 
               if (snapshot.hasError) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Machine',
                   value: null,
                   items: const [],
@@ -257,7 +265,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
                       ))
                   .toList();
 
-              return DropdownField<String>(
+              return WebDropdownField<String>(
                 label: 'Machine',
                 value: _selectedMachineId,
                 items: machineItems,
@@ -287,7 +295,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
               if (snapshot.connectionState == ConnectionState.waiting &&
                   _selectedMachineId != null &&
                   _selectedMachineId!.isNotEmpty) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Batch (Optional)',
                   value: null,
                   items: const [],
@@ -298,7 +306,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
               }
 
               if (snapshot.hasError) {
-                return DropdownField<String>(
+                return WebDropdownField<String>(
                   label: 'Batch (Optional)',
                   value: null,
                   items: const [],
@@ -316,7 +324,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
                       ))
                   .toList();
 
-              return DropdownField<String>(
+              return WebDropdownField<String>(
                 label: 'Batch (Optional)',
                 value: _selectedBatchId,
                 items: batchItems,
@@ -335,7 +343,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
           const SizedBox(height: 16),
 
           // Waste Category
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Waste Category',
             value: _selectedWasteCategory,
             items: const [
@@ -350,7 +358,6 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
             onChanged: (value) {
               setState(() {
                 _selectedWasteCategory = value;
-                _plantTypeController.clear();
                 _wasteCategoryError = null;
               });
             },
@@ -361,11 +368,9 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
           InputField(
             label: 'Target Plant Type',
             controller: _plantTypeController,
-            hintText: _selectedWasteCategory == null
-                ? 'Select category first'
-                : 'Enter plant type',
+            hintText: 'Enter plant type',
             errorText: _plantTypeError,
-            enabled: _selectedWasteCategory != null && !_isLoading,
+            enabled: !_isLoading,
             required: true,
             maxLength: 50,
             onChanged: (value) => setState(() => _plantTypeError = null),
@@ -373,24 +378,19 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
           const SizedBox(height: 16),
 
           // Quantity
-          NumberStepperField(
-            label: 'Quantity',
-            value: _quantity,
-            min: _minQuantity,
-            max: _maxQuantity,
-            step: 0.5,
-            decimalPlaces: 1,
-            unit: 'kg',
+          InputField(
+            label: 'Quantity (kg)',
+            controller: _quantityController,
+            hintText: 'Enter quantity in kg',
             errorText: _quantityError,
-            helperText: 'Enter quantity ($_minQuantity-$_maxQuantity kg)',
             enabled: !_isLoading,
             required: true,
-            onChanged: (value) {
-              setState(() {
-                _quantity = value;
-                _quantityError = null;
-              });
-            },
+            maxLength: 3,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+            ],
+            onChanged: (value) => setState(() => _quantityError = null),
           ),
           const SizedBox(height: 16),
 

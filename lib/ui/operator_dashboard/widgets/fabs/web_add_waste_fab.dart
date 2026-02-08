@@ -1,6 +1,7 @@
 // lib/ui/operator_dashboard/widgets/fabs/web_add_waste_fab.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../quick_actions/quick_actions_dialog.dart';
 import '../../../core/themes/web_colors.dart';
@@ -46,7 +47,7 @@ class WebAddWasteFAB extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return FloatingActionButton(
       onPressed: () => _handleFABPress(context, ref),
-      backgroundColor: Colors.teal[800],
+      backgroundColor: AppColors.green100,
       elevation: 5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

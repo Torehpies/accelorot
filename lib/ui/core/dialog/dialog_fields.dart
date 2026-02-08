@@ -6,6 +6,9 @@ import '../themes/web_text_styles.dart';
 import '../themes/web_colors.dart';
 import '../toast/toast_service.dart';
 
+// Export dropdown components for convenience
+export '../fields/dropdown_field.dart' show WebDropdownField, DropdownItem;
+
 // ==================== READ ONLY ====================
 
 /// Single read-only field displaying label-value pair (side-by-side)
@@ -359,114 +362,6 @@ class InputField extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Dropdown field matching InputField design
-class DropdownField<T> extends StatelessWidget {
-  final String label;
-  final T? value;
-  final List<DropdownItem<T>> items;
-  final String? hintText;
-  final String? errorText;
-  final String? helperText;
-  final bool enabled;
-  final bool required;
-  final ValueChanged<T?>? onChanged;
-
-  const DropdownField({
-    super.key,
-    required this.label,
-    required this.items,
-    this.value,
-    this.hintText,
-    this.errorText,
-    this.helperText,
-    this.enabled = true,
-    this.required = false,
-    this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      decoration: InputDecoration(
-        // Floating label with required indicator
-        label: RichText(
-          text: TextSpan(
-            text: label,
-            style: WebTextStyles.label.copyWith(color: WebColors.textLabel),
-            children: [
-              if (required)
-                const TextSpan(
-                  text: ' *',
-                  style: TextStyle(color: WebColors.error),
-                ),
-            ],
-          ),
-        ),
-        hintText: hintText,
-        hintStyle: WebTextStyles.bodyMediumGray,
-        errorText: errorText,
-        helperText: helperText,
-        helperStyle: WebTextStyles.caption.copyWith(
-          color: WebColors.textLabel,
-        ),
-        // Disabled state fill
-        filled: !enabled,
-        fillColor: enabled ? null : WebColors.inputBackground,
-        // Rounded borders (matching mobile design)
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: WebColors.cardBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: WebColors.cardBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: WebColors.greens, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: WebColors.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: WebColors.error, width: 2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
-      ),
-      hint: hintText != null
-          ? Text(hintText!, style: WebTextStyles.bodyMediumGray)
-          : null,
-      isExpanded: true,
-      items: items.map((item) {
-        return DropdownMenuItem<T>(
-          value: item.value,
-          child: Text(item.label, style: WebTextStyles.body),
-        );
-      }).toList(),
-      onChanged: enabled ? onChanged : null,
-      style: WebTextStyles.body,
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
-      ),
-    );
-  }
-}
-
-/// Model for dropdown items
-class DropdownItem<T> {
-  final T value;
-  final String label;
-
-  const DropdownItem({required this.value, required this.label});
 }
 
 /// Date picker field matching InputField design
