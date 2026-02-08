@@ -116,7 +116,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
             ),
             ResponsiveButton(
               tooltipMessage: 'Add Machine',
-              label: const Text('Add Admin'),
+              label: const Text('Add Machine'),
               icon: Icon(Icons.add),
               onPressed: () => _showAddMachineDialog(context),
               isTablet: isTablet,
@@ -133,47 +133,6 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
               },
               isTablet: isTablet,
             ),
-            // Tooltip(
-            //   message: 'Add Machine',
-            //   child: ElevatedButton.icon(
-            //     onPressed: () => _showAddMachineDialog(context),
-            //     icon: const Icon(Icons.add, size: 18),
-            //     label: const Text('Add Machine'),
-            //     style: ElevatedButton.styleFrom(
-            //       foregroundColor: Colors.white,
-            //       padding: const EdgeInsets.symmetric(
-            //         horizontal: 16,
-            //         vertical: 12,
-            //       ),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(8),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // Tooltip(
-            //   message: 'Add Admin',
-            //   child: ElevatedButton.icon(
-            //     onPressed: () {
-            //       showDialog(
-            //         context: context,
-            //         builder: (_) => AddAdminDialog(teamId: _teamId),
-            //       );
-            //     },
-            //     icon: const Icon(Icons.add_moderator, size: 18),
-            //     label: const Text('Add Admin'),
-            //     style: ElevatedButton.styleFrom(
-            //       foregroundColor: Colors.white,
-            //       padding: const EdgeInsets.symmetric(
-            //         horizontal: 16,
-            //         vertical: 12,
-            //       ),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(8),
-            //       ),
-            //     ),
-            //   ),
-            // ),
           ],
           tableHeader: TableHeader(
             isLoading: state.isLoading,
@@ -227,7 +186,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
                                 : WebColors.textLabel,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         FilterDropdown<TeamMemberStatusFilter>(
                           label: 'Status',
                           value: state.statusFilter,
