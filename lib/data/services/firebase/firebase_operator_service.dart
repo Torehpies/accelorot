@@ -207,7 +207,7 @@ class FirebaseOperatorService implements OperatorService {
   }
 
   @override
-  Future<app_result.Result<AppUser>> addOperator({
+  Future<app_result.Result<AppUser>> addUser({
     required String email,
     required String password,
     required String firstname,

@@ -10,8 +10,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamHeaderWithTabs extends StatelessWidget {
   final TabController controller;
+  final List<String> tabTitles;
 
-  const TeamHeaderWithTabs({super.key, required this.controller});
+  const TeamHeaderWithTabs({
+    super.key,
+    required this.controller,
+    required this.tabTitles,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +31,7 @@ class TeamHeaderWithTabs extends StatelessWidget {
             ? MainAxisAlignment.start
             : MainAxisAlignment.center,
         children: [
-          TabsRow(controller: controller),
+          TabsRow(controller: controller, tabTitles: tabTitles),
           if (isDesktop) ..._buildFilters(controller, isTablet),
         ],
       ),

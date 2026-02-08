@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
-import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/add_admin_notifier.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/add_operator_notifier.dart';
-import 'package:flutter_application_1/ui/core/ui/outline_app_button.dart';
-import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 
-class AddOperatorDialog extends ConsumerStatefulWidget {
-  const AddOperatorDialog({super.key});
+class AddAdminDialog extends ConsumerStatefulWidget {
+  final String teamId;
+
+  const AddAdminDialog({super.key, required this.teamId});
+
   @override
-  ConsumerState<AddOperatorDialog> createState() => _AddOperatorDialogState();
+  ConsumerState<AddAdminDialog> createState() => _AddAdminDialogState();
 }
 
-class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
+class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
   final _formKey = GlobalKey<FormState>();
-  // Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
-  // Password visibility state
   bool _isPasswordVisible = false;
-  // Tracks whether form fields have been modified
   bool isDirty = false;
-  // Validators
+
   final emailRegex = RegExp(
     r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
   );
@@ -70,13 +67,13 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
         title: Text(title),
         content: Text(message),
         actions: [
-          OutlineAppButton(
-            text: cancelText,
+          TextButton(
+            child: Text(cancelText),
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          PrimaryButton(
+          ElevatedButton(
+            child: Text(confirmText),
             onPressed: () => Navigator.of(context).pop(true),
-            text: confirmText,
           ),
         ],
       ),
@@ -85,14 +82,13 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(addOperatorProvider);
-    // Listen for state updates
-    ref.listen(addOperatorProvider, (previous, next) {
+    final state = ref.watch(addAdminProvider);
+    ref.listen(addAdminProvider, (previous, next) {
       if (previous?.isLoading == true && next.isLoading == false) {
-        if (next.operator != null) {
+        if (next.admin != null) {
           if (context.mounted) {
             Navigator.of(context).pop();
-            AppSnackbar.success(context, 'Operator added successfully!');
+            AppSnackbar.success(context, 'Admin added successfully!');
           }
         } else if (next.error != null) {
           AppSnackbar.error(context, next.error!);
@@ -101,7 +97,7 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
     });
     return DialogShell(
       title: const Text(
-        'Add Operator',
+        'Add Admin',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
       content: SingleChildScrollView(
@@ -109,62 +105,52 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Fill in the details below to add a new operator."),
+            const Text("Fill in the details below to add a new admin."),
             const Divider(thickness: 1, height: 24),
             Form(
               key: _formKey,
               child: Column(
                 children: [
-                  // First Name Field
                   TextFormField(
                     controller: firstnameController,
-                    decoration: InputDecoration(labelText: 'First Name'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'First Name is required' : null,
-                    onChanged: (value) {
-                      setState(() {
-                        isDirty = true;
-                      });
-                    },
+                    decoration: const InputDecoration(labelText: 'First Name'),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'First Name is required'
+                        : null,
+                    onChanged: (_) => setState(() {
+                      isDirty = true;
+                    }),
                   ),
                   const SizedBox(height: 16),
-                  // Last Name Field
                   TextFormField(
                     controller: lastnameController,
-                    decoration: InputDecoration(labelText: 'Last Name'),
-                    validator: (value) =>
-                        value!.isEmpty ? 'Last Name is required' : null,
-                    onChanged: (value) {
-                      setState(() {
-                        isDirty = true;
-                      });
-                    },
+                    decoration: const InputDecoration(labelText: 'Last Name'),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Last Name is required'
+                        : null,
+                    onChanged: (_) => setState(() {
+                      isDirty = true;
+                    }),
                   ),
                   const SizedBox(height: 16),
-                  // Email Field
                   TextFormField(
                     controller: emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: const InputDecoration(labelText: 'Email'),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) => validateEmail(value ?? ''),
-                    onChanged: (value) {
-                      setState(() {
-                        isDirty = true;
-                      });
-                    },
+                    onChanged: (_) => setState(() {
+                      isDirty = true;
+                    }),
                   ),
                   const SizedBox(height: 16),
-                  // Password Field with Reveal Password
                   TextFormField(
                     controller: passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
+                        onPressed: () => setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        }),
                         icon: Icon(
                           _isPasswordVisible
                               ? Icons.visibility
@@ -175,11 +161,9 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                     ),
                     obscureText: !_isPasswordVisible,
                     validator: (value) => validatePassword(value ?? ''),
-                    onChanged: (value) {
-                      setState(() {
-                        isDirty = true;
-                      });
-                    },
+                    onChanged: (_) => setState(() {
+                      isDirty = true;
+                    }),
                   ),
                 ],
               ),
@@ -200,10 +184,8 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                 title: 'Unsaved Changes',
                 message: 'Are you sure you want to discard your changes?',
               );
-              if (confirm == true) {
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+              if (confirm == true && context.mounted) {
+                Navigator.of(context).pop();
               }
             } else {
               Navigator.of(context).pop();
@@ -223,18 +205,21 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                     );
                     if (confirm == true) {
                       await ref
-                          .read(addOperatorProvider.notifier)
-                          .addOperator(
+                          .read(addAdminProvider.notifier)
+                          .addAdmin(
                             email: emailController.text,
                             password: passwordController.text,
                             firstname: firstnameController.text,
                             lastname: lastnameController.text,
+                            teamId: widget.teamId,
                           )
                           .then((_) {
-                            // Refresh Tabs
-                            ref.read(teamMembersProvider.notifier).refresh();
-                            // Refresh Summary Header
-                            ref.invalidate(currentTeamProvider);
+                            // Refresh admin/member list providers
+                            ref
+                                .read(
+                                  teamDetailProvider(widget.teamId).notifier,
+                                )
+                                .refresh();
                           });
                     }
                   }
