@@ -32,20 +32,17 @@ class TeamMemberEditSheet extends StatefulWidget {
 class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
-  late final TextEditingController _emailController;
   late UserStatus _status;
 
   bool _isLoading = false;
   String? _firstNameError;
   String? _lastNameError;
-  String? _emailError;
 
   @override
   void initState() {
     super.initState();
     _firstNameController = TextEditingController(text: widget.member.firstName);
     _lastNameController = TextEditingController(text: widget.member.lastName);
-    _emailController = TextEditingController(text: widget.member.email);
     _status = widget.member.status;
   }
 
@@ -53,14 +50,12 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
   bool get _hasChanges {
     return _firstNameController.text.trim() != widget.member.firstName.trim() ||
         _lastNameController.text.trim() != widget.member.lastName.trim() ||
-        _emailController.text.trim() != widget.member.email.trim() ||
         _status != widget.member.status;
   }
 
@@ -68,7 +63,6 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
     setState(() {
       _firstNameError = null;
       _lastNameError = null;
-      _emailError = null;
     });
 
     bool isValid = true;
@@ -83,19 +77,7 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
       isValid = false;
     }
 
-    if (_emailController.text.trim().isEmpty) {
-      setState(() => _emailError = 'Email cannot be empty');
-      isValid = false;
-    } else if (!_isValidEmail(_emailController.text.trim())) {
-      setState(() => _emailError = 'Invalid email format');
-      isValid = false;
-    }
-
     return isValid;
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   Future<void> _save() async {
@@ -108,7 +90,7 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
         id: widget.member.id,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
+        email: widget.member.email, // Keep original email
         status: _status,
       );
 
@@ -194,16 +176,6 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
           ),
           const SizedBox(height: 16),
 
-          MobileInputField(
-            label: 'Email',
-            controller: _emailController,
-            required: true,
-            errorText: _emailError,
-            hintText: 'Enter email',
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-
           MobileDropdownField<UserStatus>(
             label: 'Status',
             value: _status,
@@ -218,6 +190,10 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
           MobileReadOnlySection(
             sectionTitle: 'Additional Information',
             fields: [
+              MobileReadOnlyField(
+                label: 'Email',
+                value: widget.member.email,
+              ),
               MobileReadOnlyField(
                 label: 'Member ID',
                 value: widget.member.id,
