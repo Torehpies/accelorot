@@ -8,7 +8,7 @@ import '../widgets/mobile/activity_card.dart';
 import '../widgets/mobile/machine_selector.dart';
 import '../widgets/mobile/batch_selector.dart';
 import '../../core/widgets/containers/mobile_common_widgets.dart';
-import '../../core/widgets/containers/mobile_list_header.dart';
+import '../../core/widgets/containers/mobile_sliver_header.dart';
 import '../../core/widgets/containers/mobile_list_content.dart';
 import '../../core/widgets/buttons/compact_back_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
@@ -83,66 +83,77 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: MobileListHeader(
-          // Custom compact back button - fits within constraints
-          leading: const CompactBackButton(),
+        body: RefreshIndicator(
+          onRefresh: onRefresh,
+          color: AppColors.green100,
+          child: CustomScrollView(
+            slivers: [
+              // Header with 3 rows: Title + Selectors + Search/Filters
+              MobileSliverHeader(
+                // Custom compact back button
+                leading: const CompactBackButton(),
 
-          // Row 1: Title (from ViewModel config)
-          title: viewModel.screenTitle,
+                // Row 1: Title (from ViewModel config)
+                title: viewModel.screenTitle,
 
-          // Row 2: Selectors (Machine + Batch)
-          selectorWidgets: [
-            MachineSelector(
-              selectedMachineId: state.selectedMachineId,
-              onChanged: onMachineChanged,
-              isCompact: true,
-            ),
-            BatchSelector(
-              selectedBatchId: state.selectedBatchId,
-              selectedMachineId: state.selectedMachineId,
-              onChanged: onBatchChanged,
-              onMachineAutoSelect: onMachineChanged,
-              isCompact: true,
-            ),
-          ],
+                // Row 2: Selectors (Machine + Batch)
+                selectorWidgets: [
+                  MachineSelector(
+                    selectedMachineId: state.selectedMachineId,
+                    onChanged: onMachineChanged,
+                    isCompact: true,
+                  ),
+                  BatchSelector(
+                    selectedBatchId: state.selectedBatchId,
+                    selectedMachineId: state.selectedMachineId,
+                    onChanged: onBatchChanged,
+                    onMachineAutoSelect: onMachineChanged,
+                    isCompact: true,
+                  ),
+                ],
 
-          // Row 3: Search + Status (TODO) + Date
-          searchConfig: SearchBarConfig(
-            onSearchChanged: onSearchChanged,
-            searchFocusNode: _searchFocusNode,
-            searchHint: 'Search activities...',
-            isLoading: state.isLoading,
-          ),
-          filterWidgets: [
-            // TODO: Add MobileDropdownFilterButton for status here
-            MobileDateFilterButton(
-              onFilterChanged: onDateFilterChanged,
-              isLoading: state.isLoading,
-            ),
-          ],
-        ),
+                // Row 3: Search + Filters
+                searchConfig: SearchBarConfig(
+                  onSearchChanged: onSearchChanged,
+                  searchFocusNode: _searchFocusNode,
+                  searchHint: 'Search activities...',
+                  isLoading: state.isLoading,
+                ),
+                filterWidgets: [
+                  // TODO: Add MobileDropdownFilterButton for status here
+                  MobileDateFilterButton(
+                    onFilterChanged: onDateFilterChanged,
+                    isLoading: state.isLoading,
+                  ),
+                ],
+              ),
 
-        // Body: Content cards with top padding for breathing room
-        body: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: MobileListContent<ActivityLogItem>(
-            isLoading: state.isLoading,
-            isInitialLoad: state.status == LoadingStatus.loading,
-            hasError: state.hasError,
-            errorMessage: state.errorMessage,
-            items: state.filteredActivities,
-            displayedItems: state.displayedActivities,
-            hasMoreToLoad: state.hasMoreToLoad,
-            remainingCount: state.remainingCount,
-            emptyStateConfig: _getEmptyStateConfig(state),
-            onRefresh: onRefresh,
-            onLoadMore: onLoadMore,
-            onRetry: onRefresh,
-            itemBuilder: (context, item, index) => ActivityCard(
-              item: item,
-              onTap: () => _onActivityTap(item),
-            ),
-            skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              // Top padding for breathing room
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 8),
+              ),
+
+              // Content cards
+              MobileListContent<ActivityLogItem>(
+                isLoading: state.isLoading,
+                isInitialLoad: state.status == LoadingStatus.loading,
+                hasError: state.hasError,
+                errorMessage: state.errorMessage,
+                items: state.filteredActivities,
+                displayedItems: state.displayedActivities,
+                hasMoreToLoad: state.hasMoreToLoad,
+                remainingCount: state.remainingCount,
+                emptyStateConfig: _getEmptyStateConfig(state),
+                onRefresh: onRefresh,
+                onLoadMore: onLoadMore,
+                onRetry: onRefresh,
+                itemBuilder: (context, item, index) => ActivityCard(
+                  item: item,
+                  onTap: () => _onActivityTap(item),
+                ),
+                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              ),
+            ],
           ),
         ),
       ),

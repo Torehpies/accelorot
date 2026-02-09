@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets/containers/mobile_common_widgets.dart';
-import '../../core/widgets/containers/mobile_list_header.dart';
+import '../../core/widgets/containers/mobile_sliver_header.dart';
 import '../../core/widgets/containers/mobile_list_content.dart';
 import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
@@ -113,52 +113,69 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: MobileListHeader(
-          title: 'My Machines',
-          showAddButton: false, // Operators cannot add machines
-          searchConfig: SearchBarConfig(
-            onSearchChanged: notifier.setSearchQuery,
-            searchHint: 'Search machines...',
-            isLoading: state.isLoading,
-            searchFocusNode: _searchFocusNode,
-          ),
-          filterWidgets: [
-            MobileStatusFilterButton(
-              currentFilter: state.selectedStatusFilter,
-              onFilterChanged: notifier.setStatusFilter,
-              isLoading: state.isLoading,
-            ),
-            const SizedBox(width: 8),
-            MobileDateFilterButton(
-              onFilterChanged: notifier.setDateFilter,
-              isLoading: state.isLoading,
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: MobileListContent<MachineModel>(
-            isLoading: state.isLoading,
-            isInitialLoad: state.machines.isEmpty,
-            hasError: state.hasError,
-            errorMessage: state.errorMessage,
-            items: state.filteredMachines,
-            displayedItems: state.displayedMachines,
-            hasMoreToLoad: state.hasMoreToLoad,
-            remainingCount: state.remainingCount,
-            emptyStateConfig: _getEmptyStateConfig(state),
-            onRefresh: () async {
-              if (_teamId != null) {
-                await notifier.refresh(_teamId!);
-              }
-            },
-            onLoadMore: notifier.loadMore,
-            onRetry: () {
-              notifier.clearError();
-              if (_teamId != null) notifier.initialize(_teamId!);
-            },
-            itemBuilder: _buildMachineCard,
-            skeletonBuilder: (context, index) => const DataCardSkeleton(),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            if (_teamId != null) {
+              await notifier.refresh(_teamId!);
+            }
+          },
+          color: AppColors.green100,
+          child: CustomScrollView(
+            slivers: [
+              // Header with search + filters
+              MobileSliverHeader(
+                title: 'My Machines',
+                showAddButton: false, // Operators cannot add machines
+                searchConfig: SearchBarConfig(
+                  onSearchChanged: notifier.setSearchQuery,
+                  searchHint: 'Search machines...',
+                  isLoading: state.isLoading,
+                  searchFocusNode: _searchFocusNode,
+                ),
+                filterWidgets: [
+                  MobileStatusFilterButton(
+                    currentFilter: state.selectedStatusFilter,
+                    onFilterChanged: notifier.setStatusFilter,
+                    isLoading: state.isLoading,
+                  ),
+                  const SizedBox(width: 8),
+                  MobileDateFilterButton(
+                    onFilterChanged: notifier.setDateFilter,
+                    isLoading: state.isLoading,
+                  ),
+                ],
+              ),
+
+              // Top padding for breathing room
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 8),
+              ),
+
+              // Content
+              MobileListContent<MachineModel>(
+                isLoading: state.isLoading,
+                isInitialLoad: state.machines.isEmpty,
+                hasError: state.hasError,
+                errorMessage: state.errorMessage,
+                items: state.filteredMachines,
+                displayedItems: state.displayedMachines,
+                hasMoreToLoad: state.hasMoreToLoad,
+                remainingCount: state.remainingCount,
+                emptyStateConfig: _getEmptyStateConfig(state),
+                onRefresh: () async {
+                  if (_teamId != null) {
+                    await notifier.refresh(_teamId!);
+                  }
+                },
+                onLoadMore: notifier.loadMore,
+                onRetry: () {
+                  notifier.clearError();
+                  if (_teamId != null) notifier.initialize(_teamId!);
+                },
+                itemBuilder: _buildMachineCard,
+                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              ),
+            ],
           ),
         ),
       ),

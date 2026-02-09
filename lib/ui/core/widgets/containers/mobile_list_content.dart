@@ -1,4 +1,4 @@
-// lib/ui/core/widgets/mobile_list_content.dart
+// lib/ui/core/widgets/containers/mobile_list_content.dart
 
 import 'package:flutter/material.dart';
 import 'mobile_common_widgets.dart';
@@ -20,6 +20,7 @@ class EmptyStateConfig {
 }
 
 /// Generic list content handler with pull-to-refresh and pagination
+/// Returns a sliver widget for use with CustomScrollView
 class MobileListContent<T> extends StatelessWidget {
   final bool isLoading;
   final bool isInitialLoad;
@@ -56,51 +57,61 @@ class MobileListContent<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return sliver based on state
     if (isLoading && isInitialLoad) {
-      return MobileLoadingState(
-        itemCount: 5,
-        skeletonBuilder: skeletonBuilder,
+      return SliverFillRemaining(
+        child: MobileLoadingState(
+          itemCount: 5,
+          skeletonBuilder: skeletonBuilder,
+        ),
       );
     }
 
     if (isLoading && !isInitialLoad) {
-      return Center(
-        child: CircularProgressIndicator(color: AppColors.green100),
+      return SliverFillRemaining(
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.green100),
+        ),
       );
     }
 
     if (hasError) {
-      return MobileErrorState(
-        message: errorMessage ?? 'An error occurred',
-        onRetry: onRetry,
+      return SliverFillRemaining(
+        child: MobileErrorState(
+          message: errorMessage ?? 'An error occurred',
+          onRetry: onRetry,
+        ),
       );
     }
 
     if (displayedItems.isEmpty) {
-      return MobileEmptyState(
-        icon: emptyStateConfig.icon,
-        message: emptyStateConfig.message,
-        actionLabel: emptyStateConfig.actionLabel,
-        onAction: emptyStateConfig.onAction,
+      return SliverFillRemaining(
+        child: MobileEmptyState(
+          icon: emptyStateConfig.icon,
+          message: emptyStateConfig.message,
+          actionLabel: emptyStateConfig.actionLabel,
+          onAction: emptyStateConfig.onAction,
+        ),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: onRefresh,
-      color: AppColors.green100,
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: displayedItems.length + (hasMoreToLoad ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == displayedItems.length) {
-            return MobileLoadMoreButton(
-              remainingCount: remainingCount,
-              onPressed: onLoadMore,
-            );
-          }
+    // Normal list content as sliver
+    return SliverPadding(
+      padding: EdgeInsets.zero,
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (index == displayedItems.length) {
+              return MobileLoadMoreButton(
+                remainingCount: remainingCount,
+                onPressed: onLoadMore,
+              );
+            }
 
-          return itemBuilder(context, displayedItems[index], index);
-        },
+            return itemBuilder(context, displayedItems[index], index);
+          },
+          childCount: displayedItems.length + (hasMoreToLoad ? 1 : 0),
+        ),
       ),
     );
   }
