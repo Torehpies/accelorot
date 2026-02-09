@@ -19,7 +19,6 @@ class OxygenStatisticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const mainColor = Color(0xFF7C3AED); // Purple color
-    const borderColor = Color(0xFFDDD6FE); // Light Purple Border
 
     // Generate daily chart data from real readings
     final chartData = _generateDailyData();
@@ -28,7 +27,6 @@ class OxygenStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 2), // Full colored border
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +37,7 @@ class OxygenStatisticCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFFAF5FF), width: 1),
+                  bottom: BorderSide(color: Color(0xFFFAF5FF), width: 3),
                 ),
               ),
               child: Row(
@@ -180,7 +178,7 @@ class OxygenStatisticCard extends StatelessWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               reservedSize: 60,
-                              interval: 500,
+                              interval: 1000,
                               getTitlesWidget: (double value, TitleMeta meta) {
                                 return Text(
                                   '${value.toInt()} ppm',
@@ -257,7 +255,7 @@ class OxygenStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Divider
-                  const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+                  const Divider(height: 3, thickness: 3, color: Color(0xFFF3F4F6)),
                   const SizedBox(height: 16),
                   
                   // Trend Text

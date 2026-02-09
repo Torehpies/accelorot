@@ -161,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Waste entry added successfully!'),
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.green,
             ),
           );
         }
@@ -255,7 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           height: 58,
           child: FloatingActionButton(
             onPressed: _handleFABPress,
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.green,
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),

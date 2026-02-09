@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/themes/app_theme.dart';
 
 class SettingsSection extends StatelessWidget {
   final String title;
@@ -20,9 +21,9 @@ class SettingsSection extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
         ),

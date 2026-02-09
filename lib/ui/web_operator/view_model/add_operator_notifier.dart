@@ -37,7 +37,7 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
     final teamId = teamUser?.teamId;
     if (teamId == null) return;
 
-    final result = await _service.addOperator(
+    final result = await _service.addUser(
       email: email,
       password: password,
       firstname: firstname,

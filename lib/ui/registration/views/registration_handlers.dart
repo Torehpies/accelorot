@@ -94,7 +94,7 @@ class RegistrationFormContent extends ConsumerWidget {
               width: logoSize,
               height: logoSize,
               fit: BoxFit.contain,
-              semanticsLabel: 'Accel-O-Rot Logo',
+              semanticsLabel: 'Accelorot logo',
             ),
           ),
         SizedBox(height: isDesktop ? 0 : 8),

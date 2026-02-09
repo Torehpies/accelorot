@@ -49,7 +49,10 @@ class _MobileOperatorManagementScreenState
             margin: const EdgeInsets.all(16),
             child: Column(
               children: [
-                TeamHeaderWithTabs(controller: _tabController),
+                TeamHeaderWithTabs(
+                  controller: _tabController,
+                  tabTitles: ['Members', 'For Approval'],
+                ),
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,

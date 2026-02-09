@@ -6,10 +6,12 @@ import '../../models/report.dart';
 abstract class ReportService {
   /// Fetch all reports for the current user's team
   /// Handles authentication and team resolution internally
-  Future<List<Report>> fetchTeamReports();
+  /// [limit] - Maximum number of reports to fetch (null = fetch all)
+  Future<List<Report>> fetchTeamReports({int? limit});
 
   /// Fetch all reports for a specific team (admin use)
-  Future<List<Report>> fetchReportsByTeam(String teamId);
+  /// [limit] - Maximum number of reports to fetch (null = fetch all)
+  Future<List<Report>> fetchReportsByTeam(String teamId, {int? limit});
 
   /// Fetch reports for a specific machine
   /// @param machineId - the machine identifier

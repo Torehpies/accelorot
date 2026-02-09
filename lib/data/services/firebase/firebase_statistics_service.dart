@@ -43,44 +43,63 @@ class FirebaseStatisticsService implements StatisticsService {
 
       debugPrint('📅 Scanning $batchId from ${startDate.toString().substring(0, 10)} to ${endDateNormalized.toString().substring(0, 10)}');
 
-      // Scan each date directly (bypasses phantom date documents)
-      // Use isBefore with endDate + 1 day to include today, but not tomorrow
+      // Generate list of dates to fetch
+      final List<DateTime> datesToFetch = [];
       for (var day = startDate;
            !day.isAfter(endDateNormalized);
            day = day.add(const Duration(days: 1))) {
-        
-        final dateStr = day.toIso8601String().substring(0, 10);
+        datesToFetch.add(day);
+      }
 
-        final timeSnapshot = await _db
-            .collection('batches')
-            .doc(batchId)
-            .collection('readings')
-            .doc(dateStr)
-            .collection('time')
-            .get();
+      // Parallel fetch using Future.wait
+      final List<List<Map<String, dynamic>>> results = await Future.wait(
+        datesToFetch.map((day) async {
+          final dateStr = day.toIso8601String().substring(0, 10);
+          final dailyReadings = <Map<String, dynamic>>[];
 
-        if (timeSnapshot.docs.isNotEmpty) {
-          debugPrint('✅ $dateStr: ${timeSnapshot.docs.length} readings');
+          try {
+            final timeSnapshot = await _db
+                .collection('batches')
+                .doc(batchId)
+                .collection('readings')
+                .doc(dateStr)
+                .collection('time')
+                .get();
 
-          for (var timeDoc in timeSnapshot.docs) {
-            final data = timeDoc.data();
-            if (data.containsKey(fieldName)) {
-              allReadings.add({
-                'id': timeDoc.id,
-                'value': (data[fieldName] ?? 0).toDouble(),
-                'timestamp': _parseTimestamp(data['timestamp']),
+            if (timeSnapshot.docs.isNotEmpty) {
+              for (var timeDoc in timeSnapshot.docs) {
+                final data = timeDoc.data();
+                if (data.containsKey(fieldName)) {
+                  dailyReadings.add({
+                    'id': timeDoc.id,
+                    'value': (data[fieldName] ?? 0).toDouble(),
+                    'timestamp': _parseTimestamp(data['timestamp']),
+                  });
+                }
+              }
+            } else {
+               // No readings for this day - add a zero value at midnight
+               dailyReadings.add({
+                'id': '$dateStr-00-00-00',
+                'value': 0.0,
+                'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
               });
             }
+          } catch (e) {
+            debugPrint('Error fetching day $dateStr: $e');
+             dailyReadings.add({
+                'id': '$dateStr-00-00-00',
+                'value': 0.0,
+                'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
+              });
           }
-        } else {
-          // No readings for this day - add a zero value at midnight
-          debugPrint('⚪ $dateStr: No readings, adding zero value');
-          allReadings.add({
-            'id': '$dateStr-00-00-00',
-            'value': 0.0,
-            'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
-          });
-        }
+          return dailyReadings;
+        }),
+      );
+
+      // Flatten results
+      for (var dayResults in results) {
+        allReadings.addAll(dayResults);
       }
 
       debugPrint('📊 Total $fieldName: ${allReadings.length}');
