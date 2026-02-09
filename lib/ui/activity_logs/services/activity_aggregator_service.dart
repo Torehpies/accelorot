@@ -40,6 +40,11 @@ class ActivityAggregatorService {
 
   // ===== MEMORY CACHE =====
   static const _cacheTTL = Duration(minutes: 5);
+  
+  // ===== CUTOFF CONFIGURATION =====
+  /// Default cutoff in days for alerts and cycles (change this to adjust globally)
+  static const defaultCutoffDays = 2;
+  
   final Map<String, CachedData<List<ActivityLogItem>>> _cache = {};
   CachedData<ActivityResult>? _allActivitiesCache;
 
@@ -108,7 +113,7 @@ class ActivityAggregatorService {
   }
 
   /// Fetch and transform alert activities
-  Future<List<ActivityLogItem>> getAlerts() async {
+  Future<List<ActivityLogItem>> getAlerts({DateTime? cutoffDate, int? limit}) async {
     // Check cache first
     final cached = _cache['alerts'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -119,7 +124,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh alerts from Firebase...');
-      final alerts = await _alertRepo.getTeamAlerts();
+      final alerts = await _alertRepo.getTeamAlerts(cutoffDate: cutoffDate, limit: limit);
       final items = alerts
           .map((alert) => ActivityPresentationMapper.fromAlert(alert))
           .toList();
@@ -188,7 +193,7 @@ class ActivityAggregatorService {
   }
 
   /// Fetch and transform cycle & recommendation activities
-  Future<List<ActivityLogItem>> getCyclesRecom() async {
+  Future<List<ActivityLogItem>> getCyclesRecom({DateTime? cutoffDate, int? limit}) async {
     // Check cache first
     final cached = _cache['cycles'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -199,7 +204,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh cycles from Firebase...');
-      final cycles = await _cycleRepo.getTeamCycles();
+      final cycles = await _cycleRepo.getTeamCycles(cutoffDate: cutoffDate, limit: limit);
       final items = cycles
           .map(
             (cycle) =>
@@ -332,8 +337,14 @@ class ActivityAggregatorService {
       // Process substrates
       final substrateStopwatch = Stopwatch()..start();
       for (var substrate in substrates) {
-        cache['substrate_${substrate.id}'] = substrate;
-        allItems.add(ActivityPresentationMapper.fromSubstrate(substrate));
+        try {
+          final cacheKey = 'substrate_${substrate.id}';
+          cache[cacheKey] = substrate;
+          allItems.add(ActivityPresentationMapper.fromSubstrate(substrate));
+          debugPrint('   🔑 Cached substrate: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing substrate ${substrate.id}: $e');
+        }
       }
       substrateStopwatch.stop();
       debugPrint(
@@ -343,8 +354,14 @@ class ActivityAggregatorService {
       // Process alerts
       final alertStopwatch = Stopwatch()..start();
       for (var alert in alerts) {
-        cache['alert_${alert.id}'] = alert;
-        allItems.add(ActivityPresentationMapper.fromAlert(alert));
+        try {
+          final cacheKey = 'alert_${alert.id}';
+          cache[cacheKey] = alert;
+          allItems.add(ActivityPresentationMapper.fromAlert(alert));
+          debugPrint('   🔑 Cached alert: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing alert ${alert.id}: $e');
+        }
       }
       alertStopwatch.stop();
       debugPrint(
@@ -354,8 +371,14 @@ class ActivityAggregatorService {
       // Process cycles
       final cycleStopwatch = Stopwatch()..start();
       for (var cycle in cycles) {
-        cache['cycle_${cycle.id}'] = cycle;
-        allItems.add(ActivityPresentationMapper.fromCycleRecommendation(cycle));
+        try {
+          final cacheKey = 'cycle_${cycle.id}';
+          cache[cacheKey] = cycle;
+          allItems.add(ActivityPresentationMapper.fromCycleRecommendation(cycle));
+          debugPrint('   🔑 Cached cycle: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing cycle ${cycle.id}: $e');
+        }
       }
       cycleStopwatch.stop();
       debugPrint(
@@ -365,8 +388,14 @@ class ActivityAggregatorService {
       // Process reports
       final reportStopwatch = Stopwatch()..start();
       for (var report in reports) {
-        cache['report_${report.id}'] = report;
-        allItems.add(ActivityPresentationMapper.fromReport(report));
+        try {
+          final cacheKey = 'report_${report.id}';
+          cache[cacheKey] = report;
+          allItems.add(ActivityPresentationMapper.fromReport(report));
+          debugPrint('   🔑 Cached report: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing report ${report.id}: $e');
+        }
       }
       reportStopwatch.stop();
       debugPrint(

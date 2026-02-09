@@ -89,18 +89,23 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== DATA FETCHING =====
 
   Future<List<ActivityLogItem>> _fetchData() async {
+    // Apply cutoff for alerts and cycles (using centralized config)
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: ActivityAggregatorService.defaultCutoffDays),
+    );
+
     switch (_screenType) {
       case ActivityScreenType.substrates:
         return await _aggregator.getSubstrates();
 
       case ActivityScreenType.alerts:
-        return await _aggregator.getAlerts();
+        return await _aggregator.getAlerts(cutoffDate: cutoffDate);
 
       case ActivityScreenType.reports:
         return await _aggregator.getReports();
 
       case ActivityScreenType.cyclesRecom:
-        return await _aggregator.getCyclesRecom();
+        return await _aggregator.getCyclesRecom(cutoffDate: cutoffDate);
 
       case ActivityScreenType.allActivity:
         // Use the new caching method for allActivity screen

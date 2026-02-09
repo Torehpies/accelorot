@@ -94,17 +94,25 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching substrates...');
-      // Use cached method instead of raw
-      final substrateActivityList = await _aggregator.getSubstrates();
+      // Fetch raw substrates to build cache
+      final substrates = await _aggregator.getSubstratesRaw();
+      
+      // Build cache for substrates
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var substrate in substrates) {
+        final cacheKey = 'substrate_${substrate.id}';
+        newCache[cacheKey] = substrate;
+      }
+      
+      // Transform to ActivityLogItem
+      final substrateActivityList = substrates
+          .map((s) => ActivityPresentationMapper.fromSubstrate(s))
+          .toList();
 
       stopwatch.stop();
       debugPrint(
         'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrateActivityList.length} items)',
       );
-
-      // Build cache from returned items
-      final newCache = Map<String, dynamic>.from(state.entityCache);
-      // Note: Cache building happens in aggregator, we just use the results
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -136,16 +144,30 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching alerts...');
-      // Use cached method instead of raw
-      final alertActivityList = await _aggregator.getAlerts();
+      // Apply cutoff for alerts (using centralized config)
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      
+      // Fetch raw alerts to build cache
+      final alerts = await _aggregator.getAlertsRaw(cutoffDate: cutoffDate);
+      
+      // Build cache for alerts
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var alert in alerts) {
+        final cacheKey = 'alert_${alert.id}';
+        newCache[cacheKey] = alert;
+      }
+      
+      // Transform to ActivityLogItem
+      final alertActivityList = alerts
+          .map((a) => ActivityPresentationMapper.fromAlert(a))
+          .toList();
 
       stopwatch.stop();
       debugPrint(
         'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alertActivityList.length} items)',
       );
-
-      // Build cache
-      final newCache = Map<String, dynamic>.from(state.entityCache);
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -177,16 +199,30 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('Fetching cycles...');
-      // Use cached method instead of raw
-      final cycleActivityList = await _aggregator.getCyclesRecom();
+      // Apply cutoff for cycles (using centralized config)
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      
+      // Fetch raw cycles to build cache
+      final cycles = await _aggregator.getCyclesRaw(cutoffDate: cutoffDate);
+      
+      // Build cache for cycles
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var cycle in cycles) {
+        final cacheKey = 'cycle_${cycle.id}';
+        newCache[cacheKey] = cycle;
+      }
+      
+      // Transform to ActivityLogItem
+      final cycleActivityList = cycles
+          .map((c) => ActivityPresentationMapper.fromCycleRecommendation(c))
+          .toList();
 
       stopwatch.stop();
       debugPrint(
         'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycleActivityList.length} items)',
       );
-
-      // Build cache
-      final newCache = Map<String, dynamic>.from(state.entityCache);
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -218,16 +254,25 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
     try {
       debugPrint('🔵 Fetching reports...');
-      // Use cached method instead of raw
-      final reportActivityList = await _aggregator.getReports();
+      // Fetch raw reports to build cache
+      final reports = await _aggregator.getReportsRaw();
+      
+      // Build cache for reports
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var report in reports) {
+        final cacheKey = 'report_${report.id}';
+        newCache[cacheKey] = report;
+      }
+      
+      // Transform to ActivityLogItem
+      final reportActivityList = reports
+          .map((r) => ActivityPresentationMapper.fromReport(r))
+          .toList();
 
       stopwatch.stop();
       debugPrint(
         'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reportActivityList.length} items)',
       );
-
-      // Build cache
-      final newCache = Map<String, dynamic>.from(state.entityCache);
 
       // Update state - UI will reflect immediately!
       state = state.copyWith(
@@ -304,7 +349,18 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   /// Returns the full entity (Alert, Substrate, Report, or CycleRecommendation)
   dynamic getFullEntity(ActivityLogItem item) {
     final key = '${item.type.name}_${item.id}';
-    return state.entityCache[key];
+    debugPrint('🔍 Looking up entity with key: $key');
+    debugPrint('   Available cache keys: ${state.entityCache.keys.take(10).join(", ")}...');
+    
+    final entity = state.entityCache[key];
+    if (entity == null) {
+      debugPrint('❌ Entity NOT FOUND in cache for key: $key');
+      debugPrint('   Item details: type=${item.type.name}, id=${item.id}, title=${item.title}');
+    } else {
+      debugPrint('✅ Entity FOUND in cache for key: $key');
+    }
+    
+    return entity;
   }
 
   // ===== FILTER HANDLERS =====
