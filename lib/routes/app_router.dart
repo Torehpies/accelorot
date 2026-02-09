@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/approval/view/approval_view.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
@@ -25,7 +26,6 @@ import 'package:flutter_application_1/ui/machine_management/view/mobile_admin_ma
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
 
-
 import 'package:flutter_application_1/ui/team_management/widgets/team_detail_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
@@ -42,7 +42,6 @@ import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landin
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
-
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -107,6 +106,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: RoutePath.approval.path,
+        name: RoutePath.approval.name,
+        builder: (context, state) => const ApprovalView(),
+      ),
+      GoRoute(
         path: RoutePath.teamSelect.path,
         name: RoutePath.teamSelect.name,
         builder: (context, state) => const TeamSelectionScreen(),
@@ -126,7 +130,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return RestrictedAccessScreen(reason: reason);
         },
       ),
-
 
       // OPERATOR SHELL
       ShellRoute(
@@ -277,8 +280,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/team-details/:teamId',
             name: 'teamDetails',
             builder: (context, state) {
-              final Team team =
-                  state.extra as Team;
+              final Team team = state.extra as Team;
               return TeamDetailScreen(team: team);
             },
           ),
