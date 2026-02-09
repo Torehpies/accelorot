@@ -92,14 +92,34 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
       debugPrint('✅ Drum is RUNNING - reloading cycle state');
       await _loadExistingCycle();
     } else if (!drumActive && drumPaused) {
-      // Paused state
-      debugPrint('⏸️ Drum is PAUSED - stopping timers');
-      _stopTimer();
-      _cycleTimer?.cancel();
-      setState(() {
-        status = SystemStatus.idle;
-        _isPaused = true;
-      });
+      // Paused state - need to load cycle to get accumulated time
+      debugPrint('⏸️ Drum is PAUSED - loading paused state');
+      
+      // Load cycle to get accumulated runtime
+      if (widget.currentBatch != null) {
+        try {
+          final cycleRepository = ref.read(cycleRepositoryProvider);
+          final cycles = await cycleRepository.getDrumControllers(
+            batchId: widget.currentBatch!.id,
+          );
+          final cycle = cycles.isEmpty ? null : cycles.first;
+          
+          if (cycle != null && cycle.accumulatedRuntimeSeconds != null) {
+            _stopTimer();
+            _cycleTimer?.cancel();
+            setState(() {
+              _cycleDoc = cycle;
+              status = SystemStatus.idle;
+              _isPaused = true;
+              _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
+              _uptime = _formatDuration(Duration(seconds: cycle.accumulatedRuntimeSeconds!));
+              _startTime = null;
+            });
+          }
+        } catch (e) {
+          debugPrint('❌ Error loading paused cycle: $e');
+        }
+      }
     } else if (!drumActive && !drumPaused) {
       // Stopped state
       debugPrint('⏹️ Drum is STOPPED - resetting to idle');
@@ -221,7 +241,7 @@ Future<void> _loadExistingCycle() async {
           debugPrint('📊 Drum controller is running');
           status = SystemStatus.running;
           _isPaused = false;
-          _startTime = cycle.startedAt;
+          _startTime = DateTime.now();  // Use current time, not cycle.startedAt
           
           // Resume with accumulated time if exists
           if (cycle.accumulatedRuntimeSeconds != null) {
@@ -521,6 +541,7 @@ Future<void> _loadExistingCycle() async {
         status = SystemStatus.idle;  // Show as idle (paused)
         _isPaused = true;
         _accumulatedSeconds = totalAccumulated;
+        _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
         _startTime = null;  // Clear start time during pause
       });
 
