@@ -19,7 +19,9 @@ class RegistrationFormContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= kDesktopBreakpoint;
+    final isTablet = screenWidth >= kTabletBreakpoint && screenWidth < kDesktopBreakpoint;
 
     final state = ref.watch(registrationProvider);
     final notifier = ref.read(registrationProvider.notifier);
@@ -50,8 +52,15 @@ class RegistrationFormContent extends ConsumerWidget {
       errorText: errorText,
       errorStyle: const TextStyle(height: 0.5),
       labelText: labelText,
+      labelStyle: TextStyle(
+        fontSize: isDesktop ? 14 : (isTablet ? 13 : 11),
+      ),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: isDesktop ? 14 : (isTablet ? 14 : 8),
+      ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -62,28 +71,34 @@ class RegistrationFormContent extends ConsumerWidget {
       ),
     );
 
-    final fieldHeight = isDesktop ? 52.0 : 65.0;
-    final rowSpacing = isDesktop ? 12.0 : 16.0;
-    final titleSpacing = isDesktop ? 8.0 : 32.0;
-    final sectionSpacing = isDesktop ? 8.0 : 18.0;
-    final footerSpacing = isDesktop ? 4.0 : 6.0;
+    // Minimized spacing to fit on screen without scrolling
+    final fieldHeight = isDesktop ? 52.0 : (isTablet ? 54.0 : 44.0);
+    final rowSpacing = isDesktop ? 12.0 : (isTablet ? 8.0 : 5.0);
+    final titleSpacing = isDesktop ? 8.0 : (isTablet ? 8.0 : 4.0);
+    final sectionSpacing = isDesktop ? 8.0 : (isTablet ? 8.0 : 4.0);
+    final footerSpacing = isDesktop ? 3.0 : (isTablet ? 2.0 : 2.0);
+    final logoSize = isTablet ? 45.0 : 40.0;
+    final inputTextStyle = TextStyle(
+      fontSize: isDesktop ? 14 : (isTablet ? 13 : 11),
+      height: 1.2,
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (!isDesktop)
+        if (!isDesktop && !isTablet)
           Center(
             child: SvgPicture.asset(
               'assets/images/Accel-O-Rot Logo.svg',
-              width: 65,
-              height: 65,
+              width: logoSize,
+              height: logoSize,
               fit: BoxFit.contain,
               semanticsLabel: 'Accel-O-Rot Logo',
             ),
           ),
-        const SizedBox(height: 10),
-        Center(child: _buildTitle(theme)),
+        SizedBox(height: isDesktop ? 0 : 8),
+        Center(child: _buildTitle(context, theme)),
         SizedBox(height: titleSpacing),
 
         Row(
@@ -98,6 +113,7 @@ class RegistrationFormContent extends ConsumerWidget {
                     'First Name',
                     state.firstNameError,
                   ),
+                  style: inputTextStyle,
                   onChanged: notifier.updateFirstName,
                   autofocus: true,
                 ),
@@ -112,6 +128,7 @@ class RegistrationFormContent extends ConsumerWidget {
                   textInputAction: TextInputAction.next,
                   onChanged: notifier.updateLastName,
                   decoration: inputDecoration('Last Name', state.lastNameError),
+                  style: inputTextStyle,
                 ),
               ),
             ),
@@ -128,6 +145,7 @@ class RegistrationFormContent extends ConsumerWidget {
               state.emailError,
               prefixIcon: const Icon(Icons.email_outlined),
             ),
+            style: inputTextStyle,
             onChanged: notifier.updateEmail,
           ),
         ),
@@ -151,6 +169,7 @@ class RegistrationFormContent extends ConsumerWidget {
                 onPressed: notifier.togglePasswordVisibility,
               ),
             ),
+            style: inputTextStyle,
             onChanged: notifier.updatePassword,
           ),
         ),
@@ -174,6 +193,7 @@ class RegistrationFormContent extends ConsumerWidget {
                 onPressed: notifier.toggleConfirmPasswordVisibility,
               ),
             ),
+            style: inputTextStyle,
             onChanged: notifier.updateConfirmPassword,
           ),
         ),
@@ -185,16 +205,20 @@ class RegistrationFormContent extends ConsumerWidget {
                 ? const Text('No teams available')
                 : DropdownButtonFormField<Team>(
                     initialValue: state.selectedTeam,
-                    hint: const Text('Select a team'),
+                    hint: Text(
+                      'Select a team',
+                      style: inputTextStyle,
+                    ),
                     items: teams
                         .map(
                           (t) => DropdownMenuItem<Team>(
                             value: t,
-                            child: Text(t.teamName),
+                            child: Text(t.teamName, style: inputTextStyle),
                           ),
                         )
                         .toList(),
                     onChanged: notifier.selectTeam,
+                    style: inputTextStyle,
                   ),
             error: (e, _) => Text('Error: $e'),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -259,21 +283,28 @@ class RegistrationFormContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildTitle(ThemeData theme) {
+  Widget _buildTitle(BuildContext buildContext, ThemeData theme) {
+    final screenWidth = MediaQuery.of(buildContext).size.width;
+    final isDesktop = screenWidth >= kDesktopBreakpoint;
+    final isTablet = screenWidth >= kTabletBreakpoint && screenWidth < kDesktopBreakpoint;
+    
     return Column(
       children: [
         Text(
           'Create Account',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 59, 59, 59),
-          ),
-        ),
-        const SizedBox(height: 4),
+                  style: TextStyle(
+                    fontSize: isDesktop ? 24 : (isTablet ? 26 : 18),
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 59, 59, 59),
+                  ),
+                ),
+        SizedBox(height: isDesktop ? 2 : 4),
         Text(
           'Join us to get started',
-          style: TextStyle(fontSize: 16, color: theme.hintColor),
+          style: TextStyle(
+            fontSize: isDesktop ? 14 : (isTablet ? 15 : 10),
+            color: theme.hintColor,
+          ),
         ),
       ],
     );

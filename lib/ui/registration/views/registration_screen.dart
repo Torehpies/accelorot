@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'desktop_registration_view.dart';
 import 'mobile_registration_view.dart';
+import 'tablet_registration_view.dart';
 
 class RegistrationScreen extends ConsumerWidget {
   const RegistrationScreen({super.key});
@@ -16,8 +17,9 @@ class RegistrationScreen extends ConsumerWidget {
       body: SafeArea(
         child: RepaintBoundary(
           child: ResponsiveLayout(
-            mobileView: MobileRegistrationView(),
-            desktopView: DesktopRegistrationView(),
+            mobileView: const MobileRegistrationView(),
+            tabletView: const TabletRegistrationView(),
+            desktopView: const DesktopRegistrationView(),
           ),
         ),
       ),

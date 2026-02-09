@@ -19,7 +19,7 @@ class DesktopRegistrationView extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: const Padding(
-                padding: EdgeInsets.fromLTRB(32.0, 20.0, 32.0, 28.0),
+                padding: EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 16.0),
                 child: RegistrationFormContent(),
               ),
             ),

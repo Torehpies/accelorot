@@ -65,6 +65,17 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
 
   @override
   Widget build(BuildContext context) {
+    // Get screen dimensions for responsive sizing
+    final size = MediaQuery.of(context).size;
+    final isSmallHeight = size.height < 700;
+    
+    // Scale decorative elements based on available space
+    final blobSize1 = (size.width * 0.6).clamp(200.0, 300.0);
+    final blobSize2 = (size.width * 0.7).clamp(250.0, 350.0);
+    final cloudSize1 = (size.width * 0.2).clamp(80.0, 100.0);
+    final cloudSize2 = (size.width * 0.28).clamp(100.0, 140.0);
+    final cloudSize3 = (size.width * 0.18).clamp(70.0, 90.0);
+    
     return RepaintBoundary(
       child: Container(
         decoration: const BoxDecoration(
@@ -79,64 +90,64 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
         ),
         child: Stack(
           children: [
-            // Animated decorative background blobs
+            // Animated decorative background blobs (responsive positioning)
             Positioned(
-              top: -80,
-              right: -80,
+              top: -(blobSize1 * 0.27),
+              right: -(blobSize1 * 0.27),
               child: _AnimatedDecorativeBlob(
                 animation: _blobController,
-                size: 300,
+                size: blobSize1,
                 color: AppColors.green100.withValues(alpha: 0.15),
                 offset: 0,
               ),
             ),
             Positioned(
-              bottom: -100,
-              left: -100,
+              bottom: -(blobSize2 * 0.29),
+              left: -(blobSize2 * 0.29),
               child: _AnimatedDecorativeBlob(
                 animation: _blobController,
-                size: 350,
+                size: blobSize2,
                 color: AppColors.green100.withValues(alpha: 0.1),
                 offset: 0.5,
               ),
             ),
 
-            // Animated clouds
+            // Animated clouds (responsive sizing)
             Positioned(
-              top: 60,
-              left: -40,
+              top: size.height * 0.08,
+              left: -cloudSize1 * 0.4,
               child: _FloatingCloud(
                 animation: _cloudController,
-                size: 100,
+                size: cloudSize1,
                 color: const Color(0xFFF0F8FF).withValues(alpha: 0.7),
                 offset: 0.0,
               ),
             ),
             Positioned(
-              top: 120,
-              right: -60,
+              top: size.height * 0.15,
+              right: -cloudSize2 * 0.43,
               child: _FloatingCloud(
                 animation: _cloudController,
-                size: 140,
+                size: cloudSize2,
                 color: const Color(0xFFE6F7FF).withValues(alpha: 0.8),
                 offset: 0.3,
               ),
             ),
             Positioned(
-              top: 200,
-              left: 40,
+              top: size.height * 0.25,
+              left: size.width * 0.1,
               child: _FloatingCloud(
                 animation: _cloudController,
-                size: 90,
+                size: cloudSize3,
                 color: const Color(0xFFE3F2FD).withValues(alpha: 0.75),
                 offset: 0.6,
               ),
             ),
 
-            // Floating leaves
+            // Floating leaves (responsive positioning)
             Positioned(
-              top: 100,
-              left: 40,
+              top: size.height * 0.15,
+              left: size.width * 0.1,
               child: _FloatingLeaf(
                 animation: _floatingController,
                 rotationAnimation: _rotationController,
@@ -145,8 +156,8 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
               ),
             ),
             Positioned(
-              bottom: 200,
-              right: 60,
+              bottom: size.height * 0.28,
+              right: size.width * 0.15,
               child: _FloatingLeaf(
                 animation: _floatingController,
                 rotationAnimation: _rotationController,
@@ -155,8 +166,8 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
               ),
             ),
             Positioned(
-              top: 250,
-              right: 100,
+              top: size.height * 0.35,
+              right: size.width * 0.25,
               child: _FloatingLeaf(
                 animation: _floatingController,
                 rotationAnimation: _rotationController,
@@ -165,8 +176,8 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
               ),
             ),
             Positioned(
-              top: 400,
-              left: 80,
+              top: size.height * 0.55,
+              left: size.width * 0.2,
               child: _FloatingLeaf(
                 animation: _floatingController,
                 rotationAnimation: _rotationController,
@@ -175,22 +186,26 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
               ),
             ),
 
-            // Main content
+            // Main content (no scroll, minimized padding)
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(40.0),
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.width * 0.08,
+                  vertical: 20.0,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Animated composting illustration
+                    // Animated composting illustration (responsive)
                     _AnimatedCompostingIllustration(
                       floatingAnimation: _floatingController,
                       scaleAnimation: _scaleController,
+                      size: isSmallHeight ? 180.0 : 240.0,
                     ),
 
-                    const SizedBox(height: 60),
+                    SizedBox(height: isSmallHeight ? 30 : 40),
 
-                    // Title with fade-in
+                    // Title with fade-in (responsive font size)
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
                       duration: const Duration(milliseconds: 800),
@@ -203,11 +218,11 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Nurture Nature',
                         style: TextStyle(
-                          color: Color(0xFF2D3748),
-                          fontSize: 36,
+                          color: const Color(0xFF2D3748),
+                          fontSize: isSmallHeight ? 26 : 32,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
                         ),
@@ -215,7 +230,7 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    SizedBox(height: isSmallHeight ? 12 : 16),
 
                     // Subtitle with delayed fade-in
                     TweenAnimationBuilder<double>(
@@ -230,12 +245,12 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Turn waste into wonder. Join\nthe smart composting\nrevolution today.',
                         style: TextStyle(
-                          color: Color(0xFF4A5568),
-                          fontSize: 16,
-                          height: 1.6,
+                          color: const Color(0xFF4A5568),
+                          fontSize: isSmallHeight ? 13 : 15,
+                          height: 1.5,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -255,10 +270,12 @@ class _RegistrationLeftPanelState extends State<RegistrationLeftPanel>
 class _AnimatedCompostingIllustration extends StatelessWidget {
   final Animation<double> floatingAnimation;
   final Animation<double> scaleAnimation;
+  final double size;
 
   const _AnimatedCompostingIllustration({
     required this.floatingAnimation,
     required this.scaleAnimation,
+    this.size = 280.0,
   });
 
   @override
@@ -267,78 +284,82 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
       animation: Listenable.merge([floatingAnimation, scaleAnimation]),
       builder: (context, child) {
         final floatOffset = math.sin(floatingAnimation.value * math.pi * 2) * 15;
+        final scale = size / 280.0; // Scale relative to default size
 
         return Transform.translate(
           offset: Offset(0, floatOffset),
           child: SizedBox(
-            width: 280,
-            height: 280,
+            width: size,
+            height: size,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Background leaves with staggered animation
+                // Background leaves with staggered animation (scaled)
                 Positioned(
-                  top: 60,
-                  left: 60,
+                  top: 60 * scale,
+                  left: 60 * scale,
                   child: _AnimatedLeaf(
                     animation: floatingAnimation,
                     rotationOffset: 0.0,
-                    width: 80,
-                    height: 120,
+                    width: 80 * scale,
+                    height: 120 * scale,
                     color: AppColors.green100.withValues(alpha: 0.4),
                   ),
                 ),
                 Positioned(
-                  top: 50,
+                  top: 50 * scale,
                   child: _AnimatedLeaf(
                     animation: floatingAnimation,
                     rotationOffset: 0.3,
-                    width: 90,
-                    height: 130,
+                    width: 90 * scale,
+                    height: 130 * scale,
                     color: AppColors.green100.withValues(alpha: 0.5),
                   ),
                 ),
                 Positioned(
-                  top: 60,
-                  right: 60,
+                  top: 60 * scale,
+                  right: 60 * scale,
                   child: _AnimatedLeaf(
                     animation: floatingAnimation,
                     rotationOffset: 0.6,
-                    width: 80,
-                    height: 120,
+                    width: 80 * scale,
+                    height: 120 * scale,
                     color: AppColors.green100.withValues(alpha: 0.4),
                   ),
                 ),
 
-                // Composting drum
+                // Composting drum (scaled)
                 Positioned(
-                  bottom: 40,
-                  child: _CompostDrum(),
+                  bottom: 40 * scale,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: _CompostDrum(),
+                  ),
                 ),
 
-                // Animated sprouts
+                // Animated sprouts (scaled)
                 Positioned(
-                  bottom: 130,
+                  bottom: 130 * scale,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _AnimatedSprout(
                         animation: scaleAnimation,
-                        height: 30,
+                        height: 30 * scale,
                         delay: 0,
                       ),
-                      const SizedBox(width: 20),
+                      SizedBox(width: 20 * scale),
                       _AnimatedSprout(
                         animation: scaleAnimation,
-                        height: 35,
+                        height: 35 * scale,
                         delay: 0.5,
                       ),
                     ],
                   ),
                 ),
 
-                // Animated particles
-                ..._buildFloatingParticles(floatingAnimation),
+                // Animated particles (scaled)
+                ..._buildFloatingParticles(floatingAnimation, scale),
               ],
             ),
           ),
@@ -347,12 +368,12 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildFloatingParticles(Animation<double> animation) {
+  List<Widget> _buildFloatingParticles(Animation<double> animation, double scale) {
     return List.generate(3, (index) {
       final offset = index * 0.3;
       return Positioned(
-        top: 180 + (index * 30),
-        left: 100 + (index * 20),
+        top: (180 + (index * 30)) * scale,
+        left: (100 + (index * 20)) * scale,
         child: AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
@@ -365,8 +386,8 @@ class _AnimatedCompostingIllustration extends StatelessWidget {
               child: Opacity(
                 opacity: opacity * 0.5,
                 child: SizedBox(
-                  width: 8,
-                  height: 8,
+                  width: 8 * scale,
+                  height: 8 * scale,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: AppColors.green100,

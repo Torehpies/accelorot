@@ -6,17 +6,24 @@ class MobileRegistrationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: kMaxFormWidth),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24.0,
-            vertical: 32.0, // Reduced vertical padding from login view
-          ),
-          // Delegates the content rendering to the shared form
-          child: RegistrationFormContent(),
-        ),
+    return SafeArea(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(20.0, 4.0, 20.0, 16.0 + bottomInset),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: kMaxFormWidth),
+                  // Delegates the content rendering to the shared form
+                  child: const RegistrationFormContent(),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
