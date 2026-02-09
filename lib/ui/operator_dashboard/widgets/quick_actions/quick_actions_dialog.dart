@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import '../../../core/dialog/base_dialog.dart';
-import '../../../core/dialog/dialog_action.dart';
+import '../../../core/widgets/dialog/base_dialog.dart';
+import '../../../core/widgets/dialog/dialog_action.dart';
 import '../../../core/themes/web_colors.dart';
 import '../../../core/themes/web_text_styles.dart';
 import '../add_waste/add_waste_dialog.dart';

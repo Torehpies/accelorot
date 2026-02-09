@@ -1,7 +1,7 @@
 // lib/ui/operator_dashboard/fields/batch_selection_field.dart
 
 import 'package:flutter/material.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
 import '../../core/skeleton/skeleton_dropdown.dart';
 import '../../../data/models/batch_model.dart';
 import '../../../data/services/firebase/firebase_batch_service.dart';

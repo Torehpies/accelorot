@@ -31,7 +31,7 @@ import 'package:flutter_application_1/ui/team_management/widgets/team_management
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
-import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
+import 'package:flutter_application_1/ui/operator_management/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';

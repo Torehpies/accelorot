@@ -1,13 +1,15 @@
+// lib/ui/machine_management/view/mobile_admin_machine_view.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/widgets/mobile_common_widgets.dart';
-import '../../core/widgets/mobile_list_header.dart';
-import '../../core/widgets/mobile_list_content.dart';
-import '../../core/widgets/data_card.dart';
+import '../../core/widgets/containers/mobile_common_widgets.dart';
+import '../../core/widgets/containers/mobile_sliver_header.dart';
+import '../../core/widgets/containers/mobile_list_content.dart';
+import '../../core/widgets/sample_cards/data_card.dart';
 import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
-import '../../core/dialog/mobile_confirmation_dialog.dart';
+import '../../core/widgets/dialog/mobile_confirmation_dialog.dart';
 import '../../core/ui/app_snackbar.dart';
 import '../helpers/machine_status_helper.dart';
 import '../../core/themes/app_theme.dart';
@@ -201,55 +203,72 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: MobileListHeader(
-          title: 'Machine List',
-          showAddButton: true,
-          onAddPressed: _showAddSheet,
-          addButtonColor: AppColors.green100,
-          addButtonLabel: 'Add Machine',
-          searchConfig: SearchBarConfig(
-            onSearchChanged: notifier.setSearchQuery,
-            searchHint: 'Search machines...',
-            isLoading: state.isLoading,
-            searchFocusNode: _searchFocusNode,
-          ),
-          filterWidgets: [
-            MobileStatusFilterButton(
-              currentFilter: state.selectedStatusFilter,
-              onFilterChanged: notifier.setStatusFilter,
-              isLoading: state.isLoading,
-            ),
-            const SizedBox(width: 8),
-            MobileDateFilterButton(
-              onFilterChanged: notifier.setDateFilter,
-              isLoading: state.isLoading,
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: MobileListContent<MachineModel>(
-            isLoading: state.isLoading,
-            isInitialLoad: state.machines.isEmpty,
-            hasError: state.hasError,
-            errorMessage: state.errorMessage,
-            items: state.filteredMachines,
-            displayedItems: state.displayedMachines,
-            hasMoreToLoad: state.hasMoreToLoad,
-            remainingCount: state.remainingCount,
-            emptyStateConfig: _getEmptyStateConfig(state),
-            onRefresh: () async {
-              if (_teamId != null) {
-                await notifier.refresh(_teamId!);
-              }
-            },
-            onLoadMore: notifier.loadMore,
-            onRetry: () {
-              notifier.clearError();
-              if (_teamId != null) notifier.initialize(_teamId!);
-            },
-            itemBuilder: _buildMachineCard,
-            skeletonBuilder: (context, index) => const DataCardSkeleton(),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            if (_teamId != null) {
+              await notifier.refresh(_teamId!);
+            }
+          },
+          color: AppColors.green100,
+          child: CustomScrollView(
+            slivers: [
+              // Header with Add button + search + filters
+              MobileSliverHeader(
+                title: 'Machine List',
+                showAddButton: true,
+                onAddPressed: _showAddSheet,
+                addButtonColor: AppColors.green100,
+                addButtonLabel: 'Add Machine',
+                searchConfig: SearchBarConfig(
+                  onSearchChanged: notifier.setSearchQuery,
+                  searchHint: 'Search machines...',
+                  isLoading: state.isLoading,
+                  searchFocusNode: _searchFocusNode,
+                ),
+                filterWidgets: [
+                  MobileStatusFilterButton(
+                    currentFilter: state.selectedStatusFilter,
+                    onFilterChanged: notifier.setStatusFilter,
+                    isLoading: state.isLoading,
+                  ),
+                  const SizedBox(width: 8),
+                  MobileDateFilterButton(
+                    onFilterChanged: notifier.setDateFilter,
+                    isLoading: state.isLoading,
+                  ),
+                ],
+              ),
+
+              // Top padding for breathing room
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 8),
+              ),
+
+              // Content
+              MobileListContent<MachineModel>(
+                isLoading: state.isLoading,
+                isInitialLoad: state.machines.isEmpty,
+                hasError: state.hasError,
+                errorMessage: state.errorMessage,
+                items: state.filteredMachines,
+                displayedItems: state.displayedMachines,
+                hasMoreToLoad: state.hasMoreToLoad,
+                remainingCount: state.remainingCount,
+                emptyStateConfig: _getEmptyStateConfig(state),
+                onRefresh: () async {
+                  if (_teamId != null) {
+                    await notifier.refresh(_teamId!);
+                  }
+                },
+                onLoadMore: notifier.loadMore,
+                onRetry: () {
+                  notifier.clearError();
+                  if (_teamId != null) notifier.initialize(_teamId!);
+                },
+                itemBuilder: _buildMachineCard,
+                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              ),
+            ],
           ),
         ),
       ),

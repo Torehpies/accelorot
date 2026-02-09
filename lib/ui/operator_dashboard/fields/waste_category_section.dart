@@ -1,7 +1,7 @@
 // lib/ui/operator_dashboard/fields/waste_category_section.dart
 
 import 'package:flutter/material.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
 import 'waste_config.dart';
 import 'info_box.dart';
 
