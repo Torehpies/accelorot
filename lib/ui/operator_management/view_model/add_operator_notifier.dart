@@ -44,8 +44,8 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
       lastname: lastname,
       globalRole: GlobalRole.user.value,
       teamRole: TeamRole.operator.value,
-      status: UserStatus.active.value,
-      teamId: teamId,
+      status: UserStatus.approval.value,
+      requestTeamId: teamId,
     );
     // Handle success and errors
     if (result is Ok<AppUser>) {

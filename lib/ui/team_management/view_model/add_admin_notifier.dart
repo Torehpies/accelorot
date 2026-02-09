@@ -36,8 +36,8 @@ class AddAdminNotifier extends _$AddAdminNotifier {
       lastname: lastname,
       globalRole: GlobalRole.user.value,
       teamRole: TeamRole.admin.value,
-      status: UserStatus.active.value,
-      teamId: teamId,
+      status: UserStatus.approval.value,
+      requestTeamId: teamId,
     );
     if (result is Ok<AppUser>) {
       final appUser = result.value;
