@@ -1,13 +1,21 @@
 // lib/ui/activity_logs/view_model/unified_activity_viewmodel.dart
 
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../../../data/models/alert.dart';
+import '../../../data/models/cycle_recommendation.dart';
+import '../../../data/models/report.dart';
 import '../models/unified_activity_state.dart';
 import '../models/activity_enums.dart';
 import '../services/activity_aggregator_service.dart';
 import '../../../data/providers/activity_providers.dart';
+import '../../../data/providers/alert_providers.dart';
+import '../../../data/providers/cycle_providers.dart';
+import '../../../data/providers/report_providers.dart';
 import '../models/activity_common.dart';
 import '../mappers/activity_presentation_mapper.dart';
 
@@ -16,10 +24,23 @@ part 'unified_activity_viewmodel.g.dart';
 @riverpod
 class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   late final ActivityAggregatorService _aggregator;
+  
+  // ===== STREAM SUBSCRIPTIONS FOR REAL-TIME UPDATES =====
+  StreamSubscription<List<Alert>>? _alertsSubscription;
+  StreamSubscription<List<CycleRecommendation>>? _cyclesSubscription;
+  StreamSubscription<List<Report>>? _reportsSubscription;
 
   @override
   UnifiedActivityState build() {
     _aggregator = ref.read(activityAggregatorProvider);
+
+    // Setup disposal of streams
+    ref.onDispose(() {
+      debugPrint('🧹 Disposing stream subscriptions...');
+      _alertsSubscription?.cancel();
+      _cyclesSubscription?.cancel();
+      _reportsSubscription?.cancel();
+    });
 
     // Initialize asynchronously
     Future.microtask(() => _initialize());
@@ -44,7 +65,197 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
       'ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
     );
 
+    // Setup real-time streams after initial load
+    _setupStreams();
+
     unawaited(loadActivities());
+  }
+
+  // ===== REAL-TIME STREAMING =====
+
+  /// Setup real-time streams for automatic updates
+  void _setupStreams() {
+    debugPrint('🔴 Setting up real-time streams...');
+    
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: ActivityAggregatorService.defaultCutoffDays),
+    );
+
+    // Stream alerts with cutoff
+    _alertsSubscription = ref.read(alertRepositoryProvider)
+        .streamTeamAlerts(cutoffDate: cutoffDate)
+        .listen(
+          (alerts) {
+            debugPrint('🔔 Alerts stream updated: ${alerts.length} items');
+            _onAlertsStreamUpdate(alerts);
+          },
+          onError: (e) {
+            debugPrint('❌ Alerts stream error: $e');
+          },
+        );
+
+    // Stream cycles
+    _cyclesSubscription = ref.read(cycleRepositoryProvider)
+        .streamTeamCycles()
+        .listen(
+          (cycles) {
+            debugPrint('🔔 Cycles stream updated: ${cycles.length} items');
+            _onCyclesStreamUpdate(cycles);
+          },
+          onError: (e) {
+            debugPrint('❌ Cycles stream error: $e');
+          },
+        );
+
+    // Stream reports - get teamId from current user
+    _setupReportsStream();
+
+    debugPrint('✅ Real-time streams setup complete');
+  }
+
+  /// Setup reports stream (requires teamId lookup)
+  Future<void> _setupReportsStream() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      
+      if (currentUser != null) {
+        // Get teamId from current user's Firestore profile
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+        
+        final teamId = userDoc.data()?['teamId'] as String?;
+        
+        if (teamId != null && teamId.isNotEmpty) {
+          _reportsSubscription = ref.read(reportRepositoryProvider)
+              .watchReportsByTeam(teamId)
+              .listen(
+                (reports) {
+                  debugPrint('🔔 Reports stream updated: ${reports.length} items');
+                  _onReportsStreamUpdate(reports);
+                },
+                onError: (e) {
+                  debugPrint('❌ Reports stream error: $e');
+                },
+              );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Failed to setup reports stream: $e');
+    }
+  }
+
+  /// Handle alerts stream updates
+  void _onAlertsStreamUpdate(List<Alert> alerts) {
+    try {
+      // Apply cutoff filter
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      final filteredAlerts = alerts
+          .where((a) => a.timestamp.isAfter(cutoffDate))
+          .toList();
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var alert in filteredAlerts) {
+        newCache['alert_${alert.id}'] = alert;
+      }
+
+      // Transform to ActivityLogItem
+      final alertActivityList = filteredAlerts
+          .map((a) => ActivityPresentationMapper.fromAlert(a))
+          .toList();
+
+      // Update state
+      state = state.copyWith(
+        alertActivities: alertActivityList,
+        entityCache: newCache,
+        alertsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'alerts': alertActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing alerts stream update: $e');
+    }
+  }
+
+  /// Handle cycles stream updates
+  void _onCyclesStreamUpdate(List<CycleRecommendation> cycles) {
+    try {
+      // Apply cutoff filter
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      final filteredCycles = cycles
+          .where((c) => (c.startedAt ?? DateTime(1970)).isAfter(cutoffDate))
+          .toList();
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var cycle in filteredCycles) {
+        newCache['cycle_${cycle.id}'] = cycle;
+      }
+
+      // Transform to ActivityLogItem
+      final cycleActivityList = filteredCycles
+          .map((c) => ActivityPresentationMapper.fromCycleRecommendation(c))
+          .toList();
+
+      // Update state
+      state = state.copyWith(
+        cycleActivities: cycleActivityList,
+        entityCache: newCache,
+        cyclesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'operations': cycleActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing cycles stream update: $e');
+    }
+  }
+
+  /// Handle reports stream updates
+  void _onReportsStreamUpdate(List<Report> reports) {
+    try {
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var report in reports) {
+        newCache['report_${report.id}'] = report;
+      }
+
+      // Transform to ActivityLogItem
+      final reportActivityList = reports
+          .map((r) => ActivityPresentationMapper.fromReport(r))
+          .toList();
+
+      // Update state
+      state = state.copyWith(
+        reportActivities: reportActivityList,
+        entityCache: newCache,
+        reportsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'reports': reportActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing reports stream update: $e');
+    }
   }
 
   // ===== DATA LOADING =====
