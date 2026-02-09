@@ -9,6 +9,7 @@ enum RoutePath {
   teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
+  resetEmailSent(path: '/reset-email-sent'),
 
   // operator paths
   dashboard(path: '/operator/dashboard'),

@@ -1,25 +1,23 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import '../../../utils/snackbar_utils.dart';
 import '../../../ui/core/themes/app_theme.dart';
 import '../../../routes/route_path.dart';
 
-class ForgotPassScreen extends StatefulWidget {
-  const ForgotPassScreen({super.key});
+class ResetEmailSentScreen extends StatefulWidget {
+  final String email;
+
+  const ResetEmailSentScreen({
+    super.key,
+    required this.email,
+  });
 
   @override
-  State<ForgotPassScreen> createState() => _ForgotPasswordScreenState();
+  State<ResetEmailSentScreen> createState() => _ResetEmailSentScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPassScreen>
+class _ResetEmailSentScreenState extends State<ResetEmailSentScreen>
     with TickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  bool _isSending = false;
-
   // Animation controllers
   late final AnimationController _blobController;
   late final AnimationController _cloudController;
@@ -27,6 +25,7 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
   late final AnimationController _rotationController;
   late final AnimationController _scaleController;
   late final AnimationController _waveController;
+  late final AnimationController _successController;
 
   @override
   void initState() {
@@ -62,6 +61,11 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
       vsync: this,
     );
     // Wave animation removed - static waves only
+
+    _successController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    )..forward();
   }
 
   @override
@@ -72,43 +76,8 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
     _rotationController.dispose();
     _scaleController.dispose();
     _waveController.dispose();
-    _emailController.dispose();
+    _successController.dispose();
     super.dispose();
-  }
-
-  Future<void> _sendResetEmail() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSending = true);
-    try {
-      final email = _emailController.text.trim();
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      if (!mounted) return;
-
-      context.go(
-        RoutePath.resetEmailSent.path,
-        extra: {'email': email},
-      );
-    } on FirebaseAuthException catch (e) {
-      showSnackbar(
-        context,
-        e.message ?? 'Failed to send reset email',
-        isError: true,
-      );
-    } catch (e) {
-      showSnackbar(context, 'An unexpected error occurred', isError: true);
-    } finally {
-      if (mounted) setState(() => _isSending = false);
-    }
-  }
-
-  String? _validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Email required';
-    final email = v.trim();
-    final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}");
-    if (!emailRegex.hasMatch(email)) return 'Enter a valid email';
-    return null;
   }
 
   @override
@@ -277,6 +246,26 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
 
 
 
+          // Floating email icons (celebrating success)
+          Positioned(
+            top: screenHeight * 0.2,
+            left: screenWidth * 0.1,
+            child: _FloatingEmailIcon(
+              animation: _floatingController,
+              size: 30,
+              offset: 0.1,
+            ),
+          ),
+          Positioned(
+            top: screenHeight * 0.4,
+            right: screenWidth * 0.1,
+            child: _FloatingEmailIcon(
+              animation: _floatingController,
+              size: 25,
+              offset: 0.4,
+            ),
+          ),
+
           // Content
           SafeArea(
             child: Center(
@@ -291,24 +280,39 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
                     ),
                     child: Padding(
                       padding: EdgeInsets.all(isWideScreen ? 40 : 24),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Logo
-                            Center(
-                              child: SvgPicture.asset(
-                                'assets/images/Accelorot_logo.svg',
-                                width: isWideScreen ? 80 : 70,
-                                height: isWideScreen ? 80 : 70,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Success Icon with animation
+                          Center(
+                            child: ScaleTransition(
+                              scale: CurvedAnimation(
+                                parent: _successController,
+                                curve: Curves.elasticOut,
+                              ),
+                              child: Container(
+                                width: isWideScreen ? 100 : 80,
+                                height: isWideScreen ? 100 : 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.mark_email_read_outlined,
+                                  size: isWideScreen ? 50 : 40,
+                                  color: Colors.green,
+                                ),
                               ),
                             ),
-                            SizedBox(height: isWideScreen ? 20 : 16),
+                          ),
+                          SizedBox(height: isWideScreen ? 24 : 20),
 
-                            Text(
-                              'Reset Password',
+                          // Title
+                          FadeTransition(
+                            opacity: _successController,
+                            child: Text(
+                              'Email Sent!',
                               style: TextStyle(
                                 fontSize: isWideScreen ? 26 : 22,
                                 fontWeight: FontWeight.bold,
@@ -316,64 +320,106 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 16),
+                          ),
+                          const SizedBox(height: 16),
 
-                            const Text(
-                              'Enter the email associated with your account. We will send a password reset link to this email.',
-                              style: TextStyle(fontSize: 16, height: 1.5),
-                              textAlign: TextAlign.center,
+                          // Message
+                          Text(
+                            'A password reset link has been sent to',
+                            style: TextStyle(
+                              fontSize: isWideScreen ? 16 : 15,
+                              color: Colors.grey[700],
+                              height: 1.5,
                             ),
-                            SizedBox(height: isWideScreen ? 32 : 24),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
 
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: _validateEmail,
-                              decoration: InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: const Icon(Icons.email_outlined),
-                                border: OutlineInputBorder(
+                          // Email address
+                          Text(
+                            widget.email,
+                            style: TextStyle(
+                              fontSize: isWideScreen ? 16 : 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+
+                          Text(
+                            'Please check your inbox and follow the instructions to reset your password.',
+                            style: TextStyle(
+                              fontSize: isWideScreen ? 16 : 15,
+                              color: Colors.grey[700],
+                              height: 1.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: isWideScreen ? 32 : 24),
+
+                          // Info box
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.blue[700],
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Didn\'t receive the email? Check your spam folder.',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.blue[900],
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: isWideScreen ? 32 : 24),
+
+                          // Back to Sign In Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.go(RoutePath.signin.path);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: isWideScreen ? 18 : 16,
+                                ),
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                elevation: 4,
                               ),
-                            ),
-                            SizedBox(height: isWideScreen ? 32 : 24),
-
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: _isSending ? null : _sendResetEmail,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: isWideScreen ? 18 : 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 4,
+                              child: const Text(
+                                'Back to Sign In',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                child: _isSending
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Send Reset Email',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -669,4 +715,43 @@ class _TreePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+
+
+
+// Floating Email Icon (for success celebration)
+class _FloatingEmailIcon extends StatelessWidget {
+  final Animation<double> animation;
+  final double size;
+  final double offset;
+
+  const _FloatingEmailIcon({
+    required this.animation,
+    required this.size,
+    required this.offset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final floatY = math.sin((animation.value + offset) * math.pi * 2) * 15;
+        final floatX = math.cos((animation.value + offset) * math.pi * 2) * 8;
+        final opacity = (math.sin((animation.value + offset) * math.pi * 2) + 1) / 2;
+        return Transform.translate(
+          offset: Offset(floatX, floatY),
+          child: Opacity(
+            opacity: opacity * 0.4,
+            child: Icon(
+              Icons.email_outlined,
+              size: size,
+              color: Colors.green,
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
