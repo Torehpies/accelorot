@@ -216,8 +216,8 @@ class MoistureStatisticCard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
-                        minX: _downsampleData(chartData).isEmpty ? 0 : _downsampleData(chartData).first['day'] as double,
-                        maxX: _downsampleData(chartData).isEmpty ? 6 : (_downsampleData(chartData).last['day'] as double),
+                        minX: 0,
+                        maxX: _getMaxDay(chartData).toDouble(),
                             minY: 0,
                             maxY: 100,
                         lineBarsData: [
@@ -285,6 +285,14 @@ class MoistureStatisticCard extends StatelessWidget {
           ],
         ),
     );
+  }
+
+    int _getMaxDay(List<Map<String, dynamic>> data) {
+    if (data.isEmpty) return 6;
+
+    return data
+        .map((d) => (d['day'] as double).floor())
+        .reduce((a, b) => a > b ? a : b);
   }
 
   List<Widget> _buildMoreInfo() {
