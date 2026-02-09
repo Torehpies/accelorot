@@ -121,6 +121,7 @@ class CycleRepository {
       _cycleService.fetchCycleById(id);
 
   /// Stream all cycles for the team with real-time updates
-  Stream<List<CycleRecommendation>> streamTeamCycles() =>
-      _cycleService.streamTeamCycles();
+  /// [cutoffDate] - Only stream cycles newer than this date (defaults to 2 days ago)
+  Stream<List<CycleRecommendation>> streamTeamCycles({DateTime? cutoffDate}) =>
+      _cycleService.streamTeamCycles(cutoffDate: cutoffDate);
 }

@@ -12,7 +12,8 @@ class ActivityLogsWeb extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(allActivitiesProvider);
+    // ✅ Use streaming provider for real-time updates
+    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -68,7 +69,8 @@ class ActivityLogsWeb extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh, size: 20),
             onPressed: () {
-              ref.invalidate(allActivitiesProvider);
+              // Invalidate streaming provider to force refresh
+              ref.invalidate(allActivitiesStreamProvider);
             },
             tooltip: 'Refresh',
             padding: EdgeInsets.zero,

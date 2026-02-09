@@ -318,14 +318,12 @@ class FirestoreAlertService implements AlertService {
         return;
       }
 
-      final now = DateTime.now();
-      final cutoff = cutoffDate ?? now.subtract(const Duration(days: 2));
+      final cutoff = cutoffDate ?? DateTime.now().subtract(const Duration(days: 2));
 
       debugPrint('🔴 Streaming ${batches.length} batches for alerts (cutoff: $cutoff)');
 
-      // Stream alerts from all batches combined
-      // This will emit whenever ANY batch has an alert change
-      await for (final allAlerts in _streamAlertsForBatches(batches, cutoff, now)) {
+      // Create real-time streams for each batch and merge them
+      await for (final allAlerts in _streamAlertsForBatches(batches, cutoff)) {
         debugPrint('📡 Stream update: ${allAlerts.length} alerts');
         yield allAlerts;
       }
@@ -335,35 +333,57 @@ class FirestoreAlertService implements AlertService {
     }
   }
 
-  /// Stream alerts from multiple batches combined
+  /// Stream alerts from multiple batches using polling with cutoff filter
   Stream<List<Alert>> _streamAlertsForBatches(
     List<QueryDocumentSnapshot> batches,
     DateTime cutoff,
-    DateTime now,
   ) async* {
-    // Use periodic polling for simplicity (every 5 seconds)
-    await for (final _ in Stream.periodic(const Duration(seconds: 5))) {
-      final List<Alert> allAlerts = [];
+    // Emit immediately on first call
+    yield await _fetchAllAlertsFromBatches(batches, cutoff);
+    
+    // Then poll every 1 second for updates
+    await for (final _ in Stream.periodic(const Duration(seconds: 1))) {
+      yield await _fetchAllAlertsFromBatches(batches, cutoff);
+    }
+  }
+  
+  /// Helper to fetch alerts from all batches
+  Future<List<Alert>> _fetchAllAlertsFromBatches(
+    List<QueryDocumentSnapshot> batches,
+    DateTime cutoff,
+  ) async {
+    final List<Alert> allAlerts = [];
+    
+    // Fetch latest from all batches in parallel
+    final futures = batches.map((batchDoc) async {
+      final data = batchDoc.data() as Map<String, dynamic>;
+      final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+      final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
+      final machineId = data['machineId'] as String?;
       
-      // Fetch current state from all batches in parallel
-      final futures = batches.map((batchDoc) async {
+      try {
         return await fetchAlertsForBatch(
           batchDoc.id,
-          start: cutoff,
-          end: now,
+          start: createdAt,
+          end: completedAt,
+          machineId: machineId,
+          cutoffDate: cutoff,
         );
-      });
-      
-      final results = await Future.wait(futures);
-      
-      for (final batchAlerts in results) {
-        allAlerts.addAll(batchAlerts);
+      } catch (e) {
+        debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
+        return <Alert>[];
       }
-      
-      // Sort by timestamp
-      allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      
-      yield allAlerts;
+    });
+    
+    final results = await Future.wait(futures);
+    
+    for (final batchAlerts in results) {
+      allAlerts.addAll(batchAlerts);
     }
+    
+    // Sort by timestamp descending
+    allAlerts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    
+    return allAlerts;
   }
 }

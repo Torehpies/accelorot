@@ -836,7 +836,7 @@ class FirestoreCycleService implements CycleService {
   }
 
   @override
-  Stream<List<CycleRecommendation>> streamTeamCycles() async* {
+  Stream<List<CycleRecommendation>> streamTeamCycles({DateTime? cutoffDate}) async* {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -863,89 +863,105 @@ class FirestoreCycleService implements CycleService {
       return;
     }
 
-    // Emit updates every 5 seconds
-    await for (final _ in Stream.periodic(const Duration(seconds: 5))) {
+    // Apply default cutoff if not provided (2 days)
+    final cutoff = cutoffDate ?? DateTime.now().subtract(const Duration(days: 2));
+    debugPrint('🟣 Streaming cycles with cutoff: $cutoff');
+
+    // Emit immediately on first call
+    yield await _fetchAllCyclesFromBatches(batches, cutoff);
+    
+    // Then poll every 1 second for real-time updates
+    await for (final _ in Stream.periodic(const Duration(seconds: 1))) {
       try {
-        debugPrint('🔄 Fetching cycles for ${batches.length} batches...');
-
-        final List<CycleRecommendation> allCycles = [];
-
-        // Fetch cycles from all batches in parallel
-        final results = await Future.wait(
-          batches.map((batchDoc) async {
-            final List<CycleRecommendation> batchCycles = [];
-
-            try {
-              final cyclesSnapshot = await _firestore
-                  .collection('batches')
-                  .doc(batchDoc.id)
-                  .collection('cyclesRecom')
-                  .get();
-
-              for (var cycleDoc in cyclesSnapshot.docs) {
-                // Fetch drum_controller and aerator in parallel
-                final futures = await Future.wait([
-                  _firestore
-                      .collection('batches')
-                      .doc(batchDoc.id)
-                      .collection('cyclesRecom')
-                      .doc(cycleDoc.id)
-                      .collection('drum_controller')
-                      .get(),
-                  _firestore
-                      .collection('batches')
-                      .doc(batchDoc.id)
-                      .collection('cyclesRecom')
-                      .doc(cycleDoc.id)
-                      .collection('aerator')
-                      .get(),
-                ]);
-
-                final drumSnapshot = futures[0];
-                final aeratorSnapshot = futures[1];
-
-                // Add drum controller cycles
-                for (var drumDoc in drumSnapshot.docs) {
-                  try {
-                    batchCycles.add(CycleRecommendation.fromFirestore(drumDoc));
-                  } catch (e) {
-                    debugPrint('⚠️ Error parsing drum cycle: $e');
-                  }
-                }
-
-                // Add aerator cycles
-                for (var aeratorDoc in aeratorSnapshot.docs) {
-                  try {
-                    batchCycles
-                        .add(CycleRecommendation.fromFirestore(aeratorDoc));
-                  } catch (e) {
-                    debugPrint('⚠️ Error parsing aerator cycle: $e');
-                  }
-                }
-              }
-            } catch (e) {
-              debugPrint('⚠️ Error fetching cycles for batch ${batchDoc.id}: $e');
-            }
-
-            return batchCycles;
-          }),
-        );
-
-        // Combine all cycles from all batches
-        for (var cycles in results) {
-          allCycles.addAll(cycles);
-        }
-
-        // Sort by timestamp descending
-        allCycles.sort((a, b) =>
-            (b.timestamp ?? DateTime(2000)).compareTo(a.timestamp ?? DateTime(2000)));
-
-        debugPrint('✅ Stream yielding ${allCycles.length} cycles');
-        yield allCycles;
+        yield await _fetchAllCyclesFromBatches(batches, cutoff);
       } catch (e) {
         debugPrint('❌ Error in streamTeamCycles: $e');
         yield [];
       }
     }
+  }
+  
+  /// Helper to fetch cycles from all batches
+  Future<List<CycleRecommendation>> _fetchAllCyclesFromBatches(
+    List<QueryDocumentSnapshot> batches,
+    DateTime cutoff,
+  ) async {
+    debugPrint('🔄 Fetching cycles for ${batches.length} batches...');
+
+    final List<CycleRecommendation> allCycles = [];
+
+    // Fetch cycles from all batches in parallel
+    final results = await Future.wait(
+      batches.map((batchDoc) async {
+        final List<CycleRecommendation> batchCycles = [];
+
+        try {
+          final cyclesSnapshot = await _firestore
+              .collection('batches')
+              .doc(batchDoc.id)
+              .collection('cyclesRecom')
+              .get();
+
+          for (var cycleDoc in cyclesSnapshot.docs) {
+            // Fetch drum_controller and aerator in parallel with cutoff filter
+            final futures = await Future.wait([
+              _firestore
+                  .collection('batches')
+                  .doc(batchDoc.id)
+                  .collection('cyclesRecom')
+                  .doc(cycleDoc.id)
+                  .collection('drum_controller')
+                  .where('startedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(cutoff))
+                  .get(),
+              _firestore
+                  .collection('batches')
+                  .doc(batchDoc.id)
+                  .collection('cyclesRecom')
+                  .doc(cycleDoc.id)
+                  .collection('aerator')
+                  .where('startedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(cutoff))
+                  .get(),
+            ]);
+
+            final drumSnapshot = futures[0];
+            final aeratorSnapshot = futures[1];
+
+            // Add drum controller cycles
+            for (var drumDoc in drumSnapshot.docs) {
+              try {
+                batchCycles.add(CycleRecommendation.fromFirestore(drumDoc));
+              } catch (e) {
+                debugPrint('⚠️ Error parsing drum cycle: $e');
+              }
+            }
+
+            // Add aerator cycles
+            for (var aeratorDoc in aeratorSnapshot.docs) {
+              try {
+                batchCycles.add(CycleRecommendation.fromFirestore(aeratorDoc));
+              } catch (e) {
+                debugPrint('⚠️ Error parsing aerator cycle: $e');
+              }
+            }
+          }
+        } catch (e) {
+          debugPrint('⚠️ Error fetching cycles for batch ${batchDoc.id}: $e');
+        }
+
+        return batchCycles;
+      }),
+    );
+
+    // Combine all cycles from all batches
+    for (var cycles in results) {
+      allCycles.addAll(cycles);
+    }
+
+    // Sort by timestamp descending
+    allCycles.sort((a, b) =>
+        (b.timestamp ?? DateTime(2000)).compareTo(a.timestamp ?? DateTime(2000)));
+
+    debugPrint('✅ Stream yielding ${allCycles.length} cycles');
+    return allCycles;
   }
 }

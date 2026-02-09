@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/web/stats_card_row.dart
 
 import 'package:flutter/material.dart';
-import '../../../core/widgets/base_stats_card.dart';
+import '../../../core/widgets/sample_cards/base_stats_card.dart';
 import '../../../core/themes/web_colors.dart';
 import '../../models/activity_common.dart';
 

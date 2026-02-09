@@ -1,7 +1,7 @@
 // lib/ui/activity_logs/widgets/mobile/activity_card.dart
 
 import 'package:flutter/material.dart';
-import '../../../core/widgets/data_card.dart';
+import '../../../core/widgets/sample_cards/data_card.dart';
 import '../../../../data/models/activity_log_item.dart';
 
 /// Activity card that uses DataCard for consistent styling across the app

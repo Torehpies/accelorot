@@ -1,4 +1,5 @@
-// lib/frontend/operator/dashboard/add_waste/fields/submit_button.dart
+// lib/ui/operator_dashboard/fields/submit_button.dart
+
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatelessWidget {

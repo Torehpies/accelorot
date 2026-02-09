@@ -1,11 +1,10 @@
+// lib/ui/operator_dashboard/screens/web_home_screen.dart
+
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/drum_control_card.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/fabs/web_add_waste_fab.dart';
 
 class WebHomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine;
@@ -133,64 +133,9 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
     });
   }
 
-  void _handleFABPress() async {
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => const QuickActionsSheet(),
-    );
-
-    if (action == null || !mounted) return;
-
-    if (action == 'add_waste') {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => AddWasteProduct(
-          preSelectedMachineId: _selectedMachineId,
-          preSelectedBatchId: _selectedBatchId,
-        ),
-      );
-
-      if (result == true && mounted) {
-        ref.invalidate(allActivitiesProvider);
-        ref.invalidate(userTeamBatchesProvider);
-
-        if (_selectedMachineId != null) {
-          await _autoSelectBatchForMachine(_selectedMachineId!);
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Waste entry added successfully!'),
-            backgroundColor: Colors.teal,
-          ),
-        );
-        ref.invalidate(allActivitiesProvider);
-      }
-    } else if (action == 'submit_report') {
-      final result = await showDialog<bool>(
-        context: context,
-        builder: (context) => SubmitReport(
-          preSelectedMachineId: _selectedMachineId,
-          preSelectedBatchId: _selectedBatchId,
-        ),
-      );
-
-      if (result == true && mounted) {
-        ref.invalidate(allActivitiesProvider);
-        ref.invalidate(userTeamBatchesProvider);
-
-        if (_selectedMachineId != null) {
-          await _autoSelectBatchForMachine(_selectedMachineId!);
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Report submitted successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        ref.invalidate(allActivitiesProvider);
-      }
+  void _handleFABSuccess() async {
+    if (_selectedMachineId != null) {
+      await _autoSelectBatchForMachine(_selectedMachineId!);
     }
   }
 
@@ -341,12 +286,10 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _handleFABPress,
-        backgroundColor: Colors.green,
-        elevation: 5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: const Icon(Icons.add, size: 32, color: Colors.white),
+      floatingActionButton: WebAddWasteFAB(
+        preSelectedMachineId: _selectedMachineId,
+        preSelectedBatchId: _selectedBatchId,
+        onSuccess: _handleFABSuccess,
       ),
     );
   }

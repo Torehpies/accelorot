@@ -10,7 +10,8 @@ class RecentActivitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(userTeamActivitiesProvider);
+    // Use streaming provider for real-time updates 
+    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -106,29 +107,7 @@ class RecentActivitiesTable extends ConsumerWidget {
           Expanded(
             flex: 2,
             child: Text(
-              'Machine',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF9CA3AF),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Batch',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF9CA3AF),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Category',
+              'Machine / Batch',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -177,7 +156,8 @@ class RecentActivitiesTable extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.refresh, size: 16),
-          onPressed: () => ref.invalidate(userTeamActivitiesProvider),
+          // ✅ Invalidate streaming provider to force refresh
+          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
           tooltip: 'Refresh',
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -256,27 +236,34 @@ class RecentActivitiesTable extends ConsumerWidget {
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              machineText,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              batchDisplayName ?? '',
-              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              _getCategoryText(activity),
-              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Machine name
+                Text(
+                  machineText.isNotEmpty ? machineText : '—',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF374151),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (batchDisplayName != null && batchDisplayName.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  // Batch name
+                  Text(
+                    batchDisplayName,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
@@ -300,19 +287,6 @@ class RecentActivitiesTable extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _getCategoryText(ActivityLogItem log) {
-    switch (log.type) {
-      case ActivityType.substrate:
-        return 'Substrate';
-      case ActivityType.alert:
-        return 'Alert';
-      case ActivityType.report:
-        return log.reportType ?? 'Report';
-      case ActivityType.cycle:
-        return log.controllerType == 'drum_controller' ? 'Drum' : 'Aerator';
-    }
   }
 
   String _getStatusText(ActivityLogItem log) {

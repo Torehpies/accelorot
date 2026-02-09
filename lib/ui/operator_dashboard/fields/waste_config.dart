@@ -1,3 +1,5 @@
+// lib/ui/operator_dashboard/fields/waste_config.dart
+
 const wasteCategoryInfo = {
   'greens': 'Nitrogen source (fast decomposition)',
   'browns': 'Carbon source (slow decomposition)',
