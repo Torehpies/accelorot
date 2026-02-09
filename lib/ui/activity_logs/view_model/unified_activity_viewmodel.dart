@@ -21,7 +21,8 @@ import '../mappers/activity_presentation_mapper.dart';
 
 part 'unified_activity_viewmodel.g.dart';
 
-@riverpod
+// Keep provider alive across navigation - prevents disposal and refetch
+@Riverpod(keepAlive: true)
 class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   late final ActivityAggregatorService _aggregator;
   
@@ -33,6 +34,9 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   @override
   UnifiedActivityState build() {
     _aggregator = ref.read(activityAggregatorProvider);
+
+    // Keep provider alive to prevent disposal on navigation
+    ref.keepAlive();
 
     // Setup disposal of streams
     ref.onDispose(() {
