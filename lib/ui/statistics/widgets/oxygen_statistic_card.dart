@@ -212,6 +212,8 @@ class OxygenStatisticCard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
+                        minX: _downsampleData(chartData).isEmpty ? 0 : _downsampleData(chartData).first['day'] as double,
+                        maxX: _downsampleData(chartData).isEmpty ? 6 : (_downsampleData(chartData).last['day'] as double),
                         minY: 0,
                         maxY: 5000,
                         lineBarsData: [

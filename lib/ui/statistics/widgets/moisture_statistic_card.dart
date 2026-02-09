@@ -216,6 +216,10 @@ class MoistureStatisticCard extends StatelessWidget {
                           ),
                         ),
                         borderData: FlBorderData(show: false),
+                        minX: _downsampleData(chartData).isEmpty ? 0 : _downsampleData(chartData).first['day'] as double,
+                        maxX: _downsampleData(chartData).isEmpty ? 6 : (_downsampleData(chartData).last['day'] as double),
+                            minY: 0,
+                            maxY: 100,
                         lineBarsData: [
                           LineChartBarData(
                             spots: _downsampleData(chartData).map((d) => FlSpot(d['day'] as double, d['value'] as double)).toList(),
