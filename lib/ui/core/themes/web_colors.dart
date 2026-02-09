@@ -6,7 +6,7 @@ import '../../../ui/activity_logs/models/activity_enums.dart';
 /// Centralized color palette for web activity logs - Updated with design colors
 class WebColors {
   // Primary Colors (from design)
-  static const greenAccent = Color(0xFF10B981); // Main teal accent color
+  static const greenAccent = Color(0xFF22C55E); // Main teal accent color
   static const greenLight = Color(0xFF34D399); // Lighter teal for gradients
 
   // Backgrounds
@@ -43,7 +43,7 @@ class WebColors {
   static const textSecondary = Color(0xFF374151); // Secondary content
   static const textLabel = Color(0xFF6B7280); // Labels and titles
   static const textMuted = Color(0xFF9CA3AF); // Muted subtext
-  static const textButton = Color(0xFF10B981); // Primary button text (green)
+  static const textButton = Color(0xFF22C55E); // Primary button text (green)
   static const textTitle = Color(0xFF28A85A); // Titles (green)
   static const textbutton2 = Color(0xFFFFFFFF); // Links (blue)
   static const greenPrimary = Color(0xFF28A85A); 
@@ -55,7 +55,7 @@ class WebColors {
 
   // Status Colors
   static const error = Color(0xFFEF4444); // Error/danger state
-  static const success = Color(0xFF10B981); // Success state
+  static const success = Color(0xFF22C55E); // Success state
   static const warning = Color(0xFFF59E0B); // Warning state
   static const info = Color(0xFF3B82F6); // Info state
   static const neutralStatus = Color(0xFF4338CA); // Neutral status (New, No log)
@@ -73,7 +73,7 @@ class WebColors {
     static const buttonText = Colors.white; // Button Text
     
     // Stats Card Colors
-    static const substratesIcon = Color(0xFF10B981); // emerald-500
+    static const substratesIcon = Color(0xFF22C55E); // emerald-500
     static const substratesBackground = Color(0xFFD1FAE5); // emerald-100
     static const alertsIcon = Color(0xFFF59E0B); // amber-500
     static const alertsBackground = Color(0xFFFEF3C7); // amber-100
@@ -84,7 +84,7 @@ class WebColors {
     static const featuresIcon = Color(0xFF6fd5b3); // emerald-100
     
     // Activity Type Colors (for chips and badges)
-    static const greens = Color(0xFF10B981); // emerald-500
+    static const greens = Color(0xFF22C55E); // emerald-500
     static const browns = Color(0xFFF59E0B); // amber-500
     static const compost = Color(0xFF84CC16); // lime-500
     static const temperature = Color(0xFFF97316); // orange-500

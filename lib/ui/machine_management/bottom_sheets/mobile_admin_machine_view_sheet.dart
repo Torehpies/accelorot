@@ -1,3 +1,5 @@
+// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_edit_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';

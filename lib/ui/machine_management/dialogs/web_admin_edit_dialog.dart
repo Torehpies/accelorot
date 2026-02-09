@@ -5,7 +5,7 @@ import '../../../data/models/machine_model.dart';
 import '../../core/dialog/base_dialog.dart';
 import '../../core/dialog/dialog_action.dart';
 import '../../core/dialog/dialog_fields.dart';
-import '../../core/dialog/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 
 class WebAdminEditDialog extends StatefulWidget {
   final MachineModel machine;
@@ -44,6 +44,10 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     super.dispose();
   }
 
+  bool get _hasChanges {
+    return _nameController.text.trim() != widget.machine.machineName;
+  }
+
   void _validateName() {
     setState(() {
       final name = _nameController.text.trim();
@@ -64,13 +68,6 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
       return;
     }
 
-    // Check if changed
-    if (name == widget.machine.machineName) {
-      if (!mounted) return;
-      ToastService.show(context, message: 'No changes detected');
-      return;
-    }
-
     setState(() => _isSubmitting = true);
 
     try {
@@ -81,10 +78,10 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ToastService.show(context, message: 'Machine updated successfully');
+      AppSnackbar.success(context, 'Machine updated successfully');
     } catch (e) {
       if (!mounted) return;
-      ToastService.show(context, message: 'Failed to update: $e');
+      AppSnackbar.error(context, 'Failed to update: $e');
       setState(() => _isSubmitting = false);
     }
   }
@@ -131,10 +128,9 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
         ),
         DialogAction.primary(
           label: 'Update Machine',
-          onPressed: _nameError == null && !_isSubmitting
-              ? _handleSubmit
-              : null,
+          onPressed: _handleSubmit,
           isLoading: _isSubmitting,
+          isDisabled: !_hasChanges || _nameError != null,
         ),
       ],
     );

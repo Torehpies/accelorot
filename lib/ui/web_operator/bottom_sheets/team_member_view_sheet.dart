@@ -1,3 +1,5 @@
+// lib/ui/web_operator/bottom_sheets/team_member_view_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';

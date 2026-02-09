@@ -2,8 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/toast/mobile_toast_service.dart';
-import '../../../core/toast/toast_type.dart';
+import '../../../core/ui/app_snackbar.dart';
 import '../../themes/web_colors.dart';
 import '../../themes/web_text_styles.dart';
 
@@ -47,11 +46,7 @@ class _MobileReadOnlyFieldState extends State<MobileReadOnlyField> {
   void _copy() {
     if (widget.value.isEmpty) return;
     Clipboard.setData(ClipboardData(text: widget.value));
-    MobileToastService.show(
-      context,
-      message: 'Copied!',
-      type: ToastType.success,
-    );
+    AppSnackbar.success(context, 'Copied!');
   }
   
   @override

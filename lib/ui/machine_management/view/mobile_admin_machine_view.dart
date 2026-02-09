@@ -8,8 +8,7 @@ import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
 import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/ui/app_snackbar.dart';
 import '../helpers/machine_status_helper.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
@@ -65,9 +64,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         machine: machine,
         onEdit: () {
           Navigator.of(context).pop();
-          Future.delayed(const Duration(milliseconds: 250), () {
-            if (mounted) _showEditSheet(machine);
-          });
+          _showEditSheet(machine);
         },
         onArchive: () {
           Navigator.pop(context);
@@ -133,19 +130,11 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
             .archiveMachine(_teamId!, machine.machineId);
 
         if (mounted) {
-          MobileToastService.show(
-            context,
-            message: 'Machine archived successfully',
-            type: ToastType.success,
-          );
+          AppSnackbar.success(context, 'Machine archived successfully');
         }
       } catch (e) {
         if (mounted) {
-          MobileToastService.show(
-            context,
-            message: 'Failed to archive machine',
-            type: ToastType.error,
-          );
+          AppSnackbar.error(context, 'Failed to archive machine');
         }
       }
     }

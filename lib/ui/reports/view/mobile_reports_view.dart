@@ -54,12 +54,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
       builder: (context) => ReportViewBottomSheet(
         report: report,
         onEdit: () {
-          // Close view sheet, then open edit sheet
           Navigator.of(context).pop();
-          // Small delay so the view sheet finishes its exit animation
-          Future.delayed(const Duration(milliseconds: 250), () {
-            if (mounted) _showReportEdit(report);
-          });
+          _showReportEdit(report);
         },
       ),
     );

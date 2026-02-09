@@ -1,3 +1,5 @@
+// lib/ui/web_operator/bottom_sheets/team_member_edit_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
@@ -9,8 +11,7 @@ import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
 import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
 import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateTeamMemberCallback = Future<void> Function(EditOperatorForm form);
 
@@ -31,20 +32,17 @@ class TeamMemberEditSheet extends StatefulWidget {
 class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
   late final TextEditingController _firstNameController;
   late final TextEditingController _lastNameController;
-  late final TextEditingController _emailController;
   late UserStatus _status;
 
   bool _isLoading = false;
   String? _firstNameError;
   String? _lastNameError;
-  String? _emailError;
 
   @override
   void initState() {
     super.initState();
     _firstNameController = TextEditingController(text: widget.member.firstName);
     _lastNameController = TextEditingController(text: widget.member.lastName);
-    _emailController = TextEditingController(text: widget.member.email);
     _status = widget.member.status;
   }
 
@@ -52,14 +50,12 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
   bool get _hasChanges {
     return _firstNameController.text.trim() != widget.member.firstName.trim() ||
         _lastNameController.text.trim() != widget.member.lastName.trim() ||
-        _emailController.text.trim() != widget.member.email.trim() ||
         _status != widget.member.status;
   }
 
@@ -67,7 +63,6 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
     setState(() {
       _firstNameError = null;
       _lastNameError = null;
-      _emailError = null;
     });
 
     bool isValid = true;
@@ -82,19 +77,7 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
       isValid = false;
     }
 
-    if (_emailController.text.trim().isEmpty) {
-      setState(() => _emailError = 'Email cannot be empty');
-      isValid = false;
-    } else if (!_isValidEmail(_emailController.text.trim())) {
-      setState(() => _emailError = 'Invalid email format');
-      isValid = false;
-    }
-
     return isValid;
-  }
-
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   Future<void> _save() async {
@@ -107,29 +90,21 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
         id: widget.member.id,
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
+        email: widget.member.email, // Keep original email
         status: _status,
       );
 
       await widget.onUpdate(form);
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Team member updated successfully',
-          type: ToastType.success,
-        );
+        AppSnackbar.success(context, 'Team member updated successfully');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to update team member',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to update team member');
       }
     }
   }
@@ -171,12 +146,13 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(
@@ -200,16 +176,6 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
           ),
           const SizedBox(height: 16),
 
-          MobileInputField(
-            label: 'Email',
-            controller: _emailController,
-            required: true,
-            errorText: _emailError,
-            hintText: 'Enter email',
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 16),
-
           MobileDropdownField<UserStatus>(
             label: 'Status',
             value: _status,
@@ -224,6 +190,10 @@ class _TeamMemberEditSheetState extends State<TeamMemberEditSheet> {
           MobileReadOnlySection(
             sectionTitle: 'Additional Information',
             fields: [
+              MobileReadOnlyField(
+                label: 'Email',
+                value: widget.member.email,
+              ),
               MobileReadOnlyField(
                 label: 'Member ID',
                 value: widget.member.id,
