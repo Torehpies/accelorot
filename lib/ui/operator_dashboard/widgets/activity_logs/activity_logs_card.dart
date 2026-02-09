@@ -47,7 +47,8 @@ class ActivityLogsCard extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.refresh, size: 20),
                     onPressed: () {
-                      ref.invalidate(allActivitiesProvider);
+                      // Invalidate streaming provider to force refresh
+                      ref.invalidate(allActivitiesStreamProvider);
                     },
                     tooltip: 'Refresh',
                   ),

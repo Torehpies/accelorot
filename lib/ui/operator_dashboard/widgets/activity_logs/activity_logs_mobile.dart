@@ -12,7 +12,8 @@ class ActivityLogsMobile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(allActivitiesProvider);
+    // ✅ Use streaming provider for real-time updates
+    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
 
     return activitiesAsync.when(
       data: (allLogs) => _buildContent(allLogs),
