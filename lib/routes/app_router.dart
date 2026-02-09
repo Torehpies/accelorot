@@ -42,6 +42,8 @@ import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landin
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
+
 
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -93,6 +95,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RoutePath.forgotPassword.name,
         builder: (context, state) => const ForgotPassScreen(),
       ),
+      GoRoute(
+        path: RoutePath.resetEmailSent.path,
+        name: RoutePath.resetEmailSent.name,
+        builder: (context, state) {
+          final email = (state.extra as Map<String, dynamic>?)?['email'] as String? ?? '';
+          return ResetEmailSentScreen(email: email);
+        },
+      ),
+      
       GoRoute(
         path: RoutePath.verifyEmail.path,
         name: RoutePath.verifyEmail.name,
