@@ -73,7 +73,6 @@ class ThemeConstants {
   static const double fontSize20 = 20.0;
   static const double fontSize32 = 32.0;
 
-
   static BorderRadius borderRadiusCircular(double radius) {
     return BorderRadius.circular(radius);
   }

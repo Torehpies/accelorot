@@ -1,0 +1,16 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+@JsonEnum(valueField: 'value')
+enum UserStatus {
+  loading('loading'),
+  unauthenticated('unauthenticated'),
+  unverified('unverified'),
+  teamSelect('teamSelect'),
+  pending('pending'),
+  archived('archived'),
+  removed('removed'),
+  active('active');
+
+  final String value;
+  const UserStatus(this.value);
+}

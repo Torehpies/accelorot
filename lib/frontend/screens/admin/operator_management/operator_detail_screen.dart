@@ -1,4 +1,3 @@
-// lib/frontend/screens/admin/operator_management/operator_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -87,10 +86,15 @@ class _OperatorDetailScreenState extends State<OperatorDetailScreen> {
           .collection('members')
           .doc(widget.operatorId);
 
+      final userRef = _firestore.collection('users').doc(widget.operatorId);
+
       batch.update(memberRef, {
         'isArchived': true,
         'archivedAt': FieldValue.serverTimestamp(),
       });
+
+      /// Also updates the user document
+      batch.update(userRef, {'isArchived': true});
 
       await batch.commit();
 

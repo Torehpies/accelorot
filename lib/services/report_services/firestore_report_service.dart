@@ -47,8 +47,6 @@ class FirestoreReportService {
     }
   }
 
-  /// Update an existing report
-  /// Path: machines/{machineId}/reports/{reportId}
   static Future<void> updateReport({
     required String machineId,
     required String reportId,

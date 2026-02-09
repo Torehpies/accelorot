@@ -1,15 +1,12 @@
-// lib/frontend/screens/admin/operator_management/operator_management_screen.dart
-
-// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/pending_members/widgets/accept_operator_screen.dart';
 import 'operator_detail_screen.dart';
 import 'add_operator_screen.dart';
-import 'accept_operator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class OperatorManagementScreen extends StatefulWidget {
-  const OperatorManagementScreen({super.key});
+  const OperatorManagementScreen({super.key, required String teamId});
 
   @override
   State<OperatorManagementScreen> createState() =>
@@ -129,12 +126,25 @@ class _OperatorManagementScreenState extends State<OperatorManagementScreen> {
     if (teamId.isEmpty) return;
 
     try {
-      await _firestore
+      final batch = _firestore.batch();
+
+      final memberRef = _firestore
           .collection('teams')
           .doc(teamId)
           .collection('members')
-          .doc(operator['uid'])
-          .update({'isArchived': false, 'archivedAt': FieldValue.delete()});
+          .doc(operator['uid']);
+
+      final userRef = _firestore.collection('users').doc(operator['uid']);
+
+      batch.update(memberRef, {
+        'isArchived': false,
+        'archivedAt': FieldValue.delete(),
+      });
+
+      /// Also updates the user document
+      batch.update(userRef, {'isArchived': false});
+
+      await batch.commit();
 
       if (!mounted) return;
 
