@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
@@ -42,6 +44,46 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
     super.initState();
     if (widget.currentBatch != null && widget.currentBatch!.isActive) {
       _loadExistingCycle();
+    }
+  }
+
+  /// Handle real-time machine state changes from Firebase stream
+  void _handleMachineStateChange(bool aeratorActive) async {
+    if (!mounted) return;
+    
+    // Get current machine state to check pause flag
+    final machineRepository = ref.read(machineRepositoryProvider);
+    final machine = await machineRepository.getMachineById(widget.machineId!);
+    
+    if (machine == null) return;
+    
+    final aeratorPaused = machine.aeratorPaused;
+    
+    debugPrint('🔔 Machine state changed: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused');
+    
+    // Determine state based on aeratorActive and aeratorPaused combination
+    if (aeratorActive && !aeratorPaused) {
+      // Running state
+      debugPrint('✅ Aerator is RUNNING - reloading cycle state');
+      await _loadExistingCycle();
+    } else if (!aeratorActive && aeratorPaused) {
+      // Paused state
+      debugPrint('⏸️ Aerator is PAUSED - stopping timers');
+      _stopTimer();
+      _cycleTimer?.cancel();
+      setState(() {
+        status = SystemStatus.idle;
+        _isPaused = true;
+      });
+    } else if (!aeratorActive && !aeratorPaused) {
+      // Stopped state
+      debugPrint('⏹️ Aerator is STOPPED - resetting to idle');
+      _stopTimer();
+      _cycleTimer?.cancel();
+      setState(() {
+        status = SystemStatus.idle;
+        _isPaused = false;
+      });
     }
   }
 
@@ -282,7 +324,6 @@ Future<void> _loadExistingCycle() async {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
       await cycleRepository.startAerator(
         batchId: widget.currentBatch!.id,
@@ -292,7 +333,15 @@ Future<void> _loadExistingCycle() async {
         duration: settings.period,
       );
 
-      await machineRepository.updateAeratorActive(widget.machineId!, true);
+      // Set aeratorActive to true and aeratorPaused to false (running state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'aeratorActive': true,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Wait a bit for Firestore to propagate
       await Future.delayed(const Duration(milliseconds: 500));
@@ -338,11 +387,17 @@ Future<void> _loadExistingCycle() async {
     if (widget.machineId == null) return;
 
     try {
-      final machineRepository = ref.read(machineRepositoryProvider);
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set aeratorActive to false (stops hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, false);
+      // Set aeratorActive to false and aeratorPaused to false (stopped state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'aeratorActive': false,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle status to 'stopped' (NOT 'completed')
       if (_cycleDoc != null && widget.currentBatch?.id != null) {
@@ -395,7 +450,6 @@ Future<void> _loadExistingCycle() async {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
       // Calculate current runtime
       final elapsed = _startTime != null 
@@ -403,8 +457,15 @@ Future<void> _loadExistingCycle() async {
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Set aeratorActive to false (stops hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, false);
+      // Set aeratorActive to false and aeratorPaused to true (paused state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'aeratorActive': false,
+        'aeratorPaused': true,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle document to 'paused' status
       await cycleRepository.pauseAerator(
@@ -448,10 +509,16 @@ Future<void> _loadExistingCycle() async {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
-      // Set aeratorActive to true (restarts hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, true);
+      // Set aeratorActive to true and aeratorPaused to false (running state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'aeratorActive': true,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle document to 'running' status
       await cycleRepository.resumeAerator(
@@ -561,6 +628,20 @@ Future<void> _loadExistingCycle() async {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for machine state changes (aeratorActive) to sync UI
+    if (widget.machineId != null) {
+      ref.listen<AsyncValue<MachineModel?>>(
+        machineStreamProvider(widget.machineId!),
+        (previous, next) {
+          next.whenData((machine) {
+            if (machine != null) {
+              _handleMachineStateChange(machine.aeratorActive);
+            }
+          });
+        },
+      );
+    }
+    
     final hasActiveBatch =
         widget.currentBatch != null && widget.currentBatch!.isActive;
     final batchCompleted =

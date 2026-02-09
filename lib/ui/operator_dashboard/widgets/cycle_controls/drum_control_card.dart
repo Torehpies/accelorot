@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
@@ -68,6 +70,46 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
       _isPaused = false;
       _accumulatedSeconds = 0;
     });
+  }
+
+  /// Handle real-time machine state changes from Firebase stream
+  void _handleMachineStateChange(bool drumActive) async {
+    if (!mounted) return;
+    
+    // Get current machine state to check pause flag
+    final machineRepository = ref.read(machineRepositoryProvider);
+    final machine = await machineRepository.getMachineById(widget.machineId!);
+    
+    if (machine == null) return;
+    
+    final drumPaused = machine.drumPaused;
+    
+    debugPrint('🔔 Machine state changed: drumActive=$drumActive, drumPaused=$drumPaused');
+    
+    // Determine state based on drumActive and drumPaused combination
+    if (drumActive && !drumPaused) {
+      // Running state
+      debugPrint('✅ Drum is RUNNING - reloading cycle state');
+      await _loadExistingCycle();
+    } else if (!drumActive && drumPaused) {
+      // Paused state
+      debugPrint('⏸️ Drum is PAUSED - stopping timers');
+      _stopTimer();
+      _cycleTimer?.cancel();
+      setState(() {
+        status = SystemStatus.idle;
+        _isPaused = true;
+      });
+    } else if (!drumActive && !drumPaused) {
+      // Stopped state
+      debugPrint('⏹️ Drum is STOPPED - resetting to idle');
+      _stopTimer();
+      _cycleTimer?.cancel();
+      setState(() {
+        status = SystemStatus.idle;
+        _isPaused = false;
+      });
+    }
   }
 
   @override
@@ -302,7 +344,6 @@ Future<void> _loadExistingCycle() async {
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
       debugPrint('🔵 Starting drum controller...');
 
@@ -316,9 +357,17 @@ Future<void> _loadExistingCycle() async {
 
       debugPrint('✅ Drum controller service started');
 
-      await machineRepository.updateDrumActive(widget.machineId!, true);
+      // Set drumActive to true and drumPaused to false (running state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'drumActive': true,
+        'drumPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
-      debugPrint('✅ drumActive set to true');
+      debugPrint('✅ Machine state set to RUNNING');
 
       // Wait a bit for Firestore to propagate
       await Future.delayed(const Duration(milliseconds: 500));
@@ -366,11 +415,17 @@ Future<void> _loadExistingCycle() async {
     if (widget.machineId == null) return;
 
     try {
-      final machineRepository = ref.read(machineRepositoryProvider);
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set drumActive to false (stops hardware)
-      await machineRepository.updateDrumActive(widget.machineId!, false);
+      // Set drumActive to false and drumPaused to false (stopped state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'drumActive': false,
+        'drumPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle status to 'stopped' (NOT 'completed')
       if (_cycleDoc != null && widget.currentBatch?.id != null) {
@@ -422,7 +477,6 @@ Future<void> _loadExistingCycle() async {
     if (widget.machineId == null) return;
 
     try {
-      final machineRepository = ref.read(machineRepositoryProvider);
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
       debugPrint('🔵 Starting pause operation...');
@@ -449,10 +503,17 @@ Future<void> _loadExistingCycle() async {
         debugPrint('❌ Missing cycle doc or batch ID');
       }
 
-      // Set drumActive to false (stops hardware)
-      debugPrint('🔵 Updating drumActive to false...');
-      await machineRepository.updateDrumActive(widget.machineId!, false);
-      debugPrint('✅ drumActive updated');
+      // Set drumActive to false and drumPaused to true (paused state)
+      debugPrint('🔵 Updating drumActive=false, drumPaused=true...');
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'drumActive': false,
+        'drumPaused': true,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+      debugPrint('✅ Machine state updated to PAUSED');
 
       _stopTimer();
 
@@ -488,7 +549,6 @@ Future<void> _loadExistingCycle() async {
     if (widget.machineId == null) return;
 
     try {
-      final machineRepository = ref.read(machineRepositoryProvider);
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
       debugPrint('🔵 Starting resume operation...');
@@ -502,10 +562,17 @@ Future<void> _loadExistingCycle() async {
         debugPrint('✅ Resume service call completed');
       }
 
-      // Set drumActive to true (restarts hardware)
-      debugPrint('🔵 Updating drumActive to true...');
-      await machineRepository.updateDrumActive(widget.machineId!, true);
-      debugPrint('✅ drumActive updated');
+      // Set drumActive to true and drumPaused to false (running state)
+      debugPrint('🔵 Updating drumActive=true, drumPaused=false...');
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(widget.machineId!)
+          .update({
+        'drumActive': true,
+        'drumPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+      debugPrint('✅ Machine state updated to RUNNING');
 
       setState(() {
         status = SystemStatus.running;  // Set status back to running
@@ -609,6 +676,20 @@ Future<void> _loadExistingCycle() async {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for machine state changes (drumActive) to sync UI
+    if (widget.machineId != null) {
+      ref.listen<AsyncValue<MachineModel?>>(
+        machineStreamProvider(widget.machineId!),
+        (previous, next) {
+          next.whenData((machine) {
+            if (machine != null) {
+              _handleMachineStateChange(machine.drumActive);
+            }
+          });
+        },
+      );
+    }
+    
     final hasActiveBatch =
         widget.currentBatch != null && widget.currentBatch!.isActive;
     final batchCompleted =

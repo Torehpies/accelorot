@@ -27,6 +27,9 @@ abstract class MachineService {
   /// Stream of machines for real-time updates
   Stream<List<MachineModel>> watchMachinesByTeam(String teamId);
 
+  /// Stream a single machine for real-time updates
+  Stream<MachineModel?> watchMachineById(String machineId);
+
   /// Update drum active status
   Future<void> updateDrumActive(String machineId, bool isActive);
 
