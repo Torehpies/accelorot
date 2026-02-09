@@ -12,7 +12,7 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../activity_logs/widgets/mobile/machine_selector.dart';
-import '../../core/widgets/stats_skeleton.dart';
+import '../../core/skeleton/stats_skeleton.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
