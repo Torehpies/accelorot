@@ -1,8 +1,12 @@
 // lib/ui/activity_logs/services/activity_aggregator_service.dart
 
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../../../data/models/alert.dart';
+import '../../../data/models/cycle_recommendation.dart';
 import '../../../data/repositories/substrate_repository.dart';
 import '../../../data/repositories/alert_repository.dart';
 import '../../../data/repositories/report_repository.dart';
@@ -446,5 +450,60 @@ class ActivityAggregatorService {
     _cache.remove(category);
     _allActivitiesCache = null; // Also clear combined cache
     debugPrint('🗑️ Cache cleared for category: $category');
+  }
+
+  // ===== STREAMING METHODS =====
+
+  /// Stream all activities with real-time updates
+  Stream<List<ActivityLogItem>> streamAllActivities() async* {
+    debugPrint('🔴 Setting up streamAllActivities...');
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: defaultCutoffDays));
+    
+    // Setup streams for real-time data
+    final alertsStream = _alertRepo.streamTeamAlerts(cutoffDate: cutoffDate);
+    final cyclesStream = _cycleRepo.streamTeamCycles(cutoffDate: cutoffDate);
+    
+    // Get initial substrates (they don't have streaming support yet)
+    final substrates = await _substrateRepo.getAllSubstrates();
+    final substrateItems = substrates
+        .map((s) => ActivityPresentationMapper.fromSubstrate(s))
+        .toList();
+
+    // Combine alerts and cycles streams
+    await for (final alertsAndCycles in Rx.combineLatest2(
+      alertsStream,
+      cyclesStream,
+      (List<Alert> alerts, List<CycleRecommendation> cycles) {
+        return {'alerts': alerts, 'cycles': cycles};
+      },
+    )) {
+      try {
+        final alerts = alertsAndCycles['alerts'] as List<Alert>;
+        final cycles = alertsAndCycles['cycles'] as List<CycleRecommendation>;
+        
+        // Get reports (using one-time fetch for now)
+        final reports = await getReportsRaw();
+
+        // Transform all to ActivityLogItems
+        final allActivities = <ActivityLogItem>[
+          ...substrateItems,
+          ...alerts.map((a) => ActivityPresentationMapper.fromAlert(a)),
+          ...cycles.map((c) => ActivityPresentationMapper.fromCycleRecommendation(c)),
+          ...reports.map((r) => ActivityPresentationMapper.fromReport(r)),
+        ];
+
+        // Sort by timestamp (newest first)
+        allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+        debugPrint('🔔 Stream updated: ${allActivities.length} total activities');
+
+        // Yield the combined list
+        yield allActivities;
+      } catch (e) {
+        debugPrint('❌ Error in streamAllActivities: $e');
+        yield [];
+      }
+    }
   }
 }

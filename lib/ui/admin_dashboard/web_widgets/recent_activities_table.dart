@@ -10,7 +10,8 @@ class RecentActivitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(userTeamActivitiesProvider);
+    // Use streaming provider for real-time updates 
+    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -177,7 +178,8 @@ class RecentActivitiesTable extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.refresh, size: 16),
-          onPressed: () => ref.invalidate(userTeamActivitiesProvider),
+          // ✅ Invalidate streaming provider to force refresh
+          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
           tooltip: 'Refresh',
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
