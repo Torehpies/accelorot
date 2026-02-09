@@ -193,6 +193,18 @@ class FirebaseMachineService implements MachineService {
   }
 
   @override
+  Stream<MachineModel?> watchMachineById(String machineId) {
+    return _machinesCollection
+        .doc(machineId)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.exists
+              ? MachineModel.fromFirestore(snapshot)
+              : null,
+        );
+  }
+
+  @override
   Future<void> updateDrumActive(String machineId, bool isActive) async {
     if (currentUserId == null) {
       throw Exception('User must be authenticated');

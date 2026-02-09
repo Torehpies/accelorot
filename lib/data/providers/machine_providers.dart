@@ -22,6 +22,15 @@ final machinesStreamProvider =
       return repository.watchMachinesByTeam(teamId);
     });
 
+// StreamProvider for single machine (real-time updates for drumActive/aeratorActive)
+final machineStreamProvider = StreamProvider.family<MachineModel?, String>((
+  ref,
+  machineId,
+) {
+  final repository = ref.watch(machineRepositoryProvider);
+  return repository.watchMachineById(machineId);
+});
+
 // FutureProvider for single machine
 final machineByIdProvider = FutureProvider.family<MachineModel?, String>((
   ref,
