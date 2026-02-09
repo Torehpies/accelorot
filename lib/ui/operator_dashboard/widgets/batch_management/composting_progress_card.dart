@@ -7,7 +7,10 @@ import '../../models/compost_batch_model.dart';
 import '../../../activity_logs/widgets/mobile/machine_selector.dart';
 import '../../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../../../data/providers/batch_providers.dart';
+import '../../../../data/providers/selected_batch_provider.dart';
+import '../../../../data/providers/selected_machine_provider.dart';
 import '../../../../data/models/batch_model.dart';
+import '../../../core/themes/app_theme.dart';
 
 class CompostingProgressCard extends ConsumerStatefulWidget {
   static const int totalDays = 12; // Fixed 12-day cycle
@@ -35,9 +38,10 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
 class _CompostingProgressCardState
     extends ConsumerState<CompostingProgressCard>
     with AutomaticKeepAliveClientMixin {
-  String? _selectedMachineId;
-  String? _selectedBatchId;
-  BatchModel? _activeBatch;
+ 
+  // String? _selectedMachineId;
+  // String? _selectedBatchId;
+  // BatchModel? _activeBatch;
 
   @override
   bool get wantKeepAlive => true;
@@ -45,66 +49,83 @@ class _CompostingProgressCardState
   @override
   void initState() {
     super.initState();
-    _selectedMachineId = widget.preSelectedMachineId;
+    // Initialize machine provider if preSelectedMachineId is provided
+    if (widget.preSelectedMachineId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(selectedMachineIdProvider.notifier).setMachine(
+          widget.preSelectedMachineId!
+        );
+      });
+    }
   }
 
   @override
   void didUpdateWidget(CompostingProgressCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update machine if it changed from parent
+    // Update machine provider if it changed from parent
     if (widget.preSelectedMachineId != oldWidget.preSelectedMachineId) {
-      setState(() {
-        _selectedMachineId = widget.preSelectedMachineId;
-        _selectedBatchId = null;
-        _activeBatch = null;
+
+      Future.microtask(() {
+        if (mounted && widget.preSelectedMachineId != null) {
+          ref.read(selectedMachineIdProvider.notifier).setMachine(
+            widget.preSelectedMachineId!
+          );
+  
+          ref.read(selectedBatchIdProvider.notifier).clearSelection();
+          // Auto-select latest batch for the new machine
+          _autoSelectLatestBatch();
+        }
       });
-      // Auto-select latest batch for the new machine
-      if (_selectedMachineId != null) {
-        _autoSelectLatestBatch();
-      }
     }
   }
 
   void _autoSelectLatestBatch() {
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
     final batchesAsync = ref.read(userTeamBatchesProvider);
     batchesAsync.whenData((batches) {
-      if (_selectedMachineId != null) {
+      if (selectedMachineId.isNotEmpty) {
         final machineBatches = batches
-            .where((b) => b.machineId == _selectedMachineId)
+            .where((b) => b.machineId == selectedMachineId)
             .toList();
 
         if (machineBatches.isNotEmpty) {
           machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           final latestBatch = machineBatches.first;
 
-          if (mounted) {
-            setState(() {
-              _selectedBatchId = latestBatch.id;
-              _activeBatch = latestBatch;
-            });
-            widget.onBatchChanged?.call(latestBatch);
-          }
+     
+          Future.microtask(() {
+            if (mounted) {
+              ref.read(selectedBatchIdProvider.notifier).setBatch(latestBatch.id);
+              widget.onBatchChanged?.call(latestBatch);
+            }
+          });
         } else {
-          if (mounted) {
-            widget.onBatchChanged?.call(null);
-          }
+        
+          Future.microtask(() {
+            if (mounted) {
+              ref.read(selectedBatchIdProvider.notifier).clearSelection();
+              widget.onBatchChanged?.call(null);
+            }
+          });
         }
       }
     });
   }
 
   void _startBatch(BuildContext context) async {
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
+    
     // Check if there's an active batch for this machine
-    if (_selectedMachineId != null) {
+    if (selectedMachineId.isNotEmpty) {
       final batchesAsync = ref.read(userTeamBatchesProvider);
       final hasActiveBatch = batchesAsync.when(
         data: (batches) {
           return batches.any(
-            (b) => b.machineId == _selectedMachineId && b.isActive,
+            (b) => b.machineId == selectedMachineId && b.isActive,
           );
         },
         loading: () => false,
-        error: (_, _) => false,
+        error: (_, __) => false,
       );
 
       if (hasActiveBatch) {
@@ -124,7 +145,9 @@ class _CompostingProgressCardState
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) =>
-          BatchStartDialog(preSelectedMachineId: _selectedMachineId),
+          BatchStartDialog(
+            preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
+          ),
     );
 
     if (result == true && mounted) {
@@ -132,7 +155,7 @@ class _CompostingProgressCardState
       await ref.read(userTeamBatchesProvider.notifier).refresh();
 
       // Auto-select the newly created batch for the current machine
-      if (_selectedMachineId != null) {
+      if (selectedMachineId.isNotEmpty) {
         // Wait a bit for the refresh to complete
         await Future.delayed(const Duration(milliseconds: 300));
         _autoSelectLatestBatch();
@@ -140,13 +163,13 @@ class _CompostingProgressCardState
     }
   }
 
-  void _completeBatch(BuildContext context) {
-    if (_activeBatch == null) return;
+  void _completeBatch(BuildContext context, BatchModel? activeBatch) {
+    if (activeBatch == null) return;
 
     showDialog(
       context: context,
       builder: (ctx) => BatchCompleteDialog(
-        batch: _convertToCompostBatch(_activeBatch!),
+        batch: _convertToCompostBatch(activeBatch),
         onComplete: () async {
           // Refresh the provider first
           await ref.read(userTeamBatchesProvider.notifier).refresh();
@@ -154,24 +177,7 @@ class _CompostingProgressCardState
           // Wait a bit for the refresh to complete
           await Future.delayed(const Duration(milliseconds: 300));
 
-          // Update local state to reflect the completed batch
-          if (mounted) {
-            final batchesAsync = ref.read(userTeamBatchesProvider);
-            batchesAsync.whenData((batches) {
-              final updatedBatch = batches.firstWhere(
-                (b) => b.id == _selectedBatchId,
-                orElse: () => batches.first,
-              );
-
-              if (mounted) {
-                setState(() {
-                  _activeBatch = updatedBatch;
-                });
-              }
-            });
-          }
-
-          // Call parent callback
+          // Notify parent callback
           widget.onBatchCompleted();
         },
       ),
@@ -190,11 +196,11 @@ class _CompostingProgressCardState
     );
   }
 
-  int _getDaysPassed() {
-    if (_activeBatch == null) return 0;
+  int _getDaysPassed(BatchModel? activeBatch) {
+    if (activeBatch == null) return 0;
     final now = DateTime.now();
     return now
-        .difference(_activeBatch!.createdAt)
+        .difference(activeBatch.createdAt)
         .inDays
         .clamp(0, CompostingProgressCard.totalDays);
   }
@@ -221,32 +227,29 @@ class _CompostingProgressCardState
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     
-    //  auto-update when selected batch changes
+    // ✅ Watch the persisted providers
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    final selectedBatchId = ref.watch(selectedBatchIdProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
-    // Removed problematic auto-selection logic that was causing resets during zoom
-    // Now only updates if batch details changed (not selection)
-    batchesAsync.whenData((batches) {
-      if (_selectedBatchId != null) {
-        final matchingBatches = batches.where((b) => b.id == _selectedBatchId).toList();
+    // Find the active batch from provider state
+    BatchModel? activeBatch;
+    final batchesValue = batchesAsync.asData?.value;
+    if (batchesValue != null && selectedBatchId != null) {
+      try {
+        final matchingBatches = batchesValue.where((b) => b.id == selectedBatchId).toList();
         if (matchingBatches.isNotEmpty) {
-          final batch = matchingBatches.first;
-          if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
-            Future.microtask(() {
-              if (mounted) {
-                setState(() => _activeBatch = batch);
-                widget.onBatchChanged?.call(batch);
-              }
-            });
-          }
+          activeBatch = matchingBatches.first;
         }
+      } catch (e) {
+        // Handle error silently
       }
-    });
+    }
 
-    final isActive = _activeBatch?.isActive ?? false;
-    final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
-    final hasBatchSelected = _activeBatch != null;
-    final hasMachineSelected = _selectedMachineId != null;
+    final isActive = activeBatch?.isActive ?? false;
+    final batchIsCompleted = activeBatch != null && !activeBatch.isActive;
+    final hasBatchSelected = activeBatch != null;
+    final hasMachineSelected = selectedMachineId.isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
@@ -319,13 +322,12 @@ class _CompostingProgressCardState
               children: [
                 Expanded(
                   child: MachineSelector(
-                    selectedMachineId: _selectedMachineId,
+                    selectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     onChanged: (machineId) {
-                      setState(() {
-                        _selectedMachineId = machineId;
-                        _selectedBatchId = null;
-                        _activeBatch = null;
-                      });
+                      // ✅ Update provider instead of local state
+                      ref.read(selectedMachineIdProvider.notifier).setMachine(machineId ?? "");
+                      // ✅ Clear batch in provider
+                      ref.read(selectedBatchIdProvider.notifier).clearSelection();
                       // Notify parent that batch is cleared
                       widget.onBatchChanged?.call(null);
                       // Auto-select latest batch for new machine
@@ -339,18 +341,29 @@ class _CompostingProgressCardState
                 const SizedBox(width: 10),
                 Expanded(
                   child: BatchSelector(
-                    selectedBatchId: _selectedBatchId,
-                    selectedMachineId: _selectedMachineId,
+                    selectedBatchId: selectedBatchId,  // ✅ Use provider value
+                    selectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     onMachineAutoSelect: (machineId) {
-                      setState(() {
-                        _selectedMachineId = machineId;
-                      });
+
+                      if (machineId != null) {
+                        ref.read(selectedMachineIdProvider.notifier).setMachine(machineId);
+                      }
                     },
                     onChanged: (batchId) {
-                      setState(() {
-                        _selectedBatchId = batchId;
-                        if (batchId == null) {
-                          _activeBatch = null;
+                     
+                      ref.read(selectedBatchIdProvider.notifier).setBatch(batchId);
+                      
+                      // Update parent
+                      batchesAsync.whenData((batches) {
+                        if (batchId != null) {
+                          try {
+                            final batch = batches.firstWhere((b) => b.id == batchId);
+                            widget.onBatchChanged?.call(batch);
+                          } catch (e) {
+                            widget.onBatchChanged?.call(null);
+                          }
+                        } else {
+                          widget.onBatchChanged?.call(null);
                         }
                       });
                     },
@@ -398,7 +411,7 @@ class _CompostingProgressCardState
                           ? () => _startBatch(context)
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
+                        backgroundColor: AppColors.green100,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -431,21 +444,21 @@ class _CompostingProgressCardState
                       Expanded(
                         child: _buildDetailItem(
                           'Batch Name',
-                          _activeBatch!.displayName,
+                          activeBatch.displayName,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
                           'Batch Number',
-                          '#${_activeBatch!.batchNumber}',
+                          '#${activeBatch.batchNumber}',
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
                           'Started',
-                          _formatDate(_activeBatch!.createdAt),
+                          _formatDate(activeBatch.createdAt),
                         ),
                       ),
                     ],
@@ -456,14 +469,14 @@ class _CompostingProgressCardState
                       Expanded(
                         child: _buildDetailItem(
                           'Machine ID',
-                          _activeBatch!.machineId,
+                          activeBatch.machineId,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildDetailItem(
                           'Days Elapsed',
-                          '${_getDaysPassed()} days',
+                          '${_getDaysPassed(activeBatch)} days',
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -471,8 +484,8 @@ class _CompostingProgressCardState
                         child: _buildDetailItem(
                           batchIsCompleted ? 'Completed' : 'Status',
                           batchIsCompleted
-                              ? _formatDate(_activeBatch!.completedAt!)
-                              : (_activeBatch!.isActive
+                              ? _formatDate(activeBatch.completedAt!)
+                              : (activeBatch.isActive
                                     ? 'Active'
                                     : 'Inactive'),
                         ),
@@ -490,18 +503,18 @@ class _CompostingProgressCardState
                           : () {
                               // If machine is not selected and batch is active, allow complete
                               if (!hasMachineSelected && !batchIsCompleted) {
-                                _completeBatch(context);
+                                _completeBatch(context, activeBatch);
                                 return;
                               }
                               // Normal flow: machine is selected
                               if (batchIsCompleted) {
                                 _startBatch(context);
                               } else {
-                                _completeBatch(context);
+                                _completeBatch(context, activeBatch);
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
+                        backgroundColor: AppColors.green100,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(

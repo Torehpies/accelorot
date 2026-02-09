@@ -10,6 +10,8 @@ import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_acti
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
+import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
+import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/fabs/mobile_add_waste_fab.dart';
@@ -25,8 +27,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   CompostBatch? _currentBatch;
-  String? _selectedMachineId;
-  String? _selectedBatchId;
+
   BatchModel? _activeBatchModel;
 
   // Add this to force widget rebuilds
@@ -35,7 +36,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedMachineId = widget.focusedMachine?.machineId;
+    // Set machine in provider if passed from widget
+    if (widget.focusedMachine?.machineId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(selectedMachineIdProvider.notifier).setMachine(widget.focusedMachine!.machineId);
+      });
+    }
   }
 
   void _updateActiveBatch(BatchModel? batch) {
@@ -44,12 +50,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) {
       setState(() {
         _activeBatchModel = batch;
-        _selectedBatchId = batch?.id;
+        ref.read(selectedBatchIdProvider.notifier).setBatch(batch?.id);
         // Increment rebuild key to force cards to rebuild
         _rebuildKey++;
 
         if (batch != null) {
-          _selectedMachineId = batch.machineId;
+          ref.read(selectedMachineIdProvider.notifier).setMachine(batch.machineId);
           _currentBatch = CompostBatch(
             batchName: batch.displayName,
             batchNumber: batch.id,
@@ -84,7 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         if (mounted) {
           setState(() {
-            _selectedBatchId = latestBatch.id;
+            ref.read(selectedBatchIdProvider.notifier).setBatch(latestBatch.id);
             _activeBatchModel = latestBatch;
             _currentBatch = CompostBatch(
               batchName: latestBatch.displayName,
@@ -130,14 +136,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _handleFABSuccess() async {
-    if (_selectedMachineId != null) {
-      await _autoSelectBatchForMachine(_selectedMachineId!);
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
+    if (selectedMachineId.isNotEmpty) {
+      await _autoSelectBatchForMachine(selectedMachineId);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isMachineView = widget.focusedMachine != null;
+
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
 
     return Scaffold(
       appBar: MobileHeader(title: 'Dashboard'),
@@ -165,7 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
-                    preSelectedMachineId: _selectedMachineId,
+                    preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     onBatchChanged: _updateActiveBatch,
                   ),
                   const SizedBox(height: 16),
@@ -173,7 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // Swipeable cycle cards
                   SwipeableCycleCards(
                     currentBatch: _activeBatchModel,
-                    machineId: _selectedMachineId,
+                    machineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                   ),
                   const SizedBox(height: 16),
 
@@ -189,8 +198,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       floatingActionButton: MobileAddWasteFAB(
-        preSelectedMachineId: _selectedMachineId,
-        preSelectedBatchId: _selectedBatchId,
+        preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
+        preSelectedBatchId: ref.watch(selectedBatchIdProvider),  // ✅ Use provider
         onSuccess: _handleFABSuccess,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
