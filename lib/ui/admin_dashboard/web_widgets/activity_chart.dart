@@ -103,6 +103,7 @@ class ActivityChart extends StatelessWidget {
                         children: activities.map((item) {
                           final count = item['count'] as int;
                           final heightFactor = count / maxValue;
+                          final day = item['day'].toString();
                           return Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -115,20 +116,48 @@ class ActivityChart extends StatelessWidget {
                                     child: FractionallySizedBox(
                                       alignment: Alignment.bottomCenter,
                                       heightFactor: heightFactor,
-                                      child: Container(
+                                      child: Tooltip(
+                                        message:
+                                            'Day: $day\nCount: $count\nRange: Last 7 days',
+                                        textStyle: const TextStyle(
+                                          color: Color(0xFF111827),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF10B981),
+                                          color: Colors.white,
                                           borderRadius:
-                                              const BorderRadius.vertical(
-                                                top: Radius.circular(4),
-                                              ),
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: const Color(0xFFE5E7EB),
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.08),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: MouseRegion(
+                                          cursor: SystemMouseCursors.click,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF10B981),
+                                              borderRadius:
+                                                  const BorderRadius.vertical(
+                                                    top: Radius.circular(4),
+                                                  ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    item['day'].toString(),
+                                    day,
                                     style: const TextStyle(
                                       fontSize: 10,
                                       color: Color(0xFF6B7280),

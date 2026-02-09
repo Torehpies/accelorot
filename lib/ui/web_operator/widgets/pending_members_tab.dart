@@ -44,7 +44,10 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
 
     return BaseTableContainer(
       // ── Left header: tab switcher (same controller, shared with TeamMembersTab) ──
-      leftHeaderWidget: TabsRow(controller: widget.tabController),
+      leftHeaderWidget: TabsRow(
+        controller: widget.tabController,
+        tabTitles: ['Members', 'For Approval'],
+      ),
 
       // ── Right header: date filter, search, add button ──
       rightHeaderWidgets: [
@@ -110,7 +113,7 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
             ),
           ),
           TableCellWidget(
-            flex: 3,
+            flex: 2,
             child: TableHeaderCell(
               label: 'Email',
               sortable: true,
@@ -266,4 +269,3 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     );
   }
 }
-

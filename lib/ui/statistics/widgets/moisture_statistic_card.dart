@@ -2,11 +2,13 @@ import '../../../data/models/moisture_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../../core/widgets/progress_bar.dart';
 
 class MoistureStatisticCard extends StatelessWidget {
   final double currentMoisture;
   final List<MoistureModel> readings;
   final DateTime? lastUpdated;
+  
 
   const MoistureStatisticCard({
     super.key,
@@ -15,10 +17,11 @@ class MoistureStatisticCard extends StatelessWidget {
     this.lastUpdated,
   });
 
+  
+
   @override
   Widget build(BuildContext context) {
     const mainColor = Color(0xFF0284C7); // Blue color
-    const borderColor = Color(0xFFBAE6FD); // Light Blue Border
 
     // Generate daily chart data from real readings
     final chartData = _generateDailyData();
@@ -27,7 +30,6 @@ class MoistureStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 2), // Full colored border
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +40,7 @@ class MoistureStatisticCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 1),
+                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 3),
                 ),
               ),
               child: Row(
@@ -60,7 +62,7 @@ class MoistureStatisticCard extends StatelessWidget {
                       const Text(
                         'Compost moisture content',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           color: Color(0xFF9CA3AF),
                         ),
                       ),
@@ -92,6 +94,7 @@ class MoistureStatisticCard extends StatelessWidget {
                 ],
               ),
             ),
+            
 
             Padding(
               padding: const EdgeInsets.all(16),
@@ -99,35 +102,31 @@ class MoistureStatisticCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Ideal Range Label
-                  const Text(
-                    'Ideal Range: 40% - 60%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF4B5563),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  // const Text(
+                  //   'Ideal Range: 40% - 60%',
+                  //   style: TextStyle(
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.w500,
+                  //     color: Color(0xFF4B5563),
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
 
-                  // Progress Bar
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: _calculateProgress(currentMoisture),
-                      backgroundColor: const Color(
-                        0xFFE0F2FE,
-                      ), // Very light blue
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Color(0xFF0369A1),
-                      ), // Darker Blue
-                      minHeight: 12,
-                    ),
+                  // Progress Bar with Range Indicators
+                  SimpleRangeProgressBar(
+                    currentValue: currentMoisture,
+                    minIdeal: 40,
+                    maxIdeal: 60,
+                    maxScale: 100,
+                    unit: '%',
+                    primaryColor: const Color(0xFF0369A1),
+                    backgroundColor: const Color(0xFFE0F2FE),
                   ),
                   const SizedBox(height: 20),
 
                   // Chart
                   SizedBox(
-                    height: 120,
+                    height: 300,
                     child: LineChart(
                       LineChartData(
                         lineTouchData: LineTouchData(
@@ -179,19 +178,36 @@ class MoistureStatisticCard extends StatelessWidget {
                           topTitles: const AxisTitles(
                             sideTitles: SideTitles(showTitles: false),
                           ),
-                          leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: 20,
+                              getTitlesWidget: (double value, TitleMeta meta) {
+                                return Text(
+                                  '${value.toInt()}%',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF9CA3AF),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
                               reservedSize: 30,
-                              interval: 1,
+                              interval: _getBottomAxisInterval(chartData),
                               getTitlesWidget: (double value, TitleMeta meta) {
+                                // Only show labels at the interval
+                                if (value % _getBottomAxisInterval(chartData) != 0) {
+                                  return const SizedBox.shrink();
+                                }
                                 return Text(
                                   'Day ${value.toInt() + 1}',
                                   style: const TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     color: Color(0xFF9CA3AF),
                                   ),
                                 );
@@ -238,21 +254,21 @@ class MoistureStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Divider
-                  const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+                  const Divider(height: 3, thickness: 3, color: Color(0xFFF3F4F6)),
                   const SizedBox(height: 16),
                   
                   // Trend Text
-                  const Text(
-                    'Trending up by 5.2% this week',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
-                  ),
-                  const SizedBox(height: 16),
+                  // const Text(
+                  //   'Trending up by 5.2% this week',
+                  //   style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                  // ),
+                  // const SizedBox(height: 16),
 
                   // More Information Section
                   const Text(
                     'More Information:',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1F2937),
                     ),
@@ -292,7 +308,7 @@ class MoistureStatisticCard extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Color(0xFF6B7280),
               ),
             ),
@@ -317,58 +333,141 @@ class MoistureStatisticCard extends StatelessWidget {
     
     final List<Map<String, dynamic>> data = [];
     
-    // Group by day to identify start/end for markers
-    final Map<int, List<int>> dayIndices = {};
+    // Group by day to get min, max, start, and end values
+    final Map<int, List<Map<String, dynamic>>> dayGroups = {};
 
     for (int i = 0; i < sortedReadings.length; i++) {
         final reading = sortedReadings[i];
         final date = reading.timestamp ?? DateTime.now();
-        // Calculate continuous day value (e.g., 0.5 for noon on Day 1)
         final diff = date.difference(startDate);
-        // Use exact fractional days for X axis
         final double dayValue = diff.inSeconds / (24 * 3600);
         final int dayInt = dayValue.floor();
 
-        if (!dayIndices.containsKey(dayInt)) {
-            dayIndices[dayInt] = [];
+        if (!dayGroups.containsKey(dayInt)) {
+            dayGroups[dayInt] = [];
         }
-        dayIndices[dayInt]!.add(i);
-
-        data.add({
+        
+        dayGroups[dayInt]!.add({
             'day': dayValue,
             'value': reading.value,
-            'isMarker': false,
             'timestamp': date,
         });
     }
 
-    // Mark only the start of each day
-  dayIndices.forEach((day, indices) {
-      if (indices.isNotEmpty) {
-          data[indices.first]['isMarker'] = true; // Start of day only
+    // For each day, keep: start, end, min, and max points
+    dayGroups.forEach((day, points) {
+      if (points.isEmpty) return;
+      
+      // Sort points by time within the day
+      points.sort((a, b) => (a['day'] as double).compareTo(b['day'] as double));
+      
+      final start = points.first;
+      final end = points.last;
+      
+      // Find min and max values
+      var minPoint = points.first;
+      var maxPoint = points.first;
+      
+      for (var point in points) {
+        if ((point['value'] as double) < (minPoint['value'] as double)) {
+          minPoint = point;
+        }
+        if ((point['value'] as double) > (maxPoint['value'] as double)) {
+          maxPoint = point;
+        }
       }
-  });
+      
+      // Add unique points (start is always a marker)
+      final uniquePoints = <Map<String, dynamic>>{};
+      
+      // Add start point (marked)
+      uniquePoints.add({...start, 'isMarker': true});
+      
+      // Add min if different from start/end
+      if (minPoint != start && minPoint != end) {
+        uniquePoints.add({...minPoint, 'isMarker': false});
+      }
+      
+      // Add max if different from start/end
+      if (maxPoint != start && maxPoint != end) {
+        uniquePoints.add({...maxPoint, 'isMarker': false});
+      }
+      
+      // Add end if different from start
+      if (end != start) {
+        uniquePoints.add({...end, 'isMarker': false});
+      }
+      
+      // Convert set back to list and sort by day value
+      final dayData = uniquePoints.toList();
+      dayData.sort((a, b) => (a['day'] as double).compareTo(b['day'] as double));
+      data.addAll(dayData);
+    });
 
     return data;
   }
 
-  // Downsample data to reduce visual clutter when there are too many points
+  // Smart downsampling that preserves important points
   List<Map<String, dynamic>> _downsampleData(List<Map<String, dynamic>> data) {
-    if (data.length <= 50) return data;
-    
-    final int step = (data.length / 50).ceil();
-    final List<Map<String, dynamic>> downsampled = [];
-    
-    for (int i = 0; i < data.length; i++) {
-      if (data[i]['isMarker'] == true || i % step == 0) {
-        downsampled.add(data[i]);
-      }
-    }
-    
-    return downsampled;
+    // Already optimized in _generateDailyData, so just return
+    return data;
   }
 
-  double _calculateProgress(double moisture) {
-    return (moisture.clamp(0.0, 100.0) / 100.0);
+  // Calculate appropriate interval for bottom axis labels based on number of days
+  double _getBottomAxisInterval(List<Map<String, dynamic>> data) {
+    if (data.isEmpty) return 1.0;
+    
+    final maxDay = data.map((d) => (d['day'] as double).floor()).reduce((a, b) => a > b ? a : b);
+    final totalDays = maxDay + 1;
+    
+    // Adjust interval based on total days to prevent crowding
+    if (totalDays <= 7) {
+      return 1.0; // Show every day
+    } else if (totalDays <= 14) {
+      return 2.0; // Show every 2 days
+    } else if (totalDays <= 30) {
+      return 3.0; // Show every 3 days
+    } else {
+      return 5.0; // Show every 5 days
+    }
+  }
+
+}
+
+class RangeIndicatorPainter extends CustomPainter {
+  final double minPercent;
+  final double maxPercent;
+
+  RangeIndicatorPainter({
+    required this.minPercent,
+    required this.maxPercent,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF22C55E)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final minX = (minPercent / 100) * size.width;
+    final maxX = (maxPercent / 100) * size.width;
+
+    // Draw vertical lines at min and max
+    canvas.drawLine(
+      Offset(minX, 0),
+      Offset(minX, size.height),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(maxX, 0),
+      Offset(maxX, size.height),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(RangeIndicatorPainter oldDelegate) {
+    return oldDelegate.minPercent != minPercent || oldDelegate.maxPercent != maxPercent;
   }
 }

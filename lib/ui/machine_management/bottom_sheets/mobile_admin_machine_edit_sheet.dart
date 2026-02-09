@@ -1,9 +1,8 @@
-// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_edit_sheet.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 import '../../core/bottom_sheet/fields/mobile_input_field.dart';
@@ -12,7 +11,6 @@ import '../../core/dialog/mobile_confirmation_dialog.dart';
 import '../../core/toast/mobile_toast_service.dart';
 import '../../core/toast/toast_type.dart';
 
-/// Callback signature for updating machine
 typedef UpdateMachineCallback = Future<void> Function({
   required String teamId,
   required String machineId,
@@ -21,7 +19,6 @@ typedef UpdateMachineCallback = Future<void> Function({
   List<String>? assignedUserIds,
 });
 
-/// Editable form for editing machine details with validation and change tracking
 class MobileAdminMachineEditSheet extends StatefulWidget {
   final MachineModel machine;
   final String teamId;
@@ -118,7 +115,6 @@ class _MobileAdminMachineEditSheetState
       if (result == ConfirmResult.confirmed && mounted) {
         Navigator.of(context).pop();
       }
-      // cancelled → stay on the sheet
     } else {
       Navigator.of(context).pop();
     }
@@ -138,7 +134,7 @@ class _MobileAdminMachineEditSheetState
     return MobileBottomSheetBase(
       title: widget.machine.machineName,
       subtitle: 'Edit Machine',
-      showCloseButton: false, // use Cancel button instead
+      showCloseButton: false,
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
@@ -153,7 +149,6 @@ class _MobileAdminMachineEditSheetState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Editable fields at the top ───────────────────────────────────
           MobileInputField(
             label: 'Machine Name',
             controller: _machineNameController,
@@ -174,7 +169,6 @@ class _MobileAdminMachineEditSheetState
           ),
           const SizedBox(height: 24),
 
-          // ── Read-only info section at the bottom ─────────────────────────
           MobileReadOnlySection(
             sectionTitle: 'Additional Information',
             fields: [

@@ -33,10 +33,14 @@ class CompostingProgressCard extends ConsumerStatefulWidget {
 }
 
 class _CompostingProgressCardState
-    extends ConsumerState<CompostingProgressCard> {
+    extends ConsumerState<CompostingProgressCard>
+    with AutomaticKeepAliveClientMixin {
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatch;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -195,13 +199,6 @@ class _CompostingProgressCardState
         .clamp(0, CompostingProgressCard.totalDays);
   }
 
-  double _getProgress() {
-    return (_getDaysPassed() / CompostingProgressCard.totalDays).clamp(
-      0.0,
-      1.0,
-    );
-  }
-
   String _formatDate(DateTime date) {
     final monthNames = [
       'Jan',
@@ -222,47 +219,31 @@ class _CompostingProgressCardState
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     //  auto-update when selected batch changes
     final batchesAsync = ref.watch(userTeamBatchesProvider);
 
-    // Update active batch when selection changes
+    // Removed problematic auto-selection logic that was causing resets during zoom
+    // Now only updates if batch details changed (not selection)
     batchesAsync.whenData((batches) {
-      if (_selectedMachineId != null && _selectedBatchId == null) {
-        final machineBatches = batches
-            .where((b) => b.machineId == _selectedMachineId)
-            .toList();
-
-        if (machineBatches.isNotEmpty) {
-          Future.microtask(() {
-            if (mounted) {
-              machineBatches.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-              final latestBatch = machineBatches.first;
-              setState(() {
-                _selectedBatchId = latestBatch.id;
-                _activeBatch = latestBatch;
-              });
-              widget.onBatchChanged?.call(latestBatch);
-            }
-          });
-        }
-      } else if (_selectedBatchId != null) {
-        final batch = batches.firstWhere(
-          (b) => b.id == _selectedBatchId,
-          orElse: () => batches.first,
-        );
-        if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
-          Future.microtask(() {
-            if (mounted) {
-              setState(() => _activeBatch = batch);
-              widget.onBatchChanged?.call(batch);
-            }
-          });
+      if (_selectedBatchId != null) {
+        final matchingBatches = batches.where((b) => b.id == _selectedBatchId).toList();
+        if (matchingBatches.isNotEmpty) {
+          final batch = matchingBatches.first;
+          if (batch.id == _selectedBatchId && _activeBatch?.id != batch.id) {
+            Future.microtask(() {
+              if (mounted) {
+                setState(() => _activeBatch = batch);
+                widget.onBatchChanged?.call(batch);
+              }
+            });
+          }
         }
       }
     });
 
     final isActive = _activeBatch?.isActive ?? false;
-    final progress = _getProgress();
     final batchIsCompleted = _activeBatch != null && !_activeBatch!.isActive;
     final hasBatchSelected = _activeBatch != null;
     final hasMachineSelected = _selectedMachineId != null;
@@ -345,7 +326,7 @@ class _CompostingProgressCardState
                         _selectedBatchId = null;
                         _activeBatch = null;
                       });
-                      // Notify parent immediately that batch is cleared
+                      // Notify parent that batch is cleared
                       widget.onBatchChanged?.call(null);
                       // Auto-select latest batch for new machine
                       if (machineId != null) {
@@ -383,54 +364,12 @@ class _CompostingProgressCardState
             const SizedBox(height: 16),
 
             // Decomposition Progress section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Decomposition Progress',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1a1a1a),
-                  ),
-                ),
-                Text(
-                  '${(progress * 100).toInt()}%',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1a1a1a),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE5E7EB),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: progress,
-                    child: Container(
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: batchIsCompleted
-                            ? const Color(0xFF6B7280)
-                            : const Color(0xFF10B981),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
+            const Text(
+              'Decomposition Progress',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1a1a1a),
               ),
             ),
             const SizedBox(height: 16),

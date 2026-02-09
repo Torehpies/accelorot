@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
@@ -98,100 +99,95 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
         }
       }
     });
-    return AlertDialog(
-      backgroundColor: Colors.white,
+    return DialogShell(
       title: const Text(
         'Add Operator',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      content: SizedBox(
-        width: 400,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Fill in the details below to add a new operator."),
-              const Divider(thickness: 1, height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    // First Name Field
-                    TextFormField(
-                      controller: firstnameController,
-                      decoration: InputDecoration(labelText: 'First Name'),
-                      validator: (value) =>
-                          value!.isEmpty ? 'First Name is required' : null,
-                      onChanged: (value) {
-                        setState(() {
-                          isDirty = true;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Last Name Field
-                    TextFormField(
-                      controller: lastnameController,
-                      decoration: InputDecoration(labelText: 'Last Name'),
-                      validator: (value) =>
-                          value!.isEmpty ? 'Last Name is required' : null,
-                      onChanged: (value) {
-                        setState(() {
-                          isDirty = true;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Email Field
-                    TextFormField(
-                      controller: emailController,
-                      decoration: InputDecoration(labelText: 'Email'),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) => validateEmail(value ?? ''),
-                      onChanged: (value) {
-                        setState(() {
-                          isDirty = true;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Password Field with Reveal Password
-                    TextFormField(
-                      controller: passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey,
-                          ),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Fill in the details below to add a new operator."),
+            const Divider(thickness: 1, height: 24),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // First Name Field
+                  TextFormField(
+                    controller: firstnameController,
+                    decoration: InputDecoration(labelText: 'First Name'),
+                    validator: (value) =>
+                        value!.isEmpty ? 'First Name is required' : null,
+                    onChanged: (value) {
+                      setState(() {
+                        isDirty = true;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Last Name Field
+                  TextFormField(
+                    controller: lastnameController,
+                    decoration: InputDecoration(labelText: 'Last Name'),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Last Name is required' : null,
+                    onChanged: (value) {
+                      setState(() {
+                        isDirty = true;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Email Field
+                  TextFormField(
+                    controller: emailController,
+                    decoration: InputDecoration(labelText: 'Email'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) => validateEmail(value ?? ''),
+                    onChanged: (value) {
+                      setState(() {
+                        isDirty = true;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Password Field with Reveal Password
+                  TextFormField(
+                    controller: passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.grey,
                         ),
                       ),
-                      obscureText: !_isPasswordVisible,
-                      validator: (value) => validatePassword(value ?? ''),
-                      onChanged: (value) {
-                        setState(() {
-                          isDirty = true;
-                        });
-                      },
                     ),
-                  ],
-                ),
+                    obscureText: !_isPasswordVisible,
+                    validator: (value) => validatePassword(value ?? ''),
+                    onChanged: (value) {
+                      setState(() {
+                        isDirty = true;
+                      });
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       actions: [
-        // Cancel Button
         TextButton(
           onPressed: () async {
             if (isDirty ||
@@ -215,7 +211,6 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
           },
           child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
         ),
-        // Submit Button
         ElevatedButton(
           onPressed: state.isLoading
               ? null

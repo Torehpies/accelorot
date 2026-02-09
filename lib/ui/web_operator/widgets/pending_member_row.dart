@@ -43,9 +43,9 @@ class PendingMemberRow extends StatelessWidget {
           ),
         ),
 
-        // Email (flex: 3)
+        // Email (flex: 2)
         TableCellWidget(
-          flex: 3,
+          flex: 2,
           child: Text(
             member.email,
             style: WebTextStyles.body,

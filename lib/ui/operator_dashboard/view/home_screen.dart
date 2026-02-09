@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
@@ -131,63 +132,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _handleFABPress() async {
-    final action = await showDialog<String>(
+    final action = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          titlePadding: const EdgeInsets.only(
-            top: 24,
-            left: 24,
-            right: 24,
-            bottom: 12,
-          ),
-          contentPadding: EdgeInsets.zero,
-          title: const Text(
-            'Quick Actions',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          content: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.teal.shade700,
-                    size: 24,
-                  ),
-                  title: const Text(
-                    'Add Waste',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  onTap: () => Navigator.of(context).pop('add_waste'),
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.note_add_outlined,
-                    color: Colors.teal.shade700,
-                    size: 24,
-                  ),
-                  title: const Text(
-                    'Submit Report',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  onTap: () => Navigator.of(context).pop('submit_report'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const QuickActionsSheet(),
     );
 
     if (action == null || !mounted) return;
@@ -212,7 +161,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Waste entry added successfully!'),
-              backgroundColor: Colors.teal,
+              backgroundColor: Colors.green,
             ),
           );
         }
@@ -306,7 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           height: 58,
           child: FloatingActionButton(
             onPressed: _handleFABPress,
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.green,
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),

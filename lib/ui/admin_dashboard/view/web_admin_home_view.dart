@@ -8,6 +8,7 @@ import '../../core/widgets/base_stats_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
 import '../web_widgets/recent_activities_table.dart';
+import '../../core/widgets/web_base_container.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});
@@ -23,32 +24,35 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
     final asyncState = ref.watch(adminHomeProvider);
     final activitiesAsync = ref.watch(userTeamActivitiesProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFDFF2FF),
-      body: asyncState.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
-        ),
-        error: (err, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Error: $err',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.read(adminHomeProvider.notifier).refresh(),
-                child: const Text('Retry'),
-              ),
-            ],
+    return WebScaffoldContainer(
+      child: WebContentContainer(
+        innerPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        child: asyncState.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
           ),
+          error: (err, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Error: $err',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () =>
+                      ref.read(adminHomeProvider.notifier).refresh(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+          data: (state) => _buildDashboard(state, activitiesAsync),
         ),
-        data: (state) => _buildDashboard(state, activitiesAsync),
       ),
     );
   }
@@ -69,7 +73,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
             : (isMediumScreen ? 360.0 : 320.0);
 
         return Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -139,7 +143,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
                           // Activity Overview chart
                           Expanded(
                             child: activitiesAsync.when(
@@ -159,7 +163,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     // Right column: Report Status (spans full height)
                     Expanded(
                       flex: 1,
@@ -168,7 +172,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               // Recent Activities table (full width, anchored to screen height)
               Expanded(child: const RecentActivitiesTable()),
             ],

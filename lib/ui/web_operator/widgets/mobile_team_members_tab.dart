@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/core/ui/data_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
-import 'package:flutter_application_1/utils/format.dart';
+import 'package:flutter_application_1/ui/web_operator/bottom_sheets/team_member_view_sheet.dart';
+import 'package:flutter_application_1/ui/web_operator/bottom_sheets/team_member_edit_sheet.dart';
 import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,16 +58,19 @@ class _MembersList extends ConsumerWidget {
 
   const _MembersList({required this.notifier, required this.scrollController});
 
-  void _showEditDialog(
+  void _showEditSheet(
     BuildContext context,
     TeamMembersNotifier notifier,
     TeamMember member,
   ) {
     Navigator.of(context).pop();
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) =>
-          EditOperatorDialog(operator: member, onSave: notifier.updateOperator),
+      isScrollControlled: true,
+      builder: (context) => TeamMemberEditSheet(
+        member: member,
+        onUpdate: notifier.updateOperator,
+      ),
     );
   }
 
@@ -104,34 +105,25 @@ class _MembersList extends ConsumerWidget {
           iconColor: style.textColor,
           iconBgColor: style.color,
           title: "${member.lastName}, ${member.firstName}",
-          category: toTitleCase(member.status.value),
+          category: _getStatusLabel(member.status.value),
           status: member.email,
           onTap: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (context) => DataBottomSheet<TeamMember>(
-                data: member,
-                title: '${member.lastName}, ${member.firstName}',
-                avatarIcon: Icons.person,
-                avatarColor: AppColors.green100,
-                details: [
-                  MapEntry('Email', member.email),
-                  MapEntry('Status', toTitleCase(member.status.value)),
-                  MapEntry('Created', formatDateAndTime(member.addedAt)),
-                ],
-                primaryActionLabel: 'Edit',
-                onPrimaryAction: (member) =>
-                    _showEditDialog(context, notifier, member),
+              builder: (context) => TeamMemberViewSheet(
+                member: member,
+                onEdit: () => _showEditSheet(context, notifier, member),
               ),
             );
           },
         );
       },
     );
+  }
+
+  String _getStatusLabel(String statusValue) {
+    return statusValue.substring(0, 1).toUpperCase() + statusValue.substring(1);
   }
 }
 

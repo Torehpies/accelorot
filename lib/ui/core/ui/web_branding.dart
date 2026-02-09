@@ -29,11 +29,11 @@ class WebBranding extends ConsumerWidget {
         return Column(
           children: [
             SvgPicture.asset(
-              'assets/images/Accel-O-Rot Logo.svg',
+              'assets/images/Accelorot_logo.svg',
               width: isTablet ? smallIconSize : iconSize,
               height: isTablet ? smallIconSize : iconSize,
               fit: BoxFit.contain,
-              semanticsLabel: 'Accel-O-Rot Logo',
+              semanticsLabel: 'Accelorot logo',
             ),
             const SizedBox(height: 8),
             if (!isTablet) ...[

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/view_team_dialog.dart';
+import 'package:go_router/go_router.dart';
 
 class TeamActionButtons extends StatelessWidget {
   final TeamManagementNotifier notifier;
@@ -20,6 +21,17 @@ class TeamActionButtons extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.info),
           onPressed: () => _showViewDialog(context, team),
+          tooltip: 'Quick View',
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_right),
+          onPressed: () {
+            context.pushNamed(
+              'teamDetails',
+              pathParameters: {'teamId': team.teamId.toString()},
+              extra: team,
+            );
+          },
           tooltip: 'View Team',
         ),
       ],

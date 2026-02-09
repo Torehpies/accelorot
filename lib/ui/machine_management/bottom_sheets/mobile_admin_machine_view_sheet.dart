@@ -1,13 +1,11 @@
-// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_view_sheet.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
+import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
 import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
 
-/// Read-only view of a machine for admins with Edit and Archive actions
 class MobileAdminMachineViewSheet extends StatelessWidget {
   final MachineModel machine;
   final VoidCallback onEdit;
@@ -47,7 +45,7 @@ class MobileAdminMachineViewSheet extends StatelessWidget {
         ),
       ],
       body: MobileReadOnlySection(
-        sectionTitle: null, // Flat display
+        sectionTitle: null,
         fields: [
           MobileReadOnlyField(label: 'Machine ID', value: machine.machineId),
           MobileReadOnlyField(label: 'Status', value: _statusText),

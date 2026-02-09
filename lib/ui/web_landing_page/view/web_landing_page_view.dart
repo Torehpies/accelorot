@@ -1,6 +1,7 @@
+// lib/ui/web_landing_page/views/web_landing_page_view.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/app_header.dart';
+import '../widgets/web_header.dart';
 import '../widgets/intro_section.dart';
 import '../widgets/features_section.dart';
 import '../widgets/how_it_works_section.dart';
@@ -26,8 +27,9 @@ class _WebLandingPageState extends State<WebLandingPageView> {
   final GlobalKey _featuresKey = GlobalKey();
   final GlobalKey _howItWorksKey = GlobalKey();
   final GlobalKey _impactKey = GlobalKey();
-  final GlobalKey _faqKey = GlobalKey();
   final GlobalKey _downloadKey = GlobalKey(); 
+  final GlobalKey _faqKey = GlobalKey();
+  final GlobalKey _contactKey = GlobalKey();
 
   String _activeSection = 'home';
   bool _isScrolled = false;
@@ -61,8 +63,9 @@ class _WebLandingPageState extends State<WebLandingPageView> {
     final featuresPos = _getSectionPosition(_featuresKey);
     final howItWorksPos = _getSectionPosition(_howItWorksKey);
     final impactPos = _getSectionPosition(_impactKey);
-    final faqPos = _getSectionPosition(_faqKey); 
     final downloadPos = _getSectionPosition(_downloadKey);
+    final faqPos = _getSectionPosition(_faqKey); 
+    final contactPos = _getSectionPosition(_contactKey);
 
     final threshold = screenHeight * 0.3;
     final currentPosition = scrollOffset + threshold;
@@ -70,7 +73,9 @@ class _WebLandingPageState extends State<WebLandingPageView> {
     String newSection = 'home';
     
     // Order matters: check from bottom to top
-    if (currentPosition >= faqPos) {
+    if (currentPosition >= contactPos) {
+      newSection = 'contact';
+    } else if (currentPosition >= faqPos) {
       newSection = 'faq';
     } else if (currentPosition >= downloadPos) { 
       newSection = 'download'; 
@@ -115,11 +120,14 @@ class _WebLandingPageState extends State<WebLandingPageView> {
       case 'impact':
         targetKey = _impactKey;
         break;
+      case 'download':
+        targetKey = _downloadKey;
+        break;
       case 'faq': 
         targetKey = _faqKey;
         break; 
-      case 'download':
-        targetKey = _downloadKey;
+      case 'contact':
+        targetKey = _contactKey;
         break;
     }
 
@@ -168,13 +176,9 @@ class _WebLandingPageState extends State<WebLandingPageView> {
                 Container(key: _featuresKey, child: FeaturesSection(features: _viewModel.features)),
                 Container(key: _howItWorksKey, child: HowItWorksSection(steps: _viewModel.steps)),
                 Container(key: _impactKey, child: ImpactSection(stats: _viewModel.impactStats)),
-                Container(key: _downloadKey, child: DownloadSection(onDownload: _handleDownload)), // Key matches navigation logic
+                Container(key: _downloadKey, child: DownloadSection(onDownload: _handleDownload)),
                 Container(key: _faqKey, child: const FaqSection()),
-                
-                // ✅ FIXED: Only pass onNavigateToSection
-                ContactSection(
-                  onNavigateToSection: _scrollToSection,
-                ),
+                Container(key: _contactKey, child: ContactSection(onNavigateToSection: _scrollToSection)),
               ],
             ),
           ),
@@ -183,13 +187,14 @@ class _WebLandingPageState extends State<WebLandingPageView> {
             top: 0,
             left: 0,
             right: 0,
-            child: AppHeader(
+            child: WebHeader(
               onLogin: _handleLogin,
               onGetStarted: _handleGetStarted,
               onDownload: _handleDownload,
               onBreadcrumbTap: _scrollToSection,
               activeSection: _activeSection,
               isScrolled: _isScrolled,
+              showActions: true,
             ),
           ),
         ],

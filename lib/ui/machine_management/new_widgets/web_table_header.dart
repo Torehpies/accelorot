@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import '../../../data/models/machine_model.dart';
+import '../../core/widgets/table/table_header.dart';
 import '../../core/widgets/table/table_row.dart';
 import '../../core/widgets/filters/filter_dropdown.dart';
 import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/constants/spacing.dart';
 
 class MachineTableHeader extends StatelessWidget {
   final MachineStatusFilter selectedStatusFilter;
@@ -34,106 +34,83 @@ class MachineTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isStatusActive = _isStatusFilterActive();
 
-    return Opacity(
-      opacity: isLoading ? 0.7 : 1.0,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: WebColors.pageBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8),
-            topRight: Radius.circular(8),
+    return TableHeader(
+      isLoading: isLoading,
+      columns: [
+        // Machine ID Column (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: TableHeaderCell(
+            label: 'Machine ID',
+            sortable: true,
+            sortColumn: 'machineId',
+            currentSortColumn: sortColumn,
+            sortAscending: sortAscending,
+            onSort: () => onSort('machineId'),
           ),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.tableCellHorizontal,
-          vertical: 8,
+
+        // Name Column (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: TableHeaderCell(
+            label: 'Name',
+            sortable: true,
+            sortColumn: 'name',
+            currentSortColumn: sortColumn,
+            sortAscending: sortAscending,
+            onSort: () => onSort('name'),
+          ),
         ),
-        child: Row(
-          children: [
-            // Machine ID Column (sortable)
-            Expanded(
-              flex: 2,
-              child: TableHeaderCell(
-                label: 'Machine ID',
-                sortable: true,
-                sortColumn: 'machineId',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('machineId'),
-              ),
-            ),
 
-            const SizedBox(width: AppSpacing.md),
+        // Date Added Column (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: TableHeaderCell(
+            label: 'Date Added',
+            sortable: true,
+            sortColumn: 'date',
+            currentSortColumn: sortColumn,
+            sortAscending: sortAscending,
+            onSort: () => onSort('date'),
+          ),
+        ),
 
-            // Name Column (sortable)
-            Expanded(
-              flex: 2,
-              child: TableHeaderCell(
-                label: 'Name',
-                sortable: true,
-                sortColumn: 'name',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('name'),
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Date Added Column (sortable)
-            Expanded(
-              flex: 2,
-              child: TableHeaderCell(
-                label: 'Date Added',
-                sortable: true,
-                sortColumn: 'date',
-                currentSortColumn: sortColumn,
-                sortAscending: sortAscending,
-                onSort: isLoading ? null : () => onSort('date'),
-              ),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Status Column with Dropdown
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Status',
-                      style: WebTextStyles.label.copyWith(
-                        color: isStatusActive
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<MachineStatusFilter>(
-                      label: 'Status',
-                      value: selectedStatusFilter,
-                      items: MachineStatusFilter.values,
-                      displayName: (filter) => filter.displayName,
-                      onChanged: onStatusFilterChanged,
-                      isLoading: isLoading,
-                    ),
-                  ],
+        // Status Column with Filter (flex: 2)
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Status',
+                  style: WebTextStyles.label.copyWith(
+                    color: isStatusActive
+                        ? WebColors.greenAccent
+                        : WebColors.textLabel,
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                FilterDropdown<MachineStatusFilter>(
+                  label: 'Status',
+                  value: selectedStatusFilter,
+                  items: MachineStatusFilter.values,
+                  displayName: (filter) => filter.displayName,
+                  onChanged: onStatusFilterChanged,
+                  isLoading: isLoading,
+                ),
+              ],
             ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Actions Column
-            const Expanded(
-              flex: 1,
-              child: Center(child: Text('Actions', style: WebTextStyles.label)),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        // Actions Column (flex: 1)
+        const TableCellWidget(
+          flex: 1,
+          child: TableHeaderCell(label: 'Actions'),
+        ),
+      ],
     );
   }
 }

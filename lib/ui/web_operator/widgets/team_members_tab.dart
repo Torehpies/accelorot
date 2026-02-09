@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
+import 'package:flutter_application_1/ui/web_operator/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/web_operator/widgets/add_operator_dialog.dart';
@@ -44,7 +47,10 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
 
     return BaseTableContainer(
       // ── Left header: tab switcher ──
-      leftHeaderWidget: TabsRow(controller: widget.tabController),
+      leftHeaderWidget: TabsRow(
+        controller: widget.tabController,
+        tabTitles: ['Members', 'For Approval'],
+      ),
 
       // ── Right header: date filter, search, add button ──
       rightHeaderWidgets: [
@@ -122,13 +128,31 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
           ),
           TableCellWidget(
             flex: 1,
-            child: TableHeaderCell(
-              label: 'Status',
-              sortable: true,
-              sortColumn: 'status',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('status'),
+            child: SizedBox(
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Status',
+                      style: WebTextStyles.label.copyWith(
+                        color: state.statusFilter != TeamMemberStatusFilter.all
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterDropdown<TeamMemberStatusFilter>(
+                      label: 'Status',
+                      value: state.statusFilter,
+                      items: TeamMemberStatusFilter.values,
+                      displayName: (filter) => filter.displayName,
+                      onChanged: (filter) => notifier.setStatusFilter(filter),
+                      isLoading: state.isLoading,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           TableCellWidget(
@@ -268,4 +292,3 @@ class _SkeletonBoxState extends State<_SkeletonBox>
     );
   }
 }
-

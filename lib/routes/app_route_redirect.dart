@@ -23,8 +23,8 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
             currentPath == RoutePath.signup.path ||
             currentPath == RoutePath.forgotPassword.path ||
             currentPath == '/download' ||
-            currentPath == '/privacy-policy' ||      // ADD THIS LINE
-            currentPath == '/terms-of-service'       // ADD THIS LINE
+            currentPath == '/privacy-policy' ||
+            currentPath == '/terms-of-service'
         ? null
         : RoutePath.signin.path,
     unverified: (_) => currentPath == RoutePath.verifyEmail.path
@@ -43,6 +43,15 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               ? null
               : RoutePath.restricted.path;
         case UserStatus.active:
+          if (currentPath.startsWith('/team-details')) {
+            if (globalRole == GlobalRole.superadmin) {
+              return null;
+            } else {
+              return globalRole == GlobalRole.user && teamRole == TeamRole.admin
+                  ? RoutePath.adminDashboard.path
+                  : RoutePath.dashboard.path;
+            }
+          }
           if (globalRole == GlobalRole.superadmin) {
             debugPrint("ROUTED TO SUPERADMIN");
             // Allow access to all superadmin paths
@@ -88,3 +97,4 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
     },
   );
 }
+

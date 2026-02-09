@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
@@ -25,13 +26,20 @@ class WebHomeScreen extends ConsumerStatefulWidget {
   ConsumerState<WebHomeScreen> createState() => _WebHomeScreenState();
 }
 
-class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
+class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
+    with AutomaticKeepAliveClientMixin {
   CompostBatch? _currentBatch;
   String? _selectedMachineId;
   String? _selectedBatchId;
   BatchModel? _activeBatchModel;
 
   int _rebuildKey = 0;
+
+  // GlobalKey to preserve CompostingProgressCard across layout switches
+  final _compostCardKey = GlobalKey();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -126,63 +134,11 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
   }
 
   void _handleFABPress() async {
-    final action = await showDialog<String>(
+    final action = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          titlePadding: const EdgeInsets.only(
-            top: 24,
-            left: 24,
-            right: 24,
-            bottom: 12,
-          ),
-          contentPadding: EdgeInsets.zero,
-          title: const Text(
-            'Quick Actions',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          content: SizedBox(
-            width: 320,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.teal.shade700,
-                    size: 24,
-                  ),
-                  title: const Text(
-                    'Add Waste',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  onTap: () => Navigator.of(context).pop('add_waste'),
-                ),
-                ListTile(
-                  leading: Icon(
-                    Icons.note_add_outlined,
-                    color: Colors.teal.shade700,
-                    size: 24,
-                  ),
-                  title: const Text(
-                    'Submit Report',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  onTap: () => Navigator.of(context).pop('submit_report'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => const QuickActionsSheet(),
     );
 
     if (action == null || !mounted) return;
@@ -256,6 +212,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   CompostingProgressCard(
+                    key: _compostCardKey,
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
@@ -276,14 +233,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: ControlInputCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.02),
-                  Expanded(
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400),
                     child: AeratorCard(
                       currentBatch: _activeBatchModel,
                       machineId: _selectedMachineId,
@@ -317,6 +276,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     CompostingProgressCard(
+                      key: _compostCardKey,
                       currentBatch: _currentBatch,
                       onBatchStarted: _handleBatchStarted,
                       onBatchCompleted: _handleBatchCompleted,
@@ -360,6 +320,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -381,7 +343,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _handleFABPress,
-        backgroundColor: Colors.teal[800],
+        backgroundColor: Colors.green,
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: const Icon(Icons.add, size: 32, color: Colors.white),

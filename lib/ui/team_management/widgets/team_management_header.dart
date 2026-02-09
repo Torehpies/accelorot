@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/constants/spacing.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,29 +15,30 @@ class TeamManagementHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       child: Row(
         children: [
-          SizedBox(width: 10),
-          Icon(Icons.group),
-          SizedBox(width: 10),
-          Text(
-            "Teams",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
+          const SizedBox(width: AppSpacing.sm),
+          const Icon(Icons.group, color: WebColors.textSecondary),
+          const SizedBox(width: AppSpacing.sm),
+          Text('Teams', style: WebTextStyles.sectionTitle),
           const Spacer(),
-          ElevatedButton(
-            onPressed: () {
-              _showAddTeamDialog(context);
-            },
+          ElevatedButton.icon(
+            onPressed: () => _showAddTeamDialog(context),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Team'),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
               ),
-            ),
-            child: const Row(
-              children: [Icon(Icons.add), SizedBox(width: 5), Text('Add Team')],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],

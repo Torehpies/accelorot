@@ -1,5 +1,3 @@
-// lib/ui/machine_management/view/mobile_admin_machine_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/widgets/mobile_common_widgets.dart';
@@ -20,6 +18,7 @@ import '../view_model/mobile_machine_viewmodel.dart';
 import '../models/mobile_machine_state.dart';
 import '../bottom_sheets/mobile_admin_machine_view_sheet.dart';
 import '../bottom_sheets/mobile_admin_machine_edit_sheet.dart';
+import '../bottom_sheets/mobile_admin_machine_add_sheet.dart';
 
 class AdminMachineView extends ConsumerStatefulWidget {
   const AdminMachineView({super.key});
@@ -65,16 +64,14 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
       builder: (context) => MobileAdminMachineViewSheet(
         machine: machine,
         onEdit: () {
-          // Close view sheet, then open edit sheet
           Navigator.of(context).pop();
-          // Small delay so the view sheet finishes its exit animation
           Future.delayed(const Duration(milliseconds: 250), () {
             if (mounted) _showEditSheet(machine);
           });
         },
         onArchive: () {
-          Navigator.pop(context); // Close view sheet
-          _handleArchive(machine); // Show confirmation
+          Navigator.pop(context);
+          _handleArchive(machine);
         },
       ),
     );
@@ -93,6 +90,28 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         machine: machine,
         teamId: _teamId!,
         onUpdate: ref.read(mobileMachineViewModelProvider.notifier).updateMachine,
+      ),
+    );
+  }
+
+  void _showAddSheet() {
+    if (_teamId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => MobileAdminMachineAddSheet(
+        teamId: _teamId!,
+        onCreate: ({required String machineId, required String machineName}) =>
+            ref.read(mobileMachineViewModelProvider.notifier).addMachine(
+                  teamId: _teamId!,
+                  machineId: machineId,
+                  machineName: machineName,
+                  assignedUserIds: [],
+                ),
       ),
     );
   }
@@ -130,14 +149,6 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         }
       }
     }
-  }
-
-  void _handleAddMachine() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Add machine functionality not implemented yet.'),
-      ),
-    );
   }
 
   EmptyStateConfig _getEmptyStateConfig(MobileMachineState state) {
@@ -204,7 +215,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
         appBar: MobileListHeader(
           title: 'Machine List',
           showAddButton: true,
-          onAddPressed: _handleAddMachine,
+          onAddPressed: _showAddSheet,
           addButtonColor: AppColors.green100,
           addButtonLabel: 'Add Machine',
           searchConfig: SearchBarConfig(

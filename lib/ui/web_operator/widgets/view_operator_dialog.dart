@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
+import 'package:flutter_application_1/ui/core/widgets/read_only_field.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 
@@ -10,24 +11,20 @@ class ViewOperatorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.background2,
+    return DialogShell(
       title: const Text(
         'Operator Details',
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
-      content: SizedBox(
-        width: 400,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('View in-depth information about this operator.'),
-            const Divider(thickness: 1, height: 24),
-            const SizedBox(height: 5),
-            _buildDetailsFields(context),
-          ],
-        ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('View in-depth information about this operator.'),
+          const Divider(thickness: 1, height: 24),
+          const SizedBox(height: 5),
+          _buildDetailsFields(context),
+        ],
       ),
       actions: [
         ElevatedButton(
@@ -43,21 +40,19 @@ class ViewOperatorDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.only(bottom: 16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildReadOnlyField(
-                  context: context,
+                child: ReadOnlyField(
                   label: 'First Name',
                   value: operator.firstName,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildReadOnlyField(
-                  context: context,
+                child: ReadOnlyField(
                   label: 'Last Name',
                   value: operator.lastName,
                 ),
@@ -66,66 +61,18 @@ class ViewOperatorDialog extends StatelessWidget {
           ),
         ),
 
-        _buildReadOnlyField(
-          context: context,
-          label: 'Email',
-          value: operator.email,
-        ),
-        const SizedBox(height: 20),
+        ReadOnlyField(label: 'Email', value: operator.email),
+        const SizedBox(height: 16),
 
-        _buildReadOnlyField(
-          context: context,
-          label: 'Operator ID',
-          value: operator.id,
-        ),
-        const SizedBox(height: 20),
-
-        _buildReadOnlyField(
-          context: context,
+        ReadOnlyField(
           label: 'Status',
           value: toTitleCase(operator.status.value),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
-        _buildReadOnlyField(
-          context: context,
+        ReadOnlyField(
           label: 'Added At',
           value: formatDateAndTime(operator.addedAt),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReadOnlyField({
-    required BuildContext context,
-    required String label,
-    required String value,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
-          ),
         ),
       ],
     );
