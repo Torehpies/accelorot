@@ -5,7 +5,7 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/summary_card.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/summary_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SummaryCardData {

@@ -3,10 +3,10 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
-import 'package:flutter_application_1/ui/web_operator/models/team_member_filters.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_search_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_search_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'team_members_state.dart';

@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/edit_operator_dialog.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/view_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/view_operator_dialog.dart';
 
 class TeamMemberActionButtons extends StatelessWidget {
   final TeamMembersNotifier notifier;

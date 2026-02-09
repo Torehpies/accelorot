@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
-import 'package:flutter_application_1/ui/web_operator/view/desktop_operator_management_screen.dart';
-import 'package:flutter_application_1/ui/web_operator/view/mobile_operator_management_screen.dart';
+import 'package:flutter_application_1/ui/operator_management/view/desktop_operator_management_screen.dart';
+import 'package:flutter_application_1/ui/operator_management/view/mobile_operator_management_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class OperatorManagementScreen extends ConsumerWidget {

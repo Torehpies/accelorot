@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pending_members_tab.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/summary_header.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_members_tab.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/pending_members_tab.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/summary_header.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/team_members_tab.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DesktopOperatorManagementScreen extends ConsumerStatefulWidget {

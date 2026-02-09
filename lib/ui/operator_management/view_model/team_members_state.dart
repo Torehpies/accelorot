@@ -2,7 +2,7 @@
 
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
-import 'package:flutter_application_1/ui/web_operator/models/team_member_filters.dart';
+import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'team_members_state.freezed.dart';

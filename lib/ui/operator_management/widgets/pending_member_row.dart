@@ -3,8 +3,8 @@ import 'package:flutter_application_1/data/services/api/model/pending_member/pen
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_action_buttons.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/pending_member_action_buttons.dart';
 import 'package:flutter_application_1/utils/format.dart';
 
 class PendingMemberRow extends StatelessWidget {

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamHeaderWithTabs extends StatelessWidget {

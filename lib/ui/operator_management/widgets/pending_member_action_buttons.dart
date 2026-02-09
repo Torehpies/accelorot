@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
 
 class PendingMemberActionButtons extends StatelessWidget {
   final PendingMembersNotifier notifier;

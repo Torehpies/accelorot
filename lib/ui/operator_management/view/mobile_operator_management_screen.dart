@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/mobile_pending_members_tab.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/mobile_summary_cards.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/mobile_team_members_tab.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_header_with_tabs.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/mobile_pending_members_tab.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/mobile_summary_cards.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/mobile_team_members_tab.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/team_header_with_tabs.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobileOperatorManagementScreen extends ConsumerStatefulWidget {

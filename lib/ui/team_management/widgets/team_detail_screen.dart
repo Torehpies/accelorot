@@ -22,9 +22,9 @@ import 'package:flutter_application_1/ui/team_management/view_model/team_detail_
 import 'package:flutter_application_1/ui/team_management/view_model/team_machine_actions_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/status_badge.dart';
 import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamDetailScreen extends ConsumerStatefulWidget {

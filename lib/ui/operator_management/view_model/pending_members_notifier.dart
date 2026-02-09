@@ -3,9 +3,9 @@ import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_search_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_search_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pending_members_notifier.g.dart';

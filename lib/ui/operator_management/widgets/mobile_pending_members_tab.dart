@@ -3,9 +3,9 @@ import 'package:flutter_application_1/data/services/api/model/pending_member/pen
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_state.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/bottom_sheets/pending_member_view_sheet.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_state.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/bottom_sheets/pending_member_view_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MobilePendingMembersTab extends ConsumerStatefulWidget {

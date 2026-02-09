@@ -3,9 +3,9 @@ import 'package:flutter_application_1/data/services/api/model/team_member/team_m
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/team_member_action_buttons.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/status_badge.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/team_member_action_buttons.dart';
 
 class TeamMemberRow extends StatelessWidget {
   final TeamMember member;

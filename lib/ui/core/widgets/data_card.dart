@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/status_badge.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/status_badge.dart';
 
 class DataCard<T> extends StatelessWidget {
   final IconData icon;

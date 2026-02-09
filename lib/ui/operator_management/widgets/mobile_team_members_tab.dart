@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/bottom_sheets/team_member_view_sheet.dart';
-import 'package:flutter_application_1/ui/web_operator/bottom_sheets/team_member_edit_sheet.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/bottom_sheets/team_member_view_sheet.dart';
+import 'package:flutter_application_1/ui/operator_management/bottom_sheets/team_member_edit_sheet.dart';
 import 'package:flutter_application_1/utils/get_operator_status_style.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

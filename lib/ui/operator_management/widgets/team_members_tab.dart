@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
+import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
+import 'package:flutter_application_1/ui/core/widgets/filters/filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
@@ -10,23 +12,24 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
-import 'package:flutter_application_1/ui/web_operator/providers/operators_date_filter_provider.dart';
-import 'package:flutter_application_1/ui/web_operator/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/add_operator_dialog.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/pending_member_row.dart';
-import 'package:flutter_application_1/ui/web_operator/widgets/tabs_row.dart';
+import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
+import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
+import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/add_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
+import 'package:flutter_application_1/ui/operator_management/widgets/team_member_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PendingMembersTab extends ConsumerStatefulWidget {
+class TeamMembersTab extends ConsumerStatefulWidget {
   final TabController tabController;
 
-  const PendingMembersTab({super.key, required this.tabController});
+  const TeamMembersTab({super.key, required this.tabController});
 
   @override
-  ConsumerState<PendingMembersTab> createState() => _PendingMembersTabState();
+  ConsumerState<TeamMembersTab> createState() => _TeamMembersTabState();
 }
 
-class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
+class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -35,15 +38,15 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final state = ref.watch(pendingMembersProvider);
-    final notifier = ref.read(pendingMembersProvider.notifier);
+    final state = ref.watch(teamMembersProvider);
+    final notifier = ref.read(teamMembersProvider.notifier);
 
     final pageCount = state.hasNextPage
         ? state.currentPage + 2
         : state.currentPage + 1;
 
     return BaseTableContainer(
-      // ── Left header: tab switcher (same controller, shared with TeamMembersTab) ──
+      // ── Left header: tab switcher ──
       leftHeaderWidget: TabsRow(
         controller: widget.tabController,
         tabTitles: ['Members', 'For Approval'],
@@ -113,7 +116,7 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
             ),
           ),
           TableCellWidget(
-            flex: 2,
+            flex: 3,
             child: TableHeaderCell(
               label: 'Email',
               sortable: true,
@@ -124,14 +127,32 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
             ),
           ),
           TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Requested At',
-              sortable: true,
-              sortColumn: 'requestedAt',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('requestedAt'),
+            flex: 1,
+            child: SizedBox(
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Status',
+                      style: WebTextStyles.label.copyWith(
+                        color: state.statusFilter != TeamMemberStatusFilter.all
+                            ? WebColors.greenAccent
+                            : WebColors.textLabel,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterDropdown<TeamMemberStatusFilter>(
+                      label: 'Status',
+                      value: state.statusFilter,
+                      items: TeamMemberStatusFilter.values,
+                      displayName: (filter) => filter.displayName,
+                      onChanged: (filter) => notifier.setStatusFilter(filter),
+                      isLoading: state.isLoading,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           TableCellWidget(
@@ -142,16 +163,16 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
       ),
 
       // ── Table body: rows + skeleton + empty state ──
-      tableBody: TableBody<PendingMember>(
+      tableBody: TableBody<TeamMember>(
         items: state.filteredMembers,
         isLoading: state.isLoading && state.members.isEmpty,
         emptyStateWidget: const EmptyState(
-          title: 'No pending members found',
+          title: 'No members found',
           subtitle: 'Try adjusting your filters or search',
           icon: Icons.person_search,
         ),
         rowBuilder: (member) =>
-            PendingMemberRow(member: member, notifier: notifier),
+            TeamMemberRow(member: member, notifier: notifier),
         skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
 
@@ -168,7 +189,7 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
   }
 }
 
-// ── Skeleton row matching [2, 2, 3, 2, 1] column layout ──
+// ── Skeleton row matching [2, 2, 3, 1, 1] column layout ──
 Widget _buildSkeletonRow() {
   return GenericTableRow(
     cellSpacing: AppSpacing.md,
@@ -188,12 +209,14 @@ Widget _buildSkeletonRow() {
         flex: 3,
         child: Center(child: _SkeletonBox(width: 180, height: 16)),
       ),
-      // Requested At — date text block
+      // Status badge shape
       TableCellWidget(
-        flex: 2,
-        child: Center(child: _SkeletonBox(width: 130, height: 16)),
+        flex: 1,
+        child: Center(
+          child: _SkeletonBox(width: 70, height: 24, borderRadius: 5),
+        ),
       ),
-      // Action icons (accept + decline)
+      // Action icons
       TableCellWidget(
         flex: 1,
         child: Center(
