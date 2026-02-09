@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/frontend/widgets/custom_text_field.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,15 +48,18 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         }
       }
     });
-    return AlertDialog(
+    return DialogShell(
       title: Text("Add Team", style: TextStyle(fontWeight: FontWeight.bold)),
       content: Form(
         key: _formKey,
         child: SizedBox(
-          width: 400,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text('Create new team'),
+              const Divider(thickness: 1, height: 24),
+              const SizedBox(height: 5),
               if (errorMessage != null && errorMessage is ErrorMessage)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10.0),

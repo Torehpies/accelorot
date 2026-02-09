@@ -129,7 +129,7 @@ class _BaseStatsCardState extends State<BaseStatsCard>
           // Change Badge + Subtext Row
           if (widget.isLoading)
             _buildSkeletonBox(height: 18, width: 180)
-          else if (widget.changeText != null)
+          else if (widget.changeText != null && widget.changeText!.isNotEmpty)
             Row(
               children: [
                 // Change Text
@@ -155,6 +155,17 @@ class _BaseStatsCardState extends State<BaseStatsCard>
                   ),
                 ),
               ],
+            )
+          else if (widget.subtext != null)
+  
+            Text(
+              widget.subtext!,
+              style: const TextStyle(
+                fontSize: 11,
+                color: WebColors.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
             )
           else
             const Text(

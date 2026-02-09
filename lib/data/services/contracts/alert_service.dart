@@ -6,7 +6,9 @@ import '../../models/alert.dart';
 abstract class AlertService {
   /// Fetch all alerts for the current user's team
   /// Handles authentication and team resolution internally
-  Future<List<Alert>> fetchTeamAlerts();
+  /// [limit] - Maximum number of alerts to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch alerts newer than this date (null = no filter)
+  Future<List<Alert>> fetchTeamAlerts({int? limit, DateTime? cutoffDate});
 
   /// Fetch alerts for a specific batch
   /// @param batchId - the batch identifier
@@ -15,6 +17,10 @@ abstract class AlertService {
   /// Stream alerts for real-time updates
   /// @param batchId - the batch identifier
   Stream<List<Alert>> streamAlerts(String batchId);
+
+  /// Stream team alerts for real-time updates
+  /// [cutoffDate] - Only stream alerts newer than this date (null = no filter)
+  Stream<List<Alert>> streamTeamAlerts({DateTime? cutoffDate});
 
   /// Fetch a single alert by ID
   Future<Alert?> fetchAlertById(String alertId);

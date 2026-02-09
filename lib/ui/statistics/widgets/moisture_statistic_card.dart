@@ -22,7 +22,6 @@ class MoistureStatisticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const mainColor = Color(0xFF0284C7); // Blue color
-    const borderColor = Color(0xFFBAE6FD); // Light Blue Border
 
     // Generate daily chart data from real readings
     final chartData = _generateDailyData();
@@ -31,7 +30,6 @@ class MoistureStatisticCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 2), // Full colored border
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +40,7 @@ class MoistureStatisticCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 1),
+                  bottom: BorderSide(color: Color(0xFFF0F9FF), width: 3),
                 ),
               ),
               child: Row(
@@ -256,7 +254,7 @@ class MoistureStatisticCard extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Divider
-                  const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+                  const Divider(height: 3, thickness: 3, color: Color(0xFFF3F4F6)),
                   const SizedBox(height: 16),
                   
                   // Trend Text

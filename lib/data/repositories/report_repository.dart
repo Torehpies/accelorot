@@ -12,7 +12,9 @@ class ReportRepository {
 
   /// Fetch all reports for the current user's team
   /// Auto-resolves team from current user
-  Future<List<Report>> getTeamReports() => _reportService.fetchTeamReports();
+  /// [limit] - Maximum number of reports to fetch (null = fetch all)
+  Future<List<Report>> getTeamReports({int? limit}) => 
+      _reportService.fetchTeamReports(limit: limit);
 
   /// Fetch reports for a specific team (admin use)
   Future<List<Report>> getReportsByTeam(String teamId) =>

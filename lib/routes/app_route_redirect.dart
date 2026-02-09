@@ -12,7 +12,11 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
   final auth = ref.read(authStateModelProvider);
 
   return auth.when(
-    loading: () => RoutePath.loading.path,
+    loading: () {
+      // Don't redirect during loading state - stay on current path
+      // This prevents redirect to /loading then dashboard on refresh
+      return null;
+    },
     unauthenticated: () =>
         currentPath == RoutePath.initial.path ||
             currentPath == RoutePath.signin.path ||
@@ -40,22 +44,46 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               ? null
               : RoutePath.restricted.path;
         case UserStatus.active:
+          if (currentPath.startsWith('/team-details')) {
+            if (globalRole == GlobalRole.superadmin) {
+              return null;
+            } else {
+              return globalRole == GlobalRole.user && teamRole == TeamRole.admin
+                  ? RoutePath.adminDashboard.path
+                  : RoutePath.dashboard.path;
+            }
+          }
           if (globalRole == GlobalRole.superadmin) {
             debugPrint("ROUTED TO SUPERADMIN");
+            // Allow access to all superadmin paths
             if (currentPath.startsWith('/superadmin')) return null;
-            return RoutePath.superAdminTeams.path;
+            // Only redirect to default if on non-superadmin paths
+            if (!currentPath.startsWith('/superadmin')) {
+              return RoutePath.superAdminTeams.path;
+            }
+            return null;
           }
 
           if (globalRole == GlobalRole.user) {
             if (teamRole == TeamRole.admin) {
               debugPrint("ROUTED TO ADMIN");
+              // Allow access to all admin paths
               if (currentPath.startsWith('/admin')) return null;
-              return RoutePath.adminDashboard.path;
+              // Only redirect to dashboard if on non-admin paths
+              if (!currentPath.startsWith('/admin')) {
+                return RoutePath.adminDashboard.path;
+              }
+              return null;
             }
             if (teamRole == TeamRole.operator) {
               debugPrint("ROUTED TO OPERATOR");
+              // Allow access to all operator paths
               if (currentPath.startsWith('/operator')) return null;
-              return RoutePath.dashboard.path;
+              // Only redirect to dashboard if on non-operator paths
+              if (!currentPath.startsWith('/operator')) {
+                return RoutePath.dashboard.path;
+              }
+              return null;
             }
           }
           return null;
@@ -70,3 +98,4 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
     },
   );
 }
+

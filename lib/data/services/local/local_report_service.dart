@@ -3,12 +3,15 @@ import '../contracts/report_service.dart';
 
 class LocalReportService implements ReportService {
   @override
-  Future<List<Report>> fetchTeamReports() {
+  Future<List<Report>> fetchTeamReports({int? limit}) {
     throw UnimplementedError('Local database not yet implemented');
   }
-
   @override
-  Future<List<Report>> fetchReportsByTeam(String teamId) {
+  Future<List<Report>> fetchReportsByTeam(
+    String teamId, {
+    int? limit,
+    int? filterRecentDays,
+  }) {
     throw UnimplementedError('Local database not yet implemented');
   }
 

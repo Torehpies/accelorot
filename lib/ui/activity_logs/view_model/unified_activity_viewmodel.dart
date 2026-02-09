@@ -1,5 +1,7 @@
 // lib/ui/activity_logs/view_model/unified_activity_viewmodel.dart
 
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/unified_activity_state.dart';
@@ -27,49 +29,57 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   // ===== INITIALIZATION =====
 
   Future<void> _initialize() async {
-    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
+    final vmStopwatch = Stopwatch()..start();
+    debugPrint('ViewModel initialization started');
 
-    try {
-      final isLoggedIn = await _aggregator.isUserLoggedIn();
+    state = state.copyWith(
+      status: LoadingStatus.loading,
+      isLoggedIn: true,
+      errorMessage: null,
+    );
 
-      if (!isLoggedIn) {
-        state = state.copyWith(
-          status: LoadingStatus.success,
-          isLoggedIn: false,
-        );
-        return;
-      }
+    vmStopwatch.stop();
+    debugPrint(
+      'ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
+    );
 
-      state = state.copyWith(isLoggedIn: true);
-      await loadActivities();
-    } catch (e) {
-      state = state.copyWith(
-        status: LoadingStatus.error,
-        errorMessage: e.toString(),
-      );
-    }
+    unawaited(loadActivities());
   }
 
   // ===== DATA LOADING =====
 
-  /// Load all activities from aggregator service WITH entity cache
+  /// Load all activities with progressive loading - each category updates UI as it arrives
   Future<void> loadActivities() async {
+    final loadStopwatch = Stopwatch()..start();
+    debugPrint('🔄 loadActivities() called - Progressive Loading Mode');
+
     try {
-      state = state.copyWith(status: LoadingStatus.loading);
-
-      // Fetch activities and build entity cache
-      final result = await _aggregator.getAllActivitiesWithCache();
-
+      // Set all categories to loading state
       state = state.copyWith(
-        allActivities: result.items,
-        entityCache:
-            result.entityCache, // Store cache for instant dialog loading
-        status: LoadingStatus.success,
+        status: LoadingStatus.loading,
+        substratesLoadingStatus: LoadingStatus.loading,
+        alertsLoadingStatus: LoadingStatus.loading,
+        cyclesLoadingStatus: LoadingStatus.loading,
+        reportsLoadingStatus: LoadingStatus.loading,
       );
 
-      // Apply filters to new data
-      _applyFilters();
+      // PROGRESSIVE LOADING: Launch all fetches in parallel (fire and forget)
+      // Each will update UI independently as it completes
+      unawaited(_fetchSubstratesProgressive());
+      unawaited(_fetchAlertsProgressive());
+      unawaited(_fetchCyclesProgressive());
+      unawaited(_fetchReportsProgressive());
+
+      loadStopwatch.stop();
+      debugPrint(
+        'Progressive loading launched: ${loadStopwatch.elapsedMilliseconds}ms (fetches running in background)\n',
+      );
     } catch (e) {
+      loadStopwatch.stop();
+      debugPrint(
+        'loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n',
+      );
+
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: e.toString(),
@@ -77,9 +87,214 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     }
   }
 
+  /// Fetch substrates and update UI immediately when done
+  Future<void> _fetchSubstratesProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching substrates...');
+      // Use cached method instead of raw
+      final substrateActivityList = await _aggregator.getSubstrates();
+
+      stopwatch.stop();
+      debugPrint(
+        'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrateActivityList.length} items)',
+      );
+
+      // Build cache from returned items
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      // Note: Cache building happens in aggregator, we just use the results
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        substrateActivities: substrateActivityList,
+        entityCache: newCache,
+        substratesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'substrates': substrateActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Substrates fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(substratesLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch alerts and update UI immediately when done
+  Future<void> _fetchAlertsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching alerts...');
+      // Use cached method instead of raw
+      final alertActivityList = await _aggregator.getAlerts();
+
+      stopwatch.stop();
+      debugPrint(
+        'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alertActivityList.length} items)',
+      );
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        alertActivities: alertActivityList,
+        entityCache: newCache,
+        alertsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'alerts': alertActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Alerts fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(alertsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch cycles and update UI immediately when done
+  Future<void> _fetchCyclesProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching cycles...');
+      // Use cached method instead of raw
+      final cycleActivityList = await _aggregator.getCyclesRecom();
+
+      stopwatch.stop();
+      debugPrint(
+        'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycleActivityList.length} items)',
+      );
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        cycleActivities: cycleActivityList,
+        entityCache: newCache,
+        cyclesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'operations': cycleActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Cycles fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(cyclesLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch reports and update UI immediately when done
+  Future<void> _fetchReportsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('🔵 Fetching reports...');
+      // Use cached method instead of raw
+      final reportActivityList = await _aggregator.getReports();
+
+      stopwatch.stop();
+      debugPrint(
+        'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reportActivityList.length} items)',
+      );
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        reportActivities: reportActivityList,
+        entityCache: newCache,
+        reportsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'reports': reportActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Reports fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(reportsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Check if all categories are loaded and update global status
+  void _checkIfAllLoaded() {
+    final allLoaded =
+        state.substratesLoadingStatus == LoadingStatus.success &&
+        state.alertsLoadingStatus == LoadingStatus.success &&
+        state.cyclesLoadingStatus == LoadingStatus.success &&
+        state.reportsLoadingStatus == LoadingStatus.success;
+
+    if (allLoaded) {
+      state = state.copyWith(status: LoadingStatus.success);
+      debugPrint('loaded successfully!');
+    }
+  }
+
+  /// Merge all category-specific lists into allActivities and sort by timestamp
+  void _mergeAllActivities() {
+    final merged = <ActivityLogItem>[
+      ...state.substrateActivities,
+      ...state.alertActivities,
+      ...state.cycleActivities,
+      ...state.reportActivities,
+    ];
+
+    // Sort by timestamp (newest first)
+    merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    state = state.copyWith(allActivities: merged);
+  }
+
   /// Refresh data (for pull-to-refresh)
   Future<void> refresh() async {
+    final refreshStopwatch = Stopwatch()..start();
+    debugPrint('🔃 refresh() called');
+
+    // Clear cache to force fresh fetch
+    _aggregator.clearCache();
+
     await loadActivities();
+
+    refreshStopwatch.stop();
+    debugPrint(
+      'refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n',
+    );
   }
 
   // ===== ENTITY CACHE LOOKUP =====
@@ -248,8 +463,15 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   // ===== STATS CALCULATIONS =====
 
-  /// Get count for each category
+  /// Get count for each category from stored full counts
   Map<String, int> getCategoryCounts() {
+    // Use stored full counts (fetched separately for stats cards)
+    // If not available, fall back to counting from allActivities
+    if (state.fullCategoryCounts.isNotEmpty) {
+      return state.fullCategoryCounts;
+    }
+
+    // Fallback: count from allActivities (limited data)
     return {
       'substrates': state.allActivities
           .where((item) => item.type == ActivityType.substrate)
@@ -267,113 +489,34 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Get category counts with month-over-month change percentage
+  /// Note: Stats cards now show "last 2 days" counts, not month-over-month changes
   Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
-    final now = DateTime.now();
+    // Get counts from stored full counts (last 2 days for alerts/cycles, all-time for others)
+    final counts = getCategoryCounts();
 
-    // Current month: from start of this month to now
-    final currentMonthStart = DateTime(now.year, now.month, 1);
-    final currentMonthEnd = now;
-
-    // Previous month: full month
-    final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd = DateTime(
-      now.year,
-      now.month,
-      1,
-    ).subtract(const Duration(microseconds: 1));
-
-    // Get ALL-TIME counts (for display)
-    final allTimeCounts = getCategoryCounts();
-
-    // Get counts for current month (for comparison)
-    final currentCounts = _getCountsForDateRange(
-      currentMonthStart,
-      currentMonthEnd,
-    );
-
-    // Get counts for previous month (for comparison)
-    final previousCounts = _getCountsForDateRange(
-      previousMonthStart,
-      previousMonthEnd,
-    );
-
+    // For now, we just show the counts without change percentages
+    // since we're showing "last 2 days" counts instead of monthly trends
     return {
-      'substrates': _buildChangeData(
-        allTimeCounts['substrates']!,
-        currentCounts['substrates']!,
-        previousCounts['substrates']!,
-      ),
-      'alerts': _buildChangeData(
-        allTimeCounts['alerts']!,
-        currentCounts['alerts']!,
-        previousCounts['alerts']!,
-      ),
-      'operations': _buildChangeData(
-        allTimeCounts['operations']!,
-        currentCounts['operations']!,
-        previousCounts['operations']!,
-      ),
-      'reports': _buildChangeData(
-        allTimeCounts['reports']!,
-        currentCounts['reports']!,
-        previousCounts['reports']!,
-      ),
-    };
-  }
-
-  /// Helper: Get counts for a specific date range
-  Map<String, int> _getCountsForDateRange(DateTime start, DateTime end) {
-    final activitiesInRange = state.allActivities.where((item) {
-      return item.timestamp.isAfter(start) && item.timestamp.isBefore(end);
-    }).toList();
-
-    return {
-      'substrates': activitiesInRange
-          .where((item) => item.type == ActivityType.substrate)
-          .length,
-      'alerts': activitiesInRange
-          .where((item) => item.type == ActivityType.alert)
-          .length,
-      'operations': activitiesInRange
-          .where((item) => item.type == ActivityType.cycle)
-          .length,
-      'reports': activitiesInRange
-          .where((item) => item.type == ActivityType.report)
-          .length,
-    };
-  }
-
-  /// Helper: Build change data with percentage and positive/negative indicator
-  Map<String, dynamic> _buildChangeData(
-    int allTimeCount,
-    int currentMonthCount,
-    int previousMonthCount,
-  ) {
-    String changeText;
-    bool isPositive = true;
-
-    if (previousMonthCount == 0 && currentMonthCount > 0) {
-      // New this month
-      changeText = 'New';
-      isPositive = true;
-    } else if (previousMonthCount == 0 && currentMonthCount == 0) {
-      // No data yet
-      changeText = 'No log yet';
-      isPositive = true; // Neutral
-    } else {
-      // Calculate percentage change (current month vs previous month)
-      final percentageChange =
-          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
-              .round();
-      isPositive = percentageChange >= 0;
-      final sign = isPositive ? '+' : '';
-      changeText = '$sign$percentageChange%';
-    }
-
-    return {
-      'count': allTimeCount,
-      'change': changeText,
-      'isPositive': isPositive,
+      'substrates': {
+        'count': counts['substrates'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'alerts': {
+        'count': counts['alerts'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'operations': {
+        'count': counts['operations'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'reports': {
+        'count': counts['reports'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
     };
   }
 }
