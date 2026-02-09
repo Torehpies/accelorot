@@ -98,19 +98,38 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
               }
 
               return WebContentContainer(
-                child: RefreshIndicator(
-                  onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(2, 32, 2, 100),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(allMachines, ref),
-                        const SizedBox(height: 32),
-                        _buildStatisticsCards(),
-                      ],
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return RefreshIndicator(
+                      onRefresh: () => _handleRefresh(ref, selectedBatch ?? ''),
+                      child: SingleChildScrollView(
+                        // Use physics that allows scroll only when content exceeds viewport
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          // Ensure minimum height equals viewport height
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: IntrinsicHeight(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 2,
+                                vertical: _getVerticalPadding(constraints.maxWidth),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildHeader(allMachines, ref, constraints.maxWidth),
+                                  const SizedBox(height: 24),
+                                  _buildStatisticsCards(constraints.maxWidth),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -141,14 +160,15 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildHeader(List<MachineModel> machines, WidgetRef ref) {
+  Widget _buildHeader(List<MachineModel> machines, WidgetRef ref, double width) {
     final selectedMachineId = ref.watch(selectedMachineIdProvider);
 
-    return Row(
-      children: [
-        // Machine Selector
-        Expanded(
-          child: MachineSelector(
+    // Responsive header layout
+    if (width < 700) {
+      // Mobile: Stack vertically
+      return Column(
+        children: [
+          MachineSelector(
             selectedMachineId: selectedMachineId,
             onChanged: (machineId) {
               if (machineId != null) {
@@ -159,13 +179,32 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
             },
             isCompact: false,
           ),
-        ),
-        const SizedBox(width: 16),
-
-        // Batch Selector
-        Expanded(child: _buildBatchSelector()),
-      ],
-    );
+          const SizedBox(height: 12),
+          _buildBatchSelector(),
+        ],
+      );
+    } else {
+      // Desktop: Side by side
+      return Row(
+        children: [
+          Expanded(
+            child: MachineSelector(
+              selectedMachineId: selectedMachineId,
+              onChanged: (machineId) {
+                if (machineId != null) {
+                  ref
+                      .read(selectedMachineIdProvider.notifier)
+                      .setMachine(machineId);
+                }
+              },
+              isCompact: false,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: _buildBatchSelector()),
+        ],
+      );
+    }
   }
 
   Widget _buildBatchSelector() {
@@ -182,118 +221,175 @@ class _WebStatisticsScreenState extends ConsumerState<WebStatisticsScreen> {
     );
   }
 
-  Widget _buildStatisticsCards() {
-    //final selectedMachineId = ref.watch(selectedMachineIdProvider);
-    
+  Widget _buildStatisticsCards(double width) {
     // Watch the actual data providers with the selected batch
     final batchId = selectedBatch ?? '';
     final temperatureAsync = ref.watch(temperatureDataProvider(batchId));
     final moistureAsync = ref.watch(moistureDataProvider(batchId));
     final oxygenAsync = ref.watch(oxygenDataProvider(batchId));
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
+    // Determine chart height based on screen width
+    final chartHeight = _getChartHeight(width);
+    final cardSpacing = _getCardSpacing(width);
 
-        // Build cards with actual backend data
-        final cards = [
-          temperatureAsync.when(
-            data: (readings) => TemperatureStatisticCard(
-              currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
-              readings: readings,
-              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-            ),
-            loading: () => const StatisticCardSkeleton(
-              accentColor: Colors.orange,
-              title: 'Temperature',
-              subtitle: '',
-            ),
-            error: (error, stack) => _buildErrorCard('Temperature', error),
-          ),
-          moistureAsync.when(
-            data: (readings) => MoistureStatisticCard(
-              currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
-              readings: readings,
-              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-            ),
-            loading: () => const StatisticCardSkeleton(
-              accentColor: Colors.blue,
-              title: 'Moisture',
-              subtitle: '',
-            ),
-            error: (error, stack) => _buildErrorCard('Moisture', error),
-          ),
-          oxygenAsync.when(
-            data: (readings) => OxygenStatisticCard(
-              currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
-              readings: readings,
-              lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
-            ),
-            loading: () => const StatisticCardSkeleton(
-              accentColor: Colors.purple,
-              title: 'Air Quality',
-              subtitle: '',
-            ),
-            error: (error, stack) => _buildErrorCard('Air Quality', error),
-          ),
-        ];
+    // Build cards with actual backend data
+    final cards = [
+      temperatureAsync.when(
+        data: (readings) => TemperatureStatisticCard(
+          currentTemperature: readings.isNotEmpty ? readings.last.value : 0.0,
+          readings: readings,
+          lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+          chartHeight: chartHeight,
+        ),
+        loading: () => const StatisticCardSkeleton(
+          accentColor: Colors.orange,
+          title: 'Temperature',
+          subtitle: '',
+        ),
+        error: (error, stack) => _buildErrorCard('Temperature', error),
+      ),
+      moistureAsync.when(
+        data: (readings) => MoistureStatisticCard(
+          currentMoisture: readings.isNotEmpty ? readings.last.value : 0.0,
+          readings: readings,
+          lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+          chartHeight: chartHeight,
+        ),
+        loading: () => const StatisticCardSkeleton(
+          accentColor: Colors.blue,
+          title: 'Moisture',
+          subtitle: '',
+        ),
+        error: (error, stack) => _buildErrorCard('Moisture', error),
+      ),
+      oxygenAsync.when(
+        data: (readings) => OxygenStatisticCard(
+          currentOxygen: readings.isNotEmpty ? readings.last.value : 0.0,
+          readings: readings,
+          lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
+          chartHeight: chartHeight,
+        ),
+        loading: () => const StatisticCardSkeleton(
+          accentColor: Colors.purple,
+          title: 'Air Quality',
+          subtitle: '',
+        ),
+        error: (error, stack) => _buildErrorCard('Air Quality', error),
+      ),
+    ];
 
-        // Responsive layout
-        if (width < 700) {
-          // Mobile: Single column
-          return Column(
-            children: cards
-                .map(
-                  (card) => Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: card,
-                  ),
-                )
-                .toList(),
-          );
-        } else if (width < 1100) {
-          // Tablet: 2 columns
-          return Column(
-            children: [
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: cards[0]),
-                    const SizedBox(width: 20),
-                    Expanded(child: cards[1]),
-                  ],
-                ),
+    // Responsive layout with different breakpoints
+    if (width < 700) {
+      // Mobile: Single column
+      return Column(
+        children: cards
+            .map(
+              (card) => Padding(
+                padding: EdgeInsets.only(bottom: cardSpacing),
+                child: card,
               ),
-              const SizedBox(height: 20),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: cards[2]),
-                    const Expanded(child: SizedBox()), // Empty space
-                  ],
-                ),
-              ),
-            ],
-          );
-        } else {
-          // Desktop: 3 columns
-          return IntrinsicHeight(
+            )
+            .toList(),
+      );
+    } else if (width < 1100) {
+      // Tablet: 2 columns
+      return Column(
+        children: [
+          IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(child: cards[0]),
-                const SizedBox(width: 20),
+                SizedBox(width: cardSpacing),
                 Expanded(child: cards[1]),
-                const SizedBox(width: 20),
+              ],
+            ),
+          ),
+          SizedBox(height: cardSpacing),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: cards[2]),
+                const Expanded(child: SizedBox()), // Empty space
+              ],
+            ),
+          ),
+        ],
+      );
+    } else if (width < 1600) {
+      // Medium Desktop: 3 columns with moderate spacing
+      return IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: cards[0]),
+            SizedBox(width: cardSpacing),
+            Expanded(child: cards[1]),
+            SizedBox(width: cardSpacing),
+            Expanded(child: cards[2]),
+          ],
+        ),
+      );
+    } else {
+      // Large Desktop: 3 columns with more spacing and max width constraint
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1800),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: cards[0]),
+                SizedBox(width: cardSpacing),
+                Expanded(child: cards[1]),
+                SizedBox(width: cardSpacing),
                 Expanded(child: cards[2]),
               ],
             ),
-          );
-        }
-      },
-    );
+          ),
+        ),
+      );
+    }
+  }
+
+  // Get responsive vertical padding (combined top and bottom)
+  double _getVerticalPadding(double width) {
+    if (width < 700) {
+      return 16; // Mobile
+    } else if (width < 1100) {
+      return 20; // Tablet
+    } else if (width < 1600) {
+      return 6; // Medium Desktop
+    } else {
+      return 32; // Large Desktop
+    }
+  }
+
+  // Get responsive chart height
+  double _getChartHeight(double width) {
+    if (width < 700) {
+      return 250; // Mobile
+    } else if (width < 1100) {
+      return 280; // Tablet
+    } else if (width < 1600) {
+      return 300; // Medium Desktop
+    } else {
+      return 350; // Large Desktop
+    }
+  }
+
+  // Get responsive card spacing
+  double _getCardSpacing(double width) {
+    if (width < 700) {
+      return 16;
+    } else if (width < 1100) {
+      return 20;
+    } else if (width < 1600) {
+      return 24;
+    } else {
+      return 32;
+    }
   }
 
   Future<void> _handleRefresh(WidgetRef ref, String batchId) async {
