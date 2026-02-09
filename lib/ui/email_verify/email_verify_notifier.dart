@@ -37,6 +37,7 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
           return user.emailVerified;
         })
         .listen((isVerified) {
+          if (!ref.mounted) return;
           if (isVerified) {
             _verificationSubscription?.cancel();
             state = state.copyWith(isVerified: true);
@@ -91,6 +92,10 @@ class EmailVerifyNotifier extends _$EmailVerifyNotifier {
 
   void _startCooldown() {
     Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!ref.mounted) {
+        timer.cancel();
+        return;
+      }
       if (state.resendCooldown <= 0) {
         timer.cancel();
       } else {
