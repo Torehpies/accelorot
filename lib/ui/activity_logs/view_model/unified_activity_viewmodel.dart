@@ -17,6 +17,8 @@ import '../../../data/providers/alert_providers.dart';
 import '../../../data/providers/cycle_providers.dart';
 import '../../../data/providers/report_providers.dart';
 import '../models/activity_common.dart';
+import '../mappers/activity_presentation_mapper.dart'; 
+
 
 part 'unified_activity_viewmodel.g.dart';
 
