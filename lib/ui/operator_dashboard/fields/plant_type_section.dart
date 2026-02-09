@@ -1,6 +1,6 @@
 // lib/ui/operator_dashboard/fields/plant_type_section.dart
 import 'package:flutter/material.dart';
-import '../../core/bottom_sheet/fields/mobile_input_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 
 class PlantTypeSection extends StatefulWidget {
   final String? selectedWasteCategory;

@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../view_model/admin_home_provider.dart';
-import '../../core/widgets/base_stats_card.dart';
+import '../../core/widgets/sample_cards/base_stats_card.dart';
 import '../web_widgets/activity_chart.dart';
 import '../web_widgets/report_donut_chart.dart';
 import '../web_widgets/recent_activities_table.dart';
-import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/containers/web_base_container.dart';
 
 class WebAdminHomeView extends ConsumerStatefulWidget {
   const WebAdminHomeView({super.key});

@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import '../../themes/app_theme.dart';
 
 /// A reusable container widget that displays a list of cards with search and filter capabilities
-///
-/// This widget provides:
-/// - Search functionality at the top
-/// - Horizontal scrollable filter chips/tabs
-/// - Scrollable list of cards
-/// - Empty state handling
-/// - Loading state support
 class FilterableCardListContainer extends StatefulWidget {
   /// List of filter options to display as chips/tabs
   final List<String> filters;

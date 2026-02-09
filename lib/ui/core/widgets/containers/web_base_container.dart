@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
-import '../themes/web_colors.dart';
-import '../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Wraps Scaffold + backgroundColor + SafeArea pattern used in all web views
 class WebScaffoldContainer extends StatelessWidget {

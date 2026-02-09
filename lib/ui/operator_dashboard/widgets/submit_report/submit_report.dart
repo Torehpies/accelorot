@@ -11,8 +11,8 @@ import '../../fields/description_field.dart';
 import '../../../../data/providers/report_providers.dart';
 import '../../../../data/models/report.dart';
 import '../../fields/batch_selection_field.dart';
-import '../../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
+import '../../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 import '../../../core/ui/app_snackbar.dart';
 
 class SubmitReport extends ConsumerStatefulWidget {

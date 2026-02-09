@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/dialog/base_dialog.dart';
-import '../../core/dialog/dialog_action.dart';
-import '../../core/dialog/dialog_fields.dart';
+import '../../core/widgets/dialog/base_dialog.dart';
+import '../../core/widgets/dialog/dialog_action.dart';
+import '../../core/widgets/dialog/dialog_fields.dart';
 import '../../core/ui/app_snackbar.dart';
 
 class WebAdminAddDialog extends StatefulWidget {

@@ -1,7 +1,7 @@
 // lib/ui/core/widgets/compact_back_button.dart
 
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
+import '../../themes/app_theme.dart';
 
 /// Compact back button designed for tight spaces
 /// Unlike Flutter's default BackButton, this is smaller and more space-efficient

@@ -3,13 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
-import '../../core/bottom_sheet/fields/mobile_input_field.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
-import '../../core/dialog/mobile_confirmation_dialog.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
+import '../../core/widgets/dialog/mobile_confirmation_dialog.dart';
 import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateMachineCallback = Future<void> Function({

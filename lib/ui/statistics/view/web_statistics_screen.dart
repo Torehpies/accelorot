@@ -10,8 +10,8 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../activity_logs/widgets/mobile/machine_selector.dart';
-import '../../core/widgets/web_base_container.dart';
-import '../../core/widgets/stats_skeleton.dart';
+import '../../core/widgets/containers/web_base_container.dart';
+import '../../core/skeleton/stats_skeleton.dart';
 
 class WebStatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;

@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'mobile_bottom_sheet_buttons.dart';
-import '../themes/web_colors.dart';
-import '../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
 
 class MobileBottomSheetBase extends StatelessWidget {
   final String title;

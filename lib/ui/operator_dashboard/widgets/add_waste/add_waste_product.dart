@@ -12,8 +12,8 @@ import '../../../operator_dashboard/fields/machine_selection_field.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
 import '../../../operator_dashboard/fields/batch_selection_field.dart';
-import 'package:flutter_application_1/ui/core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import 'package:flutter_application_1/ui/core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
+import 'package:flutter_application_1/ui/core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import 'package:flutter_application_1/ui/core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 
 class AddWasteProduct extends ConsumerStatefulWidget {
   final String? preSelectedMachineId;

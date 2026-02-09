@@ -1,8 +1,8 @@
 // lib/ui/core/widgets/mobile_common_widgets.dart
 
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
-import '../themes/app_text_styles.dart';
+import '../../themes/app_theme.dart';
+import '../../themes/app_text_styles.dart';
 
 /// Wrapper for scaffold with keyboard dismissal
 class MobileScaffoldContainer extends StatelessWidget {

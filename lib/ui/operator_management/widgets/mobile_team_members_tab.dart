@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
-import 'package:flutter_application_1/ui/core/widgets/data_card.dart';
+import 'package:flutter_application_1/ui/core/widgets/sample_cards/data_card.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/operator_management/bottom_sheets/team_member_view_sheet.dart';
 import 'package:flutter_application_1/ui/operator_management/bottom_sheets/team_member_edit_sheet.dart';

@@ -1,8 +1,8 @@
 // lib/ui/core/bottom_sheet/fields/mobile_dropdown_field.dart
 
 import 'package:flutter/material.dart';
-import '../../themes/web_colors.dart';
-import '../../themes/web_text_styles.dart';
+import '../../../themes/web_colors.dart';
+import '../../../themes/web_text_styles.dart';
 export '../../fields/dropdown_field.dart' show MobileDropdownField, DropdownItem;
 
 /// A generic item model for the dropdown.

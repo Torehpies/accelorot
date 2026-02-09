@@ -1,7 +1,7 @@
 // lib/ui/core/widgets/base_stats_card.dart
 
 import 'package:flutter/material.dart';
-import '../themes/web_colors.dart';
+import '../../themes/web_colors.dart';
 
 /// Enhanced stats card with change tracking and animated skeleton loader
 class BaseStatsCard extends StatefulWidget {

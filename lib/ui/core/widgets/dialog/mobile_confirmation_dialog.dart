@@ -1,8 +1,8 @@
 // lib/ui/core/dialogs/mobile_confirmation_dialog.dart
 
 import 'package:flutter/material.dart';
-import '../themes/web_colors.dart';
-import '../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Result returned by [MobileConfirmationDialog.show].
 enum ConfirmResult { confirmed, cancelled }

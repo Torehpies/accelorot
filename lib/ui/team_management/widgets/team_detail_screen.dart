@@ -8,7 +8,7 @@ import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
-import 'package:flutter_application_1/ui/core/widgets/responsive_button.dart';
+import 'package:flutter_application_1/ui/core/widgets/buttons/responsive_button.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
@@ -23,7 +23,7 @@ import 'package:flutter_application_1/ui/team_management/view_model/team_machine
 import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/status_badge.dart';
-import 'package:flutter_application_1/ui/core/widgets/web_base_container.dart';
+import 'package:flutter_application_1/ui/core/widgets/containers/web_base_container.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

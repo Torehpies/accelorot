@@ -1,8 +1,8 @@
 // lib/ui/core/bottom_sheet/fields/mobile_readonly_section.dart
 
 import 'package:flutter/material.dart';
-import '../../themes/web_colors.dart';
-import '../../themes/web_text_styles.dart';
+import '../../../themes/web_colors.dart';
+import '../../../themes/web_text_styles.dart';
 
 class MobileReadOnlySection extends StatelessWidget {
   final List<Widget> fields;

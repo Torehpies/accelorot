@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../core/bottom_sheet/fields/mobile_input_field.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 import '../../core/ui/app_snackbar.dart';
 
 typedef CreateMachineCallback = Future<void> Function({

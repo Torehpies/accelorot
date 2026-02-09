@@ -1,8 +1,8 @@
 // lib/ui/core/widgets/mobile_list_header.dart
 
 import 'package:flutter/material.dart';
-import '../themes/app_theme.dart';
-import 'filters/mobile_search_bar.dart';
+import '../../themes/app_theme.dart';
+import '../filters/mobile_search_bar.dart';
 
 /// Configuration for search bar
 class SearchBarConfig {

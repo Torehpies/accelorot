@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/ui/app_snackbar.dart';
-import '../../themes/web_colors.dart';
-import '../../themes/web_text_styles.dart';
+import '../../../ui/app_snackbar.dart';
+import '../../../themes/web_colors.dart';
+import '../../../themes/web_text_styles.dart';
 
 /// Read-only field for mobile bottom sheets
 class MobileReadOnlyField extends StatefulWidget {

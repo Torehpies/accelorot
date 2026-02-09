@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'dialog_action.dart';
 import 'dialog_widgets.dart';
-import '../themes/web_colors.dart';
+import '../../themes/web_colors.dart';
 
 /// Base reusable dialog wrapper with standard sizing and structure
 class BaseDialog extends StatelessWidget {

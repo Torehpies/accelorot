@@ -1,8 +1,8 @@
 // lib/ui/core/bottom_sheet/mobile_bottom_sheet_buttons.dart
 
 import 'package:flutter/material.dart';
-import '../themes/web_colors.dart';
-import '../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class BottomSheetAction {

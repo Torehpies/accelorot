@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../themes/web_colors.dart';
-import '../../themes/web_text_styles.dart';
+import '../../../themes/web_colors.dart';
+import '../../../themes/web_text_styles.dart';
 
 class MobileInputField extends StatelessWidget {
   final String label;

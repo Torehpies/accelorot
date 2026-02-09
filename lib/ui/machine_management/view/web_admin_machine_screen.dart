@@ -13,7 +13,7 @@ import '../dialogs/web_admin_view_details_dialog.dart';
 import '../dialogs/web_admin_edit_dialog.dart';
 import '../dialogs/web_admin_add_dialog.dart';
 import '../models/machine_state.dart';
-import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/containers/web_base_container.dart';
 
 class WebAdminMachineScreen extends ConsumerWidget {
   const WebAdminMachineScreen({super.key});

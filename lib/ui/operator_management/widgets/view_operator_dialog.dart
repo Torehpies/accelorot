@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
-import 'package:flutter_application_1/ui/core/widgets/read_only_field.dart';
+import 'package:flutter_application_1/ui/core/widgets/fields/read_only_field.dart';
 import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 

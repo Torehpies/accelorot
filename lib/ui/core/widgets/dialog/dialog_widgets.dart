@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'dialog_action.dart';
-import '../themes/web_text_styles.dart';
-import '../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
 
 // ==================== HEADER ====================
 

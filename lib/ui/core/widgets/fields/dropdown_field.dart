@@ -1,8 +1,8 @@
 // lib/ui/core/fields/dropdown_field.dart
 
 import 'package:flutter/material.dart';
-import '../themes/web_colors.dart';
-import '../themes/web_text_styles.dart';
+import '../../themes/web_colors.dart';
+import '../../themes/web_text_styles.dart';
 
 /// Generic item model for dropdowns
 class DropdownItem<T> {

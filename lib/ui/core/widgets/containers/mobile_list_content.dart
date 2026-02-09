@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'mobile_common_widgets.dart';
-import '../themes/app_theme.dart';
+import '../../themes/app_theme.dart';
 
 /// Configuration for empty state display
 class EmptyStateConfig {
