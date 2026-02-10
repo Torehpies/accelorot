@@ -86,10 +86,7 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
 
       if (!mounted) return;
 
-      context.go(
-        RoutePath.resetEmailSent.path,
-        extra: {'email': email},
-      );
+      context.go(RoutePath.resetEmailSent.path, extra: {'email': email});
     } on FirebaseAuthException catch (e) {
       showSnackbar(
         context,
@@ -273,10 +270,6 @@ class _ForgotPasswordScreenState extends State<ForgotPassScreen>
             ),
           ),
 
-
-
-
-
           // Content
           SafeArea(
             child: Center(
@@ -406,16 +399,14 @@ class _AnimatedDecorativeBlob extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final scale = 1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.15);
+        final scale =
+            1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.15);
         return Transform.scale(
           scale: scale,
           child: Container(
             width: size,
             height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           ),
         );
       },
@@ -482,7 +473,9 @@ class _FloatingCloud extends StatelessWidget {
       builder: (context, child) {
         final floatY = math.sin((animation.value + offset) * math.pi * 2) * 8;
         final driftX = math.cos((animation.value + offset) * math.pi * 2) * 5;
-        final scale = 0.95 + (math.sin((animation.value + offset * 2) * math.pi * 2) * 0.05);
+        final scale =
+            0.95 +
+            (math.sin((animation.value + offset * 2) * math.pi * 2) * 0.05);
         return Transform.translate(
           offset: Offset(driftX, floatY),
           child: Transform.scale(
@@ -515,8 +508,16 @@ class _CloudPainter extends CustomPainter {
     canvas.drawCircle(Offset(centerX * 0.6, centerY), radius, paint);
     canvas.drawCircle(Offset(centerX, centerY * 0.8), radius * 1.2, paint);
     canvas.drawCircle(Offset(centerX * 1.4, centerY), radius, paint);
-    canvas.drawCircle(Offset(centerX * 0.8, centerY * 1.3), radius * 0.9, paint);
-    canvas.drawCircle(Offset(centerX * 1.2, centerY * 1.3), radius * 0.9, paint);
+    canvas.drawCircle(
+      Offset(centerX * 0.8, centerY * 1.3),
+      radius * 0.9,
+      paint,
+    );
+    canvas.drawCircle(
+      Offset(centerX * 1.2, centerY * 1.3),
+      radius * 0.9,
+      paint,
+    );
   }
 
   @override
@@ -541,7 +542,8 @@ class _FloatingCompostBin extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         final floatY = math.sin((animation.value + offset) * math.pi * 2) * 10;
-        final scale = 0.95 + (math.sin((animation.value + offset) * math.pi * 2) * 0.05);
+        final scale =
+            0.95 + (math.sin((animation.value + offset) * math.pi * 2) * 0.05);
         return Transform.translate(
           offset: Offset(0, floatY),
           child: Transform.scale(
@@ -563,25 +565,34 @@ class _CompostBinPainter extends CustomPainter {
     final binPaint = Paint()
       ..color = const Color(0xFF8B6F47)
       ..style = PaintingStyle.fill;
-    
+
     final lidPaint = Paint()
       ..color = const Color(0xFF6B5235)
       ..style = PaintingStyle.fill;
 
     // Bin body with rounded corners
     final binPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.1, size.height * 0.2, size.width * 0.8, size.height * 0.7),
-        Radius.circular(size.width * 0.1),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            size.width * 0.1,
+            size.height * 0.2,
+            size.width * 0.8,
+            size.height * 0.7,
+          ),
+          Radius.circular(size.width * 0.1),
+        ),
+      );
     canvas.drawPath(binPath, binPaint);
 
     // Lid with rounded corners
     final lidPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height * 0.25),
-        Radius.circular(size.width * 0.15),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, size.width, size.height * 0.25),
+          Radius.circular(size.width * 0.15),
+        ),
+      );
     canvas.drawPath(lidPath, lidPaint);
 
     // Handle
@@ -590,7 +601,7 @@ class _CompostBinPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawArc(
       Rect.fromCenter(
         center: Offset(size.width / 2, size.height * 0.1),
@@ -625,7 +636,8 @@ class _FloatingTree extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final scale = 1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.08);
+        final scale =
+            1.0 + (math.sin((animation.value + offset) * math.pi * 2) * 0.08);
         final sway = math.sin((animation.value + offset) * math.pi * 2) * 0.05;
         return Transform.scale(
           scale: scale,
@@ -649,12 +661,19 @@ class _TreePainter extends CustomPainter {
     final trunkPaint = Paint()
       ..color = const Color(0xFF8B6F47)
       ..style = PaintingStyle.fill;
-    
+
     final trunkPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(size.width * 0.4, size.height * 0.5, size.width * 0.2, size.height * 0.5),
-        Radius.circular(size.width * 0.05),
-      ));
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            size.width * 0.4,
+            size.height * 0.5,
+            size.width * 0.2,
+            size.height * 0.5,
+          ),
+          Radius.circular(size.width * 0.05),
+        ),
+      );
     canvas.drawPath(trunkPath, trunkPaint);
 
     // Foliage (rounded circles) - CHANGED TO LIGHT BLUE
@@ -662,11 +681,24 @@ class _TreePainter extends CustomPainter {
       ..color = const Color(0xFFADD8E6).withValues(alpha: 0.6)
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.2), size.width * 0.35, foliagePaint);
-    canvas.drawCircle(Offset(size.width * 0.25, size.height * 0.35), size.width * 0.25, foliagePaint);
-    canvas.drawCircle(Offset(size.width * 0.75, size.height * 0.35), size.width * 0.25, foliagePaint);
+    canvas.drawCircle(
+      Offset(size.width * 0.5, size.height * 0.2),
+      size.width * 0.35,
+      foliagePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.25, size.height * 0.35),
+      size.width * 0.25,
+      foliagePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.75, size.height * 0.35),
+      size.width * 0.25,
+      foliagePaint,
+    );
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+

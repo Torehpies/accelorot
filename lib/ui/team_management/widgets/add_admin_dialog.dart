@@ -17,10 +17,10 @@ class AddAdminDialog extends ConsumerStatefulWidget {
 class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  // final passwordController = TextEditingController();
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
-  bool _isPasswordVisible = false;
+  // bool _isPasswordVisible = false;
   bool isDirty = false;
 
   final emailRegex = RegExp(
@@ -47,7 +47,7 @@ class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
   @override
   void dispose() {
     emailController.dispose();
-    passwordController.dispose();
+    // passwordController.dispose();
     firstnameController.dispose();
     lastnameController.dispose();
     super.dispose();
@@ -142,29 +142,29 @@ class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
                       isDirty = true;
                     }),
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      suffixIcon: IconButton(
-                        onPressed: () => setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        }),
-                        icon: Icon(
-                          _isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                    obscureText: !_isPasswordVisible,
-                    validator: (value) => validatePassword(value ?? ''),
-                    onChanged: (_) => setState(() {
-                      isDirty = true;
-                    }),
-                  ),
+                  // const SizedBox(height: 16),
+                  // TextFormField(
+                  //   controller: passwordController,
+                  //   decoration: InputDecoration(
+                  //     labelText: 'Password',
+                  //     suffixIcon: IconButton(
+                  //       onPressed: () => setState(() {
+                  //         _isPasswordVisible = !_isPasswordVisible;
+                  //       }),
+                  //       icon: Icon(
+                  //         _isPasswordVisible
+                  //             ? Icons.visibility
+                  //             : Icons.visibility_off,
+                  //         color: Colors.grey,
+                  //       ),
+                  //     ),
+                  //   ),
+                  //   obscureText: !_isPasswordVisible,
+                  //   validator: (value) => validatePassword(value ?? ''),
+                  //   onChanged: (_) => setState(() {
+                  //     isDirty = true;
+                  //   }),
+                  // ),
                 ],
               ),
             ),
@@ -177,8 +177,9 @@ class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
             if (isDirty ||
                 firstnameController.text.isNotEmpty ||
                 lastnameController.text.isNotEmpty ||
-                emailController.text.isNotEmpty ||
-                passwordController.text.isNotEmpty) {
+                emailController.text.isNotEmpty
+            // passwordController.text.isNotEmpty
+            ) {
               final confirm = await showConfirmDialog(
                 context: context,
                 title: 'Unsaved Changes',
@@ -208,7 +209,7 @@ class _AddAdminDialogState extends ConsumerState<AddAdminDialog> {
                           .read(addAdminProvider.notifier)
                           .addAdmin(
                             email: emailController.text,
-                            password: passwordController.text,
+                            // password: passwordController.text,
                             firstname: firstnameController.text,
                             lastname: lastnameController.text,
                             teamId: widget.teamId,

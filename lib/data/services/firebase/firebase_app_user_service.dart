@@ -57,4 +57,23 @@ class FirebaseAppUserService implements AppUserService {
       return Result.failure(DataLayerError.unknownError(e));
     }
   }
+
+  @override
+  Future<Result<void, DataLayerError>> acceptApproval({
+    required String uid,
+    required String teamId,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'status': 'active',
+        'requestTeamId': FieldValue.delete(),
+        'teamId': teamId,
+      });
+      return Result.success(null);
+    } on FirebaseException catch (e) {
+      return Result.failure(mapFirebaseAuthException(e));
+    } catch (e) {
+      return Result.failure(DataLayerError.unknownError(e));
+    }
+  }
 }

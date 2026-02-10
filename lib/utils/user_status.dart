@@ -6,6 +6,7 @@ enum UserStatus {
   unauthenticated('unauthenticated'),
   unverified('unverified'),
   teamSelect('teamSelect'),
+  approval('approval'),
   pending('pending'),
   archived('archived'),
   removed('removed'),
