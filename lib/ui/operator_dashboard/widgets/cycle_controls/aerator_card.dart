@@ -7,7 +7,6 @@ import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
