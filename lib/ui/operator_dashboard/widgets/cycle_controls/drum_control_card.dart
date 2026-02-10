@@ -893,11 +893,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
               SizedBox(height: cardWidth * 0.06),
 
         
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 240, 
-                ),
-                child: hasActiveBatch || batchCompleted
+              hasActiveBatch || batchCompleted
                     ? _buildActiveState(
                         batchCompleted,
                         cardWidth,
@@ -906,7 +902,6 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
                         bodyFontSize,
                       )
                     : const EmptyState(),
-              ),
             ],
           );
 
@@ -962,46 +957,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
                 fontSize: bodyFontSize,
               ),
             ),
-            SizedBox(width: cardWidth * 0.03),
-            Expanded(
-              child: InfoItem(
-                label: 'No. of Cycles',
-                value: _completedCycles.toString(),
-                fontSize: bodyFontSize,
-              ),
-            ),
           ],
-        ),
-        SizedBox(height: cardHeight * 0.04),
-
-        Text(
-          'Set Controller',
-          style: TextStyle(
-            fontSize: labelFontSize,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1a1a1a),
-          ),
-        ),
-        SizedBox(height: cardHeight * 0.025),
-
-        ControlInputFields(
-          selectedCycle: settings.cycles.toString(),
-          selectedPeriod: settings.period,
-          isLocked: status == SystemStatus.running || _isPaused,
-          onCycleChanged: (value) {
-            if (value != null) {
-              setState(() {
-                settings = settings.copyWith(cycles: int.parse(value));
-              });
-            }
-          },
-          onPeriodChanged: (value) {
-            if (value != null) {
-              setState(() {
-                settings = settings.copyWith(period: value);
-              });
-            }
-          },
         ),
         SizedBox(height: cardHeight * 0.04),
 
