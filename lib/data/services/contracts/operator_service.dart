@@ -9,7 +9,7 @@ abstract class OperatorService {
   Future<List<OperatorModel>> fetchTeamOperators(String teamId);
   Future<Result<AppUser>> addUser({
     required String email,
-    required String password,
+    // required String password,
     required String firstname,
     required String lastname,
     String? globalRole,
