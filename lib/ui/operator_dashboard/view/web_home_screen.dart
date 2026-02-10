@@ -14,6 +14,8 @@ import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_manage
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
+import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
+import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/fabs/web_add_waste_fab.dart';
 
@@ -29,8 +31,8 @@ class WebHomeScreen extends ConsumerStatefulWidget {
 class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
     with AutomaticKeepAliveClientMixin {
   CompostBatch? _currentBatch;
-  String? _selectedMachineId;
-  String? _selectedBatchId;
+  // ❌ Removed _selectedMachineId - now using provider
+
   BatchModel? _activeBatchModel;
 
   int _rebuildKey = 0;
@@ -44,7 +46,14 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
   @override
   void initState() {
     super.initState();
-    _selectedMachineId = widget.focusedMachine?.machineId;
+    // Initialize provider with focusedMachine if provided
+    if (widget.focusedMachine?.machineId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(selectedMachineIdProvider.notifier).setMachine(
+          widget.focusedMachine!.machineId
+        );
+      });
+    }
   }
 
   void _updateActiveBatch(BatchModel? batch) {
@@ -53,11 +62,13 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
     if (mounted) {
       setState(() {
         _activeBatchModel = batch;
-        _selectedBatchId = batch?.id;
+    
+        ref.read(selectedBatchIdProvider.notifier).setBatch(batch?.id);
         _rebuildKey++;
 
         if (batch != null) {
-          _selectedMachineId = batch.machineId;
+ 
+          ref.read(selectedMachineIdProvider.notifier).setMachine(batch.machineId);
           _currentBatch = CompostBatch(
             batchName: batch.displayName,
             batchNumber: batch.id,
@@ -90,7 +101,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
 
         if (mounted) {
           setState(() {
-            _selectedBatchId = latestBatch.id;
+
+            ref.read(selectedBatchIdProvider.notifier).setBatch(latestBatch.id);
             _activeBatchModel = latestBatch;
             _currentBatch = CompostBatch(
               batchName: latestBatch.displayName,
@@ -108,10 +120,11 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
   }
 
   void _handleBatchStarted(CompostBatch batch) async {
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => BatchStartDialog(
-        preSelectedMachineId: widget.focusedMachine?.machineId,
+        preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
       ),
     );
 
@@ -134,12 +147,16 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
   }
 
   void _handleFABSuccess() async {
-    if (_selectedMachineId != null) {
-      await _autoSelectBatchForMachine(_selectedMachineId!);
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
+    if (selectedMachineId.isNotEmpty) {
+      await _autoSelectBatchForMachine(selectedMachineId);
     }
   }
 
   Widget _buildFixedLayout(BuildContext context, double screenHeight, double screenWidth) {
+ 
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 1400),
@@ -161,7 +178,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
                     currentBatch: _currentBatch,
                     onBatchStarted: _handleBatchStarted,
                     onBatchCompleted: _handleBatchCompleted,
-                    preSelectedMachineId: widget.focusedMachine?.machineId,
+                    preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     onBatchChanged: _updateActiveBatch,
                   ),
                   SizedBox(height: screenHeight * 0.02),
@@ -182,7 +199,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
                     constraints: const BoxConstraints(maxHeight: 400),
                     child: ControlInputCard(
                       currentBatch: _activeBatchModel,
-                      machineId: _selectedMachineId,
+                      machineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.02),
@@ -190,7 +207,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
                     constraints: const BoxConstraints(maxHeight: 400),
                     child: AeratorCard(
                       currentBatch: _activeBatchModel,
-                      machineId: _selectedMachineId,
+                      machineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     ),
                   ),
                 ],
@@ -203,6 +220,9 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
   }
 
   Widget _buildScrollableLayout(BuildContext context, double screenHeight, double screenWidth) {
+  
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    
     return SingleChildScrollView(
       child: Center(
         child: Container(
@@ -225,7 +245,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
                       currentBatch: _currentBatch,
                       onBatchStarted: _handleBatchStarted,
                       onBatchCompleted: _handleBatchCompleted,
-                      preSelectedMachineId: widget.focusedMachine?.machineId,
+                      preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                       onBatchChanged: _updateActiveBatch,
                     ),
                     const SizedBox(height: 20),
@@ -246,12 +266,12 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
                   children: [
                     ControlInputCard(
                       currentBatch: _activeBatchModel,
-                      machineId: _selectedMachineId,
+                      machineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     ),
                     const SizedBox(height: 20),
                     AeratorCard(
                       currentBatch: _activeBatchModel,
-                      machineId: _selectedMachineId,
+                      machineId: selectedMachineId.isEmpty ? null : selectedMachineId,
                     ),
                   ],
                 ),
@@ -267,6 +287,7 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -287,8 +308,8 @@ class _WebHomeScreenState extends ConsumerState<WebHomeScreen>
         ),
       ),
       floatingActionButton: WebAddWasteFAB(
-        preSelectedMachineId: _selectedMachineId,
-        preSelectedBatchId: _selectedBatchId,
+        preSelectedMachineId: selectedMachineId.isEmpty ? null : selectedMachineId,
+        preSelectedBatchId: ref.watch(selectedBatchIdProvider),  // ✅ Use provider
         onSuccess: _handleFABSuccess,
       ),
     );

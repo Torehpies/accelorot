@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,11 +12,15 @@ import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/providers/machine_providers.dart';
+import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
+import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ControlInputCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
-  final String? machineId;
+  final String? machineId; // Deprecated - kept for backward compatibility
 
   const ControlInputCard({super.key, this.currentBatch, this.machineId});
 
@@ -24,7 +28,8 @@ class ControlInputCard extends ConsumerStatefulWidget {
   ConsumerState<ControlInputCard> createState() => _ControlInputCardState();
 }
 
-class _ControlInputCardState extends ConsumerState<ControlInputCard> {
+class _ControlInputCardState extends ConsumerState<ControlInputCard>
+    with AutomaticKeepAliveClientMixin {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
 
@@ -38,21 +43,66 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
   // Pause state tracking
   bool _isPaused = false;
   int _accumulatedSeconds = 0;
+  
+  // Track the current batch ID to detect actual changes
+  String? _trackedBatchId;
+  
+  // Loading state
+  bool _isLoading = false;
+  
+  // Track if we've already initialized to prevent re-initialization
+  bool _isInitialized = false;
+  
+  @override
+  bool get wantKeepAlive => true;
+  
+  // Helper getters to use providers instead of widget parameters
+  String? get _machineId {
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
+    return selectedMachineId.isEmpty ? null : selectedMachineId;
+  }
+  
+  BatchModel? get _currentBatch {
+    final selectedBatchId = ref.read(selectedBatchIdProvider);
+    if (selectedBatchId == null) return null;
+    
+    final batchesAsync = ref.read(userTeamBatchesProvider);
+    final batches = batchesAsync.asData?.value;
+    if (batches == null) return null;
+    
+    try {
+      return batches.firstWhere((batch) => batch.id == selectedBatchId);
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _trackedBatchId = _currentBatch?.id;
     _initializeFromBatch();
+    
+    // Listen to batch changes
+    ref.listenManual(selectedBatchIdProvider, (previous, next) {
+      if (next != _trackedBatchId) {
+        debugPrint('🔄 Batch changed in provider: $_trackedBatchId -> $next');
+        _trackedBatchId = next;
+        _initializeFromBatch();
+      }
+    });
   }
 
   void _initializeFromBatch() {
-    if (widget.currentBatch != null && widget.currentBatch!.isActive) {
+    if (_currentBatch != null && _currentBatch!.isActive) {
+      _trackedBatchId = _currentBatch!.id;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _loadExistingCycle();
         }
       });
     } else {
+      _trackedBatchId = null;
       _resetState();
     }
   }
@@ -69,6 +119,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
       _cycleDoc = null;
       _isPaused = false;
       _accumulatedSeconds = 0;
+      _isInitialized = false;
     });
   }
 
@@ -78,17 +129,21 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
     
     // Get current machine state to check pause flag
     final machineRepository = ref.read(machineRepositoryProvider);
-    final machine = await machineRepository.getMachineById(widget.machineId!);
+    final machine = await machineRepository.getMachineById(_machineId!);
     
     if (machine == null) return;
     
     final drumPaused = machine.drumPaused;
     
-    debugPrint('🔔 Machine state changed: drumActive=$drumActive, drumPaused=$drumPaused');
+    debugPrint('🔔 Machine state changed: drumActive=$drumActive, drumPaused=$drumPaused, initialized=$_isInitialized');
     
     // Determine state based on drumActive and drumPaused combination
     if (drumActive && !drumPaused) {
-      // Running state
+      // Running state - only reload if not already initialized and running
+      if (_isInitialized && status == SystemStatus.running && _startTime != null) {
+        debugPrint('✅ Already running - skipping reload');
+        return;
+      }
       debugPrint('✅ Drum is RUNNING - reloading cycle state');
       await _loadExistingCycle();
     } else if (!drumActive && drumPaused) {
@@ -96,11 +151,11 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
       debugPrint('⏸️ Drum is PAUSED - loading paused state');
       
       // Load cycle to get accumulated runtime
-      if (widget.currentBatch != null) {
+      if (_currentBatch != null) {
         try {
           final cycleRepository = ref.read(cycleRepositoryProvider);
           final cycles = await cycleRepository.getDrumControllers(
-            batchId: widget.currentBatch!.id,
+            batchId: _currentBatch!.id,
           );
           final cycle = cycles.isEmpty ? null : cycles.first;
           
@@ -132,57 +187,33 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard> {
     }
   }
 
-  @override
-  void didUpdateWidget(ControlInputCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final currentBatchId = widget.currentBatch?.id;
-    final oldBatchId = oldWidget.currentBatch?.id;
-
-    debugPrint(
-      '🔄 DrumControlCard didUpdateWidget: old=$oldBatchId, new=$currentBatchId',
-    );
-
-    if (currentBatchId != oldBatchId) {
-      debugPrint('✅ Batch ID changed - reinitializing');
-      _initializeFromBatch();
-    } else if (widget.currentBatch != null &&
-        oldWidget.currentBatch?.isActive == true &&
-        !widget.currentBatch!.isActive) {
-      debugPrint('⚠️ Batch completed');
-      _stopTimer();
-      _cycleTimer?.cancel();
-
-      if (_cycleDoc != null) {
-        _completeCycleInFirebase();
-      }
-
-      setState(() {
-        status = SystemStatus.stopped;
-      });
-    }
-  }
-
-Future<void> _loadExistingCycle() async {
-  if (widget.currentBatch == null) {
+  Future<void> _loadExistingCycle() async {
+  if (_currentBatch == null) {
     debugPrint('⚠️ No current batch to load');
     return;
   }
 
-  if (widget.machineId == null) {
+  if (_machineId == null) {
     debugPrint('⚠️ No machine ID provided');
     return;
   }
 
+  // Set loading state
+  if (mounted) {
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
   debugPrint(
-    '📥 Loading drum controller for batch: ${widget.currentBatch!.id}',
+    '📥 Loading drum controller for batch: ${_currentBatch!.id}',
   );
 
   try {
     // Load the cycle document first
     final cycleRepository = ref.read(cycleRepositoryProvider);
     final cycles = await cycleRepository.getDrumControllers(
-      batchId: widget.currentBatch!.id,
+      batchId: _currentBatch!.id,
     );
     final cycle = cycles.isEmpty ? null : cycles.first;
 
@@ -194,7 +225,7 @@ Future<void> _loadExistingCycle() async {
 
     // Check machine drumActive status
     final machineRepository = ref.read(machineRepositoryProvider);
-    final machine = await machineRepository.getMachineById(widget.machineId!);
+    final machine = await machineRepository.getMachineById(_machineId!);
     
     if (machine == null) {
       debugPrint('❌ Machine not found');
@@ -241,17 +272,25 @@ Future<void> _loadExistingCycle() async {
           debugPrint('📊 Drum controller is running');
           status = SystemStatus.running;
           _isPaused = false;
-          _startTime = DateTime.now();  // Use current time, not cycle.startedAt
           
-          // Resume with accumulated time if exists
+          // Calculate the correct start time based on accumulated runtime
+          // This ensures uptime continues correctly when reloading the cycle
           if (cycle.accumulatedRuntimeSeconds != null) {
             _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
+            // Set _startTime to a point in the past that accounts for accumulated time
+            _startTime = DateTime.now().subtract(Duration(seconds: _accumulatedSeconds));
+          } else {
+            // Fallback: use the original startedAt time from the cycle
+            _startTime = cycle.startedAt ?? DateTime.now();
+            _accumulatedSeconds = 0;
           }
           
           if (_startTime != null) {
             _startTimer();
             _simulateCycles();
           }
+          
+          _isInitialized = true;
         } else if (cycle.status == 'stopped') {
           debugPrint('📊 Drum controller was stopped - ready to restart');
           status = SystemStatus.idle;
@@ -294,6 +333,12 @@ Future<void> _loadExistingCycle() async {
     }
   } catch (e) {
     debugPrint('❌ Error loading drum controller cycle: $e');
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }
 
@@ -331,7 +376,9 @@ Future<void> _loadExistingCycle() async {
   }
 
   Future<void> _handleStart() async {
-    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+    if (_isLoading) return;
+
+    if (_currentBatch == null || !_currentBatch!.isActive) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cannot start: No active batch'),
@@ -341,7 +388,7 @@ Future<void> _loadExistingCycle() async {
       return;
     }
 
-    if (widget.machineId == null) {
+    if (_machineId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No machine selected'),
@@ -362,14 +409,18 @@ Future<void> _loadExistingCycle() async {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
       debugPrint('🔵 Starting drum controller...');
 
       await cycleRepository.startDrumController(
-        batchId: widget.currentBatch!.id,
-        machineId: widget.currentBatch!.machineId,
+        batchId: _currentBatch!.id,
+        machineId: _currentBatch!.machineId,
         userId: user.uid,
         cycles: settings.cycles,
         duration: settings.period,
@@ -380,7 +431,7 @@ Future<void> _loadExistingCycle() async {
       // Set drumActive to true and drumPaused to false (running state)
       await FirebaseFirestore.instance
           .collection('machines')
-          .doc(widget.machineId!)
+          .doc(_machineId!)
           .update({
         'drumActive': true,
         'drumPaused': false,
@@ -393,25 +444,26 @@ Future<void> _loadExistingCycle() async {
       await Future.delayed(const Duration(milliseconds: 500));
 
       final cycles = await cycleRepository.getDrumControllers(
-        batchId: widget.currentBatch!.id,
+        batchId: _currentBatch!.id,
       );
       final cycle = cycles.isEmpty ? null : cycles.first;
 
       debugPrint('✅ Loaded cycle doc: ${cycle?.id}');
 
-      setState(() {
-        _cycleDoc = cycle;
-        status = SystemStatus.running;
-        _startTime = DateTime.now();
-        _completedCycles = 0;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-        _startTimer();
-      });
-
-      _simulateCycles();
-
+      // Only verify mounted here to prevent setState on disposed widget
       if (mounted) {
+        setState(() {
+          _cycleDoc = cycle;
+          status = SystemStatus.running;
+          _startTime = DateTime.now();
+          _completedCycles = 0;
+          _isPaused = false;
+          _accumulatedSeconds = 0;
+          _startTimer();
+        });
+
+        _simulateCycles();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Drum controller started'),
@@ -428,11 +480,22 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handleStop() async {
-    if (widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -440,7 +503,7 @@ Future<void> _loadExistingCycle() async {
       // Set drumActive to false and drumPaused to false (stopped state)
       await FirebaseFirestore.instance
           .collection('machines')
-          .doc(widget.machineId!)
+          .doc(_machineId!)
           .update({
         'drumActive': false,
         'drumPaused': false,
@@ -448,14 +511,14 @@ Future<void> _loadExistingCycle() async {
       });
 
       // Update cycle status to 'stopped' (NOT 'completed')
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null && _currentBatch?.id != null) {
         final elapsed = _startTime != null 
             ? DateTime.now().difference(_startTime!).inSeconds 
             : 0;
         final totalAccumulated = _accumulatedSeconds + elapsed;
 
         await cycleRepository.stopDrumController(
-          batchId: widget.currentBatch!.id,
+          batchId: _currentBatch!.id,
           totalRuntimeSeconds: totalAccumulated,
         );
       }
@@ -463,17 +526,17 @@ Future<void> _loadExistingCycle() async {
       _stopTimer();
       _cycleTimer?.cancel();
 
-      setState(() {
-        status = SystemStatus.idle;  // Back to idle (ready to start fresh)
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-        _cycleDoc = null;  // Clear cycle doc reference
-      });
-
       if (mounted) {
+        setState(() {
+          status = SystemStatus.idle;  // Back to idle (ready to start fresh)
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _isPaused = false;
+          _accumulatedSeconds = 0;
+          _cycleDoc = null;  // Clear cycle doc reference
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Drum controller stopped - controller reset'),
@@ -490,11 +553,22 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handlePause() async {
-    if (widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -508,14 +582,14 @@ Future<void> _loadExistingCycle() async {
       final totalAccumulated = _accumulatedSeconds + elapsed;
       
       debugPrint('🔵 Accumulated seconds: $totalAccumulated');
-      debugPrint('🔵 Batch ID: ${widget.currentBatch?.id}');
+      debugPrint('🔵 Batch ID: ${_currentBatch?.id}');
       debugPrint('🔵 Cycle Doc: ${_cycleDoc?.id}');
 
       // Update cycle status to 'paused' FIRST
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null && _currentBatch?.id != null) {
         debugPrint('🔵 Calling pauseDrumController...');
         await cycleRepository.pauseDrumController(
-          batchId: widget.currentBatch!.id,
+          batchId: _currentBatch!.id,
           accumulatedRuntimeSeconds: totalAccumulated,
         );
         debugPrint('✅ Pause service call completed');
@@ -527,7 +601,7 @@ Future<void> _loadExistingCycle() async {
       debugPrint('🔵 Updating drumActive=false, drumPaused=true...');
       await FirebaseFirestore.instance
           .collection('machines')
-          .doc(widget.machineId!)
+          .doc(_machineId!)
           .update({
         'drumActive': false,
         'drumPaused': true,
@@ -537,15 +611,15 @@ Future<void> _loadExistingCycle() async {
 
       _stopTimer();
 
-      setState(() {
-        status = SystemStatus.idle;  // Show as idle (paused)
-        _isPaused = true;
-        _accumulatedSeconds = totalAccumulated;
-        _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
-        _startTime = null;  // Clear start time during pause
-      });
-
       if (mounted) {
+        setState(() {
+          status = SystemStatus.idle;  // Show as idle (paused)
+          _isPaused = true;
+          _accumulatedSeconds = totalAccumulated;
+          _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
+          _startTime = null;  // Clear start time during pause
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Drum controller paused'),
@@ -563,11 +637,22 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handleResume() async {
-    if (widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
@@ -575,10 +660,10 @@ Future<void> _loadExistingCycle() async {
       debugPrint('🔵 Starting resume operation...');
 
       // Update cycle status to 'running' FIRST
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null && _currentBatch?.id != null) {
         debugPrint('🔵 Calling resumeDrumController...');
         await cycleRepository.resumeDrumController(
-          batchId: widget.currentBatch!.id,
+          batchId: _currentBatch!.id,
         );
         debugPrint('✅ Resume service call completed');
       }
@@ -587,7 +672,7 @@ Future<void> _loadExistingCycle() async {
       debugPrint('🔵 Updating drumActive=true, drumPaused=false...');
       await FirebaseFirestore.instance
           .collection('machines')
-          .doc(widget.machineId!)
+          .doc(_machineId!)
           .update({
         'drumActive': true,
         'drumPaused': false,
@@ -595,16 +680,16 @@ Future<void> _loadExistingCycle() async {
       });
       debugPrint('✅ Machine state updated to RUNNING');
 
-      setState(() {
-        status = SystemStatus.running;  // Set status back to running
-        _isPaused = false;
-        _startTime = DateTime.now();  // Reset start time to now
-      });
-
-      _startTimer();
-      _simulateCycles();  // Restart cycle timer
-
       if (mounted) {
+        setState(() {
+          status = SystemStatus.running;  // Set status back to running
+          _isPaused = false;
+          _startTime = DateTime.now();  // Reset start time to now
+        });
+
+        _startTimer();
+        _simulateCycles();  // Restart cycle timer
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Drum controller resumed'),
@@ -622,6 +707,12 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -634,11 +725,11 @@ Future<void> _loadExistingCycle() async {
           _completedCycles++;
         });
 
-        if (widget.currentBatch?.id != null && _startTime != null) {
+        if (_currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
             await cycleRepository.updateDrumProgress(
-              batchId: widget.currentBatch!.id,
+              batchId: _currentBatch!.id,
               completedCycles: _completedCycles,
               totalRuntime: DateTime.now().difference(_startTime!),
             );
@@ -651,7 +742,7 @@ Future<void> _loadExistingCycle() async {
           _stopTimer();
           timer.cancel();
 
-          if (widget.currentBatch?.id != null) {
+          if (_currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
 
@@ -666,12 +757,12 @@ Future<void> _loadExistingCycle() async {
   }
 
   Future<void> _completeCycleInFirebase() async {
-    if (widget.currentBatch?.id == null) return;
+    if (_currentBatch?.id == null) return;
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
       await cycleRepository.completeDrumController(
-        batchId: widget.currentBatch!.id,
+        batchId: _currentBatch!.id,
       );
     } catch (e) {
       debugPrint('Failed to complete drum controller: $e');
@@ -697,10 +788,16 @@ Future<void> _loadExistingCycle() async {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
+    // ✅ Use provider instead of widget parameter
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    final machineId = selectedMachineId.isEmpty ? null : selectedMachineId;
+    
     // Listen for machine state changes (drumActive) to sync UI
-    if (widget.machineId != null) {
+    if (machineId != null) {
       ref.listen<AsyncValue<MachineModel?>>(
-        machineStreamProvider(widget.machineId!),
+        machineStreamProvider(machineId),
         (previous, next) {
           next.whenData((machine) {
             if (machine != null) {
@@ -712,9 +809,9 @@ Future<void> _loadExistingCycle() async {
     }
     
     final hasActiveBatch =
-        widget.currentBatch != null && widget.currentBatch!.isActive;
+        _currentBatch != null && _currentBatch!.isActive;
     final batchCompleted =
-        widget.currentBatch != null && !widget.currentBatch!.isActive;
+        _currentBatch != null && !_currentBatch!.isActive;
 
     return Container(
       decoration: BoxDecoration(
@@ -840,7 +937,7 @@ Future<void> _loadExistingCycle() async {
             Expanded(
               child: InfoItem(
                 label: 'Machine Name',
-                value: widget.currentBatch!.machineId,
+                value: _currentBatch!.machineId,
                 fontSize: bodyFontSize,
               ),
             ),
@@ -848,7 +945,7 @@ Future<void> _loadExistingCycle() async {
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
-                value: widget.currentBatch!.displayName,
+                value: _currentBatch!.displayName,
                 fontSize: bodyFontSize,
               ),
             ),
@@ -908,6 +1005,7 @@ Future<void> _loadExistingCycle() async {
         ),
         SizedBox(height: cardHeight * 0.04),
 
+        // Button logic
         if (_isPaused)
           // Paused: Show Resume and Stop
           Column(
@@ -915,9 +1013,15 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleResume,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Resume'),
+                  onPressed: _isLoading ? null : _handleResume,
+                  icon: _isLoading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.play_arrow),
+                  label: Text(_isLoading ? 'Processing...' : 'Resume'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF59E0B),
                     foregroundColor: Colors.white,
@@ -933,7 +1037,7 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleStop,
+                  onPressed: _isLoading ? null : _handleStop,
                   icon: const Icon(Icons.stop),
                   label: const Text('Stop'),
                   style: ElevatedButton.styleFrom(
@@ -956,9 +1060,15 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handlePause,
-                  icon: const Icon(Icons.pause),
-                  label: const Text('Pause'),
+                  onPressed: _isLoading ? null : _handlePause,
+                  icon: _isLoading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.pause),
+                  label: Text(_isLoading ? 'Processing...' : 'Pause'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF59E0B),
                     foregroundColor: Colors.white,
@@ -974,7 +1084,7 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleStop,
+                  onPressed: _isLoading ? null : _handleStop,
                   icon: const Icon(Icons.stop),
                   label: const Text('Stop'),
                   style: ElevatedButton.styleFrom(
@@ -995,18 +1105,23 @@ Future<void> _loadExistingCycle() async {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: batchCompleted ? null : _handleStart,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Start'),
+              onPressed: _isLoading ? null : _handleStart,
+              icon: _isLoading 
+                  ? const SizedBox(
+                      width: 20, 
+                      height: 20, 
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                    )
+                  : const Icon(Icons.play_arrow),
+              label: Text(_isLoading ? 'Starting...' : 'Start'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF14B8A6),
+                backgroundColor: AppColors.green100,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 elevation: 0,
-                disabledBackgroundColor: Colors.grey.shade300,
               ),
             ),
           ),
