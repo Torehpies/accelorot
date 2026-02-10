@@ -19,9 +19,9 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
     return const AddOperatorState(isLoading: false);
   }
 
-  /// SIPIR - Added operators are unverified
-  /// meaning they have to verify their email first
-	/// but their status will be at active
+  /// SIPIR - Added operators are email verified
+	/// as upon setting their password means
+	/// they have access to that email
 
   Future<void> addOperator({
     required String email,
