@@ -216,7 +216,7 @@ class TemperatureStatisticCard extends StatelessWidget {
                       ),
                       borderData: FlBorderData(show: false),
                       minX: 0,
-                      maxX: _getMaxDay(chartData).toDouble(),
+                      maxX: _getMaxDay(chartData) + 0.1,
                       minY: 0,
                       maxY: 100,
                       lineBarsData: [
@@ -278,13 +278,16 @@ class TemperatureStatisticCard extends StatelessWidget {
     );
   }
 
-  int _getMaxDay(List<Map<String, dynamic>> data) {
-    if (data.isEmpty) return 6;
+  double _getMaxDay(List<Map<String, dynamic>> data) {
+  if (data.isEmpty) return 6;
 
-    return data
-        .map((d) => (d['day'] as double).floor())
-        .reduce((a, b) => a > b ? a : b);
-  }
+  final maxDay = data
+      .map((d) => d['day'] as double)
+      .reduce((a, b) => a > b ? a : b);
+
+  return maxDay.ceilToDouble();
+}
+
 
   List<Widget> _buildMoreInfo() {
     final items = [

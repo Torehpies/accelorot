@@ -39,7 +39,6 @@ List<NavItem> adminNavItems = [
 
 List<NavItem> superAdminNavItems = [
   NavItem(Icons.group, "Teams", RoutePath.superAdminTeams.path),
-  NavItem(Icons.two_wheeler, "Machines", RoutePath.superAdminMachines.path),
   NavItem(Icons.settings, "Settings", RoutePath.superAdminSettings.path),
   //NavItem(Icons.person, "Profile", RoutePath.superAdminProfile.path),
 ];

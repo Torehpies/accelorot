@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/ui/approval/view_model/approval_notifier.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
@@ -13,6 +14,7 @@ class ApprovalView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appUserAsync = ref.watch(appUserProvider);
     final state = ref.watch(approvalProvider);
     final notifier = ref.read(approvalProvider.notifier);
     final teamAsync = ref.watch(requestTeamProvider);
@@ -52,17 +54,23 @@ class ApprovalView extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(
-                      Icons.email_outlined,
+                      Icons.waving_hand_outlined,
                       size: 80,
                       color: AppColors.green100,
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'Welcome!',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
+                    appUserAsync.when(
+                      data: (appUser) => (Text(
+                        appUser?.firstname != null
+                            ? 'Welcome, ${appUser!.firstname}!'
+                            : 'Welcome!',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      )),
+                      loading: () => Text('Welcome!'),
+                      error: (e, _) => Text('Welcome!'),
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -86,7 +94,7 @@ class ApprovalView extends ConsumerWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      loading: () => const CircularProgressIndicator(),
+                      loading: () => Center(child: CircularProgressIndicator()),
                     ),
                     const SizedBox(height: 40),
                     PrimaryButton(

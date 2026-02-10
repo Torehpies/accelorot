@@ -55,7 +55,6 @@ class FirebaseOperatorService implements OperatorService {
   @override
   Future<app_result.Result<AppUser>> addUser({
     required String email,
-    required String password,
     required String firstname,
     required String lastname,
     String? globalRole,
@@ -74,7 +73,6 @@ class FirebaseOperatorService implements OperatorService {
       );
       final response = await callable.call({
         'email': email,
-        'password': password,
         'firstname': firstname,
         'lastname': lastname,
         'globalRole': globalRole,
