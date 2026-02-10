@@ -1,17 +1,18 @@
-// lib/ui/core/widgets/mobile_common_widgets.dart
+// lib/ui/core/widgets/containers/mobile_common_widgets.dart
 
 import 'package:flutter/material.dart';
 import '../../themes/app_theme.dart';
 import '../../themes/app_text_styles.dart';
 
-/// Wrapper for scaffold with keyboard dismissal
+/// Wrapper for scaffold with keyboard dismissal and centralized background
+/// All screens MUST use this to enforce consistent styling
 class MobileScaffoldContainer extends StatelessWidget {
-  final Widget child;
+  final Widget body;
   final VoidCallback? onTap;
 
   const MobileScaffoldContainer({
     super.key,
-    required this.child,
+    required this.body,
     this.onTap,
   });
 
@@ -19,7 +20,10 @@ class MobileScaffoldContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap ?? () => FocusScope.of(context).unfocus(),
-      child: child,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: body,
+      ),
     );
   }
 }

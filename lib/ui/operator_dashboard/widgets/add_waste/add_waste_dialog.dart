@@ -390,6 +390,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
             enabled: !_isLoading,
             required: true,
             maxLength: 3,
+            showCounter: false,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -405,7 +406,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
             hintText: 'Add any additional notes...',
             enabled: !_isLoading,
             maxLines: 3,
-            maxLength: 200,
+            maxLength: 100,
           ),
         ],
       ),

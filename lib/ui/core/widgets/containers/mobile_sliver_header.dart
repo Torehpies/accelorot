@@ -87,7 +87,6 @@ class MobileSliverHeader extends StatelessWidget {
 
   /// Calculate expanded height based on content rows
   double get _expandedHeight {
-    // If no expandable content (no selectors, no search), just use collapsed height
     if (selectorWidgets.isEmpty && searchConfig == null) {
       return _collapsedHeight;
     }
@@ -95,7 +94,7 @@ class MobileSliverHeader extends StatelessWidget {
     double height = _collapsedHeight; // Start with collapsed height (title row)
     
     // Add spacing and content for expandable rows
-    const rowSpacing = 12.0;
+    const rowSpacing = 8.0; // Tighter spacing between rows
     
     // Row 2: Selectors (optional)
     if (selectorWidgets.isNotEmpty) {
@@ -110,7 +109,7 @@ class MobileSliverHeader extends StatelessWidget {
     }
     
     // Add bottom padding for expanded content
-    const bottomPadding = 12.0;
+    const bottomPadding = 4.0;
     height += bottomPadding;
     
     return height;
@@ -132,7 +131,6 @@ class MobileSliverHeader extends StatelessWidget {
       expandedHeight: _expandedHeight,
       collapsedHeight: _collapsedHeight,
       toolbarHeight: _collapsedHeight,
-      backgroundColor: AppColors.background,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       shadowColor: Colors.black.withValues(alpha: 0.08),
@@ -141,25 +139,25 @@ class MobileSliverHeader extends StatelessWidget {
       // Title row (visible in both collapsed and expanded states)
       title: _buildTitleRow(),
       
-      // Expanded content (visible when expanded) - NO DUPLICATE TITLE
+      // Expanded content (visible when expanded)
       flexibleSpace: _expandedHeight > _collapsedHeight
           ? FlexibleSpaceBar(
               background: Container(
-                color: AppColors.background,
+                color: Colors.white,
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Space for title row (handled by SliverAppBar.title)
-                        SizedBox(height: _collapsedHeight),
+                        // Space for title row
+                        const SizedBox(height: 44),
 
                         // Row 2: Selectors (optional)
                         if (selectorWidgets.isNotEmpty) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           SizedBox(
                             height: 40,
                             child: _buildSelectorRow(),
@@ -168,7 +166,7 @@ class MobileSliverHeader extends StatelessWidget {
 
                         // Row 3: Search + Filters (optional)
                         if (searchConfig != null) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 8),
                           SizedBox(
                             height: 40,
                             child: _MobileFilterBar(
@@ -185,7 +183,7 @@ class MobileSliverHeader extends StatelessWidget {
               titlePadding: EdgeInsets.zero,
               expandedTitleScale: 1.0,
             )
-          : null, // No flexible space if no expandable content
+          : null,
       
       // Bottom border shadow
       bottom: PreferredSize(
