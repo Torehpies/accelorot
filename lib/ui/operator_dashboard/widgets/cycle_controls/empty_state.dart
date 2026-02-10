@@ -8,14 +8,14 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
               Icons.inventory_2_outlined,
-              size: 64,
+              size: 34,
               color: Colors.grey.shade300,
             ),
             const SizedBox(height: 16),
