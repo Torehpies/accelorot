@@ -41,6 +41,7 @@ import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
+import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -48,10 +49,17 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     refreshListenable: notifier,
-    initialLocation: RoutePath.initial.path,
+    initialLocation: '/splash', // Changed to splash screen
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
     routes: [
+
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreenView(),
+      ),
+      
       GoRoute(
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
