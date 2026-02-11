@@ -76,18 +76,22 @@ class CycleRepository {
   Future<void> stopDrumController({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus,
   }) => _cycleService.stopDrumController(
     batchId: batchId,
     totalRuntimeSeconds: totalRuntimeSeconds,
+    expectedStatus: expectedStatus,
   );
 
   /// Stop aerator (manual stop, not completion)
   Future<void> stopAerator({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus,
   }) => _cycleService.stopAerator(
     batchId: batchId,
     totalRuntimeSeconds: totalRuntimeSeconds,
+    expectedStatus: expectedStatus,
   );
 
   /// Pause drum controller

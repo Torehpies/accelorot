@@ -63,12 +63,14 @@ abstract class CycleService {
   Future<void> stopDrumController({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus, // 'running' or 'paused'
   });
 
   /// Stop aerator (different from complete - for manual stop)
   Future<void> stopAerator({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus, // 'running' or 'paused'
   });
 
   /// Pause drum controller

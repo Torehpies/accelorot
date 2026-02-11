@@ -609,9 +609,12 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
+      final expectedStatus = _isPaused ? 'paused' : (status == SystemStatus.running ? 'running' : 'any');
+      
       await cycleRepository.stopDrumController(
         batchId: _currentBatch!.id,
         totalRuntimeSeconds: totalAccumulated,
+        expectedStatus: expectedStatus,
       );
 
       _stopTimer();

@@ -570,9 +570,12 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
       // Atomic stop operation
+      final expectedStatus = _isPaused ? 'paused' : (status == SystemStatus.running ? 'running' : 'any');
+
       await cycleRepository.stopAerator(
         batchId: _currentBatch!.id,
         totalRuntimeSeconds: totalAccumulated,
+        expectedStatus: expectedStatus,
       );
 
       _stopTimer();

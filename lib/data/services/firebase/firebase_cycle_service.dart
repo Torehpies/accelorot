@@ -387,6 +387,7 @@ class FirestoreCycleService implements CycleService {
   Future<void> stopDrumController({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus,
   }) async {
     try {
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
@@ -433,7 +434,18 @@ class FirestoreCycleService implements CycleService {
         final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
         final drumPaused = machineSnapshot.data()?['drumPaused'] ?? false;
 
-        // 2. CHECK: Ensure machine is not already fully stopped (can stop if running OR paused)
+        // 2. CHECK: Enforce expected state to prevent race conditions
+        if (expectedStatus == 'running') {
+          if (!drumActive) {
+            return 'ERROR:Machine is not running (expected running) - stop rejected';
+          }
+        } else if (expectedStatus == 'paused') {
+          if (!drumPaused) {
+             return 'ERROR:Machine is not paused (expected paused) - stop rejected';
+          }
+        }
+
+        // Ensure machine is not already fully stopped (fallback)
         if (!drumActive && !drumPaused) {
           return 'ERROR:Machine is already stopped';
         }
@@ -467,7 +479,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Drum controller stopped successfully (Atomic)');
+      debugPrint('✅ Drum controller stopped successfully');
     } catch (e) {
       debugPrint('❌ Error stopping drum controller: $e');
       rethrow;
@@ -480,6 +492,7 @@ class FirestoreCycleService implements CycleService {
   Future<void> stopAerator({
     required String batchId,
     required int totalRuntimeSeconds,
+    required String expectedStatus,
   }) async {
     try {
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
@@ -526,7 +539,18 @@ class FirestoreCycleService implements CycleService {
         final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
         final aeratorPaused = machineSnapshot.data()?['aeratorPaused'] ?? false;
 
-        // 2. CHECK: Ensure machine is not already fully stopped (can stop if running OR paused)
+        // 2. CHECK: Enforce expected state to prevent race conditions
+        if (expectedStatus == 'running') {
+          if (!aeratorActive) {
+            return 'ERROR:Aerator is not running (expected running) - stop rejected';
+          }
+        } else if (expectedStatus == 'paused') {
+          if (!aeratorPaused) {
+             return 'ERROR:Aerator is not paused (expected paused) - stop rejected';
+          }
+        }
+
+        // Ensure machine is not already fully stopped (fallback)
         if (!aeratorActive && !aeratorPaused) {
           return 'ERROR:Aerator is already stopped';
         }
@@ -560,7 +584,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Aerator stopped successfully (Atomic)');
+      debugPrint('✅ Aerator stopped successfully');
     } catch (e) {
       debugPrint('❌ Error stopping aerator: $e');
       rethrow;
@@ -637,7 +661,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Started aerator (Atomic): ${aeratorRef.id}');
+      debugPrint('✅ Started aerator: ${aeratorRef.id}');
       return aeratorRef.id;
     } catch (e) {
       debugPrint('❌ Error starting aerator: $e');
@@ -893,7 +917,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Drum controller paused successfully (Atomic)');
+      debugPrint('✅ Drum controller paused successfully');
     } catch (e) {
       debugPrint('❌ Error pausing drum controller: $e');
       rethrow;
@@ -983,7 +1007,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Drum controller resumed successfully (Atomic)');
+      debugPrint('✅ Drum controller resumed successfully');
     } catch (e) {
       debugPrint('❌ Error resuming drum controller: $e');
       rethrow;
@@ -1076,7 +1100,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Aerator paused successfully (Atomic)');
+      debugPrint('✅ Aerator paused successfully');
     } catch (e) {
       debugPrint('❌ Error pausing aerator: $e');
       rethrow;
@@ -1166,7 +1190,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Aerator resumed successfully (Atomic)');
+      debugPrint('✅ Aerator resumed successfully');
     } catch (e) {
       debugPrint('❌ Error resuming aerator: $e');
       rethrow;
