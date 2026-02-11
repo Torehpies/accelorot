@@ -51,29 +51,31 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
     );
     // Handle success and errors
 
-    if (result is Ok<AppUser>) {
-      final incrementResult = await _teamService.incrementTeamField(
-        teamId: teamId,
-        field: "activeOperators",
-        amount: 1,
-      );
-
-      if (incrementResult is Ok<String>) {
-        final appUser = result.value;
-        state = state.copyWith(isLoading: false, operator: appUser);
-      } else if (incrementResult is Error<String>) {
-        final error = incrementResult.error;
-        state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to update Team Summary: ${error.toString()}',
-        );
-      }
-    } else if (result is Error<AppUser>) {
+    if (result is Error<AppUser>) {
       final error = result.error;
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to Add Operator: ${error.toString()}',
       );
+      return;
     }
+
+    final incrementResult = await _teamService.incrementTeamField(
+      teamId: teamId,
+      field: "activeOperators",
+      amount: 1,
+    );
+
+    if (incrementResult is Error<String>) {
+      final error = incrementResult.error;
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to update Team Summary: ${error.toString()}',
+      );
+      return;
+    }
+
+    final appUser = (result as Ok<AppUser>).value;
+    state = state.copyWith(isLoading: false, operator: appUser);
   }
 }
