@@ -11,4 +11,9 @@ abstract class TeamService {
     required int pageSize,
     required int pageIndex,
   });
+  Future<prefix.Result<String>> incrementTeamField({
+    required String teamId,
+    required String field,
+		required int amount,
+  });
 }
