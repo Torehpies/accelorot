@@ -25,7 +25,6 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
 
   Future<void> addOperator({
     required String email,
-    // required String password,
     required String firstname,
     required String lastname,
     String? teamId,
@@ -39,7 +38,6 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
 
     final result = await _service.addUser(
       email: email,
-      // password: password,
       firstname: firstname,
       lastname: lastname,
       globalRole: GlobalRole.user.value,
