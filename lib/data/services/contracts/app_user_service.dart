@@ -10,4 +10,8 @@ abstract class AppUserService {
     String uid,
     Map<String, dynamic> data,
   );
+  Future<Result<void, DataLayerError>> acceptApproval({
+    required String uid,
+    required String teamId,
+  });
 }

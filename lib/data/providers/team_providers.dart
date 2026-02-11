@@ -47,6 +47,12 @@ Future<Team> currentTeam(Ref ref) async {
   return ref.read(teamServiceProvider).getTeam(teamId!);
 }
 
+@riverpod
+Future<Team> requestTeam(Ref ref) async {
+  final teamUser = ref.watch(appUserProvider).value;
+  final teamId = teamUser?.requestTeamId;
+  return ref.read(teamServiceProvider).getTeam(teamId!);
+}
 // Stream provider to reactively get current user's teamId
 @riverpod
 Stream<String?> currentUserTeamId(Ref ref) async* {
