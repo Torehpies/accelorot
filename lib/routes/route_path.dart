@@ -5,10 +5,12 @@ enum RoutePath {
   signup(path: '/signup'),
   //qrRefer(path: '/qr-refer'),
   pending(path: '/pending'),
+  approval(path: '/approval'),
   verifyEmail(path: '/verify-email'),
   teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
+  resetEmailSent(path: '/reset-email-sent'),
 
   // operator paths
   dashboard(path: '/operator/dashboard'),
@@ -29,7 +31,7 @@ enum RoutePath {
   superAdminTeams(path: '/superadmin/teams'),
   superAdminMachines(path: '/superadmin/machines'),
   superAdminProfile(path: '/superadmin/profile'),
-  
+
   // settings
   operatorSettings(path: '/operator/settings'),
   adminSettings(path: '/admin/settings'),

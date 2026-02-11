@@ -43,6 +43,11 @@ class LocalMachineService implements MachineService {
   }
 
   @override
+  Stream<MachineModel?> watchMachineById(String machineId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
+
+  @override
   Future<void> updateDrumActive(String machineId, bool isActive) {
     throw UnimplementedError('Local database not yet implemented');
   }

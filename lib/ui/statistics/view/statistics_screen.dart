@@ -12,6 +12,7 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../../activity_logs/widgets/mobile/batch_selector.dart';
 import '../../activity_logs/widgets/mobile/machine_selector.dart';
+import '../../core/skeleton/stats_skeleton.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   final String? focusedMachineId;
@@ -204,7 +205,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             readings: readings,
             lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
           ),
-          loading: () => _buildLoadingCard(),
+          loading: () => const StatisticCardSkeleton(
+            accentColor: Colors.orange,
+            title: 'Temperature',
+            subtitle: '',
+          ),
           error: (error, stack) => _buildErrorCard('Temperature'),
         ),
         const SizedBox(height: 16),
@@ -216,7 +221,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             readings: readings,
             lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
           ),
-          loading: () => _buildLoadingCard(),
+          loading: () => const StatisticCardSkeleton(
+            accentColor: Colors.blue,
+            title: 'Moisture',
+            subtitle: '',
+          ),
           error: (error, stack) => _buildErrorCard('Moisture'),
         ),
         const SizedBox(height: 16),
@@ -228,22 +237,14 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
             readings: readings,
             lastUpdated: readings.isNotEmpty ? readings.last.timestamp : null,
           ),
-          loading: () => _buildLoadingCard(),
+          loading: () => const StatisticCardSkeleton(
+            accentColor: Colors.purple,
+            title: 'Air Quality',
+            subtitle: '',
+          ),
           error: (error, stack) => _buildErrorCard('Air Quality'),
         ),
       ],
-    );
-  }
-
-  Widget _buildLoadingCard() {
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
     );
   }
 

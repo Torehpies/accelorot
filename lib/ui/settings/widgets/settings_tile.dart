@@ -6,6 +6,9 @@ class SettingsTile extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final TextStyle? subtitleStyle;
+  final TextStyle? titleStyle;
+  final double? iconSize;
 
   const SettingsTile({
     super.key,
@@ -14,17 +17,36 @@ class SettingsTile extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.trailing,
+    this.subtitleStyle,
+    this.titleStyle,
+    this.iconSize,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isInteractive = onTap != null;
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF4CAF50)),
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing:
-          trailing ?? (onTap != null ? const Icon(Icons.chevron_right) : null),
-      onTap: onTap,
+      leading: Icon(
+        icon,
+        color: const Color(0xFF4CAF50),
+        size: iconSize,
+      ),
+      title: Text(title, style: titleStyle),
+      subtitle: subtitle != null
+          ? Text(subtitle!, style: subtitleStyle)
+          : null,
+      trailing: trailing ??
+          (isInteractive
+              ? IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: onTap,
+                  splashRadius: 18,
+                )
+              : null),
+      onTap: null,
+      mouseCursor: SystemMouseCursors.basic,
+      hoverColor: Colors.transparent,
+      splashColor: Colors.transparent,
     );
   }
 }

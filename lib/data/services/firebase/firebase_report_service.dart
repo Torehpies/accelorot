@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../contracts/report_service.dart';
 import '../../models/report.dart';
 
@@ -34,17 +35,17 @@ class FirebaseReportService implements ReportService {
   }
 
   @override
-  Future<List<Report>> fetchTeamReports() async {
+  Future<List<Report>> fetchTeamReports({int? limit}) async {
     try {
       final teamId = await _getTeamId();
-      return fetchReportsByTeam(teamId);
+      return fetchReportsByTeam(teamId, limit: limit);
     } catch (e) {
       throw Exception('Failed to fetch team reports: $e');
     }
   }
 
   @override
-  Future<List<Report>> fetchReportsByTeam(String teamId) async {
+  Future<List<Report>> fetchReportsByTeam(String teamId, {int? limit}) async {
     try {
       // Get all machines for the team
       final machinesSnapshot = await _firestore
@@ -52,17 +53,33 @@ class FirebaseReportService implements ReportService {
           .where('teamId', isEqualTo: teamId)
           .get();
 
-      final reports = <Report>[];
+      debugPrint(
+        '🔵 Fetching reports from ${machinesSnapshot.docs.length} machines in parallel...',
+      );
 
-      // Fetch reports from each machine's subcollection
-      for (final machineDoc in machinesSnapshot.docs) {
-        final machineReports = await fetchReportsForMachine(machineDoc.id);
-        reports.addAll(machineReports);
-      }
+      // ✅ PARALLEL FETCHING: Fetch reports from all machines simultaneously
+      final futures = machinesSnapshot.docs.map((machineDoc) {
+        return fetchReportsForMachine(machineDoc.id);
+      });
 
-      // Sort by createdAt descending
+      final results = await Future.wait(futures);
+
+      // Flatten results using expand
+      final reports = results.expand((list) => list).toList();
+
+      // Sort by createdAt descending (newest first)
       reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+      // Apply limit if specified
+      if (limit != null && reports.length > limit) {
+        final limitedReports = reports.sublist(0, limit);
+        debugPrint(
+          '✅ Fetched ${reports.length} reports, limited to ${limitedReports.length}',
+        );
+        return limitedReports;
+      }
+
+      debugPrint('✅ Fetched ${reports.length} reports (Parallel Strategy)');
       return reports;
     } catch (e) {
       throw Exception('Failed to fetch reports by team: $e');

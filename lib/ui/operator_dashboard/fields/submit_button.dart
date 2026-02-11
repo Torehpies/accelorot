@@ -1,4 +1,5 @@
-// lib/frontend/operator/dashboard/add_waste/fields/submit_button.dart
+// lib/ui/operator_dashboard/fields/submit_button.dart
+
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatelessWidget {
@@ -17,7 +18,7 @@ class SubmitButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2E7D32),
+          backgroundColor: Colors.green,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

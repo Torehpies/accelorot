@@ -6,15 +6,18 @@ class CycleRepository {
 
   CycleRepository(this._cycleService);
 
-  Future<List<CycleRecommendation>> getTeamCycles() =>
-      _cycleService.fetchTeamCycles();
+  Future<List<CycleRecommendation>> getTeamCycles({
+    int? limit,
+    DateTime? cutoffDate,
+  }) =>
+      _cycleService.fetchTeamCycles(limit: limit, cutoffDate: cutoffDate);
 
-  Future<CycleRecommendation?> getDrumController({required String batchId}) =>
-      _cycleService.getDrumController(batchId: batchId);
+  Future<List<CycleRecommendation>> getDrumControllers({
+    required String batchId,
+  }) => _cycleService.getDrumControllers(batchId: batchId);
 
-  Future<CycleRecommendation?> getAerator({required String batchId}) =>
-      _cycleService.getAerator(batchId: batchId);
-
+  Future<List<CycleRecommendation>> getAerators({required String batchId}) =>
+      _cycleService.getAerators(batchId: batchId);
   Future<String> startDrumController({
     required String batchId,
     required String machineId,
@@ -69,7 +72,56 @@ class CycleRepository {
   Future<void> completeAerator({required String batchId}) =>
       _cycleService.completeAerator(batchId: batchId);
 
+  /// Stop drum controller (manual stop, not completion)
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) => _cycleService.stopDrumController(
+    batchId: batchId,
+    totalRuntimeSeconds: totalRuntimeSeconds,
+  );
+
+  /// Stop aerator (manual stop, not completion)
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) => _cycleService.stopAerator(
+    batchId: batchId,
+    totalRuntimeSeconds: totalRuntimeSeconds,
+  );
+
+  /// Pause drum controller
+  Future<void> pauseDrumController({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) => _cycleService.pauseDrumController(
+    batchId: batchId,
+    accumulatedRuntimeSeconds: accumulatedRuntimeSeconds,
+  );
+
+  /// Resume drum controller
+  Future<void> resumeDrumController({required String batchId}) =>
+      _cycleService.resumeDrumController(batchId: batchId);
+
+  /// Pause aerator
+  Future<void> pauseAerator({
+    required String batchId,
+    required int accumulatedRuntimeSeconds,
+  }) => _cycleService.pauseAerator(
+    batchId: batchId,
+    accumulatedRuntimeSeconds: accumulatedRuntimeSeconds,
+  );
+
+  /// Resume aerator
+  Future<void> resumeAerator({required String batchId}) =>
+      _cycleService.resumeAerator(batchId: batchId);
+
   /// Get a single cycle by ID
   Future<CycleRecommendation?> getCycle(String id) =>
       _cycleService.fetchCycleById(id);
+
+  /// Stream all cycles for the team with real-time updates
+  /// [cutoffDate] - Only stream cycles newer than this date (defaults to 2 days ago)
+  Stream<List<CycleRecommendation>> streamTeamCycles({DateTime? cutoffDate}) =>
+      _cycleService.streamTeamCycles(cutoffDate: cutoffDate);
 }

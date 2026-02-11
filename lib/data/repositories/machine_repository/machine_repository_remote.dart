@@ -41,6 +41,10 @@ class MachineRepositoryRemote implements MachineRepository {
       _machineService.watchMachinesByTeam(teamId);
 
   @override
+  Stream<MachineModel?> watchMachineById(String machineId) =>
+      _machineService.watchMachineById(machineId);
+
+  @override
   Future<void> updateDrumActive(String machineId, bool isActive) =>
       _machineService.updateDrumActive(machineId, isActive);
 

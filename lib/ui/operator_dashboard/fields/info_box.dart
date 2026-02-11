@@ -1,3 +1,5 @@
+// lib/ui/operator_dashboard/fields/info_box.dart
+
 import 'package:flutter/material.dart';
 
 class InfoBox extends StatelessWidget {

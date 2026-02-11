@@ -1,9 +1,12 @@
+// lib/ui/operator_dashboard/fields/batch_selection_field.dart
+
 import 'package:flutter/material.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
+import '../../core/skeleton/skeleton_dropdown.dart';
 import '../../../data/models/batch_model.dart';
 import '../../../data/services/firebase/firebase_batch_service.dart';
 import '../../../data/repositories/batch_repository/batch_repository.dart';
 import '../../../data/repositories/batch_repository/batch_repository_remote.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BatchSelectionField extends StatefulWidget {
@@ -60,8 +63,16 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
     return FutureBuilder<List<BatchModel>>(
       future: _fetchMachineBatches(),
       builder: (context, snapshot) {
+        // Show skeleton loader while loading (only if machine is selected)
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          // Only show skeleton if we're actually loading data (machine selected)
+          if (widget.selectedMachineId != null && 
+              widget.selectedMachineId!.isNotEmpty) {
+            return const SkeletonDropdown(
+              label: 'Batch',
+              showRequired: false,
+            );
+          }
         }
 
         if (snapshot.hasError) {
@@ -92,29 +103,15 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
         // If no machine selected, show disabled state
         if (widget.selectedMachineId == null ||
             widget.selectedMachineId!.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.inventory_2, color: Colors.grey.shade500, size: 20),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Select a machine first',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          return MobileDropdownField<String>(
+            label: 'Batch',
+            value: null,
+            items: const [
+              MobileDropdownItem(value: '', label: 'Select machine first'),
+            ],
+            enabled: false,
+            hintText: 'Select a machine first',
+            helperText: 'Choose a machine to see available batches',
           );
         }
 
@@ -150,40 +147,23 @@ class _BatchSelectionFieldState extends State<BatchSelectionField> {
           );
         }
 
-        return DropdownButtonFormField<String>(
-          initialValue: widget.selectedBatchId,
-          decoration: InputDecoration(
-            labelText: 'Select Batch',
-            prefixIcon: const Icon(Icons.inventory_2, size: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
-            ),
-            suffixIcon: widget.isLocked
-                ? const Icon(Icons.lock, size: 18, color: Colors.grey)
-                : null,
-            errorText: widget.errorText,
-          ),
-          items: batches.map((batch) {
-            return DropdownMenuItem<String>(
-              value: batch.id,
-              enabled: !widget.isLocked,
-              child: Text(
-                batch.displayName,
-                style: TextStyle(
-                  color: widget.isLocked ? Colors.grey : Colors.black87,
-                ),
-              ),
-            );
-          }).toList(),
+        // Convert batches to dropdown items
+        final items = batches.map((batch) {
+          return MobileDropdownItem<String>(
+            value: batch.id,
+            label: batch.displayName,
+          );
+        }).toList();
+
+        return MobileDropdownField<String>(
+          label: 'Batch',
+          value: widget.selectedBatchId,
+          items: items,
+          enabled: !widget.isLocked,
           onChanged: widget.isLocked ? null : widget.onChanged,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a batch';
-            }
-            return null;
-          },
+          errorText: widget.errorText,
+          hintText: 'Select batch',
+          helperText: widget.isLocked ? 'Batch is locked for this context' : null,
         );
       },
     );

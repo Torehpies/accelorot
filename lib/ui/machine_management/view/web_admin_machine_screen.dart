@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/themes/web_colors.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/dialog/toast_service.dart';
+import '../../core/ui/app_snackbar.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../new_widgets/web_stats_row.dart';
 import '../new_widgets/web_admin_table_container.dart';
@@ -13,7 +13,7 @@ import '../dialogs/web_admin_view_details_dialog.dart';
 import '../dialogs/web_admin_edit_dialog.dart';
 import '../dialogs/web_admin_add_dialog.dart';
 import '../models/machine_state.dart';
-import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/containers/web_base_container.dart';
 
 class WebAdminMachineScreen extends ConsumerWidget {
   const WebAdminMachineScreen({super.key});
@@ -164,11 +164,11 @@ class WebAdminMachineScreen extends ConsumerWidget {
       try {
         await notifier.archiveMachine(machine.machineId);
         if (context.mounted) {
-          ToastService.show(context, message: 'Machine archived successfully');
+          AppSnackbar.success(context, 'Machine archived successfully');
         }
       } catch (e) {
         if (context.mounted) {
-          ToastService.show(context, message: 'Failed to archive: $e');
+          AppSnackbar.error(context, 'Failed to archive: $e');
         }
       }
     }

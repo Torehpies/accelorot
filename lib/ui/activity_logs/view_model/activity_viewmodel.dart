@@ -1,5 +1,7 @@
 // lib/ui/activity_logs/view_model/activity_viewmodel.dart
 
+// ignore_for_file: avoid_public_notifier_properties
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/activity_list_state.dart';
@@ -73,9 +75,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== CONFIGURATION GETTERS =====
 
-  // ignore: avoid_public_notifier_properties
   String get screenTitle => _config.getTitle(machineId: state.focusedMachineId);
-  // ignore: avoid_public_notifier_properties
   List<String> get filters => _config.filters;
 
   // ===== ENTITY CACHE LOOKUP =====
@@ -89,18 +89,23 @@ class ActivityViewModel extends _$ActivityViewModel {
   // ===== DATA FETCHING =====
 
   Future<List<ActivityLogItem>> _fetchData() async {
+    // Apply cutoff for alerts and cycles (using centralized config)
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: ActivityAggregatorService.defaultCutoffDays),
+    );
+
     switch (_screenType) {
       case ActivityScreenType.substrates:
         return await _aggregator.getSubstrates();
 
       case ActivityScreenType.alerts:
-        return await _aggregator.getAlerts();
+        return await _aggregator.getAlerts(cutoffDate: cutoffDate);
 
       case ActivityScreenType.reports:
         return await _aggregator.getReports();
 
       case ActivityScreenType.cyclesRecom:
-        return await _aggregator.getCyclesRecom();
+        return await _aggregator.getCyclesRecom(cutoffDate: cutoffDate);
 
       case ActivityScreenType.allActivity:
         // Use the new caching method for allActivity screen
@@ -203,10 +208,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   /// Handle search cleared
   void onSearchCleared() {
-    state = state.copyWith(
-      searchQuery: '',
-      displayLimit: _loadMoreIncrement,
-    );
+    state = state.copyWith(searchQuery: '', displayLimit: _loadMoreIncrement);
     _applyFilters();
   }
 
@@ -285,3 +287,4 @@ class ActivityParams {
   int get hashCode =>
       screenType.hashCode ^ initialFilter.hashCode ^ focusedMachineId.hashCode;
 }
+

@@ -14,26 +14,33 @@ List<NavItem> operatorNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.dashboard.path),
   NavItem(Icons.history, "Activity", RoutePath.activity.path),
   NavItem(Icons.bar_chart, "Stats", RoutePath.statistics.path),
-  NavItem(Icons.precision_manufacturing, "Machines", RoutePath.operatorMachines.path),
+  NavItem(
+    Icons.precision_manufacturing,
+    "Machines",
+    RoutePath.operatorMachines.path,
+  ),
   NavItem(Icons.settings, "Settings", RoutePath.operatorSettings.path),
-  NavItem(Icons.person, "Profile", RoutePath.profile.path),
+  //NavItem(Icons.person, "Profile", RoutePath.profile.path)
 ];
 
 List<NavItem> adminNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.adminDashboard.path),
   NavItem(Icons.history, "Activity", RoutePath.adminActivity.path),
   NavItem(Icons.group, "Operators", RoutePath.adminOperators.path),
-  NavItem(Icons.precision_manufacturing, "Machines", RoutePath.adminMachines.path),
+  NavItem(
+    Icons.precision_manufacturing,
+    "Machines",
+    RoutePath.adminMachines.path,
+  ),
   NavItem(Icons.file_open, "Reports", RoutePath.adminReports.path),
   NavItem(Icons.settings, "Settings", RoutePath.adminSettings.path),
-  NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
+  //NavItem(Icons.person, "Profile", RoutePath.adminProfile.path),
 ];
 
 List<NavItem> superAdminNavItems = [
   NavItem(Icons.group, "Teams", RoutePath.superAdminTeams.path),
-  NavItem(Icons.two_wheeler, "Machines", RoutePath.superAdminMachines.path),
   NavItem(Icons.settings, "Settings", RoutePath.superAdminSettings.path),
-  NavItem(Icons.person, "Profile", RoutePath.superAdminProfile.path),
+  //NavItem(Icons.person, "Profile", RoutePath.superAdminProfile.path),
 ];
 
 int getSelectedIndex(BuildContext context, List<NavItem> navItems) {

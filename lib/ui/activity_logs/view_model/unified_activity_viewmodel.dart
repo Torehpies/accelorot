@@ -1,22 +1,51 @@
 // lib/ui/activity_logs/view_model/unified_activity_viewmodel.dart
 
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../../../data/models/alert.dart';
+import '../../../data/models/cycle_recommendation.dart';
+import '../../../data/models/report.dart';
 import '../models/unified_activity_state.dart';
 import '../models/activity_enums.dart';
 import '../services/activity_aggregator_service.dart';
 import '../../../data/providers/activity_providers.dart';
+import '../../../data/providers/alert_providers.dart';
+import '../../../data/providers/cycle_providers.dart';
+import '../../../data/providers/report_providers.dart';
 import '../models/activity_common.dart';
+import '../mappers/activity_presentation_mapper.dart'; 
+
 
 part 'unified_activity_viewmodel.g.dart';
 
-@riverpod
+// Keep provider alive across navigation - prevents disposal and refetch
+@Riverpod(keepAlive: true)
 class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   late final ActivityAggregatorService _aggregator;
+  
+  // ===== STREAM SUBSCRIPTIONS FOR REAL-TIME UPDATES =====
+  StreamSubscription<List<Alert>>? _alertsSubscription;
+  StreamSubscription<List<CycleRecommendation>>? _cyclesSubscription;
+  StreamSubscription<List<Report>>? _reportsSubscription;
 
   @override
   UnifiedActivityState build() {
     _aggregator = ref.read(activityAggregatorProvider);
+
+    // Keep provider alive to prevent disposal on navigation
+    ref.keepAlive();
+
+    // Setup disposal of streams
+    ref.onDispose(() {
+      debugPrint('🧹 Disposing stream subscriptions...');
+      _alertsSubscription?.cancel();
+      _cyclesSubscription?.cancel();
+      _reportsSubscription?.cancel();
+    });
 
     // Initialize asynchronously
     Future.microtask(() => _initialize());
@@ -27,49 +56,247 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   // ===== INITIALIZATION =====
 
   Future<void> _initialize() async {
-    state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
+    final vmStopwatch = Stopwatch()..start();
+    debugPrint('ViewModel initialization started');
 
-    try {
-      final isLoggedIn = await _aggregator.isUserLoggedIn();
+    state = state.copyWith(
+      status: LoadingStatus.loading,
+      isLoggedIn: true,
+      errorMessage: null,
+    );
 
-      if (!isLoggedIn) {
-        state = state.copyWith(
-          status: LoadingStatus.success,
-          isLoggedIn: false,
+    vmStopwatch.stop();
+    debugPrint(
+      'ViewModel initialization complete: ${vmStopwatch.elapsedMilliseconds}ms\n',
+    );
+
+    // Setup real-time streams after initial load
+    _setupStreams();
+
+    unawaited(loadActivities());
+  }
+
+  // ===== REAL-TIME STREAMING =====
+
+  /// Setup real-time streams for automatic updates
+  void _setupStreams() {
+    debugPrint('🔴 Setting up real-time streams...');
+    
+    final cutoffDate = DateTime.now().subtract(
+      Duration(days: ActivityAggregatorService.defaultCutoffDays),
+    );
+
+    // Stream alerts with cutoff
+    _alertsSubscription = ref.read(alertRepositoryProvider)
+        .streamTeamAlerts(cutoffDate: cutoffDate)
+        .listen(
+          (alerts) {
+            debugPrint('🔔 Alerts stream updated: ${alerts.length} items');
+            _onAlertsStreamUpdate(alerts);
+          },
+          onError: (e) {
+            debugPrint('❌ Alerts stream error: $e');
+          },
         );
-        return;
+
+    // Stream cycles
+    _cyclesSubscription = ref.read(cycleRepositoryProvider)
+        .streamTeamCycles()
+        .listen(
+          (cycles) {
+            debugPrint('🔔 Cycles stream updated: ${cycles.length} items');
+            _onCyclesStreamUpdate(cycles);
+          },
+          onError: (e) {
+            debugPrint('❌ Cycles stream error: $e');
+          },
+        );
+
+    // Stream reports - get teamId from current user
+    _setupReportsStream();
+
+    debugPrint('✅ Real-time streams setup complete');
+  }
+
+  /// Setup reports stream (requires teamId lookup)
+  Future<void> _setupReportsStream() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      
+      if (currentUser != null) {
+        // Get teamId from current user's Firestore profile
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+        
+        final teamId = userDoc.data()?['teamId'] as String?;
+        
+        if (teamId != null && teamId.isNotEmpty) {
+          _reportsSubscription = ref.read(reportRepositoryProvider)
+              .watchReportsByTeam(teamId)
+              .listen(
+                (reports) {
+                  debugPrint('🔔 Reports stream updated: ${reports.length} items');
+                  _onReportsStreamUpdate(reports);
+                },
+                onError: (e) {
+                  debugPrint('❌ Reports stream error: $e');
+                },
+              );
+        }
+      }
+    } catch (e) {
+      debugPrint('❌ Failed to setup reports stream: $e');
+    }
+  }
+
+  /// Handle alerts stream updates
+  void _onAlertsStreamUpdate(List<Alert> alerts) {
+    try {
+      // Apply cutoff filter
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      final filteredAlerts = alerts
+          .where((a) => a.timestamp.isAfter(cutoffDate))
+          .toList();
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var alert in filteredAlerts) {
+        newCache['alert_${alert.id}'] = alert;
       }
 
-      state = state.copyWith(isLoggedIn: true);
-      await loadActivities();
-    } catch (e) {
+      // Transform to ActivityLogItem
+      final alertActivityList = filteredAlerts
+          .map((a) => ActivityPresentationMapper.fromAlert(a))
+          .toList();
+
+      // Update state
       state = state.copyWith(
-        status: LoadingStatus.error,
-        errorMessage: e.toString(),
+        alertActivities: alertActivityList,
+        entityCache: newCache,
+        alertsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'alerts': alertActivityList.length,
+        },
       );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing alerts stream update: $e');
+    }
+  }
+
+  /// Handle cycles stream updates
+  void _onCyclesStreamUpdate(List<CycleRecommendation> cycles) {
+    try {
+      // Apply cutoff filter
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      final filteredCycles = cycles
+          .where((c) => (c.startedAt ?? DateTime(1970)).isAfter(cutoffDate))
+          .toList();
+
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var cycle in filteredCycles) {
+        newCache['cycle_${cycle.id}'] = cycle;
+      }
+
+      // Transform to ActivityLogItem
+      final cycleActivityList = filteredCycles
+          .map((c) => ActivityPresentationMapper.fromCycleRecommendation(c))
+          .toList();
+
+      // Update state
+      state = state.copyWith(
+        cycleActivities: cycleActivityList,
+        entityCache: newCache,
+        cyclesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'operations': cycleActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing cycles stream update: $e');
+    }
+  }
+
+  /// Handle reports stream updates
+  void _onReportsStreamUpdate(List<Report> reports) {
+    try {
+      // Build cache
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var report in reports) {
+        newCache['report_${report.id}'] = report;
+      }
+
+      // Transform to ActivityLogItem
+      final reportActivityList = reports
+          .map((r) => ActivityPresentationMapper.fromReport(r))
+          .toList();
+
+      // Update state
+      state = state.copyWith(
+        reportActivities: reportActivityList,
+        entityCache: newCache,
+        reportsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'reports': reportActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+    } catch (e) {
+      debugPrint('❌ Error processing reports stream update: $e');
     }
   }
 
   // ===== DATA LOADING =====
 
-  /// Load all activities from aggregator service WITH entity cache
+  /// Load all activities with progressive loading - each category updates UI as it arrives
   Future<void> loadActivities() async {
+    final loadStopwatch = Stopwatch()..start();
+    debugPrint('🔄 loadActivities() called - Progressive Loading Mode');
+
     try {
-      state = state.copyWith(status: LoadingStatus.loading);
-
-      // Fetch activities and build entity cache
-      final result = await _aggregator.getAllActivitiesWithCache();
-
+      // Set all categories to loading state
       state = state.copyWith(
-        allActivities: result.items,
-        entityCache:
-            result.entityCache, // Store cache for instant dialog loading
-        status: LoadingStatus.success,
+        status: LoadingStatus.loading,
+        substratesLoadingStatus: LoadingStatus.loading,
+        alertsLoadingStatus: LoadingStatus.loading,
+        cyclesLoadingStatus: LoadingStatus.loading,
+        reportsLoadingStatus: LoadingStatus.loading,
       );
 
-      // Apply filters to new data
-      _applyFilters();
+      // PROGRESSIVE LOADING: Launch all fetches in parallel (fire and forget)
+      // Each will update UI independently as it completes
+      unawaited(_fetchSubstratesProgressive());
+      unawaited(_fetchAlertsProgressive());
+      unawaited(_fetchCyclesProgressive());
+      unawaited(_fetchReportsProgressive());
+
+      loadStopwatch.stop();
+      debugPrint(
+        'Progressive loading launched: ${loadStopwatch.elapsedMilliseconds}ms (fetches running in background)\n',
+      );
     } catch (e) {
+      loadStopwatch.stop();
+      debugPrint(
+        'loadActivities() failed: ${loadStopwatch.elapsedMilliseconds}ms - Error: $e\n',
+      );
+
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: e.toString(),
@@ -77,9 +304,259 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
     }
   }
 
+  /// Fetch substrates and update UI immediately when done
+  Future<void> _fetchSubstratesProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching substrates...');
+      // Fetch raw substrates to build cache
+      final substrates = await _aggregator.getSubstratesRaw();
+      
+      // Build cache for substrates
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var substrate in substrates) {
+        final cacheKey = 'substrate_${substrate.id}';
+        newCache[cacheKey] = substrate;
+      }
+      
+      // Transform to ActivityLogItem
+      final substrateActivityList = substrates
+          .map((s) => ActivityPresentationMapper.fromSubstrate(s))
+          .toList();
+
+      stopwatch.stop();
+      debugPrint(
+        'Substrates fetched: ${stopwatch.elapsedMilliseconds}ms (${substrateActivityList.length} items)',
+      );
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        substrateActivities: substrateActivityList,
+        entityCache: newCache,
+        substratesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'substrates': substrateActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Substrates fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(substratesLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch alerts and update UI immediately when done
+  Future<void> _fetchAlertsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching alerts...');
+      // Apply cutoff for alerts (using centralized config)
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      
+      // Fetch raw alerts to build cache
+      final alerts = await _aggregator.getAlertsRaw(cutoffDate: cutoffDate);
+      
+      // Build cache for alerts
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var alert in alerts) {
+        final cacheKey = 'alert_${alert.id}';
+        newCache[cacheKey] = alert;
+      }
+      
+      // Transform to ActivityLogItem
+      final alertActivityList = alerts
+          .map((a) => ActivityPresentationMapper.fromAlert(a))
+          .toList();
+
+      stopwatch.stop();
+      debugPrint(
+        'Alerts fetched: ${stopwatch.elapsedMilliseconds}ms (${alertActivityList.length} items)',
+      );
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        alertActivities: alertActivityList,
+        entityCache: newCache,
+        alertsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'alerts': alertActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Alerts fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(alertsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch cycles and update UI immediately when done
+  Future<void> _fetchCyclesProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('Fetching cycles...');
+      // Apply cutoff for cycles (using centralized config)
+      final cutoffDate = DateTime.now().subtract(
+        Duration(days: ActivityAggregatorService.defaultCutoffDays),
+      );
+      
+      // Fetch raw cycles to build cache
+      final cycles = await _aggregator.getCyclesRaw(cutoffDate: cutoffDate);
+      
+      // Build cache for cycles
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var cycle in cycles) {
+        final cacheKey = 'cycle_${cycle.id}';
+        newCache[cacheKey] = cycle;
+      }
+      
+      // Transform to ActivityLogItem
+      final cycleActivityList = cycles
+          .map((c) => ActivityPresentationMapper.fromCycleRecommendation(c))
+          .toList();
+
+      stopwatch.stop();
+      debugPrint(
+        'Cycles fetched: ${stopwatch.elapsedMilliseconds}ms (${cycleActivityList.length} items)',
+      );
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        cycleActivities: cycleActivityList,
+        entityCache: newCache,
+        cyclesLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'operations': cycleActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Cycles fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(cyclesLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Fetch reports and update UI immediately when done
+  Future<void> _fetchReportsProgressive() async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      debugPrint('🔵 Fetching reports...');
+      // Fetch raw reports to build cache
+      final reports = await _aggregator.getReportsRaw();
+      
+      // Build cache for reports
+      final newCache = Map<String, dynamic>.from(state.entityCache);
+      for (var report in reports) {
+        final cacheKey = 'report_${report.id}';
+        newCache[cacheKey] = report;
+      }
+      
+      // Transform to ActivityLogItem
+      final reportActivityList = reports
+          .map((r) => ActivityPresentationMapper.fromReport(r))
+          .toList();
+
+      stopwatch.stop();
+      debugPrint(
+        'Reports fetched: ${stopwatch.elapsedMilliseconds}ms (${reportActivityList.length} items)',
+      );
+
+      // Update state - UI will reflect immediately!
+      state = state.copyWith(
+        reportActivities: reportActivityList,
+        entityCache: newCache,
+        reportsLoadingStatus: LoadingStatus.success,
+        fullCategoryCounts: {
+          ...state.fullCategoryCounts,
+          'reports': reportActivityList.length,
+        },
+      );
+
+      _mergeAllActivities();
+      _applyFilters();
+      _checkIfAllLoaded();
+    } catch (e) {
+      stopwatch.stop();
+      debugPrint(
+        'Reports fetch failed: ${stopwatch.elapsedMilliseconds}ms - $e',
+      );
+
+      state = state.copyWith(reportsLoadingStatus: LoadingStatus.error);
+    }
+  }
+
+  /// Check if all categories are loaded and update global status
+  void _checkIfAllLoaded() {
+    final allLoaded =
+        state.substratesLoadingStatus == LoadingStatus.success &&
+        state.alertsLoadingStatus == LoadingStatus.success &&
+        state.cyclesLoadingStatus == LoadingStatus.success &&
+        state.reportsLoadingStatus == LoadingStatus.success;
+
+    if (allLoaded) {
+      state = state.copyWith(status: LoadingStatus.success);
+      debugPrint('loaded successfully!');
+    }
+  }
+
+  /// Merge all category-specific lists into allActivities and sort by timestamp
+  void _mergeAllActivities() {
+    final merged = <ActivityLogItem>[
+      ...state.substrateActivities,
+      ...state.alertActivities,
+      ...state.cycleActivities,
+      ...state.reportActivities,
+    ];
+
+    // Sort by timestamp (newest first)
+    merged.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    state = state.copyWith(allActivities: merged);
+  }
+
   /// Refresh data (for pull-to-refresh)
   Future<void> refresh() async {
+    final refreshStopwatch = Stopwatch()..start();
+    debugPrint('🔃 refresh() called');
+
+    // Clear cache to force fresh fetch
+    _aggregator.clearCache();
+
     await loadActivities();
+
+    refreshStopwatch.stop();
+    debugPrint(
+      'refresh() complete: ${refreshStopwatch.elapsedMilliseconds}ms\n',
+    );
   }
 
   // ===== ENTITY CACHE LOOKUP =====
@@ -88,7 +565,18 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   /// Returns the full entity (Alert, Substrate, Report, or CycleRecommendation)
   dynamic getFullEntity(ActivityLogItem item) {
     final key = '${item.type.name}_${item.id}';
-    return state.entityCache[key];
+    debugPrint('🔍 Looking up entity with key: $key');
+    debugPrint('   Available cache keys: ${state.entityCache.keys.take(10).join(", ")}...');
+    
+    final entity = state.entityCache[key];
+    if (entity == null) {
+      debugPrint('❌ Entity NOT FOUND in cache for key: $key');
+      debugPrint('   Item details: type=${item.type.name}, id=${item.id}, title=${item.title}');
+    } else {
+      debugPrint('✅ Entity FOUND in cache for key: $key');
+    }
+    
+    return entity;
   }
 
   // ===== FILTER HANDLERS =====
@@ -248,8 +736,15 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
 
   // ===== STATS CALCULATIONS =====
 
-  /// Get count for each category
+  /// Get count for each category from stored full counts
   Map<String, int> getCategoryCounts() {
+    // Use stored full counts (fetched separately for stats cards)
+    // If not available, fall back to counting from allActivities
+    if (state.fullCategoryCounts.isNotEmpty) {
+      return state.fullCategoryCounts;
+    }
+
+    // Fallback: count from allActivities (limited data)
     return {
       'substrates': state.allActivities
           .where((item) => item.type == ActivityType.substrate)
@@ -267,113 +762,34 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   }
 
   /// Get category counts with month-over-month change percentage
+  /// Note: Stats cards now show "last 2 days" counts, not month-over-month changes
   Map<String, Map<String, dynamic>> getCategoryCountsWithChange() {
-    final now = DateTime.now();
+    // Get counts from stored full counts (last 2 days for alerts/cycles, all-time for others)
+    final counts = getCategoryCounts();
 
-    // Current month: from start of this month to now
-    final currentMonthStart = DateTime(now.year, now.month, 1);
-    final currentMonthEnd = now;
-
-    // Previous month: full month
-    final previousMonthStart = DateTime(now.year, now.month - 1, 1);
-    final previousMonthEnd = DateTime(
-      now.year,
-      now.month,
-      1,
-    ).subtract(const Duration(microseconds: 1));
-
-    // Get ALL-TIME counts (for display)
-    final allTimeCounts = getCategoryCounts();
-
-    // Get counts for current month (for comparison)
-    final currentCounts = _getCountsForDateRange(
-      currentMonthStart,
-      currentMonthEnd,
-    );
-
-    // Get counts for previous month (for comparison)
-    final previousCounts = _getCountsForDateRange(
-      previousMonthStart,
-      previousMonthEnd,
-    );
-
+    // For now, we just show the counts without change percentages
+    // since we're showing "last 2 days" counts instead of monthly trends
     return {
-      'substrates': _buildChangeData(
-        allTimeCounts['substrates']!,
-        currentCounts['substrates']!,
-        previousCounts['substrates']!,
-      ),
-      'alerts': _buildChangeData(
-        allTimeCounts['alerts']!,
-        currentCounts['alerts']!,
-        previousCounts['alerts']!,
-      ),
-      'operations': _buildChangeData(
-        allTimeCounts['operations']!,
-        currentCounts['operations']!,
-        previousCounts['operations']!,
-      ),
-      'reports': _buildChangeData(
-        allTimeCounts['reports']!,
-        currentCounts['reports']!,
-        previousCounts['reports']!,
-      ),
-    };
-  }
-
-  /// Helper: Get counts for a specific date range
-  Map<String, int> _getCountsForDateRange(DateTime start, DateTime end) {
-    final activitiesInRange = state.allActivities.where((item) {
-      return item.timestamp.isAfter(start) && item.timestamp.isBefore(end);
-    }).toList();
-
-    return {
-      'substrates': activitiesInRange
-          .where((item) => item.type == ActivityType.substrate)
-          .length,
-      'alerts': activitiesInRange
-          .where((item) => item.type == ActivityType.alert)
-          .length,
-      'operations': activitiesInRange
-          .where((item) => item.type == ActivityType.cycle)
-          .length,
-      'reports': activitiesInRange
-          .where((item) => item.type == ActivityType.report)
-          .length,
-    };
-  }
-
-  /// Helper: Build change data with percentage and positive/negative indicator
-  Map<String, dynamic> _buildChangeData(
-    int allTimeCount,
-    int currentMonthCount,
-    int previousMonthCount,
-  ) {
-    String changeText;
-    bool isPositive = true;
-
-    if (previousMonthCount == 0 && currentMonthCount > 0) {
-      // New this month
-      changeText = 'New';
-      isPositive = true;
-    } else if (previousMonthCount == 0 && currentMonthCount == 0) {
-      // No data yet
-      changeText = 'No log yet';
-      isPositive = true; // Neutral
-    } else {
-      // Calculate percentage change (current month vs previous month)
-      final percentageChange =
-          ((currentMonthCount - previousMonthCount) / previousMonthCount * 100)
-              .round();
-      isPositive = percentageChange >= 0;
-      final sign = isPositive ? '+' : '';
-      changeText = '$sign$percentageChange%';
-    }
-
-    return {
-      'count': allTimeCount,
-      'change': changeText,
-      'isPositive': isPositive,
+      'substrates': {
+        'count': counts['substrates'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'alerts': {
+        'count': counts['alerts'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'operations': {
+        'count': counts['operations'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
+      'reports': {
+        'count': counts['reports'] ?? 0,
+        'change': '', 
+        'isPositive': true,
+      },
     };
   }
 }

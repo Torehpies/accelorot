@@ -1,7 +1,7 @@
 // lib/ui/reports/widgets/web_stats_row.dart
 
 import 'package:flutter/material.dart';
-import '../../core/widgets/base_stats_card.dart';
+import '../../core/widgets/sample_cards/base_stats_card.dart';
 import '../../core/themes/web_colors.dart';
 
 class WebStatsRow extends StatelessWidget {

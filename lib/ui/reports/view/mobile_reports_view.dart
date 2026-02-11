@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/widgets/mobile_common_widgets.dart';
-import '../../core/widgets/mobile_list_header.dart';
-import '../../core/widgets/mobile_list_content.dart';
-import '../../core/widgets/data_card.dart';
+import '../../core/widgets/containers/mobile_common_widgets.dart';
+import '../../core/widgets/containers/mobile_sliver_header.dart';
+import '../../core/widgets/containers/mobile_list_content.dart';
+import '../../core/widgets/sample_cards/data_card.dart';
 import '../../core/widgets/filters/mobile_dropdown_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
@@ -14,7 +14,8 @@ import '../../../data/models/report.dart';
 import '../view_model/mobile_reports_viewmodel.dart';
 import '../models/mobile_reports_state.dart';
 import '../models/report_filters.dart';
-import '../dialogs/edit_report_modal.dart';
+import '../bottom_sheets/report_view_bottom_sheet.dart';
+import '../bottom_sheets/report_edit_bottom_sheet.dart';
 
 class MobileReportsView extends ConsumerStatefulWidget {
   const MobileReportsView({super.key});
@@ -40,15 +41,44 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     super.dispose();
   }
 
-  void _showReportDetails(Report report) {
+  // ---------------------------------------------------------------------------
+  // Bottom sheet flow:  tap card → View sheet → Edit button → Edit sheet
+  // ---------------------------------------------------------------------------
+
+  /// Opens the read-only view sheet.
+  void _showReportView(Report report) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => EditReportModal(report: report),
+      builder: (context) => ReportViewBottomSheet(
+        report: report,
+        onEdit: () {
+          Navigator.of(context).pop();
+          _showReportEdit(report);
+        },
+      ),
     );
   }
 
+  /// Opens the editable sheet (drag & dismiss disabled).
+  void _showReportEdit(Report report) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => ReportEditBottomSheet(
+        report: report,
+        onUpdate: ref.read(mobileReportsViewModelProvider.notifier).updateReport,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Empty state
+  // ---------------------------------------------------------------------------
   EmptyStateConfig _getEmptyStateConfig(MobileReportsState state) {
     String message;
 
@@ -57,7 +87,8 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     } else if (state.selectedCategory != ReportCategoryFilter.all) {
       message = 'No ${state.selectedCategory.displayName.toLowerCase()} reports';
     } else if (state.selectedPriority != ReportPriorityFilter.all) {
-      message = 'No ${state.selectedPriority.displayName.toLowerCase()} priority reports';
+      message =
+          'No ${state.selectedPriority.displayName.toLowerCase()} priority reports';
     } else {
       message = 'No reports available';
     }
@@ -72,12 +103,17 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
       actionLabel: state.hasActiveFilters ? 'Clear All Filters' : null,
       onAction: state.hasActiveFilters
           ? () {
-              ref.read(mobileReportsViewModelProvider.notifier).clearAllFilters();
+              ref
+                  .read(mobileReportsViewModelProvider.notifier)
+                  .clearAllFilters();
             }
           : null,
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Card builder
+  // ---------------------------------------------------------------------------
   Widget _buildReportCard(BuildContext context, Report report, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -92,11 +128,14 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
         userName: report.userName,
         statusColor: _getStatusColor(report),
         statusTextColor: const Color(0xFF424242),
-        onTap: () => _showReportDetails(report),
+        onTap: () => _showReportView(report),   // ← changed: opens view sheet
       ),
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Icon / colour helpers (unchanged)
+  // ---------------------------------------------------------------------------
   IconData _getReportIcon(Report report) {
     switch (report.reportType.toLowerCase()) {
       case 'maintenance_issue':
@@ -153,6 +192,9 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Main build
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mobileReportsViewModelProvider);
@@ -162,54 +204,67 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
       onTap: () => _searchFocusNode.unfocus(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: MobileListHeader(
-          title: 'Reports',
-          showAddButton: false,
-          searchConfig: SearchBarConfig(
-            onSearchChanged: notifier.setSearchQuery,
-            searchHint: 'Search reports...',
-            isLoading: state.isLoading,
-            searchFocusNode: _searchFocusNode,
-          ),
-          filterWidgets: [
-            MobileDropdownFilterButton<ReportStatusFilter>(
-              icon: Icons.tune,
-              currentFilter: state.selectedStatus,
-              options: ReportStatusFilter.values,
-              onFilterChanged: notifier.setStatusFilter,
-              isLoading: state.isLoading,
-            ),
-            const SizedBox(width: 8),
-            MobileDateFilterButton(
-              onFilterChanged: notifier.setDateFilter,
-              isLoading: state.isLoading,
-            ),
-          ],
-        ),
-        body: Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: MobileListContent<Report>(
-              isLoading: state.isLoading,
-              isInitialLoad: state.reports.isEmpty,
-              hasError: state.hasError,
-              errorMessage: state.errorMessage,
-              items: state.filteredReports,
-              displayedItems: state.displayedReports,
-              hasMoreToLoad: state.hasMoreToLoad,
-              remainingCount: state.remainingCount,
-              emptyStateConfig: _getEmptyStateConfig(state),
-              onRefresh: () async {
-                await notifier.refresh();
-              },
-              onLoadMore: notifier.loadMore,
-              onRetry: () {
-                notifier.clearError();
-                notifier.initialize();
-              },
-              itemBuilder: _buildReportCard,
-              skeletonBuilder: (context, index) => const DataCardSkeleton(),
-            ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await notifier.refresh();
+          },
+          color: AppColors.green100,
+          child: CustomScrollView(
+            slivers: [
+              // Header with search + filters
+              MobileSliverHeader(
+                title: 'Reports',
+                showAddButton: false,
+                searchConfig: SearchBarConfig(
+                  onSearchChanged: notifier.setSearchQuery,
+                  searchHint: 'Search reports...',
+                  isLoading: state.isLoading,
+                  searchFocusNode: _searchFocusNode,
+                ),
+                filterWidgets: [
+                  MobileDropdownFilterButton<ReportStatusFilter>(
+                    icon: Icons.tune,
+                    currentFilter: state.selectedStatus,
+                    options: ReportStatusFilter.values,
+                    onFilterChanged: notifier.setStatusFilter,
+                    isLoading: state.isLoading,
+                  ),
+                  const SizedBox(width: 8),
+                  MobileDateFilterButton(
+                    onFilterChanged: notifier.setDateFilter,
+                    isLoading: state.isLoading,
+                  ),
+                ],
+              ),
+
+              // Top padding for breathing room
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 8),
+              ),
+
+              // Content
+              MobileListContent<Report>(
+                isLoading: state.isLoading,
+                isInitialLoad: state.reports.isEmpty,
+                hasError: state.hasError,
+                errorMessage: state.errorMessage,
+                items: state.filteredReports,
+                displayedItems: state.displayedReports,
+                hasMoreToLoad: state.hasMoreToLoad,
+                remainingCount: state.remainingCount,
+                emptyStateConfig: _getEmptyStateConfig(state),
+                onRefresh: () async {
+                  await notifier.refresh();
+                },
+                onLoadMore: notifier.loadMore,
+                onRetry: () {
+                  notifier.clearError();
+                  notifier.initialize();
+                },
+                itemBuilder: _buildReportCard,
+                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              ),
+            ],
           ),
         ),
       ),

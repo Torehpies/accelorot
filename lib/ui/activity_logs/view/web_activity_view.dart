@@ -6,7 +6,7 @@ import '../view_model/unified_activity_viewmodel.dart';
 import '../widgets/web/stats_card_row.dart';
 import '../widgets/web/web_table_container.dart';
 import '../dialogs/activity_dialog_helper.dart';
-import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/containers/web_base_container.dart';
 
 /// Main unified activity view with enhanced stats
 class WebActivityView extends ConsumerWidget {
@@ -27,6 +27,10 @@ class WebActivityView extends ConsumerWidget {
                 statsRow: StatsCardRow(
                   countsWithChange: viewModel.getCategoryCountsWithChange(),
                   isLoading: state.isLoading,
+                  substratesLoadingStatus: state.substratesLoadingStatus,
+                  alertsLoadingStatus: state.alertsLoadingStatus,
+                  cyclesLoadingStatus: state.cyclesLoadingStatus,
+                  reportsLoadingStatus: state.reportsLoadingStatus,
                 ),
                 table: WebTableContainer(
                   items: state.paginatedItems,

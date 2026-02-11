@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
-import '../../core/themes/web_text_styles.dart';
 import '../../core/themes/web_colors.dart';
 import '../models/impact_stat_model.dart';
-import 'dart:math' as math;
 
 class ImpactSection extends StatefulWidget {
   final List<ImpactStatModel> stats;
@@ -18,62 +16,62 @@ class ImpactSection extends StatefulWidget {
   State<ImpactSection> createState() => _ImpactSectionState();
 }
 
-class _ImpactSectionState extends State<ImpactSection> with SingleTickerProviderStateMixin {
-  int? _expandedIndex;
-  int _currentExpandedInfo = 0;
-  late AnimationController _swipeAnimationController;
-  late Animation<double> _swipeAnimation;
-  final Map<String, bool> _impactItemHover = {};
+class _ImpactSectionState extends State<ImpactSection> {
+  int? _expandedImpactIndex;
 
-  @override
-  void initState() {
-    super.initState();
-    _swipeAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _swipeAnimation = CurvedAnimation(
-      parent: _swipeAnimationController,
-      curve: Curves.easeInOut,
-    );
-  }
+  // Map for impact item descriptions
+  final Map<String, String> _impactDescriptions = {
+    'Reduces landfill waste':
+        'Addresses the pressing environmental concern in the Philippines where over 50% of municipal solid waste is organic. Prevents methane emissions from landfills that contribute to climate change.',
+    'Produces nutrient-rich compost':
+        'Transforms organic waste into high-quality compost through accelerated decomposition. Improves soil health and reduces need for chemical fertilizers in agriculture.',
+    'Empowers communities':
+        'Supports Republic Act 9003 implementation by providing accessible composting technology. Reduces manual labor and makes sustainable waste management practical for households and communities.',
+  };
 
-  @override
-  void dispose() {
-    _swipeAnimationController.dispose();
-    super.dispose();
-  }
-
-  void _swipeToNext() {
-    if (_expandedIndex == null) return;
-    
-    _swipeAnimationController.forward(from: 0).then((_) {
-      setState(() {
-        _currentExpandedInfo = (_currentExpandedInfo + 1) % 3;
-      });
-    });
-  }
+  final List<_ImpactCardData> _impactCards = const [
+    _ImpactCardData(
+      title: 'Reduces landfill waste',
+      icon: Icons.delete_outline,
+      backgroundColor:  WebColors.substratesBackground,
+      textColor: WebColors.textPrimary,
+    ),
+    _ImpactCardData(
+      title: 'Produces nutrient-rich compost',
+      icon: Icons.compost,
+      backgroundColor: WebColors.alertsBackground,
+      textColor: WebColors.textPrimary,
+    ),
+    _ImpactCardData(
+      title: 'Empowers communities',
+      icon: Icons.groups,
+      backgroundColor: WebColors.operationsBackground,
+      textColor: WebColors.textPrimary,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final sectionHeight = _sectionHeight(context);
     return Container(
       width: double.infinity,
+      constraints: BoxConstraints(
+        minHeight: sectionHeight,
+      ),
       padding: _getResponsivePadding(context),
       color: Colors.white,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final screenWidth = constraints.maxWidth;
-          
           if (widget.stats.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          
           if (screenWidth < 600) {
-            return _buildMobileLayout(context, screenWidth);
+            return _buildMobileLayout(screenWidth);
           } else if (screenWidth < 1024) {
-            return _buildTabletLayout(context, screenWidth);
+            return _buildTabletLayout(screenWidth);
           } else {
-            return _buildDesktopLayout(context, screenWidth);
+            return _buildDesktopLayout(screenWidth);
           }
         },
       ),
@@ -82,647 +80,101 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
 
   EdgeInsets _getResponsivePadding(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
     if (screenWidth < 600) {
       return const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.lg,
+        vertical: AppSpacing.xl,
       );
     } else if (screenWidth < 1024) {
       return const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
+        horizontal: AppSpacing.lg,
         vertical: AppSpacing.xl,
       );
     } else {
       return const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xxl,
-        vertical: AppSpacing.xl * 1.5,
+        horizontal: AppSpacing.xxxl,
+        vertical: AppSpacing.xxl,
       );
     }
   }
 
-  // ===================== MOBILE LAYOUT (<600px) - MINIMIZED =====================
-  Widget _buildMobileLayout(BuildContext context, double screenWidth) {
+  // ===================== MOBILE LAYOUT (<600px) =====================
+  Widget _buildMobileLayout(double screenWidth) {
+    final cardsHeight = MediaQuery.of(context).size.height * 0.55;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'MAKING A SUSTAINABLE IMPACT',
-          textAlign: TextAlign.center,
-          style: WebTextStyles.h2.copyWith(
-            fontSize: screenWidth < 400 ? 20 : 22,
-            fontWeight: FontWeight.w700,
-            color: WebColors.textTitle,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: Text(
-            'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
-            textAlign: TextAlign.center,
-            style: WebTextStyles.sectionSubtitle.copyWith(
-              fontSize: screenWidth < 400 ? 10 : 11,
-              height: 1.4,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: screenWidth < 400 ? 300 : 350,
-            ),
-            child: Column(
-              children: [
-                _buildMobileImpactItem(Icons.delete_outline, 'Reduces landfill waste', screenWidth),
-                const SizedBox(height: 4),
-                _buildMobileImpactItem(Icons.restaurant_outlined, 'Produces nutrient-rich compost', screenWidth),
-                const SizedBox(height: 4),
-                _buildMobileImpactItem(Icons.eco_outlined, 'Empowers communities', screenWidth),
-              ],
-            ),
-          ),
-        ),
-
+        _buildImpactIntroCard(screenWidth, isCompact: true),
         const SizedBox(height: AppSpacing.lg),
-
-        // MINIMIZED Grid for mobile
-        _buildMobileGrid(screenWidth),
+        _buildImpactCardsArea(
+          screenWidth,
+          height: cardsHeight,
+          isCompact: true,
+        ),
       ],
     );
   }
 
-  Widget _buildMobileImpactItem(IconData icon, String text, double screenWidth) {
-    final isHovered = _impactItemHover[text] ?? false;
-    
-    return MouseRegion(
-      onEnter: (_) => _safeSetState(() => _impactItemHover[text] = true),
-      onExit: (_) => _safeSetState(() => _impactItemHover[text] = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 6 : 5,
-          horizontal: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isHovered 
-            ? const Color.fromARGB(15, 118, 230, 207)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: isHovered 
-              ? WebColors.greenLight
-              : const Color(0xFFE8F5E9),
-            width: isHovered ? 1.5 : 1,
-          ),
-          boxShadow: isHovered ? [
-            BoxShadow(
-              color: const Color.fromARGB(20, 118, 230, 207),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(38, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 8,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 400 ? 8 : 9,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMobileGrid(double screenWidth) {
-    if (widget.stats.length < 4) {
-      return const SizedBox();
-    }
-    
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: screenWidth < 400 ? 0 : AppSpacing.xs),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.xs,
-          crossAxisSpacing: AppSpacing.xs,
-          childAspectRatio: screenWidth < 400 ? 1.1 : 1.2,
-        ),
-        itemCount: widget.stats.length,
-        itemBuilder: (context, index) {
-          return _buildMobileStatCard(index, widget.stats[index], screenWidth);
-        },
-      ),
-    );
-  }
-
-  Widget _buildMobileStatCard(int index, ImpactStatModel stat, double screenWidth) {
-    final row = index ~/ 2;
-    final col = index % 2;
-    final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
-    final isHovered = _expandedIndex == index;
-
-    return MouseRegion(
-      onEnter: (_) => _safeSetState(() => _expandedIndex = index),
-      onExit: (_) => _safeSetState(() => _expandedIndex = null),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isGreen 
-            ? const Color.fromARGB(255, 74, 211, 126)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isHovered
-              ? (isGreen ? Colors.transparent : WebColors.greenLight)
-              : (isGreen ? Colors.transparent : const Color(0xFFE0E0E0)),
-            width: isHovered ? 1.5 : 1,
-          ),
-          boxShadow: isHovered ? [
-            BoxShadow(
-              color: const Color.fromARGB(20, 0, 0, 0),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ] : [
-            BoxShadow(
-              color: const Color.fromARGB(10, 0, 0, 0),
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (stat.label.toLowerCase().contains('week'))
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        stat.value,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: screenWidth < 400 ? 18 : 20,
-                          fontWeight: FontWeight.w800,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                          height: 0.9,
-                        ),
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        'weeks',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: screenWidth < 400 ? 12 : 14,
-                          fontWeight: FontWeight.w600,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Composting Time',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 7,
-                          fontWeight: FontWeight.w500,
-                          color: isGreen ? Colors.white : const Color(0xFF666666),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        stat.value,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: screenWidth < 400 ? 16 : 18,
-                          fontWeight: FontWeight.w800,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3.0),
-                        child: Text(
-                          stat.label,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 7,
-                            fontWeight: FontWeight.w500,
-                            color: isGreen ? Colors.white : const Color(0xFF666666),
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ===================== TABLET LAYOUT (600-1024px) - MINIMIZED =====================
-  Widget _buildTabletLayout(BuildContext context, double screenWidth) {
+  // ===================== TABLET LAYOUT (600-1024px) =====================
+  Widget _buildTabletLayout(double screenWidth) {
+    final cardsHeight = _sectionHeight(context);
+    final isSmallTablet = screenWidth < 800;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Making a Sustainable Impact',
-          textAlign: TextAlign.center,
-          style: WebTextStyles.h2.copyWith(
-            fontSize: screenWidth < 800 ? 24 : 26,
-            fontWeight: FontWeight.w700,
-            color: WebColors.textTitle,
+        if (isSmallTablet) ...[
+          _buildImpactIntroCard(screenWidth, isCompact: true),
+          const SizedBox(height: AppSpacing.lg),
+          _buildImpactCardsArea(
+            screenWidth,
+            height: cardsHeight,
+            isCompact: true,
           ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-          child: Text(
-            'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
-            textAlign: TextAlign.center,
-            style: WebTextStyles.sectionSubtitle.copyWith(
-              fontSize: screenWidth < 800 ? 12 : 13,
-              height: 1.5,
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: screenWidth < 800 ? 450 : 500,
-            ),
-            child: Column(
+        ] else
+          SizedBox(
+            height: cardsHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildTabletImpactItem(Icons.delete_outline, 'Reduces landfill waste', screenWidth),
-                const SizedBox(height: 6),
-                _buildTabletImpactItem(Icons.restaurant_outlined, 'Produces nutrient-rich compost', screenWidth),
-                const SizedBox(height: 6),
-                _buildTabletImpactItem(Icons.eco_outlined, 'Empowers communities', screenWidth),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: AppSpacing.lg),
-
-        // MINIMIZED Grid for tablet
-        _buildTabletGrid(screenWidth),
-      ],
-    );
-  }
-
-  Widget _buildTabletImpactItem(IconData icon, String text, double screenWidth) {
-    final isHovered = _impactItemHover[text] ?? false;
-    
-    return MouseRegion(
-      onEnter: (_) => _safeSetState(() => _impactItemHover[text] = true),
-      onExit: (_) => _safeSetState(() => _impactItemHover[text] = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 8 : 7,
-          horizontal: 10,
-        ),
-        decoration: BoxDecoration(
-          color: isHovered 
-            ? const Color.fromARGB(15, 118, 230, 207)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: isHovered 
-              ? WebColors.greenLight
-              : const Color(0xFFE8F5E9),
-            width: isHovered ? 1.5 : 1,
-          ),
-          boxShadow: isHovered ? [
-            BoxShadow(
-              color: const Color.fromARGB(20, 118, 230, 207),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ] : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Icon(
-                icon,
-                size: 10,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: screenWidth < 800 ? 10 : 11,
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
+                Expanded(
+                  flex: 5,
+                  child: _buildImpactIntroCard(screenWidth),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabletGrid(double screenWidth) {
-    if (widget.stats.length < 4) {
-      return const SizedBox();
-    }
-    
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: screenWidth < 800 ? AppSpacing.sm : AppSpacing.md),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.sm,
-          crossAxisSpacing: AppSpacing.sm,
-          childAspectRatio: screenWidth < 800 ? 1.3 : 1.4,
-        ),
-        itemCount: widget.stats.length,
-        itemBuilder: (context, index) {
-          return _buildTabletStatCard(index, widget.stats[index], screenWidth);
-        },
-      ),
-    );
-  }
-
-  Widget _buildTabletStatCard(int index, ImpactStatModel stat, double screenWidth) {
-    final row = index ~/ 2;
-    final col = index % 2;
-    final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
-    final isHovered = _expandedIndex == index;
-
-    return MouseRegion(
-      onEnter: (_) => _safeSetState(() => _expandedIndex = index),
-      onExit: (_) => _safeSetState(() => _expandedIndex = null),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isGreen 
-            ? const Color.fromARGB(255, 74, 211, 126)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isHovered
-              ? (isGreen ? Colors.transparent : WebColors.greenLight)
-              : (isGreen ? Colors.transparent : const Color(0xFFE0E0E0)),
-            width: isHovered ? 1.8 : 1.3,
-          ),
-          boxShadow: isHovered ? [
-            BoxShadow(
-              color: const Color.fromARGB(25, 0, 0, 0),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ] : [
-            BoxShadow(
-              color: const Color.fromARGB(15, 0, 0, 0),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (stat.label.toLowerCase().contains('week'))
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        stat.value,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                          height: 0.9,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'weeks',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Composting Time',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: isGreen ? Colors.white : const Color(0xFF666666),
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        stat.value,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: isGreen ? Colors.white : WebColors.textTitle,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                        child: Text(
-                          stat.label,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w500,
-                            color: isGreen ? Colors.white : const Color(0xFF666666),
-                            height: 1.1,
-                          ),
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(
+                  flex: 4,
+                  child: _buildImpactCardsArea(
+                    screenWidth,
+                    height: cardsHeight,
                   ),
+                ),
               ],
             ),
           ),
-        ),
-      ),
+      ],
     );
   }
 
   // ===================== DESKTOP LAYOUT (>1024px) =====================
-  Widget _buildDesktopLayout(BuildContext context, double screenWidth) {
-    final isLargeDesktop = screenWidth > 1440;
-    
-    if (widget.stats.length < 4) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    
+  Widget _buildDesktopLayout(double screenWidth) {
+    final cardsHeight = _sectionHeight(context);
     return SizedBox(
-      height: 500,
+      height: cardsHeight,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Left side: 3 impact items
           Expanded(
-            flex: isLargeDesktop ? 4 : 3,
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: isLargeDesktop ? AppSpacing.lg : AppSpacing.md,
-                left: isLargeDesktop ? AppSpacing.xxl : AppSpacing.xl,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Making a Sustainable Impact',
-                    style: WebTextStyles.h2.copyWith(
-                      fontSize: isLargeDesktop ? 36 : 32,
-                      fontWeight: FontWeight.w700,
-                      color: WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      'In the Philippines, over 50% of municipal solid waste is organic.\nAccel-O-Rot helps manage waste responsibly.',
-                      style: WebTextStyles.sectionSubtitle.copyWith(
-                        fontSize: isLargeDesktop ? 14 : 13,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: isLargeDesktop ? 450 : 400,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildDesktopImpactItem(Icons.delete_outline, 'Reduces landfill waste', screenWidth),
-                        const SizedBox(height: 10),
-                        _buildDesktopImpactItem(Icons.restaurant_outlined, 'Produces nutrient-rich compost', screenWidth),
-                        const SizedBox(height: 10),
-                        _buildDesktopImpactItem(Icons.eco_outlined, 'Empowers communities', screenWidth),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            flex: 5,
+            child: _buildImpactIntroCard(screenWidth),
           ),
-
-          // Right side: 4 stat cards - MOVED TO LEFT
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
-            flex: isLargeDesktop ? 5 : 4,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: AppSpacing.md, // Reduced left padding to move cards left
-                right: isLargeDesktop ? AppSpacing.xxxl * 2 : AppSpacing.xxl * 2, // Increased right padding
-              ),
-              child: SizedBox(
-                width: isLargeDesktop ? 460 : 420,
-                height: 420,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Base grid
-                    if (_expandedIndex == null)
-                      _buildDesktopGrid(screenWidth),
-                    
-                    // Expanded card overlay
-                    if (_expandedIndex != null && _expandedIndex! < widget.stats.length)
-                      _buildExpandedDesktopCard(_expandedIndex!, screenWidth),
-                  ],
-                ),
-              ),
+            flex: 6,
+            child: _buildImpactCardsArea(
+              screenWidth,
+              height: cardsHeight,
             ),
           ),
         ],
@@ -730,479 +182,435 @@ class _ImpactSectionState extends State<ImpactSection> with SingleTickerProvider
     );
   }
 
-  Widget _buildDesktopImpactItem(IconData icon, String text, double screenWidth) {
-    final isHovered = _impactItemHover[text] ?? false;
-    
-    return MouseRegion(
-      onEnter: (_) => _safeSetState(() => _impactItemHover[text] = true),
-      onExit: (_) => _safeSetState(() => _impactItemHover[text] = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(
-          vertical: isHovered ? 12 : 10,
-          horizontal: isHovered ? 16 : 12,
+  double _sectionHeight(BuildContext context) {
+    return MediaQuery.of(context).size.height * 0.78;
+  }
+
+  double _impactDescriptionSize(double screenWidth) {
+    if (screenWidth < 600) {
+      return 10.0;
+    } else if (screenWidth < 1024) {
+      return 12.0;
+    } else {
+      return screenWidth > 1440 ? 17.0 : 16.0;
+    }
+  }
+
+  Widget _buildImpactIntroCard(double screenWidth, {bool isCompact = false}) {
+    final isMobile = screenWidth < 600;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final titleSize = isMobile
+        ? 30.0
+        : isTablet
+            ? 34.0
+            : (screenWidth > 1440 ? 64.0 : 58.0);
+    final subtitleSize = _impactDescriptionSize(screenWidth) + (isMobile ? 1 : isTablet ? 1 : 0);
+    return Container(
+      constraints: isMobile
+          ? const BoxConstraints(
+              minHeight: 240,
+            )
+          : null,
+      padding: EdgeInsets.all(
+        isMobile
+            ? AppSpacing.sm
+            : isTablet
+                ? AppSpacing.md
+                : AppSpacing.xl,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF10B981),
+            Color(0xFF22C55E),
+          ],
         ),
-        decoration: BoxDecoration(
-          color: isHovered 
-            ? const Color.fromARGB(15, 118, 230, 207)
-            : Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isHovered 
-              ? WebColors.greenLight
-              : const Color(0xFFE8F5E9),
-            width: isHovered ? 1.5 : 1,
+      ),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isMobile) const SizedBox(height: AppSpacing.md),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: RichText(
+                      textAlign: TextAlign.left,
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: titleSize,
+                          fontWeight: FontWeight.w800,
+                          height: (titleSize + 10) / titleSize,
+                        ),
+                        children: const [
+                          TextSpan(
+                            text: 'MAKING A\n',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          TextSpan(
+                            text: 'SUSTAINABLE\n',
+                            style: TextStyle(color: Color(0xFF1B5E20)),
+                          ),
+                          TextSpan(
+                            text: 'IMPACT',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: isMobile ? AppSpacing.md : isTablet ? AppSpacing.lg : AppSpacing.xxxl),
+                  Text(
+                    'In the Philippines, over 50% of Municipal Solid Waste is organic.\nAccel-O-Rot helps manage waste responsible',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: subtitleSize,
+                      height: 1.35,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          boxShadow: isHovered ? [
-            BoxShadow(
-              color: const Color.fromARGB(20, 118, 230, 207),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+          Positioned(
+            right: isCompact ? 8 : 18,
+            bottom: isCompact ? 8 : 18,
+            child: Icon(
+              Icons.eco,
+              size: isCompact ? 24 : 36,
+              color: const Color(0xFFB7E36C),
             ),
-          ] : [
-            BoxShadow(
-              color: const Color.fromARGB(8, 0, 0, 0),
-              blurRadius: 3,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: isHovered ? 28 : 26,
-              height: isHovered ? 28 : 26,
-              decoration: BoxDecoration(
-                color: isHovered
-                  ? WebColors.greenLight
-                  : const Color.fromARGB(51, 40, 168, 90),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Icon(
-                icon,
-                size: isHovered ? 16 : 14,
-                color: isHovered 
-                  ? Colors.white 
-                  : const Color(0xFF28A85A),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: isHovered 
-                    ? (screenWidth > 1440 ? 14 : 13)
-                    : (screenWidth > 1440 ? 13 : 12),
-                  fontWeight: isHovered ? FontWeight.w600 : FontWeight.w500,
-                  color: isHovered 
-                    ? WebColors.textTitle
-                    : const Color(0xFF444444),
-                ),
-              ),
-            ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpactCardsArea(double screenWidth, {required double height, bool isCompact = false}) {
+    return MouseRegion(
+      onExit: (_) => setState(() => _expandedImpactIndex = null),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: screenWidth),
+        child: SizedBox(
+          width: double.infinity,
+          height: height,
+          child: _buildImpactGrid(isCompact: isCompact),
         ),
       ),
     );
   }
 
-  Widget _buildDesktopGrid(double screenWidth) {
-    final isLargeDesktop = screenWidth > 1440;
-    
+  Widget _buildImpactGrid({bool isCompact = false}) {
+    final hovered = _expandedImpactIndex;
+    final topIndex = hovered == 1
+        ? 1
+        : hovered == 2
+            ? 2
+            : 0;
+    final bottomLeftIndex = hovered == 1 ? 0 : 1;
+    final bottomRightIndex = hovered == 2 ? 0 : 2;
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (_) => _safeSetState(() => _expandedIndex = 0),
-                child: _buildDesktopStatCard(0, widget.stats[0], screenWidth),
-              ),
-            ),
-            SizedBox(width: isLargeDesktop ? AppSpacing.md : AppSpacing.sm),
-            Expanded(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (_) => _safeSetState(() => _expandedIndex = 1),
-                child: _buildDesktopStatCard(1, widget.stats[1], screenWidth),
-              ),
-            ),
-          ],
+        Expanded(
+          flex: 2,
+          child: _buildImpactSmallCard(
+            _impactCards[topIndex],
+            0,
+            displayIndex: topIndex,
+            isCompact: isCompact,
+          ),
         ),
-        SizedBox(height: isLargeDesktop ? AppSpacing.md : AppSpacing.sm),
-        Row(
-          children: [
-            Expanded(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (_) => _safeSetState(() => _expandedIndex = 2),
-                child: _buildDesktopStatCard(2, widget.stats[2], screenWidth),
+        const SizedBox(height: AppSpacing.lg),
+        Expanded(
+          flex: 1,
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildImpactSmallCard(
+                  _impactCards[bottomLeftIndex],
+                  1,
+                  displayIndex: bottomLeftIndex,
+                  isCompact: isCompact,
+                ),
               ),
-            ),
-            SizedBox(width: isLargeDesktop ? AppSpacing.md : AppSpacing.sm),
-            Expanded(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (_) => _safeSetState(() => _expandedIndex = 3),
-                child: _buildDesktopStatCard(3, widget.stats[3], screenWidth),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(
+                child: _buildImpactSmallCard(
+                  _impactCards[bottomRightIndex],
+                  2,
+                  displayIndex: bottomRightIndex,
+                  isCompact: isCompact,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildDesktopStatCard(int index, ImpactStatModel stat, double screenWidth) {
-    final row = index ~/ 2;
-    final col = index % 2;
-    final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
-
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        color: isGreen 
-          ? const Color.fromARGB(255, 74, 211, 126)
-          : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isGreen ? Colors.transparent : const Color(0xFFE0E0E0),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(25, 0, 0, 0),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (stat.label.toLowerCase().contains('week'))
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                      height: 0.9,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'weeks',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w600,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Composting Time',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isGreen ? Colors.white : const Color(0xFF666666),
-                    ),
-                  ),
-                ],
-              )
-            else
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    stat.value,
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: isGreen ? Colors.white : WebColors.textTitle,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text(
-                      stat.label,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isGreen ? Colors.white : const Color(0xFF666666),
-                        height: 1.1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExpandedDesktopCard(int index, double screenWidth) {
-    if (index >= widget.stats.length) {
-      return _buildDesktopGrid(screenWidth);
-    }
-    
-    final stat = widget.stats[index];
-    final isLargeDesktop = screenWidth > 1440;
-    final row = index ~/ 2;
-    final col = index % 2;
-    final isGreen = (row == 0 && col == 0) || (row == 1 && col == 1);
-
-    final List<Map<String, dynamic>> expandedInfos = [
-      {
-        'icon': Icons.analytics_outlined,
-        'title': 'Environmental Impact',
-        'description': 'Biodegradable materials account for more than 50% of total municipal solid waste annually. This significant portion highlights the urgent need for effective organic waste management solutions in the Philippines.'
-      },
-      {
-        'icon': Icons.timer_outlined,
-        'title': 'Fast Processing',
-        'description': 'Accel-O-Rot reduces composting time from months to just 2 weeks through optimized conditions, temperature control, and efficient aeration systems, ensuring faster waste transformation.'
-      },
-      {
-        'icon': Icons.settings_outlined,
-        'title': 'Smart Technology',
-        'description': 'Our IoT-enabled system operates 24/7 with minimal human intervention, providing real-time monitoring and automated adjustments for optimal composting conditions and efficiency.'
-      },
-    ];
-
+  Widget _buildImpactSmallCard(
+    _ImpactCardData data,
+    int index, {
+    required int displayIndex,
+    bool isCompact = false,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final descriptionSize = _impactDescriptionSize(screenWidth);
+    final isHovered = _expandedImpactIndex == displayIndex;
+    final isIllustration = index == 0;
+    final hoverColor =
+        Color.lerp(_impactCards.first.backgroundColor, Colors.white, 0.2)!;
     return MouseRegion(
-      onExit: (_) => _safeSetState(() {
-        _expandedIndex = null;
-        _currentExpandedInfo = 0;
+      onEnter: (_) => setState(() {
+        _expandedImpactIndex = displayIndex;
+      }),
+      onExit: (_) => setState(() {
+        _expandedImpactIndex = null;
       }),
       child: GestureDetector(
-        onTap: _swipeToNext,
-        child: AnimatedBuilder(
-          animation: _swipeAnimation,
-          builder: (context, child) {
-            final currentInfo = expandedInfos[_currentExpandedInfo];
-            
-            return Transform.translate(
-              offset: Offset(0, -20 * math.sin(_swipeAnimation.value * math.pi)),
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 200),
-                opacity: 1.0 - (_swipeAnimation.value * 0.3),
-                child: Container(
-                  width: double.infinity,
-                  height: 420,
-                  decoration: BoxDecoration(
-                    color: isGreen 
-                      ? const Color.fromARGB(255, 74, 211, 126)
-                      : Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isGreen ? Colors.transparent : WebColors.greenLight,
-                      width: 2.0,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromARGB(35, 0, 0, 0),
-                        blurRadius: 18,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 55,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: isGreen 
-                              ? const Color.fromARGB(90, 255, 255, 255)
-                              : const Color.fromARGB(45, 118, 230, 207),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isGreen ? Colors.white : WebColors.greenLight,
-                              width: 1.8,
+        onTap: () => setState(() => _expandedImpactIndex = displayIndex),
+        child: Container(
+          padding: EdgeInsets.all(isCompact ? AppSpacing.md : AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: isHovered ? hoverColor : data.backgroundColor,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: isIllustration
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: Center(
+                              child: FractionallySizedBox(
+                                widthFactor: isMobile
+                                    ? 0.7
+                                    : isTablet
+                                        ? 0.75
+                                        : 0.85,
+                                heightFactor: isMobile
+                                    ? 0.7
+                                    : isTablet
+                                        ? 0.75
+                                        : 0.85,
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final maxWidth = constraints.maxWidth;
+                                    final maxHeight = constraints.maxHeight;
+                                    final heightBounded =
+                                        maxHeight != double.infinity && maxHeight > 0;
+                                    final diameter =
+                                        heightBounded ? (maxWidth < maxHeight ? maxWidth : maxHeight) : maxWidth;
+                                    return Center(
+                                      child: SizedBox.square(
+                                        dimension: diameter,
+                                        child: ClipOval(
+                                          child: Image.asset(
+                                            _imageForIndex(displayIndex),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
-                          child: Icon(
-                            currentInfo['icon'] as IconData,
-                            size: 26,
-                            color: isGreen ? Colors.white : WebColors.greenLight,
+                          SizedBox(
+                            width: isMobile
+                                ? AppSpacing.xs
+                                : isTablet
+                                    ? AppSpacing.sm
+                                    : AppSpacing.lg,
                           ),
-                        ),
-                        const SizedBox(height: 18),
-                        
-                        if (stat.label.toLowerCase().contains('week'))
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Expanded(
+                            flex: 5,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: isCompact ? AppSpacing.md : AppSpacing.xl,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Align(
+                                    alignment: index == 0
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    child: Text(
+                                      data.title.toUpperCase(),
+                                      textAlign: index == 0 ? TextAlign.right : TextAlign.left,
+                                      style: TextStyle(
+                                      fontSize: isMobile
+                                          ? 16
+                                          : isTablet
+                                              ? 18
+                                              : 26,
+                                      fontWeight: FontWeight.w800,
+                                      color: data.textColor,
+                                    ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                if (index == 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: AppSpacing.sm),
+                                    child: Text(
+                                      _impactDescriptions[data.title] ?? '',
+                                      textAlign: TextAlign.justify,
+                                      style: TextStyle(
+                                        fontSize: descriptionSize,
+                                        height: 1.4,
+                                        color: data.textColor.withValues(alpha: 0.9),
+                                      ),
+                                      maxLines: 5,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ),
+                          ),
+                        ],
+
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                stat.value,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                  height: 0.9,
+                              Container(
+                                width: isMobile
+                                    ? 24
+                                    : isTablet
+                                        ? 28
+                                        : 42,
+                                height: isMobile
+                                    ? 24
+                                    : isTablet
+                                        ? 28
+                                        : 42,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  data.icon ?? Icons.eco_outlined,
+                                  size: isMobile
+                                      ? 16
+                                      : isTablet
+                                          ? 20
+                                          : 36,
+                                  color: const Color(0xFF3F8E3F),
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'weeks',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 32 : 28,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                'Composting Time',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 18 : 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Column(
-                            children: [
-                              Text(
-                                stat.value,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 44 : 40,
-                                  fontWeight: FontWeight.w800,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                stat.label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: isLargeDesktop ? 18 : 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: isGreen ? Colors.white : WebColors.textTitle,
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  data.title.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: (() {
+                                      final baseSize = isMobile
+                                          ? 11.0
+                                          : isTablet
+                                              ? 13.0
+                                              : ((data.title == 'Produces nutrient-rich compost' ||
+                                                  data.title == 'Empowers communities')
+                                              ? 16.0
+                                              : data.title == 'Reduces landfill waste'
+                                                  ? 18.0
+                                                  : 20.0);
+                                      if (index != 0 && isHovered) {
+                                        return baseSize - 2.0;
+                                      }
+                                      return baseSize;
+                                    })(),
+                                    fontWeight: FontWeight.w800,
+                                    color: data.textColor,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                        
-                        const SizedBox(height: 18),
-                        
-                        Divider(
-                          color: isGreen 
-                            ? const Color.fromARGB(120, 255, 255, 255)
-                            : const Color(0xFFE0E0E0),
-                          thickness: 1.5,
-                        ),
-                        
-                        const SizedBox(height: 18),
-                        
-                        Text(
-                          currentInfo['title'],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: isLargeDesktop ? 20 : 18,
-                            fontWeight: FontWeight.w700,
-                            color: isGreen ? Colors.white : WebColors.textTitle,
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Text(
-                              currentInfo['description'],
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: isLargeDesktop ? 14 : 13,
-                                fontWeight: FontWeight.normal,
-                                color: isGreen 
-                                  ? const Color.fromARGB(230, 255, 255, 255)
-                                  : const Color(0xFF666666),
-                                height: 1.6,
-                              ),
+                          if (index == 0)
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              switchInCurve: Curves.easeOut,
+                              switchOutCurve: Curves.easeIn,
+                              child: isHovered
+                                  ? Padding(
+                                      key: ValueKey<String>('desc_${data.title}'),
+                                      padding: const EdgeInsets.only(top: AppSpacing.sm),
+                                      child: Text(
+                                        _impactDescriptions[data.title] ?? '',
+                                        style: TextStyle(
+                                          fontSize: descriptionSize,
+                                          height: 1.4,
+                                          color: data.textColor.withValues(alpha: 0.9),
+                                        ),
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
                             ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(3, (i) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              width: i == _currentExpandedInfo ? 24 : 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: i == _currentExpandedInfo 
-                                  ? (isGreen ? Colors.white : WebColors.greenLight)
-                                  : (isGreen 
-                                      ? const Color.fromARGB(100, 255, 255, 255)
-                                      : const Color(0xFFE0E0E0)),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            );
-                          }),
-                        ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        Text(
-                          'Click to see more • Hover off to collapse',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isGreen 
-                              ? const Color.fromARGB(180, 255, 255, 255)
-                              : const Color(0xFF999999),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                        ],
+                      ),
               ),
-            );
-          },
+              const SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
-    );
+      );
   }
 
-  void _safeSetState(VoidCallback callback) {
-    if (mounted) {
-      setState(callback);
+  String _imageForIndex(int index) {
+    switch (index) {
+      case 0:
+        return 'assets/images/Reduce_lanfill.png';
+      case 1:
+        return 'assets/images/produce.png';
+      case 2:
+        return 'assets/images/empower.png';
+      default:
+        return 'assets/images/reduce.png';
     }
   }
+}
+
+class _ImpactCardData {
+  final String title;
+  final IconData? icon;
+  final Color backgroundColor;
+  final Color textColor;
+  const _ImpactCardData({
+    required this.title,
+    this.icon,
+    required this.backgroundColor,
+    required this.textColor,
+  });
 }

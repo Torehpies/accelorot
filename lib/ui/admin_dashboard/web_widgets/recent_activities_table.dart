@@ -10,7 +10,8 @@ class RecentActivitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activitiesAsync = ref.watch(userTeamActivitiesProvider);
+    // Use streaming provider for real-time updates 
+    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -27,54 +28,41 @@ class RecentActivitiesTable extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Recent Activities',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
+              _buildHeaderTitleRow(ref),
+              const SizedBox(height: 20),
+              _buildHeader(),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              const SizedBox(height: 8),
+              Expanded(
+                child: activitiesAsync.when(
+                  data: (activities) => _buildContent(activities, batches),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, stack) => const Center(
+                    child: Text(
+                      'Failed to load activities',
+                      style: TextStyle(color: Color(0xFF9CA3AF)),
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh, size: 16),
-                onPressed: () => ref.invalidate(userTeamActivitiesProvider),
-                tooltip: 'Refresh',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          _buildHeader(),
-          const Divider(height: 1, color: Color(0xFFE5E7EB)),
-          const SizedBox(height: 8),
-          Expanded(
-            child: activitiesAsync.when(
-              data: (activities) => _buildContent(activities, batches),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, stack) => const Center(
-                child: Text(
-                  'Failed to load activities',
-                  style: TextStyle(color: Color(0xFF9CA3AF)),
-                ),
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildContent(
     List<ActivityLogItem> activities,
-    List<dynamic> batches,
-  ) {
+    List<dynamic> batches, {
+    bool shrinkWrap = false,
+  }) {
     if (activities.isEmpty) {
       return const Center(
         child: Text(
@@ -87,7 +75,10 @@ class RecentActivitiesTable extends ConsumerWidget {
     return ListView.separated(
       itemCount: activities.length,
       padding: EdgeInsets.zero,
-      physics: const ClampingScrollPhysics(),
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap
+          ? const NeverScrollableScrollPhysics()
+          : const ClampingScrollPhysics(),
       itemBuilder: (context, index) {
         final activity = activities[index];
         return _buildRow(activity, batches);
@@ -103,7 +94,7 @@ class RecentActivitiesTable extends ConsumerWidget {
       child: Row(
         children: const [
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Text(
               'Description',
               style: TextStyle(
@@ -114,8 +105,9 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 2,
             child: Text(
-              'Category',
+              'Machine / Batch',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -124,6 +116,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 2,
             child: Text(
               'Status',
               style: TextStyle(
@@ -134,6 +127,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 1,
             child: Text(
               'Date',
               style: TextStyle(
@@ -145,6 +139,30 @@ class RecentActivitiesTable extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderTitleRow(WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Recent Activities',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, size: 16),
+          // ✅ Invalidate streaming provider to force refresh
+          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
+          tooltip: 'Refresh',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      ],
     );
   }
 
@@ -161,13 +179,15 @@ class RecentActivitiesTable extends ConsumerWidget {
       }
     }
 
+    final machineText = activity.machineName ?? activity.machineId ?? '';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -197,85 +217,6 @@ class RecentActivitiesTable extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-
-                      // Machine and Batch info row
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          if (activity.machineName != null ||
-                              activity.machineId != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.blue.shade200,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.precision_manufacturing,
-                                    size: 10,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    activity.machineName ??
-                                        activity.machineId ??
-                                        '',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.blue.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (batchDisplayName != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.purple.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: Colors.purple.shade200,
-                                  width: 0.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.inventory_2_outlined,
-                                    size: 10,
-                                    color: Colors.purple.shade700,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    batchDisplayName,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.purple.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
                       // Operator name
                       Text(
                         activity.operatorName != null &&
@@ -294,12 +235,39 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              _getCategoryText(activity),
-              style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Machine name
+                Text(
+                  machineText.isNotEmpty ? machineText : '—',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF374151),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (batchDisplayName != null && batchDisplayName.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  // Batch name
+                  Text(
+                    batchDisplayName,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
+            flex: 2,
             child: Text(
               _getStatusText(activity),
               style: const TextStyle(
@@ -310,6 +278,7 @@ class RecentActivitiesTable extends ConsumerWidget {
             ),
           ),
           Expanded(
+            flex: 1,
             child: Text(
               _formatDate(activity.timestamp),
               style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
@@ -318,19 +287,6 @@ class RecentActivitiesTable extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _getCategoryText(ActivityLogItem log) {
-    switch (log.type) {
-      case ActivityType.substrate:
-        return 'Substrate';
-      case ActivityType.alert:
-        return 'Alert';
-      case ActivityType.report:
-        return log.reportType ?? 'Report';
-      case ActivityType.cycle:
-        return log.controllerType == 'drum_controller' ? 'Drum' : 'Aerator';
-    }
   }
 
   String _getStatusText(ActivityLogItem log) {

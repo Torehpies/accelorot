@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/mobile/activity_section_card.dart';
 import '../widgets/mobile/navigation_section_card.dart';
-import '../widgets/mobile/batch_filter_section.dart';
+import '../widgets/mobile/all_activity_section.dart';
 import '../models/activity_filter_model.dart';
 import '../../core/themes/app_theme.dart';
 
@@ -20,8 +20,6 @@ class ActivityLogsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Removed the machine filter banner
-
               // Main content container with white background
               Expanded(
                 child: Container(
@@ -50,21 +48,11 @@ class ActivityLogsScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // All Activity Section
-                              const NavigationSectionCard(
-                                icon: Icons.history,
-                                title: 'View All Activity',
-                                route: '/all-activity',
-                                // Removed focusedMachineId
-                              ),
-                              const SizedBox(height: 16),
-
                               // Substrate Section
                               const ActivitySectionCard(
                                 icon: Icons.eco_outlined,
                                 title: 'Substrate',
                                 viewAllRoute: '/substrates',
-                                // Removed focusedMachineId
                                 filters: [
                                   FilterConfig(
                                     icon: Icons.eco,
@@ -96,7 +84,6 @@ class ActivityLogsScreen extends StatelessWidget {
                                 icon: Icons.warning_amber_outlined,
                                 title: 'Alerts',
                                 viewAllRoute: '/alerts',
-                                // Removed focusedMachineId
                                 filters: [
                                   FilterConfig(
                                     icon: Icons.thermostat,
@@ -126,9 +113,8 @@ class ActivityLogsScreen extends StatelessWidget {
                               // Cycles & Recommendations Section
                               const NavigationSectionCard(
                                 icon: Icons.auto_awesome,
-                                title: 'Cycles & Recommendations',
+                                title: 'Operations and AI',
                                 route: '/cycles-recom',
-                                // Removed focusedMachineId
                               ),
                               const SizedBox(height: 16),
 
@@ -137,7 +123,6 @@ class ActivityLogsScreen extends StatelessWidget {
                                 icon: Icons.report_outlined,
                                 title: 'Reports',
                                 viewAllRoute: '/reports',
-                                // Removed focusedMachineId
                                 filters: [
                                   FilterConfig(
                                     icon: Icons.build,
@@ -167,12 +152,12 @@ class ActivityLogsScreen extends StatelessWidget {
                         ),
                       ),
 
-                      // Batch filter header - positioned on top
+                      // All Activity header - positioned on top
                       const Positioned(
                         top: 0,
                         left: 0,
                         right: 0,
-                        child: BatchFilterSection(),
+                        child: AllActivitySection(),
                       ),
                     ],
                   ),
