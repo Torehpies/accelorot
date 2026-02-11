@@ -53,21 +53,29 @@ class _PaginationControlsState extends State<PaginationControls>
     super.dispose();
   }
 
-  List<int> _getVisiblePages() {
-    if (widget.totalPages <= 7) {
+  List<int> _getVisiblePages({required bool isCompact}) {
+    final maxVisible = isCompact ? 3 : 5;
+    if (widget.totalPages <= maxVisible) {
       return List.generate(widget.totalPages, (i) => i + 1);
     }
 
-    // Show current page with 2 pages on each side
-    int start = (widget.currentPage - 2).clamp(1, widget.totalPages - 4);
-    int end = (start + 4).clamp(5, widget.totalPages);
+    final sidePages = isCompact ? 1 : 2;
+    final windowSize = 1 + (sidePages * 2);
 
-    // Adjust start if we're near the end
+    int start = (widget.currentPage - sidePages).clamp(
+      1,
+      widget.totalPages - (windowSize - 1),
+    );
+    int end = (start + (windowSize - 1)).clamp(windowSize, widget.totalPages);
+
     if (end == widget.totalPages) {
-      start = (widget.totalPages - 4).clamp(1, widget.totalPages);
+      start = (widget.totalPages - (windowSize - 1)).clamp(
+        1,
+        widget.totalPages,
+      );
     }
 
-    return List.generate(5, (i) => start + i);
+    return List.generate(windowSize, (i) => start + i);
   }
 
   void _showItemsPerPageMenu(BuildContext context) async {
@@ -106,147 +114,200 @@ class _PaginationControlsState extends State<PaginationControls>
 
   @override
   Widget build(BuildContext context) {
-    final visiblePages = _getVisiblePages();
-    final showLeftEllipsis = visiblePages.first > 1;
-    final showRightEllipsis = visiblePages.last < widget.totalPages;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 900;
+        final visiblePages = _getVisiblePages(isCompact: isCompact);
+        final showLeftEllipsis = visiblePages.first > 1;
+        final showRightEllipsis = visiblePages.last < widget.totalPages;
+        final pageControls = _buildPageControls(
+          showLeftEllipsis: showLeftEllipsis,
+          showRightEllipsis: showRightEllipsis,
+          visiblePages: visiblePages,
+          isCompact: isCompact,
+        );
+        final spacing = isCompact ? 6.0 : AppSpacing.sm;
 
-    return AnimatedOpacity(
-      opacity: widget.isLoading ? 0.5 : 1.0,
-      duration: const Duration(milliseconds: 200),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Items per page selector with enhanced loading state
-          Row(
+        return AnimatedOpacity(
+          opacity: widget.isLoading ? 0.5 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Items per page:',
-                style: WebTextStyles.bodyMediumGray,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Builder(
-                builder: (context) => MouseRegion(
-                  cursor:
-                      (widget.isLoading || widget.onItemsPerPageChanged == null)
-                      ? SystemMouseCursors.basic
-                      : SystemMouseCursors.click,
-                  child: InkWell(
-                    onTap:
-                        (widget.isLoading ||
-                            widget.onItemsPerPageChanged == null)
-                        ? null
-                        : () => _showItemsPerPageMenu(context),
-                    borderRadius: BorderRadius.circular(8),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: widget.isLoading
-                            ? WebColors.inputBackground.withValues(alpha: 0.5)
-                            : WebColors.inputBackground,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: widget.isLoading
-                              ? WebColors.tableBorder
-                              : WebColors.cardBorder,
-                          width: widget.isLoading ? 2 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.isLoading)
-                            _buildSkeletonBox(width: 24, height: 16)
-                          else
-                            Text(
-                              '${widget.itemsPerPage}',
-                              style: WebTextStyles.bodyMedium,
-                            ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_drop_down,
-                            size: 20,
-                            color: widget.isLoading
-                                ? WebColors.textMuted
-                                : WebColors.textLabel,
-                          ),
-                        ],
-                      ),
-                    ),
+              _buildItemsPerPage(context, isCompact: isCompact),
+              Expanded(
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _withSpacing(pageControls, spacing),
                   ),
                 ),
               ),
+              if (!isCompact) const SizedBox(width: 150),
             ],
           ),
+        );
+      },
+    );
+  }
 
-          // Centered page navigation with numbered buttons
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Back button
-                _buildNavButton(
-                  icon: Icons.chevron_left,
-                  label: 'Back',
-                  isEnabled:
-                      widget.currentPage > 1 &&
-                      widget.onPageChanged != null &&
-                      !widget.isLoading,
-                  onTap: () => widget.onPageChanged!(widget.currentPage - 1),
-                  isNext: false,
-                ),
+  Widget _buildItemsPerPage(BuildContext context, {required bool isCompact}) {
+    final labelStyle = WebTextStyles.bodyMediumGray.copyWith(
+      fontSize: isCompact ? 12 : null,
+    );
+    final valueStyle = WebTextStyles.bodyMedium.copyWith(
+      fontSize: isCompact ? 12 : null,
+    );
+    final padding = EdgeInsets.symmetric(
+      horizontal: isCompact ? 6 : 8,
+      vertical: isCompact ? 2 : 4,
+    );
 
-                const SizedBox(width: AppSpacing.sm),
-
-                // First page if not visible
-                if (showLeftEllipsis) ...[
-                  _buildPageButton(1),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('...', style: WebTextStyles.bodyMediumGray),
+    return Row(
+      children: [
+        Text('Items per page:', style: labelStyle),
+        const SizedBox(width: AppSpacing.sm),
+        Builder(
+          builder: (context) => MouseRegion(
+            cursor:
+                (widget.isLoading || widget.onItemsPerPageChanged == null)
+                ? SystemMouseCursors.basic
+                : SystemMouseCursors.click,
+            child: InkWell(
+              onTap:
+                  (widget.isLoading || widget.onItemsPerPageChanged == null)
+                  ? null
+                  : () => _showItemsPerPageMenu(context),
+              borderRadius: BorderRadius.circular(8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: padding,
+                decoration: BoxDecoration(
+                  color: widget.isLoading
+                      ? WebColors.inputBackground.withValues(alpha: 0.5)
+                      : WebColors.inputBackground,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: widget.isLoading
+                        ? WebColors.tableBorder
+                        : WebColors.cardBorder,
+                    width: widget.isLoading ? 2 : 1,
                   ),
-                ],
-
-                // Visible page numbers
-                ...visiblePages.map((page) => _buildPageButton(page)),
-
-                // Last page if not visible
-                if (showRightEllipsis) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('...', style: WebTextStyles.bodyMediumGray),
-                  ),
-                  _buildPageButton(widget.totalPages),
-                ],
-
-                const SizedBox(width: AppSpacing.sm),
-
-                // Next button
-                _buildNavButton(
-                  icon: Icons.chevron_right,
-                  label: 'Next',
-                  isEnabled:
-                      widget.currentPage < widget.totalPages &&
-                      widget.onPageChanged != null &&
-                      !widget.isLoading,
-                  onTap: () => widget.onPageChanged!(widget.currentPage + 1),
-                  isNext: true,
                 ),
-              ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.isLoading)
+                      _buildSkeletonBox(width: 24, height: 16)
+                    else
+                      Text(
+                        '${widget.itemsPerPage}',
+                        style: valueStyle,
+                      ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: isCompact ? 18 : 20,
+                      color: widget.isLoading
+                          ? WebColors.textMuted
+                          : WebColors.textLabel,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
+        ),
+      ],
+    );
+  }
 
-          const SizedBox(width: 150),
-        ],
+  List<Widget> _buildPageControls({
+    required bool showLeftEllipsis,
+    required bool showRightEllipsis,
+    required List<int> visiblePages,
+    required bool isCompact,
+  }) {
+    final widgets = <Widget>[
+      _buildNavButton(
+        icon: Icons.chevron_left,
+        label: 'Back',
+        isEnabled:
+            widget.currentPage > 1 &&
+            widget.onPageChanged != null &&
+            !widget.isLoading,
+        onTap: () => widget.onPageChanged!(widget.currentPage - 1),
+        isNext: false,
+        isCompact: isCompact,
+      ),
+    ];
+
+    if (showLeftEllipsis) {
+      widgets.addAll([
+        _buildPageButton(1),
+        Text(
+          '...',
+          style: WebTextStyles.bodyMediumGray.copyWith(
+            fontSize: isCompact ? 12 : null,
+          ),
+        ),
+      ]);
+    }
+
+    widgets.addAll(visiblePages.map(_buildPageButton));
+
+    if (showRightEllipsis) {
+      widgets.addAll([
+        Text(
+          '...',
+          style: WebTextStyles.bodyMediumGray.copyWith(
+            fontSize: isCompact ? 12 : null,
+          ),
+        ),
+        _buildPageButton(widget.totalPages),
+      ]);
+    }
+
+    widgets.add(
+      _buildNavButton(
+        icon: Icons.chevron_right,
+        label: 'Next',
+        isEnabled:
+            widget.currentPage < widget.totalPages &&
+            widget.onPageChanged != null &&
+            !widget.isLoading,
+        onTap: () => widget.onPageChanged!(widget.currentPage + 1),
+        isNext: true,
+        isCompact: isCompact,
       ),
     );
+
+    return widgets;
+  }
+
+  List<Widget> _withSpacing(List<Widget> widgets, double spacing) {
+    if (widgets.isEmpty) return widgets;
+    final spaced = <Widget>[];
+    for (var i = 0; i < widgets.length; i++) {
+      spaced.add(widgets[i]);
+      if (i < widgets.length - 1) {
+        spaced.add(SizedBox(width: spacing));
+      }
+    }
+    return spaced;
   }
 
   Widget _buildPageButton(int page) {
     final isActive = page == widget.currentPage;
+    final isCompact = contextSizeIsCompact(context);
+    final padding = EdgeInsets.symmetric(
+      horizontal: isCompact ? 8 : 12,
+      vertical: isCompact ? 4 : 6,
+    );
+    final textStyle = WebTextStyles.bodyMedium.copyWith(
+      fontSize: isCompact ? 12 : null,
+      color: isActive ? WebColors.cardBackground : null,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -257,7 +318,7 @@ class _PaginationControlsState extends State<PaginationControls>
         borderRadius: BorderRadius.circular(6),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: padding,
           decoration: BoxDecoration(
             color: isActive ? WebColors.success : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
@@ -272,11 +333,7 @@ class _PaginationControlsState extends State<PaginationControls>
               ? _buildSkeletonBox(width: 12, height: 16)
               : Text(
                   '$page',
-                  style: isActive
-                      ? WebTextStyles.bodyMedium.copyWith(
-                          color: WebColors.cardBackground,
-                        )
-                      : WebTextStyles.bodyMedium,
+                  style: textStyle,
                 ),
         ),
       ),
@@ -290,7 +347,13 @@ class _PaginationControlsState extends State<PaginationControls>
     required bool isEnabled,
     required VoidCallback onTap,
     required bool isNext,
+    required bool isCompact,
   }) {
+    final textStyle = WebTextStyles.bodyMedium.copyWith(
+      fontSize: isCompact ? 12 : null,
+      color: isEnabled ? WebColors.textSecondary : WebColors.textMuted,
+    );
+
     return MouseRegion(
       cursor: isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
       child: Material(
@@ -302,33 +365,32 @@ class _PaginationControlsState extends State<PaginationControls>
               ? WebColors.inputBackground
               : Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: isCompact ? 8 : 16,
+              vertical: isCompact ? 6 : 8,
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!isNext) ...[
                   Icon(
                     icon,
-                    size: 18,
+                    size: isCompact ? 16 : 18,
                     color: isEnabled
                         ? WebColors.textSecondary
                         : WebColors.textMuted,
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: isCompact ? 4 : 6),
                 ],
                 Text(
                   label,
-                  style: WebTextStyles.bodyMedium.copyWith(
-                    color: isEnabled
-                        ? WebColors.textSecondary
-                        : WebColors.textMuted,
-                  ),
+                  style: textStyle,
                 ),
                 if (isNext) ...[
-                  const SizedBox(width: 6),
+                  SizedBox(width: isCompact ? 4 : 6),
                   Icon(
                     icon,
-                    size: 18,
+                    size: isCompact ? 16 : 18,
                     color: isEnabled
                         ? WebColors.textSecondary
                         : WebColors.textMuted,
@@ -340,6 +402,11 @@ class _PaginationControlsState extends State<PaginationControls>
         ),
       ),
     );
+  }
+
+  bool contextSizeIsCompact(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return width < 900;
   }
 
   /// Animated skeleton box with pulsing effect
