@@ -117,3 +117,15 @@ final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
     return true;
   }).toList();
 });
+
+// ===== STREAMING ACTIVITY PROVIDERS =====
+
+/// Stream provider for all activities with real-time updates
+/// Used by both operator dashboard (Activity Logs) and admin dashboard (Recent Activities Table)
+final allActivitiesStreamProvider = StreamProvider<List<ActivityLogItem>>((ref) {
+  // Watch auth state to rebuild when user changes
+  ref.watch(authStateChangesProvider);
+
+  final aggregator = ref.watch(activityAggregatorProvider);
+  return aggregator.streamAllActivities();
+});

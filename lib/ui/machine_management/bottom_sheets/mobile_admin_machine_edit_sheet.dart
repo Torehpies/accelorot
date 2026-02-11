@@ -1,15 +1,16 @@
+// lib/ui/machine_management/bottom_sheets/mobile_admin_machine_edit_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
-import '../../core/bottom_sheet/fields/mobile_input_field.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
-import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
+import '../../core/widgets/dialog/mobile_confirmation_dialog.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateMachineCallback = Future<void> Function({
   required String teamId,
@@ -88,23 +89,13 @@ class _MobileAdminMachineEditSheetState
       );
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Machine updated successfully',
-          type: ToastType.success,
-        );
-        // Small delay so the toast is visible before the sheet closes
-        await Future.delayed(const Duration(milliseconds: 600));
-        if (mounted) Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        AppSnackbar.success(context, 'Machine updated successfully');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to update machine',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to update machine');
       }
     }
   }
@@ -138,12 +129,13 @@ class _MobileAdminMachineEditSheetState
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(

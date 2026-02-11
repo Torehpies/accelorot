@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'mobile_settings_view.dart';
-import '../../core/widgets/web_base_container.dart';
+import '../../core/widgets/containers/web_base_container.dart';
 
 class WebSettingsView extends ConsumerWidget {
   const WebSettingsView({super.key});

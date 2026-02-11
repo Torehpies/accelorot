@@ -1,5 +1,7 @@
-// waste_category_section.dart
+// lib/ui/operator_dashboard/fields/waste_category_section.dart
+
 import 'package:flutter/material.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
 import 'waste_config.dart';
 import 'info_box.dart';
 
@@ -15,33 +17,34 @@ class WasteCategorySection extends StatelessWidget {
     this.errorText,
   });
 
+  static const List<MobileDropdownItem<String>> _wasteCategoryItems = [
+    MobileDropdownItem(value: 'greens', label: 'Greens (Nitrogen)'),
+    MobileDropdownItem(value: 'browns', label: 'Browns (Carbon)'),
+    MobileDropdownItem(value: 'compost', label: 'Compost'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        MobileDropdownField<String>(
+          label: 'Waste Category',
+          value: selectedWasteCategory,
+          items: _wasteCategoryItems,
+          required: true,
+          onChanged: onCategoryChanged,
+          errorText: errorText,
+          hintText: 'Select category',
+        ),
         if (selectedWasteCategory != null) ...[
+          const SizedBox(height: 12),
           InfoBox(
             text: wasteCategoryInfo[selectedWasteCategory]!,
             color: Colors.green,
             emoji: '',
           ),
-          const SizedBox(height: 12),
         ],
-        DropdownButtonFormField<String>(
-          initialValue: selectedWasteCategory,
-          isExpanded: true,
-          decoration: InputDecoration(
-            labelText: 'Select category',
-            prefixIcon: const Icon(Icons.category_outlined, size: 18),
-            errorText: errorText,
-          ),
-          items: const [
-            DropdownMenuItem(value: 'greens', child: Text('Greens (Nitrogen)')),
-            DropdownMenuItem(value: 'browns', child: Text('Browns (Carbon)')),
-            DropdownMenuItem(value: 'compost', child: Text('Compost')),
-          ],
-          onChanged: onCategoryChanged,
-        ),
       ],
     );
   }

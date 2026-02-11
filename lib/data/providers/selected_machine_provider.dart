@@ -2,7 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SelectedMachineNotifier extends Notifier<String> {
   @override
-  String build() => "";
+  String build() {
+
+    ref.keepAlive();
+    return "";
+  }
 
   void setMachine(String machineId) {
     state = machineId;
@@ -16,4 +20,6 @@ class SelectedMachineNotifier extends Notifier<String> {
 final selectedMachineIdProvider =
     NotifierProvider<SelectedMachineNotifier, String>(
       () => SelectedMachineNotifier(),
+
+      dependencies: const [],
     );

@@ -83,6 +83,8 @@ abstract class MachineModel with _$MachineModel {
     Map<String, dynamic>? metadata,
     @Default(false) bool drumActive,
     @Default(false) bool aeratorActive,
+    @Default(false) bool drumPaused,
+    @Default(false) bool aeratorPaused,
   }) = _MachineModel;
 
   factory MachineModel.fromJson(Map<String, dynamic> json) =>
@@ -128,6 +130,8 @@ abstract class MachineModel with _$MachineModel {
           (data['metadata'] as Map<String, dynamic>?) ?? <String, dynamic>{},
       drumActive: data['drumActive'] ?? false,
       aeratorActive: data['aeratorActive'] ?? false,
+      drumPaused: data['drumPaused'] ?? false,
+      aeratorPaused: data['aeratorPaused'] ?? false,
     );
   }
 
@@ -160,6 +164,8 @@ abstract class MachineModel with _$MachineModel {
       if (metadata != null) 'metadata': metadata,
       'drumActive': drumActive,
       'aeratorActive': aeratorActive,
+      'drumPaused': drumPaused,
+      'aeratorPaused': aeratorPaused,
     };
   }
 }

@@ -1,8 +1,12 @@
 // lib/ui/activity_logs/services/activity_aggregator_service.dart
 
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../../../data/models/alert.dart';
+import '../../../data/models/cycle_recommendation.dart';
 import '../../../data/repositories/substrate_repository.dart';
 import '../../../data/repositories/alert_repository.dart';
 import '../../../data/repositories/report_repository.dart';
@@ -40,6 +44,11 @@ class ActivityAggregatorService {
 
   // ===== MEMORY CACHE =====
   static const _cacheTTL = Duration(minutes: 5);
+  
+  // ===== CUTOFF CONFIGURATION =====
+  /// Default cutoff in days for alerts and cycles (change this to adjust globally)
+  static const defaultCutoffDays = 2;
+  
   final Map<String, CachedData<List<ActivityLogItem>>> _cache = {};
   CachedData<ActivityResult>? _allActivitiesCache;
 
@@ -108,7 +117,7 @@ class ActivityAggregatorService {
   }
 
   /// Fetch and transform alert activities
-  Future<List<ActivityLogItem>> getAlerts() async {
+  Future<List<ActivityLogItem>> getAlerts({DateTime? cutoffDate, int? limit}) async {
     // Check cache first
     final cached = _cache['alerts'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -119,7 +128,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh alerts from Firebase...');
-      final alerts = await _alertRepo.getTeamAlerts();
+      final alerts = await _alertRepo.getTeamAlerts(cutoffDate: cutoffDate, limit: limit);
       final items = alerts
           .map((alert) => ActivityPresentationMapper.fromAlert(alert))
           .toList();
@@ -188,7 +197,7 @@ class ActivityAggregatorService {
   }
 
   /// Fetch and transform cycle & recommendation activities
-  Future<List<ActivityLogItem>> getCyclesRecom() async {
+  Future<List<ActivityLogItem>> getCyclesRecom({DateTime? cutoffDate, int? limit}) async {
     // Check cache first
     final cached = _cache['cycles'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -199,7 +208,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh cycles from Firebase...');
-      final cycles = await _cycleRepo.getTeamCycles();
+      final cycles = await _cycleRepo.getTeamCycles(cutoffDate: cutoffDate, limit: limit);
       final items = cycles
           .map(
             (cycle) =>
@@ -332,8 +341,14 @@ class ActivityAggregatorService {
       // Process substrates
       final substrateStopwatch = Stopwatch()..start();
       for (var substrate in substrates) {
-        cache['substrate_${substrate.id}'] = substrate;
-        allItems.add(ActivityPresentationMapper.fromSubstrate(substrate));
+        try {
+          final cacheKey = 'substrate_${substrate.id}';
+          cache[cacheKey] = substrate;
+          allItems.add(ActivityPresentationMapper.fromSubstrate(substrate));
+          debugPrint('   🔑 Cached substrate: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing substrate ${substrate.id}: $e');
+        }
       }
       substrateStopwatch.stop();
       debugPrint(
@@ -343,8 +358,14 @@ class ActivityAggregatorService {
       // Process alerts
       final alertStopwatch = Stopwatch()..start();
       for (var alert in alerts) {
-        cache['alert_${alert.id}'] = alert;
-        allItems.add(ActivityPresentationMapper.fromAlert(alert));
+        try {
+          final cacheKey = 'alert_${alert.id}';
+          cache[cacheKey] = alert;
+          allItems.add(ActivityPresentationMapper.fromAlert(alert));
+          debugPrint('   🔑 Cached alert: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing alert ${alert.id}: $e');
+        }
       }
       alertStopwatch.stop();
       debugPrint(
@@ -354,8 +375,14 @@ class ActivityAggregatorService {
       // Process cycles
       final cycleStopwatch = Stopwatch()..start();
       for (var cycle in cycles) {
-        cache['cycle_${cycle.id}'] = cycle;
-        allItems.add(ActivityPresentationMapper.fromCycleRecommendation(cycle));
+        try {
+          final cacheKey = 'cycle_${cycle.id}';
+          cache[cacheKey] = cycle;
+          allItems.add(ActivityPresentationMapper.fromCycleRecommendation(cycle));
+          debugPrint('   🔑 Cached cycle: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing cycle ${cycle.id}: $e');
+        }
       }
       cycleStopwatch.stop();
       debugPrint(
@@ -365,8 +392,14 @@ class ActivityAggregatorService {
       // Process reports
       final reportStopwatch = Stopwatch()..start();
       for (var report in reports) {
-        cache['report_${report.id}'] = report;
-        allItems.add(ActivityPresentationMapper.fromReport(report));
+        try {
+          final cacheKey = 'report_${report.id}';
+          cache[cacheKey] = report;
+          allItems.add(ActivityPresentationMapper.fromReport(report));
+          debugPrint('   🔑 Cached report: $cacheKey');
+        } catch (e) {
+          debugPrint('⚠️ Error processing report ${report.id}: $e');
+        }
       }
       reportStopwatch.stop();
       debugPrint(
@@ -417,5 +450,60 @@ class ActivityAggregatorService {
     _cache.remove(category);
     _allActivitiesCache = null; // Also clear combined cache
     debugPrint('🗑️ Cache cleared for category: $category');
+  }
+
+  // ===== STREAMING METHODS =====
+
+  /// Stream all activities with real-time updates
+  Stream<List<ActivityLogItem>> streamAllActivities() async* {
+    debugPrint('🔴 Setting up streamAllActivities...');
+    
+    final cutoffDate = DateTime.now().subtract(Duration(days: defaultCutoffDays));
+    
+    // Setup streams for real-time data
+    final alertsStream = _alertRepo.streamTeamAlerts(cutoffDate: cutoffDate);
+    final cyclesStream = _cycleRepo.streamTeamCycles(cutoffDate: cutoffDate);
+    
+    // Get initial substrates (they don't have streaming support yet)
+    final substrates = await _substrateRepo.getAllSubstrates();
+    final substrateItems = substrates
+        .map((s) => ActivityPresentationMapper.fromSubstrate(s))
+        .toList();
+
+    // Combine alerts and cycles streams
+    await for (final alertsAndCycles in Rx.combineLatest2(
+      alertsStream,
+      cyclesStream,
+      (List<Alert> alerts, List<CycleRecommendation> cycles) {
+        return {'alerts': alerts, 'cycles': cycles};
+      },
+    )) {
+      try {
+        final alerts = alertsAndCycles['alerts'] as List<Alert>;
+        final cycles = alertsAndCycles['cycles'] as List<CycleRecommendation>;
+        
+        // Get reports (using one-time fetch for now)
+        final reports = await getReportsRaw();
+
+        // Transform all to ActivityLogItems
+        final allActivities = <ActivityLogItem>[
+          ...substrateItems,
+          ...alerts.map((a) => ActivityPresentationMapper.fromAlert(a)),
+          ...cycles.map((c) => ActivityPresentationMapper.fromCycleRecommendation(c)),
+          ...reports.map((r) => ActivityPresentationMapper.fromReport(r)),
+        ];
+
+        // Sort by timestamp (newest first)
+        allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+        debugPrint('🔔 Stream updated: ${allActivities.length} total activities');
+
+        // Yield the combined list
+        yield allActivities;
+      } catch (e) {
+        debugPrint('❌ Error in streamAllActivities: $e');
+        yield [];
+      }
+    }
   }
 }

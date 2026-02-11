@@ -1,4 +1,8 @@
+// lib/ui/operator_dashboard/fields/machine_selection_field.dart
+
 import 'package:flutter/material.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
+import '../../core/skeleton/skeleton_dropdown.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/services/firebase/firebase_machine_service.dart';
 import '../../../data/repositories/machine_repository/machine_repository.dart';
@@ -54,8 +58,12 @@ class _MachineSelectionFieldState extends State<MachineSelectionField> {
     return FutureBuilder<List<MachineModel>>(
       future: _fetchTeamMachines(),
       builder: (context, snapshot) {
+        // Show skeleton loader while loading
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const SkeletonDropdown(
+            label: 'Machine',
+            showRequired: true,
+          );
         }
 
         if (snapshot.hasError) {
@@ -113,40 +121,24 @@ class _MachineSelectionFieldState extends State<MachineSelectionField> {
           );
         }
 
-        return DropdownButtonFormField<String>(
-          initialValue: widget.selectedMachineId,
-          decoration: InputDecoration(
-            labelText: 'Select Machine',
-            prefixIcon: const Icon(Icons.precision_manufacturing, size: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
-            ),
-            suffixIcon: widget.isLocked
-                ? const Icon(Icons.lock, size: 18, color: Colors.grey)
-                : null,
-            errorText: widget.errorText,
-          ),
-          items: machines.map((machine) {
-            return DropdownMenuItem<String>(
-              value: machine.machineId,
-              enabled: !widget.isLocked,
-              child: Text(
-                machine.machineName,
-                style: TextStyle(
-                  color: widget.isLocked ? Colors.grey : Colors.black87,
-                ),
-              ),
-            );
-          }).toList(),
+        // Convert machines to dropdown items
+        final items = machines.map((machine) {
+          return MobileDropdownItem<String>(
+            value: machine.machineId,
+            label: machine.machineName,
+          );
+        }).toList();
+
+        return MobileDropdownField<String>(
+          label: 'Machine',
+          value: widget.selectedMachineId,
+          items: items,
+          required: true,
+          enabled: !widget.isLocked,
           onChanged: widget.isLocked ? null : widget.onChanged,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a machine';
-            }
-            return null;
-          },
+          errorText: widget.errorText,
+          hintText: 'Select machine',
+          helperText: widget.isLocked ? 'Machine is locked for this context' : null,
         );
       },
     );

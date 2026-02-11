@@ -92,5 +92,6 @@ abstract class CycleService {
   Future<CycleRecommendation?> fetchCycleById(String cycleId);
 
   /// Stream all cycles for the team's batches with real-time updates
-  Stream<List<CycleRecommendation>> streamTeamCycles();
+  /// [cutoffDate] - Only stream cycles newer than this date (defaults to 2 days ago)
+  Stream<List<CycleRecommendation>> streamTeamCycles({DateTime? cutoffDate});
 }

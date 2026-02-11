@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/report.dart';
-import '../../core/dialog/base_dialog.dart';
-import '../../core/dialog/dialog_action.dart';
-import '../../core/dialog/dialog_fields.dart';
-import '../../core/dialog/toast_service.dart';
+import '../../core/widgets/dialog/base_dialog.dart';
+import '../../core/widgets/dialog/dialog_action.dart';
+import '../../core/widgets/dialog/dialog_fields.dart';
+import '../../core/ui/app_snackbar.dart';
 
 class ReportEditDetailsDialog extends StatefulWidget {
   final Report report;
@@ -63,6 +63,13 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
     super.dispose();
   }
 
+  bool get _hasChanges {
+    return _titleController.text.trim() != widget.report.title ||
+        _descriptionController.text.trim() != widget.report.description ||
+        _selectedStatus != widget.report.status ||
+        _selectedPriority != widget.report.priority;
+  }
+
   void _validateTitle() {
     setState(() {
       final title = _titleController.text.trim();
@@ -98,16 +105,6 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
       return;
     }
 
-    // Check if anything changed
-    if (title == widget.report.title &&
-        description == widget.report.description &&
-        _selectedStatus == widget.report.status &&
-        _selectedPriority == widget.report.priority) {
-      if (!mounted) return;
-      ToastService.show(context, message: 'No changes detected');
-      return;
-    }
-
     setState(() => _isSubmitting = true);
 
     try {
@@ -122,10 +119,10 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
-      ToastService.show(context, message: 'Report updated successfully');
+      AppSnackbar.success(context, 'Report updated successfully');
     } catch (e) {
       if (!mounted) return;
-      ToastService.show(context, message: 'Failed to update: $e');
+      AppSnackbar.error(context, 'Failed to update: $e');
       setState(() => _isSubmitting = false);
     }
   }
@@ -166,7 +163,7 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
           const SizedBox(height: 16),
 
           // Editable: Status
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Status',
             value: _selectedStatus,
             items: const [
@@ -182,7 +179,7 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
           const SizedBox(height: 16),
 
           // Editable: Priority
-          DropdownField<String>(
+          WebDropdownField<String>(
             label: 'Priority',
             value: _selectedPriority,
             items: const [
@@ -229,11 +226,9 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
         ),
         DialogAction.primary(
           label: 'Update Report',
-          onPressed:
-              _titleError == null && _descriptionError == null && !_isSubmitting
-              ? _handleSubmit
-              : null,
+          onPressed: _handleSubmit,
           isLoading: _isSubmitting,
+          isDisabled: !_hasChanges || _titleError != null || _descriptionError != null,
         ),
       ],
     );

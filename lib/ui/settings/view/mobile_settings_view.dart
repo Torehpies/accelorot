@@ -72,17 +72,11 @@ class SettingsContent extends ConsumerWidget {
                     icon: Icons.badge_outlined,
                     title: 'Name',
                     subtitle: displayName ?? 'Not set',
-                    titleStyle: const TextStyle(fontSize: 12),
-                    subtitleStyle: const TextStyle(fontSize: 11),
-                    iconSize: 18,
                   ),
                   SettingsTile(
                     icon: Icons.phone_outlined,
                     title: 'Contact Number',
                     subtitle: phoneNumber ?? 'Not set',
-                    titleStyle: const TextStyle(fontSize: 12),
-                    subtitleStyle: const TextStyle(fontSize: 11),
-                    iconSize: 18,
                   ),
                   SettingsTile(
                     icon: Icons.lock,

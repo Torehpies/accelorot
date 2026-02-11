@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/widgets/base_stats_card.dart';
+import '../../core/widgets/sample_cards/base_stats_card.dart';
 import '../../core/themes/web_colors.dart';
 import '../view_model/machine_viewmodel.dart';
 import '../../activity_logs/models/activity_common.dart';

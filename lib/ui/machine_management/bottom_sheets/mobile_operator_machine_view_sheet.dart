@@ -1,10 +1,12 @@
+// lib/ui/machine_management/bottom_sheets/mobile_operator_machine_view_sheet.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
 
 class MobileOperatorMachineViewSheet extends StatelessWidget {
   final MachineModel machine;

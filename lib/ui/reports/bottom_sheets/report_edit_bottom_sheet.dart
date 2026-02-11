@@ -1,14 +1,15 @@
+// lib/ui/reports/bottom_sheets/report_edit_bottom_sheet.dart
+
 import 'package:flutter/material.dart';
 import '../../../data/models/report.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_base.dart';
-import '../../core/bottom_sheet/mobile_bottom_sheet_buttons.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_field.dart';
-import '../../core/bottom_sheet/fields/mobile_readonly_section.dart';
-import '../../core/bottom_sheet/fields/mobile_input_field.dart';
-import '../../core/bottom_sheet/fields/mobile_dropdown_field.dart';
-import '../../core/dialog/mobile_confirmation_dialog.dart';
-import '../../core/toast/mobile_toast_service.dart';
-import '../../core/toast/toast_type.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
+import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_dropdown_field.dart';
+import '../../core/widgets/dialog/mobile_confirmation_dialog.dart';
+import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateReportCallback = Future<void> Function({
   required String machineId,
@@ -93,23 +94,15 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       );
 
       if (mounted) {
-        MobileToastService.show(
-          context,
-          message: 'Report updated successfully',
-          type: ToastType.success,
-        );
-        // Small delay so the toast is visible before the sheet closes
+        AppSnackbar.success(context, 'Report updated successfully');
+        // Small delay so the snackbar is visible before the sheet closes
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        MobileToastService.show(
-          context,
-          message: 'Failed to update report',
-          type: ToastType.error,
-        );
+        AppSnackbar.error(context, 'Failed to update report');
       }
     }
   }
@@ -147,12 +140,13 @@ class _ReportEditBottomSheetState extends State<ReportEditBottomSheet> {
       actions: [
         BottomSheetAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _cancel,
         ),
         BottomSheetAction.primary(
           label: 'Save',
-          onPressed: _isLoading ? null : _save,
+          onPressed: _save,
           isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
       body: Column(

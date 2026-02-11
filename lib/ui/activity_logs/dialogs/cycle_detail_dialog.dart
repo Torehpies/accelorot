@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/cycle_recommendation.dart';
-import '../../core/dialog/base_dialog.dart';
-import '../../core/dialog/dialog_action.dart';
-import '../../core/dialog/dialog_fields.dart';
+import '../../core/widgets/dialog/base_dialog.dart';
+import '../../core/widgets/dialog/dialog_action.dart';
+import '../../core/widgets/dialog/dialog_fields.dart';
 
 class CycleDetailDialog extends StatelessWidget {
   final CycleRecommendation cycle;

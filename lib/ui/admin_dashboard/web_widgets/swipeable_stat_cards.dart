@@ -1,7 +1,7 @@
 // lib/ui/mobile_admin_home/widgets/swipeable_stat_cards.dart
 
 import 'package:flutter/material.dart';
-import '../../core/widgets/base_stats_card.dart';
+import '../../core/widgets/sample_cards/base_stats_card.dart';
 import 'dart:ui';
 
 class StatCardData {

@@ -22,7 +22,7 @@ class AddAdminNotifier extends _$AddAdminNotifier {
   /// Admins are unverified initially but status is set to active
   Future<void> addAdmin({
     required String email,
-    required String password,
+    // required String password,
     required String firstname,
     required String lastname,
     required String teamId,
@@ -31,13 +31,13 @@ class AddAdminNotifier extends _$AddAdminNotifier {
 
     final result = await _service.addUser(
       email: email,
-      password: password,
+      // password: password,
       firstname: firstname,
       lastname: lastname,
       globalRole: GlobalRole.user.value,
       teamRole: TeamRole.admin.value,
-      status: UserStatus.active.value,
-      teamId: teamId,
+      status: UserStatus.approval.value,
+      requestTeamId: teamId,
     );
     if (result is Ok<AppUser>) {
       final appUser = result.value;

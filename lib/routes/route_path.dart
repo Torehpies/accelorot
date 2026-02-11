@@ -5,10 +5,12 @@ enum RoutePath {
   signup(path: '/signup'),
   //qrRefer(path: '/qr-refer'),
   pending(path: '/pending'),
+  approval(path: '/approval'),
   verifyEmail(path: '/verify-email'),
   teamSelect(path: '/team-select'),
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
+  resetEmailSent(path: '/reset-email-sent'),
 
   // operator paths
   dashboard(path: '/operator/dashboard'),

@@ -2,19 +2,24 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/control_input_fields.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
 import 'package:flutter_application_1/data/providers/machine_providers.dart';
+import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
+import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
+import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class AeratorCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
-  final String? machineId;
+  final String? machineId; // Deprecated - kept for backward compatibility
 
   const AeratorCard({super.key, this.currentBatch, this.machineId});
 
@@ -22,9 +27,34 @@ class AeratorCard extends ConsumerStatefulWidget {
   ConsumerState<AeratorCard> createState() => _AeratorCardState();
 }
 
-class _AeratorCardState extends ConsumerState<AeratorCard> {
+class _AeratorCardState extends ConsumerState<AeratorCard>
+    with AutomaticKeepAliveClientMixin {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
+  
+  @override
+  bool get wantKeepAlive => true;
+  
+  // Helper getters to use providers instead of widget parameters
+  String? get _machineId {
+    final selectedMachineId = ref.read(selectedMachineIdProvider);
+    return selectedMachineId.isEmpty ? null : selectedMachineId;
+  }
+  
+  BatchModel? get _currentBatch {
+    final selectedBatchId = ref.read(selectedBatchIdProvider);
+    if (selectedBatchId == null) return null;
+    
+    final batchesAsync = ref.read(userTeamBatchesProvider);
+    final batches = batchesAsync.asData?.value;
+    if (batches == null) return null;
+    
+    try {
+      return batches.firstWhere((batch) => batch.id == selectedBatchId);
+    } catch (e) {
+      return null;
+    }
+  }
 
   String _uptime = '00:00:00';
   int _completedCycles = 0;
@@ -36,71 +66,133 @@ class _AeratorCardState extends ConsumerState<AeratorCard> {
   // Pause state tracking
   bool _isPaused = false;
   int _accumulatedSeconds = 0;
+  
+  // Track the current batch ID to detect actual changes
+  String? _trackedBatchId;
+  
+  // Track if we've already initialized to prevent re-initialization
+  bool _isInitialized = false;
+
+  // Loading state
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.currentBatch != null && widget.currentBatch!.isActive) {
+    _trackedBatchId = _currentBatch?.id;
+    if (_currentBatch != null && _currentBatch!.isActive) {
       _loadExistingCycle();
     }
+    
+    // Listen to batch changes
+    ref.listenManual(selectedBatchIdProvider, (previous, next) {
+      if (next != _trackedBatchId) {
+        debugPrint('🔄 Aerator: Batch changed in provider: $_trackedBatchId -> $next');
+        _trackedBatchId = next;
+        _stopTimer();
+        _cycleTimer?.cancel();
+        
+        if (_currentBatch != null && _currentBatch!.isActive) {
+          _loadExistingCycle();
+        } else {
+          setState(() {
+            settings.reset();
+            status = SystemStatus.idle;
+            _uptime = '00:00:00';
+            _completedCycles = 0;
+            _startTime = null;
+            _cycleDoc = null;
+            _isInitialized = false;
+          });
+        }
+      }
+    });
   }
 
-  @override
-  void didUpdateWidget(AeratorCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final currentBatchId = widget.currentBatch?.id;
-    final oldBatchId = oldWidget.currentBatch?.id;
-
-    if (currentBatchId != oldBatchId) {
-      _stopTimer();
-      _cycleTimer?.cancel();
-
-      if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
-        setState(() {
-          settings.reset();
-          status = SystemStatus.idle;
-          _uptime = '00:00:00';
-          _completedCycles = 0;
-          _startTime = null;
-          _cycleDoc = null;
-        });
-      } else {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            _loadExistingCycle();
+  /// Handle real-time machine state changes from Firebase stream
+  void _handleMachineStateChange(bool aeratorActive) async {
+    if (!mounted) return;
+    
+    // Get current machine state to check pause flag
+    final machineRepository = ref.read(machineRepositoryProvider);
+    final machine = await machineRepository.getMachineById(_machineId!);
+    
+    if (machine == null) return;
+    
+    final aeratorPaused = machine.aeratorPaused;
+    
+    debugPrint('🔔 Machine state changed: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
+    
+    // Determine state based on aeratorActive and aeratorPaused combination
+    if (aeratorActive && !aeratorPaused) {
+      // Running state - only reload if not already initialized and running
+      if (_isInitialized && status == SystemStatus.running && _startTime != null) {
+        debugPrint('✅ Already running - skipping reload');
+        return;
+      }
+      debugPrint('✅ Aerator is RUNNING - reloading cycle state');
+      await _loadExistingCycle();
+    } else if (!aeratorActive && aeratorPaused) {
+      // Paused state - need to load cycle to get accumulated time
+      debugPrint('⏸️ Aerator is PAUSED - loading paused state');
+      
+      // Load cycle to get accumulated runtime
+      if (_currentBatch != null) {
+        try {
+          final cycleRepository = ref.read(cycleRepositoryProvider);
+          final cycles = await cycleRepository.getAerators(
+            batchId: _currentBatch!.id,
+          );
+          final cycle = cycles.isEmpty ? null : cycles.first;
+          
+          if (cycle != null && cycle.accumulatedRuntimeSeconds != null) {
+            _stopTimer();
+            _cycleTimer?.cancel();
+            setState(() {
+              _cycleDoc = cycle;
+              status = SystemStatus.idle;
+              _isPaused = true;
+              _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
+              _uptime = _formatDuration(Duration(seconds: cycle.accumulatedRuntimeSeconds!));
+              _startTime = null;
+            });
           }
-        });
+        } catch (e) {
+          debugPrint('❌ Error loading paused cycle: $e');
+        }
       }
-    } else if (widget.currentBatch != null &&
-        oldWidget.currentBatch?.isActive == true &&
-        !widget.currentBatch!.isActive) {
+    } else if (!aeratorActive && !aeratorPaused) {
+      // Stopped state
+      debugPrint('⏹️ Aerator is STOPPED - resetting to idle');
       _stopTimer();
       _cycleTimer?.cancel();
-
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
-        _completeCycleInFirebase();
-      }
-
       setState(() {
-        status = SystemStatus.stopped;
+        status = SystemStatus.idle;
+        _isPaused = false;
       });
     }
   }
 
-Future<void> _loadExistingCycle() async {
-  if (widget.currentBatch == null) return;
+  Future<void> _loadExistingCycle() async {
+  if (_currentBatch == null) return;
 
-  if (widget.machineId == null) {
+  if (_machineId == null) {
     debugPrint('⚠️ No machine ID provided');
     return;
+  }
+
+  // Set loading state
+  if (mounted) {
+    setState(() {
+      _isLoading = true;
+    });
   }
 
   try {
     // Load the cycle document first
     final cycleRepository = ref.read(cycleRepositoryProvider);
     final cycles = await cycleRepository.getAerators(
-      batchId: widget.currentBatch!.id,
+      batchId: _currentBatch!.id,
     );
     final cycle = cycles.isEmpty ? null : cycles.first;
 
@@ -112,7 +204,7 @@ Future<void> _loadExistingCycle() async {
 
     // Check machine aeratorActive status
     final machineRepository = ref.read(machineRepositoryProvider);
-    final machine = await machineRepository.getMachineById(widget.machineId!);
+    final machine = await machineRepository.getMachineById(_machineId!);
     
     if (machine == null) {
       debugPrint('❌ Machine not found');
@@ -159,17 +251,25 @@ Future<void> _loadExistingCycle() async {
           debugPrint('📊 Aerator is running');
           status = SystemStatus.running;
           _isPaused = false;
-          _startTime = cycle.startedAt;
           
-          // Resume with accumulated time if exists
+          // Calculate the correct start time based on accumulated runtime
+          // This ensures uptime continues correctly when reloading the cycle
           if (cycle.accumulatedRuntimeSeconds != null) {
             _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
+            // Set _startTime to a point in the past that accounts for accumulated time
+            _startTime = DateTime.now().subtract(Duration(seconds: _accumulatedSeconds));
+          } else {
+            // Fallback: use the original startedAt time from the cycle
+            _startTime = cycle.startedAt ?? DateTime.now();
+            _accumulatedSeconds = 0;
           }
           
           if (_startTime != null) {
             _startTimer();
             _simulateCycles();
           }
+          
+          _isInitialized = true;
         } else if (cycle.status == 'stopped') {
           debugPrint('📊 Aerator was stopped - ready to restart');
           status = SystemStatus.idle;
@@ -212,6 +312,12 @@ Future<void> _loadExistingCycle() async {
     }
   } catch (e) {
     debugPrint('Error loading aerator cycle: $e');
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }
 
@@ -249,7 +355,9 @@ Future<void> _loadExistingCycle() async {
   }
 
   Future<void> _handleStart() async {
-    if (widget.currentBatch == null || !widget.currentBatch!.isActive) {
+    if (_isLoading) return;
+
+    if (_currentBatch == null || !_currentBatch!.isActive) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Cannot start: No active batch'),
@@ -259,7 +367,7 @@ Future<void> _loadExistingCycle() async {
       return;
     }
 
-    if (widget.machineId == null) {
+    if (_machineId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No machine selected'),
@@ -280,41 +388,53 @@ Future<void> _loadExistingCycle() async {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
       await cycleRepository.startAerator(
-        batchId: widget.currentBatch!.id,
-        machineId: widget.currentBatch!.machineId,
+        batchId: _currentBatch!.id,
+        machineId: _currentBatch!.machineId,
         userId: user.uid,
         cycles: settings.cycles,
         duration: settings.period,
       );
 
-      await machineRepository.updateAeratorActive(widget.machineId!, true);
+      // Set aeratorActive to true and aeratorPaused to false (running state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(_machineId!)
+          .update({
+        'aeratorActive': true,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Wait a bit for Firestore to propagate
       await Future.delayed(const Duration(milliseconds: 500));
 
       final cycles = await cycleRepository.getAerators(
-        batchId: widget.currentBatch!.id,
+        batchId: _currentBatch!.id,
       );
       final cycle = cycles.isEmpty ? null : cycles.first;
 
-      setState(() {
-        _cycleDoc = cycle;
-        status = SystemStatus.running;
-        _startTime = DateTime.now();
-        _completedCycles = 0;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-        _startTimer();
-      });
-
-      _simulateCycles();
-
+      // Only verify mounted here to prevent setState on disposed widget
       if (mounted) {
+        setState(() {
+          _cycleDoc = cycle;
+          status = SystemStatus.running;
+          _startTime = DateTime.now();
+          _completedCycles = 0;
+          _isPaused = false;
+          _accumulatedSeconds = 0;
+          _startTimer();
+        });
+
+        _simulateCycles();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator started'),
@@ -331,28 +451,45 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handleStop() async {
-    if (widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      final machineRepository = ref.read(machineRepositoryProvider);
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set aeratorActive to false (stops hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, false);
+      // Set aeratorActive to false and aeratorPaused to false (stopped state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(_machineId!)
+          .update({
+        'aeratorActive': false,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle status to 'stopped' (NOT 'completed')
-      if (_cycleDoc != null && widget.currentBatch?.id != null) {
+      if (_cycleDoc != null && _currentBatch?.id != null) {
         final elapsed = _startTime != null 
             ? DateTime.now().difference(_startTime!).inSeconds 
             : 0;
         final totalAccumulated = _accumulatedSeconds + elapsed;
 
         await cycleRepository.stopAerator(
-          batchId: widget.currentBatch!.id,
+          batchId: _currentBatch!.id,
           totalRuntimeSeconds: totalAccumulated,
         );
       }
@@ -360,17 +497,17 @@ Future<void> _loadExistingCycle() async {
       _stopTimer();
       _cycleTimer?.cancel();
 
-      setState(() {
-        status = SystemStatus.idle;  // Back to idle (ready to start fresh)
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-        _cycleDoc = null;  // Clear cycle doc reference
-      });
-
       if (mounted) {
+        setState(() {
+          status = SystemStatus.idle;  // Back to idle (ready to start fresh)
+          _uptime = '00:00:00';
+          _completedCycles = 0;
+          _startTime = null;
+          _isPaused = false;
+          _accumulatedSeconds = 0;
+          _cycleDoc = null;  // Clear cycle doc reference
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator stopped - controller reset'),
@@ -387,15 +524,25 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handlePause() async {
-    if (widget.currentBatch == null || widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_currentBatch == null || _machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
       // Calculate current runtime
       final elapsed = _startTime != null 
@@ -403,12 +550,19 @@ Future<void> _loadExistingCycle() async {
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Set aeratorActive to false (stops hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, false);
+      // Set aeratorActive to false and aeratorPaused to true (paused state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(_machineId!)
+          .update({
+        'aeratorActive': false,
+        'aeratorPaused': true,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle document to 'paused' status
       await cycleRepository.pauseAerator(
-        batchId: widget.currentBatch!.id,
+        batchId: _currentBatch!.id,
         accumulatedRuntimeSeconds: totalAccumulated,
       );
 
@@ -416,14 +570,15 @@ Future<void> _loadExistingCycle() async {
       _stopTimer();
       _cycleTimer?.cancel();
 
-      setState(() {
-        _isPaused = true;
-        _accumulatedSeconds = totalAccumulated;
-        status = SystemStatus.idle;  // Show as idle visually
-        _startTime = null;
-      });
-
       if (mounted) {
+        setState(() {
+          _isPaused = true;
+          _accumulatedSeconds = totalAccumulated;
+          _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
+          status = SystemStatus.idle;  // Show as idle visually
+          _startTime = null;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator paused'),
@@ -440,35 +595,52 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _handleResume() async {
-    if (widget.currentBatch == null || widget.machineId == null) return;
+    if (_isLoading) return;
+    if (_currentBatch == null || _machineId == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final machineRepository = ref.read(machineRepositoryProvider);
 
-      // Set aeratorActive to true (restarts hardware)
-      await machineRepository.updateAeratorActive(widget.machineId!, true);
+      // Set aeratorActive to true and aeratorPaused to false (running state)
+      await FirebaseFirestore.instance
+          .collection('machines')
+          .doc(_machineId!)
+          .update({
+        'aeratorActive': true,
+        'aeratorPaused': false,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
 
       // Update cycle document to 'running' status
       await cycleRepository.resumeAerator(
-        batchId: widget.currentBatch!.id,
+        batchId: _currentBatch!.id,
       );
 
       // Restart timer with accumulated time
-      setState(() {
-        _isPaused = false;
-        status = SystemStatus.running;
-        _startTime = DateTime.now();  // New start time for this segment
-      });
-
-      _startTimer();
-      _simulateCycles();
-
       if (mounted) {
+        setState(() {
+          _isPaused = false;
+          status = SystemStatus.running;
+          _startTime = DateTime.now();  // New start time for this segment
+        });
+
+        _startTimer();
+        _simulateCycles();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator resumed'),
@@ -485,6 +657,12 @@ Future<void> _loadExistingCycle() async {
           ),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -497,14 +675,14 @@ Future<void> _loadExistingCycle() async {
           _completedCycles++;
         });
 
-        if (widget.currentBatch?.id != null && _startTime != null) {
+        if (_currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
             final elapsed = DateTime.now().difference(_startTime!).inSeconds;
             final totalRuntime = _accumulatedSeconds + elapsed;
             
             await cycleRepository.updateAeratorProgress(
-              batchId: widget.currentBatch!.id,
+              batchId: _currentBatch!.id,
               completedCycles: _completedCycles,
               totalRuntime: Duration(seconds: totalRuntime),
             );
@@ -517,7 +695,7 @@ Future<void> _loadExistingCycle() async {
           _stopTimer();
           timer.cancel();
 
-          if (widget.currentBatch?.id != null) {
+          if (_currentBatch?.id != null) {
             await _completeCycleInFirebase();
           }
 
@@ -532,11 +710,11 @@ Future<void> _loadExistingCycle() async {
   }
 
   Future<void> _completeCycleInFirebase() async {
-    if (widget.currentBatch?.id == null) return;
+    if (_currentBatch?.id == null) return;
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      await cycleRepository.completeAerator(batchId: widget.currentBatch!.id);
+      await cycleRepository.completeAerator(batchId: _currentBatch!.id);
     } catch (e) {
       debugPrint('Failed to complete aerator: $e');
     }
@@ -561,10 +739,26 @@ Future<void> _loadExistingCycle() async {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
+    // Listen for machine state changes (aeratorActive) to sync UI
+    if (_machineId != null) {
+      ref.listen<AsyncValue<MachineModel?>>(
+        machineStreamProvider(_machineId!),
+        (previous, next) {
+          next.whenData((machine) {
+            if (machine != null) {
+              _handleMachineStateChange(machine.aeratorActive);
+            }
+          });
+        },
+      );
+    }
+    
     final hasActiveBatch =
-        widget.currentBatch != null && widget.currentBatch!.isActive;
+        _currentBatch != null && _currentBatch!.isActive;
     final batchCompleted =
-        widget.currentBatch != null && !widget.currentBatch!.isActive;
+        _currentBatch != null && !_currentBatch!.isActive;
 
     return Container(
       decoration: BoxDecoration(
@@ -646,11 +840,7 @@ Future<void> _loadExistingCycle() async {
               SizedBox(height: cardWidth * 0.06),
 
          
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: 240, 
-                ),
-                child: hasActiveBatch || batchCompleted
+              hasActiveBatch || batchCompleted
                     ? _buildActiveState(
                         batchCompleted,
                         cardWidth,
@@ -659,7 +849,6 @@ Future<void> _loadExistingCycle() async {
                         bodyFontSize,
                       )
                     : const EmptyState(),
-              ),
             ],
           );
 
@@ -690,7 +879,7 @@ Future<void> _loadExistingCycle() async {
             Expanded(
               child: InfoItem(
                 label: 'Machine Name',
-                value: widget.currentBatch!.machineId,
+                value: _currentBatch!.machineId,
                 fontSize: bodyFontSize,
               ),
             ),
@@ -698,7 +887,7 @@ Future<void> _loadExistingCycle() async {
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
-                value: widget.currentBatch!.displayName,
+                value: _currentBatch!.displayName,
                 fontSize: bodyFontSize,
               ),
             ),
@@ -715,46 +904,7 @@ Future<void> _loadExistingCycle() async {
                 fontSize: bodyFontSize,
               ),
             ),
-            SizedBox(width: cardWidth * 0.04),
-            Expanded(
-              child: InfoItem(
-                label: 'No. of Cycles',
-                value: _completedCycles.toString(),
-                fontSize: bodyFontSize,
-              ),
-            ),
           ],
-        ),
-        SizedBox(height: cardHeight * 0.04),
-
-        Text(
-          'Set Controller',
-          style: TextStyle(
-            fontSize: labelFontSize,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1a1a1a),
-          ),
-        ),
-        SizedBox(height: cardHeight * 0.025),
-
-        ControlInputFields(
-          selectedCycle: settings.cycles.toString(),
-          selectedPeriod: settings.period,
-          isLocked: status == SystemStatus.running || _isPaused,  // Lock during running or paused
-          onCycleChanged: (value) {
-            if (value != null) {
-              setState(() {
-                settings = settings.copyWith(cycles: int.parse(value));
-              });
-            }
-          },
-          onPeriodChanged: (value) {
-            if (value != null) {
-              setState(() {
-                settings = settings.copyWith(period: value);
-              });
-            }
-          },
         ),
         SizedBox(height: cardHeight * 0.04),
 
@@ -766,11 +916,17 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handlePause,
-                  icon: const Icon(Icons.pause),
-                  label: const Text('Pause'),
+                  onPressed: _isLoading ? null : _handlePause,
+                  icon: _isLoading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.pause),
+                  label: Text(_isLoading ? 'Processing...' : 'Pause'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),  // Orange
+                    backgroundColor: const Color(0xFFF59E0B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -784,11 +940,11 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleStop,
+                  onPressed: _isLoading ? null : _handleStop,
                   icon: const Icon(Icons.stop),
                   label: const Text('Stop'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF4444),  // Red
+                    backgroundColor: const Color(0xFFEF4444),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -807,11 +963,17 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleResume,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Resume'),
+                  onPressed: _isLoading ? null : _handleResume,
+                  icon: _isLoading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.play_arrow),
+                  label: Text(_isLoading ? 'Processing...' : 'Resume'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),  // Orange
+                    backgroundColor: const Color(0xFFF59E0B),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -825,11 +987,11 @@ Future<void> _loadExistingCycle() async {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _handleStop,
+                  onPressed: _isLoading ? null : _handleStop,
                   icon: const Icon(Icons.stop),
                   label: const Text('Stop'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF4444),  // Red
+                    backgroundColor: const Color(0xFFEF4444),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -846,11 +1008,17 @@ Future<void> _loadExistingCycle() async {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: batchCompleted ? null : _handleStart,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Start'),
+              onPressed: (_isLoading || batchCompleted) ? null : _handleStart,
+              icon: _isLoading 
+                  ? const SizedBox(
+                      width: 20, 
+                      height: 20, 
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                    )
+                  : const Icon(Icons.play_arrow),
+              label: Text(_isLoading ? 'Starting...' : 'Start'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF14B8A6),
+                backgroundColor: AppColors.green100,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

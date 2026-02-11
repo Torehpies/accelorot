@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/approval/view/approval_view.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
@@ -24,24 +25,22 @@ import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/mobile_admin_machine_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
-
-
 import 'package:flutter_application_1/ui/team_management/widgets/team_detail_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
 import 'package:flutter_application_1/ui/waiting_approval/views/waiting_approval_screen.dart';
 import 'package:flutter_application_1/ui/admin_dashboard/view/admin_home_view.dart';
-import 'package:flutter_application_1/ui/web_operator/view/operator_management_screen.dart';
+import 'package:flutter_application_1/ui/operator_management/view/operator_management_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
-//import 'package:flutter_application_1/ui/web_landing_page/view/web_landing_page_view.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
+import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
 
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -94,6 +93,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ForgotPassScreen(),
       ),
       GoRoute(
+        path: RoutePath.resetEmailSent.path,
+        name: RoutePath.resetEmailSent.name,
+        builder: (context, state) {
+          final email = (state.extra as Map<String, dynamic>?)?['email'] as String? ?? '';
+          return ResetEmailSentScreen(email: email);
+        },
+      ),
+      
+      GoRoute(
         path: RoutePath.verifyEmail.path,
         name: RoutePath.verifyEmail.name,
         builder: (context, state) {
@@ -105,6 +113,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return EmailVerifyScreen(email: email);
         },
+      ),
+      GoRoute(
+        path: RoutePath.approval.path,
+        name: RoutePath.approval.name,
+        builder: (context, state) => const ApprovalView(),
       ),
       GoRoute(
         path: RoutePath.teamSelect.path,
@@ -126,7 +139,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return RestrictedAccessScreen(reason: reason);
         },
       ),
-
 
       // OPERATOR SHELL
       ShellRoute(
@@ -277,8 +289,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/team-details/:teamId',
             name: 'teamDetails',
             builder: (context, state) {
-              final Team team =
-                  state.extra as Team;
+              final Team team = state.extra as Team;
               return TeamDetailScreen(team: team);
             },
           ),
