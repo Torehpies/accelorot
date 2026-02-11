@@ -237,7 +237,7 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
 
             // Top padding for breathing room
             const SliverToBoxAdapter(
-              child: SizedBox(height: 4),
+              child: SizedBox(height: 8),
             ),
 
             // Content

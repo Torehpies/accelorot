@@ -239,7 +239,7 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
 
             // Top padding for breathing room
             const SliverToBoxAdapter(
-              child: SizedBox(height: 4),
+              child: SizedBox(height: 8),
             ),
 
             // Content

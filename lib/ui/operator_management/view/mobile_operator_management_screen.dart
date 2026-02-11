@@ -304,13 +304,7 @@ class _MobileOperatorManagementScreenState
             ),
 
             // Breathing room between header and list
-            const SliverToBoxAdapter(child: SizedBox(height: 4)),
-
-            // ----------------------------------------------------------------
-            // Content — IndexedStack equivalent via visibility:
-            // Both lists are built but only the active one is shown,
-            // keeping provider state alive for both tabs at all times.
-            // ----------------------------------------------------------------
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
             // Members list (always built, hidden when pending tab is active)
             if (_selectedTab == _kMembersTab)

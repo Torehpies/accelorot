@@ -45,10 +45,10 @@ class _MobileFilterBar extends StatelessWidget {
         ),
         if (filterWidgets.isNotEmpty) ...[
           const SizedBox(width: 8),
-          ...filterWidgets.map((widget) => Padding(
-                padding: const EdgeInsets.only(left: 0),
-                child: widget,
-              )),
+          ...filterWidgets.map(
+            (widget) =>
+                Padding(padding: const EdgeInsets.only(left: 0), child: widget),
+          ),
         ],
       ],
     );
@@ -85,37 +85,31 @@ class MobileSliverHeader extends StatelessWidget {
     this.floating = false,
   });
 
-  /// Calculate expanded height based on content rows
   double get _expandedHeight {
     if (selectorWidgets.isEmpty && searchConfig == null) {
       return _collapsedHeight;
     }
-    
-    double height = _collapsedHeight; // Start with collapsed height (title row)
-    
-    // Add spacing and content for expandable rows
-    const rowSpacing = 8.0; // Tighter spacing between rows
-    
-    // Row 2: Selectors (optional)
+
+    double height = _collapsedHeight;
+    const rowSpacing = 8.0;
+
     if (selectorWidgets.isNotEmpty) {
       const selectorRowHeight = 40.0;
       height += rowSpacing + selectorRowHeight;
     }
-    
-    // Row 3: Search + Filters (optional)
+
     if (searchConfig != null) {
       const searchRowHeight = 40.0;
       height += rowSpacing + searchRowHeight;
     }
-    
-    // Add bottom padding for expanded content
+
     const bottomPadding = 4.0;
-    height += bottomPadding;
-    
+    const dividerHeight = 1.5;
+    height += bottomPadding + dividerHeight;
+
     return height;
   }
 
-  /// Collapsed height - just title row
   double get _collapsedHeight {
     const topPadding = 12.0;
     const bottomPadding = 12.0;
@@ -133,50 +127,52 @@ class MobileSliverHeader extends StatelessWidget {
       toolbarHeight: _collapsedHeight,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      shadowColor: Colors.black.withValues(alpha: 0.08),
+      shadowColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      
-      // Title row (visible in both collapsed and expanded states)
+      backgroundColor: Colors.white,
       title: _buildTitleRow(),
-      
-      // Expanded content (visible when expanded)
       flexibleSpace: _expandedHeight > _collapsedHeight
           ? FlexibleSpaceBar(
               background: Container(
                 color: Colors.white,
                 child: SafeArea(
                   bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Space for title row
-                        const SizedBox(height: 44),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Space for title row
+                            const SizedBox(height: 44),
 
-                        // Row 2: Selectors (optional)
-                        if (selectorWidgets.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 40,
-                            child: _buildSelectorRow(),
-                          ),
-                        ],
+                            // Row 2: Selectors (optional)
+                            if (selectorWidgets.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              SizedBox(height: 40, child: _buildSelectorRow()),
+                            ],
 
-                        // Row 3: Search + Filters (optional)
-                        if (searchConfig != null) ...[
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 40,
-                            child: _MobileFilterBar(
-                              searchConfig: searchConfig!,
-                              filterWidgets: filterWidgets,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                            // Row 3: Search + Filters (optional)
+                            if (searchConfig != null) ...[
+                              const SizedBox(height: 8),
+                              SizedBox(
+                                height: 40,
+                                child: _MobileFilterBar(
+                                  searchConfig: searchConfig!,
+                                  filterWidgets: filterWidgets,
+                                ),
+                              ),
+                            ],
+
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -184,21 +180,10 @@ class MobileSliverHeader extends StatelessWidget {
               expandedTitleScale: 1.0,
             )
           : null,
-      
-      // Bottom border shadow
+      // Divider for collapsed state
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(4),
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        ),
+        preferredSize: const Size.fromHeight(1.5),
+        child: Divider(height: 1.5, thickness: 1.5, color: AppColors.grey),
       ),
     );
   }
@@ -206,10 +191,7 @@ class MobileSliverHeader extends StatelessWidget {
   Widget _buildTitleRow() {
     return Row(
       children: [
-        if (leading != null) ...[
-          leading!,
-          const SizedBox(width: 8),
-        ],
+        if (leading != null) ...[leading!, const SizedBox(width: 8)],
         Expanded(
           child: Text(
             title,
@@ -223,10 +205,7 @@ class MobileSliverHeader extends StatelessWidget {
         if (showAddButton && onAddPressed != null)
           ElevatedButton.icon(
             onPressed: onAddPressed,
-            icon: Icon(
-              addButtonIcon ?? Icons.add,
-              size: 18,
-            ),
+            icon: Icon(addButtonIcon ?? Icons.add, size: 18),
             label: Text(
               addButtonLabel ?? 'Add Machine',
               style: const TextStyle(

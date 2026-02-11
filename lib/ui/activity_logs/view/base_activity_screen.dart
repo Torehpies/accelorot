@@ -128,7 +128,7 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
             // Top padding for breathing room
             const SliverToBoxAdapter(
-              child: SizedBox(height: 4),
+              child: SizedBox(height: 8),
             ),
 
             // Content cards
