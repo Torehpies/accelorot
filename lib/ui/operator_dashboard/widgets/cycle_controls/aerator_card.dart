@@ -231,6 +231,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
     // If cycle exists, restore state based on cycle status
     if (mounted && cycle != null) {
+      bool isEffectivelyRunning = machine.aeratorActive;
+
       setState(() {
         _cycleDoc = cycle;
         settings = DrumRotationSettings(
@@ -240,7 +242,21 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         _completedCycles = cycle.completedCycles ?? 0;
 
         // Handle different statuses
-        if (cycle.status == 'paused') {
+        // Priority 1: Check actual machine state (Source of Truth)
+        if (isEffectivelyRunning && 
+           (cycle.status == 'stopped' || cycle.status == 'completed')) {
+             debugPrint('⚠️ Aerator Zombie state detected: Machine running but cycle stopped. Forcing running state.');
+             status = SystemStatus.running;
+             _isPaused = false;
+             // Use cycle start time or now if unavailable
+             _startTime = cycle.startedAt ?? DateTime.now();
+             _accumulatedSeconds = cycle.totalRuntimeSeconds ?? 0;
+             if (_startTime != null) {
+               _startTimer();
+             }
+             _isInitialized = true;
+
+        } else if (cycle.status == 'paused') {
           debugPrint('📊 Aerator is paused');
           status = SystemStatus.idle;
           _isPaused = true;
@@ -252,14 +268,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           status = SystemStatus.running;
           _isPaused = false;
           
-          // Calculate the correct start time based on accumulated runtime
-          // This ensures uptime continues correctly when reloading the cycle
           if (cycle.accumulatedRuntimeSeconds != null) {
             _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
-            // Set _startTime to a point in the past that accounts for accumulated time
             _startTime = DateTime.now().subtract(Duration(seconds: _accumulatedSeconds));
           } else {
-            // Fallback: use the original startedAt time from the cycle
             _startTime = cycle.startedAt ?? DateTime.now();
             _accumulatedSeconds = 0;
           }
@@ -299,16 +311,31 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         }
       });
     } else if (mounted) {
-      setState(() {
-        settings.reset();
-        status = SystemStatus.idle;
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _cycleDoc = null;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-      });
+       // No cycle document found
+       // Check if machine is strangely running without a cycle doc
+       if (machine.aeratorActive) {
+         debugPrint('⚠️ Aerator Zombie state detected: Machine running but NO cycle doc found.');
+         setState(() {
+           status = SystemStatus.running;
+           _isPaused = false;
+           // We have to guess start time or just show 00:00:00
+           _startTime = DateTime.now();
+           _accumulatedSeconds = 0;
+           _startTimer();
+           _isInitialized = true;
+         });
+       } else {
+         setState(() {
+           settings.reset();
+           status = SystemStatus.idle;
+           _uptime = '00:00:00';
+           _completedCycles = 0;
+           _startTime = null;
+           _cycleDoc = null;
+           _isPaused = false;
+           _accumulatedSeconds = 0;
+         });
+       }
     }
   } catch (e) {
     debugPrint('Error loading aerator cycle: $e');
@@ -395,6 +422,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
+      debugPrint('🔵 Starting aerator...');
+
+      // Atomic start operation
       await cycleRepository.startAerator(
         batchId: _currentBatch!.id,
         machineId: _currentBatch!.machineId,
@@ -403,38 +433,12 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         duration: settings.period,
       );
 
-      // Set aeratorActive to true and aeratorPaused to false (running state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'aeratorActive': true,
-        'aeratorPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
+      debugPrint('✅ Aerator service started');
 
-      // Wait a bit for Firestore to propagate
+      // Wait a bit for Firestore stream to update UI naturally
       await Future.delayed(const Duration(milliseconds: 500));
 
-      final cycles = await cycleRepository.getAerators(
-        batchId: _currentBatch!.id,
-      );
-      final cycle = cycles.isEmpty ? null : cycles.first;
-
-      // Only verify mounted here to prevent setState on disposed widget
       if (mounted) {
-        setState(() {
-          _cycleDoc = cycle;
-          status = SystemStatus.running;
-          _startTime = DateTime.now();
-          _completedCycles = 0;
-          _isPaused = false;
-          _accumulatedSeconds = 0;
-          _startTimer();
-        });
-
-        _simulateCycles();
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator started'),
@@ -444,9 +448,30 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to start: $e';
+
+        // Attempt to unwrap "converted Future" error (Web specific)
+        if (e.toString().contains('Dart exception thrown from converted Future')) {
+           try {
+             final dynamic exception = e;
+             if (exception.error != null) {
+               errorMessage = 'Error: ${exception.error}';
+             }
+           } catch (_) {
+             // ignore
+           }
+        }
+
+        if (errorMessage.contains('Aerator is already running') || 
+            errorMessage.contains('Machine is already running')) {
+          errorMessage = 'Aerator is already running. Please refresh.';
+          // Force refresh
+          _handleMachineStateChange(false);
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to start: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -471,55 +496,49 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set aeratorActive to false and aeratorPaused to false (stopped state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'aeratorActive': false,
-        'aeratorPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
+      final elapsed = _startTime != null 
+          ? DateTime.now().difference(_startTime!).inSeconds 
+          : 0;
+      final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Update cycle status to 'stopped' (NOT 'completed')
-      if (_cycleDoc != null && _currentBatch?.id != null) {
-        final elapsed = _startTime != null 
-            ? DateTime.now().difference(_startTime!).inSeconds 
-            : 0;
-        final totalAccumulated = _accumulatedSeconds + elapsed;
-
-        await cycleRepository.stopAerator(
-          batchId: _currentBatch!.id,
-          totalRuntimeSeconds: totalAccumulated,
-        );
-      }
+      // Atomic stop operation
+      await cycleRepository.stopAerator(
+        batchId: _currentBatch!.id,
+        totalRuntimeSeconds: totalAccumulated,
+      );
 
       _stopTimer();
       _cycleTimer?.cancel();
 
       if (mounted) {
         setState(() {
-          status = SystemStatus.idle;  // Back to idle (ready to start fresh)
+          status = SystemStatus.idle;
           _uptime = '00:00:00';
           _completedCycles = 0;
           _startTime = null;
           _isPaused = false;
           _accumulatedSeconds = 0;
-          _cycleDoc = null;  // Clear cycle doc reference
+          _cycleDoc = null;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator stopped - controller reset'),
+            content: Text('Aerator stopped'),
             backgroundColor: Colors.orange,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to stop: $e';
+        if (e.toString().contains('Aerator is already stopped')) {
+          errorMessage = 'Aerator is already stopped. Refreshing state...';
+          _handleMachineStateChange(false);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to stop: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -544,27 +563,20 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Calculate current runtime
+      debugPrint('🔵 Starting pause operation...');
+
       final elapsed = _startTime != null 
           ? DateTime.now().difference(_startTime!).inSeconds 
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Set aeratorActive to false and aeratorPaused to true (paused state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'aeratorActive': false,
-        'aeratorPaused': true,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
-
-      // Update cycle document to 'paused' status
+      // Atomic pause operation
       await cycleRepository.pauseAerator(
         batchId: _currentBatch!.id,
         accumulatedRuntimeSeconds: totalAccumulated,
       );
+      
+      debugPrint('✅ Pause service call completed');
 
       // Stop local timers
       _stopTimer();
@@ -582,15 +594,21 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Aerator paused'),
-            backgroundColor: Colors.orange,
+            backgroundColor: Colors.blue,
           ),
         );
       }
     } catch (e) {
+      debugPrint('❌ Error in _handlePause: $e');
       if (mounted) {
+        String errorMessage = 'Failed to pause: $e';
+        if (e.toString().contains('not running') || e.toString().contains('already stopped')) {
+          errorMessage = 'Aerator was already stopped or paused by another user. Refreshing...';
+          _handleMachineStateChange(false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to pause aerator: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -615,27 +633,20 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set aeratorActive to true and aeratorPaused to false (running state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'aeratorActive': true,
-        'aeratorPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
+      debugPrint('🔵 Starting resume operation...');
 
-      // Update cycle document to 'running' status
+      // Atomic resume operation
       await cycleRepository.resumeAerator(
         batchId: _currentBatch!.id,
       );
+      
+      debugPrint('✅ Resume service call completed');
 
-      // Restart timer with accumulated time
       if (mounted) {
         setState(() {
           _isPaused = false;
           status = SystemStatus.running;
-          _startTime = DateTime.now();  // New start time for this segment
+          _startTime = DateTime.now();
         });
 
         _startTimer();
@@ -649,10 +660,16 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         );
       }
     } catch (e) {
+      debugPrint('❌ Error in _handleResume: $e');
       if (mounted) {
+        String errorMessage = 'Failed to resume: $e';
+        if (e.toString().contains('not paused') || e.toString().contains('already stopped')) {
+          errorMessage = 'Aerator is no longer paused. Refreshing...';
+          _handleMachineStateChange(false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to resume aerator: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );

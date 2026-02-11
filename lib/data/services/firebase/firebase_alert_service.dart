@@ -159,13 +159,14 @@ class FirestoreAlertService implements AlertService {
       );
 
       // Debug: Log date paths being queried
-      if (cutoffDate != null) {
+      /*if (cutoffDate != null) {
         debugPrint(
           '🔍 Querying date paths for batch $batchId: ${datePaths.join(", ")}',
         );
       }
+      */
 
-      // ✅ SOLUTION 2: Optimized parallel fetch of all date paths
+      // Optimized parallel fetch of all date paths
       final results = await Future.wait(
         datePaths.map((dateStr) async {
           try {
@@ -197,8 +198,8 @@ class FirestoreAlertService implements AlertService {
           }
         }),
       );
- 
-      // ✅ Flatten results efficiently using expand
+
+      // Flatten results efficiently using expand
       final allBatchAlerts = results.expand((alerts) => alerts).toList();
 
       // Sort by timestamp descending (newest first)
@@ -206,7 +207,7 @@ class FirestoreAlertService implements AlertService {
 
       return allBatchAlerts;
     } catch (e) {
-      debugPrint('❌ Error fetching batch alerts: $e');
+      //debugPrint('❌ Error fetching batch alerts: $e');
       throw Exception('Failed to fetch batch alerts: $e');
     }
   }
@@ -320,11 +321,11 @@ class FirestoreAlertService implements AlertService {
 
       final cutoff = cutoffDate ?? DateTime.now().subtract(const Duration(days: 2));
 
-      debugPrint('🔴 Streaming ${batches.length} batches for alerts (cutoff: $cutoff)');
+      //debugPrint('🔴 Streaming ${batches.length} batches for alerts (cutoff: $cutoff)');
 
       // Create real-time streams for each batch and merge them
       await for (final allAlerts in _streamAlertsForBatches(batches, cutoff)) {
-        debugPrint('📡 Stream update: ${allAlerts.length} alerts');
+        //debugPrint('📡 Stream update: ${allAlerts.length} alerts');
         yield allAlerts;
       }
     } catch (e) {

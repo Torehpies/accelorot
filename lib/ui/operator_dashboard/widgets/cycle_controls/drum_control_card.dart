@@ -251,6 +251,8 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
 
     // If cycle exists, restore state based on cycle status
     if (mounted && cycle != null) {
+      bool isEffectivelyRunning = machine.drumActive;
+
       setState(() {
         _cycleDoc = cycle;
         settings = DrumRotationSettings(
@@ -260,7 +262,24 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
         _completedCycles = cycle.completedCycles ?? 0;
 
         // Handle different statuses
-        if (cycle.status == 'paused') {
+        // Priority 1: Check actual machine state (Source of Truth)
+        // If machine says running but cycle says stopped/completed, we are in a 'zombie' state.
+        // We force the UI to running so the user can settle it (Stop).
+        if (isEffectivelyRunning && 
+           (cycle.status == 'stopped' || cycle.status == 'completed')) {
+             debugPrint('⚠️ Zombie state detected: Machine running but cycle stopped. Forcing running state.');
+             status = SystemStatus.running;
+             _isPaused = false;
+             // Use cycle start time or now if unavailable
+             _startTime = cycle.startedAt ?? DateTime.now();
+             _accumulatedSeconds = cycle.totalRuntimeSeconds ?? 0;
+             
+             if (_startTime != null) {
+               _startTimer();
+             }
+             _isInitialized = true;
+
+        } else if (cycle.status == 'paused') {
           debugPrint('📊 Drum controller is paused');
           status = SystemStatus.idle;
           _isPaused = true;
@@ -272,14 +291,10 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           status = SystemStatus.running;
           _isPaused = false;
           
-          // Calculate the correct start time based on accumulated runtime
-          // This ensures uptime continues correctly when reloading the cycle
           if (cycle.accumulatedRuntimeSeconds != null) {
             _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
-            // Set _startTime to a point in the past that accounts for accumulated time
             _startTime = DateTime.now().subtract(Duration(seconds: _accumulatedSeconds));
           } else {
-            // Fallback: use the original startedAt time from the cycle
             _startTime = cycle.startedAt ?? DateTime.now();
             _accumulatedSeconds = 0;
           }
@@ -319,16 +334,31 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
         }
       });
     } else if (mounted) {
-      setState(() {
-        settings.reset();
-        status = SystemStatus.idle;
-        _uptime = '00:00:00';
-        _completedCycles = 0;
-        _startTime = null;
-        _cycleDoc = null;
-        _isPaused = false;
-        _accumulatedSeconds = 0;
-      });
+       // No cycle document found
+       // Check if machine is strangely running without a cycle doc
+       if (machine.drumActive) {
+         debugPrint('⚠️ Zombie state detected: Machine running but NO cycle doc found.');
+         setState(() {
+           status = SystemStatus.running;
+           _isPaused = false;
+           // We have to guess start time or just show 00:00:00
+           _startTime = DateTime.now();
+           _accumulatedSeconds = 0;
+           _startTimer();
+           _isInitialized = true;
+         });
+       } else {
+         setState(() {
+           settings.reset();
+           status = SystemStatus.idle;
+           _uptime = '00:00:00';
+           _completedCycles = 0;
+           _startTime = null;
+           _cycleDoc = null;
+           _isPaused = false;
+           _accumulatedSeconds = 0;
+         });
+       }
     }
   } catch (e) {
     debugPrint('❌ Error loading drum controller cycle: $e');
@@ -417,6 +447,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
 
       debugPrint('🔵 Starting drum controller...');
 
+      // Atomic start operation
       await cycleRepository.startDrumController(
         batchId: _currentBatch!.id,
         machineId: _currentBatch!.machineId,
@@ -427,43 +458,14 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
 
       debugPrint('✅ Drum controller service started');
 
-      // Set drumActive to true and drumPaused to false (running state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'drumActive': true,
-        'drumPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
-
-      debugPrint('✅ Machine state set to RUNNING');
-
-      // Wait a bit for Firestore to propagate
+      // Wait a bit for Firestore stream to update UI naturally
       await Future.delayed(const Duration(milliseconds: 500));
 
-      final cycles = await cycleRepository.getDrumControllers(
-        batchId: _currentBatch!.id,
-      );
-      final cycle = cycles.isEmpty ? null : cycles.first;
-
-      debugPrint('✅ Loaded cycle doc: ${cycle?.id}');
-
-      // Only verify mounted here to prevent setState on disposed widget
+      // We DON'T manually set state here anymore to avoid race conditions with stream
+      // But for better UX, we can temporarily set it if mounted
       if (mounted) {
-        setState(() {
-          _cycleDoc = cycle;
-          status = SystemStatus.running;
-          _startTime = DateTime.now();
-          _completedCycles = 0;
-          _isPaused = false;
-          _accumulatedSeconds = 0;
-          _startTimer();
-        });
-
-        _simulateCycles();
-
-        ScaffoldMessenger.of(context).showSnackBar(
+         // Optionally force a refresh or just let the stream handle it
+         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Drum controller started'),
             backgroundColor: Colors.green,
@@ -472,9 +474,30 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to start: $e';
+
+        // Attempt to unwrap "converted Future" error (Web specific)
+        if (e.toString().contains('Dart exception thrown from converted Future')) {
+           try {
+             // Access .error via dynamic dispatch if possible
+             final dynamic exception = e;
+             if (exception.error != null) {
+               errorMessage = 'Error: ${exception.error}';
+             }
+           } catch (_) {
+             // If access fails, keep original message
+           }
+        }
+
+        if (errorMessage.contains('Machine is already running')) {
+          errorMessage = 'Machine is already running. Please refresh.';
+          // Force refresh
+          _handleMachineStateChange(false);
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to start: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -499,41 +522,30 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      // Set drumActive to false and drumPaused to false (stopped state)
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'drumActive': false,
-        'drumPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
+      // Atomic stop operation
+      // Note: We calculate runtime here for the log, but backend handles machine state
+      final elapsed = _startTime != null 
+          ? DateTime.now().difference(_startTime!).inSeconds 
+          : 0;
+      final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Update cycle status to 'stopped' (NOT 'completed')
-      if (_cycleDoc != null && _currentBatch?.id != null) {
-        final elapsed = _startTime != null 
-            ? DateTime.now().difference(_startTime!).inSeconds 
-            : 0;
-        final totalAccumulated = _accumulatedSeconds + elapsed;
-
-        await cycleRepository.stopDrumController(
-          batchId: _currentBatch!.id,
-          totalRuntimeSeconds: totalAccumulated,
-        );
-      }
+      await cycleRepository.stopDrumController(
+        batchId: _currentBatch!.id,
+        totalRuntimeSeconds: totalAccumulated,
+      );
 
       _stopTimer();
       _cycleTimer?.cancel();
 
       if (mounted) {
         setState(() {
-          status = SystemStatus.idle;  // Back to idle (ready to start fresh)
+          status = SystemStatus.idle;
           _uptime = '00:00:00';
           _completedCycles = 0;
           _startTime = null;
           _isPaused = false;
           _accumulatedSeconds = 0;
-          _cycleDoc = null;  // Clear cycle doc reference
+          _cycleDoc = null;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -545,9 +557,16 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Failed to stop: $e';
+        if (e.toString().contains('Machine is already stopped')) {
+          errorMessage = 'Machine is already stopped. Refreshing state...';
+          // Force a state refresh if possible/needed
+          _handleMachineStateChange(false); 
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to stop: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -574,49 +593,28 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
 
       debugPrint('🔵 Starting pause operation...');
 
-      // Calculate accumulated runtime
       final elapsed = _startTime != null 
           ? DateTime.now().difference(_startTime!).inSeconds 
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
       
-      debugPrint('🔵 Accumulated seconds: $totalAccumulated');
-      debugPrint('🔵 Batch ID: ${_currentBatch?.id}');
-      debugPrint('🔵 Cycle Doc: ${_cycleDoc?.id}');
-
-      // Update cycle status to 'paused' FIRST
-      if (_cycleDoc != null && _currentBatch?.id != null) {
-        debugPrint('🔵 Calling pauseDrumController...');
-        await cycleRepository.pauseDrumController(
-          batchId: _currentBatch!.id,
-          accumulatedRuntimeSeconds: totalAccumulated,
-        );
-        debugPrint('✅ Pause service call completed');
-      } else {
-        debugPrint('❌ Missing cycle doc or batch ID');
-      }
-
-      // Set drumActive to false and drumPaused to true (paused state)
-      debugPrint('🔵 Updating drumActive=false, drumPaused=true...');
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'drumActive': false,
-        'drumPaused': true,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
-      debugPrint('✅ Machine state updated to PAUSED');
+      // Atomic pause operation
+      await cycleRepository.pauseDrumController(
+        batchId: _currentBatch!.id,
+        accumulatedRuntimeSeconds: totalAccumulated,
+      );
+      
+      debugPrint('✅ Pause service call completed');
 
       _stopTimer();
 
       if (mounted) {
         setState(() {
-          status = SystemStatus.idle;  // Show as idle (paused)
+          status = SystemStatus.idle;
           _isPaused = true;
           _accumulatedSeconds = totalAccumulated;
-          _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
-          _startTime = null;  // Clear start time during pause
+          _uptime = _formatDuration(Duration(seconds: totalAccumulated));
+          _startTime = null;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -629,9 +627,14 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     } catch (e) {
       debugPrint('❌ Error in _handlePause: $e');
       if (mounted) {
+        String errorMessage = 'Failed to pause: $e';
+        if (e.toString().contains('not running') || e.toString().contains('already stopped')) {
+          errorMessage = 'Machine was already stopped or paused by another user. Refreshing...';
+          _handleMachineStateChange(false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to pause: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -658,36 +661,22 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
 
       debugPrint('🔵 Starting resume operation...');
 
-      // Update cycle status to 'running' FIRST
-      if (_cycleDoc != null && _currentBatch?.id != null) {
-        debugPrint('🔵 Calling resumeDrumController...');
-        await cycleRepository.resumeDrumController(
-          batchId: _currentBatch!.id,
-        );
-        debugPrint('✅ Resume service call completed');
-      }
-
-      // Set drumActive to true and drumPaused to false (running state)
-      debugPrint('🔵 Updating drumActive=true, drumPaused=false...');
-      await FirebaseFirestore.instance
-          .collection('machines')
-          .doc(_machineId!)
-          .update({
-        'drumActive': true,
-        'drumPaused': false,
-        'lastModified': FieldValue.serverTimestamp(),
-      });
-      debugPrint('✅ Machine state updated to RUNNING');
+      // Atomic resume operation
+      await cycleRepository.resumeDrumController(
+        batchId: _currentBatch!.id,
+      );
+      
+      debugPrint('✅ Resume service call completed');
 
       if (mounted) {
         setState(() {
-          status = SystemStatus.running;  // Set status back to running
+          status = SystemStatus.running;
           _isPaused = false;
-          _startTime = DateTime.now();  // Reset start time to now
+          _startTime = DateTime.now();
         });
 
         _startTimer();
-        _simulateCycles();  // Restart cycle timer
+        _simulateCycles(); // UI simulation only
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -699,9 +688,14 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     } catch (e) {
       debugPrint('❌ Error in _handleResume: $e');
       if (mounted) {
+        String errorMessage = 'Failed to resume: $e';
+        if (e.toString().contains('not paused') || e.toString().contains('already stopped')) {
+          errorMessage = 'Machine is no longer paused. Refreshing...';
+          _handleMachineStateChange(false);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to resume: $e'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );

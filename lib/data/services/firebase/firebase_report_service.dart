@@ -53,11 +53,11 @@ class FirebaseReportService implements ReportService {
           .where('teamId', isEqualTo: teamId)
           .get();
 
-      debugPrint(
+      /*debugPrint(
         '🔵 Fetching reports from ${machinesSnapshot.docs.length} machines in parallel...',
-      );
+      );*/
 
-      // ✅ PARALLEL FETCHING: Fetch reports from all machines simultaneously
+      // PARALLEL FETCHING: Fetch reports from all machines simultaneously
       final futures = machinesSnapshot.docs.map((machineDoc) {
         return fetchReportsForMachine(machineDoc.id);
       });
@@ -73,13 +73,13 @@ class FirebaseReportService implements ReportService {
       // Apply limit if specified
       if (limit != null && reports.length > limit) {
         final limitedReports = reports.sublist(0, limit);
-        debugPrint(
+        /*debugPrint(
           '✅ Fetched ${reports.length} reports, limited to ${limitedReports.length}',
-        );
+        );*/
         return limitedReports;
       }
 
-      debugPrint('✅ Fetched ${reports.length} reports (Parallel Strategy)');
+      //debugPrint('✅ Fetched ${reports.length} reports (Parallel Strategy)');
       return reports;
     } catch (e) {
       throw Exception('Failed to fetch reports by team: $e');

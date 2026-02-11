@@ -111,9 +111,9 @@ class FirestoreCycleService implements CycleService {
     final batches = await _batchService.getBatchesForMachines(teamMachineIds);
     if (batches.isEmpty) return [];
 
-    debugPrint(
-      '🟣 Fetching cycles from ${batches.length} batches in parallel...',
-    );
+    //debugPrint(
+    //  '🟣 Fetching cycles from ${batches.length} batches in parallel...',
+    //);
 
     final futures = batches.map((batchDoc) async {
       final batchId = batchDoc.id;
@@ -242,29 +242,57 @@ class FirestoreCycleService implements CycleService {
           await _getExistingMainCycleDocId(batchId) ??
           await _createMainCycleDocId(batchId);
 
-      final drumRef = await _firestore
+      // Create a reference for the new drum controller document
+      final drumConfigRef = _firestore
           .collection('batches')
           .doc(batchId)
           .collection('cyclesRecom')
           .doc(cycleDocId)
           .collection('drum_controller')
-          .add({
-            'category': 'cycles',
-            'controllerType': 'drum_controller',
-            'machineId': machineId,
-            'userId': userId,
-            'batchId': batchId,
-            'cycles': cycles,
-            'duration': duration,
-            'completedCycles': 0,
-            'status': 'running',
-            'startedAt': FieldValue.serverTimestamp(),
-            'timestamp': FieldValue.serverTimestamp(),
-            'totalRuntimeSeconds': 0,
-          });
+          .doc();
 
-      debugPrint('✅ Started drum controller: ${drumRef.id}');
-      return drumRef.id;
+      final machineRef = _firestore.collection('machines').doc(machineId);
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        if (!machineSnapshot.exists) {
+          throw Exception('Machine not found');
+        }
+
+        final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
+        
+        // 2. CHECK: Ensure machine is not already running
+        if (drumActive == true) {
+          throw Exception('Machine is already running');
+        }
+
+        // 3. WRITE: Update machine state to RUNNING
+        transaction.update(machineRef, {
+          'drumActive': true,
+          'drumPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. WRITE: Create new cycle log
+        transaction.set(drumConfigRef, {
+          'category': 'cycles',
+          'controllerType': 'drum_controller',
+          'machineId': machineId,
+          'userId': userId,
+          'batchId': batchId,
+          'cycles': cycles,
+          'duration': duration,
+          'completedCycles': 0,
+          'status': 'running',
+          'startedAt': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
+          'totalRuntimeSeconds': 0,
+        });
+      });
+
+      debugPrint('✅ Started drum controller (Atomic): ${drumConfigRef.id}');
+      return drumConfigRef.id;
     } catch (e) {
       debugPrint('❌ Error starting drum controller: $e');
       rethrow;
@@ -347,6 +375,151 @@ class FirestoreCycleService implements CycleService {
 
   // ===== START AERATOR =====
 
+  // ===== STOP DRUM CONTROLLER (Manual stop, not completion) =====
+
+  @override
+  Future<void> stopDrumController({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final drumSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('drum_controller')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (drumSnapshot.docs.isEmpty) {
+        throw Exception('No drum controller found to stop');
+      }
+
+      final drumDoc = drumSnapshot.docs.first;
+      final machineId = drumDoc.data()['machineId'] as String?;
+
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
+
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final drumRef = drumDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
+
+        // 2. CHECK: Ensure machine is actually running
+        // We throw if 'drumActive' is ALREADY false, preventing duplicate stops.
+        if (drumActive == false) {
+          throw Exception('Machine is already stopped');
+        }
+
+        // 3. UPDATE: Update machine to STOPPED
+        transaction.update(machineRef, {
+          'drumActive': false,
+          'drumPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to STOPPED
+        transaction.update(drumRef, {
+          'status': 'stopped',
+          'totalRuntimeSeconds': totalRuntimeSeconds,
+          'stoppedAt': FieldValue.serverTimestamp(),
+          'pausedAt': FieldValue.delete(),
+          'accumulatedRuntimeSeconds': FieldValue.delete(),
+        });
+      });
+
+      debugPrint('✅ Drum controller stopped successfully (Atomic)');
+    } catch (e) {
+      debugPrint('❌ Error stopping drum controller: $e');
+      rethrow;
+    }
+  }
+
+  // ===== STOP AERATOR (Manual stop, not completion) =====
+
+  @override
+  Future<void> stopAerator({
+    required String batchId,
+    required int totalRuntimeSeconds,
+  }) async {
+    try {
+      final cycleDocId = await _getExistingMainCycleDocId(batchId);
+      if (cycleDocId == null) {
+        throw Exception('No cycle document found for batch: $batchId');
+      }
+
+      final aeratorSnapshot = await _firestore
+          .collection('batches')
+          .doc(batchId)
+          .collection('cyclesRecom')
+          .doc(cycleDocId)
+          .collection('aerator')
+          .orderBy('startedAt', descending: true)
+          .limit(1)
+          .get();
+
+      if (aeratorSnapshot.docs.isEmpty) {
+        throw Exception('No aerator found to stop');
+      }
+
+      final aeratorDoc = aeratorSnapshot.docs.first;
+      final machineId = aeratorDoc.data()['machineId'] as String?;
+
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
+
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final aeratorRef = aeratorDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
+
+        // 2. CHECK: Ensure machine is actually running
+        if (aeratorActive == false) {
+          throw Exception('Aerator is already stopped');
+        }
+
+        // 3. UPDATE: Update machine to STOPPED
+        transaction.update(machineRef, {
+          'aeratorActive': false,
+          'aeratorPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to STOPPED
+        transaction.update(aeratorRef, {
+          'status': 'stopped',
+          'totalRuntimeSeconds': totalRuntimeSeconds,
+          'stoppedAt': FieldValue.serverTimestamp(),
+          'pausedAt': FieldValue.delete(),
+          'accumulatedRuntimeSeconds': FieldValue.delete(),
+        });
+      });
+
+      debugPrint('✅ Aerator stopped successfully (Atomic)');
+    } catch (e) {
+      debugPrint('❌ Error stopping aerator: $e');
+      rethrow;
+    }
+  }
+
+  // ===== START AERATOR =====
+
   @override
   Future<String> startAerator({
     required String batchId,
@@ -360,28 +533,56 @@ class FirestoreCycleService implements CycleService {
           await _getExistingMainCycleDocId(batchId) ??
           await _createMainCycleDocId(batchId);
 
-      final aeratorRef = await _firestore
+      // Create a reference for the new aerator document
+      final aeratorRef = _firestore
           .collection('batches')
           .doc(batchId)
           .collection('cyclesRecom')
           .doc(cycleDocId)
           .collection('aerator')
-          .add({
-            'category': 'cycles',
-            'controllerType': 'aerator',
-            'machineId': machineId,
-            'userId': userId,
-            'batchId': batchId,
-            'cycles': cycles,
-            'duration': duration,
-            'completedCycles': 0,
-            'status': 'running',
-            'startedAt': FieldValue.serverTimestamp(),
-            'timestamp': FieldValue.serverTimestamp(),
-            'totalRuntimeSeconds': 0,
-          });
+          .doc();
 
-      debugPrint('✅ Started aerator: ${aeratorRef.id}');
+      final machineRef = _firestore.collection('machines').doc(machineId);
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        if (!machineSnapshot.exists) {
+          throw Exception('Machine not found');
+        }
+
+        final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
+
+        // 2. CHECK: Ensure aerator is not already running
+        if (aeratorActive == true) {
+          throw Exception('Aerator is already running');
+        }
+
+        // 3. WRITE: Update machine state to RUNNING
+        transaction.update(machineRef, {
+          'aeratorActive': true,
+          'aeratorPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. WRITE: Create new cycle log
+        transaction.set(aeratorRef, {
+          'category': 'cycles',
+          'controllerType': 'aerator',
+          'machineId': machineId,
+          'userId': userId,
+          'batchId': batchId,
+          'cycles': cycles,
+          'duration': duration,
+          'completedCycles': 0,
+          'status': 'running',
+          'startedAt': FieldValue.serverTimestamp(),
+          'timestamp': FieldValue.serverTimestamp(),
+          'totalRuntimeSeconds': 0,
+        });
+      });
+
+      debugPrint('✅ Started aerator (Atomic): ${aeratorRef.id}');
       return aeratorRef.id;
     } catch (e) {
       debugPrint('❌ Error starting aerator: $e');
@@ -427,6 +628,7 @@ class FirestoreCycleService implements CycleService {
       throw Exception('Failed to update aerator progress: $e');
     }
   }
+
   // ===== COMPLETE AERATOR =====
 
   @override
@@ -550,109 +752,6 @@ class FirestoreCycleService implements CycleService {
     }
   }
 
-  // ===== STOP DRUM CONTROLLER (Manual stop, not completion) =====
-
-  @override
-  Future<void> stopDrumController({
-    required String batchId,
-    required int totalRuntimeSeconds,
-  }) async {
-    try {
-      final cycleDocId = await _getExistingMainCycleDocId(batchId);
-      if (cycleDocId == null) {
-        throw Exception('No cycle document found for batch: $batchId');
-      }
-
-      final drumSnapshot = await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('drum_controller')
-          .orderBy('startedAt', descending: true)
-          .limit(1)
-          .get();
-
-      if (drumSnapshot.docs.isEmpty) {
-        throw Exception('No drum controller found to stop');
-      }
-
-      final drumDocId = drumSnapshot.docs.first.id;
-
-      // Set status to 'stopped' (not 'completed')
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('drum_controller')
-          .doc(drumDocId)
-          .update({
-            'status': 'stopped',
-            'totalRuntimeSeconds': totalRuntimeSeconds,
-            'stoppedAt': FieldValue.serverTimestamp(),
-            'pausedAt': FieldValue.delete(),
-            'accumulatedRuntimeSeconds': FieldValue.delete(),
-          });
-
-      debugPrint('✅ Drum controller stopped successfully');
-    } catch (e) {
-      debugPrint('❌ Error stopping drum controller: $e');
-      rethrow;
-    }
-  }
-
-  // ===== STOP AERATOR (Manual stop, not completion) =====
-
-  @override
-  Future<void> stopAerator({
-    required String batchId,
-    required int totalRuntimeSeconds,
-  }) async {
-    try {
-      final cycleDocId = await _getExistingMainCycleDocId(batchId);
-      if (cycleDocId == null) {
-        throw Exception('No cycle document found for batch: $batchId');
-      }
-
-      final aeratorSnapshot = await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('aerator')
-          .orderBy('startedAt', descending: true)
-          .limit(1)
-          .get();
-
-      if (aeratorSnapshot.docs.isEmpty) {
-        throw Exception('No aerator found to stop');
-      }
-
-      final aeratorDocId = aeratorSnapshot.docs.first.id;
-
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('aerator')
-          .doc(aeratorDocId)
-          .update({
-            'status': 'stopped',
-            'totalRuntimeSeconds': totalRuntimeSeconds,
-            'stoppedAt': FieldValue.serverTimestamp(),
-            'pausedAt': FieldValue.delete(),
-            'accumulatedRuntimeSeconds': FieldValue.delete(),
-          });
-
-      debugPrint('✅ Aerator stopped successfully');
-    } catch (e) {
-      debugPrint('❌ Error stopping aerator: $e');
-      rethrow;
-    }
-  }
-
   // ===== PAUSE DRUM CONTROLLER =====
 
   @override
@@ -680,22 +779,43 @@ class FirestoreCycleService implements CycleService {
         throw Exception('No drum controller found to pause');
       }
 
-      final drumDocId = drumSnapshot.docs.first.id;
+      final drumDoc = drumSnapshot.docs.first;
+      final machineId = drumDoc.data()['machineId'] as String?;
 
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('drum_controller')
-          .doc(drumDocId)
-          .update({
-            'status': 'paused',
-            'pausedAt': FieldValue.serverTimestamp(),
-            'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
-          });
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
 
-      debugPrint('✅ Drum controller paused successfully');
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final drumRef = drumDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
+        final drumPaused = machineSnapshot.data()?['drumPaused'] ?? false;
+
+        // 2. CHECK: Ensure machine is actually running (not already paused/stopped)
+        if (!drumActive || drumPaused) {
+          throw Exception('Machine is not running - cannot pause');
+        }
+
+        // 3. UPDATE: Update machine to PAUSED
+        transaction.update(machineRef, {
+          'drumActive': false,
+          'drumPaused': true,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to PAUSED
+        transaction.update(drumRef, {
+          'status': 'paused',
+          'pausedAt': FieldValue.serverTimestamp(),
+          'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+        });
+      });
+
+      debugPrint('✅ Drum controller paused successfully (Atomic)');
     } catch (e) {
       debugPrint('❌ Error pausing drum controller: $e');
       rethrow;
@@ -726,18 +846,42 @@ class FirestoreCycleService implements CycleService {
         throw Exception('No drum controller found to resume');
       }
 
-      final drumDocId = drumSnapshot.docs.first.id;
+      final drumDoc = drumSnapshot.docs.first;
+      final machineId = drumDoc.data()['machineId'] as String?;
 
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('drum_controller')
-          .doc(drumDocId)
-          .update({'status': 'running', 'pausedAt': FieldValue.delete()});
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
 
-      debugPrint('✅ Drum controller resumed successfully');
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final drumRef = drumDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
+        final drumPaused = machineSnapshot.data()?['drumPaused'] ?? false;
+
+        // 2. CHECK: Ensure machine is actually paused
+        if (drumActive || !drumPaused) {
+          throw Exception('Machine is not paused - cannot resume');
+        }
+
+        // 3. UPDATE: Update machine to RUNNING
+        transaction.update(machineRef, {
+          'drumActive': true,
+          'drumPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to RUNNING
+        transaction.update(drumRef, {
+          'status': 'running',
+          'pausedAt': FieldValue.delete(),
+        });
+      });
+
+      debugPrint('✅ Drum controller resumed successfully (Atomic)');
     } catch (e) {
       debugPrint('❌ Error resuming drum controller: $e');
       rethrow;
@@ -771,22 +915,43 @@ class FirestoreCycleService implements CycleService {
         throw Exception('No aerator found to pause');
       }
 
-      final aeratorDocId = aeratorSnapshot.docs.first.id;
+      final aeratorDoc = aeratorSnapshot.docs.first;
+      final machineId = aeratorDoc.data()['machineId'] as String?;
 
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('aerator')
-          .doc(aeratorDocId)
-          .update({
-            'status': 'paused',
-            'pausedAt': FieldValue.serverTimestamp(),
-            'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
-          });
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
 
-      debugPrint('✅ Aerator paused successfully');
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final aeratorRef = aeratorDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
+        final aeratorPaused = machineSnapshot.data()?['aeratorPaused'] ?? false;
+
+        // 2. CHECK: Ensure aerator is actually running (not already paused/stopped)
+        if (!aeratorActive || aeratorPaused) {
+          throw Exception('Aerator is not running - cannot pause');
+        }
+
+        // 3. UPDATE: Update machine to PAUSED
+        transaction.update(machineRef, {
+          'aeratorActive': false,
+          'aeratorPaused': true,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to PAUSED
+        transaction.update(aeratorRef, {
+          'status': 'paused',
+          'pausedAt': FieldValue.serverTimestamp(),
+          'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
+        });
+      });
+
+      debugPrint('✅ Aerator paused successfully (Atomic)');
     } catch (e) {
       debugPrint('❌ Error pausing aerator: $e');
       rethrow;
@@ -817,18 +982,42 @@ class FirestoreCycleService implements CycleService {
         throw Exception('No aerator found to resume');
       }
 
-      final aeratorDocId = aeratorSnapshot.docs.first.id;
+      final aeratorDoc = aeratorSnapshot.docs.first;
+      final machineId = aeratorDoc.data()['machineId'] as String?;
 
-      await _firestore
-          .collection('batches')
-          .doc(batchId)
-          .collection('cyclesRecom')
-          .doc(cycleDocId)
-          .collection('aerator')
-          .doc(aeratorDocId)
-          .update({'status': 'running', 'pausedAt': FieldValue.delete()});
+      if (machineId == null) {
+        throw Exception('Machine ID not found in cycle document');
+      }
 
-      debugPrint('✅ Aerator resumed successfully');
+      final machineRef = _firestore.collection('machines').doc(machineId);
+      final aeratorRef = aeratorDoc.reference;
+
+      await _firestore.runTransaction((transaction) async {
+        // 1. READ: Get machine state
+        final machineSnapshot = await transaction.get(machineRef);
+        final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
+        final aeratorPaused = machineSnapshot.data()?['aeratorPaused'] ?? false;
+
+        // 2. CHECK: Ensure aerator is actually paused
+        if (aeratorActive || !aeratorPaused) {
+          throw Exception('Aerator is not paused - cannot resume');
+        }
+
+        // 3. UPDATE: Update machine to RUNNING
+        transaction.update(machineRef, {
+          'aeratorActive': true,
+          'aeratorPaused': false,
+          'lastModified': FieldValue.serverTimestamp(),
+        });
+
+        // 4. UPDATE: Update cycle log to RUNNING
+        transaction.update(aeratorRef, {
+          'status': 'running',
+          'pausedAt': FieldValue.delete(),
+        });
+      });
+
+      debugPrint('✅ Aerator resumed successfully (Atomic)');
     } catch (e) {
       debugPrint('❌ Error resuming aerator: $e');
       rethrow;
@@ -886,7 +1075,7 @@ class FirestoreCycleService implements CycleService {
     List<QueryDocumentSnapshot> batches,
     DateTime cutoff,
   ) async {
-    debugPrint('🔄 Fetching cycles for ${batches.length} batches...');
+    //debugPrint('🔄 Fetching cycles for ${batches.length} batches...');
 
     final List<CycleRecommendation> allCycles = [];
 
@@ -961,7 +1150,7 @@ class FirestoreCycleService implements CycleService {
     allCycles.sort((a, b) =>
         (b.timestamp ?? DateTime(2000)).compareTo(a.timestamp ?? DateTime(2000)));
 
-    debugPrint('✅ Stream yielding ${allCycles.length} cycles');
+    //debugPrint('✅ Stream yielding ${allCycles.length} cycles');
     return allCycles;
   }
 }

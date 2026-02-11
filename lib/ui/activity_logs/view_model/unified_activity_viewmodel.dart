@@ -91,7 +91,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         .streamTeamAlerts(cutoffDate: cutoffDate)
         .listen(
           (alerts) {
-            debugPrint('🔔 Alerts stream updated: ${alerts.length} items');
+            //debugPrint('🔔 Alerts stream updated: ${alerts.length} items');
             _onAlertsStreamUpdate(alerts);
           },
           onError: (e) {
@@ -104,7 +104,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
         .streamTeamCycles()
         .listen(
           (cycles) {
-            debugPrint('🔔 Cycles stream updated: ${cycles.length} items');
+            //debugPrint('🔔 Cycles stream updated: ${cycles.length} items');
             _onCyclesStreamUpdate(cycles);
           },
           onError: (e) {
@@ -137,7 +137,7 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
               .watchReportsByTeam(teamId)
               .listen(
                 (reports) {
-                  debugPrint('🔔 Reports stream updated: ${reports.length} items');
+                  //debugPrint('🔔 Reports stream updated: ${reports.length} items');
                   _onReportsStreamUpdate(reports);
                 },
                 onError: (e) {
