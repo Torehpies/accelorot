@@ -13,7 +13,7 @@ import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
-import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
+//import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ControlInputCard extends ConsumerStatefulWidget {
@@ -36,7 +36,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
   DateTime? _startTime;
   Timer? _timer;
   Timer? _cycleTimer;
-  CycleRecommendation? _cycleDoc;
+
   
   // Pause state tracking
   bool _isPaused = false;
@@ -114,7 +114,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       _uptime = '00:00:00';
       _completedCycles = 0;
       _startTime = null;
-      _cycleDoc = null;
+
       _isPaused = false;
       _accumulatedSeconds = 0;
       _isInitialized = false;
@@ -161,7 +161,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
             _stopTimer();
             _cycleTimer?.cancel();
             setState(() {
-              _cycleDoc = cycle;
+
               status = SystemStatus.idle;
               _isPaused = true;
               _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
@@ -240,7 +240,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           _uptime = '00:00:00';
           _completedCycles = 0;
           _startTime = null;
-          _cycleDoc = null;
+    
           _isPaused = false;
           _accumulatedSeconds = 0;
         });
@@ -253,7 +253,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       bool isEffectivelyRunning = machine.drumActive;
 
       setState(() {
-        _cycleDoc = cycle;
+
         settings = DrumRotationSettings(
           cycles: cycle.cycles ?? 1,
           period: cycle.duration ?? '10 minutes',
@@ -353,7 +353,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
            _uptime = '00:00:00';
            _completedCycles = 0;
            _startTime = null;
-           _cycleDoc = null;
+     
            _isPaused = false;
            _accumulatedSeconds = 0;
          });
@@ -561,7 +561,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           _startTime = null;
           _isPaused = false;
           _accumulatedSeconds = 0;
-          _cycleDoc = null;
+    
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
