@@ -253,18 +253,18 @@ class FirestoreCycleService implements CycleService {
 
       final machineRef = _firestore.collection('machines').doc(machineId);
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         if (!machineSnapshot.exists) {
-          throw Exception('Machine not found');
+          return 'ERROR:Machine not found';
         }
 
         final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
         
         // 2. CHECK: Ensure machine is not already running
         if (drumActive == true) {
-          throw Exception('Machine is already running');
+          return 'ERROR:Machine is already running';
         }
 
         // 3. WRITE: Update machine state to RUNNING
@@ -289,7 +289,12 @@ class FirestoreCycleService implements CycleService {
           'timestamp': FieldValue.serverTimestamp(),
           'totalRuntimeSeconds': 0,
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Started drum controller (Atomic): ${drumConfigRef.id}');
       return drumConfigRef.id;
@@ -412,15 +417,14 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final drumRef = drumDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
 
         // 2. CHECK: Ensure machine is actually running
-        // We throw if 'drumActive' is ALREADY false, preventing duplicate stops.
         if (drumActive == false) {
-          throw Exception('Machine is already stopped');
+          return 'ERROR:Machine is already stopped';
         }
 
         // 3. UPDATE: Update machine to STOPPED
@@ -438,7 +442,12 @@ class FirestoreCycleService implements CycleService {
           'pausedAt': FieldValue.delete(),
           'accumulatedRuntimeSeconds': FieldValue.delete(),
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Drum controller stopped successfully (Atomic)');
     } catch (e) {
@@ -484,14 +493,14 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final aeratorRef = aeratorDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
 
         // 2. CHECK: Ensure machine is actually running
         if (aeratorActive == false) {
-          throw Exception('Aerator is already stopped');
+          return 'ERROR:Aerator is already stopped';
         }
 
         // 3. UPDATE: Update machine to STOPPED
@@ -509,7 +518,12 @@ class FirestoreCycleService implements CycleService {
           'pausedAt': FieldValue.delete(),
           'accumulatedRuntimeSeconds': FieldValue.delete(),
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Aerator stopped successfully (Atomic)');
     } catch (e) {
@@ -544,18 +558,18 @@ class FirestoreCycleService implements CycleService {
 
       final machineRef = _firestore.collection('machines').doc(machineId);
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         if (!machineSnapshot.exists) {
-          throw Exception('Machine not found');
+          return 'ERROR:Machine not found';
         }
 
         final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
 
         // 2. CHECK: Ensure aerator is not already running
         if (aeratorActive == true) {
-          throw Exception('Aerator is already running');
+          return 'ERROR:Aerator is already running';
         }
 
         // 3. WRITE: Update machine state to RUNNING
@@ -580,7 +594,12 @@ class FirestoreCycleService implements CycleService {
           'timestamp': FieldValue.serverTimestamp(),
           'totalRuntimeSeconds': 0,
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Started aerator (Atomic): ${aeratorRef.id}');
       return aeratorRef.id;
@@ -789,7 +808,7 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final drumRef = drumDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
@@ -797,7 +816,7 @@ class FirestoreCycleService implements CycleService {
 
         // 2. CHECK: Ensure machine is actually running (not already paused/stopped)
         if (!drumActive || drumPaused) {
-          throw Exception('Machine is not running - cannot pause');
+          return 'ERROR:Machine is not running - cannot pause';
         }
 
         // 3. UPDATE: Update machine to PAUSED
@@ -813,7 +832,12 @@ class FirestoreCycleService implements CycleService {
           'pausedAt': FieldValue.serverTimestamp(),
           'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Drum controller paused successfully (Atomic)');
     } catch (e) {
@@ -856,7 +880,7 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final drumRef = drumDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final drumActive = machineSnapshot.data()?['drumActive'] ?? false;
@@ -864,7 +888,7 @@ class FirestoreCycleService implements CycleService {
 
         // 2. CHECK: Ensure machine is actually paused
         if (drumActive || !drumPaused) {
-          throw Exception('Machine is not paused - cannot resume');
+          return 'ERROR:Machine is not paused - cannot resume';
         }
 
         // 3. UPDATE: Update machine to RUNNING
@@ -879,7 +903,12 @@ class FirestoreCycleService implements CycleService {
           'status': 'running',
           'pausedAt': FieldValue.delete(),
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Drum controller resumed successfully (Atomic)');
     } catch (e) {
@@ -925,7 +954,7 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final aeratorRef = aeratorDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
@@ -933,7 +962,7 @@ class FirestoreCycleService implements CycleService {
 
         // 2. CHECK: Ensure aerator is actually running (not already paused/stopped)
         if (!aeratorActive || aeratorPaused) {
-          throw Exception('Aerator is not running - cannot pause');
+          return 'ERROR:Aerator is not running - cannot pause';
         }
 
         // 3. UPDATE: Update machine to PAUSED
@@ -949,7 +978,12 @@ class FirestoreCycleService implements CycleService {
           'pausedAt': FieldValue.serverTimestamp(),
           'accumulatedRuntimeSeconds': accumulatedRuntimeSeconds,
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Aerator paused successfully (Atomic)');
     } catch (e) {
@@ -992,7 +1026,7 @@ class FirestoreCycleService implements CycleService {
       final machineRef = _firestore.collection('machines').doc(machineId);
       final aeratorRef = aeratorDoc.reference;
 
-      await _firestore.runTransaction((transaction) async {
+      final result = await _firestore.runTransaction<String>((transaction) async {
         // 1. READ: Get machine state
         final machineSnapshot = await transaction.get(machineRef);
         final aeratorActive = machineSnapshot.data()?['aeratorActive'] ?? false;
@@ -1000,7 +1034,7 @@ class FirestoreCycleService implements CycleService {
 
         // 2. CHECK: Ensure aerator is actually paused
         if (aeratorActive || !aeratorPaused) {
-          throw Exception('Aerator is not paused - cannot resume');
+          return 'ERROR:Aerator is not paused - cannot resume';
         }
 
         // 3. UPDATE: Update machine to RUNNING
@@ -1015,7 +1049,12 @@ class FirestoreCycleService implements CycleService {
           'status': 'running',
           'pausedAt': FieldValue.delete(),
         });
+        return 'OK';
       });
+
+      if (result.startsWith('ERROR:')) {
+        throw Exception(result.substring(6));
+      }
 
       debugPrint('✅ Aerator resumed successfully (Atomic)');
     } catch (e) {

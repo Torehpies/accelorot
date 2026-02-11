@@ -371,6 +371,38 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
   }
 }
 
+  /// Converts raw exception text into a clean, user-friendly snackbar message.
+  String _getUserFriendlyError(Object e, String action) {
+    final raw = e.toString();
+
+    // Map known error patterns to friendly messages
+    if (raw.contains('already running')) {
+      return 'Machine is already running. Refreshing state...';
+    }
+    if (raw.contains('already stopped')) {
+      return 'Machine is already stopped. Refreshing state...';
+    }
+    if (raw.contains('not running')) {
+      return 'Machine was already stopped or paused. Refreshing...';
+    }
+    if (raw.contains('not paused')) {
+      return 'Machine is no longer paused. Refreshing...';
+    }
+    if (raw.contains('Machine not found')) {
+      return 'Machine not found. Please select a machine.';
+    }
+    if (raw.contains('No cycle document') || raw.contains('No drum controller') || raw.contains('No aerator')) {
+      return 'No active cycle found. Please try again.';
+    }
+    // Catch the ugly Web-specific error and replace with a generic message
+    if (raw.contains('Dart exception thrown from converted Future')) {
+      return 'Operation failed. Another user may have changed the state. Refreshing...';
+    }
+
+    // Fallback: just show "Failed to [action]" without the raw exception
+    return 'Failed to $action. Please try again.';
+  }
+
   @override
   void dispose() {
     _stopTimer();
@@ -474,24 +506,9 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       }
     } catch (e) {
       if (mounted) {
-        String errorMessage = 'Failed to start: $e';
+        String errorMessage = _getUserFriendlyError(e, 'start');
 
-        // Attempt to unwrap "converted Future" error (Web specific)
-        if (e.toString().contains('Dart exception thrown from converted Future')) {
-           try {
-             // Access .error via dynamic dispatch if possible
-             final dynamic exception = e;
-             if (exception.error != null) {
-               errorMessage = 'Error: ${exception.error}';
-             }
-           } catch (_) {
-             // If access fails, keep original message
-           }
-        }
-
-        if (errorMessage.contains('Machine is already running')) {
-          errorMessage = 'Machine is already running. Please refresh.';
-          // Force refresh
+        if (e.toString().contains('already running')) {
           _handleMachineStateChange(false);
         }
         
@@ -557,11 +574,10 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
       }
     } catch (e) {
       if (mounted) {
-        String errorMessage = 'Failed to stop: $e';
-        if (e.toString().contains('Machine is already stopped')) {
-          errorMessage = 'Machine is already stopped. Refreshing state...';
-          // Force a state refresh if possible/needed
-          _handleMachineStateChange(false); 
+        String errorMessage = _getUserFriendlyError(e, 'stop');
+
+        if (e.toString().contains('already stopped')) {
+          _handleMachineStateChange(false);
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -627,9 +643,9 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     } catch (e) {
       debugPrint('❌ Error in _handlePause: $e');
       if (mounted) {
-        String errorMessage = 'Failed to pause: $e';
+        String errorMessage = _getUserFriendlyError(e, 'pause');
+
         if (e.toString().contains('not running') || e.toString().contains('already stopped')) {
-          errorMessage = 'Machine was already stopped or paused by another user. Refreshing...';
           _handleMachineStateChange(false);
         }
         ScaffoldMessenger.of(context).showSnackBar(
@@ -688,9 +704,9 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     } catch (e) {
       debugPrint('❌ Error in _handleResume: $e');
       if (mounted) {
-        String errorMessage = 'Failed to resume: $e';
+        String errorMessage = _getUserFriendlyError(e, 'resume');
+
         if (e.toString().contains('not paused') || e.toString().contains('already stopped')) {
-          errorMessage = 'Machine is no longer paused. Refreshing...';
           _handleMachineStateChange(false);
         }
         ScaffoldMessenger.of(context).showSnackBar(

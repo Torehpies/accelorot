@@ -348,6 +348,36 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
   }
 }
 
+
+  /// Converts raw exception text into a clean, user-friendly snackbar message.
+  String _getUserFriendlyError(Object e, String action) {
+    final raw = e.toString();
+
+    if (raw.contains('already running')) {
+      return 'Aerator is already running. Refreshing state...';
+    }
+    if (raw.contains('already stopped')) {
+      return 'Aerator is already stopped. Refreshing state...';
+    }
+    if (raw.contains('not running')) {
+      return 'Aerator was already stopped or paused. Refreshing...';
+    }
+    if (raw.contains('not paused')) {
+      return 'Aerator is no longer paused. Refreshing...';
+    }
+    if (raw.contains('Machine not found')) {
+      return 'Machine not found. Please select a machine.';
+    }
+    if (raw.contains('No cycle document') || raw.contains('No aerator') || raw.contains('No drum controller')) {
+      return 'No active cycle found. Please try again.';
+    }
+    if (raw.contains('Dart exception thrown from converted Future')) {
+      return 'Operation failed. Another user may have changed the state. Refreshing...';
+    }
+
+    return 'Failed to $action. Please try again.';
+  }
+
   @override
   void dispose() {
     _stopTimer();
@@ -448,24 +478,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       }
     } catch (e) {
       if (mounted) {
-        String errorMessage = 'Failed to start: $e';
+        String errorMessage = _getUserFriendlyError(e, 'start');
 
-        // Attempt to unwrap "converted Future" error (Web specific)
-        if (e.toString().contains('Dart exception thrown from converted Future')) {
-           try {
-             final dynamic exception = e;
-             if (exception.error != null) {
-               errorMessage = 'Error: ${exception.error}';
-             }
-           } catch (_) {
-             // ignore
-           }
-        }
-
-        if (errorMessage.contains('Aerator is already running') || 
-            errorMessage.contains('Machine is already running')) {
-          errorMessage = 'Aerator is already running. Please refresh.';
-          // Force refresh
+        if (e.toString().contains('already running')) {
           _handleMachineStateChange(false);
         }
         
@@ -530,9 +545,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       }
     } catch (e) {
       if (mounted) {
-        String errorMessage = 'Failed to stop: $e';
-        if (e.toString().contains('Aerator is already stopped')) {
-          errorMessage = 'Aerator is already stopped. Refreshing state...';
+        String errorMessage = _getUserFriendlyError(e, 'stop');
+
+        if (e.toString().contains('already stopped')) {
           _handleMachineStateChange(false);
         }
 
@@ -601,9 +616,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     } catch (e) {
       debugPrint('❌ Error in _handlePause: $e');
       if (mounted) {
-        String errorMessage = 'Failed to pause: $e';
+        String errorMessage = _getUserFriendlyError(e, 'pause');
+
         if (e.toString().contains('not running') || e.toString().contains('already stopped')) {
-          errorMessage = 'Aerator was already stopped or paused by another user. Refreshing...';
           _handleMachineStateChange(false);
         }
         ScaffoldMessenger.of(context).showSnackBar(
@@ -662,9 +677,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     } catch (e) {
       debugPrint('❌ Error in _handleResume: $e');
       if (mounted) {
-        String errorMessage = 'Failed to resume: $e';
+        String errorMessage = _getUserFriendlyError(e, 'resume');
+
         if (e.toString().contains('not paused') || e.toString().contains('already stopped')) {
-          errorMessage = 'Aerator is no longer paused. Refreshing...';
           _handleMachineStateChange(false);
         }
         ScaffoldMessenger.of(context).showSnackBar(
