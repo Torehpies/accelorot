@@ -52,8 +52,8 @@ class RegistrationFormContent extends ConsumerWidget {
       errorText: errorText,
       errorStyle: const TextStyle(height: 0.5),
       labelText: labelText,
-      labelStyle: TextStyle(
-        fontSize: isDesktop ? 14 : (isTablet ? 13 : 11),
+      labelStyle: const TextStyle(
+        fontSize: 16,
       ),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
@@ -71,15 +71,16 @@ class RegistrationFormContent extends ConsumerWidget {
       ),
     );
 
-    // Minimized spacing to fit on screen without scrolling
     final fieldHeight = isDesktop ? 52.0 : (isTablet ? 54.0 : 44.0);
-    final rowSpacing = isDesktop ? 12.0 : (isTablet ? 8.0 : 5.0);
-    final titleSpacing = isDesktop ? 8.0 : (isTablet ? 8.0 : 4.0);
-    final sectionSpacing = isDesktop ? 8.0 : (isTablet ? 8.0 : 4.0);
-    final footerSpacing = isDesktop ? 3.0 : (isTablet ? 2.0 : 2.0);
-    final logoSize = isTablet ? 45.0 : 40.0;
-    final inputTextStyle = TextStyle(
-      fontSize: isDesktop ? 14 : (isTablet ? 13 : 11),
+    final rowSpacing = 16.0;
+    final titleSpacing = 32.0;
+    final sectionSpacing = 24.0;
+    final footerSpacing = 16.0;
+    final buttonTopSpacing = 0.0;
+    final fieldToButtonSpacing = 16.0;
+    final logoSize = 90.0;
+    final inputTextStyle = const TextStyle(
+      fontSize: 16,
       height: 1.2,
     );
 
@@ -224,6 +225,7 @@ class RegistrationFormContent extends ConsumerWidget {
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
         ),
+        SizedBox(height: fieldToButtonSpacing),
         SizedBox(
           width: double.infinity,
           child: Column(
@@ -240,6 +242,7 @@ class RegistrationFormContent extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              if (buttonTopSpacing > 0) SizedBox(height: buttonTopSpacing),
               PrimaryButton(
                 text: 'Register',
                 isLoading: state.isRegistrationLoading,
@@ -286,23 +289,22 @@ class RegistrationFormContent extends ConsumerWidget {
   Widget _buildTitle(BuildContext buildContext, ThemeData theme) {
     final screenWidth = MediaQuery.of(buildContext).size.width;
     final isDesktop = screenWidth >= kDesktopBreakpoint;
-    final isTablet = screenWidth >= kTabletBreakpoint && screenWidth < kDesktopBreakpoint;
     
     return Column(
       children: [
         Text(
           'Create Account',
-                  style: TextStyle(
-                    fontSize: isDesktop ? 24 : (isTablet ? 26 : 18),
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 59, 59, 59),
-                  ),
-                ),
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: const Color.fromARGB(255, 59, 59, 59),
+          ),
+        ),
         SizedBox(height: isDesktop ? 2 : 4),
         Text(
           'Join us to get started',
           style: TextStyle(
-            fontSize: isDesktop ? 14 : (isTablet ? 15 : 10),
+            fontSize: 16,
             color: theme.hintColor,
           ),
         ),
