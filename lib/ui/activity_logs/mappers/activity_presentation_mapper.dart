@@ -101,10 +101,22 @@ class ActivityPresentationMapper {
   // ===== CYCLE RECOMMENDATION → ActivityLogItem =====
 
   static ActivityLogItem fromCycleRecommendation(CycleRecommendation cycle) {
-    // Determine title based on controller type
-    final title = cycle.controllerType == 'drum_controller'
+    // Determine title based on controller type and action
+    final controllerName = cycle.controllerType == 'drum_controller'
         ? 'Drum Controller'
         : 'Aerator';
+    
+    // Use action if available, otherwise use status
+    final actionText = cycle.action != null 
+        ? cycle.action![0].toUpperCase() + cycle.action!.substring(1)
+        : (cycle.status != null 
+            ? cycle.status![0].toUpperCase() + cycle.status!.substring(1)
+            : '');
+    
+    final title = actionText.isNotEmpty 
+        ? '$controllerName $actionText'
+        : controllerName;
+
     // Build description
     final parts = <String>[];
     parts.add('Duration: ${cycle.duration ?? "N/A"}');
@@ -131,6 +143,7 @@ class ActivityPresentationMapper {
       batchId: cycle.batchId,
       status: cycle.status,
       controllerType: cycle.controllerType,
+      action: cycle.action,
       cycles: cycle.cycles,
       duration: cycle.duration,
       completedCycles: cycle.completedCycles,
@@ -144,6 +157,10 @@ class ActivityPresentationMapper {
     switch (status?.toLowerCase()) {
       case 'running':
         return Colors.green;
+      case 'resumed':
+        return Colors.green;
+      case 'paused':
+        return Colors.orange;
       case 'completed':
         return Colors.blue;
       case 'stopped':

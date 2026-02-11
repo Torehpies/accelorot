@@ -108,59 +108,48 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     });
   }
 
-  /// Handle real-time machine state changes from Firebase stream
-  void _handleMachineStateChange(bool aeratorActive) async {
+  /// Update UI state based on the latest machine model
+  void _syncWithMachineState(MachineModel machine) {
     if (!mounted) return;
     
-    // Get current machine state to check pause flag
-    final machineRepository = ref.read(machineRepositoryProvider);
-    final machine = await machineRepository.getMachineById(_machineId!);
-    
-    if (machine == null) return;
-    
+    final aeratorActive = machine.aeratorActive;
     final aeratorPaused = machine.aeratorPaused;
     
-    debugPrint('Machine state changed: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
+    debugPrint('Machine state sync: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
     
     // Determine state based on aeratorActive and aeratorPaused combination
-    if (aeratorActive && !aeratorPaused) {
-      // Running state - only reload if not already initialized and running
-      if (_isInitialized && status == SystemStatus.running && _startTime != null) {
-        debugPrint('Already running - skipping reload');
+    if (machine.aeratorActive && !machine.aeratorPaused) {
+      // Running state
+      
+      // Only skip reload if we are truly running
+      final isTimerRunning = _timer?.isActive ?? false;
+      if (_isInitialized && status == SystemStatus.running && _startTime != null && isTimerRunning) {
+        debugPrint('Already running (timer active) - skipping reload');
         return;
       }
-      debugPrint('Aerator is RUNNING - reloading cycle state');
-      await _loadExistingCycle();
-    } else if (!aeratorActive && aeratorPaused) {
-      // Paused state - need to load cycle to get accumulated time
-      debugPrint('⏸Aerator is PAUSED - loading paused state');
       
-      // Load cycle to get accumulated runtime
+      debugPrint('Aerator is RUNNING - reloading cycle state');
+      _loadExistingCycle(machine);
+    } else if (!machine.aeratorActive && machine.aeratorPaused) {
+      // Paused state
+      debugPrint('⏸Aerator is PAUSED - stopping timer and setting paused state');
+      
+      // Stop timer IMMEDIATELY
+      _stopTimer();
+      _cycleTimer?.cancel();
+      
+      // Aggressively update UI to Paused state immediately
+      setState(() {
+         status = SystemStatus.idle;
+         _isPaused = true;
+         // _accumulatedSeconds stays as is until accurate load
+         _startTime = null;
+      });
+      
       if (_currentBatch != null) {
-        try {
-          final cycleRepository = ref.read(cycleRepositoryProvider);
-          final cycles = await cycleRepository.getAerators(
-            batchId: _currentBatch!.id,
-          );
-          final cycle = cycles.isEmpty ? null : cycles.first;
-          
-          if (cycle != null && cycle.accumulatedRuntimeSeconds != null) {
-            _stopTimer();
-            _cycleTimer?.cancel();
-            setState(() {
-              //_cycleDoc = cycle;
-              status = SystemStatus.idle;
-              _isPaused = true;
-              _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
-              _uptime = _formatDuration(Duration(seconds: cycle.accumulatedRuntimeSeconds!));
-              _startTime = null;
-            });
-          }
-        } catch (e) {
-          debugPrint('❌ Error loading paused cycle: $e');
-        }
+        _loadPausedState(machine);
       }
-    } else if (!aeratorActive && !aeratorPaused) {
+    } else if (!machine.aeratorActive && !machine.aeratorPaused) {
       // Stopped state
       debugPrint('Aerator is STOPPED - resetting to idle');
       _stopTimer();
@@ -172,7 +161,47 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
   }
 
-  Future<void> _loadExistingCycle() async {
+  /// Force a fresh fetch of the machine state (used for error recovery)
+  Future<void> _refreshMachineState() async {
+    if (_machineId == null) return;
+    try {
+      final machineRepository = ref.read(machineRepositoryProvider);
+      final machine = await machineRepository.getMachineById(_machineId!);
+      if (machine != null) {
+        _syncWithMachineState(machine);
+      }
+    } catch (e) {
+      debugPrint('❌ Error refreshing machine state: $e');
+    }
+  }
+
+  Future<void> _loadPausedState(MachineModel machine) async {
+    try {
+      final cycleRepository = ref.read(cycleRepositoryProvider);
+      final cycles = await cycleRepository.getAerators(
+        batchId: _currentBatch!.id,
+      );
+      final cycle = cycles.isEmpty ? null : cycles.first;
+      
+      if (!mounted) return;
+      
+      final runtime = cycle?.accumulatedRuntimeSeconds ?? cycle?.totalRuntimeSeconds;
+    if (cycle != null && runtime != null) {
+      // Timer already stopped
+      setState(() {
+        status = SystemStatus.idle;
+        _isPaused = true;
+        _accumulatedSeconds = runtime;
+        _uptime = _formatDuration(Duration(seconds: runtime));
+        _startTime = null;
+      });
+    }
+    } catch (e) {
+      debugPrint('❌ Error loading paused cycle: $e');
+    }
+  }
+
+  Future<void> _loadExistingCycle([MachineModel? machineOverride]) async {
   if (_currentBatch == null) return;
 
   if (_machineId == null) {
@@ -202,16 +231,24 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
 
     // Check machine aeratorActive status
-    final machineRepository = ref.read(machineRepositoryProvider);
-    final machine = await machineRepository.getMachineById(_machineId!);
+    MachineModel? machine;
+    if (machineOverride != null) {
+      machine = machineOverride;
+    } else {
+      final machineRepository = ref.read(machineRepositoryProvider);
+      machine = await machineRepository.getMachineById(_machineId!);
+    }
     
     if (machine == null) {
       debugPrint('❌ Machine not found');
       return;
     }
+    
+    // Create non-nullable reference for use in closures
+    final effectiveMachine = machine!;
 
     // If no cycle exists and aeratorActive is false, reset to idle
-    if (cycle == null && !machine.aeratorActive) {
+    if (cycle == null && !effectiveMachine.aeratorActive) {
       debugPrint('⚠️ No cycle and aerator is not active - resetting to idle');
       if (mounted) {
         setState(() {
@@ -230,7 +267,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
     // If cycle exists, restore state based on cycle status
     if (mounted && cycle != null) {
-      bool isEffectivelyRunning = machine.aeratorActive;
+      bool isEffectivelyRunning = effectiveMachine.aeratorActive;
 
       setState(() {
         //_cycleDoc = cycle;
@@ -255,25 +292,42 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
              }
              _isInitialized = true;
 
-        } else if (cycle.status == 'paused') {
+        } else if (cycle.status == 'paused' && !isEffectivelyRunning) {
           debugPrint('Aerator is paused');
           status = SystemStatus.idle;
           _isPaused = true;
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? 0;
+          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
           _startTime = null;
-        } else if (cycle.status == 'running' && machine.aeratorActive) {
-          debugPrint('Aerator is running');
+        } else if (effectiveMachine.aeratorActive && (cycle.status == 'running' || cycle.status == 'resumed' || cycle.status == 'paused')) {
+          debugPrint('Aerator is running (cycle status: ${cycle.status})');
           status = SystemStatus.running;
           _isPaused = false;
           
-          if (cycle.accumulatedRuntimeSeconds != null) {
-            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds!;
-            _startTime = DateTime.now().subtract(Duration(seconds: _accumulatedSeconds));
+          final previousRuntime = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds;
+          
+          debugPrint('🔄 Aerator Resumed/Stale Debug: status=${cycle.status}, prev=$previousRuntime, startedAt=${cycle.startedAt}');
+
+          if (previousRuntime != null) {
+            _accumulatedSeconds = previousRuntime;
           } else {
-            _startTime = cycle.startedAt ?? DateTime.now();
             _accumulatedSeconds = 0;
           }
+          
+          if (cycle.status == 'paused') {
+             _startTime = DateTime.now();
+          } else {
+             _startTime = cycle.startedAt ?? DateTime.now();
+          }
+          
+          // Immediately compute and display the correct uptime (don't wait for timer tick)
+          final initialElapsed = DateTime.now().difference(_startTime!);
+          final totalSeconds = _accumulatedSeconds + initialElapsed.inSeconds;
+          _uptime = _formatDuration(Duration(seconds: totalSeconds));
+          
+          // Stop any existing timer before starting a new one
+          _stopTimer();
+          _cycleTimer?.cancel();
           
           if (_startTime != null) {
             _startTimer();
@@ -312,7 +366,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     } else if (mounted) {
        // No cycle document found
        // Check if machine is strangely running without a cycle doc
-       if (machine.aeratorActive) {
+       if (effectiveMachine.aeratorActive) {
          debugPrint('⚠️ Aerator Zombie state detected: Machine running but NO cycle doc found.');
          setState(() {
            status = SystemStatus.running;
@@ -480,7 +534,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         String errorMessage = _getUserFriendlyError(e, 'start');
 
         if (e.toString().contains('already running')) {
-          _handleMachineStateChange(false);
+          _refreshMachineState();
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -547,7 +601,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         String errorMessage = _getUserFriendlyError(e, 'stop');
 
         if (e.toString().contains('already stopped')) {
-          _handleMachineStateChange(false);
+          _refreshMachineState();
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -578,11 +632,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
       debugPrint('🔵 Starting pause operation...');
+      debugPrint('🔍 Aerator Pause Debug: startTime=$_startTime, accSeconds=$_accumulatedSeconds');
 
       final elapsed = _startTime != null 
           ? DateTime.now().difference(_startTime!).inSeconds 
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
+      
+      debugPrint('🔍 Aerator Pause Debug: elapsed=$elapsed, totalToSend=$totalAccumulated');
 
       // Atomic pause operation
       await cycleRepository.pauseAerator(
@@ -618,7 +675,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         String errorMessage = _getUserFriendlyError(e, 'pause');
 
         if (e.toString().contains('not running') || e.toString().contains('already stopped')) {
-          _handleMachineStateChange(false);
+          _refreshMachineState();
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -679,7 +736,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         String errorMessage = _getUserFriendlyError(e, 'resume');
 
         if (e.toString().contains('not paused') || e.toString().contains('already stopped')) {
-          _handleMachineStateChange(false);
+          _refreshMachineState();
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -779,7 +836,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         (previous, next) {
           next.whenData((machine) {
             if (machine != null) {
-              _handleMachineStateChange(machine.aeratorActive);
+              _syncWithMachineState(machine);
             }
           });
         },
