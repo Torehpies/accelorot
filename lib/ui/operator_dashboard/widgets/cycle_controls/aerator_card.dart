@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
@@ -87,7 +86,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     // Listen to batch changes
     ref.listenManual(selectedBatchIdProvider, (previous, next) {
       if (next != _trackedBatchId) {
-        debugPrint('🔄 Aerator: Batch changed in provider: $_trackedBatchId -> $next');
+        debugPrint('Aerator: Batch changed in provider: $_trackedBatchId -> $next');
         _trackedBatchId = next;
         _stopTimer();
         _cycleTimer?.cancel();
@@ -121,20 +120,20 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     
     final aeratorPaused = machine.aeratorPaused;
     
-    debugPrint('🔔 Machine state changed: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
+    debugPrint('Machine state changed: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
     
     // Determine state based on aeratorActive and aeratorPaused combination
     if (aeratorActive && !aeratorPaused) {
       // Running state - only reload if not already initialized and running
       if (_isInitialized && status == SystemStatus.running && _startTime != null) {
-        debugPrint('✅ Already running - skipping reload');
+        debugPrint('Already running - skipping reload');
         return;
       }
-      debugPrint('✅ Aerator is RUNNING - reloading cycle state');
+      debugPrint('Aerator is RUNNING - reloading cycle state');
       await _loadExistingCycle();
     } else if (!aeratorActive && aeratorPaused) {
       // Paused state - need to load cycle to get accumulated time
-      debugPrint('⏸️ Aerator is PAUSED - loading paused state');
+      debugPrint('⏸Aerator is PAUSED - loading paused state');
       
       // Load cycle to get accumulated runtime
       if (_currentBatch != null) {
@@ -163,7 +162,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       }
     } else if (!aeratorActive && !aeratorPaused) {
       // Stopped state
-      debugPrint('⏹️ Aerator is STOPPED - resetting to idle');
+      debugPrint('Aerator is STOPPED - resetting to idle');
       _stopTimer();
       _cycleTimer?.cancel();
       setState(() {
@@ -196,10 +195,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     );
     final cycle = cycles.isEmpty ? null : cycles.first;
 
-    debugPrint('📊 Aerator loaded: ${cycle != null ? "Found" : "Not found"}');
+    debugPrint('Aerator loaded: ${cycle != null ? "Found" : "Not found"}');
     
     if (cycle != null) {
-      debugPrint('📊 Cycle status: ${cycle.status}');
+      debugPrint('Cycle status: ${cycle.status}');
     }
 
     // Check machine aeratorActive status
@@ -257,14 +256,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
              _isInitialized = true;
 
         } else if (cycle.status == 'paused') {
-          debugPrint('📊 Aerator is paused');
+          debugPrint('Aerator is paused');
           status = SystemStatus.idle;
           _isPaused = true;
           _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? 0;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
           _startTime = null;
         } else if (cycle.status == 'running' && machine.aeratorActive) {
-          debugPrint('📊 Aerator is running');
+          debugPrint('Aerator is running');
           status = SystemStatus.running;
           _isPaused = false;
           
@@ -283,7 +282,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           
           _isInitialized = true;
         } else if (cycle.status == 'stopped') {
-          debugPrint('📊 Aerator was stopped - ready to restart');
+          debugPrint('Aerator was stopped - ready to restart');
           status = SystemStatus.idle;
           _isPaused = false;
           _uptime = '00:00:00';
@@ -291,7 +290,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           _startTime = null;
           _accumulatedSeconds = 0;
         } else if (cycle.status == 'completed') {
-          debugPrint('📊 Aerator is completed');
+          debugPrint('Aerator is completed');
           status = SystemStatus.stopped;
           _isPaused = false;
           if (cycle.totalRuntimeSeconds != null) {

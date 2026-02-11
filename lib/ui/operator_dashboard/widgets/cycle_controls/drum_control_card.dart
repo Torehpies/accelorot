@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
@@ -216,10 +215,10 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     );
     final cycle = cycles.isEmpty ? null : cycles.first;
 
-    debugPrint('📊 Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
+    debugPrint('Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
     
     if (cycle != null) {
-      debugPrint('📊 Cycle status: ${cycle.status}');
+      debugPrint('Cycle status: ${cycle.status}');
     }
 
     // Check machine drumActive status
@@ -280,14 +279,14 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
              _isInitialized = true;
 
         } else if (cycle.status == 'paused') {
-          debugPrint('📊 Drum controller is paused');
+          debugPrint('Drum controller is paused');
           status = SystemStatus.idle;
           _isPaused = true;
           _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? 0;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
           _startTime = null;
         } else if (cycle.status == 'running' && machine.drumActive) {
-          debugPrint('📊 Drum controller is running');
+          debugPrint('Drum controller is running');
           status = SystemStatus.running;
           _isPaused = false;
           
@@ -306,7 +305,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           
           _isInitialized = true;
         } else if (cycle.status == 'stopped') {
-          debugPrint('📊 Drum controller was stopped - ready to restart');
+          debugPrint('Drum controller was stopped - ready to restart');
           status = SystemStatus.idle;
           _isPaused = false;
           _uptime = '00:00:00';
@@ -314,7 +313,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
           _startTime = null;
           _accumulatedSeconds = 0;
         } else if (cycle.status == 'completed') {
-          debugPrint('📊 Drum controller is completed');
+          debugPrint('Drum controller is completed');
           status = SystemStatus.stopped;
           _isPaused = false;
           if (cycle.totalRuntimeSeconds != null) {

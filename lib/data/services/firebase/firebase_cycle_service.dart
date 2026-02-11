@@ -296,7 +296,7 @@ class FirestoreCycleService implements CycleService {
         throw Exception(result.substring(6));
       }
 
-      debugPrint('✅ Started drum controller (Atomic): ${drumConfigRef.id}');
+      debugPrint('✅ Started drum controller: ${drumConfigRef.id}');
       return drumConfigRef.id;
     } catch (e) {
       debugPrint('❌ Error starting drum controller: $e');
