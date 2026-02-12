@@ -11,6 +11,10 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
   final currentPath = state.uri.path;
   final auth = ref.read(authStateModelProvider);
 
+   // Allow splash screen to display without redirect
+  if (currentPath == '/splash') {
+    return null;
+  }
   return auth.when(
     loading: () {
       // Don't redirect during loading state - stay on current path

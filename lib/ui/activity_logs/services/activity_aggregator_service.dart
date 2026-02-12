@@ -496,7 +496,7 @@ class ActivityAggregatorService {
         // Sort by timestamp (newest first)
         allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-        debugPrint('🔔 Stream updated: ${allActivities.length} total activities');
+        //debugPrint('🔔 Stream updated: ${allActivities.length} total activities');
 
         // Yield the combined list
         yield allActivities;
