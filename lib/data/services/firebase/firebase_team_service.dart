@@ -7,6 +7,7 @@ import 'package:flutter_application_1/data/services/contracts/team_service.dart'
 import 'package:flutter_application_1/data/utils/document_refrences.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/data/utils/result.dart' as prefix;
+import 'package:flutter_application_1/utils/operator_headers.dart';
 
 class FirebaseTeamService implements TeamService {
   final FirebaseFirestore _firestore;
@@ -99,14 +100,32 @@ class FirebaseTeamService implements TeamService {
   @override
   Future<prefix.Result<String>> incrementTeamField({
     required String teamId,
-    required String field,
+    required OperatorHeaders field,
     required int amount,
   }) async {
     try {
       await teamRef(
         teamId,
         _firestore,
-      ).update({field: FieldValue.increment(amount)});
+      ).update({field.value: FieldValue.increment(amount)});
+      return prefix.Result.ok('');
+    } catch (e) {
+      return prefix.Result.error(Exception('Error: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<prefix.Result<String>> updateTeamField({
+    required String teamId,
+    required OperatorHeaders from,
+    required OperatorHeaders to,
+    required int amount,
+  }) async {
+    try {
+      await teamRef(teamId, _firestore).update({
+        from.value: FieldValue.increment(-amount),
+        to.value: FieldValue.increment(amount),
+      });
       return prefix.Result.ok('');
     } catch (e) {
       return prefix.Result.error(Exception('Error: ${e.toString()}'));
