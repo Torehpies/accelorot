@@ -5,6 +5,7 @@ import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_operator_service.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/roles.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -62,7 +63,7 @@ class AddOperatorNotifier extends _$AddOperatorNotifier {
 
     final incrementResult = await _teamService.incrementTeamField(
       teamId: teamId,
-      field: "activeOperators",
+      field: OperatorHeaders.activeOperators,
       amount: 1,
     );
 
