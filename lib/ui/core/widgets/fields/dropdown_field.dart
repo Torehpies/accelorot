@@ -38,7 +38,7 @@ class WebDropdownField<T> extends StatelessWidget {
   });
 
   void _showDropdownMenu(BuildContext context) async {
-    if (!enabled) return;
+    if (!enabled || items.isEmpty) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
@@ -114,12 +114,20 @@ class WebDropdownField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find the selected item's label
-    final selectedItem = items.firstWhere(
-      (item) => item.value == value,
-      orElse: () => items.first,
-    );
-    final displayText = value != null ? selectedItem.label : hintText ?? '';
+    // Safety: Handle both empty items and value not in items
+    String displayText = hintText ?? '';
+    
+    if (items.isNotEmpty && value != null) {
+      try {
+        final selectedItem = items.firstWhere(
+          (item) => item.value == value,
+        );
+        displayText = selectedItem.label;
+      } catch (e) {
+        // Value not found in items, use hint
+        displayText = hintText ?? '';
+      }
+    }
 
     return InkWell(
       onTap: enabled ? () => _showDropdownMenu(context) : null,
@@ -181,7 +189,7 @@ class WebDropdownField<T> extends StatelessWidget {
         ),
         child: Text(
           displayText,
-          style: value != null
+          style: value != null && items.any((item) => item.value == value)
               ? WebTextStyles.body
               : WebTextStyles.bodyMediumGray,
         ),
@@ -216,7 +224,7 @@ class MobileDropdownField<T> extends StatelessWidget {
   });
 
   void _showDropdownMenu(BuildContext context) async {
-    if (!enabled) return;
+    if (!enabled || items.isEmpty) return;
 
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
@@ -281,12 +289,20 @@ class MobileDropdownField<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find the selected item's label
-    final selectedItem = items.firstWhere(
-      (item) => item.value == value,
-      orElse: () => items.first,
-    );
-    final displayText = value != null ? selectedItem.label : hintText ?? '';
+    // Safety: Handle both empty items and value not in items
+    String displayText = hintText ?? '';
+    
+    if (items.isNotEmpty && value != null) {
+      try {
+        final selectedItem = items.firstWhere(
+          (item) => item.value == value,
+        );
+        displayText = selectedItem.label;
+      } catch (e) {
+        // Value not found in items, use hint
+        displayText = hintText ?? '';
+      }
+    }
 
     return InkWell(
       onTap: enabled ? () => _showDropdownMenu(context) : null,
@@ -321,7 +337,7 @@ class MobileDropdownField<T> extends StatelessWidget {
         ),
         child: Text(
           displayText,
-          style: value != null
+          style: value != null && items.any((item) => item.value == value)
               ? WebTextStyles.body
               : WebTextStyles.bodyMediumGray,
         ),

@@ -9,6 +9,10 @@ class SettingsTile extends StatelessWidget {
   final TextStyle? subtitleStyle;
   final TextStyle? titleStyle;
   final double? iconSize;
+  final Color? iconColor;
+  final Color? hoverColor;
+  final Color? splashColor;
+  final OutlinedBorder? shape;
 
   const SettingsTile({
     super.key,
@@ -20,6 +24,10 @@ class SettingsTile extends StatelessWidget {
     this.subtitleStyle,
     this.titleStyle,
     this.iconSize,
+    this.iconColor,
+    this.hoverColor,
+    this.splashColor,
+    this.shape,
   });
 
   @override
@@ -28,7 +36,7 @@ class SettingsTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: const Color(0xFF4CAF50),
+        color: iconColor ?? const Color(0xFF4CAF50),
         size: iconSize,
       ),
       title: Text(title, style: titleStyle),
@@ -43,10 +51,12 @@ class SettingsTile extends StatelessWidget {
                   splashRadius: 18,
                 )
               : null),
-      onTap: null,
-      mouseCursor: SystemMouseCursors.basic,
-      hoverColor: Colors.transparent,
-      splashColor: Colors.transparent,
+      onTap: onTap,
+      shape: shape,
+      mouseCursor:
+          isInteractive ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      hoverColor: hoverColor ?? Colors.transparent,
+      splashColor: splashColor ?? Colors.transparent,
     );
   }
 }

@@ -10,6 +10,9 @@ import '../widgets/settings_tile.dart';
 import '../../change_password_dialog/widgets/change_password_dialog.dart';
 import '../../core/ui/confirm_dialog.dart';
 import '../../profile_screen/view_model/profile_notifier.dart';
+import '../../core/themes/app_theme.dart';
+import '../../../routes/navigation_utils.dart';
+import 'package:go_router/go_router.dart';
 
 class MobileSettingsView extends ConsumerWidget {
   const MobileSettingsView({super.key});
@@ -24,6 +27,17 @@ class MobileSettingsView extends ConsumerWidget {
 
 class SettingsContent extends ConsumerWidget {
   const SettingsContent({super.key});
+
+  String _roleNameForContext(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    if (location.startsWith('/admin')) {
+      return 'Admin';
+    }
+    if (location.startsWith('/superadmin')) {
+      return 'Super Admin';
+    }
+    return 'Operator';
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,7 +70,6 @@ class SettingsContent extends ConsumerWidget {
           final displayName =
               profileState.profile?.displayName ??
               FirebaseAuth.instance.currentUser?.displayName;
-          final phoneNumber = FirebaseAuth.instance.currentUser?.phoneNumber;
           return ListView(
             children: [
               // Account Section
@@ -72,11 +85,6 @@ class SettingsContent extends ConsumerWidget {
                     icon: Icons.badge_outlined,
                     title: 'Name',
                     subtitle: displayName ?? 'Not set',
-                  ),
-                  SettingsTile(
-                    icon: Icons.phone_outlined,
-                    title: 'Contact Number',
-                    subtitle: phoneNumber ?? 'Not set',
                   ),
                   SettingsTile(
                     icon: Icons.lock,
@@ -231,6 +239,32 @@ class SettingsContent extends ConsumerWidget {
                   title: 'Help & Support',
                   onTap: () {
                     // TODO: Show help
+                  },
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: 'SESSION',
+              children: [
+                SettingsTile(
+                  icon: Icons.logout,
+                  title: 'Log Out',
+                  iconColor: AppColors.textPrimary,
+                  titleStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  hoverColor: AppColors.background,
+                  splashColor: AppColors.background,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  onTap: () async {
+                    await handleLogout(
+                      context,
+                      roleName: _roleNameForContext(context),
+                      confirmColor: AppColors.error,
+                    );
                   },
                 ),
               ],

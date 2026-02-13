@@ -80,6 +80,7 @@ class AppColors {
   static const Color background = Color(0xFFE0F2FE);
   static const Color background1 = Color(0xFFE0F2FE);
   static const Color background2 = Colors.white;
+  static const Color background3 = Color.fromARGB(255, 247, 252, 255);
   static const Color backgroundBorder = Color(0xFFABD1EA);
 
   static const Color greenBackground = Color(0xFFCCFFD9);

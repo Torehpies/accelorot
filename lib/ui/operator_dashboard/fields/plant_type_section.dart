@@ -1,4 +1,5 @@
 // lib/ui/operator_dashboard/fields/plant_type_section.dart
+
 import 'package:flutter/material.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 
@@ -32,7 +33,6 @@ class _PlantTypeSectionState extends State<PlantTypeSection> {
   @override
   void didUpdateWidget(PlantTypeSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update controller if plant type changed externally (e.g., category changed and cleared it)
     if (widget.selectedPlantType != oldWidget.selectedPlantType) {
       _controller.text = widget.selectedPlantType ?? '';
     }
@@ -46,19 +46,16 @@ class _PlantTypeSectionState extends State<PlantTypeSection> {
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled = widget.selectedWasteCategory != null;
-
     return MobileInputField(
       label: 'Target Plant Type',
       controller: _controller,
       required: true,
-      enabled: isEnabled,
-      onChanged: isEnabled ? widget.onPlantTypeChanged : null,
+      enabled: true,
+      onChanged: widget.onPlantTypeChanged,
       errorText: widget.errorText,
-      hintText: widget.selectedWasteCategory == null 
-          ? 'Select category first' 
-          : 'Enter plant type',
+      hintText: 'Enter plant type',
       maxLength: 50,
+      showCounter: true,
     );
   }
 }

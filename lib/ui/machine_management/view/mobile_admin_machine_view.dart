@@ -201,75 +201,72 @@ class _AdminMachineViewState extends ConsumerState<AdminMachineView> {
 
     return MobileScaffoldContainer(
       onTap: () => _searchFocusNode.unfocus(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: RefreshIndicator(
-          onRefresh: () async {
-            if (_teamId != null) {
-              await notifier.refresh(_teamId!);
-            }
-          },
-          color: AppColors.green100,
-          child: CustomScrollView(
-            slivers: [
-              // Header with Add button + search + filters
-              MobileSliverHeader(
-                title: 'Machine List',
-                showAddButton: true,
-                onAddPressed: _showAddSheet,
-                addButtonColor: AppColors.green100,
-                addButtonLabel: 'Add Machine',
-                searchConfig: SearchBarConfig(
-                  onSearchChanged: notifier.setSearchQuery,
-                  searchHint: 'Search machines...',
-                  isLoading: state.isLoading,
-                  searchFocusNode: _searchFocusNode,
-                ),
-                filterWidgets: [
-                  MobileStatusFilterButton(
-                    currentFilter: state.selectedStatusFilter,
-                    onFilterChanged: notifier.setStatusFilter,
-                    isLoading: state.isLoading,
-                  ),
-                  const SizedBox(width: 8),
-                  MobileDateFilterButton(
-                    onFilterChanged: notifier.setDateFilter,
-                    isLoading: state.isLoading,
-                  ),
-                ],
-              ),
-
-              // Top padding for breathing room
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 8),
-              ),
-
-              // Content
-              MobileListContent<MachineModel>(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          if (_teamId != null) {
+            await notifier.refresh(_teamId!);
+          }
+        },
+        color: AppColors.green100,
+        child: CustomScrollView(
+          slivers: [
+            // Header with Add button + search + filters
+            MobileSliverHeader(
+              title: 'Machine List',
+              showAddButton: true,
+              onAddPressed: _showAddSheet,
+              addButtonColor: AppColors.green100,
+              addButtonLabel: 'Add Machine',
+              searchConfig: SearchBarConfig(
+                onSearchChanged: notifier.setSearchQuery,
+                searchHint: 'Search machines...',
                 isLoading: state.isLoading,
-                isInitialLoad: state.machines.isEmpty,
-                hasError: state.hasError,
-                errorMessage: state.errorMessage,
-                items: state.filteredMachines,
-                displayedItems: state.displayedMachines,
-                hasMoreToLoad: state.hasMoreToLoad,
-                remainingCount: state.remainingCount,
-                emptyStateConfig: _getEmptyStateConfig(state),
-                onRefresh: () async {
-                  if (_teamId != null) {
-                    await notifier.refresh(_teamId!);
-                  }
-                },
-                onLoadMore: notifier.loadMore,
-                onRetry: () {
-                  notifier.clearError();
-                  if (_teamId != null) notifier.initialize(_teamId!);
-                },
-                itemBuilder: _buildMachineCard,
-                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+                searchFocusNode: _searchFocusNode,
               ),
-            ],
-          ),
+              filterWidgets: [
+                MobileStatusFilterButton(
+                  currentFilter: state.selectedStatusFilter,
+                  onFilterChanged: notifier.setStatusFilter,
+                  isLoading: state.isLoading,
+                ),
+                const SizedBox(width: 8),
+                MobileDateFilterButton(
+                  onFilterChanged: notifier.setDateFilter,
+                  isLoading: state.isLoading,
+                ),
+              ],
+            ),
+
+            // Top padding for breathing room
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 8),
+            ),
+
+            // Content
+            MobileListContent<MachineModel>(
+              isLoading: state.isLoading,
+              isInitialLoad: state.machines.isEmpty,
+              hasError: state.hasError,
+              errorMessage: state.errorMessage,
+              items: state.filteredMachines,
+              displayedItems: state.displayedMachines,
+              hasMoreToLoad: state.hasMoreToLoad,
+              remainingCount: state.remainingCount,
+              emptyStateConfig: _getEmptyStateConfig(state),
+              onRefresh: () async {
+                if (_teamId != null) {
+                  await notifier.refresh(_teamId!);
+                }
+              },
+              onLoadMore: notifier.loadMore,
+              onRetry: () {
+                notifier.clearError();
+                if (_teamId != null) notifier.initialize(_teamId!);
+              },
+              itemBuilder: _buildMachineCard,
+              skeletonBuilder: (context, index) => const DataCardSkeleton(),
+            ),
+          ],
         ),
       ),
     );
