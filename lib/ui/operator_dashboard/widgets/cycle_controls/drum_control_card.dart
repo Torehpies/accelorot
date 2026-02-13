@@ -268,7 +268,7 @@ class _ControlInputCardState extends ConsumerState<ControlInputCard>
     }
     
     // Create non-nullable reference for use in closures
-    final effectiveMachine = machine!;
+    final effectiveMachine = machine;
 
     // If no cycle exists and drumActive is false, reset to idle
     if (cycle == null && !effectiveMachine.drumActive) {
