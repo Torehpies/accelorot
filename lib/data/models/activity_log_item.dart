@@ -30,6 +30,7 @@ class ActivityLogItem {
 
   // Cycle-specific fields
   final String? controllerType; // 'drum_controller' or 'aerator'
+  final String? action; // 'started', 'paused', 'resumed', 'stopped', 'completed'
   final int? cycles;
   final String? duration;
   final int? completedCycles;
@@ -101,6 +102,7 @@ class ActivityLogItem {
       priority: data['priority'],
       status: data['status'],
       controllerType: data['controllerType'],
+      action: data['action'],
       cycles: data['cycles'],
       duration: data['duration'],
       completedCycles: data['completedCycles'],
@@ -149,6 +151,7 @@ class ActivityLogItem {
     this.priority,
     this.status,
     this.controllerType,
+    this.action,
     this.cycles,
     this.duration,
     this.completedCycles,

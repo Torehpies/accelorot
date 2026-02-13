@@ -22,6 +22,7 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     String? duration,
     int? completedCycles,
     String? status,
+    String? action, // 'started', 'paused', 'resumed', 'stopped', 'completed'
     DateTime? startedAt,
     DateTime? completedAt,
     int? totalRuntimeSeconds,
@@ -71,6 +72,7 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       duration: data['duration'],
       completedCycles: toInt(data['completedCycles'], 'completedCycles'),
       status: data['status'],
+      action: data['action'],
       startedAt: (data['startedAt'] as Timestamp?)?.toDate(),
       completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
       totalRuntimeSeconds: toInt(data['totalRuntimeSeconds'], 'totalRuntimeSeconds'),
