@@ -2,7 +2,6 @@ import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
 import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
@@ -70,23 +69,13 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
             user.lastname,
           );
 
+      if (!ref.mounted) return;
+
       if (result is Error) {
         _setError(result.asFailure.userFriendlyMessage);
         return;
       }
 
-      final teamResult = await ref
-          .read(teamServiceProvider)
-          .incrementTeamField(
-            teamId: teamId,
-            field: OperatorHeaders.pendingOperators,
-            amount: 1,
-          );
-
-      if (teamResult is Error<String>) {
-        _setError("Error updating team summary");
-        return;
-      }
       _setSuccess("Request submitted!");
     } catch (e) {
       _setError("Unexpected error: $e");

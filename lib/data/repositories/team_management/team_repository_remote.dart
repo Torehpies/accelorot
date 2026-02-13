@@ -1,10 +1,12 @@
 import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
+import 'package:flutter_application_1/data/utils/result.dart' as result;
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
 import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_member_service.dart';
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_service.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 
 class TeamRepositoryRemote implements TeamRepository {
@@ -84,6 +86,15 @@ class TeamRepositoryRemote implements TeamRepository {
       return Result.failure(updateUserResult.asFailure);
     }
 
+      final teamResult = await _teamService.incrementTeamField(
+        teamId: teamId,
+        field: OperatorHeaders.pendingOperators,
+        amount: 1,
+      );
+
+      if (teamResult is result.Error<String>) {
+        return Result.failure(teamResult.error as DataLayerError);
+      }
     return Result.success(null);
   }
 

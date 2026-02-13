@@ -63,10 +63,11 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final teamResult = await ref
         .read(teamServiceProvider)
-        .incrementTeamField(
+        .updateTeamField(
           teamId: teamId,
-          field: OperatorHeaders.pendingOperators,
-          amount: -1,
+          from: OperatorHeaders.pendingOperators,
+          to: OperatorHeaders.activeOperators,
+          amount: 1,
         );
 
     if (teamResult is Error) {
@@ -74,6 +75,7 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       return;
     }
 
+    ref.invalidate(currentTeamProvider);
     _handleAcceptSuccess(member);
   }
 
@@ -123,10 +125,11 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
 
     final teamResult = await ref
         .read(teamServiceProvider)
-        .incrementTeamField(
+        .updateTeamField(
           teamId: teamId,
-          field: OperatorHeaders.pendingOperators,
-          amount: -1,
+          from: OperatorHeaders.pendingOperators,
+          to: OperatorHeaders.activeOperators,
+          amount: 1,
         );
 
     if (teamResult is Error) {
@@ -425,4 +428,3 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     return sorted;
   }
 }
-
