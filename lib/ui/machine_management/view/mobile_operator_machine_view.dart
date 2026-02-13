@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../core/widgets/containers/mobile_common_widgets.dart';
 import '../../core/widgets/containers/mobile_sliver_header.dart';
 import '../../core/widgets/containers/mobile_list_content.dart';
+import '../../core/widgets/sample_cards/data_card.dart';
 import '../../core/widgets/filters/mobile_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
@@ -13,7 +15,6 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../view_model/mobile_machine_viewmodel.dart';
 import '../models/mobile_machine_state.dart';
-import '../widgets/operator_machine_card.dart';
 import '../bottom_sheets/mobile_operator_machine_view_sheet.dart';
 
 class OperatorMachineView extends ConsumerStatefulWidget {
@@ -94,11 +95,76 @@ class _OperatorMachineViewState extends ConsumerState<OperatorMachineView> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Helper methods for colors/labels (like reports view)
+  // ---------------------------------------------------------------------------
+
+  String _getStatusLabel(MachineModel machine) {
+    if (machine.isArchived) return 'Archived';
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return 'Active';
+      case MachineStatus.inactive:
+        return 'Inactive';
+      case MachineStatus.underMaintenance:
+        return 'Suspended';
+    }
+  }
+
+  Color _getIconColor(MachineModel machine) {
+    if (machine.isArchived) {
+      return const Color(0xFF9E9E9E);
+    }
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return const Color(0xFF4CAF50);
+      case MachineStatus.inactive:
+        return const Color(0xFFFFA726);
+      case MachineStatus.underMaintenance:
+        return const Color(0xFFEF5350);
+    }
+  }
+
+  Color _getStatusBgColor(MachineModel machine) {
+    if (machine.isArchived) {
+      return const Color(0xFFF5F5F5);
+    }
+    
+    switch (machine.status) {
+      case MachineStatus.active:
+        return const Color(0xFFE8F5E9);
+      case MachineStatus.inactive:
+        return const Color(0xFFFFF3E0);
+      case MachineStatus.underMaintenance:
+        return const Color(0xFFFFEBEE);
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('MMM dd, yyyy').format(date);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Card builder
+  // ---------------------------------------------------------------------------
+
   Widget _buildMachineCard(BuildContext context, MachineModel machine, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: OperatorMachineCard(
-        machine: machine,
+      child: DataCard<MachineModel>(
+        data: machine,
+        icon: Icons.precision_manufacturing,
+        iconBgColor: _getIconColor(machine),
+        title: machine.machineName,
+        description: machine.currentBatchId != null
+            ? 'Active Batch: ${machine.currentBatchId}'
+            : 'No active batch',
+        category: _getStatusLabel(machine),
+        status: 'Created on ${_formatDate(machine.dateCreated)}',
+        statusColor: _getStatusBgColor(machine),
+        statusTextColor: const Color(0xFF424242),
         onTap: () => _showMachineDetails(machine),
       ),
     );
