@@ -15,9 +15,12 @@ class MobileInputField extends StatelessWidget {
   final bool required;
   final int maxLines;
   final int? maxLength;
+  final bool showCounter;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+  final Widget? prefixIcon;
+  final String? suffix;
   final Widget? suffixIcon;
 
   const MobileInputField({
@@ -31,15 +34,18 @@ class MobileInputField extends StatelessWidget {
     this.required = false,
     this.maxLines = 1,
     this.maxLength,
+    this.showCounter = false,
     this.keyboardType,
     this.inputFormatters,
     this.onChanged,
+    this.prefixIcon,
+    this.suffix,
     this.suffixIcon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       enabled: enabled,
       maxLines: maxLines,
@@ -49,7 +55,6 @@ class MobileInputField extends StatelessWidget {
       onChanged: onChanged,
       style: WebTextStyles.body,
       decoration: InputDecoration(
-        // Floating label with required indicator
         label: RichText(
           text: TextSpan(
             text: label,
@@ -70,12 +75,21 @@ class MobileInputField extends StatelessWidget {
         helperStyle: WebTextStyles.caption.copyWith(
           color: WebColors.textLabel,
         ),
+        prefixIcon: prefixIcon,
+        suffixText: suffix,
+        suffixStyle: WebTextStyles.body.copyWith(
+          color: WebColors.textLabel,
+        ),
         suffixIcon: suffixIcon,
-        // Disabled state fill
+        
         filled: !enabled,
         fillColor: enabled ? null : WebColors.inputBackground,
-        // Counter hidden unless you explicitly want it
-        counterText: maxLength != null ? null : '',
+        
+        // Counter text
+        counterText: (maxLength != null && showCounter) ? null : '',
+        counterStyle: WebTextStyles.caption.copyWith(
+          color: WebColors.textMuted,
+        ),
       ),
     );
   }

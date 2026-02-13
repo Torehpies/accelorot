@@ -387,7 +387,7 @@ class _SubmitReportDialogState extends ConsumerState<SubmitReportDialog> {
             enabled: !_isLoading,
             required: true,
             maxLines: 5,
-            maxLength: 500,
+            maxLength: 200,
           ),
         ],
       ),

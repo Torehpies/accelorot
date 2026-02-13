@@ -39,12 +39,15 @@ class MobileMachineViewModel extends _$MobileMachineViewModel {
     try {
       final machines = await _aggregator.getMachines(teamId)
           .timeout(const Duration(seconds: 10));
+
+      if (!ref.mounted) return;
       
       state = state.copyWith(
         machines: machines,
         status: LoadingStatus.success,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(
         status: LoadingStatus.error,
         errorMessage: 'Failed to load: ${e.toString().replaceAll('Exception:', '').trim()}',
