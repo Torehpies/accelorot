@@ -11,7 +11,7 @@ class DescriptionField extends StatelessWidget {
   const DescriptionField({
     super.key,
     required this.controller,
-    this.maxLength = 100,
+    this.maxLength = 200,
     this.isRequired = false,
   });
 

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class QuickActionsSheet extends StatelessWidget {
   final String? preSelectedMachineId;
@@ -54,7 +55,7 @@ class QuickActionsSheet extends StatelessWidget {
           // Add Waste Product Option
           _ActionTile(
             icon: Icons.inventory_2,
-            iconColor: Colors.green,
+            iconColor: AppColors.green100,
             title: 'Add Waste Product',
             subtitle: 'Log waste material for composting',
             onTap: () {
@@ -78,7 +79,7 @@ class QuickActionsSheet extends StatelessWidget {
           // Submit Report Option
           _ActionTile(
             icon: Icons.description,
-            iconColor: Colors.blue,
+            iconColor: AppColors.error,
             title: 'Submit Report',
             subtitle: 'Create maintenance or observation report',
             onTap: () {
