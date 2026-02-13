@@ -129,12 +129,12 @@ class MobileSliverHeader extends StatelessWidget {
       elevation: 0,
       shadowColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background1,
       title: _buildTitleRow(),
       flexibleSpace: _expandedHeight > _collapsedHeight
           ? FlexibleSpaceBar(
               background: Container(
-                color: Colors.white,
+                color: AppColors.background1,
                 child: SafeArea(
                   bottom: false,
                   child: Column(

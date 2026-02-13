@@ -21,7 +21,7 @@ class MobileScaffoldContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTap ?? () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background1,
         body: body,
       ),
     );
