@@ -82,18 +82,20 @@ class RegistrationNotifier extends _$RegistrationNotifier {
           globalRole: 'User',
           teamId: state.selectedTeam!.teamId!,
         );
-    debugPrint('Email: ${state.email}');
-    debugPrint('Password: ${state.password}');
-    debugPrint('✅ Signup result: ${result.isSuccess ? "SUCCESS" : "FAILURE"}');
-    debugPrint(
-      'Error (if any): ${result.isFailure ? result.asFailure.userFriendlyMessage : "None"}',
-    );
+
+		if (!ref.mounted) return;
+
+    if (result.isFailure) {
+      state = state.copyWith(
+        isRegistrationLoading: false,
+        message: UiMessage.error(result.asFailure.userFriendlyMessage),
+      );
+      return;
+    }
 
     state = state.copyWith(
       isRegistrationLoading: false,
-      message: result.isSuccess
-          ? UiMessage.success('Registration successful!')
-          : UiMessage.error(result.asFailure.userFriendlyMessage),
+      message: UiMessage.success('Registration successful!'),
     );
   }
 

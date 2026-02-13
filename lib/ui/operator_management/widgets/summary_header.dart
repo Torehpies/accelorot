@@ -68,7 +68,7 @@ Row _buildPlaceholderRow() {
       const SizedBox(width: 16),
       Expanded(
         child: BaseStatsCard(
-          title: 'New Operators',
+          title: 'Pending Requests',
           value: 0,
           icon: Icons.person,
           iconColor: const Color(0xFF374151),
@@ -118,7 +118,7 @@ Row _buildShimmerRow() {
       const SizedBox(width: 16),
       Expanded(
         child: BaseStatsCard(
-          title: 'New Operators',
+          title: 'Pending Requests',
           value: 0,
           icon: Icons.person,
           iconColor: const Color(0xFF374151),
@@ -189,8 +189,8 @@ class _TeamSummaryRow extends StatelessWidget {
         // New Operators — blue
         Expanded(
           child: BaseStatsCard(
-            title: 'New Operators',
-            value: team.newOperators,
+            title: 'Pending Requests',
+            value: team.pendingOperators,
             icon: Icons.person,
             iconColor: const Color(0xFF374151),
             backgroundColor: const Color(0xFFC9E1FC),
@@ -204,3 +204,4 @@ class _TeamSummaryRow extends StatelessWidget {
     );
   }
 }
+

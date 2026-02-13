@@ -11,7 +11,11 @@ class TeamMemberRow extends StatelessWidget {
   final TeamMember member;
   final TeamMembersNotifier notifier;
 
-  const TeamMemberRow({super.key, required this.member, required this.notifier});
+  const TeamMemberRow({
+    super.key,
+    required this.member,
+    required this.notifier,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,22 +62,18 @@ class TeamMemberRow extends StatelessWidget {
         // Status (flex: 1)
         TableCellWidget(
           flex: 1,
-          child: Center(
-            child: StatusBadge(status: member.status.value),
-          ),
+          child: Center(child: StatusBadge(status: member.status.value)),
         ),
 
         // Actions (flex: 1)
         TableCellWidget(
           flex: 1,
           child: Center(
-            child: TeamMemberActionButtons(
-              notifier: notifier,
-              member: member,
-            ),
+            child: TeamMemberActionButtons(notifier: notifier, member: member),
           ),
         ),
       ],
     );
   }
 }
+

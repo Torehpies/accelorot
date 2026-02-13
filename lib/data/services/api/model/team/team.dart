@@ -13,7 +13,7 @@ abstract class Team with _$Team {
     @Default(0) int activeOperators,
     @Default(0) int archivedOperators,
     @Default(0) int formerOperators,
-    @Default(0) int newOperators,
+    @Default(0) int pendingOperators,
   }) = _Team;
 
   factory Team.fromJson(Map<String, dynamic> json) => _$TeamFromJson(json);

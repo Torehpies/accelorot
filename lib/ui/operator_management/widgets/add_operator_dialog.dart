@@ -18,12 +18,8 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
   final _formKey = GlobalKey<FormState>();
   // Controllers
   final emailController = TextEditingController();
-  // final passwordController = TextEditingController();
   final firstnameController = TextEditingController();
   final lastnameController = TextEditingController();
-  // Password visibility state
-  // bool _isPasswordVisible = false;
-  // Tracks whether form fields have been modified
   bool isDirty = false;
   // Validators
   final emailRegex = RegExp(
@@ -38,19 +34,9 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
     return null;
   }
 
-  String? validatePassword(String password) {
-    if (password.isEmpty) {
-      return 'Password is required';
-    } else if (password.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    return null;
-  }
-
   @override
   void dispose() {
     emailController.dispose();
-    // passwordController.dispose();
     firstnameController.dispose();
     lastnameController.dispose();
     super.dispose();
@@ -153,34 +139,6 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                       });
                     },
                   ),
-                  // const SizedBox(height: 16),
-                  // // Password Field with Reveal Password
-                  // TextFormField(
-                  //   controller: passwordController,
-                  //   decoration: InputDecoration(
-                  //     labelText: 'Password',
-                  //     suffixIcon: IconButton(
-                  //       onPressed: () {
-                  //         setState(() {
-                  //           _isPasswordVisible = !_isPasswordVisible;
-                  //         });
-                  //       },
-                  //       icon: Icon(
-                  //         _isPasswordVisible
-                  //             ? Icons.visibility
-                  //             : Icons.visibility_off,
-                  //         color: Colors.grey,
-                  //       ),
-                  //     ),
-                  //   ),
-                  //   obscureText: !_isPasswordVisible,
-                  //   validator: (value) => validatePassword(value ?? ''),
-                  //   onChanged: (value) {
-                  //     setState(() {
-                  //       isDirty = true;
-                  //     });
-                  //   },
-                  // ),
                 ],
               ),
             ),
@@ -194,7 +152,6 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                 firstnameController.text.isNotEmpty ||
                 lastnameController.text.isNotEmpty ||
                 emailController.text.isNotEmpty
-            // passwordController.text.isNotEmpty
             ) {
               final confirm = await showConfirmDialog(
                 context: context,
@@ -227,7 +184,6 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
                           .read(addOperatorProvider.notifier)
                           .addOperator(
                             email: emailController.text,
-                            // password: passwordController.text,
                             firstname: firstnameController.text,
                             lastname: lastnameController.text,
                           )

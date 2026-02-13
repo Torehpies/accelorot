@@ -2,11 +2,13 @@ import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
 import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/providers/operators_search_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'team_members_state.dart';
@@ -111,7 +113,7 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   }
 
   // ===== STATUS FILTERING =====
-  
+
   void setStatusFilter(TeamMemberStatusFilter filter) {
     state = state.copyWith(statusFilter: filter);
     _applyFilters();
@@ -127,6 +129,8 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       if (teamId == null) return;
 
       final currentMembers = state.pagesByIndex[state.currentPage] ?? [];
+      final oldMember = currentMembers.firstWhere((m) => m.id == form.id);
+      final oldStatus = oldMember.status;
       final updatedMembers = currentMembers.map((m) {
         if (m.id == form.id) {
           return m.copyWith(
@@ -173,13 +177,48 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         addedAt: DateTime.now(),
       );
 
-      await ref
+      final memberResult = await ref
           .read(teamMemberServiceProvider)
           .updateTeamMember(member: member, teamId: teamId);
 
-      await ref.read(appUserServiceProvider).updateUserField(form.id, {
-        'status': form.status.value,
-      });
+      if (memberResult.isFailure) {
+        // state = state.copyWith(error)
+        await refresh();
+        return;
+      }
+
+      if (oldStatus != form.status) {
+        final fromHeader = mapStatusToOperatorHeader(oldStatus);
+        final toHeader = mapStatusToOperatorHeader(form.status);
+        if (fromHeader != null && toHeader != null) {
+          final teamResult = await ref
+              .read(teamServiceProvider)
+              .updateTeamField(
+                teamId: teamId,
+                from: fromHeader,
+                to: toHeader,
+                amount: 1,
+              );
+
+          if (teamResult is Error<String>) {
+            // state = state.copyWith(error)
+            await refresh();
+            return;
+          }
+        }
+      }
+
+      final userResult = await ref.read(appUserServiceProvider).updateUserField(
+        form.id,
+        {'status': form.status.value},
+      );
+
+      if (userResult.isFailure) {
+        // state = state.copyWith(error)
+        await refresh();
+        return;
+      }
+      ref.invalidate(currentTeamProvider);
     } catch (e) {
       await refresh();
     } finally {
@@ -291,13 +330,15 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
   /// Single pipeline: search filter → status filter → sort. Used everywhere we need the final list.
   List<TeamMember> _applySearchAndSort(List<TeamMember> members) {
     List<TeamMember> result = members;
-    
+
     // 1. Search filter
     final query = state.searchQuery.toLowerCase();
     if (query.isNotEmpty) {
       result = result.where((member) {
         return member.email.toLowerCase().contains(query) ||
-            '${member.firstName} ${member.lastName}'.toLowerCase().contains(query);
+            '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+              query,
+            );
       }).toList();
     }
 

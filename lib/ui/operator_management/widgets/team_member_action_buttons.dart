@@ -5,6 +5,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons
 import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/view_operator_dialog.dart';
+import 'package:flutter_application_1/utils/roles.dart';
 
 class TeamMemberActionButtons extends StatelessWidget {
   final TeamMembersNotifier notifier;
@@ -18,6 +19,8 @@ class TeamMemberActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEditDisabled =
+        member.status.value == 'approval' || member.teamRole == TeamRole.admin;
     return TableActionButtons(
       actions: [
         // View first (swapped to match reports consistency)
@@ -28,9 +31,13 @@ class TeamMemberActionButtons extends StatelessWidget {
         ),
         // Edit second
         TableActionButton(
-          icon: Icons.edit_outlined,
-          tooltip: 'Edit Member',
-          onPressed: () => _showEditDialog(context, notifier, member),
+          icon: isEditDisabled ? Icons.dnd_forwardslash : Icons.edit_outlined,
+          tooltip: isEditDisabled
+              ? 'Editing is disabled for this member'
+              : 'Edit Member',
+          onPressed: () => isEditDisabled
+              ? null
+              : _showEditDialog(context, notifier, member),
         ),
       ],
     );
@@ -61,3 +68,4 @@ class TeamMemberActionButtons extends StatelessWidget {
     );
   }
 }
+

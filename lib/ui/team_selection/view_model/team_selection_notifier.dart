@@ -2,9 +2,10 @@ import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
+import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'team_selection_notifier.g.dart';
@@ -68,14 +69,14 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
             user.lastname,
           );
 
-      result.when(
-        success: (_) {
-          _setSuccess("Request submitted!");
-        },
-        failure: (failure) {
-          _setError(failure.userFriendlyMessage);
-        },
-      );
+      if (!ref.mounted) return;
+
+      if (result is Error) {
+        _setError(result.asFailure.userFriendlyMessage);
+        return;
+      }
+
+      _setSuccess("Request submitted!");
     } catch (e) {
       _setError("Unexpected error: $e");
     }

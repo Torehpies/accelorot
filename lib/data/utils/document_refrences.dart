@@ -16,6 +16,13 @@ DocumentReference<Map<String, dynamic>> memberRef(
       .doc(uid);
 }
 
+DocumentReference<Map<String, dynamic>> teamRef(
+  String teamId,
+  FirebaseFirestore firestore,
+) {
+  return firestore.collection('teams').doc(teamId);
+}
+
 DocumentReference<Map<String, dynamic>> userRef(
   String uid,
   FirebaseFirestore firestore,

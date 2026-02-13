@@ -6,6 +6,7 @@ import 'package:flutter_application_1/ui/activity_logs/models/activity_common.da
 import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/providers/operators_search_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_state.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pending_members_notifier.g.dart';
@@ -55,10 +56,27 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       member: member,
     );
 
-    return switch (result) {
-      Ok() => _handleAcceptSuccess(member),
-      Error() => _handleAcceptError(result.error),
-    };
+    if (result is Error) {
+      _handleAcceptError(result.error);
+      return;
+    }
+
+    final teamResult = await ref
+        .read(teamServiceProvider)
+        .updateTeamField(
+          teamId: teamId,
+          from: OperatorHeaders.pendingOperators,
+          to: OperatorHeaders.activeOperators,
+          amount: 1,
+        );
+
+    if (teamResult is Error) {
+      _handleAcceptError("Error updating team" as Exception);
+      return;
+    }
+
+    ref.invalidate(currentTeamProvider);
+    _handleAcceptSuccess(member);
   }
 
   @override
@@ -100,10 +118,26 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
       docId: member.id,
     );
 
-    return switch (result) {
-      Ok() => _handleDeclineSuccess(member),
-      Error() => _handleDeclineError(result.error),
-    };
+    if (result is Error) {
+      _handleDeclineError(result.error);
+      return;
+    }
+
+    final teamResult = await ref
+        .read(teamServiceProvider)
+        .updateTeamField(
+          teamId: teamId,
+          from: OperatorHeaders.pendingOperators,
+          to: OperatorHeaders.activeOperators,
+          amount: 1,
+        );
+
+    if (teamResult is Error) {
+      _handleDeclineError("Error updating team" as Exception);
+      return;
+    }
+
+    _handleDeclineSuccess(member);
   }
 
   // ===== PAGING NAVIGATION =====
@@ -156,13 +190,11 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
   // ===== SORT =====
 
   void onSort(String column) {
-    final isAscending =
-        state.sortColumn == column ? !state.sortAscending : true;
+    final isAscending = state.sortColumn == column
+        ? !state.sortAscending
+        : true;
 
-    state = state.copyWith(
-      sortColumn: column,
-      sortAscending: isAscending,
-    );
+    state = state.copyWith(sortColumn: column, sortAscending: isAscending);
 
     _applyFilters();
   }
@@ -353,9 +385,9 @@ class PendingMembersNotifier extends _$PendingMembersNotifier {
     if (query.isNotEmpty) {
       result = result.where((member) {
         return member.email.toLowerCase().contains(query) ||
-            '${member.firstName} ${member.lastName}'
-                .toLowerCase()
-                .contains(query);
+            '${member.firstName} ${member.lastName}'.toLowerCase().contains(
+              query,
+            );
       }).toList();
     }
 
