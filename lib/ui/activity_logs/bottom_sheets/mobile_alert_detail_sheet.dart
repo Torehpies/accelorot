@@ -50,8 +50,9 @@ class MobileAlertDetailSheet extends StatelessWidget {
             label: 'Message',
             value: alert.message,
           ),
+          // Only show readings relevant to this sensor type
           if (alert.readings != null && alert.readings!.isNotEmpty)
-            ...alert.readings!.entries.map(
+            ..._getRelevantReadings().map(
               (entry) => MobileReadOnlyField(
                 label: _formatKey(entry.key),
                 value: entry.value.toString(),
@@ -64,6 +65,49 @@ class MobileAlertDetailSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Filter readings to only show ones relevant to the current sensor type
+  List<MapEntry<String, dynamic>> _getRelevantReadings() {
+    if (alert.readings == null || alert.readings!.isEmpty) {
+      return [];
+    }
+
+    final sensorType = alert.sensorType.toLowerCase();
+    final allReadings = alert.readings!.entries.toList();
+
+    // Filter based on sensor type
+    return allReadings.where((entry) {
+      final key = entry.key.toLowerCase();
+
+      switch (sensorType) {
+        case 'temperature':
+        case 'temp':
+          return key.contains('temp') || key.contains('temperature');
+        
+        case 'oxygen':
+        case 'o2':
+          return key.contains('oxygen') || key.contains('o2');
+        
+        case 'moisture':
+        case 'humidity':
+          return key.contains('moisture') || key.contains('humidity');
+        
+        case 'ph':
+          return key.contains('ph');
+        
+        case 'pressure':
+          return key.contains('pressure');
+        
+        case 'co2':
+        case 'carbon_dioxide':
+          return key.contains('co2') || key.contains('carbon');
+        
+        default:
+          // If unknown sensor type, show all readings (fallback)
+          return true;
+      }
+    }).toList();
   }
 
   String _formatSensorType(String type) {
