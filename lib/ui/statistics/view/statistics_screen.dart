@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,7 +59,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
         final machinesAsync = ref.watch(machinesStreamProvider(teamId));
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF9FAFB),
+          backgroundColor: AppColors.background1,
           appBar: kIsWeb ? null : MobileHeader(title: 'Statistics'),
           body: machinesAsync.when(
             data: (machines) {
@@ -252,7 +253,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
     return Container(
       height: 150,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background1,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
       ),
