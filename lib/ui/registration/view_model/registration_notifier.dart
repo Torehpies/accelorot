@@ -3,7 +3,9 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/registration/view_model/registration_state.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
+import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'registration_notifier.g.dart';
@@ -82,12 +84,22 @@ class RegistrationNotifier extends _$RegistrationNotifier {
           globalRole: 'User',
           teamId: state.selectedTeam!.teamId!,
         );
-    debugPrint('Email: ${state.email}');
-    debugPrint('Password: ${state.password}');
-    debugPrint('✅ Signup result: ${result.isSuccess ? "SUCCESS" : "FAILURE"}');
-    debugPrint(
-      'Error (if any): ${result.isFailure ? result.asFailure.userFriendlyMessage : "None"}',
-    );
+
+    final teamResult = await ref
+        .read(teamServiceProvider)
+        .incrementTeamField(
+          teamId: state.selectedTeam!.teamId!,
+          field: OperatorHeaders.pendingOperators,
+          amount: 1,
+        );
+
+    if (teamResult is Error<String>) {
+      state = state.copyWith(
+        isRegistrationLoading: false,
+        message: UiMessage.error("Error updating team"),
+      );
+      return;
+    }
 
     state = state.copyWith(
       isRegistrationLoading: false,
