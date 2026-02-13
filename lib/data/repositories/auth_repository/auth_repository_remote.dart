@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/data/services/contracts/team_service.dart';
+import 'package:flutter_application_1/data/utils/result.dart' as result;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_application_1/data/models/app_user.dart';
 import 'package:flutter_application_1/data/repositories/app_user_repository/app_user_repository.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_application_1/data/services/contracts/pending_member_ser
 import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository.dart';
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
+import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -19,6 +22,7 @@ class AuthRepositoryRemote implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final AppUserService _userService;
   final GoogleSignIn _googleSignIn;
+  final TeamService _teamService;
 
   AppUser? _lastKnownUser;
 
@@ -29,6 +33,7 @@ class AuthRepositoryRemote implements AuthRepository {
     this._firebaseAuth,
     this._userService,
     this._googleSignIn,
+    this._teamService,
   );
 
   @override
@@ -137,6 +142,15 @@ class AuthRepositoryRemote implements AuthRepository {
 
       if (pendingAdd.isFailure) return Result.failure(pendingAdd.asFailure);
 
+      final teamResult = await _teamService.incrementTeamField(
+        teamId: teamId,
+        field: OperatorHeaders.pendingOperators,
+        amount: 1,
+      );
+
+      if (teamResult is result.Error<String>) {
+        return Result.failure(teamResult.error as DataLayerError);
+      }
       return const Result.success(null);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {

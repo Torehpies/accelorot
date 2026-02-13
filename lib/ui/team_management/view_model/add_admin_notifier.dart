@@ -19,10 +19,8 @@ class AddAdminNotifier extends _$AddAdminNotifier {
     return const AddAdminState(isLoading: false);
   }
 
-  /// Admins are unverified initially but status is set to active
   Future<void> addAdmin({
     required String email,
-    // required String password,
     required String firstname,
     required String lastname,
     required String teamId,
@@ -31,7 +29,6 @@ class AddAdminNotifier extends _$AddAdminNotifier {
 
     final result = await _service.addUser(
       email: email,
-      // password: password,
       firstname: firstname,
       lastname: lastname,
       globalRole: GlobalRole.user.value,

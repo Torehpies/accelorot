@@ -130,7 +130,7 @@ List<SummaryCardData> _loadingCards() {
       isLoading: true,
     ),
     SummaryCardData(
-      title: 'New Operators',
+      title: 'Pending Requests',
       value: '',
       icon: Icons.person,
       iconBackgroundColor: Colors.grey,
@@ -164,7 +164,7 @@ List<SummaryCardData> _placeholderCards() {
       iconForegroundColor: AppColors.redForeground,
     ),
     SummaryCardData(
-      title: 'New Operators',
+      title: 'Pending Requests',
       value: '—',
       icon: Icons.person,
       iconBackgroundColor: AppColors.blueBackground,
@@ -197,8 +197,8 @@ List<SummaryCardData> _cardsFromTeam(Team team) {
       iconForegroundColor: AppColors.redForeground,
     ),
     SummaryCardData(
-      title: 'New Operators',
-      value: '${team.newOperators}',
+      title: 'Pending Requests',
+      value: '${team.pendingOperators}',
       icon: Icons.person,
       iconBackgroundColor: AppColors.blueBackground,
       iconForegroundColor: AppColors.blueForeground,

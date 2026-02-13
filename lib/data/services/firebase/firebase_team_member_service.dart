@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/data/services/contracts/data_layer_error.dart';
+import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/services/contracts/team_member_service.dart';
+import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/ui/activity_logs/models/activity_common.dart';
 
 class FirebaseTeamMemberService extends TeamMemberService {
@@ -44,7 +47,7 @@ class FirebaseTeamMemberService extends TeamMemberService {
   }
 
   @override
-  Future<void> updateTeamMember({
+  Future<Result<void, DataLayerError>> updateTeamMember({
     required TeamMember member,
     required String teamId,
   }) async {
@@ -55,10 +58,12 @@ class FirebaseTeamMemberService extends TeamMemberService {
         'status': member.status.value,
         'updatedAt': DateTime.now(),
       });
+
+      return Result.success(null);
     } on FirebaseException catch (e) {
-      debugPrint(e.toString());
+      return Result.failure(mapFirebaseAuthException(e));
     } catch (e) {
-      debugPrint(e.toString());
+      return Result.failure(DataLayerError.unknownError(e));
     }
   }
 }
