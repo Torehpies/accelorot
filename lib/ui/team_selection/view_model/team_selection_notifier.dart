@@ -70,14 +70,10 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
             user.lastname,
           );
 
-      result.when(
-        success: (_) {
-          _setSuccess("Request submitted!");
-        },
-        failure: (failure) {
-          _setError(failure.userFriendlyMessage);
-        },
-      );
+      if (result is Error) {
+        _setError(result.asFailure.userFriendlyMessage);
+        return;
+      }
 
       final teamResult = await ref
           .read(teamServiceProvider)
@@ -89,8 +85,9 @@ class TeamSelectionNotifier extends _$TeamSelectionNotifier {
 
       if (teamResult is Error<String>) {
         _setError("Error updating team summary");
-				return;
+        return;
       }
+      _setSuccess("Request submitted!");
     } catch (e) {
       _setError("Unexpected error: $e");
     }
