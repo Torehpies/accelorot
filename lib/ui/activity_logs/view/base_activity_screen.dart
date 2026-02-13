@@ -16,6 +16,7 @@ import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/themes/app_theme.dart';
 import '../models/activity_common.dart';
 import '../../../data/models/activity_log_item.dart';
+import '../bottom_sheets/mobile_activity_bottom_sheet_helper.dart'; // NEW
 
 /// Clean base screen that only handles UI rendering
 /// All business logic is in ViewModels
@@ -159,10 +160,9 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
   // ===== HELPER METHODS =====
 
-  /// Handle activity card tap - override in child if needed
+  /// Handle activity card tap — shows detail bottom sheet
   void _onActivityTap(ActivityLogItem item) {
-    // TODO: Show activity detail modal
-    // For now, do nothing - will implement modal later
+    MobileActivityBottomSheetHelper.show(context, ref, item);
   }
 
   EmptyStateConfig _getEmptyStateConfig(ActivityListState state) {
