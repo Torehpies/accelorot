@@ -1,6 +1,7 @@
 // lib/ui/operator_dashboard/fields/report_title_field.dart
 
 import 'package:flutter/material.dart';
+import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 
 class ReportTitleField extends StatelessWidget {
   final TextEditingController controller;
@@ -16,16 +17,16 @@ class ReportTitleField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return MobileInputField(
+      label: 'Report Title',
       controller: controller,
-      decoration: InputDecoration(
-        labelText: 'Report Title',
-        hintText: 'Enter a descriptive title',
-        prefixIcon: const Icon(Icons.title, size: 18),
-        errorText: errorText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+      hintText: 'Enter a descriptive title',
+      prefixIcon: const Icon(Icons.title, size: 18),
+      errorText: errorText,
       onChanged: onChanged,
+      required: true,
+      maxLength: 100,
+      showCounter: true,
     );
   }
 }

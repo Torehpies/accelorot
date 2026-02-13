@@ -81,80 +81,77 @@ abstract class BaseActivityScreenState<T extends BaseActivityScreen>
 
     return MobileScaffoldContainer(
       onTap: () => _searchFocusNode.unfocus(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: RefreshIndicator(
-          onRefresh: onRefresh,
-          color: AppColors.green100,
-          child: CustomScrollView(
-            slivers: [
-              // Header with 3 rows: Title + Selectors + Search/Filters
-              MobileSliverHeader(
-                // Custom compact back button
-                leading: const CompactBackButton(),
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        color: AppColors.green100,
+        child: CustomScrollView(
+          slivers: [
+            // Header with 3 rows: Title + Selectors + Search/Filters
+            MobileSliverHeader(
+              // Custom compact back button
+              leading: const CompactBackButton(),
 
-                // Row 1: Title (from ViewModel config)
-                title: viewModel.screenTitle,
+              // Row 1: Title (from ViewModel config)
+              title: viewModel.screenTitle,
 
-                // Row 2: Selectors (Machine + Batch)
-                selectorWidgets: [
-                  MachineSelector(
-                    selectedMachineId: state.selectedMachineId,
-                    onChanged: onMachineChanged,
-                    isCompact: true,
-                  ),
-                  BatchSelector(
-                    selectedBatchId: state.selectedBatchId,
-                    selectedMachineId: state.selectedMachineId,
-                    onChanged: onBatchChanged,
-                    onMachineAutoSelect: onMachineChanged,
-                    isCompact: true,
-                  ),
-                ],
+              // Row 2: Selectors (Machine + Batch)
+              selectorWidgets: [
+                MachineSelector(
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: onMachineChanged,
+                  isCompact: true,
+                ),
+                BatchSelector(
+                  selectedBatchId: state.selectedBatchId,
+                  selectedMachineId: state.selectedMachineId,
+                  onChanged: onBatchChanged,
+                  onMachineAutoSelect: onMachineChanged,
+                  isCompact: true,
+                ),
+              ],
 
-                // Row 3: Search + Filters
-                searchConfig: SearchBarConfig(
-                  onSearchChanged: onSearchChanged,
-                  searchFocusNode: _searchFocusNode,
-                  searchHint: 'Search activities...',
+              // Row 3: Search + Filters
+              searchConfig: SearchBarConfig(
+                onSearchChanged: onSearchChanged,
+                searchFocusNode: _searchFocusNode,
+                searchHint: 'Search activities...',
+                isLoading: state.isLoading,
+              ),
+              filterWidgets: [
+                // TODO: Add MobileDropdownFilterButton for status here
+                MobileDateFilterButton(
+                  onFilterChanged: onDateFilterChanged,
                   isLoading: state.isLoading,
                 ),
-                filterWidgets: [
-                  // TODO: Add MobileDropdownFilterButton for status here
-                  MobileDateFilterButton(
-                    onFilterChanged: onDateFilterChanged,
-                    isLoading: state.isLoading,
-                  ),
-                ],
-              ),
+              ],
+            ),
 
-              // Top padding for breathing room
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 8),
-              ),
+            // Top padding for breathing room
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 8),
+            ),
 
-              // Content cards
-              MobileListContent<ActivityLogItem>(
-                isLoading: state.isLoading,
-                isInitialLoad: state.status == LoadingStatus.loading,
-                hasError: state.hasError,
-                errorMessage: state.errorMessage,
-                items: state.filteredActivities,
-                displayedItems: state.displayedActivities,
-                hasMoreToLoad: state.hasMoreToLoad,
-                remainingCount: state.remainingCount,
-                emptyStateConfig: _getEmptyStateConfig(state),
-                onRefresh: onRefresh,
-                onLoadMore: onLoadMore,
-                onRetry: onRefresh,
-                itemBuilder: (context, item, index) => ActivityCard(
-                  item: item,
-                  onTap: () => _onActivityTap(item),
-                ),
-                skeletonBuilder: (context, index) => const DataCardSkeleton(),
+            // Content cards
+            MobileListContent<ActivityLogItem>(
+              isLoading: state.isLoading,
+              isInitialLoad: state.status == LoadingStatus.loading,
+              hasError: state.hasError,
+              errorMessage: state.errorMessage,
+              items: state.filteredActivities,
+              displayedItems: state.displayedActivities,
+              hasMoreToLoad: state.hasMoreToLoad,
+              remainingCount: state.remainingCount,
+              emptyStateConfig: _getEmptyStateConfig(state),
+              onRefresh: onRefresh,
+              onLoadMore: onLoadMore,
+              onRetry: onRefresh,
+              itemBuilder: (context, item, index) => ActivityCard(
+                item: item,
+                onTap: () => _onActivityTap(item),
               ),
-            ],
-          ),
+              skeletonBuilder: (context, index) => const DataCardSkeleton(),
+            ),
+          ],
         ),
       ),
     );
