@@ -245,7 +245,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
     
     // Create non-nullable reference for use in closures
-    final effectiveMachine = machine!;
+    final effectiveMachine = machine;
 
     // If no cycle exists and aeratorActive is false, reset to idle
     if (cycle == null && !effectiveMachine.aeratorActive) {
