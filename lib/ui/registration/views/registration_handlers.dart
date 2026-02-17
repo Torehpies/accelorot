@@ -14,12 +14,22 @@ import 'package:go_router/go_router.dart';
 const double kMaxFormWidth = 450.0;
 
 class RegistrationFormContent extends ConsumerWidget {
-  const RegistrationFormContent({super.key});
+  final bool compact;
+  final bool narrow;
+
+  const RegistrationFormContent({
+    super.key,
+    this.compact = false,
+    this.narrow = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
+    final fieldHeight = compact ? 56.0 : 65.0;
+    final sectionGap = compact ? 8.0 : 12.0;
+    final titleGap = compact ? 6.0 : (isDesktop ? 10.0 : 32.0);
 
     final state = ref.watch(registrationProvider);
     final notifier = ref.read(registrationProvider.notifier);
@@ -76,16 +86,15 @@ class RegistrationFormContent extends ConsumerWidget {
               semanticsLabel: 'Accelorot logo',
             ),
           ),
-        const SizedBox(height: 10),
+        SizedBox(height: compact ? 6 : 10),
         Center(child: _buildTitle(theme)),
-        SizedBox(height: isDesktop ? 10 : 32),
+        SizedBox(height: titleGap),
 
-        Row(
-          children: [
-            // First Name Field
-            Expanded(
-              child: SizedBox(
-                height: 65,
+        if (narrow)
+          Column(
+            children: [
+              SizedBox(
+                height: fieldHeight,
                 child: TextField(
                   textInputAction: TextInputAction.next,
                   decoration: inputDecoration(
@@ -96,23 +105,52 @@ class RegistrationFormContent extends ConsumerWidget {
                   autofocus: true,
                 ),
               ),
-            ),
-            SizedBox(width: 16),
-            // Last Name Field
-            Expanded(
-              child: SizedBox(
-                height: 65,
+              SizedBox(height: sectionGap),
+              SizedBox(
+                height: fieldHeight,
                 child: TextField(
                   textInputAction: TextInputAction.next,
                   onChanged: notifier.updateLastName,
                   decoration: inputDecoration('Last Name', state.lastNameError),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          )
+        else
+          Row(
+            children: [
+              // First Name Field
+              Expanded(
+                child: SizedBox(
+                  height: fieldHeight,
+                  child: TextField(
+                    textInputAction: TextInputAction.next,
+                    decoration: inputDecoration(
+                      'First Name',
+                      state.firstNameError,
+                    ),
+                    onChanged: notifier.updateFirstName,
+                    autofocus: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Last Name Field
+              Expanded(
+                child: SizedBox(
+                  height: fieldHeight,
+                  child: TextField(
+                    textInputAction: TextInputAction.next,
+                    onChanged: notifier.updateLastName,
+                    decoration: inputDecoration('Last Name', state.lastNameError),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        SizedBox(height: sectionGap),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -124,8 +162,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateEmail,
           ),
         ),
+        SizedBox(height: sectionGap),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             obscureText: state.obscurePassword,
             textInputAction: TextInputAction.next,
@@ -146,8 +185,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updatePassword,
           ),
         ),
+        SizedBox(height: sectionGap),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: TextField(
             obscureText: state.obscureConfirmPassword,
             textInputAction: TextInputAction.done,
@@ -168,8 +208,9 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateConfirmPassword,
           ),
         ),
+        SizedBox(height: sectionGap),
         SizedBox(
-          height: 65,
+          height: fieldHeight,
           child: state.teams.when(
             data: (teams) => teams.isEmpty
                 ? const Text('No teams available')
@@ -203,7 +244,7 @@ class RegistrationFormContent extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: sectionGap),
               PrimaryButton(
                 text: 'Register',
                 isLoading: state.isRegistrationLoading,
@@ -214,9 +255,9 @@ class RegistrationFormContent extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 18),
+        SizedBox(height: compact ? 14 : 18),
         const OrDivider(),
-        const SizedBox(height: 10),
+        SizedBox(height: compact ? 8 : 10),
 
         Center(
           child: GoogleSignInButton(
