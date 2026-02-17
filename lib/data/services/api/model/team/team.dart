@@ -8,6 +8,11 @@ abstract class Team with _$Team {
   const factory Team({
     String? teamId,
     required String teamName,
+    required String houseNumber,
+    required String street,
+    required String barangay,
+    required String city,
+    required String region,
     required String address,
     String? createdBy,
     @Default(0) int activeOperators,
