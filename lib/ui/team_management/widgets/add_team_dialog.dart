@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,18 +17,18 @@ class AddTeamDialog extends ConsumerStatefulWidget {
 class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
   final _formKey = GlobalKey<FormState>();
 
+  String _teamName = '';
+  String _houseNumber = '';
+  String _street = '';
+  String _barangay = '';
+  String _city = '';
+  String _region = '';
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(teamManagementProvider);
     final isSaving = state.isSavingTeams;
     final errorMessage = state.message;
-
-    String _teamName = '';
-    String _houseNumber = '';
-    String _street = '';
-    String _barangay = '';
-    String _city = '';
-    String _region = '';
 
     ref.listen(teamManagementProvider, (previous, next) {
       if (next.isSavingTeams == false &&
@@ -200,7 +202,24 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
 
   void _addTeam() {
     if (_formKey.currentState!.validate()) {
-      ref.read(teamManagementProvider.notifier).addTeam("chan", "TODO");
+      _formKey.currentState!.save();
+      final address = [
+        _houseNumber,
+        _street,
+        _barangay,
+        _city,
+        _region,
+      ].where((s) => s.isNotEmpty).join(', ');
+      final Team team = Team(
+        teamName: _teamName,
+        houseNumber: _houseNumber,
+        street: _street,
+        barangay: _barangay,
+        city: _city,
+        region: _region,
+        address: address,
+      );
+      ref.read(addTeamProvider.notifier).addTeam(team);
     }
   }
 }
