@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
@@ -57,20 +59,18 @@ class FirebaseTeamService implements TeamService {
   }
 
   @override
-  Future<Result<Team, DataLayerError>> addTeam(Team team) async {
+  Future<Team> addTeam(Team team) async {
     try {
       final docRef = _firestore.collection('teams').doc();
       final updatedTeam = team.copyWith(teamId: docRef.id);
       await docRef.set(updatedTeam.toJson());
-      return Result.success(updatedTeam);
+      return updatedTeam;
     } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseAuthException(e));
-    } on TypeError catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } on FormatException catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
+      log('Failed to add team: $e');
+      rethrow;
     } catch (e) {
-      return Result.failure(DataLayerError.unknownError(e));
+      log('Failed to add team: $e');
+      rethrow;
     }
   }
 

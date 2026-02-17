@@ -7,7 +7,6 @@ import 'package:flutter_application_1/utils/operator_headers.dart';
 abstract class TeamService {
   Future<Team> getTeam(String id);
   Future<Result<List<Team>, DataLayerError>> getTeams();
-  Future<Result<Team, DataLayerError>> addTeam(Team team);
   Future<prefix.Result<List<Team>>> fetchTeamsPage({
     required int pageSize,
     required int pageIndex,
