@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
@@ -106,7 +108,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                 enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.text,
-                onSaved: (value) => _barangay = value!.trim(),
+                onSaved: (value) => _barangay = 'BRGY. ${value!.trim()}',
               ),
               SizedBox(height: 10),
               TextFormField(
@@ -182,6 +184,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         _city,
         _region,
       ].where((s) => s.isNotEmpty).join(', ');
+      final appUserId = ref.watch(authUserProvider).value!.uid;
       final Team team = Team(
         teamName: _teamName,
         houseNumber: _houseNumber,
@@ -190,8 +193,11 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         city: _city,
         region: _region,
         address: address,
+        createdAt: DateTime.now(),
+        createdBy: appUserId,
       );
       ref.read(addTeamProvider.notifier).addTeam(team);
+      ref.read(teamManagementProvider.notifier).refresh();
     }
   }
 }

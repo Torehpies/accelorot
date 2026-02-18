@@ -18,60 +18,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
     return const TeamManagementState();
   }
 
-  // Future<void> addTeam(String teamName, String address) async {
-  //   final user = ref.read(appUserProvider).value;
-  //
-  //   teamName = teamName.trim();
-  //   address = address.trim();
-  //
-  //   if (teamName.isEmpty || address.isEmpty) {
-  //     return;
-  //   }
-  //
-  //   state = state.copyWith(isSavingTeams: true);
-  //
-  //   final team = Team.fromJson({
-  //     'teamName': teamName,
-  //     'address': address,
-  //     'createdBy': user?.uid,
-  //   });
-  //
-  //   try {
-  //     final result = await ref
-  //         .read(teamRepositoryProvider)
-  //         .addTeam(team)
-  //         .timeout(const Duration(seconds: 30));
-  //
-  //     result.when(
-  //       success: (resultTeam) async {
-  //         await refresh();
-  //         state = state.copyWith(
-  //           isSavingTeams: false,
-  //           message: UiMessage.success('Team $teamName added successfully!'),
-  //         );
-  //       },
-  //       failure: (e) {
-  //         state = state.copyWith(
-  //           isSavingTeams: false,
-  //           message: UiMessage.error(e.userFriendlyMessage),
-  //         );
-  //       },
-  //     );
-  //   } on TimeoutException {
-  //     state = state.copyWith(
-  //       isSavingTeams: false,
-  //       message: const UiMessage.error(
-  //         'Request timed out. Please check your connection.',
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     state = state.copyWith(
-  //       isSavingTeams: false,
-  //       message: UiMessage.error('Unexpected error: $e'),
-  //     );
-  //   }
-  // }
-
   static const _cacheTtl = Duration(minutes: 1);
 
   bool _isCacheFresh(DateTime? lastFetchedAt) {
@@ -114,8 +60,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       teams: teams,
       currentPage: pageIndex,
       isLoading: false,
-      // isError: false,
-      // error: null,
       hasNextPage: teams.length == state.pageSize,
       pagesByIndex: updatedPages,
       lastFetchedAt: DateTime.now(),
@@ -125,8 +69,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   void _handleError(Exception error) {
     state = state.copyWith(
       isLoading: false,
-      // isError: true,
-      // error: error,
       teams: [],
     );
   }

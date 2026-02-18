@@ -1,3 +1,4 @@
+import 'package:flutter_application_1/data/models/profile_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'team.freezed.dart';
@@ -8,13 +9,16 @@ abstract class Team with _$Team {
   const factory Team({
     String? teamId,
     required String teamName,
-    required String houseNumber,
-    required String street,
-    required String barangay,
-    required String city,
-    required String region,
+    String? houseNumber,
+    String? street,
+    String? barangay,
+    String? city,
+    String? region,
     required String address,
     String? createdBy,
+    @TimestampConverter() DateTime? createdAt,
+    String? updatedBy,
+    @TimestampConverter() DateTime? updatedAt,
     @Default(0) int activeOperators,
     @Default(0) int archivedOperators,
     @Default(0) int formerOperators,
