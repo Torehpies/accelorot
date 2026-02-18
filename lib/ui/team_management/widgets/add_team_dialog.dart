@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/utils/ui_message.dart';
+import 'package:flutter_application_1/utils/async_value_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
@@ -26,19 +24,12 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(teamManagementProvider);
-    final isSaving = state.isSavingTeams;
-    final errorMessage = state.message;
+    final AsyncValue<void> state = ref.watch(addTeamProvider);
 
-    ref.listen(teamManagementProvider, (previous, next) {
-      if (next.isSavingTeams == false &&
-          previous?.isSavingTeams == true &&
-          (next.message is SuccessMessage)) {
-        if (context.mounted) {
-          Navigator.pop(context);
-        }
-      }
+    ref.listen<AsyncValue<void>>(addTeamProvider, (_, state) {
+      state.whenOrNull(data: (_) => Navigator.pop(context));
     });
+
     return DialogShell(
       title: Text("Add Team", style: TextStyle(fontWeight: FontWeight.bold)),
       content: Form(
@@ -51,24 +42,6 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
               const Text('Create new team'),
               const Divider(thickness: 1, height: 24),
               const SizedBox(height: 5),
-              if (errorMessage != null && errorMessage is ErrorMessage)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error, color: AppColors.error),
-                      SizedBox(width: 5),
-                      Text(
-                        errorMessage.text,
-                        style: const TextStyle(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               TextFormField(
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: InputDecoration(
@@ -80,7 +53,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length < 3)
                     ? 'Team name must be at least 3 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.text,
                 onSaved: (value) => _teamName = value!.trim(),
@@ -97,7 +70,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length < 3)
                     ? 'This field must be at least 4 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.streetAddress,
                 onSaved: (value) => _houseNumber = value!.trim(),
@@ -114,7 +87,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length < 4)
                     ? 'This field must be at least 4 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.streetAddress,
                 onSaved: (value) => _street = value!.trim(),
@@ -131,7 +104,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length > 5)
                     ? 'This field has a maximum of 5 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.text,
                 onSaved: (value) => _barangay = value!.trim(),
@@ -148,7 +121,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length < 4)
                     ? 'This field must be at least 4 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.text,
                 onSaved: (value) => _city = value!.trim(),
@@ -165,7 +138,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
                     : (value.trim().length < 3)
                     ? 'This field must be at least 3 characters'
                     : null,
-                enabled: !isSaving,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.done,
                 keyboardType: TextInputType.text,
                 onSaved: (value) => _region = value!.trim(),
@@ -177,19 +150,19 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: isSaving ? null : () => Navigator.pop(context),
+          onPressed: state.isLoading ? null : () => Navigator.pop(context),
           child: Text("Cancel"),
         ),
         ElevatedButton.icon(
-          onPressed: isSaving ? null : _addTeam,
-          icon: isSaving
+          onPressed: state.isLoading ? null : _addTeam,
+          icon: state.isLoading
               ? const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.add),
-          label: Text(isSaving ? "Saving..." : "Add Team"),
+          label: Text(state.isLoading ? "Saving..." : "Add Team"),
         ),
       ],
     );
