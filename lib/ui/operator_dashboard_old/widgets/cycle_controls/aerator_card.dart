@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/models/drum_rotation_settings.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/models/system_status.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/cycle_controls/empty_state.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
@@ -245,7 +245,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
     
     // Create non-nullable reference for use in closures
-    final effectiveMachine = machine!;
+    final effectiveMachine = machine;
 
     // If no cycle exists and aeratorActive is false, reset to idle
     if (cycle == null && !effectiveMachine.aeratorActive) {
