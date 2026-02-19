@@ -34,6 +34,7 @@ dependencies:
   http: ^1.6.0
   cloud_functions: ^6.0.6
   rxdart: ^0.28.0
+  gauge_indicator: ^0.4.3
 
 dev_dependencies:
   flutter_test:

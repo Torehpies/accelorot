@@ -1,8 +1,8 @@
 // lib/ui/operator_dashboard/widgets/add_waste/quick_actions_sheet.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/add_waste/add_waste_product.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/submit_report/submit_report.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/add_waste/add_waste_product.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/submit_report/submit_report.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class QuickActionsSheet extends StatelessWidget {
