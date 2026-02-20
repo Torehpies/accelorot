@@ -8,6 +8,7 @@ import '../widgets/wide_action_button.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../widgets/activity_list.dart';
 import '../../core/ui/confirmation_dialog.dart';
+import 'start_batch_screen.dart';
 
 class MachineDetailScreen extends StatefulWidget {
   final MachineModel machine;
@@ -35,9 +36,16 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         });
       }
     } else {
-      setState(() {
-        _isBatchActive = true;
-      });
+      final quantity = await Navigator.of(context).push<int>(
+        MaterialPageRoute(
+          builder: (context) => StartBatchScreen(machineName: widget.machine.machineName),
+        ),
+      );
+      if (quantity != null) {
+        setState(() {
+          _isBatchActive = true;
+        });
+      }
     }
   }
 
