@@ -534,8 +534,12 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
               preSelectedMachineId: currentMachine.machineId,
               preSelectedBatchId: currentMachine.currentBatchId,
               onAddWaste: () {
-                // Ensure QuickActionsSheet is dismissed first, then navigate
-                Navigator.of(context).pop(); 
+                if (!isBatchActive) {
+                  ScaffoldMessenger.of(this.context).showSnackBar(
+                    const SnackBar(content: Text('Start a batch first before adding waste.')),
+                  );
+                  return;
+                }
                 _handleAddWaste(currentMachine);
               },
             ),
