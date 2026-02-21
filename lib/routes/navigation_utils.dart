@@ -12,15 +12,9 @@ class NavItem {
 
 List<NavItem> operatorNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.dashboard.path),
-  NavItem(Icons.history, "Activity", RoutePath.activity.path),
-  NavItem(Icons.bar_chart, "Stats", RoutePath.statistics.path),
-  NavItem(
-    Icons.precision_manufacturing,
-    "Machines",
-    RoutePath.operatorMachines.path,
-  ),
+  NavItem(Icons.qr_code_scanner, "QR Scan", RoutePath.qrScan.path),
+  NavItem(Icons.description, "Reports", RoutePath.operatorReports.path),
   NavItem(Icons.settings, "Settings", RoutePath.operatorSettings.path),
-  //NavItem(Icons.person, "Profile", RoutePath.profile.path)
 ];
 
 List<NavItem> adminNavItems = [
