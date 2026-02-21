@@ -8,6 +8,8 @@ import '../../../data/models/machine_model.dart';
 import '../../../data/providers/statistics_providers.dart';
 import '../../../data/providers/batch_providers.dart';
 import '../../../data/providers/machine_providers.dart';
+import '../../../data/providers/substrate_providers.dart';
+import '../../../data/models/substrate.dart';
 import '../widgets/machine_gauge.dart';
 import '../widgets/control_card.dart';
 import '../widgets/wide_action_button.dart';
@@ -38,7 +40,7 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
         'Are you sure you want to complete this batch?',
       );
 
-      if (!context.mounted) return;
+      if (!mounted) return;
 
       if (confirmed == true) {
         if (currentMachine.currentBatchId?.isNotEmpty == true) {
@@ -53,10 +55,10 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
               finalWeight: 0, // Placeholder
             );
             ref.invalidate(activeBatchForMachineProvider(currentMachine.machineId));
-            if (!context.mounted) return;
+            if (!mounted) return;
             Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
           } catch (e) {
-            if (!context.mounted) return;
+            if (!mounted) return;
             Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to complete batch: $e')));
             return;
@@ -95,10 +97,10 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
 
         ref.invalidate(activeBatchForMachineProvider(currentMachine.machineId));
 
-        if (!context.mounted) return;
+        if (!mounted) return;
         Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
       } catch (e) {
-        if (!context.mounted) return;
+        if (!mounted) return;
         Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to start batch: $e')),
@@ -107,14 +109,76 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
     }
   }
 
-  void _handleAddWaste() {
-    Navigator.of(context).push(
+  Future<void> _handleAddWaste(MachineModel currentMachine) async {
+    // Capture provider refs BEFORE the async navigation gap,
+    // because the State may be unmounted while AddWasteScreen is showing.
+    final substrateRepo = ref.read(substrateRepositoryProvider);
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final operatorName = FirebaseAuth.instance.currentUser?.displayName ?? 'Operator';
+
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
         builder: (context) => AddWasteScreen(
-          machineName: widget.machine.machineName,
+          machineName: currentMachine.machineName,
         ),
       ),
     );
+
+    debugPrint('🔍 AddWaste result: $result');
+
+    if (result == null) return;
+    if (userId == null) {
+      debugPrint('❌ User not logged in');
+      return;
+    }
+
+    debugPrint('✅ Result received, submitting to database...');
+
+    try {
+      final double quantity = (result['quantity'] as num).toDouble();
+
+      final Set<String> substratesSet = result['substrates'] as Set<String>;
+      final String substrateLabels = substratesSet.join(', ');
+
+      final Set<String> additivesSet = result['additives'] as Set<String>;
+      final String additivesLabels = additivesSet.join(', ');
+
+      final descriptionBuffer = StringBuffer();
+      if (substratesSet.isNotEmpty) {
+        descriptionBuffer.writeln('Substrates: $substrateLabels');
+      }
+      if (additivesSet.isNotEmpty) {
+        descriptionBuffer.writeln('Additives: $additivesLabels');
+      }
+
+      final request = CreateSubstrateRequest(
+        category: 'Compost',
+        plantType: 'Added Substrates',
+        plantTypeLabel: 'Added Substrates',
+        quantity: quantity,
+        description: descriptionBuffer.toString().trim(),
+        machineId: currentMachine.machineId,
+        operatorName: operatorName,
+        userId: userId,
+      );
+
+      debugPrint('🔍 Calling addSubstrate with: ${request.toFirestore()}');
+      await substrateRepo.addSubstrate(request);
+      debugPrint('✅ addSubstrate completed successfully!');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Waste entry added successfully!')),
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Failed to add waste: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add waste: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -469,7 +533,11 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
             builder: (context) => QuickActionsSheet(
               preSelectedMachineId: currentMachine.machineId,
               preSelectedBatchId: currentMachine.currentBatchId,
-              onAddWaste: _handleAddWaste,
+              onAddWaste: () {
+                // Ensure QuickActionsSheet is dismissed first, then navigate
+                Navigator.of(context).pop(); 
+                _handleAddWaste(currentMachine);
+              },
             ),
           );
         },
