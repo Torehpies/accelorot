@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gauge_indicator/gauge_indicator.dart';
 
 class MachineGauge extends StatelessWidget {
-  final double value;
+  final double? value;
   final double min;
   final double max;
   final String label;
@@ -20,12 +20,14 @@ class MachineGauge extends StatelessWidget {
   });
 
   Color _getValueColor() {
+    if (value == null) return Colors.grey[400]!;
+    
     final range = max - min;
     final third = range / 3;
 
-    if (value < min + third) {
+    if (value! < min + third) {
       return const Color(0xFF4285F4);
-    } else if (value < min + (2 * third)) {
+    } else if (value! < min + (2 * third)) {
       return const Color(0xFF4CAF50);
     } else {
       return const Color(0xFFFF5252);
@@ -37,9 +39,11 @@ class MachineGauge extends StatelessWidget {
     const colorBlue = Color(0xFF4285F4);
     const colorGreen = Color(0xFF4CAF50);
     const colorRed = Color(0xFFFF5252);
+    final colorEmpty = Colors.grey[300]!;
 
     final range = max - min;
     final third = range / 3;
+    final hasValue = value != null;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -62,20 +66,20 @@ class MachineGauge extends StatelessWidget {
                   child: AnimatedRadialGauge(
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeOutQuad,
-                    value: value,
+                    value: value ?? min,
                     axis: GaugeAxis(
                       min: min,
                       max: max,
                       degrees: 180,
                       style: GaugeAxisStyle(
                         thickness: gaugeSize * 0.09,
-                        background: Colors.transparent,
-                        segmentSpacing: 3,
+                        background: hasValue ? Colors.transparent : colorEmpty,
+                        segmentSpacing: hasValue ? 3 : 0,
                       ),
                       pointer: GaugePointer.triangle(
                         width: gaugeSize * 0.10,
                         height: gaugeSize * 0.10,
-                        color: const Color(0xFF193663),
+                        color: hasValue ? const Color(0xFF193663) : Colors.grey[400]!,
                         border: const GaugePointerBorder(
                           color: Colors.white,
                           width: 1,
@@ -85,7 +89,7 @@ class MachineGauge extends StatelessWidget {
                         ),
                       ),
                       progressBar: null,
-                      segments: [
+                      segments: hasValue ? [
                         GaugeSegment(
                           from: min,
                           to: min + third,
@@ -104,7 +108,7 @@ class MachineGauge extends StatelessWidget {
                           color: colorRed,
                           cornerRadius: const Radius.circular(4),
                         ),
-                      ],
+                      ] : [],
                     ),
                     builder: (context, child, value) => const SizedBox.shrink(),
                   ),
@@ -112,7 +116,7 @@ class MachineGauge extends StatelessWidget {
               ),
             ),
             Text(
-              '${value.toInt()}$unit',
+              hasValue ? '${value!.toInt()}$unit' : '--',
               style: TextStyle(
                 fontFamily: 'dm-sans',
                 color: _getValueColor(),

@@ -29,4 +29,9 @@ class StatisticsRepositoryRemote implements StatisticsRepository {
     // Service handles all error handling and returns typed models
     return await _statisticsService.getOxygenData(batchId);
   }
+
+  @override
+  Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId) async {
+    return await _statisticsService.getLatestSensorReadings(batchId);
+  }
 }
