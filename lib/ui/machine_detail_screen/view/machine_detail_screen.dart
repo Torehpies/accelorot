@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/providers/statistics_providers.dart';
 import '../../../data/providers/batch_providers.dart';
+import '../../../data/providers/machine_providers.dart';
 import '../widgets/machine_gauge.dart';
 import '../widgets/control_card.dart';
 import '../widgets/wide_action_button.dart';
@@ -26,32 +28,82 @@ class MachineDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
-  bool _isBatchActive = true;
+  // We no longer need local _isBatchActive state because the stream handles it.
 
-  @override
-  void initState() {
-    super.initState();
-    _isBatchActive = widget.machine.currentBatchId != null && widget.machine.currentBatchId!.isNotEmpty;
-  }
-
-  Future<void> _handleBatchAction() async {
-    if (_isBatchActive) {
+  Future<void> _handleBatchAction(MachineModel currentMachine, bool isBatchActive) async {
+    if (isBatchActive) {
       final confirmed = await showConfirmationDialog(
         context,
         'Complete Batch',
         'Are you sure you want to complete this batch?',
       );
 
+      if (!context.mounted) return;
+
       if (confirmed == true) {
-        setState(() {
-          _isBatchActive = false;
-        });
+        if (currentMachine.currentBatchId?.isNotEmpty == true) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const Center(child: CircularProgressIndicator()),
+          );
+          try {
+            await ref.read(batchRepositoryProvider).completeBatch(
+              currentMachine.currentBatchId!,
+              finalWeight: 0, // Placeholder
+            );
+            ref.invalidate(activeBatchForMachineProvider(currentMachine.machineId));
+            if (!context.mounted) return;
+            Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+          } catch (e) {
+            if (!context.mounted) return;
+            Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to complete batch: $e')));
+            return;
+          }
+        }
       }
     } else {
       // Instant batch start UI
-      setState(() {
-        _isBatchActive = true;
-      });
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      try {
+        final userId = FirebaseAuth.instance.currentUser?.uid;
+        if (userId == null) throw Exception('User not logged in');
+
+        final batchRepo = ref.read(batchRepositoryProvider);
+        
+        // Get the historical max batch index
+        final allBatches = await batchRepo.getBatchesForMachines([currentMachine.machineId]);
+        int maxIndex = 0;
+        for (final b in allBatches) {
+          if (b.batchNumber > maxIndex) maxIndex = b.batchNumber;
+        }
+        final newBatchNumber = maxIndex + 1;
+        final newBatchName = 'Batch $newBatchNumber';
+
+        await batchRepo.createBatch(
+          userId,
+          currentMachine.machineId,
+          newBatchNumber,
+          batchName: newBatchName,
+        );
+
+        ref.invalidate(activeBatchForMachineProvider(currentMachine.machineId));
+
+        if (!context.mounted) return;
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+      } catch (e) {
+        if (!context.mounted) return;
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start batch: $e')),
+        );
+      }
     }
   }
 
@@ -67,7 +119,12 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final batchId = widget.machine.currentBatchId ?? '';
+    // Listen to real-time machine updates to correctly reflect batch start/completion
+    final currentMachineAsync = ref.watch(machineStreamProvider(widget.machine.machineId));
+    final currentMachine = currentMachineAsync.value ?? widget.machine;
+    final isBatchActive = currentMachine.currentBatchId?.isNotEmpty == true;
+
+    final batchId = currentMachine.currentBatchId ?? '';
     final latestReadingsAsync = ref.watch(latestSensorReadingsProvider(batchId));
 
     double? tempVal;
@@ -109,15 +166,15 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              widget.machine.machineName,
+              currentMachine.machineName,
               style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            if (widget.machine.currentBatchId?.isNotEmpty == true)
-              ref.watch(activeBatchForMachineProvider(widget.machine.machineId)).when(
+            if (currentMachine.currentBatchId?.isNotEmpty == true)
+              ref.watch(activeBatchForMachineProvider(currentMachine.machineId)).when(
                 data: (batch) {
                   if (batch == null) return const SizedBox.shrink();
                   final dateStr = DateFormat('MM/dd/yy').format(batch.createdAt);
@@ -313,8 +370,8 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
 
                 // Complete Batch / Start Batch
                 WideActionButton(
-                  label: _isBatchActive ? 'Complete Batch' : 'Start Batch',
-                  onPressed: _handleBatchAction,
+                  label: isBatchActive ? 'Complete Batch' : 'Start Batch',
+                  onPressed: () => _handleBatchAction(currentMachine, isBatchActive),
                 ),
 
                 const SizedBox(height: 24),
@@ -410,8 +467,8 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
             backgroundColor: Colors.transparent,
             isScrollControlled: true,
             builder: (context) => QuickActionsSheet(
-              preSelectedMachineId: widget.machine.machineId,
-              preSelectedBatchId: widget.machine.currentBatchId,
+              preSelectedMachineId: currentMachine.machineId,
+              preSelectedBatchId: currentMachine.currentBatchId,
               onAddWaste: _handleAddWaste,
             ),
           );
