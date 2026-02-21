@@ -16,13 +16,13 @@ class SubstrateOption {
   });
 }
 
-class StartBatchSubstrateStep extends StatefulWidget {
+class AddWasteSubstrateStep extends StatefulWidget {
   final String machineName;
   final Set<String> selectedSubstrates;
   final ValueChanged<Set<String>> onSubstratesChanged;
   final VoidCallback onProceed;
 
-  const StartBatchSubstrateStep({
+  const AddWasteSubstrateStep({
     super.key,
     required this.machineName,
     required this.selectedSubstrates,
@@ -31,10 +31,10 @@ class StartBatchSubstrateStep extends StatefulWidget {
   });
 
   @override
-  State<StartBatchSubstrateStep> createState() => _StartBatchSubstrateStepState();
+  State<AddWasteSubstrateStep> createState() => _AddWasteSubstrateStepState();
 }
 
-class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
+class _AddWasteSubstrateStepState extends State<AddWasteSubstrateStep> {
   late Set<String> _selected;
   late List<SubstrateOption> _options;
   

@@ -11,7 +11,9 @@ import '../widgets/wide_action_button.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../widgets/activity_list.dart';
 import '../../core/ui/confirmation_dialog.dart';
-import '../batch_start/view/start_batch_screen.dart';
+import '../add_waste/view/add_waste_screen.dart';
+import '../../operator_dashboard_old/widgets/quick_actions/quick_actions_sheet.dart';
+import '../../core/themes/app_theme.dart';
 
 class MachineDetailScreen extends ConsumerStatefulWidget {
   final MachineModel machine;
@@ -50,6 +52,16 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
         _isBatchActive = true;
       });
     }
+  }
+
+  void _handleAddWaste() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddWasteScreen(
+          machineName: widget.machine.machineName,
+        ),
+      ),
+    );
   }
 
   @override
@@ -363,7 +375,26 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (context) => QuickActionsSheet(
+              preSelectedMachineId: widget.machine.machineId,
+              preSelectedBatchId: widget.machine.currentBatchId,
+              onAddWaste: _handleAddWaste,
+            ),
+          );
+        },
+        backgroundColor: AppColors.green100,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.add, size: 28, color: Colors.white),
+      ),
     );
   }
 }
-

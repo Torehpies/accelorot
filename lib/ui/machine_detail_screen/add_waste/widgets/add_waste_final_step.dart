@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 
-class StartBatchFinalStep extends StatelessWidget {
+class AddWasteFinalStep extends StatelessWidget {
   final String machineName;
   final VoidCallback onStart;
 
-  const StartBatchFinalStep({
+  const AddWasteFinalStep({
     super.key,
     required this.machineName,
     required this.onStart,

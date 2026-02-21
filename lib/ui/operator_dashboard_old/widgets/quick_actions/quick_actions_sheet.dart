@@ -8,11 +8,13 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 class QuickActionsSheet extends StatelessWidget {
   final String? preSelectedMachineId;
   final String? preSelectedBatchId;
+  final VoidCallback? onAddWaste;
 
   const QuickActionsSheet({
     super.key,
     this.preSelectedMachineId,
     this.preSelectedBatchId,
+    this.onAddWaste,
   });
 
   @override
@@ -60,17 +62,21 @@ class QuickActionsSheet extends StatelessWidget {
             subtitle: 'Log waste material for composting',
             onTap: () {
               Navigator.of(context).pop(); // Close quick actions immediately
-              showModalBottomSheet(     // Open add waste immediately
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                isDismissible: false,
-                enableDrag: false,
-                builder: (context) => AddWasteProduct(
-                  preSelectedMachineId: preSelectedMachineId,
-                  preSelectedBatchId: preSelectedBatchId,
-                ),
-              );
+              if (onAddWaste != null) {
+                onAddWaste!();
+              } else {
+                showModalBottomSheet(     // Open add waste immediately
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  isDismissible: false,
+                  enableDrag: false,
+                  builder: (context) => AddWasteProduct(
+                    preSelectedMachineId: preSelectedMachineId,
+                    preSelectedBatchId: preSelectedBatchId,
+                  ),
+                );
+              }
             },
           ),
 

@@ -14,13 +14,13 @@ class AdditiveOption {
   });
 }
 
-class StartBatchAdditivesStep extends StatefulWidget {
+class AddWasteAdditivesStep extends StatefulWidget {
   final String machineName;
   final Set<String> selectedAdditives;
   final ValueChanged<Set<String>> onAdditivesChanged;
   final VoidCallback onProceed;
 
-  const StartBatchAdditivesStep({
+  const AddWasteAdditivesStep({
     super.key,
     required this.machineName,
     required this.selectedAdditives,
@@ -29,10 +29,10 @@ class StartBatchAdditivesStep extends StatefulWidget {
   });
 
   @override
-  State<StartBatchAdditivesStep> createState() => _StartBatchAdditivesStepState();
+  State<AddWasteAdditivesStep> createState() => _AddWasteAdditivesStepState();
 }
 
-class _StartBatchAdditivesStepState extends State<StartBatchAdditivesStep> {
+class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
   bool? _hasAdditives;
   late Set<String> _selected;
   late List<AdditiveOption> _options;

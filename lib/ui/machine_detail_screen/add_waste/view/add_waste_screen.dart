@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import '../widgets/start_batch_quantity_step.dart';
-import '../widgets/start_batch_substrate_step.dart';
-import '../widgets/start_batch_additives_step.dart';
-import '../widgets/start_batch_final_step.dart';
+import '../widgets/add_waste_quantity_step.dart';
+import '../widgets/add_waste_substrate_step.dart';
+import '../widgets/add_waste_additives_step.dart';
+import '../widgets/add_waste_final_step.dart';
 
-class StartBatchScreen extends StatefulWidget {
+class AddWasteScreen extends StatefulWidget {
   final String machineName;
 
-  const StartBatchScreen({super.key, required this.machineName});
+  const AddWasteScreen({super.key, required this.machineName});
 
   @override
-  State<StartBatchScreen> createState() => _StartBatchScreenState();
+  State<AddWasteScreen> createState() => _AddWasteScreenState();
 }
 
-class _StartBatchScreenState extends State<StartBatchScreen> {
+class _AddWasteScreenState extends State<AddWasteScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
   
@@ -92,7 +92,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: [
               // Step 1: Quantity
-              StartBatchQuantityStep(
+              AddWasteQuantityStep(
                 machineName: widget.machineName,
                 initialQuantity: _quantity,
                 onQuantityChanged: (val) => _quantity = val,
@@ -100,7 +100,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
               ),
               
               // Step 2: Substrate
-              StartBatchSubstrateStep(
+              AddWasteSubstrateStep(
                 machineName: widget.machineName,
                 selectedSubstrates: _selectedSubstrates,
                 onSubstratesChanged: (val) => _selectedSubstrates = val,
@@ -108,7 +108,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
               ),
 
               // Step 3: Additives
-              StartBatchAdditivesStep(
+              AddWasteAdditivesStep(
                 machineName: widget.machineName,
                 selectedAdditives: _selectedAdditives,
                 onAdditivesChanged: (val) => _selectedAdditives = val,
@@ -116,7 +116,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
               ),
 
               // Step 4: Final Confirmation
-              StartBatchFinalStep(
+              AddWasteFinalStep(
                 machineName: widget.machineName,
                 onStart: _finish,
               ),

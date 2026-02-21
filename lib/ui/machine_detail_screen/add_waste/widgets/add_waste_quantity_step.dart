@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 
-class StartBatchQuantityStep extends StatefulWidget {
+class AddWasteQuantityStep extends StatefulWidget {
   final String machineName;
   final int initialQuantity;
   final ValueChanged<int> onQuantityChanged;
   final VoidCallback onProceed;
 
-  const StartBatchQuantityStep({
+  const AddWasteQuantityStep({
     super.key,
     required this.machineName,
     required this.initialQuantity,
@@ -17,10 +17,10 @@ class StartBatchQuantityStep extends StatefulWidget {
   });
 
   @override
-  State<StartBatchQuantityStep> createState() => _StartBatchQuantityStepState();
+  State<AddWasteQuantityStep> createState() => _AddWasteQuantityStepState();
 }
 
-class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
+class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
   late int _quantity;
   late TextEditingController _controller;
 
