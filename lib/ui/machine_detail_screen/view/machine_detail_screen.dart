@@ -8,7 +8,7 @@ import '../widgets/wide_action_button.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../widgets/activity_list.dart';
 import '../../core/ui/confirmation_dialog.dart';
-import 'start_batch_screen.dart';
+import '../batch_start/view/start_batch_screen.dart';
 
 class MachineDetailScreen extends StatefulWidget {
   final MachineModel machine;
