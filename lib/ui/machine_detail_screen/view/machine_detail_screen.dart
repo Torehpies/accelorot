@@ -45,16 +45,10 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
         });
       }
     } else {
-      final result = await Navigator.of(context).push<Map<String, dynamic>>(
-        MaterialPageRoute(
-          builder: (context) => StartBatchScreen(machineName: widget.machine.machineName),
-        ),
-      );
-      if (result != null) {
-        setState(() {
-          _isBatchActive = true;
-        });
-      }
+      // Instant batch start UI
+      setState(() {
+        _isBatchActive = true;
+      });
     }
   }
 
