@@ -36,12 +36,12 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         });
       }
     } else {
-      final quantity = await Navigator.of(context).push<int>(
+      final result = await Navigator.of(context).push<Map<String, dynamic>>(
         MaterialPageRoute(
           builder: (context) => StartBatchScreen(machineName: widget.machine.machineName),
         ),
       );
-      if (quantity != null) {
+      if (result != null) {
         setState(() {
           _isBatchActive = true;
         });

@@ -1,6 +1,5 @@
 // lib/ui/operator_dashboard/view_model/operator_dashboard_viewmodel.dart
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/machine_model.dart';

@@ -60,31 +60,31 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Spacer(flex: 2),
+        const Spacer(flex: 1),
         
         // Machine Name
         Text(
           widget.machineName,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.black54,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         
         // Headline
         const Text(
           'Gaano Karami ang\niyong nilagay?',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
-            height: 1.2,
+            height: 1.1,
           ),
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 32),
         
         // Quantity Selector
         Container(
@@ -93,7 +93,7 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.black12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -105,7 +105,7 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
               
               // Value
               Container(
-                width: 100,
+                width: 80,
                 alignment: Alignment.center,
                 child: TextField(
                   controller: _controller,
@@ -119,8 +119,8 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
                     widget.onQuantityChanged(newVal);
                   },
                   style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.normal,
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                   decoration: const InputDecoration(
@@ -139,19 +139,19 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         
         // Instruction
         const Text(
           'Type a number or use +/- buttons,',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             color: Colors.black45,
             fontWeight: FontWeight.w500,
           ),
         ),
         
-        const Spacer(flex: 3),
+        const Spacer(flex: 2),
         
         // Proceed Button
         SizedBox(
@@ -162,7 +162,7 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
               backgroundColor: const Color(0xFFD1DCE5),
               foregroundColor: Colors.black54,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 18),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: const BorderSide(color: Colors.black12),
@@ -171,9 +171,9 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
             child: const Text(
               'PROCEED',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
+                letterSpacing: 1.1,
               ),
             ),
           ),
@@ -186,17 +186,17 @@ class _StartBatchQuantityStepState extends State<StartBatchQuantityStep> {
   Widget _buildActionButton({required IconData icon, required VoidCallback onPressed}) {
     return Material(
       color: Colors.white,
-      elevation: 2,
-      shadowColor: Colors.black12,
-      borderRadius: BorderRadius.circular(16),
+      elevation: 1,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 64,
-          height: 64,
+          width: 48,
+          height: 48,
           alignment: Alignment.center,
-          child: Icon(icon, color: Colors.blueGrey, size: 32),
+          child: Icon(icon, color: Colors.blueGrey, size: 24),
         ),
       ),
     );

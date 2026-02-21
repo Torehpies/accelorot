@@ -148,31 +148,31 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 32),
         
         // Machine Name
         Text(
           widget.machineName,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w600,
             color: Colors.black54,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         
         // Headline
         const Text(
           'Ano ang iyong mga\nnilagay?',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
-            height: 1.2,
+            height: 1.1,
           ),
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 32),
         
         // Substrate Grid/Wrap
         Expanded(
@@ -183,10 +183,10 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
                   label: 'NITROGEN-RICH MATERIALS',
                   dotColor: const Color(0xFF4CAF50),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
-                  runSpacing: 12,
+                  runSpacing: 10,
                   alignment: WrapAlignment.center,
                   children: [
                     ...nitrogenOptions.map((option) {
@@ -210,18 +210,18 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
                   ],
                 ),
                 if (_isAddingNitrogen) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _buildAddInput(true),
                 ],
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 _buildCategoryHeader(
                   label: 'CARBON-RICH MATERIALS',
                   dotColor: const Color(0xFF8D6E63),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
-                  runSpacing: 12,
+                  runSpacing: 10,
                   alignment: WrapAlignment.center,
                   children: [
                     ...carbonOptions.map((option) {
@@ -245,7 +245,7 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
                   ],
                 ),
                 if (_isAddingCarbon) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   _buildAddInput(false),
                 ],
               ],
@@ -253,29 +253,29 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
           ),
         ),
         
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
         
         // Proceed Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: widget.onProceed,
+            onPressed: _selected.isNotEmpty ? widget.onProceed : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFD1DCE5),
-              foregroundColor: Colors.black54,
+              backgroundColor: _selected.isNotEmpty ? const Color(0xFFD1DCE5) : const Color(0xFFE5EBEF),
+              foregroundColor: _selected.isNotEmpty ? Colors.black54 : Colors.black26,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 18),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Colors.black12),
+                side: BorderSide(color: _selected.isNotEmpty ? Colors.black12 : Colors.transparent),
               ),
             ),
             child: const Text(
               'PROCEED',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
+                letterSpacing: 1.1,
               ),
             ),
           ),
@@ -290,8 +290,8 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(
             color: dotColor,
             shape: BoxShape.circle,
@@ -301,7 +301,7 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
             color: dotColor.withValues(alpha: 0.8),
@@ -316,19 +316,20 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
     final bgColor = isNitrogen ? const Color(0xFFEAF5EF) : const Color(0xFFF9F4F2);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
           Expanded(
             child: TextField(
               controller: _addController,
               autofocus: true,
+              style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
                 hintText: isNitrogen ? 'e.g. Grass Clippings' : 'e.g. Dried Leaves',
-                hintStyle: TextStyle(color: color.withValues(alpha: 0.5), fontSize: 14),
+                hintStyle: TextStyle(color: color.withValues(alpha: 0.5), fontSize: 13),
                 filled: true,
                 fillColor: bgColor,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide(color: color.withValues(alpha: 0.2)),
@@ -345,19 +346,19 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
               onSubmitted: (_) => _addCustomSubstrate(isNitrogen),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () => _addCustomSubstrate(isNitrogen),
             style: ElevatedButton.styleFrom(
               backgroundColor: color,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
             ),
-            child: const Text('Add', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('Add', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
           ),
         ],
       ),
@@ -369,7 +370,7 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(25),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: bgColor.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(25),
@@ -382,14 +383,14 @@ class _StartBatchSubstrateStepState extends State<StartBatchSubstrateStep> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, size: 16, color: textColor.withValues(alpha: 0.8)),
+            Icon(Icons.add, size: 14, color: textColor.withValues(alpha: 0.8)),
             const SizedBox(width: 4),
             Text(
               'Add',
               style: TextStyle(
                 color: textColor.withValues(alpha: 0.8),
                 fontWeight: FontWeight.w600,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
           ],
@@ -425,7 +426,7 @@ class _SubstrateChip extends StatelessWidget {
       borderRadius: BorderRadius.circular(25),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(25),
@@ -435,9 +436,9 @@ class _SubstrateChip extends StatelessWidget {
           ),
           boxShadow: isSelected ? [
             BoxShadow(
-              color: selectedBg.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: selectedBg.withValues(alpha: 0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             )
           ] : [],
         ),
@@ -445,15 +446,15 @@ class _SubstrateChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isSelected) ...[
-              const Icon(Icons.check, size: 16, color: Colors.white),
-              const SizedBox(width: 8),
+              const Icon(Icons.check, size: 14, color: Colors.white),
+              const SizedBox(width: 6),
             ],
             Text(
               option.label,
               style: TextStyle(
                 color: textColor,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
           ],

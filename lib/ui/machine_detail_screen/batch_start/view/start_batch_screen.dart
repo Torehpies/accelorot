@@ -1,8 +1,8 @@
-// lib/ui/machine_detail_screen/view/start_batch_screen.dart
-
 import 'package:flutter/material.dart';
 import '../widgets/start_batch_quantity_step.dart';
 import '../widgets/start_batch_substrate_step.dart';
+import '../widgets/start_batch_additives_step.dart';
+import '../widgets/start_batch_final_step.dart';
 
 class StartBatchScreen extends StatefulWidget {
   final String machineName;
@@ -20,6 +20,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
   // State to hold values between steps
   int _quantity = 0;
   Set<String> _selectedSubstrates = {};
+  Set<String> _selectedAdditives = {};
 
   @override
   void dispose() {
@@ -28,18 +29,24 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
   }
 
   void _nextStep() {
-    if (_currentStep == 0) {
+    if (_currentStep < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
       setState(() {
-        _currentStep = 1;
+        _currentStep++;
       });
-    } else {
-      // Final Step: Return result
-      Navigator.of(context).pop(_quantity);
     }
+  }
+
+  void _finish() {
+    // Final Step: Return all results
+    Navigator.of(context).pop({
+      'quantity': _quantity,
+      'substrates': _selectedSubstrates,
+      'additives': _selectedAdditives,
+    });
   }
 
   void _previousStep() {
@@ -49,7 +56,7 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
         curve: Curves.easeInOut,
       );
       setState(() {
-        _currentStep = 0;
+        _currentStep--;
       });
     } else {
       Navigator.of(context).pop();
@@ -98,6 +105,20 @@ class _StartBatchScreenState extends State<StartBatchScreen> {
                 selectedSubstrates: _selectedSubstrates,
                 onSubstratesChanged: (val) => _selectedSubstrates = val,
                 onProceed: _nextStep,
+              ),
+
+              // Step 3: Additives
+              StartBatchAdditivesStep(
+                machineName: widget.machineName,
+                selectedAdditives: _selectedAdditives,
+                onAdditivesChanged: (val) => _selectedAdditives = val,
+                onProceed: _nextStep,
+              ),
+
+              // Step 4: Final Confirmation
+              StartBatchFinalStep(
+                machineName: widget.machineName,
+                onStart: _finish,
               ),
             ],
           ),
