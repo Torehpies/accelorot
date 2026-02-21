@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/providers/statistics_providers.dart';
+import '../../../data/providers/batch_providers.dart';
 import '../widgets/machine_gauge.dart';
 import '../widgets/control_card.dart';
 import '../widgets/wide_action_button.dart';
@@ -103,13 +104,40 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          widget.machine.machineName,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              widget.machine.machineName,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (widget.machine.currentBatchId?.isNotEmpty == true)
+              ref.watch(activeBatchForMachineProvider(widget.machine.machineId)).when(
+                data: (batch) {
+                  if (batch == null) return const SizedBox.shrink();
+                  final dateStr = DateFormat('MM/dd/yy').format(batch.createdAt);
+                  final daysPassed = DateTime.now().difference(batch.createdAt).inDays + 1;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 2.0),
+                    child: Text(
+                      '${batch.displayName} | $dateStr | Day $daysPassed',
+                      style: const TextStyle(
+                        color: Color(0xFF547589),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (e, st) => const SizedBox.shrink(),
+              ),
+          ],
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
