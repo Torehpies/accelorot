@@ -2,7 +2,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../data/models/machine_model.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../machine_management/services/machine_aggregator_service.dart';
 import '../models/operator_dashboard_state.dart';
@@ -20,8 +19,6 @@ MachineAggregatorService operatorDashboardAggregatorService(Ref ref) {
 // ===== OPERATOR DASHBOARD VIEW MODEL =====
 @riverpod
 class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
-  static const int _loadMoreIncrement = 5;
-
   late final MachineAggregatorService _aggregator;
 
   @override
@@ -73,25 +70,12 @@ class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
 
   // ===== STATUS FILTERING =====
 
-  void setStatusFilter(MachineStatusFilter filter) {
+  void setDrumFilter(DrumStatusFilter filter) {
     HapticFeedback.selectionClick();
     state = state.copyWith(
-      selectedStatusFilter: filter,
+      selectedDrumFilter: filter,
       searchQuery: '', // Clear search when switching status
-      displayLimit: _loadMoreIncrement, // Reset to initial limit
     );
-  }
-
-  // ===== LOAD-MORE PAGINATION =====
-
-  void loadMore() {
-    state = state.copyWith(
-      displayLimit: state.displayLimit + _loadMoreIncrement,
-    );
-  }
-
-  void resetDisplayLimit() {
-    state = state.copyWith(displayLimit: _loadMoreIncrement);
   }
 
   // ===== DATE FILTERING =====
@@ -100,14 +84,12 @@ class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
     HapticFeedback.selectionClick();
     state = state.copyWith(
       dateFilter: dateFilter,
-      displayLimit: _loadMoreIncrement, // Reset pagination
     );
   }
 
   void clearDateFilter() {
     state = state.copyWith(
       dateFilter: const DateFilterRange(type: DateFilterType.none),
-      displayLimit: _loadMoreIncrement,
     );
   }
 
@@ -116,14 +98,12 @@ class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
   void setSearchQuery(String query) {
     state = state.copyWith(
       searchQuery: query,
-      displayLimit: _loadMoreIncrement, // Reset pagination on search
     );
   }
 
   void clearSearch() {
     state = state.copyWith(
       searchQuery: '',
-      displayLimit: _loadMoreIncrement,
     );
   }
 
@@ -137,10 +117,9 @@ class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
 
   void clearAllFilters() {
     state = state.copyWith(
-      selectedStatusFilter: MachineStatusFilter.all,
+      selectedDrumFilter: DrumStatusFilter.all,
       dateFilter: const DateFilterRange(type: DateFilterType.none),
       searchQuery: '',
-      displayLimit: _loadMoreIncrement,
     );
   }
 

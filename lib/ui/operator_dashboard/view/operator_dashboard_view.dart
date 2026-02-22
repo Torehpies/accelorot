@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../core/widgets/containers/mobile_common_widgets.dart';
 import '../../core/widgets/containers/mobile_sliver_header.dart';
 import '../../core/widgets/containers/mobile_list_content.dart';
-import '../../core/widgets/sample_cards/data_card.dart';
+import '../../core/widgets/filters/mobile_drum_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
 import '../../core/themes/app_theme.dart';
@@ -15,6 +14,8 @@ import '../../../services/sess_service.dart';
 import '../view_model/operator_dashboard_viewmodel.dart';
 import '../models/operator_dashboard_state.dart';
 import '../../machine_detail_screen/view/machine_detail_screen.dart';
+
+import '../widgets/operator_machine_card.dart';
 
 class OperatorDashboardView extends ConsumerStatefulWidget {
   const OperatorDashboardView({super.key});
@@ -66,19 +67,22 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
   EmptyStateConfig _getEmptyStateConfig(OperatorDashboardState state) {
     String message;
 
-    switch (state.selectedStatusFilter) {
-      case MachineStatusFilter.inactive:
-        message = 'No archived machines';
+    switch (state.selectedDrumFilter) {
+      case DrumStatusFilter.all:
+        message = 'No machines available.\nContact your admin for machine assignment.';
         break;
-      case MachineStatusFilter.active:
-        message = 'No active machines';
+      case DrumStatusFilter.empty:
+        message = 'No empty machines.';
         break;
-      case MachineStatusFilter.underMaintenance:
-        message = 'No suspended machines';
+      case DrumStatusFilter.running:
+        message = 'No running machines.';
         break;
-      default:
-        message =
-            'No machines available.\nContact your admin for machine assignment.';
+      case DrumStatusFilter.rest:
+        message = 'No resting machines.';
+        break;
+      case DrumStatusFilter.alert:
+        message = 'No machines with alerts.';
+        break;
     }
 
     if (state.hasActiveFilters) {
@@ -100,76 +104,12 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
   }
 
   // ---------------------------------------------------------------------------
-  // Helper methods for colors/labels
-  // ---------------------------------------------------------------------------
-
-  String _getStatusLabel(MachineModel machine) {
-    if (machine.isArchived) return 'Archived';
-
-    switch (machine.status) {
-      case MachineStatus.active:
-        return 'Active';
-      case MachineStatus.inactive:
-        return 'Inactive';
-      case MachineStatus.underMaintenance:
-        return 'Suspended';
-    }
-  }
-
-  Color _getIconColor(MachineModel machine) {
-    if (machine.isArchived) {
-      return const Color(0xFF9E9E9E);
-    }
-
-    switch (machine.status) {
-      case MachineStatus.active:
-        return const Color(0xFF4CAF50);
-      case MachineStatus.inactive:
-        return const Color(0xFFFFA726);
-      case MachineStatus.underMaintenance:
-        return const Color(0xFFEF5350);
-    }
-  }
-
-  Color _getStatusBgColor(MachineModel machine) {
-    if (machine.isArchived) {
-      return const Color(0xFFF5F5F5);
-    }
-
-    switch (machine.status) {
-      case MachineStatus.active:
-        return const Color(0xFFE8F5E9);
-      case MachineStatus.inactive:
-        return const Color(0xFFFFF3E0);
-      case MachineStatus.underMaintenance:
-        return const Color(0xFFFFEBEE);
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat('MMM dd, yyyy').format(date);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Card builder
-  // ---------------------------------------------------------------------------
-
   Widget _buildMachineCard(
       BuildContext context, MachineModel machine, int index) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: DataCard<MachineModel>(
-        data: machine,
-        icon: Icons.precision_manufacturing,
-        iconBgColor: _getIconColor(machine),
-        title: machine.machineName,
-        description: machine.currentBatchId != null
-            ? 'Active Batch: ${machine.currentBatchId}'
-            : 'No active batch',
-        category: _getStatusLabel(machine),
-        status: 'Created on ${_formatDate(machine.dateCreated)}',
-        statusColor: _getStatusBgColor(machine),
-        statusTextColor: const Color(0xFF424242),
+      padding: const EdgeInsets.only(bottom: 8, left: 16, right: 16),
+      child: OperatorMachineCard(
+        machine: machine,
         onTap: () => _showMachineDetails(machine),
       ),
     );
@@ -203,6 +143,12 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
                 searchFocusNode: _searchFocusNode,
               ),
               filterWidgets: [
+                MobileDrumStatusFilterButton(
+                  currentFilter: state.selectedDrumFilter,
+                  onFilterChanged: notifier.setDrumFilter,
+                  isLoading: state.isLoading,
+                ),
+                const SizedBox(width: 8),
                 MobileDateFilterButton(
                   onFilterChanged: notifier.setDateFilter,
                   isLoading: state.isLoading,
@@ -222,16 +168,16 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
               hasError: state.hasError,
               errorMessage: state.errorMessage,
               items: state.filteredMachines,
-              displayedItems: state.displayedMachines,
-              hasMoreToLoad: state.hasMoreToLoad,
-              remainingCount: state.remainingCount,
+              displayedItems: state.filteredMachines, // Show all
+              hasMoreToLoad: false, // Disable load more
+              remainingCount: 0,
               emptyStateConfig: _getEmptyStateConfig(state),
               onRefresh: () async {
                 if (_teamId != null) {
                   await notifier.refresh(_teamId!);
                 }
               },
-              onLoadMore: notifier.loadMore,
+              onLoadMore: () {}, // No action
               onRetry: () {
                 notifier.clearError();
                 if (_teamId != null) notifier.initialize(_teamId!);
