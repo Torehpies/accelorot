@@ -7,6 +7,8 @@ import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
 import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
+import '../../machine_detail_screen/widgets/drum_control.dart';
+import '../../machine_detail_screen/widgets/aerator_control.dart';
 
 class OperatorMachineViewSheet extends StatelessWidget {
   final MachineModel machine;
@@ -38,24 +40,44 @@ class OperatorMachineViewSheet extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
-      body: MobileReadOnlySection(
-        sectionTitle: null,
-        fields: [
-          MobileReadOnlyField(label: 'Machine ID', value: machine.machineId),
-          MobileReadOnlyField(label: 'Status', value: _statusText),
-          MobileReadOnlyField(
-            label: 'Current Batch',
-            value: machine.currentBatchId ?? 'No active batch',
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: DrumControl(machine: machine),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AeratorControl(machine: machine),
+                ),
+              ],
+            ),
           ),
-          MobileReadOnlyField(
-            label: 'Date Created',
-            value: DateFormat('MMM dd, yyyy').format(machine.dateCreated),
-          ),
-          MobileReadOnlyField(
-            label: 'Last Modified',
-            value: machine.lastModified != null
-                ? DateFormat('MMM dd, yyyy').format(machine.lastModified!)
-                : 'Never',
+          MobileReadOnlySection(
+            sectionTitle: null,
+            fields: [
+              MobileReadOnlyField(label: 'Machine ID', value: machine.machineId),
+              MobileReadOnlyField(label: 'Status', value: _statusText),
+              MobileReadOnlyField(
+                label: 'Current Batch',
+                value: machine.currentBatchId ?? 'No active batch',
+              ),
+              MobileReadOnlyField(
+                label: 'Date Created',
+                value: DateFormat('MMM dd, yyyy').format(machine.dateCreated),
+              ),
+              MobileReadOnlyField(
+                label: 'Last Modified',
+                value: machine.lastModified != null
+                    ? DateFormat('MMM dd, yyyy').format(machine.lastModified!)
+                    : 'Never',
+              ),
+            ],
           ),
         ],
       ),

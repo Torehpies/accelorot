@@ -33,14 +33,17 @@ class OperatorMachineCard extends ConsumerWidget {
       );
     }
 
-    // 2. Fetch active batch to calculate days
+    // 2. Fetch active batch to calculate days and get name
     final batchAsync = ref.watch(activeBatchForMachineProvider(machine.machineId));
     
     int days = 0;
+    String batchName = machine.currentBatchId != null ? '${machine.currentBatchId!.substring(0, 5)}...' : '';
+
     batchAsync.whenData((batch) {
       if (batch != null) {
          final diff = DateTime.now().difference(batch.createdAt).inDays + 1;
          days = diff > 0 ? diff : 1; // Minimum Day 1
+         batchName = batch.displayName; // Retrieve actual readable name
       }
     });
 
@@ -81,7 +84,7 @@ class OperatorMachineCard extends ConsumerWidget {
         labelColor: const Color(0xFFFF4D4F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
-        subtitle: 'Batch: ${machine.currentBatchId?.substring(0, 5) ?? ''}...',
+        subtitle: 'Batch: $batchName',
       );
     } else if (machine.drumActive) {
       return _buildCard(
@@ -94,7 +97,7 @@ class OperatorMachineCard extends ConsumerWidget {
         labelColor: const Color(0xFF2ECA7F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
-        subtitle: 'Batch: ${machine.currentBatchId?.substring(0, 5) ?? ''}...',
+        subtitle: 'Batch: $batchName',
       );
     } else {
       // Rest
@@ -108,7 +111,7 @@ class OperatorMachineCard extends ConsumerWidget {
         labelColor: const Color(0xFF2ECA7F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
-        subtitle: 'Batch: ${machine.currentBatchId?.substring(0, 5) ?? ''}...',
+        subtitle: 'Batch: $batchName',
       );
     }
   }

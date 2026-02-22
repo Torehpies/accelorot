@@ -11,7 +11,9 @@ import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/substrate_providers.dart';
 import '../../../data/models/substrate.dart';
 import '../widgets/machine_gauge.dart';
-import '../widgets/control_card.dart';
+import '../widgets/drum_control.dart';
+import '../widgets/aerator_control.dart';
+import '../widgets/sensor_trend_view.dart';
 import '../widgets/wide_action_button.dart';
 import '../../../../data/models/activity_log_item.dart';
 import '../widgets/activity_list.dart';
@@ -31,6 +33,7 @@ class MachineDetailScreen extends ConsumerStatefulWidget {
 
 class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
   // We no longer need local _isBatchActive state because the stream handles it.
+  String _selectedSensorTab = 'All';
 
   Future<void> _handleBatchAction(MachineModel currentMachine, bool isBatchActive) async {
     if (isBatchActive) {
@@ -325,83 +328,155 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      latestReadingsAsync.when(
-                        data: (_) => Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: MachineGauge(
-                                      value: tempVal,
-                                      min: 0,
-                                      max: 100, // Matches stats module maxScale
-                                      label: 'Temperature',
-                                      unit: '°',
-                                    ),
+                      const SizedBox(height: 16),
+                      // Tabs
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: ['All', 'Temp', 'Moisture', 'PPM'].map((tab) {
+                            final isSelected = _selectedSensorTab == tab;
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ChoiceChip(
+                                label: Text(tab),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    setState(() => _selectedSensorTab = tab);
+                                  }
+                                },
+                                selectedColor: const Color(0xFF3B717B),
+                                backgroundColor: const Color(0xFFF0F4F7),
+                                labelStyle: TextStyle(
+                                  color: isSelected ? Colors.white : const Color(0xFF789CA4),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: isSelected ? const Color(0xFF3B717B) : Colors.transparent,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    (tempVal != null && tempVal! > 70) ? 'High' : (tempVal != null && tempVal! < 55 ? 'Low' : 'Normal'),
-                                    style: TextStyle(fontSize: 11, color: Colors.grey[400]),
-                                  ),
-                                ],
+                                ),
+                                showCheckmark: false,
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: MachineGauge(
-                                      value: moistVal,
-                                      min: 0,
-                                      max: 100, // Matches stats module maxScale
-                                      label: 'Moisture',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    (moistVal != null && moistVal! > 60) ? 'High' : (moistVal != null && moistVal! < 40 ? 'Low' : 'Normal'),
-                                    style: TextStyle(fontSize: 11, color: Colors.grey[400]),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: MachineGauge(
-                                      value: oxyVal,
-                                      min: 0,
-                                      max: 5000, // Updated to match stats module maxScale
-                                      label: 'PPM',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    (oxyVal != null && oxyVal! > 2500) ? 'High' : (oxyVal != null && oxyVal! < 1500 ? 'Low' : 'Normal'),
-                                    style: TextStyle(fontSize: 11, color: Colors.grey[400]),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        loading: () => const SizedBox(
-                          height: 150,
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
-                        error: (err, stack) => const SizedBox(
-                          height: 150,
-                          child: Center(child: Text('Error loading sensor data')),
+                            );
+                          }).toList(),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      
+                      // Content
+                      if (_selectedSensorTab == 'All')
+                        latestReadingsAsync.when(
+                          data: (_) => Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                                      child: MachineGauge(
+                                        value: tempVal,
+                                        min: 0,
+                                        max: 100, // Matches stats module maxScale
+                                        label: 'Temperature',
+                                        unit: '°',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      (tempVal != null && tempVal! > 70) ? 'High' : (tempVal != null && tempVal! < 55 ? 'Low' : 'Normal'),
+                                      style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                                      child: MachineGauge(
+                                        value: moistVal,
+                                        min: 0,
+                                        max: 100, // Matches stats module maxScale
+                                        label: 'Moisture',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      (moistVal != null && moistVal! > 60) ? 'High' : (moistVal != null && moistVal! < 40 ? 'Low' : 'Normal'),
+                                      style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                                      child: MachineGauge(
+                                        value: oxyVal,
+                                        min: 0,
+                                        max: 5000, // Updated to match stats module maxScale
+                                        label: 'PPM',
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      (oxyVal != null && oxyVal! > 2500) ? 'High' : (oxyVal != null && oxyVal! < 1500 ? 'Low' : 'Normal'),
+                                      style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          loading: () => const SizedBox(
+                            height: 150,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (err, stack) => const SizedBox(
+                            height: 150,
+                            child: Center(child: Text('Error loading sensor data')),
+                          ),
+                        )
+                      else if (_selectedSensorTab == 'Temp')
+                        SizedBox(
+                          height: 150,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 24, right: 16),
+                            child: SensorTrendView(
+                              batchId: batchId,
+                              sensorType: SensorType.temperature,
+                            ),
+                          ),
+                        )
+                      else if (_selectedSensorTab == 'Moisture')
+                        SizedBox(
+                          height: 150,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 24, right: 16),
+                            child: SensorTrendView(
+                              batchId: batchId,
+                              sensorType: SensorType.moisture,
+                            ),
+                          ),
+                        )
+                      else if (_selectedSensorTab == 'PPM')
+                        SizedBox(
+                          height: 150,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 24, right: 16),
+                            child: SensorTrendView(
+                              batchId: batchId,
+                              sensorType: SensorType.oxygen,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -411,21 +486,11 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: ControlCard(
-                        title: 'Drum Uptime',
-                        timerValue: '00:00',
-                        buttonLabel: 'Start Drum',
-                        onPressed: () {},
-                      ),
+                      child: DrumControl(machine: currentMachine),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ControlCard(
-                        title: 'Aerator Uptime',
-                        timerValue: '00:00',
-                        buttonLabel: 'Start Aerator',
-                        onPressed: () {},
-                      ),
+                      child: AeratorControl(machine: currentMachine),
                     ),
                   ],
                 ),

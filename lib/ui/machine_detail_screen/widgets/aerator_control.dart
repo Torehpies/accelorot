@@ -1,0 +1,217 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../data/models/machine_model.dart';
+import '../../../../data/providers/cycle_providers.dart';
+import 'control_card.dart';
+
+class AeratorControl extends ConsumerStatefulWidget {
+  final MachineModel machine;
+  
+  const AeratorControl({super.key, required this.machine});
+
+  @override
+  ConsumerState<AeratorControl> createState() => _AeratorControlState();
+}
+
+class _AeratorControlState extends ConsumerState<AeratorControl> {
+  Timer? _timer;
+  String _uptime = '00:00:00';
+  bool _isLoading = false;
+  
+  // State from Firestore
+  bool _isRunning = false;
+  DateTime? _startTime;
+  int _accumulatedSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+  
+  @override
+  void didUpdateWidget(AeratorControl oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.machine.aeratorActive != oldWidget.machine.aeratorActive ||
+        widget.machine.currentBatchId != oldWidget.machine.currentBatchId) {
+      _loadState();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadState() async {
+    final batchId = widget.machine.currentBatchId;
+    if (batchId == null || batchId.isEmpty) {
+      _resetState();
+      return;
+    }
+
+    try {
+      final cycleRepo = ref.read(cycleRepositoryProvider);
+      final cycles = await cycleRepo.getAerators(batchId: batchId);
+      final cycle = cycles.isEmpty ? null : cycles.first;
+      
+      if (!mounted) return;
+
+      if (cycle != null && widget.machine.aeratorActive) {
+        // It's actively running
+        setState(() {
+          _isRunning = true;
+          _startTime = cycle.startedAt ?? DateTime.now();
+          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          
+          final elapsed = DateTime.now().difference(_startTime!).inSeconds;
+          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds + elapsed));
+        });
+        _startTimer();
+      } else if (cycle != null && !widget.machine.aeratorActive && widget.machine.aeratorPaused) {
+        // It's paused
+        _timer?.cancel();
+        setState(() {
+          _isRunning = false;
+          _startTime = null;
+          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+        });
+      } else {
+        // Idle/Stopped
+        _resetState();
+      }
+    } catch (e) {
+      debugPrint('Error loading Aerator state: $e');
+    }
+  }
+
+  void _resetState() {
+    _timer?.cancel();
+    if (mounted) {
+      setState(() {
+        _isRunning = false;
+        _startTime = null;
+        _accumulatedSeconds = 0;
+        _uptime = '00:00:00';
+      });
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && _startTime != null) {
+        final elapsed = DateTime.now().difference(_startTime!).inSeconds;
+        setState(() {
+          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds + elapsed));
+        });
+      }
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$hours:$minutes:$seconds';
+  }
+
+  Future<void> _toggleAerator() async {
+    if (_isLoading) return;
+
+    final batchId = widget.machine.currentBatchId;
+    if (batchId == null || batchId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot start without an active batch.')),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in first.')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    final cycleRepo = ref.read(cycleRepositoryProvider);
+
+    try {
+      if (_isRunning) {
+        // Stop the aerator
+        final elapsed = _startTime != null 
+            ? DateTime.now().difference(_startTime!).inSeconds 
+            : 0;
+        final totalAccumulated = _accumulatedSeconds + elapsed;
+
+        await cycleRepo.stopAerator(
+          batchId: batchId,
+          totalRuntimeSeconds: totalAccumulated,
+          expectedStatus: 'running',
+        );
+
+        _timer?.cancel();
+        setState(() {
+          _isRunning = false;
+          _startTime = null;
+          _accumulatedSeconds = 0; 
+          _uptime = '00:00:00';
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Aerator stopped.')),
+          );
+        }
+
+      } else {
+        // Start the aerator
+        await cycleRepo.startAerator(
+          batchId: batchId,
+          machineId: widget.machine.machineId,
+          userId: user.uid,
+          cycles: 1, 
+          duration: 'Continuous', 
+        );
+
+        setState(() {
+          _isRunning = true;
+          _startTime = DateTime.now();
+        });
+        _startTimer();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Aerator started.'), backgroundColor: Colors.green),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to toggle Aerator: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ControlCard(
+      title: 'Aerator Uptime',
+      timerValue: _uptime,
+      buttonLabel: _isLoading ? '...' : (_isRunning ? 'Stop Aerator' : 'Start Aerator'),
+      isRunning: _isRunning,
+      onPressed: widget.machine.currentBatchId?.isNotEmpty == true ? _toggleAerator : null,
+    );
+  }
+}
