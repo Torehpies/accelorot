@@ -1,5 +1,6 @@
 // lib/ui/operator_dashboard/widgets/operator_machine_card.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
@@ -26,6 +27,7 @@ class OperatorMachineCard extends ConsumerWidget {
         iconColor: Colors.white,
         iconBgColor: const Color(0xFFA8B5C0), // Grey circle
         label: 'Empty',
+        labels: ['Empty'],
         labelColor: const Color(0xFFA8B5C0),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: '0',
@@ -50,27 +52,26 @@ class OperatorMachineCard extends ConsumerWidget {
     // 3. Listen to latest sensor readings to check for Alert state
     final readingsAsync = ref.watch(latestSensorReadingsProvider(machine.currentBatchId!));
     
-    bool isAlert = false;
-    String alertLabel = 'Alert';
+    List<String> activeAlerts = [];
 
     readingsAsync.whenData((readings) {
       if (readings != null) {
-        final temp = readings['temperature'];
-        final moist = readings['moisture'];
-        final oxy = readings['oxygen'];
+        final temp = readings['temperature'] as double?;
+        final moist = readings['moisture'] as double?;
+        final oxy = readings['oxygen'] as double?;
 
-        if (temp != null && (temp < 55 || temp > 70)) {
-          isAlert = true;
-          alertLabel = 'High Temperature';
-        } else if (moist != null && (moist < 40 || moist > 60)) {
-          isAlert = true;
-          alertLabel = 'Moisture Alert';
-        } else if (oxy != null && (oxy < 1500 || oxy > 2500)) {
-          isAlert = true;
-          alertLabel = 'Oxygen Alert';
-        }
+        if (temp != null && temp > 70) activeAlerts.add('High Temperature');
+        if (temp != null && temp < 55) activeAlerts.add('Low Temperature');
+        
+        if (moist != null && moist > 60) activeAlerts.add('High Moisture');
+        if (moist != null && moist < 40) activeAlerts.add('Low Moisture');
+        
+        if (oxy != null && oxy > 2500) activeAlerts.add('High PPM');
+        if (oxy != null && oxy < 1500) activeAlerts.add('Low PPM');
       }
     });
+
+    bool isAlert = activeAlerts.isNotEmpty;
 
     // 4. Determine Design (Alert vs Running vs Rest)
     if (isAlert) {
@@ -80,7 +81,8 @@ class OperatorMachineCard extends ConsumerWidget {
         icon: Icons.thermostat,
         iconColor: Colors.white,
         iconBgColor: const Color(0xFFFF4D4F), // Red circle
-        label: alertLabel, 
+        label: activeAlerts.first, 
+        labels: activeAlerts,
         labelColor: const Color(0xFFFF4D4F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
@@ -94,6 +96,7 @@ class OperatorMachineCard extends ConsumerWidget {
         iconColor: Colors.white,
         iconBgColor: const Color(0xFF2ECA7F), // Green circle
         label: 'Running',
+        labels: ['Running'],
         labelColor: const Color(0xFF2ECA7F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
@@ -108,6 +111,7 @@ class OperatorMachineCard extends ConsumerWidget {
         iconColor: Colors.white,
         iconBgColor: const Color(0xFF2ECA7F), // Green circle
         label: 'Rest',
+        labels: ['Rest'],
         labelColor: const Color(0xFF2ECA7F),
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
@@ -123,6 +127,7 @@ class OperatorMachineCard extends ConsumerWidget {
     required Color iconColor,
     required Color iconBgColor,
     required String label,
+    required List<String> labels,
     required Color labelColor,
     required String daysLabel,
     required Color daysColor,
@@ -175,9 +180,9 @@ class OperatorMachineCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    label,
-                    style: TextStyle(
+                  AnimatedAlertLabel(
+                    labels: labels,
+                    textStyle: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: labelColor,
@@ -218,3 +223,81 @@ class OperatorMachineCard extends ConsumerWidget {
     );
   }
 }
+
+class AnimatedAlertLabel extends StatefulWidget {
+  final List<String> labels;
+  final TextStyle textStyle;
+
+  const AnimatedAlertLabel({
+    super.key,
+    required this.labels,
+    required this.textStyle,
+  });
+
+  @override
+  State<AnimatedAlertLabel> createState() => _AnimatedAlertLabelState();
+}
+
+class _AnimatedAlertLabelState extends State<AnimatedAlertLabel> {
+  Timer? _timer;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.labels.length > 1) {
+      _startTimer();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedAlertLabel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.labels.length > 1 && oldWidget.labels.length <= 1) {
+      _startTimer();
+    } else if (widget.labels.length <= 1) {
+      _timer?.cancel();
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (mounted && widget.labels.isNotEmpty) {
+        setState(() {
+          _index = (_index + 1) % widget.labels.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.labels.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Ensure index is valid in case labels list shortened
+    final safeIndex = _index % widget.labels.length;
+    final currentLabel = widget.labels[safeIndex];
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: Text(
+        currentLabel,
+        key: ValueKey<String>(currentLabel),
+        style: widget.textStyle,
+      ),
+    );
+  }
+}
+

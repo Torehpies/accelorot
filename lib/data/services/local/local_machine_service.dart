@@ -56,4 +56,9 @@ class LocalMachineService implements MachineService {
   Future<void> updateAeratorActive(String machineId, bool isActive) {
     throw UnimplementedError('Local database not yet implemented');
   }
+
+  @override
+  Future<void> updateMachineOperator(String machineId, String operatorId) {
+    throw UnimplementedError('Local database not yet implemented');
+  }
 }

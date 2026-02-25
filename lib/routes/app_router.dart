@@ -43,8 +43,6 @@ import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy
 import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
-import 'package:flutter_application_1/ui/operator_reports/view/operator_reports_screen.dart';
-
 
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -217,7 +215,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: RoutePath.operatorReports.name,
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
-              child: const OperatorReportsScreen(),
+              child: const ReportsRoute(),
             ),
           ),
           GoRoute(
