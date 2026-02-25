@@ -51,4 +51,12 @@ class MachineRepositoryRemote implements MachineRepository {
   @override
   Future<void> updateAeratorActive(String machineId, bool isActive) =>
       _machineService.updateAeratorActive(machineId, isActive);
+
+  @override
+  Future<void> updateMachineOperator(
+    String machineId,
+    String? operatorId,
+    String? operatorName,
+  ) => _machineService.updateMachineOperator(machineId, operatorId, operatorName);
 }
+

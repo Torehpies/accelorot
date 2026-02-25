@@ -15,8 +15,7 @@ import '../widgets/drum_control.dart';
 import '../widgets/aerator_control.dart';
 import '../widgets/sensor_trend_view.dart';
 import '../widgets/wide_action_button.dart';
-import '../../../../data/models/activity_log_item.dart';
-import '../widgets/activity_list.dart';
+import '../../admin_dashboard/web_widgets/recent_activities_table.dart';
 import '../../core/ui/confirmation_dialog.dart';
 import '../add_waste/view/add_waste_screen.dart';
 import '../../operator_dashboard_old/widgets/quick_actions/quick_actions_sheet.dart';
@@ -505,86 +504,20 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
 
                 const SizedBox(height: 24),
 
-                // Activities header
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Activities',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                  ),
-                ),
-                const SizedBox(height: 12),
+
               ],
             ),
           ),
 
           // Scrollable activity list
           Expanded(
-            child: ListView.separated(
+            child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 4,
-              separatorBuilder: (context, index) => const SizedBox(height: 4),
-              itemBuilder: (context, index) {
-                final activities = [
-                  ActivityLogItem(
-                    id: '1',
-                    title: 'Drum Rotated',
-                    value: 'Rotated',
-                    statusColor: Colors.green,
-                    icon: Icons.cached,
-                    description: '',
-                    category: '',
-                    timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-                    type: ActivityType.cycle,
-                    operatorName: 'Berto',
-                    status: null,
-                  ),
-                  ActivityLogItem(
-                    id: '2',
-                    title: 'Aerator Started',
-                    value: 'Started',
-                    statusColor: Colors.green,
-                    icon: Icons.air,
-                    description: '',
-                    category: '',
-                    timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-                    type: ActivityType.cycle,
-                    operatorName: 'Berto',
-                    status: null,
-                  ),
-                  ActivityLogItem(
-                    id: '3',
-                    title: 'Moisture Above Threshold',
-                    value: 'High Moisture',
-                    statusColor: Colors.red,
-                    icon: Icons.water_drop,
-                    description: '',
-                    category: '',
-                    timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-                    type: ActivityType.alert,
-                    operatorName: 'System',
-                    status: null,
-                  ),
-                  ActivityLogItem(
-                    id: '4',
-                    title: 'Temperature Below Threshold',
-                    value: 'Low Temp',
-                    statusColor: Colors.blue,
-                    icon: Icons.thermostat,
-                    description: '',
-                    category: '',
-                    timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-                    type: ActivityType.alert,
-                    operatorName: 'System',
-                    status: null,
-                  ),
-                ];
-                final item = activities[index];
-                return ActivityListItem(item: item);
-              },
+              child: RecentActivitiesTable(
+                machineId: currentMachine.machineId,
+                hideHeader: true,
+                isCondensed: true,
+              ),
             ),
           ),
         ],

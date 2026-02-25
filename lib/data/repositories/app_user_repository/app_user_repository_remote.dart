@@ -17,11 +17,17 @@ class AppUserRepositoryRemote implements AppUserRepository {
 
   @override
   AppUser mapRawDataToDomain(Map<String, dynamic> rawData) {
-    final Timestamp timestamp = rawData['createdAt'] as Timestamp;
     final cleanMap = Map<String, dynamic>.from(rawData);
-    cleanMap['createdAt'] = timestamp.toDate();
+    // createdAt may be null during the serverTimestamp write window
+    final createdAtRaw = cleanMap['createdAt'];
+    if (createdAtRaw is Timestamp) {
+      cleanMap['createdAt'] = createdAtRaw.toDate().toIso8601String();
+    } else {
+      cleanMap.remove('createdAt'); // let freezed use the default (null)
+    }
     return AppUser.fromJson(cleanMap);
   }
+
 
   @override
   Future<Result<AppUser, DataLayerError>> getUser(String id) async {

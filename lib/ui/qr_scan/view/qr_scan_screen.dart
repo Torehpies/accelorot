@@ -1,11 +1,10 @@
-// lib/ui/qr_scan/view/qr_scan_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/batch_providers.dart';
-import '../../machine_detail_screen/view/machine_detail_screen.dart';
+import '../../../data/providers/app_user_providers.dart';
+import 'machine_qr_connected_screen.dart';
 import '../view_model/qr_scan_viewmodel.dart';
 import '../widgets/scan_frame_overlay.dart';
 
@@ -25,7 +24,9 @@ class _QRScanScreenState extends ConsumerState<QRScanScreen> {
   void initState() {
     super.initState();
     _scannerController = MobileScannerController(
-      detectionSpeed: DetectionSpeed.normal,
+      // noDuplicates prevents rapid re-detection of the same code,
+      // which avoids buffer overflow and multiple concurrent _onDetect calls.
+      detectionSpeed: DetectionSpeed.noDuplicates,
       facing: CameraFacing.back,
     );
   }
@@ -36,8 +37,10 @@ class _QRScanScreenState extends ConsumerState<QRScanScreen> {
     _viewModel = QrScanViewModel(
       machineRepo: ref.read(machineRepositoryProvider),
       batchRepo: ref.read(batchRepositoryProvider),
+      appUserRepo: ref.read(appUserRepositoryProvider),
     );
   }
+
 
   @override
   void dispose() {
@@ -49,16 +52,43 @@ class _QRScanScreenState extends ConsumerState<QRScanScreen> {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
 
-    final result = await _viewModel.validateScan(scannedValue);
+    // Stop the camera while we validate — prevents buffer overflow
+    try { await _scannerController.stop(); } catch (_) {}
+
+    QrScanResult result;
+    try {
+      result = await _viewModel.validateScan(scannedValue);
+    } catch (e) {
+      // Validation threw — clear state and bail out
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        try { await _scannerController.start(); } catch (_) {}
+      }
+      return;
+    }
+
+    // Clear loading overlay BEFORE any navigation so we never
+    // return to a stale "Checking machine…" state.
+    if (mounted) {
+      setState(() => _isProcessing = false);
+    }
 
     switch (result) {
-      case QrScanSuccess(:final machine):
+      case QrScanSuccess(:final machine, :final operatorName):
         if (!mounted) return;
+        // Camera stays STOPPED while the connected screen is visible.
+        // It only restarts after the user unowns and comes back here.
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => MachineDetailScreen(machine: machine),
+            builder: (context) => MachineQrConnectedScreen(
+              machine: machine,
+              operatorName: operatorName,
+            ),
           ),
         );
+        // Restart camera now that we're back on the QR screen
+        if (mounted) try { await _scannerController.start(); } catch (_) {}
+
       case QrScanError(:final message):
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -68,10 +98,10 @@ class _QRScanScreenState extends ConsumerState<QRScanScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
+        if (mounted) try { await _scannerController.start(); } catch (_) {}
     }
-
-    if (mounted) setState(() => _isProcessing = false);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -143,29 +173,6 @@ class _QRScanScreenState extends ConsumerState<QRScanScreen> {
 
               // Scan frame
               const ScanFrameOverlay(),
-
-              // Loading overlay
-              if (_isProcessing)
-                Container(
-                  color: Colors.black54,
-                  child: const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(color: Color(0xFF4ECDC4)),
-                        SizedBox(height: 16),
-                        Text(
-                          'Checking machine...',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
             ],
           ),
         ),

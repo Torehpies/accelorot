@@ -235,4 +235,26 @@ class FirebaseMachineService implements MachineService {
       throw Exception('Failed to update aerator status: $e');
     }
   }
+
+  @override
+  Future<void> updateMachineOperator(
+    String machineId,
+    String? operatorId,
+    String? operatorName,
+  ) async {
+    if (currentUserId == null) {
+      throw Exception('User must be authenticated');
+    }
+
+    try {
+      await _machinesCollection.doc(machineId).update({
+        'currentOperatorId': operatorId,
+        'currentOperatorName': operatorName,
+        'lastModified': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update machine operator: $e');
+    }
+  }
 }
+

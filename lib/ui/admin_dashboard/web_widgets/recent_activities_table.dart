@@ -6,7 +6,16 @@ import '../../../data/providers/batch_providers.dart';
 import '../../../data/models/activity_log_item.dart';
 
 class RecentActivitiesTable extends ConsumerWidget {
-  const RecentActivitiesTable({super.key});
+  final String? machineId;
+  final bool hideHeader;
+  final bool isCondensed;
+
+  const RecentActivitiesTable({
+    super.key,
+    this.machineId,
+    this.hideHeader = false,
+    this.isCondensed = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,9 +44,11 @@ class RecentActivitiesTable extends ConsumerWidget {
             children: [
               _buildHeaderTitleRow(ref),
               const SizedBox(height: 20),
-              _buildHeader(),
-              const Divider(height: 1, color: Color(0xFFE5E7EB)),
-              const SizedBox(height: 8),
+              if (!hideHeader) ...[
+                _buildHeader(),
+                const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                const SizedBox(height: 8),
+              ],
               Expanded(
                 child: activitiesAsync.when(
                   data: (activities) => _buildContent(activities, batches),
@@ -63,7 +74,11 @@ class RecentActivitiesTable extends ConsumerWidget {
     List<dynamic> batches, {
     bool shrinkWrap = false,
   }) {
-    if (activities.isEmpty) {
+    final filteredActivities = machineId != null
+        ? activities.where((a) => a.machineId == machineId).toList()
+        : activities;
+
+    if (filteredActivities.isEmpty) {
       return const Center(
         child: Text(
           'No activities yet',
@@ -73,14 +88,14 @@ class RecentActivitiesTable extends ConsumerWidget {
     }
 
     return ListView.separated(
-      itemCount: activities.length,
+      itemCount: filteredActivities.length,
       padding: EdgeInsets.zero,
       shrinkWrap: shrinkWrap,
       physics: shrinkWrap
           ? const NeverScrollableScrollPhysics()
           : const ClampingScrollPhysics(),
       itemBuilder: (context, index) {
-        final activity = activities[index];
+        final activity = filteredActivities[index];
         return _buildRow(activity, batches);
       },
       separatorBuilder: (context, index) =>
@@ -92,10 +107,10 @@ class RecentActivitiesTable extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        children: const [
+        children: [
           Expanded(
-            flex: 3,
-            child: Text(
+            flex: isCondensed ? 4 : 3,
+            child: const Text(
               'Description',
               style: TextStyle(
                 fontSize: 11,
@@ -104,31 +119,33 @@ class RecentActivitiesTable extends ConsumerWidget {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Machine / Batch',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF9CA3AF),
+          if (!isCondensed) ...[
+            const Expanded(
+              flex: 2,
+              child: Text(
+                'Machine / Batch',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF9CA3AF),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'Status',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF9CA3AF),
+            const Expanded(
+              flex: 2,
+              child: Text(
+                'Status',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF9CA3AF),
+                ),
               ),
             ),
-          ),
+          ],
           Expanded(
             flex: 1,
-            child: Text(
+            child: const Text(
               'Date',
               style: TextStyle(
                 fontSize: 11,
@@ -187,7 +204,7 @@ class RecentActivitiesTable extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 3,
+            flex: isCondensed ? 4 : 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -234,53 +251,57 @@ class RecentActivitiesTable extends ConsumerWidget {
               ],
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Machine name
-                Text(
-                  machineText.isNotEmpty ? machineText : '—',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF374151),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (batchDisplayName != null && batchDisplayName.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  // Batch name
+          if (!isCondensed) ...[
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Machine name
                   Text(
-                    batchDisplayName,
+                    machineText.isNotEmpty ? machineText : '—',
                     style: const TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF9CA3AF),
+                      fontSize: 11,
+                      color: Color(0xFF374151),
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (batchDisplayName != null &&
+                      batchDisplayName.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    // Batch name
+                    Text(
+                      batchDisplayName,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              _getStatusText(activity),
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF6B7280),
-                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                _getStatusText(activity),
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF6B7280),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
           Expanded(
             flex: 1,
             child: Text(
               _formatDate(activity.timestamp),
+              textAlign: TextAlign.end,
               style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
             ),
           ),
