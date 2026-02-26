@@ -21,11 +21,17 @@ class ControlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFD0DFE9),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF7C909C)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,25 +39,25 @@ class ControlCard extends StatelessWidget {
           // Title
           Text(
             title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[500],
-              letterSpacing: 0.8,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF789CA4), // Match SENSOR READINGS header color
+              letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           // Timer
           Text(
             timerValue,
             style: const TextStyle(
-              fontSize: 28,
+              fontSize: 22, // Reduced from 28
               fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              color: Color(0xFF2C3E50),
               fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           // Action Button
           SizedBox(
             width: double.infinity,
@@ -60,21 +66,21 @@ class ControlCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: isRunning
                     ? const Color(0xFFFFEBEE)
-                    : const Color(0xFFD9D9D9),
+                    : const Color(0xFFEAF4FB), // Light blue instead of grey
                 foregroundColor: isRunning
                     ? const Color(0xFFD32F2F)
-                    : Colors.black87,
+                    : const Color(0xFF3B717B), // Match brand
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: Text(
                 buttonLabel,
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

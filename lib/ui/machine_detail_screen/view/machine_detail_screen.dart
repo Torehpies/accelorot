@@ -270,8 +270,8 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 24), // Bottom padding for FAB clearance
         children: [
           // Fixed top section: gauges, controls, batch button
           Padding(
@@ -479,7 +479,7 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12), // Reduced from 20
 
                 // Control Cards
                 Row(
@@ -487,32 +487,33 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
                     Expanded(
                       child: DrumControl(machine: currentMachine),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8), // Reduced from 12
                     Expanded(
                       child: AeratorControl(machine: currentMachine),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 12), // Match the spacing between cards above
 
                 // Complete Batch / Start Batch
                 WideActionButton(
                   label: isBatchActive ? 'Complete Batch' : 'Start Batch',
+                  backgroundColor: isBatchActive ? const Color(0xFF2C3E50) : const Color(0xFF22C55E),
+                  foregroundColor: Colors.white,
                   onPressed: () => _handleBatchAction(currentMachine, isBatchActive),
                 ),
 
-                const SizedBox(height: 24),
-
-
+                const SizedBox(height: 12), // Reduced from 24 to match the cohesive card spacing
               ],
             ),
           ),
 
           // Scrollable activity list
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              height: 400, // Fixed minimum size as requested
               child: RecentActivitiesTable(
                 machineId: currentMachine.machineId,
                 hideHeader: true,
@@ -520,6 +521,9 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
               ),
             ),
           ),
+          
+          // Extra bottom padding to ensure content isn't hidden behind FAB
+          const SizedBox(height: 80),
         ],
       ),
       floatingActionButton: FloatingActionButton(
