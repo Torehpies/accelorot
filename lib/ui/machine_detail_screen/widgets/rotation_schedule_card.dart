@@ -400,55 +400,56 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   }
 
   Widget _buildManualControlsEntry(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => ManualControlsModal(machine: widget.machine),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFF0F7F9)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(12),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBFD),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFC8DCE6), width: 1),
+      ),
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) => ManualControlsModal(machine: widget.machine),
+          );
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.tune_rounded, 
+                  color: Color(0xFF1F2937),
+                  size: 22,
+                ),
               ),
-              child: const Icon(Icons.tune, color: Color(0xFF1F2937)),
-            ),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Manual Controls',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
-                    ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Manual Controls',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
+                    letterSpacing: -0.2,
                   ),
-                ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xFFD1D5DB)),
-          ],
+              const Icon(
+                Icons.arrow_forward_ios_rounded, 
+                color: Color(0xFF7C909C),
+                size: 16,
+              ),
+            ],
+          ),
         ),
       ),
     );
