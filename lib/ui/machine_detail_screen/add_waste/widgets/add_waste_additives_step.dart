@@ -1,6 +1,8 @@
 // lib/ui/machine_detail_screen/batch_start/widgets/start_batch_additives_step.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../data/providers/substrate_providers.dart';
 
 class AdditiveOption {
   final String label;
@@ -14,7 +16,7 @@ class AdditiveOption {
   });
 }
 
-class AddWasteAdditivesStep extends StatefulWidget {
+class AddWasteAdditivesStep extends ConsumerStatefulWidget {
   final String machineName;
   final Set<String> selectedAdditives;
   final ValueChanged<Set<String>> onAdditivesChanged;
@@ -29,10 +31,10 @@ class AddWasteAdditivesStep extends StatefulWidget {
   });
 
   @override
-  State<AddWasteAdditivesStep> createState() => _AddWasteAdditivesStepState();
+  ConsumerState<AddWasteAdditivesStep> createState() => _AddWasteAdditivesStepState();
 }
 
-class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
+class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
   bool? _hasAdditives;
   late Set<String> _selected;
   late List<AdditiveOption> _options;
@@ -58,7 +60,6 @@ class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
   void initState() {
     super.initState();
     _selected = Set.from(widget.selectedAdditives);
-    _options = List.from(_initialOptions);
     if (_selected.isNotEmpty) {
       _hasAdditives = true;
     }
@@ -81,24 +82,27 @@ class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
     });
   }
 
-  void _addCustomAdditive() {
+  void _addCustomAdditive() async {
     final label = _addController.text.trim();
     if (label.isEmpty) return;
 
-    setState(() {
-      final newOption = AdditiveOption(
-        label: label,
-        color: _purpleBg,
-        textColor: _purpleText,
-      );
-      
-      _options.add(newOption);
-      _selected.add(label);
-      widget.onAdditivesChanged(_selected);
-      
-      _isAddingCustom = false;
-      _addController.clear();
-    });
+    try {
+      await ref.read(substrateRepositoryProvider).saveCustomAdditive(label);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving additive: $e')));
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _selected.add(label);
+        widget.onAdditivesChanged(_selected);
+        
+        _isAddingCustom = false;
+        _addController.clear();
+      });
+    }
   }
 
   @override
@@ -110,7 +114,7 @@ class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
         
         // Machine Name & Date
         Text(
-          '${widget.machineName} 02/09/2026',
+          '${widget.machineName}',
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -232,6 +236,19 @@ class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
 
   Widget _buildConditionalContent() {
     if (_hasAdditives == true) {
+      final customAdditives = ref.watch(teamCustomAdditivesProvider).asData?.value ?? [];
+      final allAdditives = List<AdditiveOption>.from(_initialOptions);
+      
+      for (final customLabel in customAdditives) {
+        if (!allAdditives.any((opt) => opt.label == customLabel)) {
+          allAdditives.add(AdditiveOption(
+            label: customLabel,
+            color: _purpleBg,
+            textColor: _purpleText,
+          ));
+        }
+      }
+      
       return Column(
         children: [
           Row(
@@ -254,7 +271,7 @@ class _AddWasteAdditivesStepState extends State<AddWasteAdditivesStep> {
             runSpacing: 10,
             alignment: WrapAlignment.start,
             children: [
-              ..._options.map((option) {
+              ...allAdditives.map((option) {
                 final isSelected = _selected.contains(option.label);
                 return _AdditiveChip(
                   label: option.label,

@@ -29,7 +29,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   final Set<String> _completedSlots = <String>{};
 
   final List<TimeOfDay> _schedule = [
-    const TimeOfDay(hour: 10, minute: 0),
+    const TimeOfDay(hour: 8, minute: 0),
     const TimeOfDay(hour: 16, minute: 0),
   ];
 
@@ -242,7 +242,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Column(
               children: [
                 Row(
@@ -269,24 +269,24 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                       '${_getCompletedToday()}/${_schedule.length}',
                       style: const TextStyle(
                         color: Color(0xFF789CA4),
-                        fontSize: 16,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: _isRotating
                             ? Colors.green.withOpacity(0.1)
                             : isNear
                                 ? Colors.orange.withOpacity(0.1)
                                 : const Color(0xFFF0F7F9),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         _isRotating
@@ -299,10 +299,10 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                             : isNear
                                 ? Colors.orange
                                 : const Color(0xFF789CA4),
-                        size: 32,
+                        size: 22,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +311,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                             Text(
                               _formatRotationTimer(),
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.green,
                               ),
@@ -324,7 +324,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                             Text(
                               _formatCountdown(timeUntil),
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.orange,
                               ),
@@ -337,7 +337,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                             Text(
                               _formatCountdown(timeUntil),
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF1F2937),
                               ),
@@ -379,11 +379,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 InkWell(
                   onTap: () => setState(() => _isExpanded = !_isExpanded),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F4F6),
                       borderRadius: BorderRadius.circular(12),
@@ -412,7 +412,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
           if (_isExpanded) ...[
             const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -592,7 +592,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFF8FBFD),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFC8DCE6), width: 1),
       ),
       child: InkWell(
@@ -602,29 +602,29 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
             builder: (context) => ManualControlsModal(machine: widget.machine),
           );
         },
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
-                  Icons.tune_rounded, 
+                  Icons.tune_rounded,
                   color: Color(0xFF1F2937),
-                  size: 22,
+                  size: 18,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               const Expanded(
                 child: Text(
                   'Manual Controls',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1F2937),
                     letterSpacing: -0.2,
@@ -632,9 +632,9 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 ),
               ),
               const Icon(
-                Icons.arrow_forward_ios_rounded, 
+                Icons.arrow_forward_ios_rounded,
                 color: Color(0xFF7C909C),
-                size: 16,
+                size: 13,
               ),
             ],
           ),
@@ -751,7 +751,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 Text(
                   '${DateFormat('h:mm a').format(scheduledDateTime)}$dayLabel',
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1F2937),
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/substrate_preset.dart';
+import '../../../../data/models/substrate_preset.dart';
 
 class SubstratePresetCard extends StatelessWidget {
   final SubstratePreset preset;

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../model/substrate_preset.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../data/models/substrate_preset.dart';
+import '../../../../data/providers/substrate_providers.dart';
 
-class EditSubstratePresetModal extends StatefulWidget {
+class EditSubstratePresetModal extends ConsumerStatefulWidget {
   final SubstratePreset? preset; // null for "New Preset"
   final Function(SubstratePreset) onSave;
 
@@ -12,10 +14,10 @@ class EditSubstratePresetModal extends StatefulWidget {
   });
 
   @override
-  State<EditSubstratePresetModal> createState() => _EditSubstratePresetModalState();
+  ConsumerState<EditSubstratePresetModal> createState() => _EditSubstratePresetModalState();
 }
 
-class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
+class _EditSubstratePresetModalState extends ConsumerState<EditSubstratePresetModal> {
   late TextEditingController _nameController;
   final TextEditingController _customMaterialController = TextEditingController();
   late Set<SubstrateMaterial> _selectedMaterials;
@@ -23,8 +25,21 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
   bool _isAddingGreen = false;
   bool _isAddingBrown = false;
 
-  late List<SubstrateMaterial> _greenMaterials;
-  late List<SubstrateMaterial> _brownMaterials;
+  final List<SubstrateMaterial> _defaultGreenMaterials = [
+    const SubstrateMaterial(label: 'Vegetable Scraps', isNitrogenRich: true),
+    const SubstrateMaterial(label: 'Fruit Scraps', isNitrogenRich: true),
+    const SubstrateMaterial(label: 'Chicken Manure', isNitrogenRich: true),
+    const SubstrateMaterial(label: 'Plant Stem', isNitrogenRich: true),
+    const SubstrateMaterial(label: 'Grass Clippings', isNitrogenRich: true),
+  ];
+
+  final List<SubstrateMaterial> _defaultBrownMaterials = [
+    const SubstrateMaterial(label: 'Sawdust', isNitrogenRich: false),
+    const SubstrateMaterial(label: 'Cardboard', isNitrogenRich: false),
+    const SubstrateMaterial(label: 'Dry Grass', isNitrogenRich: false),
+    const SubstrateMaterial(label: 'Coconut Husk', isNitrogenRich: false),
+    const SubstrateMaterial(label: 'Dried Leaves', isNitrogenRich: false),
+  ];
 
   @override
   void initState() {
@@ -33,37 +48,6 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
     _selectedMaterials = widget.preset != null 
         ? Set.from(widget.preset!.materials) 
         : {};
-
-    _greenMaterials = [
-      const SubstrateMaterial(label: 'Vegetable Scraps', isNitrogenRich: true),
-      const SubstrateMaterial(label: 'Fruit Scraps', isNitrogenRich: true),
-      const SubstrateMaterial(label: 'Chicken Manure', isNitrogenRich: true),
-      const SubstrateMaterial(label: 'Plant Stem', isNitrogenRich: true),
-      const SubstrateMaterial(label: 'Grass Clippings', isNitrogenRich: true),
-    ];
-
-    _brownMaterials = [
-      const SubstrateMaterial(label: 'Sawdust', isNitrogenRich: false),
-      const SubstrateMaterial(label: 'Cardboard', isNitrogenRich: false),
-      const SubstrateMaterial(label: 'Dry Grass', isNitrogenRich: false),
-      const SubstrateMaterial(label: 'Coconut Husk', isNitrogenRich: false),
-      const SubstrateMaterial(label: 'Dried Leaves', isNitrogenRich: false),
-    ];
-    
-    // Ensure all materials in preset are in the list
-    if (widget.preset != null) {
-      for (var m in widget.preset!.materials) {
-        if (m.isNitrogenRich) {
-          if (!_greenMaterials.any((g) => g.label == m.label)) {
-            _greenMaterials.add(m);
-          }
-        } else {
-          if (!_brownMaterials.any((b) => b.label == m.label)) {
-            _brownMaterials.add(m);
-          }
-        }
-      }
-    }
   }
 
   @override
@@ -73,34 +57,35 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
     super.dispose();
   }
 
-  void _addCustomMaterial(bool isNitrogen) {
+  void _addCustomMaterial(bool isNitrogen) async {
     final label = _customMaterialController.text.trim();
     if (label.isEmpty) return;
 
     final newMaterial = SubstrateMaterial(label: label, isNitrogenRich: isNitrogen);
     
-    setState(() {
-      if (isNitrogen) {
-        // If it's already in the other list, we might want to move it or just add here?
-        // Let's just ensure it's in the Greens list.
-        if (!_greenMaterials.any((m) => m.label == label)) {
-          _greenMaterials.add(newMaterial);
-        }
-        _isAddingGreen = false;
-      } else {
-        if (!_brownMaterials.any((m) => m.label == label)) {
-          _brownMaterials.add(newMaterial);
-        }
-        _isAddingBrown = false;
+    try {
+      await ref.read(substrateRepositoryProvider).saveCustomMaterial(newMaterial);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving material: $e')));
       }
-      
-      // Select it! If an equal material already existed in selection (even if category was different),
-      // we remove the old one first to ensure the NEW one with correct category is the one in the set.
-      _selectedMaterials.removeWhere((m) => m.label == label);
-      _selectedMaterials.add(newMaterial);
-      
-      _customMaterialController.clear();
-    });
+    }
+
+    if (mounted) {
+      setState(() {
+        if (isNitrogen) {
+          _isAddingGreen = false;
+        } else {
+          _isAddingBrown = false;
+        }
+        
+        // Select it! 
+        _selectedMaterials.removeWhere((m) => m.label == label);
+        _selectedMaterials.add(newMaterial);
+        
+        _customMaterialController.clear();
+      });
+    }
   }
 
   void _toggleMaterial(SubstrateMaterial material) {
@@ -113,7 +98,7 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
     });
   }
 
-  void _onSave() {
+  void _onSave() async {
     if (_nameController.text.trim().isEmpty) return;
     
     final newPreset = SubstratePreset(
@@ -123,13 +108,55 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
       icon: widget.preset?.icon ?? 'usual_mix',
     );
     
-    widget.onSave(newPreset);
-    Navigator.of(context).pop();
+    try {
+      await ref.read(substrateRepositoryProvider).savePreset(newPreset);
+      if (mounted) {
+        widget.onSave(newPreset);
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving preset: $e')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     bool isNew = widget.preset == null;
+    
+    final customMaterials = ref.watch(teamCustomMaterialsProvider).asData?.value ?? [];
+    
+    final allGreens = <SubstrateMaterial>{..._defaultGreenMaterials};
+    final allBrowns = <SubstrateMaterial>{..._defaultBrownMaterials};
+    
+    // Add dynamically loaded custom materials
+    for (var m in customMaterials) {
+      if (m.isNitrogenRich) {
+        allGreens.add(m);
+      } else {
+        allBrowns.add(m);
+      }
+    }
+    
+    // Ensure materials from preset or current selection are visible
+    if (widget.preset != null) {
+      for (var m in widget.preset!.materials) {
+        if (m.isNitrogenRich) {
+          allGreens.add(m);
+        } else {
+          allBrowns.add(m);
+        }
+      }
+    }
+    for (var m in _selectedMaterials) {
+      if (m.isNitrogenRich) {
+        allGreens.add(m);
+      } else {
+        allBrowns.add(m);
+      }
+    }
+
 
     return Container(
       padding: EdgeInsets.only(
@@ -194,7 +221,7 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
               spacing: 12,
               runSpacing: 12,
               children: [
-                ..._greenMaterials.map((m) => _buildChip(m)),
+                ...allGreens.map((m) => _buildChip(m)),
                 if (!_isAddingGreen) _buildAddButton(true),
               ],
             ),
@@ -206,7 +233,7 @@ class _EditSubstratePresetModalState extends State<EditSubstratePresetModal> {
               spacing: 12,
               runSpacing: 12,
               children: [
-                ..._brownMaterials.map((m) => _buildChip(m)),
+                ...allBrowns.map((m) => _buildChip(m)),
                 if (!_isAddingBrown) _buildAddButton(false),
               ],
             ),

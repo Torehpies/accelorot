@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../contracts/substrate_service.dart';
 import '../contracts/batch_service.dart';
 import '../../models/substrate.dart';
+import '../../models/substrate_preset.dart';
 
 /// Firestore implementation of SubstrateService
 /// Handles substrate CRUD operations with team-aware queries
@@ -244,5 +245,165 @@ class FirestoreSubstrateService implements SubstrateService {
         .map((snapshot) {
       return snapshot.docs.map((doc) => Substrate.fromFirestore(doc)).toList();
     });
+  }
+
+  // ===== PRESET OPERATIONS =====
+
+  @override
+  Stream<List<SubstratePreset>> streamTeamPresets() {
+    if (currentUserId == null) return Stream.value([]);
+    
+    return Stream.fromFuture(_batchService.getUserTeamId(currentUserId!)).asyncExpand((teamId) {
+      if (teamId == null || teamId.isEmpty) return Stream.value([]);
+      return _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('substrate_presets')
+          .snapshots()
+          .map((snapshot) {
+            final presets = snapshot.docs.map((doc) => SubstratePreset.fromJson(doc.data(), doc.id)).toList();
+            
+            // Default "Usual Mix" is required on first load for a team.
+            if (presets.isEmpty) {
+              _createDefaultPreset(teamId);
+              // It will re-trigger the stream once created.
+            }
+            return presets;
+          });
+    });
+  }
+
+  Future<void> _createDefaultPreset(String teamId) async {
+    try {
+      final defaultPreset = SubstratePreset(
+        id: 'default_usual_mix',
+        name: 'Usual Mix',
+        icon: 'usual_mix',
+        materials: [
+          const SubstrateMaterial(label: 'Vegetable Scraps', isNitrogenRich: true),
+          const SubstrateMaterial(label: 'Fruit Scraps', isNitrogenRich: true),
+          const SubstrateMaterial(label: 'Chicken Manure', isNitrogenRich: true),
+          const SubstrateMaterial(label: 'Sawdust', isNitrogenRich: false),
+          const SubstrateMaterial(label: 'Cardboard', isNitrogenRich: false),
+          const SubstrateMaterial(label: 'Dry Grass', isNitrogenRich: false),
+        ],
+        teamId: teamId,
+        createdBy: 'system',
+        createdAt: DateTime.now(),
+        isDefault: true,
+      );
+      
+      await _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('substrate_presets')
+          .doc('default_usual_mix')
+          .set(defaultPreset.toJson());
+      debugPrint('✅ Created default preset for team $teamId');
+    } catch (e) {
+      debugPrint('❌ Error creating default preset: $e');
+    }
+  }
+
+  @override
+  Future<void> savePreset(SubstratePreset preset) async {
+    if (currentUserId == null) throw Exception('User not authenticated');
+    final teamId = preset.teamId ?? await _batchService.getUserTeamId(currentUserId!);
+    if (teamId == null || teamId.isEmpty) throw Exception('User has no team assigned');
+
+    final docRef = _firestore.collection('teams').doc(teamId).collection('substrate_presets').doc(preset.id);
+    
+    final presetToSave = preset.copyWith(
+      teamId: teamId,
+      createdBy: preset.createdBy ?? currentUserId,
+    );
+
+    await docRef.set(presetToSave.toJson(), SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> deletePreset(String presetId) async {
+    if (currentUserId == null) throw Exception('User not authenticated');
+    final teamId = await _batchService.getUserTeamId(currentUserId!);
+    if (teamId == null || teamId.isEmpty) throw Exception('User has no team assigned');
+
+    await _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('substrate_presets')
+        .doc(presetId)
+        .delete();
+  }
+
+  // ===== CUSTOM MATERIALS OPERATIONS =====
+
+  @override
+  Stream<List<SubstrateMaterial>> streamTeamCustomMaterials() {
+    if (currentUserId == null) return Stream.value([]);
+
+    return Stream.fromFuture(_batchService.getUserTeamId(currentUserId!)).asyncExpand((teamId) {
+      if (teamId == null || teamId.isEmpty) return Stream.value([]);
+      return _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('custom_materials')
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) => SubstrateMaterial.fromJson(doc.data())).toList();
+          });
+    });
+  }
+
+  @override
+  Future<void> saveCustomMaterial(SubstrateMaterial material) async {
+    if (currentUserId == null) throw Exception('User not authenticated');
+    final teamId = await _batchService.getUserTeamId(currentUserId!);
+    if (teamId == null || teamId.isEmpty) throw Exception('User has no team assigned');
+
+    // Use the label (lowercase/no-spaces) as ID to avoid duplicates
+    final docId = material.label.toLowerCase().replaceAll(' ', '_');
+
+    await _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('custom_materials')
+        .doc(docId)
+        .set(material.toJson(), SetOptions(merge: true));
+  }
+
+  // ===== CUSTOM ADDITIVES OPERATIONS =====
+
+  @override
+  Stream<List<String>> streamTeamCustomAdditives() {
+    if (currentUserId == null) return Stream.value([]);
+
+    return Stream.fromFuture(_batchService.getUserTeamId(currentUserId!)).asyncExpand((teamId) {
+      if (teamId == null || teamId.isEmpty) return Stream.value([]);
+      return _firestore
+          .collection('teams')
+          .doc(teamId)
+          .collection('custom_additives')
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) => doc.data()['label'] as String).toList();
+          });
+    });
+  }
+
+  @override
+  Future<void> saveCustomAdditive(String additive) async {
+    if (currentUserId == null) throw Exception('User not authenticated');
+    final teamId = await _batchService.getUserTeamId(currentUserId!);
+    if (teamId == null || teamId.isEmpty) throw Exception('User has no team assigned');
+
+    // Use the label (lowercase/no-spaces) as ID to avoid duplicates
+    final docId = additive.toLowerCase().replaceAll(' ', '_');
+
+    await _firestore
+        .collection('teams')
+        .doc(teamId)
+        .collection('custom_additives')
+        .doc(docId)
+        .set({'label': additive}, SetOptions(merge: true));
   }
 }

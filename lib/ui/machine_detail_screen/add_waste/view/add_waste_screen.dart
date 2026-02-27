@@ -4,7 +4,7 @@ import '../widgets/add_waste_preset_step.dart';
 import '../widgets/add_waste_additives_step.dart';
 import '../widgets/add_waste_final_step.dart';
 import '../widgets/edit_preset_modal.dart';
-import '../model/substrate_preset.dart';
+import '../../../../data/models/substrate_preset.dart';
 
 class AddWasteScreen extends StatefulWidget {
   final String machineName;

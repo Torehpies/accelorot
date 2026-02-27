@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import '../model/substrate_preset.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../data/models/substrate_preset.dart';
+import '../../../../data/providers/substrate_providers.dart';
 import 'substrate_preset_card.dart';
 
-class AddWastePresetStep extends StatefulWidget {
+class AddWastePresetStep extends ConsumerStatefulWidget {
   final String machineName;
   final Set<String> selectedSubstrates;
   final ValueChanged<Set<String>> onSubstratesChanged;
@@ -21,38 +23,10 @@ class AddWastePresetStep extends StatefulWidget {
   });
 
   @override
-  State<AddWastePresetStep> createState() => _AddWastePresetStepState();
+  ConsumerState<AddWastePresetStep> createState() => _AddWastePresetStepState();
 }
 
-class _AddWastePresetStepState extends State<AddWastePresetStep> {
-  // Hardcoded initial presets for demonstration
-  // In a real app, these would come from a service or local storage
-  final List<SubstratePreset> _presets = [
-    const SubstratePreset(
-      id: '1',
-      name: 'Usual Mix',
-      icon: 'usual_mix',
-      materials: [
-        SubstrateMaterial(label: 'Vegetable Scraps', isNitrogenRich: true),
-        SubstrateMaterial(label: 'Fruit Scraps', isNitrogenRich: true),
-        SubstrateMaterial(label: 'Sawdust', isNitrogenRich: false),
-        SubstrateMaterial(label: 'Dry Grass', isNitrogenRich: false),
-      ],
-    ),
-    const SubstratePreset(
-      id: '2',
-      name: 'Heavy Carbon',
-      icon: 'heavy_carbon',
-      materials: [
-        SubstrateMaterial(label: 'Chicken Manure', isNitrogenRich: true),
-        SubstrateMaterial(label: 'Cardboard', isNitrogenRich: false),
-        SubstrateMaterial(label: 'Sawdust', isNitrogenRich: false),
-        SubstrateMaterial(label: 'Coconut Husk', isNitrogenRich: false),
-        SubstrateMaterial(label: 'Dried Leaves', isNitrogenRich: false),
-      ],
-    ),
-  ];
-
+class _AddWastePresetStepState extends ConsumerState<AddWastePresetStep> {
   String? _selectedPresetId;
 
   void _onPresetTap(SubstratePreset preset) {
@@ -96,41 +70,52 @@ class _AddWastePresetStepState extends State<AddWastePresetStep> {
         
         // Presets List
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                ..._presets.map((preset) => SubstratePresetCard(
-                  preset: preset,
-                  isSelected: _selectedPresetId == preset.id,
-                  onTap: () => _onPresetTap(preset),
-                  onEdit: () => widget.onEditPreset(preset),
-                  onDelete: () {
-                    // Handle delete logically in real app
-                    setState(() {
-                      _presets.removeWhere((p) => p.id == preset.id);
-                    });
-                  },
-                )),
-                
-                const SizedBox(height: 8),
-                
-                // Add new preset button
-                TextButton.icon(
-                  onPressed: widget.onAddNewPreset,
-                  icon: const Icon(Icons.add, size: 20),
-                  label: const Text(
-                    'Save a new preset',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+          child: ref.watch(teamPresetsProvider).when(
+            data: (presets) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ...presets.map((preset) => SubstratePresetCard(
+                      preset: preset,
+                      isSelected: _selectedPresetId == preset.id,
+                      onTap: () => _onPresetTap(preset),
+                      onEdit: () => widget.onEditPreset(preset),
+                      onDelete: () async {
+                        try {
+                          await ref.read(substrateRepositoryProvider).deletePreset(preset.id);
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to delete preset: $e')),
+                            );
+                          }
+                        }
+                      },
+                    )),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Add new preset button
+                    TextButton.icon(
+                      onPressed: widget.onAddNewPreset,
+                      icon: const Icon(Icons.add, size: 20),
+                      label: const Text(
+                        'Save a new preset',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF5C9BAD),
+                      ),
                     ),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF5C9BAD),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, stack) => Center(child: Text('Error: $err')),
           ),
         ),
         
