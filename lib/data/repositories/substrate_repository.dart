@@ -23,4 +23,9 @@ class SubstrateRepository {
   Future<Substrate?> getSubstrate(String id) async {
     return await _service.fetchSubstrateById(id);
   }
+
+  /// Stream substrates for a batch
+  Stream<List<Substrate>> streamSubstratesForBatch(String batchId) {
+    return _service.streamSubstratesForBatch(batchId);
+  }
 }

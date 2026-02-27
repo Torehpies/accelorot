@@ -23,15 +23,9 @@ class ControlCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFFD0DFE9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF7C909C), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -42,7 +36,7 @@ class ControlCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF789CA4), // Match SENSOR READINGS header color
+              color: Color(0xFF789CA4),
               letterSpacing: 1.0,
             ),
           ),
@@ -51,9 +45,9 @@ class ControlCard extends StatelessWidget {
           Text(
             timerValue,
             style: const TextStyle(
-              fontSize: 22, // Reduced from 28
+              fontSize: 32,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF2C3E50),
+              color: Colors.black,
               fontFeatures: [FontFeature.tabularFigures()],
             ),
           ),
@@ -66,20 +60,20 @@ class ControlCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: isRunning
                     ? const Color(0xFFFFEBEE)
-                    : const Color(0xFFEAF4FB), // Light blue instead of grey
+                    : const Color(0xFFEAF4FB),
                 foregroundColor: isRunning
                     ? const Color(0xFFD32F2F)
-                    : const Color(0xFF3B717B), // Match brand
+                    : const Color(0xFF3B717B),
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: Text(
                 buttonLabel,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),

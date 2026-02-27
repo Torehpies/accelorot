@@ -7,8 +7,7 @@ import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
 import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_readonly_section.dart';
-import '../../machine_detail_screen/widgets/drum_control.dart';
-import '../../machine_detail_screen/widgets/aerator_control.dart';
+import '../../machine_detail_screen/widgets/rotation_schedule_card.dart';
 
 class OperatorMachineViewSheet extends StatelessWidget {
   final MachineModel machine;
@@ -46,17 +45,7 @@ class OperatorMachineViewSheet extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DrumControl(machine: machine),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: AeratorControl(machine: machine),
-                ),
-              ],
-            ),
+            child: RotationScheduleCard(machine: machine),
           ),
           MobileReadOnlySection(
             sectionTitle: null,

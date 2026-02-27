@@ -15,4 +15,7 @@ abstract class SubstrateService {
 
   /// Fetch a single substrate by ID
   Future<Substrate?> fetchSubstrateById(String substrateId);
+
+  /// Stream substrates for a specific batch
+  Stream<List<Substrate>> streamSubstratesForBatch(String batchId);
 }

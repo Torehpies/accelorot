@@ -11,8 +11,7 @@ import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/substrate_providers.dart';
 import '../../../data/models/substrate.dart';
 import '../widgets/machine_gauge.dart';
-import '../widgets/drum_control.dart';
-import '../widgets/aerator_control.dart';
+import '../widgets/rotation_schedule_card.dart';
 import '../widgets/sensor_trend_view.dart';
 import '../widgets/wide_action_button.dart';
 import '../../admin_dashboard/web_widgets/recent_activities_table.dart';
@@ -481,18 +480,8 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
                 ),
                 const SizedBox(height: 12), // Reduced from 20
 
-                // Control Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: DrumControl(machine: currentMachine),
-                    ),
-                    const SizedBox(width: 8), // Reduced from 12
-                    Expanded(
-                      child: AeratorControl(machine: currentMachine),
-                    ),
-                  ],
-                ),
+                // Rotation Schedule Card (Replaces Drum & Aerator Controls)
+                RotationScheduleCard(machine: currentMachine),
 
                 const SizedBox(height: 12), // Match the spacing between cards above
 

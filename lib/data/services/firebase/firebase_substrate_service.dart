@@ -233,4 +233,16 @@ class FirestoreSubstrateService implements SubstrateService {
       throw Exception('Failed to fetch substrate: $e');
     }
   }
+
+  @override
+  Stream<List<Substrate>> streamSubstratesForBatch(String batchId) {
+    return _firestore
+        .collection('batches')
+        .doc(batchId)
+        .collection('substrates')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => Substrate.fromFirestore(doc)).toList();
+    });
+  }
 }
