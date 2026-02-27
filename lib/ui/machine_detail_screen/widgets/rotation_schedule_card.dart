@@ -176,8 +176,6 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   DateTime _getNextRotationTime() {
     for (final time in _schedule) {
       final key = '${time.hour}:${time.minute}';
-      // Skip slots already completed this session
-      if (_completedSlots.contains(key)) continue;
       final scheduledDateTime = DateTime(
         _now.year,
         _now.month,
@@ -185,11 +183,13 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         time.hour,
         time.minute,
       );
-      if (scheduledDateTime.isAfter(_now.subtract(const Duration(minutes: 5)))) {
-        return scheduledDateTime;
-      }
+      // Skip if explicitly completed this session
+      if (_completedSlots.contains(key)) continue;
+      // Skip if already passed (missed) — only return future or "near" slots
+      if (scheduledDateTime.isBefore(_now.subtract(const Duration(minutes: 15)))) continue;
+      return scheduledDateTime;
     }
-    // If all done, get first one tomorrow
+    // All done or passed today — return first slot tomorrow
     final tomorrow = _now.add(const Duration(days: 1));
     return DateTime(
       tomorrow.year,
@@ -248,10 +248,18 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'NEXT ROTATION',
+                    Text(
+                      _isRotating
+                          ? 'ROTATING'
+                          : isNear
+                              ? 'DUE SOON'
+                              : 'RESTING',
                       style: TextStyle(
-                        color: Color(0xFF789CA4),
+                        color: _isRotating
+                            ? Colors.green
+                            : isNear
+                                ? Colors.orange
+                                : const Color(0xFF789CA4),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -273,17 +281,33 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF0F7F9),
+                        color: _isRotating
+                            ? Colors.green.withOpacity(0.1)
+                            : isNear
+                                ? Colors.orange.withOpacity(0.1)
+                                : const Color(0xFFF0F7F9),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(Icons.recycling, color: Color(0xFF22C55E), size: 32),
+                      child: Icon(
+                        _isRotating
+                            ? Icons.recycling
+                            : isNear
+                                ? Icons.notifications_active
+                                : Icons.bedtime_outlined,
+                        color: _isRotating
+                            ? Colors.green
+                            : isNear
+                                ? Colors.orange
+                                : const Color(0xFF789CA4),
+                        size: 32,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (_isRotating) ...[
+                          if (_isRotating) ...[  
                             Text(
                               _formatRotationTimer(),
                               style: const TextStyle(
@@ -293,12 +317,25 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                               ),
                             ),
                             const Text(
-                              'Rotating...',
+                              'Rotation in progress',
                               style: TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
+                            ),
+                          ] else if (isNear) ...[
+                            Text(
+                              _formatCountdown(timeUntil),
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                            Text(
+                              'Rotation at ${DateFormat('h:mm a').format(nextRotation)}',
+                              style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.w500),
                             ),
                           ] else ...[
                             Text(
-                              DateFormat('h:mm a').format(nextRotation),
+                              _formatCountdown(timeUntil),
                               style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
@@ -306,22 +343,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                               ),
                             ),
                             Text(
-                              isNear ? 'Rotation due now' : 'in ${_formatCountdown(timeUntil)}',
-                              style: TextStyle(
-                                color: isNear ? Colors.orange : const Color(0xFF789CA4),
-                                fontWeight: FontWeight.w500,
-                              ),
+                              'until ${DateFormat('h:mm a').format(nextRotation)}',
+                              style: const TextStyle(color: Color(0xFF789CA4), fontWeight: FontWeight.w500),
                             ),
                           ],
                         ],
-                      ),
-                    ),
-                    const Text(
-                      'TODAY',
-                      style: TextStyle(
-                        color: Color(0xFF789CA4),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -391,7 +417,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "TODAY'S SCHEDULE",
+                    'NEXT SCHEDULE',
                     style: TextStyle(
                       color: Color(0xFF789CA4),
                       fontSize: 12,
@@ -400,15 +426,162 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ..._schedule.map((time) => _buildScheduleItem(time)),
+                  // Build schedule: alternate rotation slots and rest slots
+                  ..._buildFullScheduleList(),
                   const SizedBox(height: 24),
                   const Divider(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   _buildManualControlsEntry(context),
                 ],
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// Builds a forward-looking schedule list always showing at least 2 upcoming items.
+  /// Pattern: [current rest (if in rest)] → rotation → rest → rotation → rest ...
+  List<Widget> _buildFullScheduleList() {
+    final items = <Widget>[];
+    final today = DateTime(_now.year, _now.month, _now.day);
+
+    // We'll generate events by walking through cycles starting from now.
+    // Each cycle = rotation slot + rest period after it.
+    // We keep going until we've collected at least 2 upcoming events.
+
+    int dayOffset = 0; // 0 = today, 1 = tomorrow, etc.
+    int shown = 0;
+    const maxItems = 4; // cap to avoid infinite build
+
+    while (shown < 2 && dayOffset <= 7) {
+      final base = today.add(Duration(days: dayOffset));
+      final label = dayOffset == 0 ? '' : dayOffset == 1 ? ' (tomorrow)' : ' (+${dayOffset}d)';
+
+      for (int i = 0; i < _schedule.length && shown < maxItems; i++) {
+        final time = _schedule[i];
+        final slotDt = DateTime(base.year, base.month, base.day, time.hour, time.minute);
+
+        // Next rest end (after this rotation)
+        final DateTime restEnd;
+        if (i + 1 < _schedule.length) {
+          final next = _schedule[i + 1];
+          restEnd = DateTime(base.year, base.month, base.day, next.hour, next.minute);
+        } else {
+          final nextDay = base.add(const Duration(days: 1));
+          final first = _schedule.first;
+          restEnd = DateTime(nextDay.year, nextDay.month, nextDay.day, first.hour, first.minute);
+        }
+
+        // Are we currently in the rest BEFORE this slot? Show current rest first.
+        if (shown == 0 && i == 0 && dayOffset == 0) {
+          // Check if we're in overnight rest (before first slot today)
+          final overnightRestStart = (() {
+            final yesterday = today.subtract(const Duration(days: 1));
+            final last = _schedule.last;
+            return DateTime(yesterday.year, yesterday.month, yesterday.day, last.hour, last.minute);
+          })();
+          final firstSlotToday = DateTime(today.year, today.month, today.day, _schedule.first.hour, _schedule.first.minute);
+
+          if (_now.isBefore(firstSlotToday) && _now.isAfter(overnightRestStart)) {
+            // We are in overnight rest right now
+            items.add(_buildRestSlot(
+              'Resting until ${DateFormat('h:mm a').format(firstSlotToday)}',
+              overnightRestStart,
+              firstSlotToday,
+              true,
+            ));
+            shown++;
+          }
+        }
+
+        // Check if we are in the rest period AFTER this slot (and before next)
+        if (dayOffset == 0 && slotDt.isBefore(_now) && restEnd.isAfter(_now)) {
+          // Currently in rest after this rotation — show current rest item
+          final inRestLabel = i + 1 < _schedule.length
+              ? 'Resting until ${DateFormat('h:mm a').format(restEnd)}'
+              : 'Resting until ${DateFormat('h:mm a').format(restEnd)} (tomorrow)';
+          items.add(_buildRestSlot(inRestLabel, slotDt, restEnd, true));
+          shown++;
+          continue; // skip the rotation slot itself (already past)
+        }
+
+        // Skip past rotations
+        if (slotDt.isBefore(_now)) continue;
+
+        // Show upcoming rotation slot
+        items.add(_buildScheduleItem(time, dayLabel: label));
+        shown++;
+
+        // Show rest after this rotation
+        if (shown < maxItems) {
+          final restLabel = i + 1 < _schedule.length
+              ? 'Rest until ${DateFormat('h:mm a').format(restEnd)}'
+              : 'Rest until ${DateFormat('h:mm a').format(restEnd)} (tomorrow)';
+          items.add(_buildRestSlot(restLabel, slotDt, restEnd, false));
+          shown++;
+        }
+      }
+
+      dayOffset++;
+    }
+
+    return items;
+  }
+
+  Widget _buildRestSlot(String label, DateTime start, DateTime end, bool isActive) {
+    final duration = end.difference(start);
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final durationLabel = minutes == 0 ? '${hours}h rest' : '${hours}h ${minutes}m rest';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          // Thin rest line indicator instead of a numbered circle
+          Column(
+            children: [
+              Container(width: 2, height: 12, color: const Color(0xFFE5E7EB)),
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: isActive ? const Color(0xFFEAF4FB) : const Color(0xFFF3F4F6),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFD1E1E9), width: 1.5),
+                ),
+              ),
+              Container(width: 2, height: 12, color: const Color(0xFFE5E7EB)),
+            ],
+          ),
+          const SizedBox(width: 26),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: isActive ? const Color(0xFF3B717B) : const Color(0xFF9CA3AF),
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: isActive ? const Color(0xFFEAF4FB) : const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              durationLabel,
+              style: TextStyle(
+                color: isActive ? const Color(0xFF3B717B) : const Color(0xFF9CA3AF),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -540,12 +713,12 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     );
   }
 
-  Widget _buildScheduleItem(TimeOfDay time) {
+  Widget _buildScheduleItem(TimeOfDay time, {String dayLabel = ''}) {
     final key = '${time.hour}:${time.minute}';
     final scheduledDateTime = DateTime(_now.year, _now.month, _now.day, time.hour, time.minute);
-    // A slot is done if: clock passed it naturally, OR we explicitly ran it this session
-    final isDone = _completedSlots.contains(key) || scheduledDateTime.isBefore(_now.subtract(const Duration(minutes: 1)));
-    final isNext = !isDone && scheduledDateTime == _getNextRotationTime();
+    // Done only if we explicitly confirmed this rotation this session
+    final isDone = _completedSlots.contains(key) && dayLabel.isEmpty;
+    final isNext = !isDone && dayLabel.isEmpty && scheduledDateTime == _getNextRotationTime();
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -576,7 +749,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  DateFormat('h:mm a').format(scheduledDateTime),
+                  '${DateFormat('h:mm a').format(scheduledDateTime)}$dayLabel',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -584,7 +757,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                   ),
                 ),
                 Text(
-                  isDone ? '5 min · logged by Berto' : (isNext ? '5 min · in ${_formatCountdown(scheduledDateTime.difference(_now))}' : '5 min'),
+                  isDone
+                      ? '3 min · done'
+                      : isNext
+                          ? '3 min · in ${_formatCountdown(scheduledDateTime.difference(_now))}'
+                          : '3 min',
                   style: const TextStyle(color: Color(0xFF789CA4), fontSize: 13),
                 ),
               ],
@@ -617,15 +794,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   }
 
   int _getCompletedToday() {
-    int completed = 0;
-    for (final time in _schedule) {
-      final key = '${time.hour}:${time.minute}';
-      final scheduledDateTime = DateTime(_now.year, _now.month, _now.day, time.hour, time.minute);
-      // Count if explicitly confirmed OR clock already passed
-      if (_completedSlots.contains(key) || scheduledDateTime.isBefore(_now.subtract(const Duration(minutes: 1)))) {
-        completed++;
-      }
-    }
-    return completed;
+    // Only count slots that were explicitly confirmed/run this session
+    return _completedSlots.length;
   }
 }
