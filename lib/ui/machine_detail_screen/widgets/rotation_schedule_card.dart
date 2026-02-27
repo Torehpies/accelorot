@@ -25,6 +25,8 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   int _rotationSecondsRemaining = 180; // 3 minutes
   bool _isRotating = false;
   DateTime _now = DateTime.now();
+  // Tracks which schedule slots were already run this session (key = 'hour:minute')
+  final Set<String> _completedSlots = <String>{};
 
   final List<TimeOfDay> _schedule = [
     const TimeOfDay(hour: 10, minute: 0),
@@ -112,6 +114,16 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
+    // Mark the nearest near slot as completed so the notice won't re-appear
+    for (final time in _schedule) {
+      final scheduledDateTime = DateTime(_now.year, _now.month, _now.day, time.hour, time.minute);
+      final timeUntil = scheduledDateTime.difference(_now);
+      if (timeUntil.inMinutes <= 15 && timeUntil.inMinutes >= -5) {
+        _completedSlots.add('${time.hour}:${time.minute}');
+        break;
+      }
+    }
+
     setState(() {
       _isRotating = true;
       _rotationSecondsRemaining = 180;
@@ -163,6 +175,9 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
 
   DateTime _getNextRotationTime() {
     for (final time in _schedule) {
+      final key = '${time.hour}:${time.minute}';
+      // Skip slots already completed this session
+      if (_completedSlots.contains(key)) continue;
       final scheduledDateTime = DateTime(
         _now.year,
         _now.month,
@@ -170,11 +185,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         time.hour,
         time.minute,
       );
-      if (scheduledDateTime.isAfter(_now)) {
+      if (scheduledDateTime.isAfter(_now.subtract(const Duration(minutes: 5)))) {
         return scheduledDateTime;
       }
     }
-    // If no more today, get first one tomorrow
+    // If all done, get first one tomorrow
     final tomorrow = _now.add(const Duration(days: 1));
     return DateTime(
       tomorrow.year,
@@ -526,10 +541,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   }
 
   Widget _buildScheduleItem(TimeOfDay time) {
-    // ... (rest of the code remains the same)
+    final key = '${time.hour}:${time.minute}';
     final scheduledDateTime = DateTime(_now.year, _now.month, _now.day, time.hour, time.minute);
-    final isDone = scheduledDateTime.isBefore(_now) && !(_now.hour == time.hour && _now.minute - time.minute < 15);
-    final isNext = scheduledDateTime == _getNextRotationTime();
+    // A slot is done if: clock passed it naturally, OR we explicitly ran it this session
+    final isDone = _completedSlots.contains(key) || scheduledDateTime.isBefore(_now.subtract(const Duration(minutes: 1)));
+    final isNext = !isDone && scheduledDateTime == _getNextRotationTime();
     
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -603,7 +619,10 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   int _getCompletedToday() {
     int completed = 0;
     for (final time in _schedule) {
-      if (DateTime(_now.year, _now.month, _now.day, time.hour, time.minute).isBefore(_now)) {
+      final key = '${time.hour}:${time.minute}';
+      final scheduledDateTime = DateTime(_now.year, _now.month, _now.day, time.hour, time.minute);
+      // Count if explicitly confirmed OR clock already passed
+      if (_completedSlots.contains(key) || scheduledDateTime.isBefore(_now.subtract(const Duration(minutes: 1)))) {
         completed++;
       }
     }

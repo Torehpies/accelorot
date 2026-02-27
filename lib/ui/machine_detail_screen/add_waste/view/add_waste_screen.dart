@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../widgets/add_waste_quantity_step.dart';
-import '../widgets/add_waste_substrate_step.dart';
+import '../widgets/add_waste_preset_step.dart';
 import '../widgets/add_waste_additives_step.dart';
 import '../widgets/add_waste_final_step.dart';
+import '../widgets/edit_preset_modal.dart';
+import '../model/substrate_preset.dart';
 
 class AddWasteScreen extends StatefulWidget {
   final String machineName;
@@ -63,6 +65,26 @@ class _AddWasteScreenState extends State<AddWasteScreen> {
     }
   }
 
+  void _showEditPresetModal([SubstratePreset? preset]) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EditSubstratePresetModal(
+        preset: preset,
+        onSave: (newPreset) {
+          // In a real app, this would persist the preset.
+          // For now, we'll just update the selection if it's the one we're editing.
+          if (preset != null && _selectedSubstrates.containsAll(preset.materials.map((m) => m.label))) {
+            setState(() {
+              _selectedSubstrates = newPreset.materials.map((m) => m.label).toSet();
+            });
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,12 +121,14 @@ class _AddWasteScreenState extends State<AddWasteScreen> {
                 onProceed: _nextStep,
               ),
               
-              // Step 2: Substrate
-              AddWasteSubstrateStep(
+              // Step 2: Substrate Preset Picker
+              AddWastePresetStep(
                 machineName: widget.machineName,
                 selectedSubstrates: _selectedSubstrates,
-                onSubstratesChanged: (val) => _selectedSubstrates = val,
+                onSubstratesChanged: (val) => setState(() => _selectedSubstrates = val),
                 onProceed: _nextStep,
+                onAddNewPreset: _showEditPresetModal,
+                onEditPreset: _showEditPresetModal,
               ),
 
               // Step 3: Additives
