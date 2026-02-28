@@ -122,20 +122,52 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
             height: 1.1,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 24),
         
         // Limits Subtitle
-        Text(
-          widget.currentWaste == 0 
-            ? 'First fill requires $_minAllowed - $_maxAllowed kg'
-            : 'You can add up to $_maxAllowed kg more',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6366f1),
-            fontWeight: FontWeight.w500,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.currentWaste == 0 
+                ? const Color(0xFFeef2ff) 
+                : const Color(0xFFf0fdf4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: widget.currentWaste == 0 
+                  ? const Color(0xFFc7d2fe)
+                  : const Color(0xFFbbf7d0),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                widget.currentWaste == 0 
+                    ? Icons.info_outline 
+                    : Icons.check_circle_outline,
+                size: 16,
+                color: widget.currentWaste == 0 
+                    ? const Color(0xFF4f46e5)
+                    : const Color(0xFF16a34a),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                widget.currentWaste == 0 
+                  ? 'First fill requires $_minAllowed - $_maxAllowed kg'
+                  : 'Allows up to $_maxAllowed kg more (${80 - _maxAllowed}kg filled)',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.currentWaste == 0 
+                      ? const Color(0xFF4f46e5)
+                      : const Color(0xFF16a34a),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         
         // Quantity Selector
         Container(
