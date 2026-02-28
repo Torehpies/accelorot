@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../data/providers/batch_providers.dart';
 import '../../../data/providers/statistics_providers.dart';
+import '../../../data/providers/substrate_providers.dart';
+import '../../../data/providers/cycle_providers.dart';
 
 class OperatorMachineCard extends ConsumerWidget {
   final MachineModel machine;
@@ -73,7 +75,34 @@ class OperatorMachineCard extends ConsumerWidget {
 
     bool isAlert = activeAlerts.isNotEmpty;
 
-    // 4. Determine Design (Alert vs Running vs Rest)
+    // 4. Determine Rotation Recommendation
+    final substratesAsync = ref.watch(batchSubstratesProvider(machine.currentBatchId!));
+    DateTime? latestWasteTime;
+    if (substratesAsync.value != null) {
+      for (final substrate in substratesAsync.value!) {
+        if (latestWasteTime == null || substrate.timestamp.isAfter(latestWasteTime)) {
+          latestWasteTime = substrate.timestamp;
+        }
+      }
+    }
+
+    DateTime? latestRotationTime;
+    final teamCyclesAsync = ref.watch(teamCyclesStreamProvider);
+    if (teamCyclesAsync.value != null) {
+      for (final cycle in teamCyclesAsync.value!) {
+        if (cycle.batchId == machine.currentBatchId! && cycle.controllerType == 'drum_controller') {
+          final cycleTime = cycle.startedAt ?? cycle.timestamp;
+          if (cycleTime != null && (latestRotationTime == null || cycleTime.isAfter(latestRotationTime))) {
+            latestRotationTime = cycleTime;
+          }
+        }
+      }
+    }
+
+    final bool cyclesLoaded = !teamCyclesAsync.isLoading;
+    final bool isRecommended = cyclesLoaded && latestWasteTime != null && (latestRotationTime == null || latestRotationTime.isBefore(latestWasteTime));
+
+    // 5. Determine Design (Alert vs Recommended vs Running vs Rest)
     if (isAlert) {
       return _buildCard(
         context: context,
@@ -84,6 +113,20 @@ class OperatorMachineCard extends ConsumerWidget {
         label: activeAlerts.first, 
         labels: activeAlerts,
         labelColor: const Color(0xFFFF4D4F),
+        daysColor: const Color(0xFF2C3E50),
+        daysLabel: days.toString(),
+        subtitle: 'Batch: $batchName',
+      );
+    } else if (isRecommended) {
+      return _buildCard(
+        context: context,
+        borderColor: Colors.orange, // Orange border
+        icon: Icons.warning_amber_rounded,
+        iconColor: Colors.white,
+        iconBgColor: Colors.orange, // Orange circle
+        label: 'Rotation Needed',
+        labels: ['Rotation Needed'],
+        labelColor: Colors.orange,
         daysColor: const Color(0xFF2C3E50),
         daysLabel: days.toString(),
         subtitle: 'Batch: $batchName',
