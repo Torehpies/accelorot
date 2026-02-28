@@ -50,6 +50,10 @@ class SubstrateRepository {
     return _service.streamTeamCustomMaterials();
   }
 
+  Future<void> saveCustomMaterial(SubstrateMaterial material) async {
+    await _service.saveCustomMaterial(material);
+  }
+
   // ===== CUSTOM ADDITIVES OPERATIONS =====
 
   Stream<List<String>> streamTeamCustomAdditives() {

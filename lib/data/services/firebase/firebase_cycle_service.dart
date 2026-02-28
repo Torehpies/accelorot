@@ -767,10 +767,8 @@ class FirestoreCycleService implements CycleService {
 
   Future<String> _getOperatorName(String userId) async {
     final user = _auth.currentUser;
-    if (user != null && user.uid == userId && user.displayName != null && user.displayName!.isNotEmpty) {
-      return user.displayName!;
-    }
     
+    // Try Firestore first for full name
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
@@ -781,8 +779,18 @@ class FirestoreCycleService implements CycleService {
         if (name.isNotEmpty) return name;
       }
     } catch (_) {}
+
+    // Fallback to Firebase profile info
+    if (user != null && user.uid == userId) {
+      if (user.displayName != null && user.displayName!.isNotEmpty) {
+        return user.displayName!;
+      }
+      if (user.email != null && user.email!.isNotEmpty) {
+        return user.email!;
+      }
+    }
     
-    return user?.email ?? 'Operator';
+    return 'Operator';
   }
 
   // Get cycle by ID

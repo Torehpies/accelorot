@@ -136,7 +136,7 @@ class FirestoreSubstrateService implements SubstrateService {
 
     try {
       // Get or create batch
-      String batchId =
+      String batchId = data['batchId'] ?? 
           await _batchService.getBatchId(currentUserId!, machineId) ??
           await _batchService.createBatch(currentUserId!, machineId, 1);
 

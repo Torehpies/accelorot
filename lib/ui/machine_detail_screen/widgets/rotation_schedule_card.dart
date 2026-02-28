@@ -214,25 +214,74 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     final substratesAsync = ref.watch(batchSubstratesProvider(batchId));
     final hasWaste = substratesAsync.value?.isNotEmpty ?? false;
 
+    final teamCyclesAsync = ref.watch(teamCyclesStreamProvider);
+
+    if (teamCyclesAsync.isLoading || substratesAsync.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF789CA4)),
+          ),
+        ),
+      );
+    }
+
     if (batchId.isEmpty || !hasWaste) {
       return _buildInactiveCard();
     }
 
+    // Determine latest waste time
+    DateTime? latestWasteTime;
+    if (substratesAsync.value != null) {
+      for (final substrate in substratesAsync.value!) {
+        if (latestWasteTime == null || substrate.timestamp.isAfter(latestWasteTime)) {
+          latestWasteTime = substrate.timestamp;
+        }
+      }
+    }
+
+    // Determine latest rotation time
+    DateTime? latestRotationTime;
+    if (teamCyclesAsync.value != null) {
+      for (final cycle in teamCyclesAsync.value!) {
+        if (cycle.batchId == batchId && cycle.controllerType == 'drum_controller') {
+          final cycleTime = cycle.startedAt ?? cycle.timestamp;
+          if (cycleTime != null && (latestRotationTime == null || cycleTime.isAfter(latestRotationTime))) {
+            latestRotationTime = cycleTime;
+          }
+        }
+      }
+    }
+
+    // Is rotation recommended?
+    // Guard: don't show "Action Needed" while cycle data is still loading (prevents flash on open)
+    final bool cyclesLoaded = !teamCyclesAsync.isLoading;
+    final bool isRecommended = cyclesLoaded && latestWasteTime != null && (latestRotationTime == null || latestRotationTime.isBefore(latestWasteTime));
+
     final nextRotation = _getNextRotationTime();
     final timeUntil = nextRotation.difference(_now);
     final isNear = timeUntil.inMinutes <= 15;
+
+    // Use isRecommended for UI logic specifically
+    final bool showOrangeAlert = isRecommended || isNear;
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: _isRotating ? Colors.green : (isNear ? Colors.orange : Colors.transparent),
+          color: _isRotating ? Colors.green : (showOrangeAlert ? Colors.orange : Colors.transparent),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -251,13 +300,15 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                     Text(
                       _isRotating
                           ? 'ROTATING'
-                          : isNear
-                              ? 'DUE SOON'
-                              : 'RESTING',
+                          : isRecommended
+                              ? 'ROTATION RECOMMENDED'
+                              : isNear
+                                  ? 'DUE SOON'
+                                  : 'RESTING',
                       style: TextStyle(
                         color: _isRotating
                             ? Colors.green
-                            : isNear
+                            : showOrangeAlert
                                 ? Colors.orange
                                 : const Color(0xFF789CA4),
                         fontSize: 12,
@@ -265,14 +316,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                         letterSpacing: 1.2,
                       ),
                     ),
-                    Text(
-                      '${_getCompletedToday()}/${_schedule.length}',
-                      style: const TextStyle(
-                        color: Color(0xFF789CA4),
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -282,21 +326,23 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: _isRotating
-                            ? Colors.green.withOpacity(0.1)
-                            : isNear
-                                ? Colors.orange.withOpacity(0.1)
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : showOrangeAlert
+                                ? Colors.orange.withValues(alpha: 0.1)
                                 : const Color(0xFFF0F7F9),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         _isRotating
                             ? Icons.recycling
-                            : isNear
-                                ? Icons.notifications_active
-                                : Icons.bedtime_outlined,
+                            : isRecommended
+                                ? Icons.warning_amber_rounded
+                                : isNear
+                                    ? Icons.notifications_active
+                                    : Icons.bedtime_outlined,
                         color: _isRotating
                             ? Colors.green
-                            : isNear
+                            : showOrangeAlert
                                 ? Colors.orange
                                 : const Color(0xFF789CA4),
                         size: 22,
@@ -319,6 +365,19 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                             const Text(
                               'Rotation in progress',
                               style: TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
+                            ),
+                          ] else if (isRecommended) ...[
+                            const Text(
+                              'Action Needed',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                            const Text(
+                              'Added waste needs mixing',
+                              style: TextStyle(color: Colors.orange, fontWeight: FontWeight.w500),
                             ),
                           ] else if (isNear) ...[
                             Text(
@@ -356,13 +415,13 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                   const SizedBox(height: 16),
                   LinearProgressIndicator(
                     value: (180 - _rotationSecondsRemaining) / 180,
-                    backgroundColor: Colors.green.withOpacity(0.1),
+                    backgroundColor: Colors.green.withValues(alpha: 0.1),
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                     minHeight: 6,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ],
-                if (isNear && !_isRotating) ...[
+                if (showOrangeAlert && !_isRotating) ...[
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -610,7 +669,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -651,7 +710,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -793,8 +852,4 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} / 03:00";
   }
 
-  int _getCompletedToday() {
-    // Only count slots that were explicitly confirmed/run this session
-    return _completedSlots.length;
-  }
 }

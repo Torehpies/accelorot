@@ -36,6 +36,9 @@ abstract class SubstrateService {
   /// Stream all custom substrate materials for the current user's team
   Stream<List<SubstrateMaterial>> streamTeamCustomMaterials();
 
+  /// Save a new custom substrate material to the team's collection
+  Future<void> saveCustomMaterial(SubstrateMaterial material);
+
   // ===== CUSTOM ADDITIVES OPERATIONS =====
 
   /// Stream all custom additives for the current user's team

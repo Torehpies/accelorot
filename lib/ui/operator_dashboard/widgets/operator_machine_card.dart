@@ -41,7 +41,7 @@ class OperatorMachineCard extends ConsumerWidget {
     int days = 0;
     String batchName = machine.currentBatchId != null ? '${machine.currentBatchId!.substring(0, 5)}...' : '';
 
-    batchAsync.whenData((batch) {
+     batchAsync.whenData((batch) {
       if (batch != null) {
          final diff = DateTime.now().difference(batch.createdAt).inDays + 1;
          days = diff > 0 ? diff : 1; // Minimum Day 1

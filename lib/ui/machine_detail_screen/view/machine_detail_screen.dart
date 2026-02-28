@@ -9,6 +9,7 @@ import '../../../data/providers/statistics_providers.dart';
 import '../../../data/providers/batch_providers.dart';
 import '../../../data/providers/machine_providers.dart';
 import '../../../data/providers/substrate_providers.dart';
+import '../../../data/providers/auth_providers.dart';
 import '../../../data/models/substrate.dart';
 import '../widgets/machine_gauge.dart';
 import '../widgets/rotation_schedule_card.dart';
@@ -115,7 +116,12 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
     // because the State may be unmounted while AddWasteScreen is showing.
     final substrateRepo = ref.read(substrateRepositoryProvider);
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    final operatorName = FirebaseAuth.instance.currentUser?.displayName ?? 'Operator';
+    
+    // Resolve operator name from profile or fallback
+    final appUser = ref.read(appUserProvider).value;
+    final operatorName = appUser?.displayName ?? 
+                        FirebaseAuth.instance.currentUser?.displayName ?? 
+                        'Operator';
 
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
       MaterialPageRoute(
@@ -161,6 +167,7 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
         machineId: currentMachine.machineId,
         operatorName: operatorName,
         userId: userId,
+        batchId: currentMachine.currentBatchId,
       );
 
       debugPrint('🔍 Calling addSubstrate with: ${request.toFirestore()}');

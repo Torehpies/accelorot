@@ -37,7 +37,6 @@ class AddWasteAdditivesStep extends ConsumerStatefulWidget {
 class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
   bool? _hasAdditives;
   late Set<String> _selected;
-  late List<AdditiveOption> _options;
   
   bool _isAddingCustom = false;
   final TextEditingController _addController = TextEditingController();
@@ -114,7 +113,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
         
         // Machine Name & Date
         Text(
-          '${widget.machineName}',
+          widget.machineName,
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
