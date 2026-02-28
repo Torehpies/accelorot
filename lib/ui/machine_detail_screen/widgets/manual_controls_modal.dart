@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../data/models/machine_model.dart';
 import '../../../../data/providers/cycle_providers.dart';
+import '../../../../data/providers/machine_providers.dart';
 
 class ManualControlsModal extends ConsumerStatefulWidget {
   final MachineModel machine;
@@ -38,6 +39,16 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   }
 
   @override
+  void didUpdateWidget(ManualControlsModal oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.machine.drumActive != oldWidget.machine.drumActive ||
+        widget.machine.aeratorActive != oldWidget.machine.aeratorActive ||
+        widget.machine.currentBatchId != oldWidget.machine.currentBatchId) {
+      _loadStates();
+    }
+  }
+
+  @override
   void dispose() {
     _drumTimer?.cancel();
     _aeratorTimer?.cancel();
@@ -45,46 +56,106 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   }
 
   Future<void> _loadStates() async {
-    final batchId = widget.machine.currentBatchId;
-    if (batchId == null || batchId.isEmpty) return;
+    if (_drumLoading || _aeratorLoading) return;
 
     try {
-      final cycleRepo = ref.read(cycleRepositoryProvider);
+      final liveMachine = ref.read(machineStreamProvider(widget.machine.machineId)).value ?? widget.machine;
+      final batchId = liveMachine.currentBatchId;
+      if (batchId == null || batchId.isEmpty) return;
+
+      final teamCyclesAsync = ref.read(teamCyclesStreamProvider);
+      if (teamCyclesAsync.value == null) return;
       
+      final cycles = teamCyclesAsync.value!;
+
       // Load Drum
-      final drumCycles = await cycleRepo.getDrumControllers(batchId: batchId);
+      final drumCycles = cycles.where((c) => c.batchId == batchId && c.controllerType == 'drum_controller').toList();
+      drumCycles.sort((a, b) {
+        if (a.timestamp == null && b.timestamp == null) return 0;
+        if (a.timestamp == null) return 1;
+        if (b.timestamp == null) return -1;
+        return b.timestamp!.compareTo(a.timestamp!);
+      });
       final drumCycle = drumCycles.isEmpty ? null : drumCycles.first;
       
-      if (drumCycle != null && widget.machine.drumActive) {
-        _drumRunning = true;
-        _drumStartTime = drumCycle.startedAt ?? DateTime.now();
-        _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
-        _startDrumTimer();
-      } else if (drumCycle != null && widget.machine.drumPaused) {
+      if (drumCycle != null && liveMachine.drumActive) {
+        if (!_drumRunning) {
+          _drumRunning = true;
+          _startDrumTimer();
+        }
+        
+        if (drumCycle.action == 'started') {
+          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+          _drumStartTime = drumCycle.startedAt ?? _drumStartTime ?? DateTime.now();
+          _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
+        } else if (_drumStartTime == null) {
+          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          _drumStartTime = DateTime.now();
+          _drumAccumulatedSeconds = 0;
+        }
+      } else if (drumCycle != null && liveMachine.drumPaused) {
         _drumRunning = false;
+        _drumTimer?.cancel();
         _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
         _drumUptime = _formatDuration(Duration(seconds: _drumAccumulatedSeconds));
+      } else {
+        _resetDrumState();
       }
 
       // Load Aerator
-      final aeratorCycles = await cycleRepo.getAerators(batchId: batchId);
+      final aeratorCycles = cycles.where((c) => c.batchId == batchId && c.controllerType == 'aerator_controller').toList();
+      aeratorCycles.sort((a, b) {
+        if (a.timestamp == null && b.timestamp == null) return 0;
+        if (a.timestamp == null) return 1;
+        if (b.timestamp == null) return -1;
+        return b.timestamp!.compareTo(a.timestamp!);
+      });
       final aeratorCycle = aeratorCycles.isEmpty ? null : aeratorCycles.first;
 
-      if (aeratorCycle != null && widget.machine.aeratorActive) {
-        _aeratorRunning = true;
-        _aeratorStartTime = aeratorCycle.startedAt ?? DateTime.now();
-        _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
-        _startAeratorTimer();
-      } else if (aeratorCycle != null && widget.machine.aeratorPaused) {
+      if (aeratorCycle != null && liveMachine.aeratorActive) {
+        if (!_aeratorRunning) {
+          _aeratorRunning = true;
+          _startAeratorTimer();
+        }
+        
+        if (aeratorCycle.action == 'started') {
+          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+          _aeratorStartTime = aeratorCycle.startedAt ?? _aeratorStartTime ?? DateTime.now();
+          _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
+        } else if (_aeratorStartTime == null) {
+          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          _aeratorStartTime = DateTime.now();
+          _aeratorAccumulatedSeconds = 0;
+        }
+      } else if (aeratorCycle != null && liveMachine.aeratorPaused) {
         _aeratorRunning = false;
+        _aeratorTimer?.cancel();
         _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
         _aeratorUptime = _formatDuration(Duration(seconds: _aeratorAccumulatedSeconds));
+      } else {
+        _resetAeratorState();
       }
 
       if (mounted) setState(() {});
     } catch (e) {
       debugPrint('Error loading states: $e');
     }
+  }
+
+  void _resetDrumState() {
+    _drumTimer?.cancel();
+    _drumRunning = false;
+    _drumStartTime = null;
+    _drumAccumulatedSeconds = 0;
+    _drumUptime = '00:00:00';
+  }
+
+  void _resetAeratorState() {
+    _aeratorTimer?.cancel();
+    _aeratorRunning = false;
+    _aeratorStartTime = null;
+    _aeratorAccumulatedSeconds = 0;
+    _aeratorUptime = '00:00:00';
   }
 
   void _startDrumTimer() {
@@ -113,9 +184,10 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
+    return '$hours:$minutes:$seconds';
   }
 
   Future<void> _toggleDrum() async {
@@ -131,18 +203,28 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     try {
       if (_drumRunning) {
         final elapsed = _drumStartTime != null ? DateTime.now().difference(_drumStartTime!).inSeconds : 0;
+        
+        // Optimistic UI update
+        _drumTimer?.cancel();
+        setState(() {
+          _drumRunning = false;
+          _drumUptime = '00:00:00';
+          _drumAccumulatedSeconds = 0;
+        });
+
         await cycleRepo.stopDrumController(
           batchId: batchId,
           totalRuntimeSeconds: _drumAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
-        _drumTimer?.cancel();
-        setState(() {
-          _drumRunning = false;
-          _drumUptime = '00:00';
-          _drumAccumulatedSeconds = 0;
-        });
       } else {
+        // Optimistic UI update
+        setState(() {
+          _drumRunning = true;
+          _drumStartTime = DateTime.now();
+        });
+        _startDrumTimer();
+
         await cycleRepo.startDrumController(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -150,11 +232,6 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
           cycles: 1,
           duration: 'Manual',
         );
-        setState(() {
-          _drumRunning = true;
-          _drumStartTime = DateTime.now();
-        });
-        _startDrumTimer();
       }
     } catch (e) {
       debugPrint('Error toggling drum: $e');
@@ -176,18 +253,28 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     try {
       if (_aeratorRunning) {
         final elapsed = _aeratorStartTime != null ? DateTime.now().difference(_aeratorStartTime!).inSeconds : 0;
+        
+        // Optimistic UI update
+        _aeratorTimer?.cancel();
+        setState(() {
+          _aeratorRunning = false;
+          _aeratorUptime = '00:00:00';
+          _aeratorAccumulatedSeconds = 0;
+        });
+
         await cycleRepo.stopAerator(
           batchId: batchId,
           totalRuntimeSeconds: _aeratorAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
-        _aeratorTimer?.cancel();
-        setState(() {
-          _aeratorRunning = false;
-          _aeratorUptime = '00:00';
-          _aeratorAccumulatedSeconds = 0;
-        });
       } else {
+        // Optimistic UI update
+        setState(() {
+          _aeratorRunning = true;
+          _aeratorStartTime = DateTime.now();
+        });
+        _startAeratorTimer();
+
         await cycleRepo.startAerator(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -195,11 +282,6 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
           cycles: 1,
           duration: 'Manual',
         );
-        setState(() {
-          _aeratorRunning = true;
-          _aeratorStartTime = DateTime.now();
-        });
-        _startAeratorTimer();
       }
     } catch (e) {
       debugPrint('Error toggling aerator: $e');
@@ -210,6 +292,18 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(machineStreamProvider(widget.machine.machineId), (previous, next) {
+      if (next.hasValue && next.value != null) {
+        _loadStates();
+      }
+    });
+
+    ref.listen(teamCyclesStreamProvider, (previous, next) {
+      if (next.hasValue && next.value != null && next.value!.isNotEmpty) {
+        _loadStates();
+      }
+    });
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       backgroundColor: Colors.white,

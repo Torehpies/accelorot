@@ -65,6 +65,8 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     }
   }
 
+  bool _isManualRotation = false;
+
   Future<void> _loadActiveCycle() async {
     final batchId = widget.machine.currentBatchId;
     if (batchId == null || batchId.isEmpty) return;
@@ -78,16 +80,30 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         final startedAt = activeCycle.startedAt ?? DateTime.now();
         final elapsedSeconds = DateTime.now().difference(startedAt).inSeconds;
         
-        if (elapsedSeconds < 180) {
+        if (activeCycle.duration == 'Manual') {
           setState(() {
             _isRotating = true;
-            _rotationSecondsRemaining = 180 - elapsedSeconds;
+            _isManualRotation = true;
           });
-          _startRotationTimer();
+          // Do not start rotation timer for auto-stop, as manual controls run infinitely
         } else {
-          // It should have stopped
-          _stopRotation();
+          if (elapsedSeconds < 180) {
+            setState(() {
+              _isRotating = true;
+              _isManualRotation = false;
+              _rotationSecondsRemaining = 180 - elapsedSeconds;
+            });
+            _startRotationTimer();
+          } else {
+            // It should have stopped
+            _stopRotation();
+          }
         }
+      } else {
+         setState(() {
+           _isRotating = false;
+           _isManualRotation = false;
+         });
       }
     } catch (e) {
       debugPrint('Error loading active cycle: $e');
@@ -164,12 +180,10 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     } catch (e) {
       debugPrint('Error stopping rotation: $e');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isRotating = false;
-          _rotationSecondsRemaining = 180;
-        });
-      }
+      setState(() {
+        _isRotating = false;
+        _rotationSecondsRemaining = 180;
+      });
     }
   }
 
@@ -210,6 +224,13 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(teamCyclesStreamProvider, (previous, next) {
+      if (next.hasValue && next.value != null) {
+        // Trigger a re-evaluation of the running state based on live cycle data
+        _checkRotationState();
+      }
+    });
+
     final batchId = widget.machine.currentBatchId ?? '';
     final substratesAsync = ref.watch(batchSubstratesProvider(batchId));
     final hasWaste = substratesAsync.value?.isNotEmpty ?? false;
@@ -276,7 +297,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: _isRotating ? Colors.green : (showOrangeAlert ? Colors.orange : Colors.transparent),
+          color: _isRotating ? (_isManualRotation ? const Color(0xFF6366f1) : Colors.green) : (showOrangeAlert ? Colors.orange : Colors.transparent),
           width: 2,
         ),
         boxShadow: [
@@ -307,7 +328,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                                   : 'RESTING',
                       style: TextStyle(
                         color: _isRotating
-                            ? Colors.green
+                            ? (_isManualRotation ? const Color(0xFF6366f1) : Colors.green)
                             : showOrangeAlert
                                 ? Colors.orange
                                 : const Color(0xFF789CA4),
@@ -326,7 +347,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: _isRotating
-                            ? Colors.green.withValues(alpha: 0.1)
+                            ? (_isManualRotation ? const Color(0xFF6366f1).withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1))
                             : showOrangeAlert
                                 ? Colors.orange.withValues(alpha: 0.1)
                                 : const Color(0xFFF0F7F9),
@@ -341,7 +362,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                                     ? Icons.notifications_active
                                     : Icons.bedtime_outlined,
                         color: _isRotating
-                            ? Colors.green
+                            ? (_isManualRotation ? const Color(0xFF6366f1) : Colors.green)
                             : showOrangeAlert
                                 ? Colors.orange
                                 : const Color(0xFF789CA4),
@@ -354,18 +375,33 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_isRotating) ...[  
-                            Text(
-                              _formatRotationTimer(),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.green,
+                            if (_isManualRotation) ...[
+                              Text(
+                                '${DateFormat('h:mm a').format(_now)}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF6366f1),
+                                ),
                               ),
-                            ),
-                            const Text(
-                              'Rotation in progress',
-                              style: TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
-                            ),
+                              const Text(
+                                'Duration unknown',
+                                style: TextStyle(color: Color(0xFF9ca3af), fontWeight: FontWeight.w500),
+                              ),
+                            ] else ...[
+                              Text(
+                                _formatRotationTimer(),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              const Text(
+                                'Rotation in progress',
+                                style: TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
+                              ),
+                            ]
                           ] else if (isRecommended) ...[
                             const Text(
                               'Action Needed',
@@ -411,7 +447,31 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                     ),
                   ],
                 ),
-                if (_isRotating) ...[
+                if (_isRotating && _isManualRotation) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFe0e7ff),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info, color: Color(0xFF6366f1), size: 16),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Started via manual controls',
+                          style: TextStyle(
+                            color: Color(0xFF4f46e5),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                if (_isRotating && !_isManualRotation) ...[
                   const SizedBox(height: 16),
                   LinearProgressIndicator(
                     value: (180 - _rotationSecondsRemaining) / 180,
