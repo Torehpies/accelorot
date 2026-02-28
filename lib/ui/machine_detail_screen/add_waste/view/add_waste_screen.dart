@@ -8,8 +8,13 @@ import '../../../../data/models/substrate_preset.dart';
 
 class AddWasteScreen extends StatefulWidget {
   final String machineName;
+  final double currentWaste;
 
-  const AddWasteScreen({super.key, required this.machineName});
+  const AddWasteScreen({
+    super.key, 
+    required this.machineName,
+    required this.currentWaste,
+  });
 
   @override
   State<AddWasteScreen> createState() => _AddWasteScreenState();
@@ -20,9 +25,15 @@ class _AddWasteScreenState extends State<AddWasteScreen> {
   int _currentStep = 0;
   
   // State to hold values between steps
-  int _quantity = 0;
+  late int _quantity;
   Set<String> _selectedSubstrates = {};
   Set<String> _selectedAdditives = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = widget.currentWaste == 0 ? 60 : 1;
+  }
 
   @override
   void dispose() {
@@ -117,6 +128,7 @@ class _AddWasteScreenState extends State<AddWasteScreen> {
               AddWasteQuantityStep(
                 machineName: widget.machineName,
                 initialQuantity: _quantity,
+                currentWaste: widget.currentWaste,
                 onQuantityChanged: (val) => _quantity = val,
                 onProceed: _nextStep,
               ),

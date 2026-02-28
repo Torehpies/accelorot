@@ -117,6 +117,25 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
     final substrateRepo = ref.read(substrateRepositoryProvider);
     final userId = FirebaseAuth.instance.currentUser?.uid;
     
+    // Calculate current accumulated waste for the active batch
+    final batchId = currentMachine.currentBatchId ?? '';
+    double currentWaste = 0;
+    if (batchId.isNotEmpty) {
+      final substratesAsync = ref.read(batchSubstratesProvider(batchId));
+      if (substratesAsync.value != null) {
+        for (var substrate in substratesAsync.value!) {
+          currentWaste += substrate.quantity;
+        }
+      }
+    }
+
+    if (currentWaste >= 80) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Drum capacity limit reached (80kg max).')),
+      );
+      return;
+    }
+
     // Resolve operator name from profile or fallback
     final appUser = ref.read(appUserProvider).value;
     final operatorName = appUser?.displayName ?? 
@@ -127,6 +146,7 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
       MaterialPageRoute(
         builder: (context) => AddWasteScreen(
           machineName: currentMachine.machineName,
+          currentWaste: currentWaste,
         ),
       ),
     );

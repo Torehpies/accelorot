@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class AddWasteQuantityStep extends StatefulWidget {
   final String machineName;
   final int initialQuantity;
+  final double currentWaste;
   final ValueChanged<int> onQuantityChanged;
   final VoidCallback onProceed;
 
@@ -12,6 +13,7 @@ class AddWasteQuantityStep extends StatefulWidget {
     super.key,
     required this.machineName,
     required this.initialQuantity,
+    required this.currentWaste,
     required this.onQuantityChanged,
     required this.onProceed,
   });
@@ -23,30 +25,66 @@ class AddWasteQuantityStep extends StatefulWidget {
 class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
   late int _quantity;
   late TextEditingController _controller;
+  
+  late int _minAllowed;
+  late int _maxAllowed;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _quantity = widget.initialQuantity;
     _controller = TextEditingController(text: _quantity.toString());
+    
+    if (widget.currentWaste == 0) {
+      _minAllowed = 60;
+      _maxAllowed = 80;
+    } else {
+      _minAllowed = 1;
+      _maxAllowed = (80 - widget.currentWaste).floor();
+      if (_maxAllowed < 1) _maxAllowed = 1; // Fallback just in case
+    }
   }
 
   void _increment() {
     setState(() {
-      _quantity++;
-      _controller.text = _quantity.toString();
-      widget.onQuantityChanged(_quantity);
+      _errorMessage = null;
+      if (_quantity < _maxAllowed) {
+        _quantity++;
+        _controller.text = _quantity.toString();
+        widget.onQuantityChanged(_quantity);
+      }
     });
   }
 
   void _decrement() {
-    if (_quantity > 0) {
-      setState(() {
+    setState(() {
+      _errorMessage = null;
+      if (_quantity > _minAllowed) {
         _quantity--;
         _controller.text = _quantity.toString();
         widget.onQuantityChanged(_quantity);
+      }
+    });
+  }
+
+  void _handleProceed() {
+    if (_quantity < _minAllowed) {
+      setState(() {
+        _errorMessage = 'Minimum required is $_minAllowed kg';
       });
+      return;
     }
+    if (_quantity > _maxAllowed) {
+      setState(() {
+        _errorMessage = 'Maximum allowed is $_maxAllowed kg';
+      });
+      return;
+    }
+    setState(() {
+      _errorMessage = null;
+    });
+    widget.onProceed();
   }
 
   @override
@@ -84,14 +122,30 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
             height: 1.1,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 8),
+        
+        // Limits Subtitle
+        Text(
+          widget.currentWaste == 0 
+            ? 'First fill requires $_minAllowed - $_maxAllowed kg'
+            : 'You can add up to $_maxAllowed kg more',
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF6366f1),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 24),
         
         // Quantity Selector
         Container(
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.black12),
+            border: Border.all(
+              color: _errorMessage != null ? Colors.red : Colors.black12,
+              width: _errorMessage != null ? 2 : 1,
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
@@ -112,6 +166,9 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
                   keyboardType: TextInputType.number,
                   textAlign: TextAlign.center,
                   onChanged: (value) {
+                    setState(() {
+                      _errorMessage = null; // Clear error on edit
+                    });
                     final newVal = int.tryParse(value) ?? 0;
                     setState(() {
                       _quantity = newVal;
@@ -139,17 +196,29 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
         
-        // Instruction
-        const Text(
-          'Type a number or use +/- buttons,',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.black45,
-            fontWeight: FontWeight.w500,
+        if (_errorMessage != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _errorMessage!,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
+        ] else ...[
+          const SizedBox(height: 12),
+          // Instruction
+          const Text(
+            'Type a number or use +/- buttons',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.black45,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
         
         const Spacer(flex: 2),
         
@@ -157,7 +226,7 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: widget.onProceed,
+            onPressed: _handleProceed,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFD1DCE5),
               foregroundColor: Colors.black54,
