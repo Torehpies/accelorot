@@ -421,7 +421,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
           Text(
             uptime,
             style: const TextStyle(
-              fontSize: 32,
+              fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Colors.black,
               fontFeatures: [FontFeature.tabularFigures()],
