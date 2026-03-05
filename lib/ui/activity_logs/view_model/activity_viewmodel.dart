@@ -1,5 +1,3 @@
-// lib/ui/activity_logs/view_model/activity_viewmodel.dart
-
 // ignore_for_file: avoid_public_notifier_properties
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -287,4 +285,3 @@ class ActivityParams {
   int get hashCode =>
       screenType.hashCode ^ initialFilter.hashCode ^ focusedMachineId.hashCode;
 }
-

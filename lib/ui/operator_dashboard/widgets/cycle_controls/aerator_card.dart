@@ -13,7 +13,6 @@ import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
-//import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class AeratorCard extends ConsumerStatefulWidget {
@@ -245,7 +244,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
     
     // Create non-nullable reference for use in closures
-    final effectiveMachine = machine!;
+    final effectiveMachine = machine;
 
     // If no cycle exists and aeratorActive is false, reset to idle
     if (cycle == null && !effectiveMachine.aeratorActive) {
