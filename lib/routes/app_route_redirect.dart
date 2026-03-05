@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/models/app_auth_state.dart';
 import 'package:flutter_application_1/data/providers/app_auth_state.dart';
@@ -11,7 +12,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
   final currentPath = state.uri.path;
   final auth = ref.read(authStateModelProvider);
 
-   // Allow splash screen to display without redirect
+  // Allow splash screen to display without redirect
   if (currentPath == '/splash') {
     return null;
   }
@@ -26,7 +27,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
             currentPath == RoutePath.signin.path ||
             currentPath == RoutePath.signup.path ||
             currentPath == RoutePath.forgotPassword.path ||
-             currentPath == RoutePath.resetEmailSent.path || 
+            currentPath == RoutePath.resetEmailSent.path ||
             currentPath == '/download' ||
             currentPath == '/privacy-policy' ||
             currentPath == '/terms-of-service'
@@ -39,7 +40,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
         currentPath == RoutePath.signup.path ? null : RoutePath.teamSelect.path,
     authenticated: (firebaseUser, userDoc, status, globalRole, teamRole) {
       switch (status) {
-				case UserStatus.approval:
+        case UserStatus.approval:
           return currentPath == RoutePath.approval.path
               ? null
               : RoutePath.approval.path;
@@ -62,7 +63,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
             }
           }
           if (globalRole == GlobalRole.superadmin) {
-            debugPrint("ROUTED TO SUPERADMIN");
+            // debugPrint("ROUTED TO SUPERADMIN");
             // Allow access to all superadmin paths
             if (currentPath.startsWith('/superadmin')) return null;
             // Only redirect to default if on non-superadmin paths
@@ -74,7 +75,7 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
 
           if (globalRole == GlobalRole.user) {
             if (teamRole == TeamRole.admin) {
-              debugPrint("ROUTED TO ADMIN");
+              // debugPrint("ROUTED TO ADMIN");
               // Allow access to all admin paths
               if (currentPath.startsWith('/admin')) return null;
               // Only redirect to dashboard if on non-admin paths
@@ -83,8 +84,11 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
               }
               return null;
             }
+            if (teamRole == TeamRole.operator && kIsWeb) {
+              return RoutePath.operatorRestricted.path;
+            }
             if (teamRole == TeamRole.operator) {
-              debugPrint("ROUTED TO OPERATOR");
+              // debugPrint("ROUTED TO OPERATOR");
               // Allow access to all operator paths
               if (currentPath.startsWith('/operator')) return null;
               // Only redirect to dashboard if on non-operator paths
@@ -106,4 +110,3 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
     },
   );
 }
-
