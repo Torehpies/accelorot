@@ -25,6 +25,7 @@ import 'package:flutter_application_1/ui/login/views/login_screen.dart';
 import 'package:flutter_application_1/ui/machine_management/view/mobile_admin_machine_view.dart';
 import 'package:flutter_application_1/ui/registration/views/registration_screen.dart';
 import 'package:flutter_application_1/ui/reports/view/reports_route.dart';
+import 'package:flutter_application_1/ui/restrict_operator/restrict_operator_view.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_detail_screen.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_management_screen.dart';
 import 'package:flutter_application_1/ui/team_selection/widgets/team_selection_screen.dart';
@@ -44,7 +45,6 @@ import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_s
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
 
-
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
 
@@ -54,13 +54,12 @@ final routerProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     redirect: (context, state) => appRouteRedirect(context, ref, state),
     routes: [
-
       GoRoute(
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const SplashScreenView(),
       ),
-      
+
       GoRoute(
         path: RoutePath.initial.path,
         name: RoutePath.initial.name,
@@ -105,11 +104,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePath.resetEmailSent.path,
         name: RoutePath.resetEmailSent.name,
         builder: (context, state) {
-          final email = (state.extra as Map<String, dynamic>?)?['email'] as String? ?? '';
+          final email =
+              (state.extra as Map<String, dynamic>?)?['email'] as String? ?? '';
           return ResetEmailSentScreen(email: email);
         },
       ),
-      
+
       GoRoute(
         path: RoutePath.verifyEmail.path,
         name: RoutePath.verifyEmail.name,
@@ -148,10 +148,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           return RestrictedAccessScreen(reason: reason);
         },
       ),
+      GoRoute(
+        path: RoutePath.operatorRestricted.path,
+        name: RoutePath.operatorRestricted.name,
+        builder: (context, state) => const RestrictOperatorView(),
+      ),
 
       // OPERATOR SHELL
       ShellRoute(
         builder: (context, state, child) {
+          // if (kIsWeb) {
+          //   return RestrictOperatorView();
+          // }
           final isDesktop =
               MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
@@ -356,3 +364,4 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+

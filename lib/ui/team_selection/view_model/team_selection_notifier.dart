@@ -3,7 +3,6 @@ import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/team_selection/view_model/team_selection_state.dart';
-//import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

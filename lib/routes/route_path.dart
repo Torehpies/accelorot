@@ -13,6 +13,7 @@ enum RoutePath {
   resetEmailSent(path: '/reset-email-sent'),
 
   // operator paths
+  operatorRestricted(path: '/operator/restricted'),
   dashboard(path: '/operator/dashboard'),
   activity(path: '/operator/activity'),
   statistics(path: '/operator/statistics'),
