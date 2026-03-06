@@ -81,11 +81,12 @@ class _AddWastePresetStepState extends ConsumerState<AddWastePresetStep> {
                       onTap: () => _onPresetTap(preset),
                       onEdit: () => widget.onEditPreset(preset),
                       onDelete: () async {
+                        final messenger = ScaffoldMessenger.of(context);
                         try {
                           await ref.read(substrateRepositoryProvider).deletePreset(preset.id);
                         } catch (e) {
                           if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               SnackBar(content: Text('Failed to delete preset: $e')),
                             );
                           }
@@ -94,8 +95,8 @@ class _AddWastePresetStepState extends ConsumerState<AddWastePresetStep> {
                     )),
                     
                     const SizedBox(height: 8),
-                    
-                    // Add new preset button
+
+        
                     TextButton.icon(
                       onPressed: widget.onAddNewPreset,
                       icon: const Icon(Icons.add, size: 20),
