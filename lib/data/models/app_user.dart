@@ -20,6 +20,10 @@ abstract class AppUser with _$AppUser {
     @TimestampConverter() DateTime? createdAt,
   }) = _AppUser;
 
+  const AppUser._();
+
+  String get displayName => '$firstname $lastname'.trim();
+
   factory AppUser.fromJson(Map<String, dynamic> json) =>
       _$AppUserFromJson(json);
 }

@@ -77,6 +77,7 @@ abstract class CreateSubstrateRequest with _$CreateSubstrateRequest {
     required String machineId,
     required String operatorName,
     required String userId,
+    String? batchId,
   }) = _CreateSubstrateRequest;
 
   const CreateSubstrateRequest._();
@@ -94,6 +95,7 @@ abstract class CreateSubstrateRequest with _$CreateSubstrateRequest {
       'operatorName': operatorName,
       'userId': userId,
       'timestamp': Timestamp.fromDate(DateTime.now()),
+      if (batchId != null) 'batchId': batchId,
     };
   }
 }

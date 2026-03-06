@@ -2,19 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/models/compost_batch_model.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/models/compost_batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/composting_progress_card.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/swipeable_cycle_cards.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/batch_management/composting_progress_card.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/cycle_controls/swipeable_cycle_cards.dart';
 import 'package:flutter_application_1/ui/admin_dashboard/web_widgets/recent_activities_table.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/batch_management/batch_start_dialog.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/batch_management/batch_start_dialog.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
 import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
 import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/mobile_header.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/fabs/mobile_add_waste_fab.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/fabs/mobile_add_waste_fab.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final MachineModel? focusedMachine;

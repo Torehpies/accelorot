@@ -186,4 +186,66 @@ class FirebaseStatisticsService implements StatisticsService {
     }
     return null;
   }
+
+  @override
+  Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId) async {
+    try {
+      if (batchId.isEmpty) return null;
+
+      // 1. Get the batch to find its creation and completion dates
+      final batchDoc = await _db.collection('batches').doc(batchId).get();
+      if (!batchDoc.exists) {
+        debugPrint('⚠️ Batch not found: $batchId');
+        return null;
+      }
+
+      final batchData = batchDoc.data()!;
+      DateTime? startDate = _parseTimestamp(batchData['createdAt']);
+      DateTime? endDate = _parseTimestamp(batchData['completedAt']) ?? DateTime.now();
+
+      if (startDate == null) return null;
+
+      // Normalize dates
+      startDate = DateTime(startDate.year, startDate.month, startDate.day);
+      final endDateNormalized = DateTime(endDate.year, endDate.month, endDate.day);
+
+      // 2. Iterate backwards from end date to start date to find the most recent reading
+      for (var day = endDateNormalized;
+           !day.isBefore(startDate);
+           day = day.subtract(const Duration(days: 1))) {
+        
+        final dateStr = day.toIso8601String().substring(0, 10);
+        
+        // 3. Query the time subcollection for this date, ordered by timestamp descending, limit 1
+        final timeSnapshot = await _db
+            .collection('batches')
+            .doc(batchId)
+            .collection('readings')
+            .doc(dateStr)
+            .collection('time')
+            .orderBy('timestamp', descending: true)
+            .limit(1)
+            .get();
+
+        if (timeSnapshot.docs.isNotEmpty) {
+          final doc = timeSnapshot.docs.first;
+          final data = doc.data();
+          
+          return {
+            'temperature': (data['temperature'] ?? 0).toDouble(),
+            'moisture': (data['moisture'] ?? 0).toDouble(),
+            'oxygen': (data['oxygen'] ?? 0).toDouble(),
+            'timestamp': _parseTimestamp(data['timestamp']),
+          };
+        }
+      }
+
+      // No readings found in the entire batch period
+      return null;
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error fetching latest sensor readings: $e');
+      debugPrint('Stack: $stackTrace');
+      return null;
+    }
+  }
 }

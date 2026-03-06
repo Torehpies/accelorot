@@ -85,6 +85,9 @@ abstract class MachineModel with _$MachineModel {
     @Default(false) bool aeratorActive,
     @Default(false) bool drumPaused,
     @Default(false) bool aeratorPaused,
+    // Operator currently logged in via QR scan — read by ESP32
+    String? currentOperatorId,
+    String? currentOperatorName,
   }) = _MachineModel;
 
   factory MachineModel.fromJson(Map<String, dynamic> json) =>
@@ -132,6 +135,8 @@ abstract class MachineModel with _$MachineModel {
       aeratorActive: data['aeratorActive'] ?? false,
       drumPaused: data['drumPaused'] ?? false,
       aeratorPaused: data['aeratorPaused'] ?? false,
+      currentOperatorId: data['currentOperatorId'] as String?,
+      currentOperatorName: data['currentOperatorName'] as String?,
     );
   }
 
@@ -166,6 +171,8 @@ abstract class MachineModel with _$MachineModel {
       'aeratorActive': aeratorActive,
       'drumPaused': drumPaused,
       'aeratorPaused': aeratorPaused,
+      if (currentOperatorId != null) 'currentOperatorId': currentOperatorId,
+      if (currentOperatorName != null) 'currentOperatorName': currentOperatorName,
     };
   }
 }

@@ -42,3 +42,9 @@ final oxygenDataProvider = FutureProvider.family<List<OxygenModel>, String>((ref
   final repository = ref.watch(statisticsRepositoryProvider);
   return repository.getOxygenReadings(batchId);
 });
+
+// Latest sensor readings provider
+final latestSensorReadingsProvider = FutureProvider.family<Map<String, dynamic>?, String>((ref, batchId) async {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getLatestSensorReadings(batchId);
+});

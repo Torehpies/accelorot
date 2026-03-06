@@ -19,6 +19,8 @@ enum RoutePath {
   statistics(path: '/operator/statistics'),
   operatorMachines(path: '/operator/machines'),
   profile(path: '/operator/profile'),
+  qrScan(path: '/operator/qr-scan'),
+  operatorReports(path: '/operator/reports'),
 
   //admin paths
   adminDashboard(path: '/admin/dashboard'),

@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../../operator_dashboard/fields/waste_category_section.dart';
-import '../../../operator_dashboard/fields/plant_type_section.dart';
-import '../../../operator_dashboard/fields/quantity_field.dart';
-import '../../../operator_dashboard/fields/description_field.dart';
-import '../../../operator_dashboard/fields/machine_selection_field.dart';
+import '../../../operator_dashboard_old/fields/waste_category_section.dart';
+import '../../../operator_dashboard_old/fields/plant_type_section.dart';
+import '../../../operator_dashboard_old/fields/quantity_field.dart';
+import '../../../operator_dashboard_old/fields/description_field.dart';
+import '../../../operator_dashboard_old/fields/machine_selection_field.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
-import '../../../operator_dashboard/fields/batch_selection_field.dart';
+import '../../../../data/providers/profile_providers.dart';
+import '../../../operator_dashboard_old/fields/batch_selection_field.dart';
 import 'package:flutter_application_1/ui/core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
 import 'package:flutter_application_1/ui/core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 
@@ -126,6 +127,10 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
     // Trim the plant type input
     final plantTypeValue = _selectedPlantType!.trim();
 
+    // Fetch profile for accurate operator name instead of email fallback
+    final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
+    final String operatorName = profile?.displayName ?? user.displayName ?? user.email ?? 'Operator';
+
     final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
       plantType: plantTypeValue,        // Store the readable text
@@ -133,7 +138,7 @@ class _AddWasteProductState extends ConsumerState<AddWasteProduct> {
       quantity: double.parse(_quantityController.text),
       description: _descriptionController.text.trim(),
       machineId: _selectedMachineId!,
-      operatorName: user.displayName ?? user.email ?? 'Operator',
+      operatorName: operatorName,
       userId: user.uid,
     );
 

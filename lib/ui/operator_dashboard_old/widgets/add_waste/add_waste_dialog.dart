@@ -12,6 +12,7 @@ import '../../../core/ui/app_snackbar.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import '../../../../data/models/substrate.dart';
 import '../../../../data/models/machine_model.dart';
+import '../../../../data/providers/profile_providers.dart';
 import '../../../../data/models/batch_model.dart';
 import '../../../../data/services/firebase/firebase_machine_service.dart';
 import '../../../../data/services/firebase/firebase_batch_service.dart';
@@ -182,6 +183,10 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
     final plantTypeValue = _plantTypeController.text.trim();
     final quantityValue = double.parse(_quantityController.text.trim());
 
+    // Fetch profile for accurate operator name instead of email fallback
+    final profile = await ref.read(profileRepositoryProvider).getCurrentProfile();
+    final String operatorName = profile?.displayName ?? user.displayName ?? user.email ?? 'Operator';
+
     final substrateData = CreateSubstrateRequest(
       category: _capitalizeCategory(_selectedWasteCategory!),
       plantType: plantTypeValue,
@@ -189,7 +194,7 @@ class _AddWasteDialogState extends ConsumerState<AddWasteDialog> {
       quantity: quantityValue,
       description: _descriptionController.text.trim(),
       machineId: _selectedMachineId!,
-      operatorName: user.displayName ?? user.email ?? 'Operator',
+      operatorName: operatorName,
       userId: user.uid,
     );
 

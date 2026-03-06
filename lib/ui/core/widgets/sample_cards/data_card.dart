@@ -11,7 +11,7 @@ class DataCard<T> extends StatelessWidget {
   final String title;
   final String? description;
   final String? category;
-  final String status;
+  final String? status;
   final String? userName;
   final Color? statusColor;
   final Color? statusTextColor;
@@ -25,7 +25,8 @@ class DataCard<T> extends StatelessWidget {
     required this.title,
     this.description,
     this.category,
-    required this.status,
+
+    this.status, // Made optional
     this.userName,
     this.statusColor,
     this.statusTextColor,
@@ -41,6 +42,7 @@ class DataCard<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       color: AppColors.background2,
       shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(
@@ -93,44 +95,46 @@ class DataCard<T> extends StatelessWidget {
                     ],
                     if (_hasDescription || _hasCategory)
                       const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor ?? AppColors.grey,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                color: statusTextColor ?? AppColors.textPrimary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        if (_hasUserName)
-                          Flexible(
-                            child: Text(
-                              'by $userName',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade500,
-                                fontWeight: FontWeight.w500,
+                    if (status != null || _hasUserName)
+                      Row(
+                        children: [
+                          if (status != null)
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor ?? AppColors.grey,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  status!,
+                                  style: TextStyle(
+                                    color: statusTextColor ?? AppColors.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
+                          if (status != null) const Spacer(),
+                          if (_hasUserName)
+                            Flexible(
+                              child: Text(
+                                'by $userName',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                   ],
                 ),
               ),

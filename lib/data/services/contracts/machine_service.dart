@@ -35,4 +35,12 @@ abstract class MachineService {
 
   /// Update aerator active status
   Future<void> updateAeratorActive(String machineId, bool isActive);
+
+  /// Set the current operator on a machine (called after QR scan)
+  /// Pass null values to clear the operator (e.g., when leaving the machine)
+  Future<void> updateMachineOperator(
+    String machineId,
+    String? operatorId,
+    String? operatorName,
+  );
 }

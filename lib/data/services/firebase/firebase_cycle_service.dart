@@ -242,6 +242,8 @@ class FirestoreCycleService implements CycleService {
           await _getExistingMainCycleDocId(batchId) ??
           await _createMainCycleDocId(batchId);
 
+      String operatorName = await _getOperatorName(userId);
+
       // Create a reference for the new drum controller document
       final drumConfigRef = _firestore
           .collection('batches')
@@ -281,6 +283,7 @@ class FirestoreCycleService implements CycleService {
           'action': 'started',
           'machineId': machineId,
           'userId': userId,
+          'operatorName': operatorName,
           'batchId': batchId,
           'cycles': cycles,
           'duration': duration,
@@ -390,6 +393,12 @@ class FirestoreCycleService implements CycleService {
     required String expectedStatus,
   }) async {
     try {
+      final currentUserId = this.currentUserId;
+      if (currentUserId == null) {
+        throw Exception('User not authenticated');
+      }
+      String operatorName = await _getOperatorName(currentUserId);
+
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
       if (cycleDocId == null) {
         throw Exception('No cycle document found for batch: $batchId');
@@ -464,6 +473,8 @@ class FirestoreCycleService implements CycleService {
           'action': 'stopped',
           'status': 'stopped',
           'machineId': machineId,
+          'userId': currentUserId,
+          'operatorName': operatorName,
           'batchId': batchId,
           'duration': existingData['duration'],
           'cycles': existingData['cycles'],
@@ -495,6 +506,12 @@ class FirestoreCycleService implements CycleService {
     required String expectedStatus,
   }) async {
     try {
+      final currentUserId = this.currentUserId;
+      if (currentUserId == null) {
+        throw Exception('User not authenticated');
+      }
+      String operatorName = await _getOperatorName(currentUserId);
+
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
       if (cycleDocId == null) {
         throw Exception('No cycle document found for batch: $batchId');
@@ -569,6 +586,8 @@ class FirestoreCycleService implements CycleService {
           'action': 'stopped',
           'status': 'stopped',
           'machineId': machineId,
+          'userId': currentUserId,
+          'operatorName': operatorName,
           'batchId': batchId,
           'duration': existingData['duration'],
           'cycles': existingData['cycles'],
@@ -605,6 +624,8 @@ class FirestoreCycleService implements CycleService {
       String cycleDocId =
           await _getExistingMainCycleDocId(batchId) ??
           await _createMainCycleDocId(batchId);
+
+      String operatorName = await _getOperatorName(userId);
 
       // Create a reference for the new aerator document
       final aeratorRef = _firestore
@@ -645,6 +666,7 @@ class FirestoreCycleService implements CycleService {
           'action': 'started',
           'machineId': machineId,
           'userId': userId,
+          'operatorName': operatorName,
           'batchId': batchId,
           'cycles': cycles,
           'duration': duration,
@@ -741,6 +763,34 @@ class FirestoreCycleService implements CycleService {
       debugPrint('❌ Error completing aerator: $e');
       throw Exception('Failed to complete aerator: $e');
     }
+  }
+
+  Future<String> _getOperatorName(String userId) async {
+    final user = _auth.currentUser;
+    
+    // Try Firestore first for full name
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        final firstName = data['firstname'] ?? '';
+        final lastName = data['lastname'] ?? '';
+        final name = '$firstName $lastName'.trim();
+        if (name.isNotEmpty) return name;
+      }
+    } catch (_) {}
+
+    // Fallback to Firebase profile info
+    if (user != null && user.uid == userId) {
+      if (user.displayName != null && user.displayName!.isNotEmpty) {
+        return user.displayName!;
+      }
+      if (user.email != null && user.email!.isNotEmpty) {
+        return user.email!;
+      }
+    }
+    
+    return 'Operator';
   }
 
   // Get cycle by ID

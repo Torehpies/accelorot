@@ -141,6 +141,7 @@ class ActivityPresentationMapper {
       type: ActivityType.cycle,
       machineId: cycle.machineId,
       batchId: cycle.batchId,
+      operatorName: cycle.operatorName,
       status: cycle.status,
       controllerType: cycle.controllerType,
       action: cycle.action,
