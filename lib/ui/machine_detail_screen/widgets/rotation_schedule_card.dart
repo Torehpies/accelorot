@@ -19,10 +19,12 @@ class RotationScheduleCard extends ConsumerStatefulWidget {
 }
 
 class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
+  static const int _rotationDurationSeconds = 120; // 2 minutes
+
   bool _isExpanded = false;
   Timer? _countdownTimer;
   Timer? _rotationTimer;
-  int _rotationSecondsRemaining = 180; // 3 minutes
+  int _rotationSecondsRemaining = _rotationDurationSeconds;
   bool _isRotating = false;
   DateTime _now = DateTime.now();
   // Tracks which schedule slots were already run this session (key = 'hour:minute')
@@ -87,11 +89,11 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
           });
           // Do not start rotation timer for auto-stop, as manual controls run infinitely
         } else {
-          if (elapsedSeconds < 180) {
+          if (elapsedSeconds < _rotationDurationSeconds) {
             setState(() {
               _isRotating = true;
               _isManualRotation = false;
-              _rotationSecondsRemaining = 180 - elapsedSeconds;
+              _rotationSecondsRemaining = _rotationDurationSeconds - elapsedSeconds;
             });
             _startRotationTimer();
           } else {
@@ -142,7 +144,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
 
     setState(() {
       _isRotating = true;
-      _rotationSecondsRemaining = 180;
+      _rotationSecondsRemaining = _rotationDurationSeconds;
     });
 
     try {
@@ -151,7 +153,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
             machineId: widget.machine.machineId,
             userId: user.uid,
             cycles: 1,
-            duration: '3 minutes',
+            duration: '2 minutes',
           );
       _startRotationTimer();
     } catch (e) {
@@ -174,7 +176,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     try {
       await ref.read(cycleRepositoryProvider).stopDrumController(
             batchId: batchId,
-            totalRuntimeSeconds: 180 - _rotationSecondsRemaining,
+            totalRuntimeSeconds: _rotationDurationSeconds - _rotationSecondsRemaining,
             expectedStatus: 'running',
           );
     } catch (e) {
@@ -182,7 +184,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
     } finally {
       setState(() {
         _isRotating = false;
-        _rotationSecondsRemaining = 180;
+        _rotationSecondsRemaining = _rotationDurationSeconds;
       });
     }
   }
@@ -377,7 +379,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                           if (_isRotating) ...[  
                             if (_isManualRotation) ...[
                               Text(
-                                '${DateFormat('h:mm a').format(_now)}',
+                                DateFormat('h:mm a').format(_now),
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -474,7 +476,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 if (_isRotating && !_isManualRotation) ...[
                   const SizedBox(height: 16),
                   LinearProgressIndicator(
-                    value: (180 - _rotationSecondsRemaining) / 180,
+                    value: (_rotationDurationSeconds - _rotationSecondsRemaining) / _rotationDurationSeconds,
                     backgroundColor: Colors.green.withValues(alpha: 0.1),
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                     minHeight: 6,
@@ -877,10 +879,10 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                 ),
                 Text(
                   isDone
-                      ? '3 min · done'
+                      ? '2 min · done'
                       : isNext
-                          ? '3 min · in ${_formatCountdown(scheduledDateTime.difference(_now))}'
-                          : '3 min',
+                          ? '2 min · in ${_formatCountdown(scheduledDateTime.difference(_now))}'
+                          : '2 min',
                   style: const TextStyle(color: Color(0xFF789CA4), fontSize: 13),
                 ),
               ],
@@ -909,7 +911,7 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
   String _formatRotationTimer() {
     final minutes = _rotationSecondsRemaining ~/ 60;
     final seconds = _rotationSecondsRemaining % 60;
-    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} / 03:00";
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} / 02:00";
   }
 
 }

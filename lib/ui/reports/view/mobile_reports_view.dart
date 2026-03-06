@@ -116,13 +116,12 @@ class _MobileReportsViewState extends ConsumerState<MobileReportsView> {
   // ---------------------------------------------------------------------------
   Widget _buildReportCard(BuildContext context, Report report, int index) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: DataCard<Report>(
         data: report,
         icon: _getReportIcon(report),
         iconBgColor: _getReportIconColor(report),
         title: report.title,
-        description: report.description,
         category: report.statusLabel,
         status: 'Created ${_formatDate(report.createdAt)}',
         userName: report.userName,
