@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
+import 'package:go_router/go_router.dart';
 
 class ResponsiveMobileShell extends StatelessWidget {
   final Widget child;
@@ -18,6 +19,9 @@ class ResponsiveMobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = getSelectedIndex(context, navItems);
+    final String location = GoRouterState.of(context).uri.toString();
+    final bool showFab = location != '/chat' && location != '/operator/qr-scan';
+    // location != '/operator/dashboard';
 
     return Scaffold(
       //      appBar: AppBar(
@@ -26,6 +30,17 @@ class ResponsiveMobileShell extends StatelessWidget {
       //        foregroundColor: Colors.white,
       //      ),
       body: child,
+      floatingActionButton: Visibility(
+        visible: showFab,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 70.0),
+          child: FloatingActionButton(
+            onPressed: () {},
+            elevation: 5,
+            child: const Icon(Icons.smart_toy),
+          ),
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
