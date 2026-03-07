@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/data/repositories/team_repository/team_repository.dart';
 import 'package:flutter_application_1/data/utils/result.dart' as result;
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
