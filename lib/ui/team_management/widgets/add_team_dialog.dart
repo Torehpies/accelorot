@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/widgets/custom_text_field.dart';
-import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/data/providers/auth_providers.dart';
+import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
@@ -15,39 +15,22 @@ class AddTeamDialog extends ConsumerStatefulWidget {
 
 class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final addressController = TextEditingController();
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    addressController.dispose();
-    super.dispose();
-  }
-
-  void _addTeam() {
-    if (_formKey.currentState!.validate()) {
-      ref
-          .read(teamManagementProvider.notifier)
-          .addTeam(nameController.text, addressController.text);
-    }
-  }
+  String _teamName = '';
+  String _houseNumber = '';
+  String _street = '';
+  String _barangay = '';
+  String _city = '';
+  String _region = '';
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(teamManagementProvider);
-    final isSaving = state.isSavingTeams;
-    final errorMessage = state.message;
+    final AsyncValue<void> state = ref.watch(addTeamProvider);
 
-    ref.listen(teamManagementProvider, (previous, next) {
-      if (next.isSavingTeams == false &&
-          previous?.isSavingTeams == true &&
-          (next.message is SuccessMessage)) {
-        if (context.mounted) {
-          Navigator.pop(context);
-        }
-      }
+    ref.listen<AsyncValue<void>>(addTeamProvider, (_, state) {
+      state.whenOrNull(data: (_) => Navigator.pop(context));
     });
+
     return DialogShell(
       title: Text("Add Team", style: TextStyle(fontWeight: FontWeight.bold)),
       content: Form(
@@ -60,84 +43,161 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
               const Text('Create new team'),
               const Divider(thickness: 1, height: 24),
               const SizedBox(height: 5),
-              if (errorMessage != null && errorMessage is ErrorMessage)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error, color: AppColors.error),
-                      SizedBox(width: 5),
-                      Text(
-                        errorMessage.text,
-                        style: const TextStyle(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: 'Team',
+                  labelText: 'Team Name',
                 ),
-              CustomTextField(
-                enabled: !isSaving,
-                labelText: "Team Name",
-                prefixIcon: Icons.group,
-                controller: nameController,
-                autoFocus: true,
-                validator: (value) {
-                  final trimmed = value?.trim();
-                  if (trimmed == null || trimmed.isEmpty) {
-                    return "Please enter a team name.";
-                  }
-                  if (trimmed.length < 3) {
-                    return "Team name must be at least 3 characters.";
-                  }
-                  return null;
-                },
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'Team Name is required'
+                    : (value.trim().length < 3)
+                    ? 'Team name must be at least 3 characters'
+                    : null,
+                enabled: !state.isLoading,
                 textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.text,
+                onSaved: (value) => _teamName = value!.trim(),
               ),
               SizedBox(height: 10),
-              CustomTextField(
-                enabled: !isSaving,
-                onFieldSubmitted: (value) => isSaving ? null : _addTeam(),
-                autoFocus: true,
-                labelText: "Address",
-                prefixIcon: Icons.location_on,
-                controller: addressController,
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: '1111 / Lot 10 Blk 10',
+                  labelText: 'House/Lot/Block',
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'This field is required'
+                    : (value.trim().length < 3)
+                    ? 'This field must be at least 4 characters'
+                    : null,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.streetAddress,
-                validator: (value) {
-                  final trimmed = value?.trim();
-                  if (trimmed == null || trimmed.isEmpty) {
-                    return "Please enter an address.";
-                  }
-                  if (trimmed.length < 20) {
-                    return "Address name must be at least 20 characters.";
-                  }
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
+                onSaved: (value) => _houseNumber = value!.trim(),
               ),
+              SizedBox(height: 10),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: 'Libra St. / Zabarte Road / Luisa Subd.',
+                  labelText: 'Street/Road/Subd.',
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'This field is required'
+                    : (value.trim().length < 4)
+                    ? 'This field must be at least 4 characters'
+                    : null,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.streetAddress,
+                onSaved: (value) => _street = value!.trim(),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: '178 / 176-E',
+                  labelText: 'Barangay',
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'This field is required'
+                    : (value.trim().length > 5)
+                    ? 'This field has a maximum of 5 characters'
+                    : null,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.text,
+                onSaved: (value) => _barangay = 'BRGY. ${value!.trim()}',
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: 'Caloocan City',
+                  labelText: 'City',
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'This field is required'
+                    : (value.trim().length < 4)
+                    ? 'This field must be at least 4 characters'
+                    : null,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.text,
+                onSaved: (value) => _city = value!.trim(),
+              ),
+              SizedBox(height: 10),
+              TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: InputDecoration(
+                  hintText: 'Region 1 / NCR',
+                  labelText: 'Region',
+                ),
+                validator: (value) => (value == null || value.trim().isEmpty)
+                    ? 'This field is required'
+                    : (value.trim().length < 3)
+                    ? 'This field must be at least 3 characters'
+                    : null,
+                enabled: !state.isLoading,
+                textInputAction: TextInputAction.done,
+                keyboardType: TextInputType.text,
+                onSaved: (value) => _region = value!.trim(),
+              ),
+              SizedBox(height: 10),
             ],
           ),
         ),
       ),
       actions: [
         TextButton(
-          onPressed: isSaving ? null : () => Navigator.pop(context),
+          onPressed: state.isLoading ? null : () => Navigator.pop(context),
           child: Text("Cancel"),
         ),
         ElevatedButton.icon(
-          onPressed: isSaving ? null : _addTeam,
-          icon: isSaving
+          onPressed: state.isLoading ? null : _addTeam,
+          icon: state.isLoading
               ? const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.add),
-          label: Text(isSaving ? "Saving..." : "Add Team"),
+          label: Text(state.isLoading ? "Saving..." : "Add Team"),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _addTeam() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      final address = [
+        _houseNumber,
+        _street,
+        _barangay,
+        _city,
+        _region,
+      ].where((s) => s.isNotEmpty).join(', ');
+      final appUserId = ref.watch(authUserProvider).value!.uid;
+      final Team team = Team(
+        teamName: _teamName,
+        houseNumber: _houseNumber,
+        street: _street,
+        barangay: _barangay,
+        city: _city,
+        region: _region,
+        address: address,
+        createdAt: DateTime.now(),
+        createdBy: appUserId,
+      );
+      ref.read(addTeamProvider.notifier).addTeam(team);
+      ref.read(teamManagementProvider.notifier).refresh();
+    }
   }
 }

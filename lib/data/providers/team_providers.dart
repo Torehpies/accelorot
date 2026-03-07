@@ -2,8 +2,9 @@ import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
-import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
-import 'package:flutter_application_1/data/repositories/team_management/team_repository_remote.dart';
+import 'package:flutter_application_1/data/providers/statistics_providers.dart';
+import 'package:flutter_application_1/data/repositories/team_repository/team_repository.dart';
+import 'package:flutter_application_1/data/repositories/team_repository/team_repository_remote.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/pending_members_service.dart';
 import 'package:flutter_application_1/data/services/contracts/team_member_service.dart';
@@ -27,6 +28,7 @@ TeamRepository teamRepository(Ref ref) {
     ref.read(teamServiceProvider),
     ref.read(pendingMemberServiceProvider),
     ref.read(appUserServiceProvider),
+		ref.read(firestoreProvider)
   );
 }
 

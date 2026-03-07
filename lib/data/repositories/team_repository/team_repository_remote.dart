@@ -1,4 +1,7 @@
-import 'package:flutter_application_1/data/repositories/team_management/team_repository.dart';
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/repositories/team_repository/team_repository.dart';
 import 'package:flutter_application_1/data/utils/result.dart' as result;
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/contracts/app_user_service.dart';
@@ -14,23 +17,29 @@ class TeamRepositoryRemote implements TeamRepository {
     this._teamService,
     this._pendingMemberService,
     this._appUserService,
+    this._firestore,
   );
 
+  final FirebaseFirestore _firestore;
   final TeamService _teamService;
   final PendingMemberService _pendingMemberService;
   final AppUserService _appUserService;
   List<Team>? _cachedTeams;
 
   @override
-  Future<Result<Team, DataLayerError>> addTeam(Team team) async {
-    final result = await _teamService.addTeam(team);
-
-    result.when(
-      success: (team) => _cachedTeams?.add(team),
-      failure: (_) => _cachedTeams,
-    );
-
-    return result;
+  Future<Team> addTeam(Team team) async {
+    try {
+      final docRef = _firestore.collection('teams').doc();
+      final updatedTeam = team.copyWith(teamId: docRef.id);
+      await docRef.set(updatedTeam.toJson());
+      return updatedTeam;
+    } on FirebaseException catch (e) {
+      log('Failed to add team: $e');
+      rethrow;
+    } catch (e) {
+      log('Failed to add team: $e');
+      rethrow;
+    }
   }
 
   @override
@@ -86,15 +95,15 @@ class TeamRepositoryRemote implements TeamRepository {
       return Result.failure(updateUserResult.asFailure);
     }
 
-      final teamResult = await _teamService.incrementTeamField(
-        teamId: teamId,
-        field: OperatorHeaders.pendingOperators,
-        amount: 1,
-      );
+    final teamResult = await _teamService.incrementTeamField(
+      teamId: teamId,
+      field: OperatorHeaders.pendingOperators,
+      amount: 1,
+    );
 
-      if (teamResult is result.Error<String>) {
-        return Result.failure(teamResult.error as DataLayerError);
-      }
+    if (teamResult is result.Error<String>) {
+      return Result.failure(teamResult.error as DataLayerError);
+    }
     return Result.success(null);
   }
 
