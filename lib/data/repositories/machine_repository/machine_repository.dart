@@ -12,4 +12,9 @@ abstract class MachineRepository {
   Stream<MachineModel?> watchMachineById(String machineId);
   Future<void> updateDrumActive(String machineId, bool isActive);
   Future<void> updateAeratorActive(String machineId, bool isActive);
+  Future<void> updateMachineOperator(
+    String machineId,
+    String? operatorId,
+    String? operatorName,
+  );
 }

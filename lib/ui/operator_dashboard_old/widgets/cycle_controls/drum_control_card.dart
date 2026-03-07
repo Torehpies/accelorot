@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/models/drum_rotation_settings.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/models/system_status.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/empty_state.dart';
-import 'package:flutter_application_1/ui/operator_dashboard/widgets/cycle_controls/info_item.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/models/drum_rotation_settings.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/models/system_status.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/cycle_controls/empty_state.dart';
+import 'package:flutter_application_1/ui/operator_dashboard_old/widgets/cycle_controls/info_item.dart';
 import 'package:flutter_application_1/data/models/batch_model.dart';
 import 'package:flutter_application_1/data/models/machine_model.dart';
 import 'package:flutter_application_1/data/providers/cycle_providers.dart';
@@ -13,22 +13,43 @@ import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/providers/selected_machine_provider.dart';
 import 'package:flutter_application_1/data/providers/selected_batch_provider.dart';
 import 'package:flutter_application_1/data/providers/batch_providers.dart';
+//import 'package:flutter_application_1/data/models/cycle_recommendation.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
-class AeratorCard extends ConsumerStatefulWidget {
+class ControlInputCard extends ConsumerStatefulWidget {
   final BatchModel? currentBatch;
   final String? machineId; // Deprecated - kept for backward compatibility
 
-  const AeratorCard({super.key, this.currentBatch, this.machineId});
+  const ControlInputCard({super.key, this.currentBatch, this.machineId});
 
   @override
-  ConsumerState<AeratorCard> createState() => _AeratorCardState();
+  ConsumerState<ControlInputCard> createState() => _ControlInputCardState();
 }
 
-class _AeratorCardState extends ConsumerState<AeratorCard>
+class _ControlInputCardState extends ConsumerState<ControlInputCard>
     with AutomaticKeepAliveClientMixin {
   DrumRotationSettings settings = DrumRotationSettings();
   SystemStatus status = SystemStatus.idle;
+
+  String _uptime = '00:00:00';
+  int _completedCycles = 0;
+  DateTime? _startTime;
+  Timer? _timer;
+  Timer? _cycleTimer;
+
+  
+  // Pause state tracking
+  bool _isPaused = false;
+  int _accumulatedSeconds = 0;
+  
+  // Track the current batch ID to detect actual changes
+  String? _trackedBatchId;
+  
+  // Loading state
+  bool _isLoading = false;
+  
+  // Track if we've already initialized to prevent re-initialization
+  bool _isInitialized = false;
   
   @override
   bool get wantKeepAlive => true;
@@ -54,56 +75,49 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     }
   }
 
-  String _uptime = '00:00:00';
-  int _completedCycles = 0;
-  DateTime? _startTime;
-  Timer? _timer;
-  Timer? _cycleTimer;
-  //CycleRecommendation? _cycleDoc;
-  
-  // Pause state tracking
-  bool _isPaused = false;
-  int _accumulatedSeconds = 0;
-  
-  // Track the current batch ID to detect actual changes
-  String? _trackedBatchId;
-  
-  // Track if we've already initialized to prevent re-initialization
-  bool _isInitialized = false;
-
-  // Loading state
-  bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
     _trackedBatchId = _currentBatch?.id;
-    if (_currentBatch != null && _currentBatch!.isActive) {
-      _loadExistingCycle();
-    }
+    _initializeFromBatch();
     
     // Listen to batch changes
     ref.listenManual(selectedBatchIdProvider, (previous, next) {
       if (next != _trackedBatchId) {
-        debugPrint('Aerator: Batch changed in provider: $_trackedBatchId -> $next');
+        debugPrint('🔄 Batch changed in provider: $_trackedBatchId -> $next');
         _trackedBatchId = next;
-        _stopTimer();
-        _cycleTimer?.cancel();
-        
-        if (_currentBatch != null && _currentBatch!.isActive) {
-          _loadExistingCycle();
-        } else {
-          setState(() {
-            settings.reset();
-            status = SystemStatus.idle;
-            _uptime = '00:00:00';
-            _completedCycles = 0;
-            _startTime = null;
-            //_cycleDoc = null;
-            _isInitialized = false;
-          });
-        }
+        _initializeFromBatch();
       }
+    });
+  }
+
+  void _initializeFromBatch() {
+    if (_currentBatch != null && _currentBatch!.isActive) {
+      _trackedBatchId = _currentBatch!.id;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _loadExistingCycle();
+        }
+      });
+    } else {
+      _trackedBatchId = null;
+      _resetState();
+    }
+  }
+
+  void _resetState() {
+    _stopTimer();
+    _cycleTimer?.cancel();
+    setState(() {
+      settings.reset();
+      status = SystemStatus.idle;
+      _uptime = '00:00:00';
+      _completedCycles = 0;
+      _startTime = null;
+
+      _isPaused = false;
+      _accumulatedSeconds = 0;
+      _isInitialized = false;
     });
   }
 
@@ -111,33 +125,33 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
   void _syncWithMachineState(MachineModel machine) {
     if (!mounted) return;
     
-    final aeratorActive = machine.aeratorActive;
-    final aeratorPaused = machine.aeratorPaused;
+    final drumActive = machine.drumActive;
+    final drumPaused = machine.drumPaused;
     
-    debugPrint('Machine state sync: aeratorActive=$aeratorActive, aeratorPaused=$aeratorPaused, initialized=$_isInitialized');
+    debugPrint('🔔 Machine state sync: drumActive=$drumActive, drumPaused=$drumPaused, initialized=$_isInitialized');
     
-    // Determine state based on aeratorActive and aeratorPaused combination
-    if (machine.aeratorActive && !machine.aeratorPaused) {
+    // Determine state based on drumActive and drumPaused combination
+    if (machine.drumActive && !machine.drumPaused) {
       // Running state
       
-      // Only skip reload if we are truly running
+      // Only skip reload if we are truly running (initialized, status running, AND timer ticking)
       final isTimerRunning = _timer?.isActive ?? false;
       if (_isInitialized && status == SystemStatus.running && _startTime != null && isTimerRunning) {
-        debugPrint('Already running (timer active) - skipping reload');
+        debugPrint('✅ Already running (timer active) - skipping reload');
         return;
       }
       
-      debugPrint('Aerator is RUNNING - reloading cycle state');
+      debugPrint('✅ Drum is RUNNING (timer inactive or state mismatch) - reloading cycle state');
       _loadExistingCycle(machine);
-    } else if (!machine.aeratorActive && machine.aeratorPaused) {
+    } else if (!machine.drumActive && machine.drumPaused) {
       // Paused state
-      debugPrint('⏸Aerator is PAUSED - stopping timer and setting paused state');
+      debugPrint('⏸️ Drum is PAUSED - stopping timer and setting parsed state');
       
       // Stop timer IMMEDIATELY
       _stopTimer();
       _cycleTimer?.cancel();
       
-      // Aggressively update UI to Paused state immediately
+      // Aggressively update UI to Paused state immediately so it doesn't look like it's running
       setState(() {
          status = SystemStatus.idle;
          _isPaused = true;
@@ -145,12 +159,13 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
          _startTime = null;
       });
       
+      // Load accurate cycle data to refine accumulated runtime
       if (_currentBatch != null) {
         _loadPausedState(machine);
       }
-    } else if (!machine.aeratorActive && !machine.aeratorPaused) {
+    } else if (!machine.drumActive && !machine.drumPaused) {
       // Stopped state
-      debugPrint('Aerator is STOPPED - resetting to idle');
+      debugPrint('⏹️ Drum is STOPPED - resetting to idle');
       _stopTimer();
       _cycleTimer?.cancel();
       setState(() {
@@ -177,31 +192,35 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
   Future<void> _loadPausedState(MachineModel machine) async {
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      final cycles = await cycleRepository.getAerators(
+      final cycles = await cycleRepository.getDrumControllers(
         batchId: _currentBatch!.id,
       );
       final cycle = cycles.isEmpty ? null : cycles.first;
       
+      // Double check state hasn't changed while awaiting
       if (!mounted) return;
       
       final runtime = cycle?.accumulatedRuntimeSeconds ?? cycle?.totalRuntimeSeconds;
-    if (cycle != null && runtime != null) {
-      // Timer already stopped
-      setState(() {
-        status = SystemStatus.idle;
-        _isPaused = true;
-        _accumulatedSeconds = runtime;
-        _uptime = _formatDuration(Duration(seconds: runtime));
-        _startTime = null;
-      });
-    }
+      if (cycle != null && runtime != null) {
+        // Timer already stopped in _syncWithMachineState
+        setState(() {
+          status = SystemStatus.idle;
+          _isPaused = true;
+          _accumulatedSeconds = runtime;
+          _uptime = _formatDuration(Duration(seconds: runtime));
+          _startTime = null;
+        });
+      }
     } catch (e) {
       debugPrint('❌ Error loading paused cycle: $e');
     }
   }
 
   Future<void> _loadExistingCycle([MachineModel? machineOverride]) async {
-  if (_currentBatch == null) return;
+  if (_currentBatch == null) {
+    debugPrint('⚠️ No current batch to load');
+    return;
+  }
 
   if (_machineId == null) {
     debugPrint('⚠️ No machine ID provided');
@@ -215,21 +234,26 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     });
   }
 
+  debugPrint(
+    '📥 Loading drum controller for batch: ${_currentBatch!.id}',
+  );
+
   try {
     // Load the cycle document first
     final cycleRepository = ref.read(cycleRepositoryProvider);
-    final cycles = await cycleRepository.getAerators(
+    final cycles = await cycleRepository.getDrumControllers(
       batchId: _currentBatch!.id,
     );
     final cycle = cycles.isEmpty ? null : cycles.first;
 
-    debugPrint('Aerator loaded: ${cycle != null ? "Found" : "Not found"}');
+    debugPrint('Drum controller loaded: ${cycle != null ? "Found" : "Not found"}');
     
     if (cycle != null) {
-      debugPrint('Cycle status: ${cycle.status}');
+      debugPrint('📋 Cycle details: status=${cycle.status}, acc=${cycle.accumulatedRuntimeSeconds}, total=${cycle.totalRuntimeSeconds}, startedAt=${cycle.startedAt}, action=${cycle.action}');
     }
 
-    // Check machine aeratorActive status
+    // Check machine drumActive status
+    // Use override if available (from stream), otherwise fetch fresh
     MachineModel? machine;
     if (machineOverride != null) {
       machine = machineOverride;
@@ -246,9 +270,9 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     // Create non-nullable reference for use in closures
     final effectiveMachine = machine;
 
-    // If no cycle exists and aeratorActive is false, reset to idle
-    if (cycle == null && !effectiveMachine.aeratorActive) {
-      debugPrint('⚠️ No cycle and aerator is not active - resetting to idle');
+    // If no cycle exists and drumActive is false, reset to idle
+    if (cycle == null && !effectiveMachine.drumActive) {
+      debugPrint('⚠️ No cycle and drum is not active - resetting to idle');
       if (mounted) {
         setState(() {
           settings.reset();
@@ -256,7 +280,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           _uptime = '00:00:00';
           _completedCycles = 0;
           _startTime = null;
-          //_cycleDoc = null;
+    
           _isPaused = false;
           _accumulatedSeconds = 0;
         });
@@ -266,10 +290,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
     // If cycle exists, restore state based on cycle status
     if (mounted && cycle != null) {
-      bool isEffectivelyRunning = effectiveMachine.aeratorActive;
+      bool isEffectivelyRunning = effectiveMachine.drumActive;
 
       setState(() {
-        //_cycleDoc = cycle;
+
         settings = DrumRotationSettings(
           cycles: cycle.cycles ?? 1,
           period: cycle.duration ?? '10 minutes',
@@ -278,64 +302,74 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
         // Handle different statuses
         // Priority 1: Check actual machine state (Source of Truth)
+        // If machine says running but cycle says stopped/completed, we are in a 'zombie' state.
+        // We force the UI to running so the user can settle it (Stop).
         if (isEffectivelyRunning && 
            (cycle.status == 'stopped' || cycle.status == 'completed')) {
-             debugPrint('⚠️ Aerator Zombie state detected: Machine running but cycle stopped. Forcing running state.');
+             debugPrint('⚠️ Zombie state detected: Machine running but cycle stopped. Forcing running state.');
              status = SystemStatus.running;
              _isPaused = false;
              // Use cycle start time or now if unavailable
              _startTime = cycle.startedAt ?? DateTime.now();
              _accumulatedSeconds = cycle.totalRuntimeSeconds ?? 0;
+             
              if (_startTime != null) {
                _startTimer();
              }
              _isInitialized = true;
 
         } else if (cycle.status == 'paused' && !isEffectivelyRunning) {
-          debugPrint('Aerator is paused');
+          debugPrint('Drum controller is paused');
           status = SystemStatus.idle;
           _isPaused = true;
           _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
           _startTime = null;
-        } else if (effectiveMachine.aeratorActive && (cycle.status == 'running' || cycle.status == 'resumed' || cycle.status == 'paused')) {
-          debugPrint('Aerator is running (cycle status: ${cycle.status})');
-          status = SystemStatus.running;
-          _isPaused = false;
-          
-          final previousRuntime = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds;
-          
-          debugPrint('🔄 Aerator Resumed/Stale Debug: status=${cycle.status}, prev=$previousRuntime, startedAt=${cycle.startedAt}');
-
-          if (previousRuntime != null) {
-            _accumulatedSeconds = previousRuntime;
-          } else {
-            _accumulatedSeconds = 0;
-          }
-          
-          if (cycle.status == 'paused') {
-             _startTime = DateTime.now();
-          } else {
-             _startTime = cycle.startedAt ?? DateTime.now();
-          }
-          
-          // Immediately compute and display the correct uptime (don't wait for timer tick)
-          final initialElapsed = DateTime.now().difference(_startTime!);
-          final totalSeconds = _accumulatedSeconds + initialElapsed.inSeconds;
-          _uptime = _formatDuration(Duration(seconds: totalSeconds));
-          
-          // Stop any existing timer before starting a new one
-          _stopTimer();
-          _cycleTimer?.cancel();
-          
-          if (_startTime != null) {
-            _startTimer();
-            _simulateCycles();
-          }
-          
-          _isInitialized = true;
+        } else if (effectiveMachine.drumActive && (cycle.status == 'running' || cycle.status == 'resumed' || cycle.status == 'paused')) {
+           // If machine is active, we treat 'paused' cycle as a stale state that will be updated soon.
+           // We resume immediately using the paused cycle's data.
+           debugPrint('Drum controller is running (cycle status: ${cycle.status})');
+           status = SystemStatus.running;
+           _isPaused = false;
+           
+           // For resumed state, runtime might be in totalRuntimeSeconds
+           // For stale paused state, it's in accumulatedRuntimeSeconds
+           final previousRuntime = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds;
+           
+           debugPrint('🔄 Resumed/Stale Debug: status=${cycle.status}, prev=$previousRuntime, startedAt=${cycle.startedAt}');
+ 
+           if (previousRuntime != null) {
+             _accumulatedSeconds = previousRuntime;
+           } else {
+             _accumulatedSeconds = 0;
+           }
+           
+           // If status is 'paused', it means we are resuming from a pause but the doc hasn't updated yet.
+           // So we use NOW as start time.
+           // If status is 'resumed' or 'running', we use the doc's start time.
+           if (cycle.status == 'paused') {
+              _startTime = DateTime.now();
+           } else {
+              _startTime = cycle.startedAt ?? DateTime.now();
+           }
+           
+           // Immediately compute and display the correct uptime (don't wait for timer tick)
+           final initialElapsed = DateTime.now().difference(_startTime!);
+           final totalSeconds = _accumulatedSeconds + initialElapsed.inSeconds;
+           _uptime = _formatDuration(Duration(seconds: totalSeconds));
+           
+           // Stop any existing timer before starting a new one
+           _stopTimer();
+           _cycleTimer?.cancel();
+           
+           if (_startTime != null) {
+             _startTimer();
+             _simulateCycles();
+           }
+           
+           _isInitialized = true;
         } else if (cycle.status == 'stopped') {
-          debugPrint('Aerator was stopped - ready to restart');
+          debugPrint('Drum controller was stopped - ready to restart');
           status = SystemStatus.idle;
           _isPaused = false;
           _uptime = '00:00:00';
@@ -343,7 +377,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           _startTime = null;
           _accumulatedSeconds = 0;
         } else if (cycle.status == 'completed') {
-          debugPrint('Aerator is completed');
+          debugPrint('Drum controller is completed');
           status = SystemStatus.stopped;
           _isPaused = false;
           if (cycle.totalRuntimeSeconds != null) {
@@ -352,7 +386,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
             );
           }
         } else {
-          debugPrint('⚠️ Unknown aerator state - resetting to idle');
+          debugPrint('⚠️ Unknown drum controller state - resetting to idle');
           settings.reset();
           status = SystemStatus.idle;
           _isPaused = false;
@@ -365,8 +399,8 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     } else if (mounted) {
        // No cycle document found
        // Check if machine is strangely running without a cycle doc
-       if (effectiveMachine.aeratorActive) {
-         debugPrint('⚠️ Aerator Zombie state detected: Machine running but NO cycle doc found.');
+       if (effectiveMachine.drumActive) {
+         debugPrint('⚠️ Zombie state detected: Machine running but NO cycle doc found.');
          setState(() {
            status = SystemStatus.running;
            _isPaused = false;
@@ -383,14 +417,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
            _uptime = '00:00:00';
            _completedCycles = 0;
            _startTime = null;
-           //_cycleDoc = null;
+     
            _isPaused = false;
            _accumulatedSeconds = 0;
          });
        }
     }
   } catch (e) {
-    debugPrint('Error loading aerator cycle: $e');
+    debugPrint('❌ Error loading drum controller cycle: $e');
   } finally {
     if (mounted) {
       setState(() {
@@ -400,33 +434,35 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
   }
 }
 
-
   /// Converts raw exception text into a clean, user-friendly snackbar message.
   String _getUserFriendlyError(Object e, String action) {
     final raw = e.toString();
 
+    // Map known error patterns to friendly messages
     if (raw.contains('already running')) {
-      return 'Aerator is already running. Refreshing state...';
+      return 'Machine is already running. Refreshing state...';
     }
     if (raw.contains('already stopped')) {
-      return 'Aerator is already stopped. Refreshing state...';
+      return 'Machine is already stopped. Refreshing state...';
     }
     if (raw.contains('not running')) {
-      return 'Aerator was already stopped or paused. Refreshing...';
+      return 'Machine was already stopped or paused. Refreshing...';
     }
     if (raw.contains('not paused')) {
-      return 'Aerator is no longer paused. Refreshing...';
+      return 'Machine is no longer paused. Refreshing...';
     }
     if (raw.contains('Machine not found')) {
       return 'Machine not found. Please select a machine.';
     }
-    if (raw.contains('No cycle document') || raw.contains('No aerator') || raw.contains('No drum controller')) {
+    if (raw.contains('No cycle document') || raw.contains('No drum controller') || raw.contains('No aerator')) {
       return 'No active cycle found. Please try again.';
     }
+    // Catch the ugly Web-specific error and replace with a generic message
     if (raw.contains('Dart exception thrown from converted Future')) {
       return 'Operation failed. Another user may have changed the state. Refreshing...';
     }
 
+    // Fallback: just show "Failed to [action]" without the raw exception
     return 'Failed to $action. Please try again.';
   }
 
@@ -490,7 +526,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please log in to start the aerator'),
+          content: Text('Please log in to start the drum controller'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -504,10 +540,10 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
-      debugPrint('🔵 Starting aerator...');
+      debugPrint('🔵 Starting drum controller...');
 
       // Atomic start operation
-      await cycleRepository.startAerator(
+      await cycleRepository.startDrumController(
         batchId: _currentBatch!.id,
         machineId: _currentBatch!.machineId,
         userId: user.uid,
@@ -515,15 +551,18 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         duration: settings.period,
       );
 
-      debugPrint('✅ Aerator service started');
+      debugPrint('✅ Drum controller service started');
 
       // Wait a bit for Firestore stream to update UI naturally
       await Future.delayed(const Duration(milliseconds: 500));
 
+      // We DON'T manually set state here anymore to avoid race conditions with stream
+      // But for better UX, we can temporarily set it if mounted
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+         // Optionally force a refresh or just let the stream handle it
+         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator started'),
+            content: Text('Drum controller started'),
             backgroundColor: Colors.green,
           ),
         );
@@ -563,15 +602,16 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
+      // Atomic stop operation
+      // Note: We calculate runtime here for the log, but backend handles machine state
       final elapsed = _startTime != null 
           ? DateTime.now().difference(_startTime!).inSeconds 
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
 
-      // Atomic stop operation
       final expectedStatus = _isPaused ? 'paused' : (status == SystemStatus.running ? 'running' : 'any');
-
-      await cycleRepository.stopAerator(
+      
+      await cycleRepository.stopDrumController(
         batchId: _currentBatch!.id,
         totalRuntimeSeconds: totalAccumulated,
         expectedStatus: expectedStatus,
@@ -588,12 +628,12 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
           _startTime = null;
           _isPaused = false;
           _accumulatedSeconds = 0;
-          //_cycleDoc = null;
+    
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator stopped'),
+            content: Text('Drum controller stopped - controller reset'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -605,7 +645,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         if (e.toString().contains('already stopped')) {
           _refreshMachineState();
         }
-
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -624,7 +664,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
   Future<void> _handlePause() async {
     if (_isLoading) return;
-    if (_currentBatch == null || _machineId == null) return;
+    if (_machineId == null) return;
 
     setState(() {
       _isLoading = true;
@@ -634,39 +674,39 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       final cycleRepository = ref.read(cycleRepositoryProvider);
 
       debugPrint('🔵 Starting pause operation...');
-      debugPrint('🔍 Aerator Pause Debug: startTime=$_startTime, accSeconds=$_accumulatedSeconds');
+      debugPrint('🔍 Pause Debug: startTime=$_startTime, accSeconds=$_accumulatedSeconds');
 
       final elapsed = _startTime != null 
           ? DateTime.now().difference(_startTime!).inSeconds 
           : 0;
       final totalAccumulated = _accumulatedSeconds + elapsed;
       
-      debugPrint('🔍 Aerator Pause Debug: elapsed=$elapsed, totalToSend=$totalAccumulated');
-
+      debugPrint('🔍 Pause Debug: elapsed=$elapsed, totalToSend=$totalAccumulated');
+      
       // Atomic pause operation
-      await cycleRepository.pauseAerator(
+      
+      // Atomic pause operation
+      await cycleRepository.pauseDrumController(
         batchId: _currentBatch!.id,
         accumulatedRuntimeSeconds: totalAccumulated,
       );
       
       debugPrint('✅ Pause service call completed');
 
-      // Stop local timers
       _stopTimer();
-      _cycleTimer?.cancel();
 
       if (mounted) {
         setState(() {
+          status = SystemStatus.idle;
           _isPaused = true;
           _accumulatedSeconds = totalAccumulated;
-          _uptime = _formatDuration(Duration(seconds: totalAccumulated)); // Freeze uptime display
-          status = SystemStatus.idle;  // Show as idle visually
+          _uptime = _formatDuration(Duration(seconds: totalAccumulated));
           _startTime = null;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator paused'),
+            content: Text('Drum controller paused'),
             backgroundColor: Colors.blue,
           ),
         );
@@ -697,7 +737,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
   Future<void> _handleResume() async {
     if (_isLoading) return;
-    if (_currentBatch == null || _machineId == null) return;
+    if (_machineId == null) return;
 
     setState(() {
       _isLoading = true;
@@ -709,7 +749,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
       debugPrint('🔵 Starting resume operation...');
 
       // Atomic resume operation
-      await cycleRepository.resumeAerator(
+      await cycleRepository.resumeDrumController(
         batchId: _currentBatch!.id,
       );
       
@@ -717,17 +757,17 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
       if (mounted) {
         setState(() {
-          _isPaused = false;
           status = SystemStatus.running;
+          _isPaused = false;
           _startTime = DateTime.now();
         });
 
         _startTimer();
-        _simulateCycles();
+        _simulateCycles(); // UI simulation only
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Aerator resumed'),
+            content: Text('Drum controller resumed'),
             backgroundColor: Colors.green,
           ),
         );
@@ -768,16 +808,13 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         if (_currentBatch?.id != null && _startTime != null) {
           try {
             final cycleRepository = ref.read(cycleRepositoryProvider);
-            final elapsed = DateTime.now().difference(_startTime!).inSeconds;
-            final totalRuntime = _accumulatedSeconds + elapsed;
-            
-            await cycleRepository.updateAeratorProgress(
+            await cycleRepository.updateDrumProgress(
               batchId: _currentBatch!.id,
               completedCycles: _completedCycles,
-              totalRuntime: Duration(seconds: totalRuntime),
+              totalRuntime: DateTime.now().difference(_startTime!),
             );
           } catch (e) {
-            debugPrint('Failed to update aerator progress: $e');
+            debugPrint('Failed to update drum progress: $e');
           }
         }
 
@@ -804,9 +841,11 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
 
     try {
       final cycleRepository = ref.read(cycleRepositoryProvider);
-      await cycleRepository.completeAerator(batchId: _currentBatch!.id);
+      await cycleRepository.completeDrumController(
+        batchId: _currentBatch!.id,
+      );
     } catch (e) {
-      debugPrint('Failed to complete aerator: $e');
+      debugPrint('Failed to complete drum controller: $e');
     }
   }
 
@@ -831,10 +870,14 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     
-    // Listen for machine state changes (aeratorActive) to sync UI
-    if (_machineId != null) {
+    // ✅ Use provider instead of widget parameter
+    final selectedMachineId = ref.watch(selectedMachineIdProvider);
+    final machineId = selectedMachineId.isEmpty ? null : selectedMachineId;
+    
+    // Listen for machine state changes (drumActive) to sync UI
+    if (machineId != null) {
       ref.listen<AsyncValue<MachineModel?>>(
-        machineStreamProvider(_machineId!),
+        machineStreamProvider(machineId),
         (previous, next) {
           next.whenData((machine) {
             if (machine != null) {
@@ -885,7 +928,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
                 children: [
                   Flexible(
                     child: Text(
-                      'Aerator',
+                      'Drum Controller',
                       style: TextStyle(
                         fontSize: titleFontSize,
                         fontWeight: FontWeight.w600,
@@ -929,7 +972,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
               ),
               SizedBox(height: cardWidth * 0.06),
 
-         
+        
               hasActiveBatch || batchCompleted
                     ? _buildActiveState(
                         batchCompleted,
@@ -973,7 +1016,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
                 fontSize: bodyFontSize,
               ),
             ),
-            SizedBox(width: cardWidth * 0.04),
+            SizedBox(width: cardWidth * 0.03),
             Expanded(
               child: InfoItem(
                 label: 'Batch Name',
@@ -999,54 +1042,7 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
         SizedBox(height: cardHeight * 0.04),
 
         // Button logic
-        if (status == SystemStatus.running && !_isPaused)
-          // Running: Show Pause and Stop
-          Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _handlePause,
-                  icon: _isLoading 
-                      ? const SizedBox(
-                          width: 20, 
-                          height: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-                        )
-                      : const Icon(Icons.pause),
-                  label: Text(_isLoading ? 'Processing...' : 'Pause'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-              SizedBox(height: cardHeight * 0.02),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _handleStop,
-                  icon: const Icon(Icons.stop),
-                  label: const Text('Stop'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEF4444),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
-              ),
-            ],
-          )
-        else if (_isPaused)
+        if (_isPaused)
           // Paused: Show Resume and Stop
           Column(
             children: [
@@ -1093,12 +1089,59 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
               ),
             ],
           )
+        else if (status == SystemStatus.running)
+          // Running: Show Pause and Stop
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _handlePause,
+                  icon: _isLoading 
+                      ? const SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        )
+                      : const Icon(Icons.pause),
+                  label: Text(_isLoading ? 'Processing...' : 'Pause'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF59E0B),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              SizedBox(height: cardHeight * 0.02),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _handleStop,
+                  icon: const Icon(Icons.stop),
+                  label: const Text('Stop'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ],
+          )
         else
           // Idle/Stopped: Show Start
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: (_isLoading || batchCompleted) ? null : _handleStart,
+              onPressed: _isLoading ? null : _handleStart,
               icon: _isLoading 
                   ? const SizedBox(
                       width: 20, 
@@ -1115,7 +1158,6 @@ class _AeratorCardState extends ConsumerState<AeratorCard>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 elevation: 0,
-                disabledBackgroundColor: Colors.grey.shade300,
               ),
             ),
           ),

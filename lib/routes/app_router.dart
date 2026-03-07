@@ -43,6 +43,7 @@ import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_servi
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
+import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
@@ -207,6 +208,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => NoTransitionPage(
               key: state.pageKey,
               child: const SettingsScreen(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.qrScan.path,
+            name: RoutePath.qrScan.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const QRScanScreen(),
+            ),
+          ),
+          GoRoute(
+            path: RoutePath.operatorReports.path,
+            name: RoutePath.operatorReports.name,
+            pageBuilder: (context, state) => NoTransitionPage(
+              key: state.pageKey,
+              child: const ReportsRoute(),
             ),
           ),
           GoRoute(

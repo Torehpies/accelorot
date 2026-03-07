@@ -56,7 +56,7 @@ class TeamRow extends StatelessWidget {
                   },
                 ),
                 TableActionButton(
-                  icon: Icons.arrow_right,
+                  icon: Icons.view_list,
                   tooltip: 'View Team',
                   onPressed: () {
                     context.pushNamed(

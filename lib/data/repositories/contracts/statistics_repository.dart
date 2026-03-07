@@ -6,4 +6,5 @@ abstract class StatisticsRepository {
   Future<List<TemperatureModel>> getTemperatureReadings(String batchId);
   Future<List<MoistureModel>> getMoistureReadings(String batchId);
   Future<List<OxygenModel>> getOxygenReadings(String batchId);
+  Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId);
 }

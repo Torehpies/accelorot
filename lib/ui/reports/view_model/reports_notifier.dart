@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/report.dart';
 import '../../../data/repositories/report_repository.dart';
 import '../../../data/providers/report_providers.dart';
+import '../../../data/providers/auth_providers.dart';
 import '../../../services/sess_service.dart';
 
 part 'reports_notifier.g.dart';
@@ -131,7 +132,8 @@ class ReportsNotifier extends _$ReportsNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final reports = await _repository.getReportsByTeam(teamId);
+      var reports = await _repository.getReportsByTeam(teamId);
+      reports = _filterForOperator(reports);
       state = state.copyWith(reports: reports, isLoading: false);
     } catch (e) {
       state = state.copyWith(
@@ -143,11 +145,24 @@ class ReportsNotifier extends _$ReportsNotifier {
 
   Future<void> refresh(String teamId) async {
     try {
-      final reports = await _repository.getReportsByTeam(teamId);
+      var reports = await _repository.getReportsByTeam(teamId);
+      reports = _filterForOperator(reports);
       state = state.copyWith(reports: reports);
     } catch (e) {
       state = state.copyWith(errorMessage: 'Failed to refresh: $e');
     }
+  }
+
+  /// If the current user is an operator, only return reports they submitted.
+  List<Report> _filterForOperator(List<Report> reports) {
+    final appUser = ref.read(appUserProvider).asData?.value;
+    if (appUser == null) return reports;
+    
+    final role = appUser.teamRole?.toLowerCase();
+    if (role == 'operator') {
+      return reports.where((r) => r.userId == appUser.uid).toList();
+    }
+    return reports;
   }
 
   void setSearchQuery(String query) {

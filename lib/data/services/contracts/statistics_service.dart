@@ -6,4 +6,5 @@ abstract class StatisticsService {
   Future<List<TemperatureModel>> getTemperatureData(String batchId);
   Future<List<MoistureModel>> getMoistureData(String batchId);
   Future<List<OxygenModel>> getOxygenData(String batchId);
+  Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId);
 }

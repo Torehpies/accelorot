@@ -15,6 +15,7 @@ abstract class CycleRecommendation with _$CycleRecommendation {
     required String controllerType, // 'drum_controller' or 'aerator'
     String? machineId,
     String? userId,
+    String? operatorName,
     String? batchId,
 
     // Cycle settings
@@ -67,6 +68,7 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       controllerType: data['controllerType'] ?? '',
       machineId: data['machineId'],
       userId: data['userId'],
+      operatorName: data['operatorName'],
       batchId: data['batchId'],
       cycles: toInt(data['cycles'], 'cycles'),
       duration: data['duration'],
@@ -89,6 +91,7 @@ abstract class CycleRecommendation with _$CycleRecommendation {
       'controllerType': controllerType,
       if (machineId != null) 'machineId': machineId,
       if (userId != null) 'userId': userId,
+      if (operatorName != null) 'operatorName': operatorName,
       if (batchId != null) 'batchId': batchId,
       if (cycles != null) 'cycles': cycles,
       if (duration != null) 'duration': duration,

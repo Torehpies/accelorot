@@ -57,24 +57,6 @@ class FirebaseTeamService implements TeamService {
   }
 
   @override
-  Future<Result<Team, DataLayerError>> addTeam(Team team) async {
-    try {
-      final docRef = _firestore.collection('teams').doc();
-      final updatedTeam = team.copyWith(teamId: docRef.id);
-      await docRef.set(updatedTeam.toJson());
-      return Result.success(updatedTeam);
-    } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseAuthException(e));
-    } on TypeError catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } on FormatException catch (_) {
-      return const Result.failure(DataLayerError.mappingError());
-    } catch (e) {
-      return Result.failure(DataLayerError.unknownError(e));
-    }
-  }
-
-  @override
   Future<prefix.Result<List<Team>>> fetchTeamsPage({
     required int pageSize,
     required int pageIndex,
