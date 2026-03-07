@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
+import 'package:flutter_application_1/ui/chatbot/chat_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class ResponsiveMobileShell extends StatelessWidget {
@@ -16,26 +17,29 @@ class ResponsiveMobileShell extends StatelessWidget {
     required this.onTapped,
   });
 
+  void _showChatSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Crucial for a chat UI to take up space
+      backgroundColor: Colors.transparent, // Allows custom rounding/blur
+      builder: (context) => const ChatSheet(), // The UI widget we discussed
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedIndex = getSelectedIndex(context, navItems);
     final String location = GoRouterState.of(context).uri.toString();
     final bool showFab = location != '/chat' && location != '/operator/qr-scan';
-    // location != '/operator/dashboard';
 
     return Scaffold(
-      //      appBar: AppBar(
-      //        title: Text(navItems[selectedIndex].label),
-      //        backgroundColor: primaryColor,
-      //        foregroundColor: Colors.white,
-      //      ),
       body: child,
       floatingActionButton: Visibility(
         visible: showFab,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 70.0),
           child: FloatingActionButton(
-            onPressed: () {},
+            onPressed: () => _showChatSheet(context),
             elevation: 5,
             child: const Icon(Icons.smart_toy),
           ),
