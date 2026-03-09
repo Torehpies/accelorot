@@ -1,0 +1,38 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/data/models/chatbot_prompt.dart';
+import 'package:flutter_application_1/data/repositories/chatbot_repository/chatbot_repository.dart';
+
+class ChatbotPromptRepositoryRemote implements ChatbotPromptRepository {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  @override
+  Future<void> addPrompt(
+    String uid,
+    String sessionId,
+    ChatbotPrompt prompt,
+  ) async {
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('sessions')
+        .doc(sessionId)
+        .collection('messages')
+        .add(prompt.toJson());
+  }
+
+  @override
+  Stream<ChatbotPrompt?> streamPrompt(
+    String uid,
+    String sessionId,
+    String messageId,
+  ) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('sessions')
+        .doc(sessionId)
+        .collection('messages')
+        .doc(messageId)
+        .snapshots()
+        .map((doc) => doc.exists ? ChatbotPrompt.fromJson(doc.data()!) : null);
+  }
+}
