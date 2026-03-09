@@ -3,8 +3,9 @@ import 'package:flutter_application_1/data/models/chatbot_session.dart';
 import 'package:flutter_application_1/data/repositories/chatbot_session_repository/chatbot_session_repository.dart';
 import 'package:flutter_application_1/data/utils/collection_references.dart';
 
-class SessionRepositoryRemote implements SessionRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class ChatbotSessionRepositoryRemote implements ChatbotSessionRepository {
+  ChatbotSessionRepositoryRemote(this._firestore);
+  final FirebaseFirestore _firestore;
   @override
   Future<String> createSession(ChatbotSession session) async {
     try {
@@ -36,7 +37,10 @@ class SessionRepositoryRemote implements SessionRepository {
   @override
   Future<List<ChatbotSession>> getSessions(String uid) async {
     try {
-      final snapshot = await sessionCollection(uid, _firestore).get();
+      final snapshot = await sessionCollection(
+        uid,
+        _firestore,
+      ).orderBy('lastActive', descending: true).limit(5).get();
       return snapshot.docs
           .map(
             (doc) =>

@@ -1,6 +1,6 @@
 import 'package:flutter_application_1/data/models/chatbot_session.dart';
 
-abstract class SessionRepository {
+abstract class ChatbotSessionRepository {
   Future<String> createSession(ChatbotSession session);
   Future<ChatbotSession?> getSession(String uid, String sessionId);
   Future<List<ChatbotSession>> getSessions(String uid);

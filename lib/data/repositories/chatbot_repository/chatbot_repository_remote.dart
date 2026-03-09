@@ -3,7 +3,8 @@ import 'package:flutter_application_1/data/models/chatbot_prompt.dart';
 import 'package:flutter_application_1/data/repositories/chatbot_repository/chatbot_repository.dart';
 
 class ChatbotPromptRepositoryRemote implements ChatbotPromptRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  ChatbotPromptRepositoryRemote(this._firestore);
+  final FirebaseFirestore _firestore;
   @override
   Future<void> addPrompt(
     String uid,
