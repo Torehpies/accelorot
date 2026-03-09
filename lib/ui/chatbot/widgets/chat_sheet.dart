@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/chatbot/chat_bubble.dart';
+import 'package:flutter_application_1/ui/chatbot/widgets/chat_bubble.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ChatSheet extends StatelessWidget {
   const ChatSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This allows the sheet to push up when the keyboard appears
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -15,14 +15,12 @@ class ChatSheet extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      // We use a BoxConstraints to cap the height at 90% of the screen
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.9,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Shrinks to content if few messages
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. The "Grabber" Handle
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
             height: 5,
@@ -33,7 +31,6 @@ class ChatSheet extends StatelessWidget {
             ),
           ),
 
-          // 2. Chat Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
@@ -42,10 +39,7 @@ class ChatSheet extends StatelessWidget {
                   backgroundColor: Theme.of(
                     context,
                   ).primaryColor.withValues(alpha: 0.1),
-                  child: Icon(
-                    Icons.smart_toy,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  child: Icon(Icons.smart_toy, color: AppColors.green200),
                 ),
                 const SizedBox(width: 12),
                 const Text(
@@ -66,13 +60,10 @@ class ChatSheet extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
-              reverse: true, // Newest messages at the bottom
+              reverse: true,
               children: const [
                 ChatBubble(message: "How can I help you today?", isUser: false),
-                ChatBubble(
-                  message: "Hi! I have a question about my order.",
-                  isUser: true,
-                ),
+                ChatBubble(message: "Halu", isUser: true),
               ],
             ),
           ),
@@ -102,7 +93,7 @@ class ChatSheet extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: AppColors.green100,
                     child: IconButton(
                       icon: const Icon(
                         Icons.send,

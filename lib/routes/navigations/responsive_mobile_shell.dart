@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
-import 'package:flutter_application_1/ui/chatbot/chat_sheet.dart';
+import 'package:flutter_application_1/ui/chatbot/widgets/chat_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class ResponsiveMobileShell extends StatelessWidget {
