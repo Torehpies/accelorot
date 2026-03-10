@@ -39,4 +39,27 @@ class ChatbotSessionsNotifier extends _$ChatbotSessionsNotifier {
       return sortedSessions.take(3).toList();
     });
   }
+
+  Future<String?> addNewSession() async {
+    final repo = ref.read(chatbotSessionRepositoryProvider);
+    final userId = ref.watch(authUserProvider).value?.uid;
+    if (userId == null) {
+      state = AsyncValue.error("User not logged in", StackTrace.current);
+      return null;
+    }
+    state = AsyncValue.loading();
+    try {
+      final newSession = ChatbotSession(
+        sessionId: null,
+        createdAt: DateTime.now(),
+        lastActive: DateTime.now(),
+      );
+      final sessionId = await repo.createSession(newSession);
+      await getSessions();
+      return sessionId;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return null;
+    }
+  }
 }
