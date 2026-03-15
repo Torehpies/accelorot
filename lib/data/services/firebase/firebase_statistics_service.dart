@@ -77,21 +77,21 @@ class FirebaseStatisticsService implements StatisticsService {
                   });
                 }
               }
-            } else {
+            /*} else {
                // No readings for this day - add a zero value at midnight
                dailyReadings.add({
                 'id': '$dateStr-00-00-00',
                 'value': 0.0,
                 'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
-              });
+              });*/
             }
           } catch (e) {
             debugPrint('Error fetching day $dateStr: $e');
-             dailyReadings.add({
+             /*dailyReadings.add({
                 'id': '$dateStr-00-00-00',
                 'value': 0.0,
                 'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
-              });
+              });*/
           }
           return dailyReadings;
         }),
@@ -247,5 +247,112 @@ class FirebaseStatisticsService implements StatisticsService {
       debugPrint('Stack: $stackTrace');
       return null;
     }
+  }
+
+  @override
+  Stream<Map<String, dynamic>?> getLatestSensorReadingsStream(String batchId) {
+    if (batchId.isEmpty) return Stream.value(null);
+
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    // Combine initial fetch with a listener for today's updates
+    return Stream.fromFuture(getLatestSensorReadings(batchId)).asyncExpand((initial) {
+      return _db
+          .collection('batches')
+          .doc(batchId)
+          .collection('readings')
+          .doc(todayStr)
+          .collection('time')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .snapshots()
+          .map((snapshot) {
+            if (snapshot.docs.isNotEmpty) {
+              final data = snapshot.docs.first.data();
+              return {
+                'temperature': (data['temperature'] ?? 0).toDouble(),
+                'moisture': (data['moisture'] ?? 0).toDouble(),
+                'oxygen': (data['oxygen'] ?? 0).toDouble(),
+                'timestamp': _parseTimestamp(data['timestamp']),
+              };
+            }
+            return initial;
+          });
+    });
+  }
+
+  /// Generic stream for historical + real-time sensor data
+  Stream<List<T>> _getSensorDataStream<T>({
+    required String batchId,
+    required String fieldName,
+    required T Function(Map<String, dynamic>) fromMap,
+  }) {
+    if (batchId.isEmpty) return Stream.value([]);
+
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    // 1. Fetch historical data up to yesterday
+    final historicalFuture = _getSensorData(batchId: batchId, fieldName: fieldName).then((list) {
+      // Filter out today's data from historical fetch if any, as the listener handles it
+      return list.where((item) {
+        final ts = item['timestamp'] as DateTime?;
+        if (ts == null) return true;
+        return ts.toIso8601String().substring(0, 10) != todayStr;
+      }).toList();
+    });
+
+    // 2. Listen to today's data
+    final todayStream = _db
+        .collection('batches')
+        .doc(batchId)
+        .collection('readings')
+        .doc(todayStr)
+        .collection('time')
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+
+    // 3. Combine them
+    return Stream.fromFuture(historicalFuture).asyncExpand((historical) {
+      return todayStream.map((snapshot) {
+        final todayReadings = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'id': doc.id,
+            'value': (data[fieldName] ?? 0).toDouble(),
+            'timestamp': _parseTimestamp(data['timestamp']),
+          };
+        }).toList();
+
+        final combined = [...historical, ...todayReadings];
+        return combined.map((data) => fromMap(data)).toList();
+      });
+    });
+  }
+
+  @override
+  Stream<List<TemperatureModel>> getTemperatureDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'temperature',
+      fromMap: (data) => TemperatureModel.fromMap(data),
+    );
+  }
+
+  @override
+  Stream<List<MoistureModel>> getMoistureDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'moisture',
+      fromMap: (data) => MoistureModel.fromMap(data),
+    );
+  }
+
+  @override
+  Stream<List<OxygenModel>> getOxygenDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'oxygen',
+      fromMap: (data) => OxygenModel.fromMap(data),
+    );
   }
 }

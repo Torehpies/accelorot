@@ -48,3 +48,24 @@ final latestSensorReadingsProvider = FutureProvider.family<Map<String, dynamic>?
   final repository = ref.watch(statisticsRepositoryProvider);
   return repository.getLatestSensorReadings(batchId);
 });
+
+// Stream-based providers for real-time updates
+final temperatureStreamProvider = StreamProvider.family<List<TemperatureModel>, String>((ref, batchId) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getTemperatureReadingsStream(batchId);
+});
+
+final moistureStreamProvider = StreamProvider.family<List<MoistureModel>, String>((ref, batchId) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getMoistureReadingsStream(batchId);
+});
+
+final oxygenStreamProvider = StreamProvider.family<List<OxygenModel>, String>((ref, batchId) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getOxygenReadingsStream(batchId);
+});
+
+final latestSensorReadingsStreamProvider = StreamProvider.family<Map<String, dynamic>?, String>((ref, batchId) {
+  final repository = ref.watch(statisticsRepositoryProvider);
+  return repository.getLatestSensorReadingsStream(batchId);
+});
