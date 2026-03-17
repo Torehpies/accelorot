@@ -13,6 +13,7 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../view_model/operator_dashboard_viewmodel.dart';
 import '../models/operator_dashboard_state.dart';
+import '../../activity_logs/models/activity_common.dart';
 import '../../machine_detail_screen/view/machine_detail_screen.dart';
 
 import '../widgets/operator_machine_card.dart';
@@ -47,13 +48,13 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
 
     _teamId = userData?['teamId'] as String?;
 
-    if (_teamId != null) {
-      ref
-          .read(operatorDashboardViewModelProvider.notifier)
-          .initialize(_teamId!);
-    }
+    if (!mounted) return;
 
-    if (mounted) setState(() {});
+    if (_teamId != null) {
+      final notifier = ref.read(operatorDashboardViewModelProvider.notifier);
+      // Only initialize once — ViewModel's initialize() is a no-op if already loaded.
+      notifier.initialize(_teamId!);
+    }
   }
 
   void _showMachineDetails(MachineModel machine) {
@@ -69,7 +70,8 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
 
     switch (state.selectedDrumFilter) {
       case DrumStatusFilter.all:
-        message = 'No machines available.\nContact your admin for machine assignment.';
+        message =
+            'No machines available.\nContact your admin for machine assignment.';
         break;
       case DrumStatusFilter.empty:
         message = 'No empty machines.';
@@ -105,7 +107,10 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
 
   // ---------------------------------------------------------------------------
   Widget _buildMachineCard(
-      BuildContext context, MachineModel machine, int index) {
+    BuildContext context,
+    MachineModel machine,
+    int index,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 16, right: 16),
       child: OperatorMachineCard(
@@ -118,8 +123,7 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(operatorDashboardViewModelProvider);
-    final notifier =
-        ref.read(operatorDashboardViewModelProvider.notifier);
+    final notifier = ref.read(operatorDashboardViewModelProvider.notifier);
 
     return MobileScaffoldContainer(
       onTap: () => _searchFocusNode.unfocus(),
@@ -157,14 +161,12 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
             ),
 
             // Top padding for breathing room
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 8),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
             // Content
             MobileListContent<MachineModel>(
               isLoading: state.isLoading,
-              isInitialLoad: state.machines.isEmpty,
+              isInitialLoad: state.machines.isEmpty && !state.hasError,
               hasError: state.hasError,
               errorMessage: state.errorMessage,
               items: state.filteredMachines,

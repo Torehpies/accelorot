@@ -79,4 +79,5 @@ TODO.md
 
 # ignore local scripts used for seeding/moving test data
 /script/*.dart
+
 .env

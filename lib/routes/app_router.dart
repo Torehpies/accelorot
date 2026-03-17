@@ -154,85 +154,63 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RestrictOperatorView(),
       ),
 
-      // OPERATOR SHELL
-      ShellRoute(
-        builder: (context, state, child) {
-          // if (kIsWeb) {
-          //   return RestrictOperatorView();
-          // }
+      // OPERATOR SHELL — uses StatefulShellRoute to keep each tab's widget
+      // tree alive, preventing the dashboard from reloading on tab switch.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
           final isDesktop =
               MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
-            return WebShell(child: child);
+            return WebShell(child: navigationShell);
           } else {
-            return MobileNavigationShell(child: child);
+            return MobileNavigationShell(navigationShell: navigationShell);
           }
         },
-        routes: [
-          GoRoute(
-            path: RoutePath.dashboard.path,
-            name: RoutePath.dashboard.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ResponsiveDashboard(),
-              key: state.pageKey,
-            ),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.dashboard.path,
+                name: RoutePath.dashboard.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ResponsiveDashboard(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.activity.path,
-            name: RoutePath.activity.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ActivityLogsRoute(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.qrScan.path,
+                name: RoutePath.qrScan.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: QRScanScreen(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.statistics.path,
-            name: RoutePath.statistics.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ResponsiveStatistics(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.operatorReports.path,
+                name: RoutePath.operatorReports.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ReportsRoute(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.operatorMachines.path,
-            name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const OperatorMachineScreens(),
-              key: state.pageKey,
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.operatorSettings.path,
-            name: RoutePath.operatorSettings.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const SettingsScreen(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.qrScan.path,
-            name: RoutePath.qrScan.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const QRScanScreen(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.operatorReports.path,
-            name: RoutePath.operatorReports.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const ReportsRoute(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.profile.path,
-            name: RoutePath.profile.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ProfileScreenRoute(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.operatorSettings.path,
+                name: RoutePath.operatorSettings.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: SettingsScreen(),
+                ),
+              ),
+            ],
           ),
         ],
       ),
