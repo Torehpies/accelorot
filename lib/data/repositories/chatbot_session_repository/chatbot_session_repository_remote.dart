@@ -7,9 +7,9 @@ class ChatbotSessionRepositoryRemote implements ChatbotSessionRepository {
   ChatbotSessionRepositoryRemote(this._firestore);
   final FirebaseFirestore _firestore;
   @override
-  Future<String> createSession(ChatbotSession session) async {
+  Future<String> createSession(String uid, ChatbotSession session) async {
     try {
-      final collection = sessionCollection(session.sessionId ?? '', _firestore);
+      final collection = sessionCollection(uid, _firestore);
       if (session.sessionId != null && session.sessionId!.isNotEmpty) {
         await collection.doc(session.sessionId).set(session.toJson());
         return session.sessionId!;

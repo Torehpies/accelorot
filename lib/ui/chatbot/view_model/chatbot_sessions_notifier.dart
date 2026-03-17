@@ -56,7 +56,7 @@ class ChatbotSessionsNotifier extends _$ChatbotSessionsNotifier {
         createdAt: DateTime.now(),
         lastActive: DateTime.now(),
       );
-      final sessionId = await repo.createSession(newSession);
+      final sessionId = await repo.createSession(userId, newSession);
       await getSessions();
       return sessionId;
     } catch (e, st) {
