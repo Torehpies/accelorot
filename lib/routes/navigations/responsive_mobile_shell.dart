@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/chat_sheet.dart';
+import 'package:flutter_application_1/ui/chatbot/widgets/session_selector_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class ResponsiveMobileShell extends StatelessWidget {
@@ -17,12 +18,21 @@ class ResponsiveMobileShell extends StatelessWidget {
     required this.onTapped,
   });
 
+  void _showSessionSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const SessionSelectorSheet(),
+    );
+  }
+
   void _showChatSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Crucial for a chat UI to take up space
-      backgroundColor: Colors.transparent, // Allows custom rounding/blur
-      builder: (context) => const ChatSheet(), // The UI widget we discussed
+      isScrollControlled: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const ChatSheet(),
     );
   }
 
