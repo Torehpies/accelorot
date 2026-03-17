@@ -23,14 +23,16 @@ class ChatbotSendNotifier extends _$ChatbotSendNotifier {
       return;
     }
 
+    if (sessionId.trim().isEmpty) {
+      state = AsyncValue.error('Session not available', StackTrace.current);
+      return;
+    }
+
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(chatbotPromptRepositoryProvider);
       final payload = ChatbotPrompt(
         prompt: prompt,
-        response: null,
-        createTime: DateTime.now(),
-        status: const PromptStatus(state: 'PENDING'),
       );
       await repo.addPrompt(userId, sessionId, payload);
     });

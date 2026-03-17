@@ -5,7 +5,7 @@ import 'package:flutter_application_1/ui/chatbot/widgets/session_selector_sheet.
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ChatSheet extends ConsumerWidget {
+class ChatSheet extends ConsumerStatefulWidget {
   final String? sessionId;
   const ChatSheet({
     super.key,
@@ -13,8 +13,36 @@ class ChatSheet extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChatSheet> createState() => _ChatSheetState();
+}
+
+class _ChatSheetState extends ConsumerState<ChatSheet> {
+  String? _activeSessionId;
+
+  @override
+  void initState() {
+    super.initState();
+    _activeSessionId = widget.sessionId;
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sessionId != widget.sessionId) {
+      _activeSessionId = widget.sessionId;
+    }
+  }
+
+  void _handleSessionCreated(String sessionId) {
+    setState(() {
+      _activeSessionId = sessionId;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final viewInsets = MediaQuery.of(context).viewInsets;
+    final activeSessionId = _activeSessionId;
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
@@ -60,9 +88,9 @@ class ChatSheet extends ConsumerWidget {
                                 ),
                           ),
                           Text(
-                            sessionId == null
+                            activeSessionId == null
                                 ? 'Start a new conversation'
-                                : 'Session #$sessionId',
+                                : 'Session #$activeSessionId',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -99,12 +127,13 @@ class ChatSheet extends ConsumerWidget {
                 child: Divider(height: 20),
               ),
               Expanded(
-                child: sessionId == null
+                child: activeSessionId == null
                     ? const _ChatEmptyState()
-                    : ChatMessagesList(sessionId: sessionId!),
+                    : ChatMessagesList(sessionId: activeSessionId),
               ),
               ChatPromptInput(
-                sessionId: sessionId,
+                sessionId: activeSessionId,
+                onSessionCreated: _handleSessionCreated,
               ),
             ],
           ),

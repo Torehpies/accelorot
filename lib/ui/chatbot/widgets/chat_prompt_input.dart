@@ -8,9 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatPromptInput extends ConsumerStatefulWidget {
   final String? sessionId;
+  final ValueChanged<String>? onSessionCreated;
   const ChatPromptInput({
     super.key,
     this.sessionId,
+    this.onSessionCreated,
   });
 
   @override
@@ -71,6 +73,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
           AppSnackbar.error(context, 'Failed to create session');
           return;
         }
+        widget.onSessionCreated?.call(resolvedSessionId);
       }
 
       await ref

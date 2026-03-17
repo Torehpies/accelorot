@@ -15,6 +15,10 @@ class ChatbotSessionRepositoryRemote implements ChatbotSessionRepository {
         return session.sessionId!;
       } else {
         final docRef = await collection.add(session.toJson());
+        await docRef.set(
+          session.copyWith(sessionId: docRef.id).toJson(),
+          SetOptions(merge: true),
+        );
         return docRef.id;
       }
     } catch (e) {

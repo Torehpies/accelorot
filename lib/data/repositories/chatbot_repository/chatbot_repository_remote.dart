@@ -33,7 +33,6 @@ class ChatbotPromptRepositoryRemote implements ChatbotPromptRepository {
         .map(
           (snapshot) => snapshot.docs
               .map((doc) => ChatbotPrompt.fromJson(doc.data()))
-              .where((prompt) => prompt.status?.state == 'COMPLETED')
               .toList(),
         );
   }
