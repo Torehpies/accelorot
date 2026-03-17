@@ -21,6 +21,24 @@ class ChatbotPromptRepositoryRemote implements ChatbotPromptRepository {
   }
 
   @override
+  Stream<List<ChatbotPrompt>> streamMessages(String uid, String sessionId) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('sessions')
+        .doc(sessionId)
+        .collection('messages')
+        .orderBy('createTime', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ChatbotPrompt.fromJson(doc.data()))
+              .where((prompt) => prompt.status?.state == 'COMPLETED')
+              .toList(),
+        );
+  }
+
+  @override
   Stream<ChatbotPrompt?> streamPrompt(
     String uid,
     String sessionId,

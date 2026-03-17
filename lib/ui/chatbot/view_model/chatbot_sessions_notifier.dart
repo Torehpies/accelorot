@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/models/chatbot_session.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/chatbot_providers.dart';
@@ -19,7 +20,7 @@ class ChatbotSessionsNotifier extends _$ChatbotSessionsNotifier {
       ..sort(
         (a, b) => b.lastActive?.compareTo(a.lastActive ?? DateTime(0)) ?? 0,
       );
-    return sortedSessions.take(3).toList();
+    return sortedSessions.toList();
   }
 
   Future<void> getSessions() async {
@@ -32,11 +33,12 @@ class ChatbotSessionsNotifier extends _$ChatbotSessionsNotifier {
     state = AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final sessions = await repo.getSessions(userId);
+      debugPrint("getting sessions");
       final sortedSessions = List<ChatbotSession>.from(sessions)
         ..sort(
           (a, b) => b.lastActive?.compareTo(a.lastActive ?? DateTime(0)) ?? 0,
         );
-      return sortedSessions.take(3).toList();
+      return sortedSessions.toList();
     });
   }
 
