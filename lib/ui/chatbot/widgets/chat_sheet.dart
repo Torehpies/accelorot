@@ -7,48 +7,153 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatSheet extends ConsumerWidget {
   final String? sessionId;
-  const ChatSheet({super.key, this.sessionId});
+  const ChatSheet({
+    super.key,
+    this.sessionId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    final viewInsets = MediaQuery.of(context).viewInsets;
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background2,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
         ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.white,
-                      builder: (context) => const SessionSelectorSheet(),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.green100,
-                  ),
-                  child: const Text('Open Sessions'),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.greenBackground,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.green400,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI Assistant',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          Text(
+                            sessionId == null
+                                ? 'Start a new conversation'
+                                : 'Session #$sessionId',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: AppColors.background2,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(20),
+                            ),
+                          ),
+                          builder: (context) => const SessionSelectorSheet(),
+                        );
+                      },
+                      icon: const Icon(Icons.history, size: 18),
+                      label: const Text('Sessions'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.green300,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Divider(height: 20),
+              ),
+              Expanded(
+                child: sessionId == null
+                    ? const _ChatEmptyState()
+                    : ChatMessagesList(sessionId: sessionId!),
+              ),
+              ChatPromptInput(
+                sessionId: sessionId,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatEmptyState extends StatelessWidget {
+  const _ChatEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.blueBackground,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.chat_bubble_outline,
+                color: AppColors.blueForeground,
+                size: 28,
+              ),
             ),
-            Expanded(
-              child: sessionId == null
-                  ? const Center(child: Text('Ask our AI chatbot 👋'))
-                  : ChatMessagesList(sessionId: sessionId!),
+            const SizedBox(height: 16),
+            Text(
+              'Ask anything about your process.',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
             ),
-            ChatPromptInput(sessionId: sessionId),
+            const SizedBox(height: 6),
+            Text(
+              'Get quick answers, summaries, and next steps in seconds.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),

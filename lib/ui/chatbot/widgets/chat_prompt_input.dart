@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_prompt_input_provider.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_send_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
+import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ChatPromptInput extends ConsumerStatefulWidget {
   final String? sessionId;
-  const ChatPromptInput({super.key, this.sessionId});
+  const ChatPromptInput({
+    super.key,
+    this.sessionId,
+  });
 
   @override
   ConsumerState<ChatPromptInput> createState() => _ChatPromptInputState();
@@ -34,9 +39,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
 
     ref.listen<AsyncValue<void>>(chatbotSendProvider, (previous, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.error.toString())));
+        AppSnackbar.error(context, next.error.toString());
       }
 
       if ((previous?.isLoading ?? false) && next.hasValue) {
@@ -65,9 +68,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
         final sessionNotifier = ref.read(chatbotSessionsProvider.notifier);
         resolvedSessionId = await sessionNotifier.addNewSession();
         if (resolvedSessionId == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to create session')),
-          );
+          AppSnackbar.error(context, 'Failed to create session');
           return;
         }
       }
@@ -78,35 +79,79 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              enabled: !isSending,
-              decoration: const InputDecoration(
-                hintText: 'Type your question…',
-              ),
-              onChanged: (value) {
-                ref.read(chatbotPromptInputProvider.notifier).setInput(value);
-              },
-              onSubmitted: (_) => handleSend(),
-              textInputAction: TextInputAction.send,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.background2,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.backgroundBorder),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 12,
+              offset: Offset(0, 6),
             ),
-          ),
-          const SizedBox(width: 12),
-          ElevatedButton(
-            onPressed: isDisabled ? null : handleSend,
-            child: isSending
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Send'),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                enabled: !isSending,
+                minLines: 1,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'Ask our AI assistant...',
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 6),
+                ),
+                onChanged: (value) {
+                  ref.read(chatbotPromptInputProvider.notifier).setInput(value);
+                },
+                onSubmitted: (_) => handleSend(),
+                textInputAction: TextInputAction.send,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Material(
+              color: isDisabled ? AppColors.grey : AppColors.green100,
+              shape: const CircleBorder(),
+              child: InkWell(
+                onTap: isDisabled ? null : handleSend,
+                customBorder: const CircleBorder(),
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: isSending
+                          ? const SizedBox(
+                              key: ValueKey('loading'),
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.arrow_upward,
+                              key: ValueKey('send'),
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

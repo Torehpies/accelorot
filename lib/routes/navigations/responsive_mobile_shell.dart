@@ -23,16 +23,16 @@ class ResponsiveMobileShell extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const SessionSelectorSheet(),
+      builder: (_) => const SessionSelectorSheet(),
     );
   }
 
   void _showChatSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: false,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const ChatSheet(),
+      builder: (_) => const ChatSheet(),
     );
   }
 

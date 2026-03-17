@@ -14,11 +14,12 @@ class ChatMessagesList extends ConsumerWidget {
     return messages.when(
       data: (items) {
         if (items.isEmpty) {
-          return const Center(child: Text('Ask our AI chatbot 👋'));
+          return const SizedBox.shrink();
         }
 
         return ListView.builder(
           reverse: true,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
           itemCount: items.length,
           itemBuilder: (context, index) {
             final prompt = items[index];

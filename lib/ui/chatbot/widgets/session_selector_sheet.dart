@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/chat_sheet.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SessionSelectorSheet extends ConsumerWidget {
@@ -10,41 +11,97 @@ class SessionSelectorSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionsAsync = ref.watch(chatbotSessionsProvider);
     return sessionsAsync.when(
-      loading: () => CircularProgressIndicator(),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
-      data: (sessions) => Column(
-        children: [
-          ...sessions
-              .where((s) => s.sessionId != null)
-              .map(
-                (session) => ListTile(
-                  title: Text('Session ${session.sessionId}'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (_) => ChatSheet(sessionId: session.sessionId!),
-                    );
-                  },
+      data: (sessions) {
+        final items = sessions.where((s) => s.sessionId != null).toList();
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Conversations',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
-              ),
-          ElevatedButton(
-            child: Text('Create New Session'),
-            onPressed: () async {
-              final notifier = ref.read(chatbotSessionsProvider.notifier);
-              final newSessionId = await notifier.addNewSession();
-              if (!context.mounted) return;
-              if (newSessionId != null) {
-                Navigator.of(context).pop();
-                showModalBottomSheet(
-                  context: context,
-                  builder: (_) => ChatSheet(sessionId: newSessionId),
-                );
-              }
-            },
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final session = items[index];
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: AppColors.greenBackground,
+                          child: const Icon(
+                            Icons.chat_bubble_outline,
+                            color: AppColors.green400,
+                            size: 18,
+                          ),
+                        ),
+                        title: Text('Session ${session.sessionId}'),
+                        subtitle: const Text('Tap to resume'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: AppColors.background2,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            builder: (_) => ChatSheet(
+                              sessionId: session.sessionId!,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final notifier =
+                        ref.read(chatbotSessionsProvider.notifier);
+                    final newSessionId = await notifier.addNewSession();
+                    if (!context.mounted) return;
+                    if (newSessionId != null) {
+                      Navigator.of(context).pop();
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: AppColors.background2,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        builder: (_) => ChatSheet(
+                          sessionId: newSessionId,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('New session'),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
