@@ -7,7 +7,7 @@ import '../../core/widgets/containers/mobile_sliver_header.dart';
 import '../../core/widgets/containers/mobile_list_content.dart';
 import '../../core/widgets/filters/mobile_drum_status_filter_button.dart';
 import '../../core/widgets/filters/mobile_date_filter_button.dart';
-import '../../core/widgets/sample_cards/data_card_skeleton.dart';
+import '../widgets/operator_machine_card_skeleton.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
@@ -183,7 +183,10 @@ class _OperatorDashboardViewState extends ConsumerState<OperatorDashboardView> {
                 if (_teamId != null) notifier.initialize(_teamId!);
               },
               itemBuilder: _buildMachineCard,
-              skeletonBuilder: (context, index) => const DataCardSkeleton(),
+              skeletonBuilder: (context, index) => const Padding(
+                padding: EdgeInsets.only(bottom: 8, left: 16, right: 16),
+                child: OperatorMachineCardSkeleton(),
+              ),
             ),
           ],
         ),
