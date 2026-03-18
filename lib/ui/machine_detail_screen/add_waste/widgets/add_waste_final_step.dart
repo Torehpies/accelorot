@@ -30,9 +30,9 @@ class AddWasteFinalStep extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         
-        // Handa na!
+        // Ready!
         const Text(
-          'Handa na!',
+          'Ready!',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -43,7 +43,7 @@ class AddWasteFinalStep extends StatelessWidget {
         
         // Headline
         const Text(
-          'I-lock ang pinto ng\ndrum at i-tap ang start',
+          'Lock the drum door\nand tap start',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,

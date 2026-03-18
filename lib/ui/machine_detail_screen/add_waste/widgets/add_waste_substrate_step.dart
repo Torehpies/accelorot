@@ -163,7 +163,7 @@ class _AddWasteSubstrateStepState extends State<AddWasteSubstrateStep> {
         
         // Headline
         const Text(
-          'Ano ang iyong mga\nnilagay?',
+          'What did you\nadd?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,
