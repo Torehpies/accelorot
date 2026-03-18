@@ -111,17 +111,18 @@ class SettingsContent extends ConsumerWidget {
             SettingsSection(
               title: 'NOTIFICATIONS',
               children: [
-                SettingsSwitchTile(
-                  icon: Icons.notifications,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive app notifications',
-                  value: settings.notifications.pushEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .togglePushNotifications(value);
-                  },
-                ),
+                if (_roleNameForContext(context) != 'Admin' && _roleNameForContext(context) != 'Super Admin')
+                  SettingsSwitchTile(
+                    icon: Icons.notifications,
+                    title: 'Push Notifications',
+                    subtitle: 'Receive app notifications',
+                    value: settings.notifications.pushEnabled,
+                    onChanged: (value) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .togglePushNotifications(value);
+                    },
+                  ),
                 SettingsSwitchTile(
                   icon: Icons.email_outlined,
                   title: 'Email Reports',
