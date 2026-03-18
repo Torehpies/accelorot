@@ -25,13 +25,13 @@ class SensorTrendView extends ConsumerWidget {
 
     switch (sensorType) {
       case SensorType.temperature:
-        asyncData = ref.watch(temperatureDataProvider(batchId));
+        asyncData = ref.watch(temperatureStreamProvider(batchId));
         break;
       case SensorType.moisture:
-        asyncData = ref.watch(moistureDataProvider(batchId));
+        asyncData = ref.watch(moistureStreamProvider(batchId));
         break;
       case SensorType.oxygen:
-        asyncData = ref.watch(oxygenDataProvider(batchId));
+        asyncData = ref.watch(oxygenStreamProvider(batchId));
         break;
     }
 

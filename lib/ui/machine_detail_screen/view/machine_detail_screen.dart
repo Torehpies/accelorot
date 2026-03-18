@@ -217,7 +217,7 @@ class _MachineDetailScreenState extends ConsumerState<MachineDetailScreen> {
     final isBatchActive = currentMachine.currentBatchId?.isNotEmpty == true;
 
     final batchId = currentMachine.currentBatchId ?? '';
-    final latestReadingsAsync = ref.watch(latestSensorReadingsProvider(batchId));
+    final latestReadingsAsync = ref.watch(latestSensorReadingsStreamProvider(batchId));
 
     double? tempVal;
     double? moistVal;

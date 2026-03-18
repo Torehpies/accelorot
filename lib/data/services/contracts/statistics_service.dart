@@ -7,4 +7,10 @@ abstract class StatisticsService {
   Future<List<MoistureModel>> getMoistureData(String batchId);
   Future<List<OxygenModel>> getOxygenData(String batchId);
   Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId);
+
+  // Stream-based methods for real-time updates
+  Stream<List<TemperatureModel>> getTemperatureDataStream(String batchId);
+  Stream<List<MoistureModel>> getMoistureDataStream(String batchId);
+  Stream<List<OxygenModel>> getOxygenDataStream(String batchId);
+  Stream<Map<String, dynamic>?> getLatestSensorReadingsStream(String batchId);
 }

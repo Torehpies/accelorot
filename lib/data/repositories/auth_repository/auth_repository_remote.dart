@@ -13,6 +13,7 @@ import 'package:flutter_application_1/data/repositories/auth_repository/auth_rep
 import 'package:flutter_application_1/data/utils/map_firebase_exception.dart';
 import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
+import 'package:flutter_application_1/services/push_notification_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthRepositoryRemote implements AuthRepository {
@@ -23,6 +24,7 @@ class AuthRepositoryRemote implements AuthRepository {
   final AppUserService _userService;
   final GoogleSignIn _googleSignIn;
   final TeamService _teamService;
+  final PushNotificationService _pushNotificationService;
 
   AppUser? _lastKnownUser;
 
@@ -34,6 +36,7 @@ class AuthRepositoryRemote implements AuthRepository {
     this._userService,
     this._googleSignIn,
     this._teamService,
+    this._pushNotificationService,
   );
 
   @override
@@ -82,6 +85,16 @@ class AuthRepositoryRemote implements AuthRepository {
   }) async {
     try {
       await _authService.signInWithEmail(email, password);
+      
+      // Update FCM token on sign in
+      final userId = _firebaseAuth.currentUser?.uid;
+      if (userId != null) {
+        final token = await _pushNotificationService.getDeviceToken();
+        if (token != null) {
+          await _userService.updateUserField(userId, {'fcmToken': token});
+        }
+      }
+
       return Result.success(null);
     } on FirebaseAuthException catch (e) {
       return Result.failure(mapFirebaseAuthException(e));
@@ -117,6 +130,7 @@ class AuthRepositoryRemote implements AuthRepository {
       await _authService.updateDisplayName(user, "$firstName $lastName");
 
       /// Add user profile in firestore
+      final token = await _pushNotificationService.getDeviceToken();
       final profileResult = await _userRepository.createUserProfile(
         uid: user.uid,
         email: email,
@@ -126,6 +140,10 @@ class AuthRepositoryRemote implements AuthRepository {
         status: UserStatus.pending.value,
         requestTeamId: teamId,
       );
+
+      if (profileResult.isSuccess && token != null) {
+        await _userService.updateUserField(user.uid, {'fcmToken': token});
+      }
 
       if (profileResult.isFailure) {
         return Result.failure(profileResult.asFailure);
