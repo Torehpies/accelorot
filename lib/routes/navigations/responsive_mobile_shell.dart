@@ -59,7 +59,9 @@ class ResponsiveMobileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedIndex = getSelectedIndex(context, navItems);
     final String location = GoRouterState.of(context).uri.toString();
-    final bool showFab = location != '/chat' && location != '/operator/qr-scan';
+    final bool showFab = location != '/chat' &&
+        location != '/operator/qr-scan' &&
+        !location.endsWith('/settings');
 
     return Scaffold(
       body: child,

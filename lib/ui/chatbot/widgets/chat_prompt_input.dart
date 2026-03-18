@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_messages_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_prompt_input_provider.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_send_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
@@ -59,7 +60,28 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
     });
 
     final isSending = sendState.isLoading;
-    final isDisabled = isSending || promptText.trim().isEmpty;
+    bool isProcessing = false;
+
+    if (widget.sessionId != null) {
+      final messagesAsync =
+          ref.watch(chatbotMessagesProvider(widget.sessionId!));
+      final messages = messagesAsync.asData?.value ?? [];
+      if (messages.isNotEmpty) {
+        final latestMessage = messages.first;
+        final state = latestMessage.status?.state;
+        // Consider processing if explicitly PROCESSING or if not COMPLETED and no response yet
+        // (This covers the gap where status might be null or initial state)
+        if (state == 'PROCESSING' ||
+            (state != 'COMPLETED' &&
+                (latestMessage.response == null ||
+                    latestMessage.response!.isEmpty))) {
+          isProcessing = true;
+        }
+      }
+    }
+
+    final isBusy = isSending || isProcessing;
+    final isDisabled = isBusy || promptText.trim().isEmpty;
 
     Future<void> handleSend() async {
       if (isDisabled) return;
@@ -102,7 +124,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                enabled: !isSending,
+                enabled: !isBusy,
                 minLines: 1,
                 maxLines: 4,
                 decoration: const InputDecoration(
@@ -135,7 +157,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
                   child: Center(
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
-                      child: isSending
+                      child: isBusy
                           ? const SizedBox(
                               key: ValueKey('loading'),
                               width: 18,
