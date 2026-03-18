@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
-import 'package:flutter_application_1/ui/chatbot/widgets/chat_sheet.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,20 +50,8 @@ class SessionSelectorSheet extends ConsumerWidget {
                         subtitle: const Text('Tap to resume'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          Navigator.of(context).pop();
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: AppColors.background2,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(20),
-                              ),
-                            ),
-                            builder: (_) => ChatSheet(
-                              sessionId: session.sessionId!,
-                            ),
-                          );
+                          // Return the selected sessionId and close the sheet
+                          Navigator.of(context).pop(session.sessionId);
                         },
                       );
                     },
@@ -78,20 +65,8 @@ class SessionSelectorSheet extends ConsumerWidget {
                     final newSessionId = await notifier.addNewSession();
                     if (!context.mounted) return;
                     if (newSessionId != null) {
-                      Navigator.of(context).pop();
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: AppColors.background2,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                        builder: (_) => ChatSheet(
-                          sessionId: newSessionId,
-                        ),
-                      );
+                      // Return the new sessionId and close the sheet
+                      Navigator.of(context).pop(newSessionId);
                     }
                   },
                   icon: const Icon(Icons.add),
@@ -105,3 +80,4 @@ class SessionSelectorSheet extends ConsumerWidget {
     );
   }
 }
+

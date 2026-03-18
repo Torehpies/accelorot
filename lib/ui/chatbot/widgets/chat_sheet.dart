@@ -99,8 +99,9 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                       ),
                     ),
                     TextButton.icon(
-                      onPressed: () {
-                        showModalBottomSheet(
+                      onPressed: () async {
+                        final selectedSessionId =
+                            await showModalBottomSheet<String>(
                           context: context,
                           isScrollControlled: true,
                           backgroundColor: AppColors.background2,
@@ -111,6 +112,12 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                           ),
                           builder: (context) => const SessionSelectorSheet(),
                         );
+
+                        if (selectedSessionId != null && mounted) {
+                          setState(() {
+                            _activeSessionId = selectedSessionId;
+                          });
+                        }
                       },
                       icon: const Icon(Icons.history, size: 18),
                       label: const Text('Sessions'),
