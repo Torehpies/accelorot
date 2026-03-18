@@ -108,6 +108,10 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
                 decoration: const InputDecoration(
                   hintText: 'Ask our AI assistant...',
                   border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(horizontal: 6),
                 ),

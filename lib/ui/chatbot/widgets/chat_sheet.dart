@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/models/chatbot_session.dart';
+import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/chat_messages_list.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/chat_prompt_input.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/session_selector_sheet.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class ChatSheet extends ConsumerStatefulWidget {
   final String? sessionId;
@@ -39,15 +42,47 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
     });
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    try {
+      return DateFormat('MMM d, h:mm a').format(date);
+    } catch (_) {
+      // Fallback if intl not available or error
+      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.of(context).viewInsets;
     final activeSessionId = _activeSessionId;
+    final sessionsAsync = ref.watch(chatbotSessionsProvider);
+    final sessions = sessionsAsync.asData?.value ?? [];
+
+    String? sessionDisplay;
+    if (activeSessionId != null) {
+      ChatbotSession? session;
+      try {
+        session = sessions.firstWhere(
+          (s) => s.sessionId == activeSessionId,
+        );
+      } catch (_) {
+        session = null;
+      }
+      
+      if (session?.createdAt != null) {
+        sessionDisplay = _formatDate(session!.createdAt);
+      } else {
+        sessionDisplay = 'Session #$activeSessionId';
+      }
+    }
+
     return AnimatedPadding(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: viewInsets.bottom),
       child: Container(
+        margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 50),
         decoration: const BoxDecoration(
           color: AppColors.background2,
           borderRadius: BorderRadius.only(
@@ -90,7 +125,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                           Text(
                             activeSessionId == null
                                 ? 'Start a new conversation'
-                                : 'Session #$activeSessionId',
+                                : sessionDisplay ?? 'Session #$activeSessionId',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -98,6 +133,7 @@ class _ChatSheetState extends ConsumerState<ChatSheet> {
                         ],
                       ),
                     ),
+
                     TextButton.icon(
                       onPressed: () async {
                         final selectedSessionId =

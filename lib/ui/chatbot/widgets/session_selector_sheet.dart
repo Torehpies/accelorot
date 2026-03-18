@@ -2,9 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class SessionSelectorSheet extends ConsumerWidget {
   const SessionSelectorSheet({super.key});
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    try {
+      return DateFormat('MMM d, h:mm a').format(date);
+    } catch (_) {
+      // Fallback if intl not available or error
+      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,6 +46,7 @@ class SessionSelectorSheet extends ConsumerWidget {
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final session = items[index];
+                      final displayDate = _formatDate(session.createdAt);
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: CircleAvatar(
@@ -46,7 +58,7 @@ class SessionSelectorSheet extends ConsumerWidget {
                             size: 18,
                           ),
                         ),
-                        title: Text('Session ${session.sessionId}'),
+                        title: Text(displayDate.isNotEmpty ? displayDate : 'Session ${session.sessionId}'),
                         subtitle: const Text('Tap to resume'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
