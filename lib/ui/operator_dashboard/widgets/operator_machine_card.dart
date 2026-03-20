@@ -8,6 +8,7 @@ import '../../../data/providers/batch_providers.dart';
 import '../../../data/providers/statistics_providers.dart';
 import '../../../data/providers/substrate_providers.dart';
 import '../../../data/providers/cycle_providers.dart';
+import 'operator_machine_card_skeleton.dart';
 
 class OperatorMachineCard extends ConsumerWidget {
   final MachineModel machine;
@@ -97,6 +98,15 @@ class OperatorMachineCard extends ConsumerWidget {
           }
         }
       }
+    }
+
+    final bool isLoading = (batchAsync.isLoading && !batchAsync.hasValue) ||
+                           (readingsAsync.isLoading && !readingsAsync.hasValue) ||
+                           (substratesAsync.isLoading && !substratesAsync.hasValue) ||
+                           (teamCyclesAsync.isLoading && !teamCyclesAsync.hasValue);
+
+    if (isLoading) {
+      return const OperatorMachineCardSkeleton();
     }
 
     final bool cyclesLoaded = !teamCyclesAsync.isLoading;

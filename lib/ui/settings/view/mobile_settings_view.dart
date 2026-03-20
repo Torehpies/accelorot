@@ -66,7 +66,6 @@ class SettingsContent extends ConsumerWidget {
           ),
         ),
         loaded: (state) {
-          final settings = state.settings;
           final displayName =
               profileState.profile?.displayName ??
               FirebaseAuth.instance.currentUser?.displayName;
@@ -93,120 +92,13 @@ class SettingsContent extends ConsumerWidget {
                       ChangePasswordDialog.show(context);
                     },
                   ),
-                  SettingsSwitchTile(
-                    icon: Icons.email,
-                    title: 'Email Updates',
-                    subtitle: 'Receive updates and newsletters',
-                    value: settings.account.emailUpdates,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .toggleEmailUpdates(value);
-                    },
-                  ),
                 ],
               ),
 
-            // Notifications Section
-            SettingsSection(
-              title: 'NOTIFICATIONS',
-              children: [
-                SettingsSwitchTile(
-                  icon: Icons.notifications,
-                  title: 'Push Notifications',
-                  subtitle: 'Receive app notifications',
-                  value: settings.notifications.pushEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .togglePushNotifications(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  icon: Icons.email_outlined,
-                  title: 'Email Reports',
-                  subtitle: 'Get weekly reports via email',
-                  value: settings.notifications.emailReportsEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .toggleEmailReports(value);
-                  },
-                ),
-                const Divider(height: 1),
-                const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text(
-                    'ALERT PREFERENCES',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-                SettingsSwitchTile(
-                  icon: Icons.thermostat,
-                  title: 'Temperature Alerts',
-                  value: settings.notifications.temperatureAlertsEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .toggleTemperatureAlerts(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  icon: Icons.water_drop,
-                  title: 'Moisture Alerts',
-                  value: settings.notifications.moistureAlertsEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .toggleMoistureAlerts(value);
-                  },
-                ),
-                SettingsSwitchTile(
-                  icon: Icons.air,
-                  title: 'Oxygen Alerts',
-                  value: settings.notifications.oxygenAlertsEnabled,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .toggleOxygenAlerts(value);
-                  },
-                ),
-              ],
-            ),
+
 
             // Appearance Section Removed
 
-            // Data & Privacy Section
-            SettingsSection(
-              title: 'DATA & PRIVACY',
-              children: [
-                SettingsTile(
-                  icon: Icons.delete_forever,
-                  title: 'Clear Cache',
-                  onTap: () async {
-                    final confirm = await showConfirmDialog(
-                      context: context,
-                      title: 'Clear Cache',
-                      message: 'Are you sure you want to clear all cached data?',
-                      confirmText: 'Clear',
-                      cancelText: 'Cancel',
-                    );
-                    if (confirm == true) {
-                      // TODO: Implement cache clearing
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Cache cleared')),
-                        );
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
 
             // About Section
             SettingsSection(

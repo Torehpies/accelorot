@@ -34,4 +34,24 @@ class StatisticsRepositoryRemote implements StatisticsRepository {
   Future<Map<String, dynamic>?> getLatestSensorReadings(String batchId) async {
     return await _statisticsService.getLatestSensorReadings(batchId);
   }
+
+  @override
+  Stream<List<TemperatureModel>> getTemperatureReadingsStream(String batchId) {
+    return _statisticsService.getTemperatureDataStream(batchId);
+  }
+
+  @override
+  Stream<List<MoistureModel>> getMoistureReadingsStream(String batchId) {
+    return _statisticsService.getMoistureDataStream(batchId);
+  }
+
+  @override
+  Stream<List<OxygenModel>> getOxygenReadingsStream(String batchId) {
+    return _statisticsService.getOxygenDataStream(batchId);
+  }
+
+  @override
+  Stream<Map<String, dynamic>?> getLatestSensorReadingsStream(String batchId) {
+    return _statisticsService.getLatestSensorReadingsStream(batchId);
+  }
 }
