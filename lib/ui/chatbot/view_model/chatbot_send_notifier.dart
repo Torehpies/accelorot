@@ -1,5 +1,4 @@
 import 'package:flutter_application_1/data/models/chatbot_prompt.dart';
-import 'package:flutter_application_1/data/models/prompt_status.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/chatbot_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
