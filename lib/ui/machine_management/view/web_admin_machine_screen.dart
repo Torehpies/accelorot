@@ -53,27 +53,35 @@ class WebAdminMachineScreen extends ConsumerWidget {
                       _showViewDetailsDialog(context, machine, notifier),
                   onPageChanged: notifier.onPageChanged,
                   onItemsPerPageChanged: notifier.onItemsPerPageChanged,
-                  onAddMachine: () => _showAddMachineDialog(context, notifier),
+                  onAddMachine: () =>
+                      _showAddMachineDialog(context, state.machines, notifier),
                 ),
               ),
             ),
     );
   }
 
-  void _showAddMachineDialog(BuildContext context, MachineViewModel notifier) {
+  void _showAddMachineDialog(
+    BuildContext context,
+    List<MachineModel> machines,
+    MachineViewModel notifier,
+  ) {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
-      barrierDismissible: false, // Prevent closing while creating
+      barrierDismissible: false,
       builder: (context) => WebAdminAddDialog(
-        onCreate:
-            ({required String machineId, required String machineName}) async {
-              await notifier.addMachine(
-                machineId: machineId,
-                machineName: machineName,
-                assignedUserIds: [],
-              );
-            },
+        machines: machines,
+        onCreate: ({
+          required String machineId,
+          required String machineName,
+        }) async {
+          await notifier.addMachine(
+            machineId: machineId,
+            machineName: machineName,
+            assignedUserIds: [],
+          );
+        },
       ),
     );
   }
@@ -86,23 +94,22 @@ class WebAdminMachineScreen extends ConsumerWidget {
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
-      barrierDismissible: false, // Prevent closing while editing
+      barrierDismissible: false,
       builder: (context) => WebAdminEditDialog(
         machine: machine,
-        onUpdate:
-            ({
-              required String machineId,
-              String? machineName,
-              MachineStatus? status,
-              List<String>? assignedUserIds,
-            }) async {
-              await notifier.updateMachine(
-                machineId: machineId,
-                machineName: machineName,
-                status: status,
-                assignedUserIds: assignedUserIds,
-              );
-            },
+        onUpdate: ({
+          required String machineId,
+          String? machineName,
+          MachineStatus? status,
+          List<String>? assignedUserIds,
+        }) async {
+          await notifier.updateMachine(
+            machineId: machineId,
+            machineName: machineName,
+            status: status,
+            assignedUserIds: assignedUserIds,
+          );
+        },
       ),
     );
   }

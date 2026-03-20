@@ -1,4 +1,8 @@
+// lib/ui/team_management/widgets/team_detail_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/data/models/machine_model.dart';
+import 'package:flutter_application_1/data/providers/machine_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
@@ -300,18 +304,34 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
     );
   }
 
-  void _showAddMachineDialog(BuildContext context) {
+  // ── Add Machine Dialog ───────────────────────────────────────────────
+  Future<void> _showAddMachineDialog(BuildContext context) async {
+    final repository = ref.read(machineRepositoryProvider);
+
+    List<MachineModel> machines;
+    try {
+      machines = await repository.getMachinesByTeam(_teamId);
+    } catch (_) {
+      // If fetch fails, fall back to empty list — dialog will start at MACH001
+      machines = [];
+    }
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: false,
       builder: (context) => WebAdminAddDialog(
-        onCreate:
-            ({required String machineId, required String machineName}) async {
-              await ref
-                  .read(teamMachineActionsProvider(_teamId).notifier)
-                  .addMachine(machineId: machineId, machineName: machineName);
-            },
+        machines: machines,
+        onCreate: ({
+          required String machineId,
+          required String machineName,
+        }) async {
+          await ref
+              .read(teamMachineActionsProvider(_teamId).notifier)
+              .addMachine(machineId: machineId, machineName: machineName);
+        },
       ),
     );
   }
