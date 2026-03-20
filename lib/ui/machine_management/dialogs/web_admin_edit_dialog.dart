@@ -6,7 +6,7 @@ import '../../../data/models/machine_model.dart';
 import '../../core/widgets/dialog/base_dialog.dart';
 import '../../core/widgets/dialog/dialog_action.dart';
 import '../../core/widgets/dialog/dialog_fields.dart';
-import '../../core/widgets/dialog/mobile_confirmation_dialog.dart';
+import '../../core/widgets/dialog/web_confirmation_dialog.dart';
 import '../../core/ui/app_snackbar.dart';
 
 typedef UpdateMachineCallback = Future<void> Function({
@@ -93,7 +93,7 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
 
   Future<void> _cancel() async {
     if (_hasChanges) {
-      final result = await MobileConfirmationDialog.show(context);
+      final result = await WebConfirmationDialog.show(context);
       if (result == ConfirmResult.confirmed && mounted) {
         Navigator.of(context).pop();
       }
@@ -117,7 +117,7 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
       subtitle: 'Edit Machine',
       canClose: !_isLoading,
       content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           InputField(
             label: 'Machine Name',

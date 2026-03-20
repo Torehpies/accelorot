@@ -131,9 +131,6 @@ class MobileConfirmationDialog extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: WebColors.error,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       elevation: 0,
                     ),
