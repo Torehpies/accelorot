@@ -90,10 +90,17 @@ class WebAdminMachineScreen extends ConsumerWidget {
       builder: (context) => WebAdminEditDialog(
         machine: machine,
         onUpdate:
-            ({required String machineId, required String machineName}) async {
+            ({
+              required String machineId,
+              String? machineName,
+              MachineStatus? status,
+              List<String>? assignedUserIds,
+            }) async {
               await notifier.updateMachine(
                 machineId: machineId,
                 machineName: machineName,
+                status: status,
+                assignedUserIds: assignedUserIds,
               );
             },
       ),
