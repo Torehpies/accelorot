@@ -1,7 +1,7 @@
 // lib/ui/operator_dashboard/fields/description_field.dart
 
 import 'package:flutter/material.dart';
-import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
+import '../../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 
 class DescriptionField extends StatelessWidget {
   final TextEditingController controller;

@@ -11,7 +11,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pending_members_notifier.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class PendingMembersNotifier extends _$PendingMembersNotifier {
   void setPageSize(int newSize) {
     if (newSize == state.pageSize) return;

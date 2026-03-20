@@ -19,8 +19,8 @@ class RecentActivitiesTable extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use streaming provider for real-time updates 
-    final activitiesAsync = ref.watch(allActivitiesStreamProvider);
+    // Use future provider for one-time fetch 
+    final activitiesAsync = ref.watch(allActivitiesProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
 
@@ -87,6 +87,14 @@ class RecentActivitiesTable extends ConsumerWidget {
       );
     }
 
+    // ✅ NEW: Constant time lookup map to reduce N+1 performance bottleneck
+    final Map<String, String> batchNameLookup = {};
+    for (var b in batches) {
+      if (b.id != null) {
+        batchNameLookup[b.id] = b.displayName ?? b.id;
+      }
+    }
+
     return ListView.separated(
       itemCount: filteredActivities.length,
       padding: EdgeInsets.zero,
@@ -96,7 +104,7 @@ class RecentActivitiesTable extends ConsumerWidget {
           : const ClampingScrollPhysics(),
       itemBuilder: (context, index) {
         final activity = filteredActivities[index];
-        return _buildRow(activity, batches);
+        return _buildRow(activity, batchNameLookup);
       },
       separatorBuilder: (context, index) =>
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
@@ -173,8 +181,11 @@ class RecentActivitiesTable extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.refresh, size: 16),
-          // ✅ Invalidate streaming provider to force refresh
-          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
+          // ✅ Clear cache and invalidate provider to force refresh
+          onPressed: () {
+            ref.read(activityAggregatorProvider).clearCache();
+            ref.invalidate(allActivitiesProvider);
+          },
           tooltip: 'Refresh',
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -183,16 +194,16 @@ class RecentActivitiesTable extends ConsumerWidget {
     );
   }
 
-  Widget _buildRow(ActivityLogItem activity, List<dynamic> batches) {
+  Widget _buildRow(ActivityLogItem activity, Map<String, String> batchNameLookup) {
     final iconColor = activity.statusColor;
     final icon = activity.icon;
 
-    // Lookup batch display name
+    // Lookup batch display name using constant-time map
     String? batchDisplayName = activity.batchName ?? activity.batchId;
     if (activity.batchName == null && activity.batchId != null) {
-      final matchingBatches = batches.where((b) => b.id == activity.batchId);
-      if (matchingBatches.isNotEmpty) {
-        batchDisplayName = matchingBatches.first.displayName;
+      final name = batchNameLookup[activity.batchId];
+      if (name != null) {
+        batchDisplayName = name;
       }
     }
 

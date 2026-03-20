@@ -16,7 +16,7 @@ class LocalReportService implements ReportService {
   }
 
   @override
-  Future<List<Report>> fetchReportsForMachine(String machineId) {
+  Future<List<Report>> fetchReportsForMachine(String machineId, {int? limit}) {
     throw UnimplementedError('Local database not yet implemented');
   }
 

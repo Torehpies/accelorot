@@ -43,7 +43,15 @@ final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref.watch(authStateChangesProvider);
 
   final aggregator = ref.watch(activityAggregatorProvider);
-  final result = await aggregator.getAllActivitiesWithCache();
+  
+  // Fetch up to 50 latest activities from the last 7 days
+  // forceRefresh: true ensures it bypasses the aggregator's 5-minute memory cache
+  // since FutureProvider inherently handles its own state caching lifecycle.
+  final result = await aggregator.getAllActivitiesWithCache(
+    limit: 50,
+    filterRecentDays: 7,
+    forceRefresh: true,
+  );
   return result.items;
 });
 
@@ -52,7 +60,7 @@ final substrateActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getSubstrates();
+  return aggregator.getSubstrates(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for alerts only
@@ -60,7 +68,7 @@ final alertActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getAlerts();
+  return aggregator.getAlerts(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for cycles only
@@ -68,7 +76,7 @@ final cycleActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getCyclesRecom();
+  return aggregator.getCyclesRecom(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for reports only
@@ -76,7 +84,7 @@ final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getReports();
+  return aggregator.getReports(limit: 50);
 });
 
 /// Provider for activities filtered by user's team
@@ -97,8 +105,8 @@ final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   // Get team's machine IDs
   final machineIds = await batchRepo.getTeamMachineIds(profile!.teamId!);
 
-  // Get all activities
-  final result = await aggregator.getAllActivitiesWithCache();
+  // Get all activities (bounded to 7 days, 50 limits to prevent extreme UI hangs)
+  final result = await aggregator.getAllActivitiesWithCache(limit: 50, filterRecentDays: 7);
 
   // Filter activities by team's machines or team membership
   return result.items.where((activity) {

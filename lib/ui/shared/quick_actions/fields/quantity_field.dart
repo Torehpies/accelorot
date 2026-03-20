@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
+import '../../../core/widgets/bottom_sheets/fields/mobile_input_field.dart';
 
 class QuantityField extends StatelessWidget {
   final TextEditingController controller;

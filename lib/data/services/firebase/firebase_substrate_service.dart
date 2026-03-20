@@ -29,7 +29,10 @@ class FirestoreSubstrateService implements SubstrateService {
   // ===== FETCH OPERATIONS =====
 
   @override
-  Future<List<Substrate>> fetchTeamSubstrates() async {
+  Future<List<Substrate>> fetchTeamSubstrates({
+    int? limit,
+    DateTime? cutoffDate,
+  }) async {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -45,10 +48,15 @@ class FirestoreSubstrateService implements SubstrateService {
       }
 
       // Fetch team-wide substrates
-      final allSubstrates = await _fetchTeamSubstrates(teamId);
+      var allSubstrates = await _fetchTeamSubstrates(teamId, limit: limit, cutoffDate: cutoffDate);
 
       // Sort by timestamp descending (newest first)
       allSubstrates.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Apply upper bound total limit
+      if (limit != null && allSubstrates.length > limit) {
+        allSubstrates = allSubstrates.sublist(0, limit);
+      }
 
       debugPrint('✅ Fetched ${allSubstrates.length} substrates');
       return allSubstrates;
@@ -59,7 +67,11 @@ class FirestoreSubstrateService implements SubstrateService {
   }
 
   /// Fetch substrates for team users (multi-step query)
-  Future<List<Substrate>> _fetchTeamSubstrates(String teamId) async {
+  Future<List<Substrate>> _fetchTeamSubstrates(
+    String teamId, {
+    int? limit,
+    DateTime? cutoffDate,
+  }) async {
     final List<Substrate> allSubstrates = [];
     int successCount = 0;
     int failureCount = 0;
@@ -83,13 +95,24 @@ class FirestoreSubstrateService implements SubstrateService {
     // Fetch substrates from each batch's subcollection in parallel
     final futures = batches.map((batchDoc) async {
       try {
-        // PATH: batches/{batchId}/substrates
-        final substratesSnapshot = await _firestore
+        var query = _firestore
             .collection('batches')
             .doc(batchDoc.id)
             .collection('substrates')
-            .orderBy('timestamp', descending: true)
-            .get();
+            .orderBy('timestamp', descending: true);
+
+        if (cutoffDate != null) {
+          query = query.where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
+          );
+        }
+
+        if (limit != null) {
+          query = query.limit(limit);
+        }
+
+        final substratesSnapshot = await query.get();
 
         final substrates = substratesSnapshot.docs
             .map((doc) => Substrate.fromFirestore(doc))

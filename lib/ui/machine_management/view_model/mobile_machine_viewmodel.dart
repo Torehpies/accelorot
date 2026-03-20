@@ -12,14 +12,14 @@ import '../../activity_logs/models/activity_common.dart';
 part 'mobile_machine_viewmodel.g.dart';
 
 // ===== AGGREGATOR SERVICE PROVIDER =====
-@riverpod
+@Riverpod(keepAlive: true)
 MachineAggregatorService mobileMachineAggregatorService(Ref ref) {
   final repository = ref.watch(machineRepositoryProvider);
   return MachineAggregatorService(machineRepo: repository);
 }
 
 // ===== MOBILE MACHINE VIEW MODEL =====
-@riverpod
+@Riverpod(keepAlive: true)
 class MobileMachineViewModel extends _$MobileMachineViewModel {
   static const int _loadMoreIncrement = 5;
   

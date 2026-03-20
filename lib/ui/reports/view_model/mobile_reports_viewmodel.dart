@@ -12,14 +12,14 @@ import '../models/report_filters.dart';
 part 'mobile_reports_viewmodel.g.dart';
 
 // ===== AGGREGATOR SERVICE PROVIDER =====
-@riverpod
+@Riverpod(keepAlive: true)
 ReportAggregatorService mobileReportsAggregatorService(Ref ref) {
   final repository = ref.watch(reportRepositoryProvider);
   return ReportAggregatorService(reportRepo: repository);
 }
 
 // ===== MOBILE REPORTS VIEW MODEL =====
-@riverpod
+@Riverpod(keepAlive: true)
 class MobileReportsViewModel extends _$MobileReportsViewModel {
   static const int _loadMoreIncrement = 5;
   

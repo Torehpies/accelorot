@@ -106,8 +106,8 @@ class ActivityViewModel extends _$ActivityViewModel {
         return await _aggregator.getCyclesRecom(cutoffDate: cutoffDate);
 
       case ActivityScreenType.allActivity:
-        // Use the new caching method for allActivity screen
-        final result = await _aggregator.getAllActivitiesWithCache();
+        // Applying identical limits to the viewmodel to block 22s fetches on the Activity screen
+        final result = await _aggregator.getAllActivitiesWithCache(limit: 50, filterRecentDays: 7);
         _entityCache = result.entityCache; // Store cache
         return result.items;
     }

@@ -18,7 +18,7 @@ import '../widgets/wide_action_button.dart';
 import '../../admin_dashboard/web_widgets/recent_activities_table.dart';
 import '../../core/ui/confirmation_dialog.dart';
 import '../add_waste/view/add_waste_screen.dart';
-import '../../operator_dashboard_old/widgets/quick_actions/quick_actions_sheet.dart';
+import '../../shared/quick_actions/sheet/quick_actions_sheet.dart';
 import '../../core/themes/app_theme.dart';
 
 class MachineDetailScreen extends ConsumerStatefulWidget {

@@ -15,7 +15,7 @@ import 'team_members_state.dart';
 
 part 'team_members_notifier.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TeamMembersNotifier extends _$TeamMembersNotifier {
   void setPageSize(int newSize) {
     if (newSize == state.pageSize) return;

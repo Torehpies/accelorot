@@ -59,7 +59,7 @@ class FirebaseReportService implements ReportService {
 
       // PARALLEL FETCHING: Fetch reports from all machines simultaneously
       final futures = machinesSnapshot.docs.map((machineDoc) {
-        return fetchReportsForMachine(machineDoc.id);
+        return fetchReportsForMachine(machineDoc.id, limit: limit);
       });
 
       final results = await Future.wait(futures);
@@ -87,14 +87,19 @@ class FirebaseReportService implements ReportService {
   }
 
   @override
-  Future<List<Report>> fetchReportsForMachine(String machineId) async {
+  Future<List<Report>> fetchReportsForMachine(String machineId, {int? limit}) async {
     try {
-      final snapshot = await _firestore
+      var query = _firestore
           .collection('machines')
           .doc(machineId)
           .collection('reports')
-          .orderBy('createdAt', descending: true)
-          .get();
+          .orderBy('createdAt', descending: true);
+          
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+          
+      final snapshot = await query.get();
 
       return snapshot.docs.map((doc) => Report.fromFirestore(doc)).toList();
     } catch (e) {

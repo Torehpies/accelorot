@@ -71,8 +71,8 @@ class FirestoreCycleService implements CycleService {
         return [];
       }
 
-      // ✅ NEW: Pass cutoffDate to _fetchTeamCycles
-      var allCycles = await _fetchTeamCycles(teamId, cutoffDate: cutoffDate);
+      // ✅ NEW: Pass cutoffDate and limit to _fetchTeamCycles
+      var allCycles = await _fetchTeamCycles(teamId, cutoffDate: cutoffDate, limit: limit);
 
       // Sort by timestamp descending (newest first)
       allCycles.sort(
@@ -101,6 +101,7 @@ class FirestoreCycleService implements CycleService {
   Future<List<CycleRecommendation>> _fetchTeamCycles(
     String teamId, {
     DateTime? cutoffDate,
+    int? limit,
   }) async {
     final stopwatch = Stopwatch()..start();
     final List<CycleRecommendation> allCycles = [];
@@ -120,8 +121,8 @@ class FirestoreCycleService implements CycleService {
 
       // ✅ Parallel sub-queries per batch
       final results = await Future.wait([
-        getDrumControllers(batchId: batchId, cutoffDate: cutoffDate),
-        getAerators(batchId: batchId, cutoffDate: cutoffDate),
+        getDrumControllers(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
+        getAerators(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
       ]);
 
       return [...results[0], ...results[1]];
@@ -154,6 +155,7 @@ class FirestoreCycleService implements CycleService {
   Future<List<CycleRecommendation>> getDrumControllers({
     required String batchId,
     DateTime? cutoffDate, // ✅ NEW: Add cutoff parameter
+    int? limit, // ✅ NEW: Add limit parameter
   }) async {
     try {
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
@@ -175,6 +177,11 @@ class FirestoreCycleService implements CycleService {
         );
       }
 
+      // ✅ NEW: Apply limit at Firestore query level
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
       final drumSnapshot = await query.get();
 
       if (drumSnapshot.docs.isEmpty) return [];
@@ -194,6 +201,7 @@ class FirestoreCycleService implements CycleService {
   Future<List<CycleRecommendation>> getAerators({
     required String batchId,
     DateTime? cutoffDate, // ✅ NEW: Add cutoff parameter
+    int? limit, // ✅ NEW: Add limit parameter
   }) async {
     try {
       final cycleDocId = await _getExistingMainCycleDocId(batchId);
@@ -213,6 +221,11 @@ class FirestoreCycleService implements CycleService {
           'startedAt',
           isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
         );
+      }
+
+      // ✅ NEW: Apply limit at Firestore query level
+      if (limit != null) {
+        query = query.limit(limit);
       }
 
       final aeratorSnapshot = await query.get();
