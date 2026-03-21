@@ -12,6 +12,8 @@ import '../../core/ui/confirm_dialog.dart';
 import '../../profile_screen/view_model/profile_notifier.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../routes/navigation_utils.dart';
+import '../widgets/edit_name_dialog.dart';
+import '../widgets/about_dialogs.dart';
 import 'package:go_router/go_router.dart';
 
 class MobileSettingsView extends ConsumerWidget {
@@ -85,6 +87,7 @@ class SettingsContent extends ConsumerWidget {
                     icon: Icons.badge_outlined,
                     title: 'Name',
                     subtitle: displayName ?? 'Not set',
+                    onTap: () => EditNameDialog.show(context),
                   ),
                   SettingsTile(
                     icon: Icons.lock,
@@ -214,32 +217,24 @@ class SettingsContent extends ConsumerWidget {
               children: [
                 SettingsTile(
                   icon: Icons.info,
-                  title: 'Version',
-                  trailing: const Text(
-                    '0.0.0',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  title: 'App Info',
+                  subtitle: 'Version 1.0.0',
+                  onTap: () => AboutDialogs.showAppInfo(context),
                 ),
                 SettingsTile(
                   icon: Icons.privacy_tip,
                   title: 'Privacy Policy',
-                  onTap: () {
-                    // TODO: Show privacy policy
-                  },
+                  onTap: () => AboutDialogs.showPrivacyPolicy(context),
                 ),
                 SettingsTile(
                   icon: Icons.description,
                   title: 'Terms of Service',
-                  onTap: () {
-                    // TODO: Show terms
-                  },
+                  onTap: () => AboutDialogs.showTermsOfService(context),
                 ),
                 SettingsTile(
                   icon: Icons.help,
                   title: 'Help & Support',
-                  onTap: () {
-                    // TODO: Show help
-                  },
+                  onTap: () => AboutDialogs.showHelpSupport(context),
                 ),
               ],
             ),
