@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ChatBubble extends StatelessWidget {

@@ -43,7 +43,7 @@ class SessionSelectorSheet extends ConsumerWidget {
                   child: ListView.separated(
                     shrinkWrap: true,
                     itemCount: items.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final session = items[index];
                       final displayDate = _formatDate(session.createdAt);
