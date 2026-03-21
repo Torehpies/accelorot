@@ -1,8 +1,11 @@
+// lib/ui/operator_management/dialogs/view_operator_dialog.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
-import 'package:flutter_application_1/ui/core/widgets/fields/read_only_field.dart';
-import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/base_dialog.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/dialog_action.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/dialog_fields.dart';
+import 'package:flutter_application_1/utils/format.dart';
 
 class ViewOperatorDialog extends StatelessWidget {
   final TeamMember operator;
@@ -11,68 +14,42 @@ class ViewOperatorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DialogShell(
-      title: const Text(
-        'Operator Details',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('View in-depth information about this operator.'),
-          const Divider(thickness: 1, height: 24),
-          const SizedBox(height: 5),
-          _buildDetailsFields(context),
+    return BaseDialog(
+      title: '${operator.firstName} ${operator.lastName}',
+      subtitle: 'Operator Details',
+      maxHeightFactor: 0.6,
+      content: ReadOnlySection(
+        fields: [
+          ReadOnlyField(
+            label: 'First Name',
+            value: operator.firstName,
+          ),
+          ReadOnlyField(
+            label: 'Last Name',
+            value: operator.lastName,
+          ),
+          ReadOnlyField(
+            label: 'Email',
+            value: operator.email,
+          ),
+          ReadOnlyField(
+            label: 'Status',
+            value: toTitleCase(operator.status.value),
+          ),
+          ReadOnlyField(
+            label: 'Operator ID',
+            value: operator.id,
+          ),
+          ReadOnlyField(
+            label: 'Added At',
+            value: formatDateAndTime(operator.addedAt),
+          ),
         ],
       ),
       actions: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailsFields(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ReadOnlyField(
-                  label: 'First Name',
-                  value: operator.firstName,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ReadOnlyField(
-                  label: 'Last Name',
-                  value: operator.lastName,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        ReadOnlyField(label: 'Email', value: operator.email),
-        const SizedBox(height: 16),
-
-        ReadOnlyField(
-          label: 'Status',
-          value: toTitleCase(operator.status.value),
-        ),
-        const SizedBox(height: 16),
-
-        ReadOnlyField(
-          label: 'Added At',
-          value: formatDateAndTime(operator.addedAt),
+        DialogAction.secondary(
+          label: 'Close',
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ],
     );
