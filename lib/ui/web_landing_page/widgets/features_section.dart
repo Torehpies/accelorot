@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
-import '../../core/themes/web_colors.dart';
 import '../models/feature_model.dart';
 
 class FeaturesSection extends StatefulWidget {
@@ -24,6 +24,7 @@ class FeaturesSectionState extends State<FeaturesSection> {
   late PageController _pageController;
   int _currentIndex = 0;
   double _currentPage = 0.0;
+  Timer? _autoScrollTimer;
 
   final List<String> featureImages = [
     'assets/images/Mobile Dashboard.png',
@@ -37,37 +38,39 @@ class FeaturesSectionState extends State<FeaturesSection> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.85);
+    // Increased viewportFraction from 0.25 to 0.45 for larger visible images
+    _pageController = PageController(viewportFraction: 0.45);
     _pageController.addListener(() {
+      if (!mounted) return;
       setState(() {
         _currentPage = _pageController.page ?? 0.0;
         _currentIndex = _currentPage.round();
       });
     });
+    _startAutoScroll();
   }
 
-  void goToPrevious() {
-    if (_currentIndex > 0 && _pageController.hasClients) {
-      _pageController.animateToPage(
-        _currentIndex - 1,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    }
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!mounted) return;
+      if (_pageController.hasClients) {
+        final nextPage = (_currentIndex + 1) % featureImages.length;
+        _pageController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
-  void goToNext() {
-    if (_currentIndex < featureImages.length - 1 && _pageController.hasClients) {
-      _pageController.animateToPage(
-        _currentIndex + 1,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    }
+  void _stopAutoScroll() {
+    _autoScrollTimer?.cancel();
   }
 
   @override
   void dispose() {
+    _stopAutoScroll();
     _pageController.dispose();
     super.dispose();
   }
@@ -95,115 +98,41 @@ class FeaturesSectionState extends State<FeaturesSection> {
                 TextSpan(text: 'Smart Features for '),
                 TextSpan(
                   text: 'Efficient Composting',
-                  style: TextStyle(color: WebColors.textTitle),
+                  style: TextStyle(color: Color(0xFF2D3748)),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Our IoT-enabled system combines automation, real-time monitoring, and AI recommendations',
+            'Our IoT-enabled system combines automation, monitoring, and AI Chatbot',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl * 1.5),
 
-          // CAROUSEL — image with arrows and indicators inside
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: screenWidth > 1400 ? 1000 : screenWidth * 0.85,
-              maxHeight: 500,
-            ),
+          // CAROUSEL - Images only with increased size
+          SizedBox(
+            // Increased height for larger images
+            height: isMobile ? 420 : 580,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Scaled image carousel
-                SizedBox(
-                  height: 440,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: featureImages.length,
-                    itemBuilder: (context, index) {
-                      return _buildCarouselItem(index);
-                    },
-                  ),
+                // PageView with images only
+                PageView.builder(
+                  controller: _pageController,
+                  itemCount: featureImages.length,
+                  onPageChanged: (index) {
+                    if (mounted) {
+                      setState(() => _currentIndex = index);
+                    }
+                  },
+                  itemBuilder: (context, index) {
+                    return _buildImageCard(index, isMobile);
+                  },
                 ),
 
-                // LEFT ARROW — inside image, vertically centered
-                Positioned(
-                  left: isMobile ? 12 : 24,
-                  child: Center(
-                    child: Container(
-                      width: isMobile ? 40 : 48,
-                      height: isMobile ? 40 : 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F8FF), // Alice blue
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: _currentIndex > 0 ? goToPrevious : null,
-                        icon: Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: isMobile ? 20 : 24,
-                          color: Colors.green,
-                        ),
-                        padding: EdgeInsets.zero,
-                        splashRadius: isMobile ? 20 : 24,
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(Colors.transparent),
-                          overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // RIGHT ARROW — inside image, vertically centered
-                Positioned(
-                  right: isMobile ? 12 : 24,
-                  child: Center(
-                    child: Container(
-                      width: isMobile ? 40 : 48,
-                      height: isMobile ? 40 : 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0F8FF), // Alice blue
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: _currentIndex < featureImages.length - 1 ? goToNext : null,
-                        icon: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: isMobile ? 20 : 24,
-                          color: Colors.green,
-                        ),
-                        padding: EdgeInsets.zero,
-                        splashRadius: isMobile ? 20 : 24,
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(Colors.transparent),
-                          overlayColor: WidgetStateProperty.all(Colors.white.withValues(alpha: 0.1)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // INDICATORS — positioned at bottom inside image
+                // INDICATORS - Modern dots at bottom
                 Positioned(
                   bottom: isMobile ? 16 : 24,
                   left: 0,
@@ -212,15 +141,18 @@ class FeaturesSectionState extends State<FeaturesSection> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       featureImages.length,
-                      (index) => Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentIndex == index ? (isMobile ? 20 : 24) : 8,
-                        height: isMobile ? 6 : 8,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 6),
+                        width: _currentIndex == index 
+                            ? (isMobile ? 32 : 40) 
+                            : 10,
+                        height: _currentIndex == index ? 10 : 10,
                         decoration: BoxDecoration(
                           color: _currentIndex == index 
-                              ? Colors.white.withValues(alpha: 0.9)  // Active indicator - bright white
-                              : Colors.white.withValues(alpha: 0.3), // Inactive indicator - muted/low opacity
-                          borderRadius: BorderRadius.circular(4),
+                              ? const Color(0xFF2D3748)
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                     ),
@@ -236,69 +168,59 @@ class FeaturesSectionState extends State<FeaturesSection> {
     );
   }
 
-  Widget _buildCarouselItem(int index) {
+  Widget _buildImageCard(int index, bool isMobile) {
     return AnimatedBuilder(
       animation: _pageController,
       builder: (context, child) {
-        double value = 1.0;
+        double scale = 1.0;
+        double opacity = 1.0;
+        double yOffset = 0.0;
 
         if (_pageController.position.haveDimensions) {
-          value = _pageController.page! - index;
-          value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+          final value = (_pageController.page! - index).abs();
+          
+          // Adjusted scale curve for more prominent active image
+          scale = (1 - (value * 0.25)).clamp(0.85, 1.0);
+          opacity = (1 - (value * 0.4)).clamp(0.6, 1.0);
+          yOffset = value * 15;
         }
 
         return Center(
-          child: Transform.scale(
-            scale: value,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              constraints: const BoxConstraints(
-                maxWidth: 700,
-                maxHeight: 440,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: value > 0.95
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 20,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 8),
+          child: Transform.translate(
+            offset: Offset(0, -yOffset),
+            child: Transform.scale(
+              scale: scale,
+              child: Opacity(
+                opacity: opacity,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Image.asset(
+                    featureImages[index],
+                    // Changed to BoxFit.scaleDown for better high-res handling
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    // Added cacheWidth/cacheHeight for better performance with large images
+                    cacheWidth: isMobile ? 600 : 1200,
+                    cacheHeight: isMobile ? 400 : 800,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: isMobile ? 280 : 500,
+                        height: isMobile ? 350 : 600,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 10,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 4),
+                        child: Center(
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: isMobile ? 56 : 80,
+                            color: Colors.grey.shade400,
+                          ),
                         ),
-                      ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  featureImages[index],
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey.shade100,
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.broken_image_outlined, size: 64, color: Colors.grey[500]),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Image Load Failed',
-                              style: TextStyle(color: Colors.grey[700], fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

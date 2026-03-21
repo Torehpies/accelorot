@@ -1,17 +1,23 @@
+// lib/ui/web_landing_page/widgets/contact_section.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:go_router/go_router.dart';
 
+import '../dialogs/terms_of_service_dialog.dart';
+import '../dialogs/privacy_policy_dialog.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 
 class ContactSection extends StatelessWidget {
   final ValueChanged<String>? onNavigateToSection;
+  final VoidCallback? onBackToTop;
+  final bool showBackToTop;
 
   const ContactSection({
     super.key,
     this.onNavigateToSection,
+    this.onBackToTop,
+    this.showBackToTop = true,
   });
 
   Future<void> _launchUrl(String urlString) async {
@@ -26,7 +32,7 @@ class ContactSection extends StatelessWidget {
     final subject = 'Inquiry from Accel-O-Rot Website';
 
     final gmailUri = Uri.parse(
-      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject'
+      'https://mail.google.com/mail/?view=cm&fs=1&to=      $email&su=$subject',
     );
 
     if (!await launchUrl(gmailUri)) {
@@ -44,10 +50,16 @@ class ContactSection extends StatelessWidget {
   void _handleLinkNavigation(BuildContext context, String linkText) {
     switch (linkText) {
       case 'Privacy Policy':
-        context.go('/privacy-policy');
+        showDialog(
+          context: context,
+          builder: (context) => const PrivacyPolicyDialog(),
+        );
         break;
       case 'Terms of Service':
-        context.go('/terms-of-service');
+        showDialog(
+          context: context,
+          builder: (context) => const TermsOfServiceDialog(),
+        );
         break;
       case 'Features':
         onNavigateToSection?.call('features');
@@ -72,209 +84,208 @@ class ContactSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF25282B), // Full-width background
+      color: const Color(0xFF25282B),
       width: double.infinity,
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1440), // Constrain content width
+          constraints: const BoxConstraints(maxWidth: 1440),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isMobile = constraints.maxWidth < 768;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              return Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? AppSpacing.xl : AppSpacing.xxxl * 2,
-                      vertical: AppSpacing.xl * 2,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMobile ? AppSpacing.xl : AppSpacing.xxxl * 2,
+                          vertical: AppSpacing.xl * 2,
+                        ),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Column(
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      MouseRegion(
+                                        cursor: SystemMouseCursors.click,
+                                        child: GestureDetector(
+                                          onTap: () => onNavigateToSection?.call('home'),
+                                          child: SvgPicture.asset(
+                                            'assets/images/Accelorot_name.svg',
+                                            width: isMobile ? 150 : 180,
+                                            height: isMobile ? 40 : 50,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: AppSpacing.md),
+                                      Text(
+                                        'Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting in the Philippines.',
+                                        style: WebTextStyles.caption.copyWith(
+                                          color: const Color(0xFF9CA3AF),
+                                          fontSize: 14,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: AppSpacing.xxxl),
+
+                            if (isMobile)
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Replaced logo with text-only SVG version
-                                  MouseRegion(
-                                    cursor: SystemMouseCursors.click,
-                                    child: GestureDetector(
-                                      onTap: () => onNavigateToSection?.call('home'),
-                                      child: SvgPicture.asset(
-                                        'assets/images/Accelorot_name.svg',
-                                        width: isMobile ? 150 : 180,
-                                        height: isMobile ? 40 : 50,
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: AppSpacing.md),
-                                  Text(
-                                    'Smart Rotary Drum System for Accelerated Organic Waste Decomposition and Sustainable Composting in the Philippines.',
-                                    style: WebTextStyles.caption.copyWith(
-                                      color: const Color(0xFF9CA3AF),
-                                      fontSize: 14,
-                                      height: 1.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: AppSpacing.xxxl),
-
-                        if (isMobile)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _FooterColumn(
-                                title: 'Quick Links',
-                                links: const [
-                                  'Features',
-                                  'How It Works',
-                                  'Impact',
-                                  'Download',
-                                  'FAQ',
-                                ],
-                                onLinkTap: (link) => _handleLinkNavigation(context, link),
-                              ),
-                              const SizedBox(height: AppSpacing.xxxl),
-                              _FooterColumn(
-                                title: 'Legal Policies',
-                                links: const [
-                                  'Privacy Policy',
-                                  'Terms of Service',
-                                ],
-                                onLinkTap: (link) => _handleLinkNavigation(context, link),
-                              ),
-                              const SizedBox(height: AppSpacing.xxxl),
-                              _FooterColumn(
-                                title: 'Contact Us',
-                                links: const [],
-                                onLinkTap: null,
-                                customContent: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Facebook entry matching contact icon style
-                                    _ContactRow(
-                                      icon: Icons.facebook_outlined,
-                                      text: 'Accel-O-Rot',
-                                      onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    _ContactRow(
-                                      icon: Icons.location_on_outlined,
-                                      text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    _ContactRow(
-                                      icon: Icons.email_outlined,
-                                      text: 'accelorot.management@gmail.com',
-                                      onTap: _launchGmailCompose,
-                                    ),
-                                    const SizedBox(height: AppSpacing.md),
-                                    _ContactRow(
-                                      icon: Icons.phone_outlined,
-                                      text: '+63 951 000 7296',
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: AppSpacing.xxxl),
-                                  child: _FooterColumn(
-                                    title: 'Quick Links',
-                                    links: const [
-                                      'Features',
-                                      'How It Works',
-                                      'Impact',
-                                      'Download',
-                                      'FAQ',
-                                    ],
-                                    onLinkTap: (link) => _handleLinkNavigation(context, link),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxxl),
-                                  child: _FooterColumn(
+                                  _FooterColumn(
                                     title: 'Legal Policies',
                                     links: const [
                                       'Privacy Policy',
                                       'Terms of Service',
                                     ],
                                     onLinkTap: (link) => _handleLinkNavigation(context, link),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: _FooterColumn(
-                                  title: 'Contact Us',
-                                  links: const [],
-                                  onLinkTap: null,
-                                  customContent: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Facebook entry matching contact icon style
-                                      _ContactRow(
-                                        icon: Icons.facebook_outlined,
-                                        text: 'Accel-O-Rot',
-                                        onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
-                                      ),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _ContactRow(
-                                        icon: Icons.location_on_outlined,
-                                        text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
-                                      ),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _ContactRow(
-                                        icon: Icons.email_outlined,
-                                        text: 'accelorot.management@gmail.com',
-                                        onTap: _launchGmailCompose,
-                                      ),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _ContactRow(
-                                        icon: Icons.phone_outlined,
-                                        text: '+63 951 000 7296',
-                                      ),
+                                    icons: const [
+                                      Icons.shield_outlined,
+                                      Icons.article_outlined,
                                     ],
                                   ),
+                                  const SizedBox(height: AppSpacing.xxxl),
+                                  _FooterColumn(
+                                    title: 'Contact Us',
+                                    links: const [],
+                                    onLinkTap: null,
+                                    customContent: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _ContactRow(
+                                          icon: Icons.facebook_outlined,
+                                          text: 'Accel-O-Rot',
+                                          onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/      '),
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        _ContactRow(
+                                          icon: Icons.location_on_outlined,
+                                          text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        _ContactRow(
+                                          icon: Icons.email_outlined,
+                                          text: 'accelorot.management@gmail.com',
+                                          onTap: _launchGmailCompose,
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        _ContactRow(
+                                          icon: Icons.phone_outlined,
+                                          text: '+63 951 000 7296',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: AppSpacing.xxxl),
+                                      child: _FooterColumn(
+                                        title: 'Legal Policies',
+                                        links: const [
+                                          'Privacy Policy',
+                                          'Terms of Service',
+                                        ],
+                                        onLinkTap: (link) => _handleLinkNavigation(context, link),
+                                        icons: const [
+                                          Icons.shield_outlined,
+                                          Icons.article_outlined,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: _FooterColumn(
+                                      title: 'Contact Us',
+                                      links: const [],
+                                      onLinkTap: null,
+                                      customContent: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _ContactRow(
+                                            icon: Icons.facebook_outlined,
+                                            text: 'Accel-O-Rot',
+                                            onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/      '),
+                                          ),
+                                          const SizedBox(height: AppSpacing.md),
+                                          _ContactRow(
+                                            icon: Icons.location_on_outlined,
+                                            text: 'Congressional Rd Ext, Barangay 171, Caloocan City, Philippines',
+                                          ),
+                                          const SizedBox(height: AppSpacing.md),
+                                          _ContactRow(
+                                            icon: Icons.email_outlined,
+                                            text: 'accelorot.management@gmail.com',
+                                            onTap: _launchGmailCompose,
+                                          ),
+                                          const SizedBox(height: AppSpacing.md),
+                                          _ContactRow(
+                                            icon: Icons.phone_outlined,
+                                            text: '+63 951 000 7296',
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                            const SizedBox(height: AppSpacing.xxxl),
+                            
+                            // Horizontal line
+                            Container(height: 1, color: const Color(0xFF374151)),
+                            
+                            const SizedBox(height: AppSpacing.md),
+                            
+                            // Copyright text - centered and AFTER the line
+                            Center(
+                              child: Text(
+                                '© 2026 Accel-O-Rot. All rights reserved.',
+                                style: WebTextStyles.caption.copyWith(
+                                  color: const Color(0xFF9CA3AF),
+                                  fontSize: 13,
                                 ),
                               ),
-                            ],
-                          ),
-
-                        const SizedBox(height: AppSpacing.xxxl),
-                        Container(height: 1, color: const Color(0xFF374151)),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          '© 2026 Accel-O-Rot. All rights reserved.',
-                          style: WebTextStyles.caption.copyWith(
-                            color: const Color(0xFF9CA3AF),
-                            fontSize: 13,
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                  // Return to Top Button - positioned on right side (desktop only)
+                  if (!isMobile && showBackToTop)
+                    Positioned(
+                      right: AppSpacing.xl * 2,
+                      bottom: AppSpacing.xl * 5,
+                      child: AnimatedOpacity(
+                        opacity: showBackToTop ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: _ReturnToTopButton(onTap: onBackToTop),
+                      ),
+                    ),
                 ],
               );
             },
@@ -285,21 +296,27 @@ class ContactSection extends StatelessWidget {
   }
 }
 
+// ==================== Helper Widgets ====================
+
 class _FooterColumn extends StatelessWidget {
   final String title;
   final List<String> links;
   final ValueChanged<String>? onLinkTap;
   final Widget? customContent;
+  final List<IconData>? icons;
 
   const _FooterColumn({
     required this.title,
     required this.links,
     this.onLinkTap,
     this.customContent,
+    this.icons,
   });
 
   @override
   Widget build(BuildContext context) {
+    final linkIcons = icons;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,9 +341,11 @@ class _FooterColumn extends StatelessWidget {
                     _FooterLink(
                       text: links[i],
                       onTap: () => onLinkTap?.call(links[i]),
+                      icon: linkIcons != null && i < linkIcons.length 
+                          ? linkIcons[i] 
+                          : null,
                     ),
-                    if (i < links.length - 1) 
-                      const SizedBox(height: AppSpacing.md),
+                    if (i < links.length - 1) const SizedBox(height: AppSpacing.md),
                   ],
                 ),
             ],
@@ -339,25 +358,44 @@ class _FooterColumn extends StatelessWidget {
 class _FooterLink extends StatelessWidget {
   final String text;
   final VoidCallback? onTap;
+  final IconData? icon;
 
   const _FooterLink({
     required this.text,
     this.onTap,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 18,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        Flexible(
+          child: Text(
+            text,
+            style: WebTextStyles.caption.copyWith(
+              color: const Color(0xFF9CA3AF),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
-        child: Text(
-          text,
-          style: WebTextStyles.caption.copyWith(
-            color: const Color(0xFF9CA3AF),
-            fontSize: 14,
-          ),
-        ),
+        child: content,
       ),
     );
   }
@@ -403,5 +441,82 @@ class _ContactRow extends StatelessWidget {
     }
 
     return content;
+  }
+}
+
+class _ReturnToTopButton extends StatefulWidget {
+  final VoidCallback? onTap;
+
+  const _ReturnToTopButton({this.onTap});
+
+  @override
+  State<_ReturnToTopButton> createState() => _ReturnToTopButtonState();
+}
+
+class _ReturnToTopButtonState extends State<_ReturnToTopButton> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: _isHovered
+              ? const EdgeInsets.symmetric(horizontal: 24, vertical: 12)
+              : const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: _isHovered 
+                ? const Color(0xFF16A34A)
+                : const Color(0xFF22C55E),
+            borderRadius: BorderRadius.circular(50),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.arrow_upward_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                AnimatedOpacity(
+                  opacity: _isHovered ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: _isHovered
+                      ? Row(
+                          children: [
+                            const SizedBox(width: 8),
+                            Text(
+                              'Return to Top',
+                              style: WebTextStyles.caption.copyWith(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
