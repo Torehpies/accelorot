@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
 import 'package:flutter_application_1/ui/chatbot/view_model/chatbot_sessions_notifier.dart';
 import 'package:flutter_application_1/ui/chatbot/widgets/chat_sheet.dart';
-import 'package:flutter_application_1/ui/chatbot/widgets/session_selector_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_public_notifier_properties
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/activity_list_state.dart';
@@ -73,6 +71,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== CONFIGURATION GETTERS =====
 
+  // ignore: avoid_public_notifier_properties
   String get screenTitle => _config.getTitle(machineId: state.focusedMachineId);
   List<String> get filters => _config.filters;
 

@@ -10,11 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ChatPromptInput extends ConsumerStatefulWidget {
   final String? sessionId;
   final ValueChanged<String>? onSessionCreated;
-  const ChatPromptInput({
-    super.key,
-    this.sessionId,
-    this.onSessionCreated,
-  });
+  const ChatPromptInput({super.key, this.sessionId, this.onSessionCreated});
 
   @override
   ConsumerState<ChatPromptInput> createState() => _ChatPromptInputState();
@@ -63,8 +59,9 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
     bool isProcessing = false;
 
     if (widget.sessionId != null) {
-      final messagesAsync =
-          ref.watch(chatbotMessagesProvider(widget.sessionId!));
+      final messagesAsync = ref.watch(
+        chatbotMessagesProvider(widget.sessionId!),
+      );
       final messages = messagesAsync.asData?.value ?? [];
       if (messages.isNotEmpty) {
         final latestMessage = messages.first;
@@ -91,6 +88,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
       if (resolvedSessionId == null) {
         final sessionNotifier = ref.read(chatbotSessionsProvider.notifier);
         resolvedSessionId = await sessionNotifier.addNewSession();
+        if (!context.mounted) return;
         if (resolvedSessionId == null) {
           AppSnackbar.error(context, 'Failed to create session');
           return;
@@ -164,8 +162,9 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Icon(
