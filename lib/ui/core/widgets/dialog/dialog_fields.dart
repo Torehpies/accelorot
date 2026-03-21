@@ -252,7 +252,7 @@ class ReadOnlySection extends StatelessWidget {
 
 // ==================== INPUT FIELDS ====================
 
-/// Reusable input field for dialogs - matches mobile design
+/// Reusable input field for dialogs
 class InputField extends StatelessWidget {
   final String label;
   final TextEditingController? controller;
@@ -341,7 +341,7 @@ class InputField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: WebColors.cardBorder),
+          borderSide: BorderSide(color: WebColors.tableBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

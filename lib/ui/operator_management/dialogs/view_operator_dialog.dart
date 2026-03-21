@@ -17,7 +17,6 @@ class ViewOperatorDialog extends StatelessWidget {
     return BaseDialog(
       title: '${operator.firstName} ${operator.lastName}',
       subtitle: 'Operator Details',
-      maxHeightFactor: 0.6,
       content: ReadOnlySection(
         fields: [
           ReadOnlyField(

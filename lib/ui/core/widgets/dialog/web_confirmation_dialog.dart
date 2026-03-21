@@ -107,7 +107,7 @@ class WebConfirmationDialog extends StatelessWidget {
               ),
 
               // ── Divider ──────────────────────────────────────────────
-              const Divider(height: 1, color: WebColors.cardBorder),
+              const Divider(height: 1, color: WebColors.tableBorder),
 
               // ── Buttons — styled to match DialogFooter._buildButton ──
               Padding(
