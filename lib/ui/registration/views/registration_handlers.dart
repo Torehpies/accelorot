@@ -196,7 +196,7 @@ class RegistrationFormContent extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                '*Please complete all Fields',
+                '*Please complete all fields',
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 12,
