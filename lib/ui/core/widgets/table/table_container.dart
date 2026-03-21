@@ -4,35 +4,32 @@ import 'package:flutter/material.dart';
 import '../../constants/spacing.dart';
 import '../../themes/web_colors.dart';
 
-/// Reusable base table container with consistent styling
-/// Provides: filter header, bordered table wrapper, pagination footer
+/// Reusable base table container with consistent styling.
+/// Provides: filter header, bordered table wrapper, pagination footer.
 class BaseTableContainer extends StatelessWidget {
-  /// Left section of filter bar (title, filters, etc.)
+  /// Left section of filter bar (tabs, title, etc.)
   final Widget? leftHeaderWidget;
 
-  /// Right section of filter bar (search, date filter, etc.)
+  /// Right section of filter bar (search, filters, add button, etc.)
   final List<Widget>? rightHeaderWidgets;
 
-  /// Table header (column titles, filters in headers)
-  final Widget tableHeader;
+  /// Column header row — nullable, skipped entirely when null
+  final Widget? tableHeader;
 
-  /// Table body (scrollable content)
+  /// Scrollable table content
   final Widget tableBody;
 
-  /// Optional pagination controls at bottom
+  /// Optional pagination footer
   final Widget? paginationWidget;
 
-  /// Custom container padding (default: symmetric horizontal:16, vertical:0)
   final EdgeInsets? tablePadding;
-
-  /// Custom border color
   final Color? borderColor;
 
   const BaseTableContainer({
     super.key,
     this.leftHeaderWidget,
     this.rightHeaderWidgets,
-    required this.tableHeader,
+    this.tableHeader,
     required this.tableBody,
     this.paginationWidget,
     this.tablePadding,
@@ -49,15 +46,14 @@ class BaseTableContainer extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Filter Header Bar (if provided)
+          // ── Filter header bar ──
           if (leftHeaderWidget != null || rightHeaderWidgets != null)
             _buildFilterBar(),
 
-          // Table Wrapper (Header + Body with border)
+          // ── Bordered table wrapper ──
           Expanded(
             child: Padding(
-              padding:
-                  tablePadding ??
+              padding: tablePadding ??
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               child: Container(
                 decoration: BoxDecoration(
@@ -68,20 +64,21 @@ class BaseTableContainer extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Table Header with bottom border
-                    Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: WebColors.tableBorder,
-                            width: 1,
+                    // ── Table header — skipped when null ──
+                    if (tableHeader != null)
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: WebColors.tableBorder,
+                              width: 1,
+                            ),
                           ),
                         ),
+                        child: tableHeader!,
                       ),
-                      child: tableHeader,
-                    ),
 
-                    // Table Body
+                    // ── Table body ──
                     Expanded(child: tableBody),
                   ],
                 ),
@@ -89,7 +86,7 @@ class BaseTableContainer extends StatelessWidget {
             ),
           ),
 
-          // Pagination Footer (if provided)
+          // ── Pagination footer ──
           if (paginationWidget != null)
             Container(
               padding: const EdgeInsets.symmetric(
@@ -108,20 +105,18 @@ class BaseTableContainer extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Left section - natural sizing, no Expanded wrapper
-          ?leftHeaderWidget,
-
-          // Spacer eats all remaining space, pushes right section to edge
+          if (leftHeaderWidget != null) leftHeaderWidget!,
           if (leftHeaderWidget != null && rightHeaderWidgets != null)
             const Spacer(),
-
-          // Right section - compact and right-aligned
           if (rightHeaderWidgets != null)
             ...rightHeaderWidgets!.map((widget) {
               final index = rightHeaderWidgets!.indexOf(widget);
               return Row(
                 mainAxisSize: MainAxisSize.min,
-                children: [if (index > 0) const SizedBox(width: 12), widget],
+                children: [
+                  if (index > 0) const SizedBox(width: 12),
+                  widget,
+                ],
               );
             }),
         ],

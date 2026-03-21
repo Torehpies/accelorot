@@ -4,25 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
-import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
-import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
-import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
-import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/add_operator_dialog.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/pending_member_row.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PendingMembersTab extends ConsumerStatefulWidget {
-  final TabController tabController;
-
-  const PendingMembersTab({super.key, required this.tabController});
+  const PendingMembersTab({super.key});
 
   @override
   ConsumerState<PendingMembersTab> createState() => _PendingMembersTabState();
@@ -40,133 +32,108 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
     final state = ref.watch(pendingMembersProvider);
     final notifier = ref.read(pendingMembersProvider.notifier);
 
-    return BaseTableContainer(
-      // ── Left header: tab switcher ──
-      leftHeaderWidget: TabsRow(
-        controller: widget.tabController,
-        tabTitles: ['Members', 'For Approval'],
-      ),
-
-      // ── Right header: date filter, search, add button ──
-      rightHeaderWidgets: [
-        SizedBox(
-          height: 32,
-          child: DateFilterDropdown(
+    return Column(
+      children: [
+        // ── Table header ──
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: WebColors.tableBorder, width: 1),
+            ),
+          ),
+          child: TableHeader(
             isLoading: state.isLoading,
-            onFilterChanged: (filter) {
-              ref.read(operatorsDateFilterProvider.notifier).setFilter(filter);
-            },
+            columns: [
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'First Name',
+                  sortable: true,
+                  sortColumn: 'firstName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('firstName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'Last Name',
+                  sortable: true,
+                  sortColumn: 'lastName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('lastName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'Email',
+                  sortable: true,
+                  sortColumn: 'email',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('email'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'Requested At',
+                  sortable: true,
+                  sortColumn: 'requestedAt',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('requestedAt'),
+                ),
+              ),
+              const TableCellWidget(
+                flex: 1,
+                child: TableHeaderCell(label: 'Actions'),
+              ),
+            ],
           ),
         ),
-        SearchField(
-          isLoading: state.isLoading,
-          onChanged: (query) => notifier.setSearch(query),
-        ),
-        Tooltip(
-          message: 'Add Operator',
-          child: ElevatedButton.icon(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => AddOperatorDialog(),
-              );
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Operator'),
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+
+        // ── Table body ──
+        Expanded(
+          child: TableBody<PendingMember>(
+            items: state.paginatedMembers,
+            isLoading: state.isLoading && state.allMembers.isEmpty,
+            emptyStateWidget: const EmptyState(
+              title: 'No pending members found',
+              subtitle: 'Try adjusting your filters or search',
+              icon: Icons.person_search,
             ),
+            rowBuilder: (member) =>
+                PendingMemberRow(member: member, notifier: notifier),
+            skeletonRowBuilder: _buildSkeletonRow,
+          ),
+        ),
+
+        // ── Pagination ──
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.tableCellHorizontal,
+            vertical: AppSpacing.lg,
+          ),
+          child: PaginationControls(
+            currentPage: state.currentPage + 1,
+            totalPages: state.totalPages,
+            itemsPerPage: state.itemsPerPage,
+            isLoading: state.isLoading,
+            onPageChanged: (page) => notifier.onPageChanged(page - 1),
+            onItemsPerPageChanged: notifier.onItemsPerPageChanged,
           ),
         ),
       ],
-
-      // ── Table header: sortable columns ──
-      tableHeader: TableHeader(
-        isLoading: state.isLoading,
-        columns: [
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'First Name',
-              sortable: true,
-              sortColumn: 'firstName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('firstName'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Last Name',
-              sortable: true,
-              sortColumn: 'lastName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('lastName'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Email',
-              sortable: true,
-              sortColumn: 'email',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('email'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Requested At',
-              sortable: true,
-              sortColumn: 'requestedAt',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('requestedAt'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 1,
-            child: const TableHeaderCell(label: 'Actions'),
-          ),
-        ],
-      ),
-
-      // ── Table body: paginatedMembers (computed slice of filteredMembers) ──
-      tableBody: TableBody<PendingMember>(
-        items: state.paginatedMembers,              // ← was state.filteredMembers
-        isLoading: state.isLoading && state.allMembers.isEmpty,
-        emptyStateWidget: const EmptyState(
-          title: 'No pending members found',
-          subtitle: 'Try adjusting your filters or search',
-          icon: Icons.person_search,
-        ),
-        rowBuilder: (member) =>
-            PendingMemberRow(member: member, notifier: notifier),
-        skeletonRowBuilder: () => _buildSkeletonRow(),
-      ),
-
-      // ── Pagination — totalPages and itemsPerPage are now computed/state ──
-      paginationWidget: PaginationControls(
-        currentPage: state.currentPage + 1,         // UI is 1-based
-        totalPages: state.totalPages,               // ← computed getter
-        itemsPerPage: state.itemsPerPage,           // ← was state.pageSize
-        isLoading: state.isLoading,
-        onPageChanged: (page) => notifier.onPageChanged(page - 1),
-        onItemsPerPageChanged: notifier.onItemsPerPageChanged,
-      ),
     );
   }
 }
 
-// ── Skeleton row matching [2, 2, 2, 2, 1] column layout ──
+// ── Skeleton row: [2, 2, 2, 2, 1] ──
+
 Widget _buildSkeletonRow() {
   return GenericTableRow(
     cellSpacing: AppSpacing.md,
@@ -203,6 +170,8 @@ Widget _buildSkeletonRow() {
     ],
   );
 }
+
+// ── Pulsing skeleton box ──
 
 class _SkeletonBox extends StatefulWidget {
   final double width;
