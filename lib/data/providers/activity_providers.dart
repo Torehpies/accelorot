@@ -18,13 +18,22 @@ import 'core_providers.dart';
 /// Provider for ActivityAggregatorService
 /// Depends on all repository providers
 final activityAggregatorProvider = Provider<ActivityAggregatorService>((ref) {
-  return ActivityAggregatorService(
+  final service = ActivityAggregatorService(
     substrateRepo: ref.watch(substrateRepositoryProvider),
     alertRepo: ref.watch(alertRepositoryProvider),
     reportRepo: ref.watch(reportRepositoryProvider),
     cycleRepo: ref.watch(cycleRepositoryProvider),
     auth: FirebaseAuth.instance,
   );
+
+  // Clear memory cache when user logs out or switches accounts
+  ref.listen(authStateChangesProvider, (previous, next) {
+    if (previous?.value?.uid != next?.value?.uid) {
+      service.clearCache();
+    }
+  });
+
+  return service;
 });
 
 // ===== ACTIVITY FILTER SERVICE PROVIDER =====
