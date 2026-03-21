@@ -8,7 +8,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart
 import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/add_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/dialogs/add_operator_dialog.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/pending_members_tab.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/summary_header.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';

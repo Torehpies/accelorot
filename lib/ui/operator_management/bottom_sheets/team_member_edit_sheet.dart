@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/dialogs/edit_operator_dialog.dart';
 import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_base.dart';
 import '../../core/widgets/bottom_sheets/mobile_bottom_sheet_buttons.dart';
 import '../../core/widgets/bottom_sheets/fields/mobile_readonly_field.dart';

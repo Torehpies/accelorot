@@ -5,7 +5,7 @@ import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
 import 'package:flutter_application_1/utils/user_status.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'edit_operator_dialog.freezed.dart';
+part '../widgets/edit_operator_dialog.freezed.dart';
 
 @freezed
 abstract class EditOperatorForm with _$EditOperatorForm {

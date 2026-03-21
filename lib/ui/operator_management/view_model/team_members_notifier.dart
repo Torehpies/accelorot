@@ -9,7 +9,7 @@ import 'package:flutter_application_1/ui/activity_logs/models/activity_common.da
 import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
 import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/providers/operators_search_provider.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/edit_operator_dialog.dart';
+import 'package:flutter_application_1/ui/operator_management/dialogs/edit_operator_dialog.dart';
 import 'package:flutter_application_1/utils/operator_headers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
