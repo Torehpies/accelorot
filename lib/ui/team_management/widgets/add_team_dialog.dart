@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/frontend/widgets/custom_text_field.dart';
+import 'package:flutter_application_1/ui/core/ui/custom_text_field.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';

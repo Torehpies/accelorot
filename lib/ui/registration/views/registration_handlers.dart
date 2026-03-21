@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/frontend/components/google_signin_button.dart';
-import 'package:flutter_application_1/frontend/components/or_divider.dart';
+import 'package:flutter_application_1/ui/login/widgets/google_signin_button.dart';
+import 'package:flutter_application_1/ui/login/widgets/or_divider.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';

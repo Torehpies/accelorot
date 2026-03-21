@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/onboarding/view/forgot_pass.dart';
+import 'package:flutter_application_1/ui/onboarding/view/restricted_access_screen.dart';
 import 'package:flutter_application_1/ui/approval/view/approval_view.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
@@ -39,7 +39,7 @@ import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landin
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
 import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
+import 'package:flutter_application_1/ui/onboarding/view/resent_email_sent_screen.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
 
