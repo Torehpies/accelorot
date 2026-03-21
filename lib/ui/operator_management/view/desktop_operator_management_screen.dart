@@ -93,7 +93,7 @@ class _DesktopOperatorManagementScreenState
             Tooltip(
               message: 'Add Operator',
               child: ElevatedButton.icon(
-                onPressed: () => showDialog(
+                onPressed: _isLoading ? null : () => showDialog(
                   context: context,
                   builder: (_) => AddOperatorDialog(),
                 ),
