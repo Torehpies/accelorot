@@ -11,6 +11,7 @@ import 'package:flutter_application_1/ui/core/widgets/dialog/web_confirmation_di
 import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
   const AddTeamDialog({super.key});
@@ -238,7 +239,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             keyboardType: TextInputType.text,
             onChanged: (_) => setState(() => _teamNameError = null),
           ),
-          const SizedBox(height:  12),
+          const SizedBox(height: 16),
 
           // ── House / Lot / Block
           InputField(
@@ -251,7 +252,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             keyboardType: TextInputType.streetAddress,
             onChanged: (_) => setState(() => _houseNumberError = null),
           ),
-          const SizedBox(height:  12),
+          const SizedBox(height: 16),
 
           // ── Street / Road / Subd.
           InputField(
@@ -264,20 +265,65 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             keyboardType: TextInputType.streetAddress,
             onChanged: (_) => setState(() => _streetError = null),
           ),
-          const SizedBox(height:  12),
+          const SizedBox(height: 16),
 
-          // ── Barangay
-          InputField(
-            label: 'Barangay',
+          // ── Barangay — raw TextFormField to support prefixText
+          TextFormField(
             controller: _barangayController,
-            hintText: '178 / 176-E',
-            errorText: _barangayError,
             enabled: !state.isLoading,
-            required: true,
             keyboardType: TextInputType.text,
+            style: const TextStyle(fontSize: 14, color: WebColors.textPrimary),
             onChanged: (_) => setState(() => _barangayError = null),
+            decoration: InputDecoration(
+              label: RichText(
+                text: const TextSpan(
+                  text: 'Barangay',
+                  style: TextStyle(fontSize: 14, color: WebColors.textLabel),
+                  children: [
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(color: WebColors.error),
+                    ),
+                  ],
+                ),
+              ),
+              prefixText: 'BRGY. ',
+              prefixStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: WebColors.textSecondary,
+              ),
+              hintText: '178 / 176-E',
+              hintStyle: TextStyle(color: WebColors.textMuted),
+              errorText: _barangayError,
+              filled: false,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: WebColors.cardBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: WebColors.tableBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: WebColors.greens, width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: WebColors.error),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: WebColors.error, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
+            ),
           ),
-          const SizedBox(height:  12),
+          const SizedBox(height: 16),
 
           // ── City
           InputField(
@@ -290,7 +336,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             keyboardType: TextInputType.text,
             onChanged: (_) => setState(() => _cityError = null),
           ),
-          const SizedBox(height:  12),
+          const SizedBox(height: 16),
 
           // ── Region
           InputField(

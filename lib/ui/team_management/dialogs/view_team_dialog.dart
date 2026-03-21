@@ -33,19 +33,7 @@ class ViewTeamDialog extends StatelessWidget {
           ReadOnlyField(
             label: 'Address',
             value: team.address,
-          ),
-          ReadOnlyField(
-            label: 'House/Lot/Block',
-            value: team.houseNumber ?? '—',
-          ),
-          ReadOnlyField(
-            label: 'Street/Road/Subd.',
-            value: team.street ?? '—',
-          ),
-          ReadOnlyField(
-            label: 'Barangay',
-            value: team.barangay ?? '—',
-          ),
+          ),          
           ReadOnlyField(
             label: 'City',
             value: team.city ?? '—',
