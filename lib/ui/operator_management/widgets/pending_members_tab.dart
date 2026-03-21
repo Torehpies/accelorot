@@ -1,3 +1,5 @@
+// lib/ui/operator_management/widgets/pending_members_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
@@ -38,12 +40,8 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
     final state = ref.watch(pendingMembersProvider);
     final notifier = ref.read(pendingMembersProvider.notifier);
 
-    final pageCount = state.hasNextPage
-        ? state.currentPage + 2
-        : state.currentPage + 1;
-
     return BaseTableContainer(
-      // ── Left header: tab switcher (same controller, shared with TeamMembersTab) ──
+      // ── Left header: tab switcher ──
       leftHeaderWidget: TabsRow(
         controller: widget.tabController,
         tabTitles: ['Members', 'For Approval'],
@@ -141,10 +139,10 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
         ],
       ),
 
-      // ── Table body: rows + skeleton + empty state ──
+      // ── Table body: paginatedMembers (computed slice of filteredMembers) ──
       tableBody: TableBody<PendingMember>(
-        items: state.filteredMembers,
-        isLoading: state.isLoading && state.members.isEmpty,
+        items: state.paginatedMembers,              // ← was state.filteredMembers
+        isLoading: state.isLoading && state.allMembers.isEmpty,
         emptyStateWidget: const EmptyState(
           title: 'No pending members found',
           subtitle: 'Try adjusting your filters or search',
@@ -155,45 +153,40 @@ class _PendingMembersTabState extends ConsumerState<PendingMembersTab>
         skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
 
-      // ── Pagination ──
+      // ── Pagination — totalPages and itemsPerPage are now computed/state ──
       paginationWidget: PaginationControls(
-        currentPage: state.currentPage + 1,
-        totalPages: pageCount,
-        itemsPerPage: state.pageSize,
+        currentPage: state.currentPage + 1,         // UI is 1-based
+        totalPages: state.totalPages,               // ← computed getter
+        itemsPerPage: state.itemsPerPage,           // ← was state.pageSize
         isLoading: state.isLoading,
-        onPageChanged: (page) => notifier.goToPage(page - 1),
-        onItemsPerPageChanged: notifier.setPageSize,
+        onPageChanged: (page) => notifier.onPageChanged(page - 1),
+        onItemsPerPageChanged: notifier.onItemsPerPageChanged,
       ),
     );
   }
 }
 
-// ── Skeleton row matching [2, 2, 3, 2, 1] column layout ──
+// ── Skeleton row matching [2, 2, 2, 2, 1] column layout ──
 Widget _buildSkeletonRow() {
   return GenericTableRow(
     cellSpacing: AppSpacing.md,
     cells: [
-      // First Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Last Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Email
       TableCellWidget(
-        flex: 3,
+        flex: 2,
         child: Center(child: _SkeletonBox(width: 180, height: 16)),
       ),
-      // Requested At — date text block
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 130, height: 16)),
       ),
-      // Action icons (accept + decline)
       TableCellWidget(
         flex: 1,
         child: Center(
@@ -211,7 +204,6 @@ Widget _buildSkeletonRow() {
   );
 }
 
-/// Simple pulsing skeleton box — matches the animation pattern used across the app
 class _SkeletonBox extends StatefulWidget {
   final double width;
   final double height;

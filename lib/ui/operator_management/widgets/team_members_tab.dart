@@ -1,3 +1,5 @@
+// lib/ui/operator_management/widgets/team_members_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
@@ -40,10 +42,6 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
 
     final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
-
-    final pageCount = state.hasNextPage
-        ? state.currentPage + 2
-        : state.currentPage + 1;
 
     return BaseTableContainer(
       // ── Left header: tab switcher ──
@@ -162,10 +160,10 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
         ],
       ),
 
-      // ── Table body: rows + skeleton + empty state ──
+      // ── Table body: paginatedMembers (computed slice of filteredMembers) ──
       tableBody: TableBody<TeamMember>(
-        items: state.filteredMembers,
-        isLoading: state.isLoading && state.members.isEmpty,
+        items: state.paginatedMembers,              // ← was state.filteredMembers
+        isLoading: state.isLoading && state.allMembers.isEmpty,
         emptyStateWidget: const EmptyState(
           title: 'No members found',
           subtitle: 'Try adjusting your filters or search',
@@ -176,14 +174,14 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
         skeletonRowBuilder: () => _buildSkeletonRow(),
       ),
 
-      // ── Pagination ──
+      // ── Pagination — totalPages and itemsPerPage are now computed/state =====
       paginationWidget: PaginationControls(
-        currentPage: state.currentPage + 1,
-        totalPages: pageCount,
-        itemsPerPage: state.pageSize,
+        currentPage: state.currentPage + 1,         // UI is 1-based
+        totalPages: state.totalPages,               // ← computed getter
+        itemsPerPage: state.itemsPerPage,           // ← was state.pageSize
         isLoading: state.isLoading,
-        onPageChanged: (page) => notifier.goToPage(page - 1),
-        onItemsPerPageChanged: notifier.setPageSize,
+        onPageChanged: (page) => notifier.onPageChanged(page - 1),
+        onItemsPerPageChanged: notifier.onItemsPerPageChanged,
       ),
     );
   }
@@ -194,29 +192,24 @@ Widget _buildSkeletonRow() {
   return GenericTableRow(
     cellSpacing: AppSpacing.md,
     cells: [
-      // First Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Last Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Email
       TableCellWidget(
         flex: 3,
         child: Center(child: _SkeletonBox(width: 180, height: 16)),
       ),
-      // Status badge shape
       TableCellWidget(
         flex: 1,
         child: Center(
           child: _SkeletonBox(width: 70, height: 24, borderRadius: 5),
         ),
       ),
-      // Action icons
       TableCellWidget(
         flex: 1,
         child: Center(
@@ -234,7 +227,6 @@ Widget _buildSkeletonRow() {
   );
 }
 
-/// Simple pulsing skeleton box — matches the animation pattern used across the app
 class _SkeletonBox extends StatefulWidget {
   final double width;
   final double height;

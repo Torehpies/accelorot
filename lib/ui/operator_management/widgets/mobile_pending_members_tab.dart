@@ -1,3 +1,5 @@
+// lib/ui/operator_management/widgets/mobile_pending_members_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/pending_member/pending_member.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
@@ -13,10 +15,11 @@ class MobilePendingMembersTab extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
-      _MobileTeamMembersState();
+      _MobilePendingMembersState();
 }
 
-class _MobileTeamMembersState extends ConsumerState<MobilePendingMembersTab>
+class _MobilePendingMembersState
+    extends ConsumerState<MobilePendingMembersTab>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
 
@@ -38,7 +41,7 @@ class _MobileTeamMembersState extends ConsumerState<MobilePendingMembersTab>
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref.read(pendingMembersProvider.notifier).loadNextPage();
+      ref.read(pendingMembersProvider.notifier).loadMoreItems();
     }
   }
 
@@ -68,10 +71,11 @@ class _MembersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (state.isLoading && state.items.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+    if (state.isLoading && state.allMembers.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
     }
-    if (state.items.isEmpty && !state.isLoading) {
+
+    if (state.displayedMembers.isEmpty && !state.isLoading) {
       return Center(
         child: Text(
           'No pending requests found',
@@ -79,21 +83,22 @@ class _MembersList extends StatelessWidget {
         ),
       );
     }
+
     return ListView.separated(
       controller: scrollController,
-      padding: EdgeInsets.all(16),
-      separatorBuilder: (_, _) => SizedBox(height: 2),
-      itemCount: state.items.length + (state.hasNextPage ? 1 : 0),
+      padding: const EdgeInsets.all(16),
+      separatorBuilder: (_, _) => const SizedBox(height: 2),
+      itemCount: state.displayedMembers.length + (state.hasMoreToLoad ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= state.items.length) {
+        if (index >= state.displayedMembers.length) {
           return _buildLoadingItem();
         }
-        PendingMember member = state.items[index];
+        final member = state.displayedMembers[index];
         return DataCard<PendingMember>(
           data: member,
           icon: Icons.person,
           iconBgColor: AppColors.green100,
-          title: "${member.lastName}, ${member.firstName}",
+          title: '${member.lastName}, ${member.firstName}',
           status: member.email,
           onTap: () {
             showModalBottomSheet(
@@ -143,7 +148,7 @@ class _MembersList extends StatelessWidget {
 }
 
 Widget _buildLoadingItem() {
-  return Padding(
+  return const Padding(
     padding: EdgeInsets.all(16),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,

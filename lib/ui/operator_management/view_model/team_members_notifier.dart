@@ -1,3 +1,5 @@
+// lib/ui/operator_management/view_model/team_members_notifier.dart
+
 import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
@@ -17,25 +19,6 @@ part 'team_members_notifier.g.dart';
 
 @riverpod
 class TeamMembersNotifier extends _$TeamMembersNotifier {
-  void setPageSize(int newSize) {
-    if (newSize == state.pageSize) return;
-    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..clear();
-
-    state = state.copyWith(
-      pageSize: newSize,
-      currentPage: 0,
-      pagesByIndex: updatedPages,
-      items: const [],
-      members: const [],
-      filteredMembers: const [],
-      lastFetchedAt: null,
-      hasNextPage: false,
-    );
-    _loadPage(0);
-  }
-
-  static const _cacheTtl = Duration(minutes: 1);
 
   @override
   TeamMembersState build() {
@@ -50,54 +33,91 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         _handleFilterOrSearchChange(state.dateFilter, next);
       }
     });
+
     state = const TeamMembersState();
-    Future.microtask(() => _loadPage(0));
+    Future.microtask(() => _loadAll());
     return state;
   }
 
-  Future<void> goToPage(int pageIndex) => _loadPage(pageIndex);
+  // ===== LOAD =====
 
-  Future<void> loadNextPage() async {
-    if (!state.hasNextPage || state.isLoading) return;
-    await _loadPage(state.currentPage + 1);
+  Future<void> _loadAll() async {
+    if (state.isLoading) return;
+
+    final teamUser = ref.read(appUserProvider).value;
+    final teamId = teamUser?.teamId;
+    if (teamId == null || teamId.isEmpty) {
+      state = state.copyWith(
+        allMembers: const [],
+        filteredMembers: const [],
+        currentPage: 0,
+        isLoading: false,
+      );
+      return;
+    }
+
+    state = state.copyWith(isLoading: true);
+
+    final members = await ref
+        .read(teamMemberServiceProvider)
+        .fetchAllTeamMembers(
+          teamId: teamId,
+          dateFilter: state.dateFilter,
+        );
+
+    state = state.copyWith(
+      allMembers: members,
+      isLoading: false,
+    );
+
+    _applyFilters();
   }
 
-  Future<void> nextPage() async {
-    if (!state.hasNextPage) return;
-    await _loadPage(state.currentPage + 1);
-  }
-
-  Future<void> previousPage() async {
-    if (state.currentPage == 0) return;
-    await _loadPage(state.currentPage - 1);
-  }
+  // ===== REFRESH =====
 
   Future<void> refresh() async {
-    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..clear();
     state = state.copyWith(
+      allMembers: const [],
+      filteredMembers: const [],
+      currentPage: 0,
+      displayLimit: 15,
       dateFilter: const DateFilterRange(type: DateFilterType.none),
-      pagesByIndex: updatedPages,
-      items: const [],
-      lastFetchedAt: null,
     );
-    await _loadPage(0);
+    await _loadAll();
   }
 
-  void setDateFilter(DateFilterRange filter) {
-    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..clear();
+  // ===== WEB PAGINATION — pure UI state, zero Firestore calls =====
 
+  void onPageChanged(int page) {
+    // page is 0-based
+    state = state.copyWith(currentPage: page);
+  }
+
+  void onItemsPerPageChanged(int size) {
+    state = state.copyWith(itemsPerPage: size, currentPage: 0);
+  }
+
+  // ===== MOBILE INFINITE SCROLL =====
+
+  /// Reveals the next batch of already-loaded items.
+  /// Called by the scroll listener when approaching the bottom of the list.
+  void loadMoreItems() {
+    if (!state.hasMoreToLoad) return;
+    state = state.copyWith(
+      displayLimit: state.displayLimit + 15,
+    );
+  }
+
+  // ===== DATE FILTER — must re-fetch since it's a Firestore where clause =====
+
+  void setDateFilter(DateFilterRange filter) {
     state = state.copyWith(
       dateFilter: filter,
-      pagesByIndex: updatedPages,
-      items: const [],
+      allMembers: const [],
+      filteredMembers: const [],
       currentPage: 0,
-      lastFetchedAt: null,
     );
-
-    // Reload first page with new filter
-    _loadPage(0);
+    _loadAll();
   }
 
   // ===== SORT =====
@@ -108,14 +128,20 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
         : true;
 
     state = state.copyWith(sortColumn: column, sortAscending: isAscending);
-
     _applyFilters();
   }
 
-  // ===== STATUS FILTERING =====
+  // ===== STATUS FILTER =====
 
   void setStatusFilter(TeamMemberStatusFilter filter) {
-    state = state.copyWith(statusFilter: filter);
+    state = state.copyWith(statusFilter: filter, currentPage: 0);
+    _applyFilters();
+  }
+
+  // ===== SEARCH =====
+
+  void setSearch(String query) {
+    state = state.copyWith(searchQuery: query, currentPage: 0);
     _applyFilters();
   }
 
@@ -128,45 +154,23 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       final teamId = teamUser?.teamId;
       if (teamId == null) return;
 
-      final currentMembers = state.pagesByIndex[state.currentPage] ?? [];
-      final oldMember = currentMembers.firstWhere((m) => m.id == form.id);
+      // Find old member from allMembers — no pagesByIndex lookup needed
+      final oldMember = state.allMembers.firstWhere((m) => m.id == form.id);
       final oldStatus = oldMember.status;
-      final updatedMembers = currentMembers.map((m) {
-        if (m.id == form.id) {
-          return m.copyWith(
-            email: form.email,
-            firstName: form.firstName,
-            lastName: form.lastName,
-            status: form.status,
-          );
-        }
-        return m;
+
+      // Optimistic update directly on allMembers
+      final updatedAll = state.allMembers.map((m) {
+        if (m.id != form.id) return m;
+        return m.copyWith(
+          email: form.email,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          status: form.status,
+        );
       }).toList();
 
-      final updatedFilteredMembers = _applySearchAndSort(updatedMembers);
-
-      final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-        ..[state.currentPage] = updatedMembers;
-
-      final updatedItems = state.items.map((m) {
-        if (m.id == form.id) {
-          return m.copyWith(
-            email: form.email,
-            firstName: form.firstName,
-            lastName: form.lastName,
-            status: form.status,
-          );
-        }
-        return m;
-      }).toList();
-
-      state = state.copyWith(
-        pagesByIndex: updatedPages,
-        members: updatedMembers,
-        filteredMembers: updatedFilteredMembers,
-        items: updatedItems,
-        lastFetchedAt: DateTime.now(),
-      );
+      state = state.copyWith(allMembers: updatedAll);
+      _applyFilters(); // re-slice immediately so UI reflects the change
 
       final member = TeamMember(
         id: form.id,
@@ -182,7 +186,6 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
           .updateTeamMember(member: member, teamId: teamId);
 
       if (memberResult.isFailure) {
-        // state = state.copyWith(error)
         await refresh();
         return;
       }
@@ -201,7 +204,6 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
               );
 
           if (teamResult is Error<String>) {
-            // state = state.copyWith(error)
             await refresh();
             return;
           }
@@ -214,10 +216,10 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
       );
 
       if (userResult.isFailure) {
-        // state = state.copyWith(error)
         await refresh();
         return;
       }
+
       ref.invalidate(currentTeamProvider);
     } catch (e) {
       await refresh();
@@ -226,108 +228,39 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     }
   }
 
-  // ===== CACHE =====
-
-  bool _isCacheFresh(DateTime? lastFetchedAt) {
-    if (lastFetchedAt == null) return false;
-    return DateTime.now().difference(lastFetchedAt) < _cacheTtl;
-  }
-
-  // ===== PAGING =====
-
-  Future<void> _loadPage(int pageIndex) async {
-    if (state.isLoading) return;
-
-    final teamUser = ref.watch(appUserProvider).value;
-    final teamId = teamUser?.teamId;
-    if (teamId == null || teamId.isEmpty) {
-      state = state.copyWith(
-        items: const [],
-        members: const [],
-        currentPage: 0,
-        isLoading: false,
-        hasNextPage: false,
-      );
-      return;
-    }
-
-    final cachedPage = state.pagesByIndex[pageIndex];
-    if (cachedPage != null && _isCacheFresh(state.lastFetchedAt)) {
-      final filteredMembers = _applySearchAndSort(cachedPage);
-      final newItems = pageIndex == 0
-          ? cachedPage
-          : [...state.items, ...cachedPage];
-      state = state.copyWith(
-        currentPage: pageIndex,
-        members: cachedPage,
-        filteredMembers: filteredMembers,
-        items: newItems,
-        isLoading: false,
-        hasNextPage: cachedPage.length == state.pageSize,
-      );
-      return;
-    }
-    state = state.copyWith(isLoading: true);
-
-    final service = ref.read(teamMemberServiceProvider);
-
-    final pageMembers = await service.fetchTeamMembersPage(
-      teamId: teamId,
-      pageSize: state.pageSize,
-      pageIndex: pageIndex,
-      dateFilter: state.dateFilter,
-    );
-
-    final filteredMembers = _applySearchAndSort(pageMembers);
-    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..[pageIndex] = pageMembers;
-
-    final newItems = pageIndex == 0
-        ? filteredMembers
-        : [...state.items, ...filteredMembers];
-
-    state = state.copyWith(
-      items: newItems,
-      members: pageMembers,
-      filteredMembers: filteredMembers,
-      currentPage: pageIndex,
-      isLoading: false,
-      hasNextPage: pageMembers.length == state.pageSize,
-      pagesByIndex: updatedPages,
-      lastFetchedAt: DateTime.now(),
-    );
-  }
-
-  // ===== SEARCH =====
-
-  void setSearch(String query) {
-    state = state.copyWith(searchQuery: query);
-    _applyFilters();
-  }
+  // ===== FILTER/SEARCH CHANGE HANDLER (from provider listeners) =====
 
   void _handleFilterOrSearchChange(DateFilterRange filter, String searchQuery) {
-    final updatedPages = Map<int, List<TeamMember>>.from(state.pagesByIndex)
-      ..clear();
+    // Date filter changed — must re-fetch from Firestore
+    // Search query changed — re-filter in memory only
+    final dateChanged = filter != state.dateFilter;
+
     state = state.copyWith(
       dateFilter: filter,
       searchQuery: searchQuery,
-      pagesByIndex: updatedPages,
-      items: const [],
+      allMembers: dateChanged ? const [] : state.allMembers,
+      filteredMembers: const [],
       currentPage: 0,
-      lastFetchedAt: null,
+      displayLimit: 15,
     );
-    _loadPage(0);
+
+    if (dateChanged) {
+      _loadAll();
+    } else {
+      _applyFilters();
+    }
   }
 
   // ===== FILTER + SORT CORE =====
 
-  /// Called whenever search query or sort changes — filters + sorts current members
+  /// Called whenever search, sort, or status filter changes.
+  /// Operates entirely on allMembers in memory — no Firestore calls.
   void _applyFilters() {
-    final filtered = _applySearchAndSort(state.members);
+    final filtered = _applySearchAndSort(state.allMembers);
     state = state.copyWith(filteredMembers: filtered);
   }
 
-  /// Single pipeline: search filter → status filter → sort. Used everywhere we need the final list.
+  /// Single pipeline: search filter → status filter → sort.
   List<TeamMember> _applySearchAndSort(List<TeamMember> members) {
     List<TeamMember> result = members;
 
@@ -336,9 +269,9 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     if (query.isNotEmpty) {
       result = result.where((member) {
         return member.email.toLowerCase().contains(query) ||
-            '${member.firstName} ${member.lastName}'.toLowerCase().contains(
-              query,
-            );
+            '${member.firstName} ${member.lastName}'
+                .toLowerCase()
+                .contains(query);
       }).toList();
     }
 
@@ -389,7 +322,6 @@ class TeamMembersNotifier extends _$TeamMembersNotifier {
     return sorted;
   }
 
-  // Helper method to convert enum to status value
   String _getStatusValue(TeamMemberStatusFilter filter) {
     switch (filter) {
       case TeamMemberStatusFilter.active:
