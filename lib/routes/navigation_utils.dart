@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/route_path.dart';
@@ -76,8 +77,10 @@ Future<void> handleLogout(
   );
 
   if (shouldLogout == true && context.mounted) {
-    // Read providers from the nearest ProviderScope without requiring a WidgetRef.
     await FirebaseAuth.instance.signOut();
+    if (context.mounted) {
+      context.go(RoutePath.signin.path);
+    }
   }
 }
 
