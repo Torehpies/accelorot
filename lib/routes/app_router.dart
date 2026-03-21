@@ -39,8 +39,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/terms_of_service_dialog.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/privacy_policy_dialog.dart';
 import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
@@ -73,12 +73,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/terms-of-service',
         name: 'terms-of-service',
-        builder: (context, state) => const TermsOfServicePage(),
+        builder: (context, state) => const TermsOfServiceDialog(),
       ),
       GoRoute(
         path: '/privacy-policy',
         name: 'privacy-policy',
-        builder: (context, state) => const PrivacyPolicyPage(),
+        builder: (context, state) => const PrivacyPolicyDialog(),
       ),
       GoRoute(
         path: RoutePath.loading.path,

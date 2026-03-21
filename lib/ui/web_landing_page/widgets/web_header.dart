@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_colors.dart';
-import '../../core/ui/primary_button.dart';
-import '../../web_landing_page/buttons/button_one.dart';
+import '../buttons/header_button.dart'; 
 
 class WebHeader extends StatefulWidget {
   final VoidCallback? onLogin;
@@ -38,13 +37,11 @@ class _WebHeaderState extends State<WebHeader> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    final horizontalPadding = isTablet
-        ? AppSpacing.lg
-        : AppSpacing.xxxl;
-
-    final headerHeight = 88.0;
-    final logoSize = isTablet ? 40.0 : 50.0;
-    final appNameLogoWidth = isTablet ? 100.0 : 130.0;
+    // Reduced sizes
+    final horizontalPadding = isTablet ? AppSpacing.md : AppSpacing.xxl;
+    final headerHeight = 72.0;
+    final logoSize = isTablet ? 32.0 : 40.0;
+    final appNameLogoWidth = isTablet ? 80.0 : 100.0;
     final showAppName = screenWidth > 280;
 
     return AnimatedContainer(
@@ -65,15 +62,15 @@ class _WebHeaderState extends State<WebHeader> {
             ? [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 16,
+                  blurRadius: 12,
                   spreadRadius: 0,
-                  offset: const Offset(0, 4),
+                  offset: const Offset(0, 3),
                 ),
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
+                  blurRadius: 6,
                   spreadRadius: 0,
-                  offset: const Offset(0, 2),
+                  offset: const Offset(0, 1),
                 ),
               ]
             : [],
@@ -146,82 +143,85 @@ class _WebHeaderState extends State<WebHeader> {
                         id: 'home',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'Features',
                         id: 'features',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'How It Works',
                         id: 'how-it-works',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'Impact',
                         id: 'impact',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'Downloads',
                         id: 'download',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'FAQs',
                         id: 'faq',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
-                      _Chevron(size: isTablet ? 18 : 20),
+                      _Chevron(size: isTablet ? 14 : 16),
                       _BreadcrumbItem(
                         label: 'Contact',
                         id: 'contact',
                         active: widget.activeSection,
                         onTap: widget.onBreadcrumbTap!,
-                        fontSize: isTablet ? 15 : 16,
+                        fontSize: isTablet ? 13 : 14,
                       ),
+                      _Chevron(size: isTablet ? 14 : 16),
                     ],
                   ),
                 ),
               ),
             
-            // Login and Get Started buttons
+            // ✅ Updated: Login and Get Started buttons using HeaderButton
             if (widget.showActions && widget.onLogin != null && widget.onGetStarted != null)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 100,
-                    height: isTablet ? 38 : 42,
-                    child: ButtonOne(
-                      text: 'Login',
-                      onPressed: widget.onLogin!,
-                    ),
+                  // Sign In / Login button (outline style)
+                  HeaderButton(
+                    text: 'Login',
+                    type: HeaderButtonType.outline,
+                    onPressed: widget.onLogin!,
+                    width: 85,
+                    height: isTablet ? 32 : 36,
+                    fontSize: isTablet ? 13 : 14,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  SizedBox(
-                    width: 140,
-                    height: isTablet ? 38 : 42,
-                    child: PrimaryButton(
-                      text: 'Get Started',
-                      onPressed: widget.onGetStarted!,
-                    ),
+                  const SizedBox(width: AppSpacing.xs),
+                  // Get Started button (filled style)
+                  HeaderButton(
+                    text: 'Get Started',
+                    type: HeaderButtonType.filled,
+                    onPressed: widget.onGetStarted!,
+                    width: 120,
+                    height: isTablet ? 32 : 36,
+                    fontSize: isTablet ? 13 : 14,
                   ),
                 ],
               ),
@@ -244,7 +244,7 @@ class _BreadcrumbItem extends StatefulWidget {
     required this.id,
     required this.active,
     required this.onTap,
-    this.fontSize = 16,
+    this.fontSize = 14,
   });
 
   @override
@@ -257,8 +257,8 @@ class _BreadcrumbItemState extends State<_BreadcrumbItem> {
   @override
   Widget build(BuildContext context) {
     final bool isActive = widget.active == widget.id;
-    final double paddingVertical = widget.fontSize < 16 ? 6 : 8;
-    final double paddingHorizontal = widget.fontSize < 16 ? 4 : 6;
+    final double paddingVertical = widget.fontSize < 14 ? 4 : 6;
+    final double paddingHorizontal = widget.fontSize < 14 ? 3 : 5;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -295,13 +295,13 @@ class _BreadcrumbItemState extends State<_BreadcrumbItem> {
 class _Chevron extends StatelessWidget {
   final double size;
 
-  const _Chevron({this.size = 16});
+  const _Chevron({this.size = 14});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: size < 20 ? 6 : 10,
+        horizontal: size < 16 ? 5 : 8,
       ),
       child: Icon(
         Icons.chevron_right,

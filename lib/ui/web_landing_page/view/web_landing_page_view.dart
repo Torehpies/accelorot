@@ -137,7 +137,7 @@ class _WebLandingPageState extends State<WebLandingPageView> {
       final position = box.localToGlobal(Offset.zero).dy + _scrollController.offset;
       
       _scrollController.animateTo(
-        position - 88,
+        position - 88, // Account for fixed header height
         duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOut,
       );
@@ -178,7 +178,16 @@ class _WebLandingPageState extends State<WebLandingPageView> {
                 Container(key: _impactKey, child: ImpactSection(stats: _viewModel.impactStats)),
                 Container(key: _downloadKey, child: DownloadSection(onDownload: _handleDownload)),
                 Container(key: _faqKey, child: const FaqSection()),
-                Container(key: _contactKey, child: ContactSection(onNavigateToSection: _scrollToSection)),
+                
+                // ← UPDATED: Added onBackToTop callback + showBackToTop visibility
+                Container(
+                  key: _contactKey, 
+                  child: ContactSection(
+                    onNavigateToSection: _scrollToSection,
+                    onBackToTop: () => _scrollToSection('home'), // ← Scroll to IntroSection (home)
+                    showBackToTop: _isScrolled, // ← Only show button after scrolling
+                  ),
+                ),
               ],
             ),
           ),
