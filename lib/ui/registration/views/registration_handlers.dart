@@ -6,6 +6,7 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/registration/view_model/registration_notifier.dart';
+import 'package:flutter_application_1/ui/registration/widgets/register_field_box.dart';
 import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -80,39 +81,35 @@ class RegistrationFormContent extends ConsumerWidget {
         Center(child: _buildTitle(theme)),
         SizedBox(height: isDesktop ? 10 : 32),
 
-        Row(
-          children: [
-            // First Name Field
-            Expanded(
-              child: SizedBox(
-                height: 65,
-                child: TextField(
-                  textInputAction: TextInputAction.next,
-                  decoration: inputDecoration(
-                    'First Name',
-                    state.firstNameError,
-                  ),
-                  onChanged: notifier.updateFirstName,
-                  autofocus: true,
-                ),
-              ),
+        // First Name Field
+        RegisterFieldBox(
+          child: TextField(
+            controller: TextEditingController(text: state.firstName)
+              ..selection = TextSelection.fromPosition(
+                  TextPosition(offset: state.firstName.length)),
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            decoration: inputDecoration(
+              'First Name',
+              state.firstNameError,
             ),
-            SizedBox(width: 16),
-            // Last Name Field
-            Expanded(
-              child: SizedBox(
-                height: 65,
-                child: TextField(
-                  textInputAction: TextInputAction.next,
-                  onChanged: notifier.updateLastName,
-                  decoration: inputDecoration('Last Name', state.lastNameError),
-                ),
-              ),
-            ),
-          ],
+            onChanged: notifier.updateFirstName,
+            autofocus: true,
+          ),
         ),
-        SizedBox(
-          height: 65,
+        // Last Name Field
+        RegisterFieldBox(
+          child: TextField(
+            controller: TextEditingController(text: state.lastName)
+              ..selection = TextSelection.fromPosition(
+                  TextPosition(offset: state.lastName.length)),
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            onChanged: notifier.updateLastName,
+            decoration: inputDecoration('Last Name', state.lastNameError),
+          ),
+        ),
+        RegisterFieldBox(
           child: TextField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
@@ -124,8 +121,7 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateEmail,
           ),
         ),
-        SizedBox(
-          height: 65,
+        RegisterFieldBox(
           child: TextField(
             obscureText: state.obscurePassword,
             textInputAction: TextInputAction.next,
@@ -146,8 +142,7 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updatePassword,
           ),
         ),
-        SizedBox(
-          height: 65,
+        RegisterFieldBox(
           child: TextField(
             obscureText: state.obscureConfirmPassword,
             textInputAction: TextInputAction.done,
@@ -168,8 +163,7 @@ class RegistrationFormContent extends ConsumerWidget {
             onChanged: notifier.updateConfirmPassword,
           ),
         ),
-        SizedBox(
-          height: 65,
+        RegisterFieldBox(
           child: state.teams.when(
             data: (teams) => teams.isEmpty
                 ? const Text('No teams available')
@@ -196,7 +190,7 @@ class RegistrationFormContent extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                '*Please complete all Fields',
+                '*Please complete all fields',
                 style: TextStyle(
                   color: Colors.red,
                   fontSize: 12,
@@ -230,7 +224,7 @@ class RegistrationFormContent extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Already have an account? "),
+						const Text("Already have an account? "),
             TextButton(
               onPressed: () => context.go('/signin'),
               child: Text(
