@@ -22,15 +22,6 @@ class ResponsiveMobileShell extends StatelessWidget {
     this.selectedIndex,
   });
 
-  void _showSessionSelector(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const SessionSelectorSheet(),
-    );
-  }
-
   Future<void> _showChatSheet(BuildContext context, WidgetRef ref) async {
     String? initialSessionId;
     try {
