@@ -143,7 +143,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
 
                           // ── Activity chart
                           Expanded(
@@ -159,7 +159,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView>
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
 
                     // ── Right column: donut chart
                     Expanded(
@@ -171,7 +171,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView>
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
               // ── Recent activities (handles its own skeleton internally)
               Expanded(child: RecentActivitiesTable(pulse: _skeletonPulse)),
