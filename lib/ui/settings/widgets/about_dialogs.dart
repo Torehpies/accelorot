@@ -383,11 +383,17 @@ class _HelpSupportDialog extends StatelessWidget {
                 color: AppColors.green100, size: 22),
           ),
           const SizedBox(width: 12),
-          const Text('Help & Support',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          const Flexible(
+            child: Text('Help & Support',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
         ],
       ),
-      content: _contactContent(context),
+      // Wrap in SingleChildScrollView — Material 3 AlertDialog does NOT
+      // auto-scroll its content, so tall content would overflow the Flexible.
+      content: SingleChildScrollView(
+        child: _contactContent(context),
+      ),
       actions: [
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(),
