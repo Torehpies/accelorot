@@ -11,6 +11,7 @@ class ResponsiveMobileShell extends StatelessWidget {
   final List<NavItem> navItems;
   final Color color;
   final Function(BuildContext, int) onTapped;
+  final int? selectedIndex; // Optional: if set by StatefulShellRoute
 
   const ResponsiveMobileShell({
     super.key,
@@ -18,6 +19,7 @@ class ResponsiveMobileShell extends StatelessWidget {
     required this.navItems,
     required this.color,
     required this.onTapped,
+    this.selectedIndex,
   });
 
   void _showSessionSelector(BuildContext context) {
@@ -57,11 +59,12 @@ class ResponsiveMobileShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = getSelectedIndex(context, navItems);
+    // final selectedIndex = getSelectedIndex(context, navItems);
     final String location = GoRouterState.of(context).uri.toString();
     final bool showFab = location != '/chat' &&
         location != '/operator/qr-scan' &&
         !location.endsWith('/settings');
+    final index = selectedIndex ?? getSelectedIndex(context, navItems);
 
     return Scaffold(
       body: child,
@@ -82,10 +85,10 @@ class ResponsiveMobileShell extends StatelessWidget {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: selectedIndex,
+        currentIndex: index,
         selectedItemColor: color,
         unselectedItemColor: Colors.grey,
-        onTap: (index) => onTapped(context, index),
+        onTap: (i) => onTapped(context, i),
         items: navItems.map((item) {
           return BottomNavigationBarItem(
             icon: Icon(item.icon),

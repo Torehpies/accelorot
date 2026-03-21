@@ -16,6 +16,7 @@ abstract class AppUser with _$AppUser {
     String? teamRole,
     String? teamId,
     String? requestTeamId,
+    String? fcmToken,
     @Default(UserStatus.unverified) UserStatus status,
     @TimestampConverter() DateTime? createdAt,
   }) = _AppUser;

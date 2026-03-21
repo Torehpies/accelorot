@@ -113,7 +113,7 @@ class _AddWasteQuantityStepState extends State<AddWasteQuantityStep> {
         
         // Headline
         const Text(
-          'Gaano Karami ang\niyong nilagay?',
+          'How much did you\nadd?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,

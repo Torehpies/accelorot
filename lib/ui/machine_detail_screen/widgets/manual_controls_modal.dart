@@ -103,7 +103,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       }
 
       // Load Aerator
-      final aeratorCycles = cycles.where((c) => c.batchId == batchId && c.controllerType == 'aerator_controller').toList();
+      final aeratorCycles = cycles.where((c) => c.batchId == batchId && c.controllerType == 'aerator').toList();
       aeratorCycles.sort((a, b) {
         if (a.timestamp == null && b.timestamp == null) return 0;
         if (a.timestamp == null) return 1;
