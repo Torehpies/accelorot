@@ -17,7 +17,7 @@ class PushNotificationService {
 
   Future<void> initialize() async {
     // 1. Request permission (especially for iOS, mostly automatic on Android)
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    final settings = await _firebaseMessaging.requestPermission(
       alert: true,
       announcement: false,
       badge: true,
@@ -27,7 +27,7 @@ class PushNotificationService {
       sound: true,
     );
 
-    debugPrint('User granted permission: \${settings.authorizationStatus}');
+    debugPrint('User granted permission: ${settings.authorizationStatus}');
 
     // 2. Register background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

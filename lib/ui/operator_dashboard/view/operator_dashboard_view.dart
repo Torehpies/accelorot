@@ -13,7 +13,7 @@ import '../../../data/models/machine_model.dart';
 import '../../../services/sess_service.dart';
 import '../view_model/operator_dashboard_viewmodel.dart';
 import '../models/operator_dashboard_state.dart';
-import '../../activity_logs/models/activity_common.dart';
+//import '../../activity_logs/models/activity_common.dart';
 import '../../machine_detail_screen/view/machine_detail_screen.dart';
 
 import '../widgets/operator_machine_card.dart';

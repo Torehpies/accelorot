@@ -10,7 +10,7 @@ import '../../activity_logs/models/activity_common.dart';
 part 'operator_dashboard_viewmodel.g.dart';
 
 // ===== AGGREGATOR SERVICE PROVIDER =====
-@riverpod
+@Riverpod(keepAlive: true)
 MachineAggregatorService operatorDashboardAggregatorService(Ref ref) {
   final repository = ref.watch(machineRepositoryProvider);
   return MachineAggregatorService(machineRepo: repository);

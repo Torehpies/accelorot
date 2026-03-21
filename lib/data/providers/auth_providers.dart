@@ -9,7 +9,6 @@ import 'package:flutter_application_1/data/repositories/auth_repository/auth_rep
 import 'package:flutter_application_1/data/repositories/auth_repository/auth_repository_remote.dart';
 import 'package:flutter_application_1/data/services/contracts/auth_service.dart';
 import 'package:flutter_application_1/data/services/firebase/firebase_auth_service.dart';
-import 'package:flutter_application_1/services/push_notification_service.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
