@@ -9,13 +9,50 @@ import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
-class CompleteProfileScreen extends ConsumerWidget {
+class CompleteProfileScreen extends ConsumerStatefulWidget {
   const CompleteProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CompleteProfileScreen> createState() =>
+      _CompleteProfileScreenState();
+}
+
+class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
+  late final TextEditingController _firstNameController;
+  late final TextEditingController _lastNameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(completeProfileProvider);
     final notifier = ref.read(completeProfileProvider.notifier);
+
+    if (_firstNameController.text != state.firstName) {
+      _firstNameController.text = state.firstName;
+      _firstNameController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _firstNameController.text.length),
+      );
+    }
+
+    if (_lastNameController.text != state.lastName) {
+      _lastNameController.text = state.lastName;
+      _lastNameController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _lastNameController.text.length),
+      );
+    }
 
     // Listen for messages (success/error)
     ref.listen(completeProfileProvider, (previous, next) {
@@ -26,9 +63,6 @@ class CompleteProfileScreen extends ConsumerWidget {
         message.maybeWhen(
           success: (text) {
             AppSnackbar.success(context, text);
-            // After successful completion, the redirect logic in AppRouteRedirect
-            // should take over as the user status will change from 'missingProfile'
-            // to 'pending'.
           },
           error: (text) => AppSnackbar.error(context, text),
           orElse: () {},
@@ -39,8 +73,6 @@ class CompleteProfileScreen extends ConsumerWidget {
         });
       }
     });
-
-    // final isDesktop = MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,7 +86,7 @@ class CompleteProfileScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                   Center(
+                  Center(
                     child: SvgPicture.asset(
                       'assets/images/Accelorot_logo.svg',
                       width: 65,
@@ -79,7 +111,9 @@ class CompleteProfileScreen extends ConsumerWidget {
                         Text(
                           'One last step to get you started',
                           style: TextStyle(
-                              fontSize: 16, color: Theme.of(context).hintColor),
+                            fontSize: 16,
+                            color: Theme.of(context).hintColor,
+                          ),
                         ),
                       ],
                     ),
@@ -89,16 +123,15 @@ class CompleteProfileScreen extends ConsumerWidget {
                   // First Name Field
                   RegisterFieldBox(
                     child: TextFormField(
-                      controller: TextEditingController(text: state.firstName)
-                        ..selection = TextSelection.fromPosition(
-                            TextPosition(offset: state.firstName.length)),
+                      controller: _firstNameController,
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: 'First Name',
                         errorText: state.firstNameError,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onChanged: notifier.updateFirstName,
                     ),
@@ -107,16 +140,15 @@ class CompleteProfileScreen extends ConsumerWidget {
                   // Last Name Field
                   RegisterFieldBox(
                     child: TextFormField(
-                      controller: TextEditingController(text: state.lastName)
-                        ..selection = TextSelection.fromPosition(
-                            TextPosition(offset: state.lastName.length)),
+                      controller: _lastNameController,
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
                         labelText: 'Last Name',
                         errorText: state.lastNameError,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onChanged: notifier.updateLastName,
                     ),
@@ -128,7 +160,7 @@ class CompleteProfileScreen extends ConsumerWidget {
                       data: (teams) => teams.isEmpty
                           ? const Text('No teams available')
                           : DropdownButtonFormField<Team>(
-                              value: state.selectedTeam,
+                              initialValue: state.selectedTeam,
                               decoration: InputDecoration(
                                 labelText: 'Select a Team',
                                 border: OutlineInputBorder(
@@ -159,15 +191,15 @@ class CompleteProfileScreen extends ConsumerWidget {
                     onPressed: notifier.submitProfile,
                     enabled: state.isFormValid && !state.isSubmitting,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   TextButton(
                     onPressed: () {
-                       ref.read(authRepositoryProvider).signOut();
-                    }, 
-                    child: const Text("Cancel & Sign Out")
-                  )
+                      ref.read(authRepositoryProvider).signOut();
+                    },
+                    child: const Text("Cancel & Sign Out"),
+                  ),
                 ],
               ),
             ),

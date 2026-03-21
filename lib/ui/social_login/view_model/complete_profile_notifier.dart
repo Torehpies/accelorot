@@ -17,15 +17,6 @@ class CompleteProfileNotifier extends _$CompleteProfileNotifier {
   }
 
   Future<void> _initialize() async {
-    state = state.copyWith(teams: const AsyncValue.loading());
-    
-    // Load teams
-    state = state.copyWith(
-      teams: await AsyncValue.guard(
-        () => ref.read(teamRepositoryProvider).getTeams(),
-      ),
-    );
-
     // Pre-fill name from Google data if available
     final user = ref.read(firebaseAuthProvider).currentUser;
     if (user?.displayName != null) {
@@ -34,11 +25,20 @@ class CompleteProfileNotifier extends _$CompleteProfileNotifier {
       final lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
       
       state = state.copyWith(
-        firstName: firstName,
-        lastName: lastName,
+        firstName: state.firstName.isEmpty ? firstName : state.firstName,
+        lastName: state.lastName.isEmpty ? lastName : state.lastName,
       );
       validateForm();
     }
+
+    state = state.copyWith(teams: const AsyncValue.loading());
+    
+    // Load teams
+    state = state.copyWith(
+      teams: await AsyncValue.guard(
+        () => ref.read(teamRepositoryProvider).getTeams(),
+      ),
+    );
   }
 
   void updateFirstName(String value) {
