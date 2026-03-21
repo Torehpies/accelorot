@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/add_team_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamManagementHeader extends ConsumerWidget {

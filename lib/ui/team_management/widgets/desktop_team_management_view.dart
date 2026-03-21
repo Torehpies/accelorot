@@ -11,7 +11,7 @@ import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/core/widgets/containers/web_base_container.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/add_team_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/skeleton_row.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/team_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

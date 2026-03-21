@@ -24,8 +24,8 @@ import 'package:flutter_application_1/ui/team_management/models/team_member_filt
 import 'package:flutter_application_1/ui/machine_management/dialogs/web_admin_add_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_detail_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_machine_actions_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/add_admin_dialog.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/view_member_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/add_admin_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/view_member_dialog.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/status_badge.dart';
 import 'package:flutter_application_1/ui/core/widgets/containers/web_base_container.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
